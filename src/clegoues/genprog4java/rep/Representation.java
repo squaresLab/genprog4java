@@ -1,9 +1,10 @@
 package clegoues.genprog4java.rep;
 
 import java.util.List;
-import clegoues.genprog4java.Fitness.TestCase;
+import java.util.TreeSet;
 
-enum Mutation { APPEND, DELETE, REPLACE, SWAP };
+import clegoues.genprog4java.Fitness.TestCase;
+import clegoues.genprog4java.util.Pair;
 
 public interface Representation<G,C> {
 
@@ -18,8 +19,8 @@ public interface Representation<G,C> {
 		boolean deserialize(String filename);
 		void debugInfo();
 		int maxAtom(); // atomid type?
-		List<AtomPair> getFaultyAtoms();
-		List<AtomPair> getFixSourceAtoms();
+		List<WeightedAtom> getFaultyAtoms();
+		List<WeightedAtom> getFixSourceAtoms();
 		boolean sanityCheck() throws SanityCheckException;
 		void computeLocalization();
 		void fromSource(String filename);
@@ -36,17 +37,18 @@ public interface Representation<G,C> {
 		void addHistory(History<C> newItem);
 		void reduceSearchSpace(); // do this?
 		void reduceFixSpace(); 
-		List<Mutation> availableMutations(int atomId);
+		TreeSet<Pair<Mutation, Double>> availableMutations(int atomId);
 		// TODO: do we need  availableCrossoverPoints? Crossover is so stupid.
 		void delete(int atomId);
 		void append(int whereToAppend, int whatToAppend);
-		List<AtomPair> appendSources(int atomId);
+		TreeSet<WeightedAtom> appendSources(int atomId);
 		void swap(int swap1, int swap2);
-		List<AtomPair> swapSources(int atomId);
+		TreeSet<WeightedAtom>  swapSources(int atomId);
 		void replace(int whatToReplace, int whatToReplaceWith);
-		List<AtomPair> replaceSources(int atomId);
+		TreeSet<WeightedAtom>  replaceSources(int atomId);
 // ignoring subatoms for now
 // ignoring atomToStr because I think that should go in whatever implements the code fragments
 // also leaving out hash unless we need it
+		Representation<G, C> copy();
 
 }
