@@ -30,7 +30,7 @@ public class Fitness<G,C> {
 	    fails a test case.  This makes less sense for single_fitness, but
 	    single_fitness being true won't break it.  Does do sampling if specified. */
 
-	public boolean testToFirstFailure(Representation<G, C> rep) {
+	public  boolean testToFirstFailure(Representation<G,C> rep) {
 		int count=0;
 		boolean retVal = true;
 		try {
@@ -41,7 +41,7 @@ public class Fitness<G,C> {
 				}
 				count++;
 			} 
-			Long L = Math.round(this.sample * Main.config.getNumPositiveTests());
+			Long L = Math.round(sample * Main.config.getNumPositiveTests());
 			int sampleSize = Integer.valueOf(L.intValue());
 
 			ArrayList<Integer> allPositiveTests = GlobalUtils.range(1,Main.config.getNumPositiveTests());

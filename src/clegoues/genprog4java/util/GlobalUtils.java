@@ -1,6 +1,9 @@
 package clegoues.genprog4java.util;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import clegoues.genprog4java.rep.WeightedAtom;
 
 public class GlobalUtils {
 	// range is inclusive!
@@ -11,5 +14,8 @@ public class GlobalUtils {
 		}
 		return returnVal;
 		
+	}
+	public static WeightedAtom chooseOneWeighted(List<WeightedAtom> atoms) {
+		throw new UnsupportedOperationException();
 	}
 }
