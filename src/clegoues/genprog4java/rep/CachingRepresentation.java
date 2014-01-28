@@ -161,7 +161,7 @@ public abstract class CachingRepresentation<G,C> implements Representation<G, C>
 				// TODO: remove applicable subdirectories from disk
 			}
 		
-			void setFitness(double fitness) {
+			public void setFitness(double fitness) {
 				this.fitness = fitness; // not using the hashtable thing because only one fitness measure for now
 			}
 
