@@ -26,11 +26,12 @@ public interface Representation<G,C> {
 		void outputSource(String filename);
 		List<String> sourceName();
 		void cleanup();
-		void setFitness(float fitness);
-		float getFitness();
+		void setFitness(double fitness);
+		double getFitness();
+		boolean fitnessIsValid();
 		boolean compile(String sourceName, String exeName);
 		boolean testCase(TestCase test);
-		String name();
+		String getName();
 		List<History<C>> getHistory();
 		void addHistory(History<C> newItem);
 		void reduceSearchSpace(); // do this?
