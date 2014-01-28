@@ -3,6 +3,7 @@ package clegoues.genprog4java.rep;
 import java.util.List;
 import clegoues.genprog4java.Fitness.TestCase;
 
+enum Mutation { APPEND, DELETE, REPLACE, SWAP };
 
 public interface Representation<G,C> {
 
@@ -14,12 +15,12 @@ public interface Representation<G,C> {
 		void noteSuccess();
 		void load(String filename);
 		void serialize(String filename);
-		void deserialize(String filename);
+		boolean deserialize(String filename);
 		void debugInfo();
 		int maxAtom(); // atomid type?
 		List<AtomPair> getFaultyAtoms();
 		List<AtomPair> getFixSourceAtoms();
-		void sanityCheck();
+		boolean sanityCheck() throws SanityCheckException;
 		void computeLocalization();
 		void fromSource(String filename);
 		void outputSource(String filename);
@@ -35,7 +36,7 @@ public interface Representation<G,C> {
 		void reduceSearchSpace(); // do this?
 		void reduceFixSpace(); 
 		List<Mutation> availableMutations(int atomId);
-		// not implementing availableCrossoverPoints unless we need it
+		// TODO: do we need  availableCrossoverPoints? Crossover is so stupid.
 		void delete(int atomId);
 		void append(int whereToAppend, int whatToAppend);
 		List<AtomPair> appendSources(int atomId);
