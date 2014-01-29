@@ -1,9 +1,12 @@
 package clegoues.genprog4java.rep;
 
-public abstract class FaultLocRepresentation<G,C> extends CachingRepresentation<G,C> {
-	private List<AtomPair> faultLocalization;
-	private List<AtomPair> fixLocalization;
+import java.util.ArrayList;
 
+public abstract class FaultLocRepresentation<G,C> extends CachingRepresentation<G,C> {
+	private ArrayList<WeightedAtom> faultLocalization;
+	private ArrayList<WeightedAtom> fixLocalization;
+
+	/*
 			  (***********************************)
 			  (* Methods that must be provided by a subclass.  *)
 			  (***********************************)
@@ -71,7 +74,7 @@ public abstract class FaultLocRepresentation<G,C> extends CachingRepresentation<
 			  (***********************************)
 			  (* Concrete methods implementing the interface *)
 			  (***********************************)
-			  (**/**)
+	
 			  method serialize ?out_channel ?global_info (filename : string) =
 			    let fout = 
 			      match out_channel with
@@ -228,7 +231,6 @@ public abstract class FaultLocRepresentation<G,C> extends CachingRepresentation<
 			        fun (i,w) ->
 			          WeightSet.add (i,w) weightset)
 			      (WeightSet.empty) (lfilt (fun (i,w) -> i <> x) !fix_localization)
-			  (**/**)      
 
 			  (***********************************)
 			  (* No Subatoms (subclasses can override) *)
@@ -588,6 +590,6 @@ public abstract class FaultLocRepresentation<G,C> extends CachingRepresentation<
 			                  output_string fout str) pos_stmts;
 			            close_out fout
 			      end
-			end 
+			end */
 
 }
