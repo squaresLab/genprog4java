@@ -1,6 +1,13 @@
 package clegoues.genprog4java.rep;
+import java.io.File;
+import java.io.StringWriter;
 import java.util.Calendar;
+import java.util.LinkedList;
 import java.util.List;
+
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.ToolProvider;
 
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
@@ -131,6 +138,10 @@ public abstract class CachingRepresentation<G,C> implements Representation<G, C>
 // debug "cachingRepresentation: sanity checking passed (time_taken = %g)\n" (time_now -. time_start) ; 
 }
 
+	// compile assumes that the source has already been serialized to disk.
+	// FIXME: add compile to do the generic thing it does in the OCaml, but
+	// I think for here, it's best to put it down in Java representation
+	
 	// FIXME: OK, in OCaml there's an outputSource declaration here that assumes that 
 	// the way we output code is to compute the source buffers AS STRINGS and then print out one per file.
 	// it's possible this is the same in Java, but unlikely, so I'm going to not implement this here yet
@@ -147,6 +158,8 @@ public abstract class CachingRepresentation<G,C> implements Representation<G, C>
 	 	// alreadySourced := Some(lmap (fun (sname,_) -> sname) many_files);
 		}*/
 
+	protected abstract Iterable<?> computeSourceBuffers();
+	
 			protected abstract boolean internalTestCase(String sanityExename, String sanityFilename, TestCase thisTest);
 		// TODO Auto-generated method stub
 

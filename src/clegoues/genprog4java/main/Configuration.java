@@ -1,6 +1,10 @@
 package clegoues.genprog4java.main;
 
 public class Configuration {
+	// FIXME: rename these, and also figure out what they mean
+	public static String libs;
+	public static String sourceVersion;
+	public static String targetVersion;
 	private int numPositiveTests = 5;
 	private int numNegativeTests = 1;
 	private String sanityFilename = "repair.sanity.java";
@@ -8,7 +12,7 @@ public class Configuration {
 	private String globalExtension = ".java";
 	private String searchStrategy = "ga";
 
-	public int getNumPositiveTests() { return this.numPositiveTests; }
+	public  int getNumPositiveTests() { return this.numPositiveTests; }
 	public int getNumNegativeTests() { return this.numNegativeTests; }
 	public Configuration() {};
 	public Configuration(int numPos, int numNeg) {
