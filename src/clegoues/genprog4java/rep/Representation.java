@@ -38,6 +38,7 @@ public interface Representation<G,C> extends Comparable<Representation<G,C>> {
 		void reduceSearchSpace(); // do this?
 		void reduceFixSpace(); 
 		TreeSet<Pair<Mutation, Double>> availableMutations(int atomId);
+		void registerMutations(TreeSet<Pair<Mutation,Double>> availableMutations);
 		// TODO: do we need  availableCrossoverPoints? Crossover is so stupid.
 		void delete(int atomId);
 		void append(int whereToAppend, int whatToAppend);
