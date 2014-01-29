@@ -1,7 +1,17 @@
 package clegoues.genprog4java.Search;
 
-public class Population {
-	(*
+import java.util.Iterator;
+
+import clegoues.genprog4java.rep.Representation;
+
+public class Population<G,C> implements Iterable<Representation<G,C>>{
+
+	private int popsize = 40;  
+	
+	public int getPopsize() {
+		return this.popsize;
+	}
+	/*
 			 *
 			 * Copyright (c) 2012-2013, 
 			 *  Wes Weimer          <weimer@cs.virginia.edu>
@@ -391,6 +401,32 @@ public class Population {
 			      done ;
 			      !output
 
-			end
+			end*/
+	public void add (Representation<G,C> newItem) {
+		// TODO implement me
+	}
+	public void crossover(Representation<G,C> original) {
+		//TODO implement me;
+	}
+
+	public Population<G, C> firstN(int desiredSize) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public int size() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public Iterator<Representation<G, C>> iterator() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void selection(int popsize2) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

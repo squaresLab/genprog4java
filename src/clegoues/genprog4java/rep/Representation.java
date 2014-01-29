@@ -50,5 +50,6 @@ public interface Representation<G,C> {
 // ignoring atomToStr because I think that should go in whatever implements the code fragments
 // also leaving out hash unless we need it
 		Representation<G, C> copy();
+		int num_test_evals_ignore_cache(); // FIXME this really needs to not be here
 
 }
