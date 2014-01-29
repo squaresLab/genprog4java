@@ -14,13 +14,15 @@ import java.util.TreeSet;
 
 
 
+
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
 import clegoues.genprog4java.main.Main;
+import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
 
-public abstract class FaultLocRepresentation<G,C> extends CachingRepresentation<G,C> {
+public abstract class FaultLocRepresentation<G> extends CachingRepresentation<G> {
 	private ArrayList<WeightedAtom> faultLocalization;
 	private ArrayList<WeightedAtom> fixLocalization;
 

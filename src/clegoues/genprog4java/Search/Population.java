@@ -9,7 +9,7 @@ import java.util.TreeSet;
 
 import clegoues.genprog4java.rep.Representation;
 
-public class Population<G,C> implements Iterable<Representation<G,C>>{
+public class Population<G> implements Iterable<Representation<G>>{
 
 	private int popsize = 40;  
 	private double crossp = 0.5; 
@@ -18,13 +18,13 @@ public class Population<G,C> implements Iterable<Representation<G,C>>{
 	private String outputFormat = "txt";
 	private double tournamentP = 1.0;
 
-	private ArrayList<Representation<G,C>> population = new ArrayList<Representation<G,C>>(this.popsize);
+	private ArrayList<Representation<G>> population = new ArrayList<Representation<G>>(this.popsize);
 	
-	public Population(ArrayList<Representation<G, C>> smallerPop) {
+	public Population(ArrayList<Representation<G>> smallerPop) {
 		this.population = smallerPop;
 	}
 
-	protected ArrayList<Representation<G,C>> getPopulation() {
+	protected ArrayList<Representation<G>> getPopulation() {
 		return this.population;
 	}
 	
@@ -120,14 +120,14 @@ public class Population<G,C> implements Iterable<Representation<G,C>>{
     variants from population using variant_comparison_function to compare
     individuals, if specified, and variant fitness if not.  Returns a subset
     of the population.  */
-	private Representation<G,C> selectOne() {
+	private Representation<G> selectOne() {
 		Collections.shuffle(population);
-		List<Representation<G,C>> pool = population.subList(0, tournamentK);
+		List<Representation<G>> pool = population.subList(0, tournamentK);
 		// FIXME: in what order should this be sorted?  Ascending, or D?
-		TreeSet<Representation<G,C>> sorted = new TreeSet<Representation<G,C>>(pool);
+		TreeSet<Representation<G>> sorted = new TreeSet<Representation<G>>(pool);
 		Random r = new Random();
 		double step = 0.0;
-		for(Representation<G,C> indiv : sorted) {
+		for(Representation<G> indiv : sorted) {
 			boolean taken = false;
 			if(this.tournamentP >= 1.0) {
 				taken = true;
@@ -147,13 +147,13 @@ public class Population<G,C> implements Iterable<Representation<G,C>>{
 		}
 		return population.get(0); // FIXME: this should never happen, right?
 	}
-	private ArrayList<Representation<G,C>> tournamentSelection(int desired) {
+	private ArrayList<Representation<G>> tournamentSelection(int desired) {
 		assert(desired >= 0);
 		assert(tournamentK >= 1);
 		assert(this.tournamentP >= 0.0);
 		assert(this.tournamentP <= 1.0) ;
 		assert(population.size() >= 0);
-		ArrayList<Representation<G,C>> result = new ArrayList<Representation<G,C>>();
+		ArrayList<Representation<G>> result = new ArrayList<Representation<G>>();
 		
 		for(int i = 0 ; i < desired; i++) {
 			result.add(selectOne());
@@ -162,12 +162,12 @@ public class Population<G,C> implements Iterable<Representation<G,C>>{
 	}
 	
 
-	public void add (Representation<G,C> newItem) {
+	public void add (Representation<G> newItem) {
 
 	population.add(newItem);
 	}
 	
-	public void crossover(Representation<G,C> original) {
+	public void crossover(Representation<G> original) {
 throw new UnsupportedOperationException();
 
 /*
@@ -340,16 +340,16 @@ done ;
 end*/
 	}
 
-	public Population<G, C> firstN(int desiredSize) {
-		List<Representation<G,C>> smallerPop = population.subList(0, desiredSize);
-		return new Population<G,C>((ArrayList<Representation<G,C>>) smallerPop);
+	public Population<G> firstN(int desiredSize) {
+		List<Representation<G>> smallerPop = population.subList(0, desiredSize);
+		return new Population<G>((ArrayList<Representation<G>>) smallerPop);
 	}
 
 	public int size() {
 		return population.size();
 	}
 	@Override
-	public Iterator<Representation<G, C>> iterator() {
+	public Iterator<Representation<G>> iterator() {
 		return population.iterator(); 	
 	}
 

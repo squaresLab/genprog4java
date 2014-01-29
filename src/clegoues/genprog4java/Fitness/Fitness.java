@@ -11,7 +11,7 @@ import clegoues.genprog4java.util.GlobalUtils;
 import clegoues.genprog4java.util.Pair;
 
 
-public class Fitness<G,C> {
+public class Fitness<G> {
 	private double negativeTestWeight = 2.0; 
 	private double sample = 1.0;
 	private String sampleStrategy = "variant"; // options: all, generation, variant
@@ -30,7 +30,7 @@ public class Fitness<G,C> {
 	    fails a test case.  This makes less sense for single_fitness, but
 	    single_fitness being true won't break it.  Does do sampling if specified. */
 
-	public  boolean testToFirstFailure(Representation<G,C> rep) {
+	public  boolean testToFirstFailure(Representation<G> rep) {
 		int count=0;
 		boolean retVal = true;
 		try {
@@ -78,22 +78,22 @@ public class Fitness<G,C> {
 		return retVal;
 	}
 
-	private Pair<Double,Double> testFitnessGeneration(Representation<G,C> rep, int generation) {
+	private Pair<Double,Double> testFitnessGeneration(Representation<G> rep, int generation) {
 		throw new UnsupportedOperationException();
 	}
 
-	private Pair<Double,Double> testFitnessVariant(Representation<G,C> rep) {
+	private Pair<Double,Double> testFitnessVariant(Representation<G> rep) {
 		throw new UnsupportedOperationException();
 	}
 
-	private Pair<Double,Double> testFitnessFull(Representation<G,C> rep) {
+	private Pair<Double,Double> testFitnessFull(Representation<G> rep) {
 		throw new UnsupportedOperationException();
 	}
 	/* {b test_fitness} generation variant returns true if the variant passes all
 	    test cases and false otherwise.  Only tests fitness if the rep has not
 	    cached it.  Postcondition: records fitness in rep, calls rep#cleanup(). May
 	    implement sampling strategies if specified by the command line.*/
-	public boolean testFitness(int generation, Representation<G,C> rep) {
+	public boolean testFitness(int generation, Representation<G> rep) {
 
 		/* Find the relative weight of positive and negative tests
 		 * If negative_test_weight is 2 (the default), then the negative tests are

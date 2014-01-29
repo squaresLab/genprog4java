@@ -1,15 +1,17 @@
 package clegoues.genprog4java.rep;
 
-public class History<C> {
-	private C location;
-	private C secondItem;
+import clegoues.genprog4java.mut.Mutation;
+
+public class History {
+	private int location; // FIXME: possibly: right now using integers to index all code instead of parameterizing things
+	private int secondItem;
 	private Mutation mutationType;
 	
-	public History(C historyItem, Mutation mutationType) {
+	public History(int historyItem, Mutation mutationType) {
 		this.location = historyItem;
 		this.mutationType = mutationType;
 	}
-	public History(C location, C secondItem, Mutation mutationType) {
+	public History(int location, int secondItem, Mutation mutationType) {
 		this.location = location;
 		this.secondItem = secondItem;
 		this.mutationType = mutationType;

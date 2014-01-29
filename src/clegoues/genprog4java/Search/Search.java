@@ -1,13 +1,14 @@
 package clegoues.genprog4java.Search;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.TreeSet;
 
 import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.main.Main;
+import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.rep.History;
-import clegoues.genprog4java.rep.Mutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.genprog4java.util.GlobalUtils;
@@ -19,7 +20,7 @@ import clegoues.genprog4java.util.Pair;
   let size = List.length elts in 
     List.nth elts (Random.int size) 
  */
-public class Search<G,C> {
+public class Search<G> {
 
 	private int generations = 10;
 	private int proMut = 1;
@@ -29,7 +30,7 @@ public class Search<G,C> {
 	private double delProb = 0.33333;
 	private double swapProb = 0.33333;
 	private double repProb = 0.0;
-	private Fitness<G,C> fitnessEngine;
+	private Fitness<G> fitnessEngine;
 	private int maxEvals = 0;
 
 	/* CLG is not convinced that the responsibility for writing out the successful
@@ -46,10 +47,10 @@ public class Search<G,C> {
     @param rep successful variant
     @param orig original variant
     @param generation generation in which the repair was found */
-	void noteSuccess(Representation<G,C> rep, Representation<G,C> original, int generation) throws RepairFoundException {
-		List<History<C>> history = rep.getHistory();
+	void noteSuccess(Representation<G> rep, Representation<G> original, int generation) throws RepairFoundException {
+		ArrayList<History> history = rep.getHistory();
 		System.out.printf("\nRepair Found: ");
-		for(History<C> histEle : history) {
+		for(History histEle : history) {
 			System.out.printf(" " + histEle.toString());
 		}
 		String name = rep.getName();
@@ -76,7 +77,7 @@ public class Search<G,C> {
 		return retVal; 
 	}
 
-	private boolean doWork(Representation<G,C> rep, Representation<G,C> original, Mutation mut, int first, int second) throws RepairFoundException {
+	private boolean doWork(Representation<G> rep, Representation<G> original, Mutation mut, int first, int second) throws RepairFoundException {
 		switch(mut) {
 		case DELETE: rep.delete(first);
 		break;	
@@ -100,7 +101,7 @@ public class Search<G,C> {
 		return false;
 	}
 
-	private void registerMutations(Representation<G,C> variant) {
+	private void registerMutations(Representation<G> variant) {
 		TreeSet<Pair<Mutation,Double>> availableMutations = new TreeSet<Pair<Mutation,Double>>();
 		availableMutations.add(new Pair<Mutation,Double>(Mutation.DELETE,this.delProb));
 		availableMutations.add(new Pair<Mutation,Double>(Mutation.APPEND,this.appProb));
@@ -109,7 +110,7 @@ public class Search<G,C> {
 
 		variant.registerMutations(availableMutations);
 	}
-	public void bruteForceOne(Representation<G,C> original) throws RepairFoundException {
+	public void bruteForceOne(Representation<G> original) throws RepairFoundException {
 
 		original.reduceFixSpace();
 		registerMutations(original);
@@ -164,7 +165,7 @@ public class Search<G,C> {
 				System.out.printf("%3g %3g", weight, prob);
 
 				if(mut == Mutation.DELETE) {
-					Representation<G,C> rep = original.copy();
+					Representation<G> rep = original.copy();
 					if(this.doWork(rep, original, mut, stmt, stmt)) {
 						wins++;
 					}
@@ -172,7 +173,7 @@ public class Search<G,C> {
 					TreeSet<WeightedAtom> appendSources = this.rescaleAtomPairs(original.appendSources(stmt));
 					// FIXME: source in DESCENDING order by weight!
 					for(WeightedAtom append : appendSources) {
-						Representation<G,C> rep = original.copy();
+						Representation<G> rep = original.copy();
 						if(this.doWork(rep, original, mut, stmt, append.getAtom())) {
 							wins++;
 						}
@@ -181,7 +182,7 @@ public class Search<G,C> {
 					TreeSet<WeightedAtom> replaceSources = this.rescaleAtomPairs(original.replaceSources(stmt));
 					// FIXME: source in DESCENDING order by weight!
 					for(WeightedAtom replace : replaceSources) {
-						Representation<G,C> rep = original.copy();
+						Representation<G> rep = original.copy();
 						if(this.doWork(rep, original, mut, stmt, replace.getAtom())) {
 							wins++;
 						}
@@ -191,7 +192,7 @@ public class Search<G,C> {
 					TreeSet<WeightedAtom> swapSources = this.rescaleAtomPairs(original.swapSources(stmt));
 					// FIXME: source in DESCENDING order by weight!
 					for(WeightedAtom swap : swapSources) {
-						Representation<G,C> rep = original.copy();
+						Representation<G> rep = original.copy();
 						if(this.doWork(rep, original, mut, stmt, swap.getAtom())) {
 							wins++;
 						}
@@ -220,7 +221,7 @@ public class Search<G,C> {
 			    @param variant individual to mutate
 			    @return variant' modified/potentially mutated variant
 	 */
-	void mutate(Representation<G,C> variant) { // FIXME: don't need to return, right? 
+	void mutate(Representation<G> variant) { // FIXME: don't need to return, right? 
 		List<WeightedAtom> faultyAtoms = variant.getFaultyAtoms();
 		List<WeightedAtom> proMutList = null;
 		for(int i = 0; i < this.proMut; i++) {
@@ -264,7 +265,7 @@ public class Search<G,C> {
     @return variant post-fitness-testing, which means it should know its fitness
     (assuming the [Fitness] module behaved as it should)
     @raise Maximum_evals if max_evals is less than infinity and is reached. */
-	void calculateFitness(int generation, Representation<G,C> original, Representation<G,C> variant) throws MaximumEvalsException, RepairFoundException
+	void calculateFitness(int generation, Representation<G> original, Representation<G> variant) throws MaximumEvalsException, RepairFoundException
 	{ // FIXME: I think this should go strictly into Fitness
 		int evals = original.num_test_evals_ignore_cache(); // FIXME: this needs to go elsewhere
 		if(this.maxEvals > 0 && evals > this.maxEvals) {
@@ -284,11 +285,11 @@ public class Search<G,C> {
 			    @param original original variant
 			    @param incoming_pop possibly empty, incoming population
 			    @return initial_population generated by mutating the original */
-	private Population<G,C> initializeGa(Representation<G,C> original, Population<G,C> incomingPopulation) throws MaximumEvalsException, RepairFoundException {
+	private Population<G> initializeGa(Representation<G> original, Population<G> incomingPopulation) throws MaximumEvalsException, RepairFoundException {
 		original.reduceSearchSpace(); // FIXME: this had arguments originally
 		this.registerMutations(original);
 	
-		Population<G,C> initialPopulation = incomingPopulation;
+		Population<G> initialPopulation = incomingPopulation;
 		if(incomingPopulation.size() > incomingPopulation.getPopsize()) {
 			initialPopulation = incomingPopulation.firstN(incomingPopulation.getPopsize());
 		} // FIXME: this is too functional I think. 
@@ -309,7 +310,7 @@ public class Search<G,C> {
 			      (* compute the fitness of the initial population *)
 			      GPPopulation.map !pop (calculate_fitness 0 original) FIXME: not done
 		 */
-		for(Representation<G,C> item : initialPopulation) {
+		for(Representation<G> item : initialPopulation) {
 			this.calculateFitness(0, original, item);
 		}
 		return initialPopulation;
@@ -327,7 +328,7 @@ public class Search<G,C> {
 			    @raise Found_Repair if a repair is found
 			    @raise Max_evals if the maximum fitness evaluation count is reached
 			    @return population produced by this iteration *)*/
-	private void runGa(int startGen, int numGens, Population<G,C> incomingPopulation, Representation<G,C> original) throws MaximumEvalsException, RepairFoundException {
+	private void runGa(int startGen, int numGens, Population<G> incomingPopulation, Representation<G> original) throws MaximumEvalsException, RepairFoundException {
 		/*
 		 * the bulk of run_ga is performed by the recursive inner helper
 			     function, which Claire modeled off the MatLab code sent to her by the
@@ -341,11 +342,11 @@ public class Search<G,C> {
 			// step 2: crossover
 			incomingPopulation.crossover(original);
 			// step 3: mutation
-			for(Representation<G,C> item : incomingPopulation) {
+			for(Representation<G> item : incomingPopulation) {
 				this.mutate(item);
 			}
 			// step 4: fitness
-			for(Representation<G,C> item : incomingPopulation) {
+			for(Representation<G> item : incomingPopulation) {
 				this.calculateFitness(gen,  original, item);
 			}
 			gen++;
@@ -364,11 +365,11 @@ public class Search<G,C> {
 			    @param incoming_pop incoming population, possibly empty
 			    @raise Found_Repair if a repair is found
 			    @raise Max_evals if the maximum fitness evaluation count is set and then reached */
-	public void geneticAlgorithm(Representation<G,C> original, Population<G,C> incomingPopulation) throws RepairFoundException {
+	public void geneticAlgorithm(Representation<G> original, Population<G> incomingPopulation) throws RepairFoundException {
 		System.out.printf("search: genetic algorithm begins (|original| = \n"); // %g MB)\n" (debug_size_in_mb original);
 		assert(this.generations >= 0);
 		try {
-			Population<G,C> initialPopulation = this.initializeGa(original, incomingPopulation);
+			Population<G> initialPopulation = this.initializeGa(original, incomingPopulation);
 			generationsRun++;
 			try {
 				this.runGa(1, this.generations, initialPopulation, original);
@@ -387,8 +388,8 @@ public class Search<G,C> {
     @param original individual representation
     @param starting_genome string; a string representation of the genome 
   */
-	void oracleSearch(Representation<G,C> original, String startingGenome) throws RepairFoundException {
-		Representation<G,C> theRepair = original.copy();
+	void oracleSearch(Representation<G> original, String startingGenome) throws RepairFoundException {
+		Representation<G> theRepair = original.copy();
 		theRepair.LoadGenomeFromString(startingGenome);
 		assert(fitnessEngine.testToFirstFailure(theRepair));
 		this.noteSuccess(theRepair, original, 1);

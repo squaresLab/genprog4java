@@ -1,21 +1,16 @@
 package clegoues.genprog4java.rep;
-import java.io.File;
-import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.LinkedList;
 import java.util.List;
 
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.ToolProvider;
 
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
 import clegoues.genprog4java.util.Pair;
-import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.main.Main;
+import clegoues.genprog4java.mut.Mutation;
 
-public abstract class CachingRepresentation<G,C> implements Representation<G, C> {
+public abstract class CachingRepresentation<G> implements Representation<G> {
 	
 	private double fitness; // in repair, this is a hashtable, for when we have multiple fitnesses.  For now let's KISS	
 	/*  (** cached file contents from [internal_compute_source_buffers]; avoid
@@ -26,7 +21,7 @@ public abstract class CachingRepresentation<G,C> implements Representation<G, C>
 	private List<String> alreadySourced; // initialize to empty
 	  // TODO: private List<Digest> alreadyDigest; // Digest.t in OCaml
 	  private String alreadyCompiled; // initialized to ref None in ocaml
-	  private List<History<C>> history;
+	  private ArrayList<History> history;
 
 	  // unlike in the OCaml representation, this shouldn't return None for the first element if
 	  // it's a single-file representation b/c that's stupid.
@@ -215,9 +210,9 @@ public abstract class CachingRepresentation<G,C> implements Representation<G, C>
 			    // ommitting test_cases.  I think PAR does test cases in parallel, but 
 			 // that seems needlessly complicated for a first hack.
 
-			public List<History<C>> getHistory() { return this.history; }
+			public ArrayList<History> getHistory() { return this.history; }
 	
-			public void addHistory(History<C> edit) {
+			public void addHistory(History edit) {
 				this.history.add(edit);
 			}
 
@@ -229,34 +224,34 @@ public abstract class CachingRepresentation<G,C> implements Representation<G, C>
 					return "original";
 				}
 				String name = "";
-				for(History<C> edit : this.history) {
+				for(History edit : this.history) {
 					name = name + " " + edit.toString();
 				}
 				return name;
 			}
 // TODO: ignoring available crossover points for now
 // TODO: OK delete assumes the code type is stmtId; make this type system play nice at some point
-			public void delete(C stmtId) {
+			public void delete(int stmtId) {
 				this.updated();
-				History<C> delete = new History(stmtId, Mutation.DELETE);
+				History delete = new History(stmtId, Mutation.DELETE);
 				this.addHistory(delete);
 			}
 
-			public void append(C appendAfter, C appendWhat) {
+			public void append(int appendAfter, int appendWhat) {
 				this.updated();
-				History<C> append = new History(appendAfter, appendWhat, Mutation.APPEND);
+				History append = new History(appendAfter, appendWhat, Mutation.APPEND);
 				this.addHistory(append);
 			}
 
-			public void swap(C swapWhere, C swapWhat) {
+			public void swap(int swapWhere, int swapWhat) {
 				this.updated();
-				History<C> swap = new History(swapWhere, swapWhat, Mutation.SWAP);
+				History swap = new History(swapWhere, swapWhat, Mutation.SWAP);
 				this.addHistory(swap);
 			}
 
-			public void replace(C repWhere, C repWhat) {
+			public void replace(int repWhere, int repWhat) {
 				this.updated();
-				History<C> replace = new History(repWhere, repWhat, Mutation.REPLACE);
+				History replace = new History(repWhere, repWhat, Mutation.REPLACE);
 				this.addHistory(replace);
 			}
 
