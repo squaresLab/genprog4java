@@ -6,8 +6,8 @@ import java.util.TreeSet;
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.util.Pair;
 
-public interface Representation<G,C> {
-
+public interface Representation<G,C> extends Comparable<Representation<G,C>> {
+// will compare on fitness!
 		boolean getVariableLength();
 		List<G> getGenome();
 		void LoadGenomeFromString(String genome);
