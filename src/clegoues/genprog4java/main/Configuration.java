@@ -6,7 +6,8 @@ public class Configuration {
 	private String sanityFilename = "repair.sanity.java";
 	private String sanityExename = "repair.sanity";
 	private String globalExtension = ".java";
-	
+	private String searchStrategy = "ga";
+
 	public int getNumPositiveTests() { return this.numPositiveTests; }
 	public int getNumNegativeTests() { return this.numNegativeTests; }
 	public Configuration() {};
