@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
@@ -32,7 +33,7 @@ import org.jacoco.core.data.SessionInfo;
 import org.jacoco.core.runtime.IRuntime;
 import org.jacoco.core.runtime.LoggerRuntime;
 
-public class JavaRepresentation extends FaultLocRepresentation {
+public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 	
 	// compile assumes that it's been written to disk.  Should it continue to assume that
 	// the subdirectory has already been created?
@@ -42,6 +43,7 @@ public class JavaRepresentation extends FaultLocRepresentation {
 	private String javaVM; // FIXME
 	private String libs; // FIXME
 	private String filterClass = "";
+			private ArrayList<EditOperation> genome = null;
 			
 	protected void instrumentForFaultLocalization(){
 		String coverageOutputDir = "coverage";

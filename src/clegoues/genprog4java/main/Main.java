@@ -7,7 +7,7 @@ public class Main {
 	
 	public static void main(String[] args) throws IOException
 	{
-		StringBuffer buf = new StringBuffer();
+/*		StringBuffer buf = new StringBuffer();
 		buf.append(Main.class.getName()+"\n");
 		
 		for(String str : args)
@@ -71,21 +71,20 @@ public class Main {
 				int elapsed = getElapsedTime(startTime);
 				buf.append("\nTotal elapsed Time: " + elapsed + "\n");
 				
-				/*SMTPClient.send("put smtp server here", 25, "sender", 
+				SMTPClient.send("put smtp server here", 25, "sender", 
 						"destination", "username", "password",
-						"message", MailSecurity.TLS);*/
+						"message", MailSecurity.TLS);*/ /*
 			} catch (Exception e)
 			{
 				e.printStackTrace();
 			}
 			Runtime.getRuntime().exit(0);
 		}
-		Runtime.getRuntime().exit(0);
+		Runtime.getRuntime().exit(0);*/
 	}
 
 	private static int getElapsedTime(long start)
 	{
 		return (int) ( System.currentTimeMillis() - start ) / 1000;
 	}
-}
 }
