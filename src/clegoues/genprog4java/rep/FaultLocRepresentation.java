@@ -1,12 +1,16 @@
 package clegoues.genprog4java.rep;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeSet;
+
+
 
 
 
@@ -20,8 +24,6 @@ public abstract class FaultLocRepresentation<G,C> extends CachingRepresentation<
 	private ArrayList<WeightedAtom> faultLocalization;
 	private ArrayList<WeightedAtom> fixLocalization;
 
-	protected abstract void instrumentFaultLocalization(String coverageSourceName, String coverageExeName, String coverageDataOutName);
-	protected abstract int atomIDofSourceLine(String filename, int lineNum);
 	/*
 
 		
@@ -222,21 +224,14 @@ FIXME, maybe: coverage-per-test stuff?
 					}
 
 				
-				private TreeSet<Integer> runTestsCoverage(String path, TestType testT, int numTests, boolean expectedResult, String wd) {
+				private TreeSet<Integer> runTestsCoverage(String path, TestType testT, int numTests, boolean expectedResult, String wd) throws IOException {
 					String pathFile = wd + File.separator + path;
 					TreeSet<Integer> atoms = new TreeSet<Integer>();
 					for(int i = 1; i <= numTests; i++) {
 						this.cleanCoverage();
 						TestCase newTest = new TestCase(testT, i);
-						// FIXME: instrument, compile?
-						/*
-		                debug "Rep: coverage_sourcename: %s\n" coverage_sourcename;
-		                self#instrument_fault_localization 
-		                  coverage_sourcename coverage_exename coverage_outname ;
-		                if not (self#compile coverage_sourcename coverage_exename) then 
-		                  abort "ERROR: faultLocRep: compute_localization: cannot compile %s\n" 
-		                    coverage_sourcename ;
-*/
+				
+
 						this.testCase(newTest); // FIXME: check return values of these
 						TreeSet<Integer> thisTestResult = this.getCoverageInfo();
 						atoms.addAll(thisTestResult);
@@ -246,7 +241,7 @@ FIXME, maybe: coverage-per-test stuff?
 					return atoms;
 				}
 				
-				protected abstract TreeSet<Integer> getCoverageInfo();
+				protected abstract TreeSet<Integer> getCoverageInfo() throws FileNotFoundException, IOException;
 				
 				private TreeSet<Integer> readPathFile(String pathFile) {
 					TreeSet<Integer> retVal = new TreeSet<Integer>();
@@ -259,7 +254,7 @@ FIXME, maybe: coverage-per-test stuff?
 							return retVal;
 							
 				}
-				public void computeLocalization(String wd) {
+				public void computeLocalization(String wd) throws IOException {
 					// FIXME: THIS ONLY DOES STANDARD PATH FILE localization
 					/* FIXME: add regen-paths
 					 * Default "ICSE'09"-style fault and fix localization from path files.  The
@@ -269,6 +264,12 @@ FIXME, maybe: coverage-per-test stuff?
 					TreeSet<Integer> positivePath = null;
 					TreeSet<Integer> negativePath = null;
 					File positivePathFile = new File(wd + File.separator + this.positivePathFile);
+					// OK, we don't instrument Java programs, rather, use java library that computes coverage for us.
+					// which means either instrumentFaultLocalization should still exist and change the commands used for test case execution
+					// or we don't pretend this is trying to match OCaml exactly?
+					this.instrumentForFaultLocalization();
+					this.compile(this.getName(), "coverage.out");
+
 					if(positivePathFile.exists()) {
 						positivePath = readPathFile(wd + File.separator + this.positivePathFile);
 					} else {
@@ -311,6 +312,9 @@ FIXME, maybe: coverage-per-test stuff?
 					}
 
 				}
+
+				protected abstract void instrumentForFaultLocalization();
+		
 				
 		
 }
