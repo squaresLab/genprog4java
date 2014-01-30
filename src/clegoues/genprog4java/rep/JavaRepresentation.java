@@ -147,7 +147,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 	public TreeSet<Integer> getCoverageInfo() throws IOException
 	{
-		InputStream targetClass = new FileInputStream(new File(Main.config.outputDir + File.separator + 0+File.separator+Main.config.packageName.replace(".","/")
+		InputStream targetClass = new FileInputStream(new File(Configuration.outputDir + File.separator + "coverage"+File.separator+Configuration.packageName.replace(".","/")
 				+ File.separator + this.classUnderRepair + ".class"));
 		
 		if(executionData == null) {
@@ -204,7 +204,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	}
 
 
-	public void load(String fname) throws IOException
+	public void fromSource(String fname) throws IOException
 	{
 		// load here, get all statements and the compilation unit saved
 		// parser can visit at the same time to collect scope info
@@ -283,11 +283,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 
 
-	@Override
-	public void fromSource(String filename) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public void outputSource(String filename) {

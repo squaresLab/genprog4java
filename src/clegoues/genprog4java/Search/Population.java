@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 import java.util.TreeSet;
 
@@ -12,8 +13,9 @@ import clegoues.genprog4java.rep.Representation;
 
 public class Population<G extends EditOperation> implements Iterable<Representation<G>>{
 
-	private int popsize = 40;  
-	private double crossp = 0.5; 
+	private static int popsize = 40;
+	private static double crossp = 0.5; 
+
 	private String incomingPop = "";
 	private int tournamentK = 2;
 	private String outputFormat = "txt";
@@ -30,7 +32,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	}
 	
 	public int getPopsize() {
-		return this.popsize;
+		return Population.popsize;
 	}
 	
 
@@ -357,6 +359,15 @@ end*/
 	public void selection(int popsize) {
 		this.tournamentSelection(popsize);
 		
+	}
+
+	public static void configure(Properties prop) {
+		if(prop.getProperty("crossp") != null) {
+		crossp = Double.parseDouble(prop.getProperty("crossp").trim());
+		}
+		if(prop.getProperty("popsize") != null) {
+			popsize = Integer.parseInt(prop.getProperty("pop_size").trim());
+		}		
 	}
 
 }

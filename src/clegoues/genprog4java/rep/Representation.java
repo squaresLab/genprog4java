@@ -22,13 +22,13 @@ public interface Representation<G extends EditOperation> extends Comparable<Repr
 		void setGenome(List<G> genome);
 		int genomeLength();
 		void noteSuccess();
-		void load(String filename) throws IOException;
+		void load(String filename) throws IOException, UnexpectedCoverageResultException;
 		void serialize(String filename);
 		boolean deserialize(String filename);
 		List<WeightedAtom> getFaultyAtoms();
 		List<WeightedAtom> getFixSourceAtoms();
 		boolean sanityCheck() throws SanityCheckException;
-		void fromSource(String filename);
+		void fromSource(String filename) throws IOException;
 		void outputSource(String filename);
 		List<String> sourceName();
 		void cleanup();
@@ -53,7 +53,8 @@ public interface Representation<G extends EditOperation> extends Comparable<Repr
 
 		Representation<G> copy();
 		int num_test_evals_ignore_cache(); // FIXME this really needs to not be here
-		void computeLocalization(String wd) throws IOException,
+
+		void computeLocalization() throws IOException,
 				UnexpectedCoverageResultException;
 
 }

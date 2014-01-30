@@ -21,8 +21,10 @@ import java.util.TreeSet;
 
 
 
+
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
+import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.main.Main;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
@@ -132,11 +134,10 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			      fault_localization := (lfilt split_fun fault_localization')
 */
 			  private TreeSet<Pair<Mutation,Double>> mutations = null;
-private String positivePathFile;
-private String negativePathFile;
-private Double positivePathWeight;
+
+private double positivePathWeight; // FIXME: these should be options
 private double negativePathWeight;
-private boolean allowCoverageFail;
+private boolean allowCoverageFail = false;
 			  
 				public void registerMutations(TreeSet<Pair<Mutation,Double>> availableMutations) {
 					
@@ -273,34 +274,35 @@ private boolean allowCoverageFail;
 				}
 				@Override
 				
-				public void computeLocalization(String wd) throws IOException, UnexpectedCoverageResultException {
+				public void computeLocalization() throws IOException, UnexpectedCoverageResultException {
 					// FIXME: THIS ONLY DOES STANDARD PATH FILE localization
 					/* FIXME: add regen-paths
 					 * Default "ICSE'09"-style fault and fix localization from path files.  The
 				     * weighted path fault localization is a list of <atom,weight> pairs. The fix
 				     * weights are a hash table mapping atom_ids to weights.
 					 */
+					//FIXME: add subdirectory for coverage
+
 					TreeSet<Integer> positivePath = null;
 					TreeSet<Integer> negativePath = null;
-					File positivePathFile = new File(wd + File.separator + this.positivePathFile);
+					File positivePathFile = new File(Configuration.posCoverageFile);
 					// OK, we don't instrument Java programs, rather, use java library that computes coverage for us.
 					// which means either instrumentFaultLocalization should still exist and change the commands used for test case execution
 					// or we don't pretend this is trying to match OCaml exactly?
 					this.instrumentForFaultLocalization();
-					this.compile(this.getName(), "coverage.out");
-
+					this.compile(this.getName(), "coverage/coverage.out");
 					if(positivePathFile.exists()) {
-						positivePath = readPathFile(wd + File.separator + this.positivePathFile);
+						positivePath = readPathFile(Configuration.posCoverageFile);
 					} else {
-						positivePath = runTestsCoverage(this.positivePathFile, TestType.POSITIVE, Main.config.getNumPositiveTests(), true, wd);
+						positivePath = runTestsCoverage(Configuration.posCoverageFile, TestType.POSITIVE, Configuration.numPositiveTests, true, "coverage/"); 
 					}
-					File negativePathFile = new File(wd + File.separator + this.negativePathFile);
+					File negativePathFile = new File(Configuration.negCoverageFile);
 					
 					if(negativePathFile.exists()) {
-					negativePath = readPathFile(wd + File.separator + this.negativePathFile);
+					negativePath = readPathFile(Configuration.negCoverageFile);
 					
 					} else {
-						negativePath = runTestsCoverage(this.negativePathFile, TestType.NEGATIVE, Main.config.getNumNegativeTests(), false, wd);
+						negativePath = runTestsCoverage(Configuration.negCoverageFile, TestType.NEGATIVE, Configuration.numNegativeTests, false, "coverage/");
 					}
 					HashMap<Integer,Double> fw = new HashMap<Integer,Double>(); 
 					TreeSet<Integer> negHt = new TreeSet<Integer>();
@@ -333,6 +335,11 @@ private boolean allowCoverageFail;
 
 				protected abstract void instrumentForFaultLocalization();
 		
+				@Override
+				public void load(String fname) throws IOException, UnexpectedCoverageResultException {
+					super.load(fname); // calling super so that the code is loaded and the sanity check happens before localization is computed
+				this.computeLocalization();	
+				}
 				
 		
 }
