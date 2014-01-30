@@ -23,9 +23,6 @@ public abstract class CachingRepresentation<G> implements Representation<G> {
 	  private String alreadyCompiled; // initialized to ref None in ocaml
 	  private ArrayList<History> history;
 
-	  // unlike in the OCaml representation, this shouldn't return None for the first element if
-	  // it's a single-file representation b/c that's stupid.
-	  protected abstract List<Pair<String,String>>internalComputeSourceBuffers();
 
 	  public boolean getVariableLength() { return true; }
 

@@ -7,15 +7,18 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
 
+import javax.swing.text.BadLocationException;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
 
 import clegoues.genprog4java.Fitness.TestCase;
+import clegoues.genprog4java.Search.JavaEditOperation;
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaStatement;
@@ -36,6 +39,10 @@ import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jface.text.Document;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IClassCoverage;
@@ -50,7 +57,7 @@ import org.jacoco.core.data.SessionInfo;
 
 // this can handle ONE FILE right now
 
-public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
+public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation> {
 
 	// compile assumes that it's been written to disk.  Should it continue to assume that
 	// the subdirectory has already been created?
@@ -58,15 +65,18 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 	private static ArrayList<JavaStatement> base = new ArrayList<JavaStatement>(); // FIXME: wondering if I need this
 	private static CompilationUnit baseCompilationUnit = null;
 	private static HashMap<Integer,ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer,ArrayList<Integer>>();
-
+	private static String originalSource = "";
+			
 	private CommandLine testCommand = null;
 	private String javaRuntime;
 	private String javaVM; // FIXME
 	private String libs; // FIXME
 	private String filterClass = "";
-	private ArrayList<EditOperation> genome = null;
+	private ArrayList<JavaEditOperation> genome = null;
 	private String classUnderRepair = "";
 
+	private static String getOriginalSource() { return originalSource; }
+	
 	protected void instrumentForFaultLocalization(){
 		String coverageOutputDir = "coverage";
 		this.filterClass = "clegoues.genprog4java.util.CoverageFilter";
@@ -128,8 +138,6 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 	}
 
 	// Java-specific coverage stuff:
-
-	// this all comes originally from CoverageRuntime, where I learned to use jacoco
 
 	private ExecutionDataStore executionData = null;
 	
@@ -250,7 +258,7 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 	}
 
 
-	public ArrayList<EditOperation> getGenome() {
+	public ArrayList<JavaEditOperation> getGenome() {
 		return this.genome;
 	}
 
@@ -260,8 +268,8 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 		
 	}
 
-	public void setGenome(List<EditOperation> genome) {
-		this.genome = (ArrayList<EditOperation>) genome;
+	public void setGenome(List<JavaEditOperation> genome) {
+		this.genome = (ArrayList<JavaEditOperation>) genome;
 	}
 
 	@Override
@@ -317,22 +325,42 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 	}
 
 	@Override
-	public int compareTo(Representation<EditOperation> o) {
+	public int compareTo(Representation<JavaEditOperation> o) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 
-	@Override
-	protected List<Pair<String, String>> internalComputeSourceBuffers() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
-	protected Iterable<?> computeSourceBuffers() {
-		// TODO Auto-generated method stub
-		return null;
+	protected List<Pair<String,String>> computeSourceBuffers() {
+		CompilationUnit cu = (CompilationUnit) ASTNode.copySubtree(baseCompilationUnit.getAST(), baseCompilationUnit); // FIXME: possibly a disaster
+
+		Document doc = new Document(JavaRepresentation.getOriginalSource()); // FIXME: SET ORIGINAL SOURCE IN LOAD
+		ASTRewrite rewriter = ASTRewrite.create(cu.getAST());
+		
+		try
+		{
+			for(JavaEditOperation edit : genome) { 
+				edit.edit(rewriter);
+			}
+			
+			TextEdit edits = null;
+			
+			edits = rewriter.rewriteAST(doc, null);
+			edits.apply(doc);
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (MalformedTreeException e) {
+			e.printStackTrace();
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		} catch (ClassCastException e) {
+			e.printStackTrace();
+		}
+		ArrayList<Pair<String,String>> retVal = new ArrayList<Pair<String,String>>();
+		retVal.add(new Pair<String,String>(this.classUnderRepair, doc.get()));
+		return retVal;
 	}
 
 	@Override
