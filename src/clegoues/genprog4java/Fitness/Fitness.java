@@ -3,8 +3,10 @@ package clegoues.genprog4java.Fitness;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 
+import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.main.Main;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
@@ -13,16 +15,20 @@ import clegoues.genprog4java.util.Pair;
 
 
 public class Fitness<G extends EditOperation> {
-	private double negativeTestWeight = 2.0; 
-	private double sample = 1.0;
-	private String sampleStrategy = "variant"; // options: all, generation, variant
+	private static double negativeTestWeight = 2.0; 
+	private static double sample = 1.0;
+	private static String sampleStrategy = "variant"; // options: all, generation, variant
 
-	public Fitness() { }
-	public Fitness(double negativeWeight, double sample, String sampleStrategy) {
-		this.negativeTestWeight = negativeWeight;
-		this.sample = sample;
-		this.sampleStrategy = sampleStrategy;
-
+	public static void configure(Properties prop) {
+		if(prop.getProperty("negativeTestWeight") != null) {
+			Fitness.negativeTestWeight = Double.parseDouble(prop.getProperty("negativeTestWeight").trim());
+		}
+		if(prop.getProperty("sample") != null) {
+			Fitness.sample = Double.parseDouble(prop.getProperty("sample").trim());
+		}
+		if(prop.getProperty("sampleStrategy") != null) {
+			Fitness.sampleStrategy = prop.getProperty("sampleStrategy").trim();
+		}
 	}
 
 	/* {b test_to_first_failure} variant returns true if the variant passes all
@@ -31,23 +37,23 @@ public class Fitness<G extends EditOperation> {
 	    fails a test case.  This makes less sense for single_fitness, but
 	    single_fitness being true won't break it.  Does do sampling if specified. */
 
-	public  boolean testToFirstFailure(Representation<G> rep) {
+	public boolean testToFirstFailure(Representation<G> rep) {
 		int count=0;
 		boolean retVal = true;
 		try {
-			for( int i = 1; i <= Main.config.getNumNegativeTests(); i++) {
+			for( int i = 1; i <= Configuration.numNegativeTests; i++) {
 				TestCase thisTest = new TestCase(TestType.NEGATIVE, i);
 				if(!rep.testCase(thisTest)) {
 					throw new TestFailedException();
 				}
 				count++;
 			} 
-			Long L = Math.round(sample * Main.config.getNumPositiveTests());
+			Long L = Math.round(sample * Configuration.numPositiveTests);
 			int sampleSize = Integer.valueOf(L.intValue());
 
-			ArrayList<Integer> allPositiveTests = GlobalUtils.range(1,Main.config.getNumPositiveTests());
+			ArrayList<Integer> allPositiveTests = GlobalUtils.range(1,Configuration.numPositiveTests);
 			List<Integer> positiveSample;
-			if(sampleSize == Main.config.getNumPositiveTests()) {
+			if(sampleSize == Configuration.numPositiveTests) {
 				positiveSample = allPositiveTests;
 			} else {
 				long seed = System.nanoTime();
@@ -79,11 +85,11 @@ public class Fitness<G extends EditOperation> {
 		return retVal;
 	}
 
-	private Pair<Double,Double> testFitnessGeneration(Representation<G> rep, int generation) {
+	private  Pair<Double,Double> testFitnessGeneration(Representation<G> rep, int generation) {
 		throw new UnsupportedOperationException();
 	}
 
-	private Pair<Double,Double> testFitnessVariant(Representation<G> rep) {
+	private  Pair<Double,Double> testFitnessVariant(Representation<G> rep) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -101,12 +107,12 @@ public class Fitness<G extends EditOperation> {
 		 * worth twice as much, total, as the positive tests. This is the old
 		 * ICSE'09 behavior, where there were 5 positives tests (worth 1 each) and
 		 * 1 negative test (worth 10 points). 10:5 == 2:1. */
-		double fac = Main.config.getNumPositiveTests() * this.negativeTestWeight / Main.config.getNumNegativeTests();
+		double fac = Configuration.numPositiveTests * this.negativeTestWeight / Configuration.numNegativeTests;
 
 		// possible TODO: make num positive and num negative tests configuration flags for this class, not the 
 		// main config?
 
-		double maxFitness = Main.config.getNumPositiveTests() + ((Main.config.getNumNegativeTests() * fac));
+		double maxFitness = Configuration.numPositiveTests + ((Configuration.numNegativeTests * fac));
 		if(rep.fitnessIsValid()) {
 			System.out.printf("\t%3g %s\n", rep.getFitness(), rep.getName());
 			return !(rep.getFitness() < maxFitness);

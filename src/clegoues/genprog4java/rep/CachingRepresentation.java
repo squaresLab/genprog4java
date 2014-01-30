@@ -7,6 +7,7 @@ import java.util.List;
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
 import clegoues.genprog4java.util.Pair;
+import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.main.Main;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
@@ -34,36 +35,19 @@ public abstract class CachingRepresentation<G extends EditOperation> implements 
 // OCaml has a copy method here.  Do we need?
 	
 
-	public void load(String base) throws IOException { 
-		throw new UnsupportedOperationException();
-/*
-			    let cache_file = if !rep_cache_file = "" then (base^".cache") else !rep_cache_file in
-			    let success = 
-			      try 
-			        if !no_rep_cache then begin
-			          if !sanity = "default" then sanity := "yes";
-			          false 
-			        end else begin
-			          self#deserialize ?in_channel:None ~global_info:true cache_file; 
-			          if !sanity = "default" then sanity := "no";
-			          true
-			        end
-			      with e -> 
-			        begin
-			          debug "Exception in loading: %s\n" (Printexc.to_string e);
-			          (if !sanity = "default" then sanity := "yes"); false 
-			        end
-			    in
-			      if not success then begin
-			        self#from_source !program_to_repair;
-			      end;
-			      if !sanity = "yes" then 
-			        Stats2.time "sanity_check" self#sanity_check () ; 
-			      if (not success) || !regen_paths then begin
-			        self#compute_localization ();
-			      end;
-			      self#serialize ~global_info:true cache_file
-			  end
+	public void load(String base) throws IOException, UnexpectedCoverageResultException { 
+		// FIXME: try deserialize first
+		this.fromSource(base); 
+		if(Configuration.doSanity){
+			try {
+			assert(this.sanityCheck());
+			} catch(SanityCheckException e) {
+				System.err.println("cachingRep: Sanity check failed");
+				Runtime.getRuntime().exit(1);;
+			}
+			// FIXME: serialize
+		}
+		/*
 
 			  method serialize ?out_channel ?global_info (filename : string) = 
 			    let fout = 
@@ -103,20 +87,20 @@ public abstract class CachingRepresentation<G extends EditOperation> implements 
 	public boolean sanityCheck() throws SanityCheckException {
 		Calendar startTime = Calendar.getInstance();
 		// TODO: createSubDirectory("sanity");
-		String sanityFilename = "sanity/" + Main.config.getSanityFilename() + Main.config.getGlobalExtension();
-		String sanityExename = "sanity/" + Main.config.getSanityExename();
+		String sanityFilename = "sanity/" + Configuration.sanityFilename + Configuration.globalExtension; 
+		String sanityExename = "sanity/" + Configuration.sanityExename;
 		this.outputSource(sanityFilename);
 		if(!this.compile(sanityFilename,sanityExename))
 		{
 			throw new SanityCheckException("sanity: " + sanityFilename + " does not compile.");
 		}
-		for(int i = 1; i <= Main.config.getNumNegativeTests(); i++) {
+		for(int i = 1; i <= Configuration.numPositiveTests; i++) {
 			TestCase thisTest = new TestCase(TestType.POSITIVE, i);
 			if(!this.internalTestCase(sanityExename,sanityFilename, thisTest)) {
 				throw new SanityCheckException("sanity: " + sanityFilename + " failed " + thisTest.toString());
 			}
 		}
-		for(int i = 1; i <= Main.config.getNumNegativeTests(); i++) {
+		for(int i = 1; i <= Configuration.numNegativeTests; i++) {
 			TestCase thisTest = new TestCase(TestType.NEGATIVE, i);
 			if(this.internalTestCase(sanityExename,sanityFilename, thisTest)) {
 				throw new SanityCheckException("sanity: " + sanityFilename + " passed " + thisTest.toString());

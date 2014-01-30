@@ -1,86 +1,49 @@
 package clegoues.genprog4java.main;
-import java.io.File;
 import java.io.IOException;
+
+import clegoues.genprog4java.Fitness.Fitness;
+import clegoues.genprog4java.Search.JavaEditOperation;
+import clegoues.genprog4java.Search.RepairFoundException;
+import clegoues.genprog4java.Search.Search;
+import clegoues.genprog4java.rep.JavaRepresentation;
+import clegoues.genprog4java.rep.Representation;
+import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 
 public class Main {
 	public static Configuration config;
 	
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args) throws IOException, UnexpectedCoverageResultException
 	{
-/*		StringBuffer buf = new StringBuffer();
-		buf.append(Main.class.getName()+"\n");
+		Search searchEngine = null;
+		Representation baseRep = null;
+		Fitness fitnessEngine = null;
 		
-		for(String str : args)
-		{
-			buf.append(str+"\n");
-		}
-		
-		PropertyConfigurator.configure("log4j.properties");
-		
-		if( args.length > 0 )
-		{
-			Constants.setProperties(args[0]);
-		}
-		else
-		{
-			Constants.setProperties(PROPERTIES_FILE);
-		}
-		
-		File tmp = new File(Constants.outputDir);
-		if(!(tmp.exists() && tmp.isDirectory()))
-		{
-			boolean result = tmp.mkdirs();
-			if(!result)
-			{
-				logger.error("Unable to create temporary directories.");
-				System.err.println("Unable to create temporary directories.");
-				Runtime.getRuntime().exit(1);
-			}
-		}
-		
-		logger.info("Configuration file succefully loaded.");
-		
-		int iteration = 1;
-		
-		if(args.length > 1)
-			iteration = Integer.parseInt(args[1]);
-		
-		logger.info("Total: "+ iteration + " runs.");
-		
+		assert(args.length > 0);
 		long startTime = System.currentTimeMillis();
-		
-		try
-		{
-			for(int i = 0; i < iteration; i++)
-			{
-				logger.info("Iteration: " + i);
-				GPProcessor gpp = new GPProcessor();
-				
-				gpp.doGP();
-			}
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-			buf.append(e.getMessage()+"\n");
-			success = "Failure";
+
+		Configuration.setProperties(args[0]);
+		System.out.println("Configuration file loaded");
+		if(Configuration.globalExtension == ".java") {
+			baseRep = (Representation) new JavaRepresentation();
+			searchEngine = new Search<JavaEditOperation>();
+			fitnessEngine = new Fitness<JavaEditOperation>();
 		}
-		finally
-		{
-			try
-			{
-				int elapsed = getElapsedTime(startTime);
-				buf.append("\nTotal elapsed Time: " + elapsed + "\n");
-				
-				SMTPClient.send("put smtp server here", 25, "sender", 
-						"destination", "username", "password",
-						"message", MailSecurity.TLS);*/ /*
-			} catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-			Runtime.getRuntime().exit(0);
+		baseRep.load(Configuration.sourceDir + "/" + Configuration.targetClassName + ".java");
+		try {
+		if(Configuration.searchStrategy == "ga") {
+				searchEngine.geneticAlgorithm(baseRep, null);
+		} else if (Configuration.searchStrategy == "brute") {
+				searchEngine.bruteForceOne(baseRep);
+		} else if (Configuration.searchStrategy == "oracle") {
+			throw new UnsupportedOperationException();
 		}
-		Runtime.getRuntime().exit(0);*/
+		} catch(RepairFoundException e) {
+			e.printStackTrace(); // FIXME: this is stupid
+		}
+		int elapsed = getElapsedTime(startTime);
+		System.out.printf("\nTotal elapsed time: " + elapsed + "\n");
+		Runtime.getRuntime().exit(0);
+
 	}
 
 	private static int getElapsedTime(long start)

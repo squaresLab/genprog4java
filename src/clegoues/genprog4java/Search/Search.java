@@ -3,9 +3,11 @@ package clegoues.genprog4java.Search;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Properties;
 import java.util.TreeSet;
 
 import clegoues.genprog4java.Fitness.Fitness;
+import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.main.Main;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
@@ -24,16 +26,34 @@ import clegoues.genprog4java.util.Pair;
 
 public class Search<G extends EditOperation> {
 
-	private int generations = 10;
-	private int proMut = 1;
-	private boolean continueSearch = false;
-	private int generationsRun = 0;
-	private double appProb = 0.33333;
-	private double delProb = 0.33333;
-	private double swapProb = 0.33333;
-	private double repProb = 0.0;
+	private static int generations = 10;
+	private static double promut = 1;
+	private static boolean continueSearch = false;
+	private static double appProb = 0.33333;
+	private static double delProb = 0.33333;
+	private static double swapProb = 0.33333;
+	private static double repProb = 0.0;
+	private static int maxEvals = 0;
+
+
+	public static void configure(Properties props) {
+
+			if(props.getProperty("generations") != null) {
+			Search.generations = Integer.parseInt(props.getProperty("generations").trim());
+			}
+			
+			if(props.getProperty("promut") != null) {
+			Search.promut = Double.parseDouble(props.getProperty("pMutation").trim());
+			}	
+			if(props.getProperty("continue") != null) {
+				Search.continueSearch = true;
+			}
+			if(props.getProperty("max") != null) {
+				Search.maxEvals = Integer.parseInt(props.getProperty("max").trim());
+			}
+	}
 	private Fitness<G> fitnessEngine;
-	private int maxEvals = 0;
+	private int generationsRun = 0;
 
 	/* CLG is not convinced that the responsibility for writing out the successful
 		   repair should lie in search, but she does think it's better to have it here
@@ -50,16 +70,12 @@ public class Search<G extends EditOperation> {
     @param orig original variant
     @param generation generation in which the repair was found */
 	void noteSuccess(Representation<G> rep, Representation<G> original, int generation) throws RepairFoundException {
-		ArrayList<History> history = rep.getHistory();
-		System.out.printf("\nRepair Found: ");
-		for(History histEle : history) {
-			System.out.printf(" " + histEle.toString());
-		}
-		String name = rep.getName();
-		System.out.printf("\n Repair Name: " + name);
+// FIXME: print out edit list somehow
+		System.out.printf("\nRepair Found: " + rep.getName());
+
 		Calendar endTime = Calendar.getInstance(); // TODO do something with this
 		// TODO: createSubDirectory("repair");
-		String repairFilename = "repair/repair." + Main.config.getGlobalExtension();
+		String repairFilename = "repair/repair." + Configuration.globalExtension;
 		rep.outputSource(repairFilename);
 		rep.noteSuccess();
 
@@ -96,7 +112,7 @@ public class Search<G extends EditOperation> {
 
 		if(fitnessEngine.testToFirstFailure(rep)) {
 			this.noteSuccess(rep,original,1);
-			if(!this.continueSearch) { 
+			if(!Search.continueSearch) { 
 				throw new RepairFoundException(rep.getName());
 			}
 		}
@@ -105,10 +121,10 @@ public class Search<G extends EditOperation> {
 
 	private void registerMutations(Representation<G> variant) {
 		TreeSet<Pair<Mutation,Double>> availableMutations = new TreeSet<Pair<Mutation,Double>>();
-		availableMutations.add(new Pair<Mutation,Double>(Mutation.DELETE,this.delProb));
-		availableMutations.add(new Pair<Mutation,Double>(Mutation.APPEND,this.appProb));
-		availableMutations.add(new Pair<Mutation,Double>(Mutation.SWAP,this.swapProb));
-		availableMutations.add(new Pair<Mutation,Double>(Mutation.REPLACE,this.repProb));
+		availableMutations.add(new Pair<Mutation,Double>(Mutation.DELETE,Search.delProb));
+		availableMutations.add(new Pair<Mutation,Double>(Mutation.APPEND,Search.appProb));
+		availableMutations.add(new Pair<Mutation,Double>(Mutation.SWAP,Search.swapProb));
+		availableMutations.add(new Pair<Mutation,Double>(Mutation.REPLACE,Search.repProb));
 
 		variant.registerMutations(availableMutations);
 	}
@@ -122,16 +138,16 @@ public class Search<G extends EditOperation> {
 
 		for(WeightedAtom faultyAtom : allFaultyAtoms) {
 			int faultyLocation = faultyAtom.getAtom();
-			if(this.delProb > 0.0) {
+			if(Search.delProb > 0.0) {
 				count++;
 			}
-			if(this.appProb > 0.0) {
+			if(Search.appProb > 0.0) {
 				count += original.appendSources(faultyLocation).size();
 			}
-			if(this.repProb > 0.0) {
+			if(Search.repProb > 0.0) {
 				count += original.replaceSources(faultyLocation).size();
 			}
-			if(this.swapProb > 0.0) {
+			if(Search.swapProb > 0.0) {
 				count += original.swapSources(faultyLocation).size();
 			}
 		}
@@ -226,7 +242,7 @@ public class Search<G extends EditOperation> {
 	void mutate(Representation<G> variant) { // FIXME: don't need to return, right? 
 		List<WeightedAtom> faultyAtoms = variant.getFaultyAtoms();
 		List<WeightedAtom> proMutList = null;
-		for(int i = 0; i < this.proMut; i++) {
+		for(int i = 0; i < Search.promut; i++) {
 			proMutList.add(GlobalUtils.chooseOneWeighted(faultyAtoms));
 
 		}
@@ -270,7 +286,7 @@ public class Search<G extends EditOperation> {
 	void calculateFitness(int generation, Representation<G> original, Representation<G> variant) throws MaximumEvalsException, RepairFoundException
 	{ // FIXME: I think this should go strictly into Fitness
 		int evals = original.num_test_evals_ignore_cache(); // FIXME: this needs to go elsewhere
-		if(this.maxEvals > 0 && evals > this.maxEvals) {
+		if(Search.maxEvals > 0 && evals > Search.maxEvals) {
 			throw new MaximumEvalsException();
 		}
 		if(fitnessEngine.testFitness(generation, variant)) {
