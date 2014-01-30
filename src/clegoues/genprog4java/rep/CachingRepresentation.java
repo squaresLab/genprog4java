@@ -8,9 +8,10 @@ import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
 import clegoues.genprog4java.util.Pair;
 import clegoues.genprog4java.main.Main;
+import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
 
-public abstract class CachingRepresentation<G> implements Representation<G> {
+public abstract class CachingRepresentation<G extends EditOperation> implements Representation<G> {
 	
 	private double fitness; // in repair, this is a hashtable, for when we have multiple fitnesses.  For now let's KISS	
 	/*  (** cached file contents from [internal_compute_source_buffers]; avoid
@@ -21,7 +22,6 @@ public abstract class CachingRepresentation<G> implements Representation<G> {
 	private List<String> alreadySourced; // initialize to empty
 	  // TODO: private List<Digest> alreadyDigest; // Digest.t in OCaml
 	  private String alreadyCompiled; // initialized to ref None in ocaml
-	  private ArrayList<History> history;
 
 
 	  public boolean getVariableLength() { return true; }
@@ -202,56 +202,9 @@ public abstract class CachingRepresentation<G> implements Representation<G> {
 				throw new UnsupportedOperationException();
 			}
 
-
-
-			    // ommitting test_cases.  I think PAR does test cases in parallel, but 
-			 // that seems needlessly complicated for a first hack.
-
-			public ArrayList<History> getHistory() { return this.history; }
-	
-			public void addHistory(History edit) {
-				this.history.add(edit);
-			}
-
-		 // historyElement to string was originally in cachingRepresentation for some totally unknown reason; moved that 
-		 // to the History.toString method in the appropriate class.
-					  
-			public String name() {
-				if(history.size() == 0) {
-					return "original";
-				}
-				String name = "";
-				for(History edit : this.history) {
-					name = name + " " + edit.toString();
-				}
-				return name;
-			}
+// FIXME: unique name thing, I guess we'll deal with that in the subclasses?
+			
 // TODO: ignoring available crossover points for now
-// TODO: OK delete assumes the code type is stmtId; make this type system play nice at some point
-			public void delete(int stmtId) {
-				this.updated();
-				History delete = new History(stmtId, Mutation.DELETE);
-				this.addHistory(delete);
-			}
-
-			public void append(int appendAfter, int appendWhat) {
-				this.updated();
-				History append = new History(appendAfter, appendWhat, Mutation.APPEND);
-				this.addHistory(append);
-			}
-
-			public void swap(int swapWhere, int swapWhat) {
-				this.updated();
-				History swap = new History(swapWhere, swapWhat, Mutation.SWAP);
-				this.addHistory(swap);
-			}
-
-			public void replace(int repWhere, int repWhat) {
-				this.updated();
-				History replace = new History(repWhere, repWhat, Mutation.REPLACE);
-				this.addHistory(replace);
-			}
-
 
 // TODO:			  method hash () = Hashtbl.hash (self#get_history ()) 
 

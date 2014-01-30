@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.TreeSet;
 
+import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 
-public class Population<G> implements Iterable<Representation<G>>{
+public class Population<G extends EditOperation> implements Iterable<Representation<G>>{
 
 	private int popsize = 40;  
 	private double crossp = 0.5; 

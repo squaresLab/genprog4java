@@ -6,12 +6,13 @@ import java.util.List;
 import java.util.Random;
 
 import clegoues.genprog4java.main.Main;
+import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.util.GlobalUtils;
 import clegoues.genprog4java.util.Pair;
 
 
-public class Fitness<G> {
+public class Fitness<G extends EditOperation> {
 	private double negativeTestWeight = 2.0; 
 	private double sample = 1.0;
 	private String sampleStrategy = "variant"; // options: all, generation, variant

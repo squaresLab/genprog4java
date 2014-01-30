@@ -7,8 +7,8 @@ import java.util.TreeSet;
 
 import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.main.Main;
+import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.rep.History;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.genprog4java.util.GlobalUtils;
@@ -20,7 +20,9 @@ import clegoues.genprog4java.util.Pair;
   let size = List.length elts in 
     List.nth elts (Random.int size) 
  */
-public class Search<G> {
+
+
+public class Search<G extends EditOperation> {
 
 	private int generations = 10;
 	private int proMut = 1;
@@ -390,7 +392,7 @@ public class Search<G> {
   */
 	void oracleSearch(Representation<G> original, String startingGenome) throws RepairFoundException {
 		Representation<G> theRepair = original.copy();
-		theRepair.LoadGenomeFromString(startingGenome);
+		theRepair.loadGenomeFromString(startingGenome);
 		assert(fitnessEngine.testToFirstFailure(theRepair));
 		this.noteSuccess(theRepair, original, 1);
 	}

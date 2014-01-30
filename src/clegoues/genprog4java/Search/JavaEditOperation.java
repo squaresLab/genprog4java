@@ -15,6 +15,15 @@ public class JavaEditOperation implements EditOperation<JavaStatement,ASTRewrite
 	private JavaStatement location = null;
 	private JavaStatement fixCode = null;
 	
+	public JavaEditOperation(JavaStatement location) {
+		this.mutType = Mutation.DELETE;
+		this.location = location;
+	}
+	public JavaEditOperation(Mutation mutType, JavaStatement location, JavaStatement fixCode) {
+		this.mutType = mutType;
+		this.location = location;
+		this.fixCode = fixCode;
+	}
 	@Override
 	public Mutation getType() {
 		return this.mutType;
