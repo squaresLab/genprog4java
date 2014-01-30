@@ -7,7 +7,6 @@ import java.util.Properties;
 import java.util.Random;
 
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.main.Main;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.util.GlobalUtils;
@@ -38,7 +37,6 @@ public class Fitness<G extends EditOperation> {
 	    single_fitness being true won't break it.  Does do sampling if specified. */
 
 	public boolean testToFirstFailure(Representation<G> rep) {
-		int count=0;
 		boolean retVal = true;
 		try {
 			for( int i = 1; i <= Configuration.numNegativeTests; i++) {
@@ -46,7 +44,6 @@ public class Fitness<G extends EditOperation> {
 				if(!rep.testCase(thisTest)) {
 					throw new TestFailedException();
 				}
-				count++;
 			} 
 			Long L = Math.round(sample * Configuration.numPositiveTests);
 			int sampleSize = Integer.valueOf(L.intValue());
@@ -65,16 +62,14 @@ public class Fitness<G extends EditOperation> {
 				if(!rep.testCase(thisTest)) {
 					throw new TestFailedException();
 				}
-				count ++;	
 			}
-			if(this.sample < 1.0) {
+			if(Fitness.sample < 1.0) {
 				List<Integer> restOfSample = allPositiveTests.subList(sampleSize+1, allPositiveTests.size());
 				for(Integer testNum : restOfSample) {
 					TestCase thisTest = new TestCase(TestType.POSITIVE, testNum);
 					if(!rep.testCase(thisTest)) {
 						throw new TestFailedException();
 					}
-					count ++;
 				}
 			}
 		} catch (TestFailedException e) {
@@ -107,22 +102,19 @@ public class Fitness<G extends EditOperation> {
 		 * worth twice as much, total, as the positive tests. This is the old
 		 * ICSE'09 behavior, where there were 5 positives tests (worth 1 each) and
 		 * 1 negative test (worth 10 points). 10:5 == 2:1. */
-		double fac = Configuration.numPositiveTests * this.negativeTestWeight / Configuration.numNegativeTests;
-
-		// possible TODO: make num positive and num negative tests configuration flags for this class, not the 
-		// main config?
+		double fac = Configuration.numPositiveTests * Fitness.negativeTestWeight / Configuration.numNegativeTests;
 
 		double maxFitness = Configuration.numPositiveTests + ((Configuration.numNegativeTests * fac));
-		if(rep.fitnessIsValid()) {
+		if(rep.getFitness() > -1.0) {
 			System.out.printf("\t%3g %s\n", rep.getFitness(), rep.getName());
 			return !(rep.getFitness() < maxFitness);
 		}
 
 		Pair<Double,Double> fitnessPair = new Pair<Double,Double>(-1.0, -1.0); 
-		if(this.sample < 1.0) {
-			if (this.sampleStrategy == "generation") {
+		if(Fitness.sample < 1.0) {
+			if (Fitness.sampleStrategy == "generation") {
 				fitnessPair = this.testFitnessGeneration(rep,generation);
-			} else if (this.sampleStrategy == "variant") {
+			} else if (Fitness.sampleStrategy == "variant") {
 				fitnessPair = this.testFitnessVariant(rep);
 			} else {
 				throw new UnsupportedOperationException(); // not doing all right now because don't see a need for those experiments any time soon
@@ -160,7 +152,7 @@ import edu.ust.hk.par.util.AutoTester;
 public class FitnessTask implements Callable<Chromosome>
 {
 	private static Logger logger = Logger.getLogger(FitnessTask.class);
-	
+
 	private Chromosome chromosome;
 	private File workDIR = new File(Constants.workingDir);
 	private String source;
@@ -169,7 +161,7 @@ public class FitnessTask implements Callable<Chromosome>
 	{
 		this.setChromosome(o);
 	}
-	
+
 	public Chromosome getChromosome()
 	{
 		return chromosome;
@@ -184,15 +176,15 @@ public class FitnessTask implements Callable<Chromosome>
 	{
 		this.source = this.getChromosome().getSource();
 	}
-	
+
 	@Override
 	public Chromosome call() throws Exception
 	{
 		if(this.chromosome.isAlreadyEvaluated())
 			return this.chromosome;
-		
+
 		boolean flag = AutoTester.compile(source, this.chromosome.getSeqNumber());
-		
+
 		if(flag == false)
 		{
 			Fitness ret = new Fitness();
@@ -202,82 +194,82 @@ public class FitnessTask implements Callable<Chromosome>
 			//System.err.println("In fitness: \n"+this.chromosome.getGenes().toString());
 			return this.chromosome;
 		}
-		
-		
+
+
 		// Positive tests
 		CommandLine posCommand = CommandLine.parse(Constants.javaVM);
 		posCommand.addArgument("-classpath");
 		posCommand.addArgument( Constants.outputDir + File.separator + this.chromosome.getSeqNumber()
 				+ System.getProperty("path.separator") + Constants.libs);
-		
+
 		posCommand.addArgument("-Xms128m");
 		posCommand.addArgument("-Xmx256m");
 		posCommand.addArgument("-client");
 		//posCommand.addArgument("-Xshare:on");
 		//posCommand.addArgument("-Xquickstart");
-		
+
 		posCommand.addArgument("edu.ust.hk.par.util.runner.UnitTestRunner");
-		
+
 		posCommand.addArgument(Constants.posTestFile);
 		posCommand.addArgument(GPProcessor.SamplingTestFilter);
-		
-		
+
+
 		// Negative tests
 		CommandLine negCommand = CommandLine.parse(Constants.javaVM);
 		negCommand.addArgument("-classpath");
 		negCommand.addArgument( Constants.outputDir + File.separator + this.chromosome.getSeqNumber()
 				+ System.getProperty("path.separator") + Constants.libs);
-		
+
 		negCommand.addArgument("-Xms128m");
 		negCommand.addArgument("-Xmx256m");
 		negCommand.addArgument("-client");
 		//posCommand.addArgument("-Xshare:on");
 		//negCommand.addArgument("-Xquickstart");
-		
+
 		negCommand.addArgument("edu.ust.hk.par.util.runner.UnitTestRunner");
-		
+
 		negCommand.addArgument(Constants.negTestFile);
 		negCommand.addArgument(GPProcessor.AllTestFilter);
-		
-		
+
+
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(60*6000);
 		DefaultExecutor posExecutor = new DefaultExecutor();
 		DefaultExecutor negExecutor = new DefaultExecutor();
 		posExecutor.setWorkingDirectory(workDIR);
 		negExecutor.setWorkingDirectory(workDIR);
-		
+
 		posExecutor.setWatchdog(watchdog);
 		negExecutor.setWatchdog(watchdog);
-		
+
 		ByteArrayOutputStream out = new ByteArrayOutputStream(); 
-		
+
 		posExecutor.setExitValue(0);
 		negExecutor.setExitValue(0);
-		
+
 		posExecutor.setStreamHandler(new PumpStreamHandler(out));
 		negExecutor.setStreamHandler(new PumpStreamHandler(out));
-		
-		
+
+
 		try {
 			int exitValue = posExecutor.execute(posCommand);		
 			out.flush();
 			String output = out.toString();
 			out.reset();
-			
+
 			Fitness posFit = this.parseTestResults(output);
-			
+
 			try {
 			  Thread.sleep(500);
 			} catch (InterruptedException exception) {
 				//ignore exception
 			}
-			
+
 			exitValue = negExecutor.execute(negCommand);		
 			out.flush();
 			output = out.toString();
-			
+
 			Fitness negFit = this.parseTestResults(output);
-			
+
 			Fitness integrated = Fitness.sum(posFit, negFit);
 			this.chromosome.setFitness(integrated);
 			if(!integrated.isAllSuccessful())
@@ -289,7 +281,7 @@ public class FitnessTask implements Callable<Chromosome>
 				if(GPProcessor.SamplingTestFilter.equals("edu.ust.hk.par.util.runner.filter.AllSamplingFilter"))
 					this.chromosome.setAlreadyEvaluated();	
 			}
-			
+
 			return this.chromosome;
 		} catch (ExecuteException exception) {
 			int exitValue = exception.getExitValue();
@@ -334,7 +326,7 @@ public class FitnessTask implements Callable<Chromosome>
 				ret.setAllSuccessful(false);
 				ret.setCompilable(false);
 			}
-			
+
 			try
 			{
 				if(line.startsWith("[TOTAL]:"))
@@ -346,7 +338,7 @@ public class FitnessTask implements Callable<Chromosome>
 			{
 				ret.setCompilable(false);
 			}
-			
+
 			try
 			{
 				if(line.startsWith("[FAILURE]:"))
@@ -359,7 +351,7 @@ public class FitnessTask implements Callable<Chromosome>
 				ret.setCompilable(false);
 			}
 		}
-		
+
 		return ret;
 	}
 }*/

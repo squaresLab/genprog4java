@@ -6,41 +6,39 @@ import java.util.List;
 
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
-import clegoues.genprog4java.util.Pair;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.main.Main;
 import clegoues.genprog4java.mut.EditOperation;
-import clegoues.genprog4java.mut.Mutation;
 
-public abstract class CachingRepresentation<G extends EditOperation> implements Representation<G> {
-	
-	private double fitness; // in repair, this is a hashtable, for when we have multiple fitnesses.  For now let's KISS	
+public abstract class CachingRepresentation<G extends EditOperation> extends Representation<G> {
+
+	private double fitness = -1.0; // in repair, this is a hashtable
 	/*  (** cached file contents from [internal_compute_source_buffers]; avoid
       recomputing/reserializing *)
   val already_source_buffers = ref None */
 
 	public double getFitness() { return this.fitness; }
-	private List<String> alreadySourced; // initialize to empty
-	  // TODO: private List<Digest> alreadyDigest; // Digest.t in OCaml
-	  private String alreadyCompiled; // initialized to ref None in ocaml
+	private ArrayList<String> alreadySourced = new ArrayList<String>(); // initialize to empty
+	// TODO: private List<Digest> alreadyDigest; // Digest.t in OCaml
+	private String alreadyCompiled = ""; 
 
+	public CachingRepresentation<G> clone() throws CloneNotSupportedException {
+		CachingRepresentation<G> clone = (CachingRepresentation<G>) super.clone();
+		clone.updated();
+		return clone;
+	}
 
-	  public boolean getVariableLength() { return true; }
-
-	  public void loadGenomeFromString(String genome) {
-		throw new UnsupportedOperationException();
-	  }
+	public boolean getVariableLength() { return true; }
 
 	public void noteSuccess() { } // default does nothing.  OCaml version takes the original representation here.  Probably should do same 
-// OCaml has a copy method here.  Do we need?
-	
+	// OCaml has a copy method here.  Do we need?
+
 
 	public void load(String base) throws IOException, UnexpectedCoverageResultException { 
 		// FIXME: try deserialize first
 		this.fromSource(base); 
 		if(Configuration.doSanity){
 			try {
-			assert(this.sanityCheck());
+				assert(this.sanityCheck());
 			} catch(SanityCheckException e) {
 				System.err.println("cachingRep: Sanity check failed");
 				Runtime.getRuntime().exit(1);;
@@ -58,14 +56,14 @@ public abstract class CachingRepresentation<G extends EditOperation> implements 
 			      Marshal.to_channel fout (cachingRep_version) [] ; 
 			      debug "cachingRep: %s: saved\n" filename ; 
 			      if out_channel = None then close_out fout 
-			 */
+		 */
 	}
-	
+
 	public boolean deserialize(String filename) {
 		throw new UnsupportedOperationException();
 	}
-// did not implement the version thing
-/*
+	// did not implement the version thing
+	/*
 			  (** @raise Fail("version mismatch") if the version of the binary being read
 			      does not match the current [cachingRep_version]  *)
 			  method deserialize ?in_channel ?global_info (filename : string) = begin
@@ -82,10 +80,9 @@ public abstract class CachingRepresentation<G extends EditOperation> implements 
 			      debug "cachingRep: %s: loaded\n" filename ; 
 			      if in_channel = None then close_in fin ;
 			  end 
-*/
+	 */
 
 	public boolean sanityCheck() throws SanityCheckException {
-		Calendar startTime = Calendar.getInstance();
 		// TODO: createSubDirectory("sanity");
 		String sanityFilename = "sanity/" + Configuration.sanityFilename + Configuration.globalExtension; 
 		String sanityExename = "sanity/" + Configuration.sanityExename;
@@ -106,18 +103,17 @@ public abstract class CachingRepresentation<G extends EditOperation> implements 
 				throw new SanityCheckException("sanity: " + sanityFilename + " passed " + thisTest.toString());
 			}
 		}
-		Calendar endTime = Calendar.getInstance();
 		// TODO: printout endTime - startTime.
 		this.cleanup();
 		this.updated();
 		return true;
-// debug "cachingRepresentation: sanity checking passed (time_taken = %g)\n" (time_now -. time_start) ; 
-}
+		// debug "cachingRepresentation: sanity checking passed (time_taken = %g)\n" (time_now -. time_start) ; 
+	}
 
 	// compile assumes that the source has already been serialized to disk.
 	// FIXME: add compile to do the generic thing it does in the OCaml, but
 	// I think for here, it's best to put it down in Java representation
-	
+
 	// FIXME: OK, in OCaml there's an outputSource declaration here that assumes that 
 	// the way we output code is to compute the source buffers AS STRINGS and then print out one per file.
 	// it's possible this is the same in Java, but unlikely, so I'm going to not implement this here yet
@@ -135,41 +131,41 @@ public abstract class CachingRepresentation<G extends EditOperation> implements 
 		}*/
 
 	protected abstract Iterable<?> computeSourceBuffers();
-	
-			protected abstract boolean internalTestCase(String sanityExename, String sanityFilename, TestCase thisTest);
-		// TODO Auto-generated method stub
 
-			public List<String> sourceName() { return this.alreadySourced; }
+	protected abstract boolean internalTestCase(String sanityExename, String sanityFilename, TestCase thisTest);
 
-
-
-			public void cleanup() {
-				throw new UnsupportedOperationException();
-				// TODO: remove source code from disk
-				// TODO: remove compiled binary from disk
-				// TODO: remove applicable subdirectories from disk
-			}
-		
-			public void setFitness(double fitness) {
-				this.fitness = fitness; // not using the hashtable thing because only one fitness measure for now
-			}
-
-			// TODO: OK, as above, I think compiling Java programs is different from our 
-			// usual MO.  So while the OCaml implementation does compile in CachingRepresentation
-			// assuming that it's always a call to an external script, I'm leaving that off from here for the 
-			// time being.  Remember to save already_compiled when applicable.  Perhaps do that here
-			// as the superclass thing?
-			
-			public boolean compile(String sourceName, String exeName) {
-				// assuming that the subclass has done something (see above); here we just
-				// cache
-				this.alreadyCompiled = exeName;
-				return true;
-			}
+	@Override
+	public ArrayList<String> sourceName() { return this.alreadySourced; }
 
 
-			public boolean testCase(TestCase test) {
-				/* I need to figure out digests before I can do this
+
+	public void cleanup() {
+		throw new UnsupportedOperationException();
+		// TODO: remove source code from disk
+		// TODO: remove compiled binary from disk
+		// TODO: remove applicable subdirectories from disk
+	}
+
+	public void setFitness(double fitness) {
+		this.fitness = fitness; 
+	}
+
+	// TODO: OK, as above, I think compiling Java programs is different from our 
+	// usual MO.  So while the OCaml implementation does compile in CachingRepresentation
+	// assuming that it's always a call to an external script, I'm leaving that off from here for the 
+	// time being.  Remember to save already_compiled when applicable.  Perhaps do that here
+	// as the superclass thing?
+
+	public boolean compile(String sourceName, String exeName) {
+		// assuming that the subclass has done something (see above); here we just
+		// cache
+		this.alreadyCompiled = exeName;
+		return true;
+	}
+
+
+	public boolean testCase(TestCase test) {
+		/* I need to figure out digests before I can do this
 			      let tpr = self#prepare_for_test_case test in
 			      let digest_list, result = 
 			        match tpr with
@@ -183,35 +179,30 @@ public abstract class CachingRepresentation<G extends EditOperation> implements 
 			        Hashtbl.replace tested (digest_list,(test,!test_condition)) () ;
 			        result 
 			    end 	*/
-				throw new UnsupportedOperationException();
-			}
+		throw new UnsupportedOperationException();
+	}
 
-// FIXME: unique name thing, I guess we'll deal with that in the subclasses?
-			
-// TODO: ignoring available crossover points for now
+	// FIXME: unique name thing, I guess we'll deal with that in the subclasses?
 
-// TODO:			  method hash () = Hashtbl.hash (self#get_history ()) 
+	// TODO: ignoring available crossover points for now
+
+	// TODO:			  method hash () = Hashtbl.hash (self#get_history ()) 
 
 	// TODO: many internal methods for getting commands that are used in compiling and testing, which may
-			// or may not be necessary for Java, we'll see
-
-			// TODO: includes compute_source_bufgfers, compute_digest, internal_test_case_command,
-			// internal_test_case_postprocess, internal_test_case, prepare_for_test_case
-
-			void updated() {
-				/*
-				  (** indicates that cached information based on our AST structure is no longer
-					      valid *)
+	// or may not be necessary for Java, we'll see
+/* indicates that cached information based on our AST structure is no longer valid*/
+	void updated() {
+		/*
 					  method private updated () = 
-					    hclear fitness ;
-					    already_compiled := None ;
 					    already_source_buffers := None ; 
 					    already_digest := None ; 
-					    already_sourced := None ; */
-				throw new UnsupportedOperationException();
-			}
+					  */
+		alreadySourced = new ArrayList<String>();
+		alreadyCompiled = "";
+		fitness = -1.0;
+	}
 
-public void reduceSearchSpace() {
-} // subclasses can override as desired
+	public void reduceSearchSpace() {
+	} // subclasses can override as desired
 
 }

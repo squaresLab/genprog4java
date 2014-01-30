@@ -10,14 +10,13 @@ import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 
 public class Main {
-	public static Configuration config;
-	
+
 	public static void main(String[] args) throws IOException, UnexpectedCoverageResultException
 	{
 		Search searchEngine = null;
 		Representation baseRep = null;
 		Fitness fitnessEngine = null;
-		
+
 		assert(args.length > 0);
 		long startTime = System.currentTimeMillis();
 
@@ -30,14 +29,14 @@ public class Main {
 		}
 		baseRep.load(Configuration.sourceDir + "/" + Configuration.targetClassName + ".java");
 		try {
-		if(Configuration.searchStrategy == "ga") {
+			if(Configuration.searchStrategy == "ga") {
 				searchEngine.geneticAlgorithm(baseRep, null);
-		} else if (Configuration.searchStrategy == "brute") {
+			} else if (Configuration.searchStrategy == "brute") {
 				searchEngine.bruteForceOne(baseRep);
-		} else if (Configuration.searchStrategy == "oracle") {
-			throw new UnsupportedOperationException();
-		}
-		} catch(RepairFoundException e) {
+			} else if (Configuration.searchStrategy == "oracle") {
+				searchEngine.oracleSearch(baseRep);
+			}
+		} catch(RepairFoundException | CloneNotSupportedException e) {
 			e.printStackTrace(); // FIXME: this is stupid
 		}
 		int elapsed = getElapsedTime(startTime);

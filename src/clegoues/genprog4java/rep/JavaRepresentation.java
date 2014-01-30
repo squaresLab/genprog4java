@@ -21,7 +21,6 @@ import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.main.Main;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
@@ -292,23 +291,11 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 
 	@Override
-	public boolean fitnessIsValid() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-
-	@Override
-	public Representation<JavaEditOperation> copy() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public int num_test_evals_ignore_cache() {
@@ -389,5 +376,17 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	@Override
 	public void replace(int whatToReplace, int whatToReplaceWith) {
 		this.editHelper(whatToReplace,whatToReplaceWith,Mutation.REPLACE);		
+	}
+	
+	public JavaRepresentation clone() throws CloneNotSupportedException {
+		JavaRepresentation clone = (JavaRepresentation) super.clone();
+		// FIXME: copy or clear something?
+		return clone;
+	}
+
+	@Override
+	public void reduceFixSpace() {
+		// TODO Auto-generated method stub
+		
 	}
 }
