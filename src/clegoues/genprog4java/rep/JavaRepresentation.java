@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeSet;
 
 import javax.tools.JavaCompiler;
@@ -20,17 +19,12 @@ import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.java.ParserRequestor;
-import clegoues.genprog4java.java.SemanticInfoVisitor;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.util.Pair;
 
 import org.apache.commons.exec.CommandLine;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -216,11 +210,11 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 
 	public void load(String fname) throws IOException
 	{
-		//  FIXME: proposed flow:
 		// load here, get all statements and the compilation unit saved
-		// parser can visit at the same time to collect numvisiting info
-		// then do a visit over the AST
-		// there, do the num visitor, scopevisit, namevisit, etc
+		// parser can visit at the same time to collect scope info
+		// apparently names and types and scopes are visited here below in
+		// the calls to ASTUTils
+		
 		JavaParser myParser = new JavaParser();
 			myParser.parse(fname, this.libs.split(File.pathSeparator)); 
 			List<ASTNode> stmts = myParser.getStatements();
@@ -231,7 +225,7 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 			int stmtCounter = 0;
 			for(ASTNode node : stmts)
 			{
-				if(JavaRepresentation.canRepair(node)) {
+				if(JavaRepresentation.canRepair(node)) { // FIXME: I think this check was already done in the parser, but whatever
 				JavaStatement s = new JavaStatement();
 				s.setStmtId(stmtCounter);
 				stmtCounter++;

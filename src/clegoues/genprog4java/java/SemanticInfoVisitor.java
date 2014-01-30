@@ -167,7 +167,6 @@ public class SemanticInfoVisitor extends ASTVisitor
 			{				
 				// add scope information
 				TreeSet<String> newScope = new TreeSet<String>();
-				//newScope.addAll(this.fieldName);
 				newScope.addAll(this.currentMethodScope);
 				this.scopes.addScope4Stmt(node, newScope); // FIXME: possibly we only need this info for faulty statements, but whatever
 				this.nodeSet.add(node);
