@@ -1,14 +1,19 @@
 package clegoues.genprog4java.rep;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.TreeSet;
+
+
 
 
 
@@ -129,6 +134,7 @@ private String positivePathFile;
 private String negativePathFile;
 private Double positivePathWeight;
 private double negativePathWeight;
+private boolean allowCoverageFail;
 			  
 				public void registerMutations(TreeSet<Pair<Mutation,Double>> availableMutations) {
 					
@@ -141,11 +147,6 @@ private double negativePathWeight;
 					
 				}
 			  
-			  /*
-
-FIXME, maybe: coverage-per-test stuff?
-
-	*/
 				public TreeSet<Pair<Mutation, Double>> availableMutations(int atomId) {
 					TreeSet<Pair<Mutation,Double>> retVal = new TreeSet<Pair<Mutation,Double>>();
 					for(Pair<Mutation,Double> mutation : this.mutations){
@@ -225,30 +226,34 @@ FIXME, maybe: coverage-per-test stuff?
 						}
 					}
 
-				protected abstract int atomIDofSourceLine(int lineno);
+				protected abstract ArrayList<Integer> atomIDofSourceLine(int lineno);
 				
-				private TreeSet<Integer> runTestsCoverage(String path, TestType testT, int numTests, boolean expectedResult, String wd) throws IOException {
+				private TreeSet<Integer> runTestsCoverage(String path, TestType testT, int numTests, boolean expectedResult, String wd) throws IOException, UnexpectedCoverageResultException {
 					String pathFile = wd + File.separator + path;
-					TreeSet<Integer> lines = new TreeSet<Integer>();
+					TreeSet<Integer> atoms = new TreeSet<Integer>();
 					for(int i = 1; i <= numTests; i++) {
 						this.cleanCoverage();
 						TestCase newTest = new TestCase(testT, i);
 				
 
-						this.testCase(newTest); // FIXME: check return values of these
-						TreeSet<Integer> thisTestResult = this.getCoverageInfo();
-						lines.addAll(thisTestResult);
-					}
-			
-					// FIXME: output path to disk, via pathFile
-					TreeSet<Integer> atoms = new TreeSet<Integer>();
-					for(int line : lines) {
-						int atomId = this.atomIDofSourceLine(line);
-						if(atomId >= 0) {
-						atoms.add(atomId); 
+						if(this.testCase(newTest) != expectedResult && !this.allowCoverageFail) {
+							throw new UnexpectedCoverageResultException("FaultLocRep: unexpected coverage result: " + newTest.toString());
 						}
+						TreeSet<Integer> thisTestResult = this.getCoverageInfo();
+						atoms.addAll(thisTestResult);
 					}
-					return lines;
+								
+					BufferedWriter out = new BufferedWriter(new FileWriter(new File(pathFile)));
+					
+					for(int atom : atoms)
+					{
+						out.write(""+atom+"\n");
+					}
+					
+					out.flush();
+					out.close();
+					
+					return atoms;
 				}
 				
 				protected abstract TreeSet<Integer> getCoverageInfo() throws FileNotFoundException, IOException;
@@ -264,7 +269,7 @@ FIXME, maybe: coverage-per-test stuff?
 							return retVal;
 							
 				}
-				public void computeLocalization(String wd) throws IOException {
+				public void computeLocalization(String wd) throws IOException, UnexpectedCoverageResultException {
 					// FIXME: THIS ONLY DOES STANDARD PATH FILE localization
 					/* FIXME: add regen-paths
 					 * Default "ICSE'09"-style fault and fix localization from path files.  The
@@ -298,7 +303,6 @@ FIXME, maybe: coverage-per-test stuff?
 					TreeSet<Integer> posHt = new TreeSet<Integer> ();
 					
 					for(Integer i : positivePath) {// FIXME: this is negative path in the OCaml code and I think that may be wrong. 
-
 						fw.put(i,this.positivePathWeight);
 					}
 					for(Integer i : positivePath) {

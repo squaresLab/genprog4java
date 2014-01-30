@@ -2,16 +2,14 @@ package clegoues.genprog4java.rep;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.TreeSet;
 
 import javax.tools.JavaCompiler;
@@ -20,18 +18,29 @@ import javax.tools.ToolProvider;
 
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.java.ASTUtils;
+import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.java.StatementParser;
+import clegoues.genprog4java.java.ParserRequestor;
+import clegoues.genprog4java.java.SemanticInfoVisitor;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.main.Main;
 import clegoues.genprog4java.mut.EditOperation;
-import clegoues.genprog4java.util.GlobalUtils;
 import clegoues.genprog4java.util.Pair;
 
 import org.apache.commons.exec.CommandLine;
-import org.apache.commons.io.FileUtils;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AssertStatement;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IClassCoverage;
@@ -54,8 +63,7 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 	public static HashMap<Integer,ASTNode> codeBank = new HashMap<Integer,ASTNode>();
 	private static ArrayList<JavaStatement> base = new ArrayList<JavaStatement>(); // FIXME: wondering if I need this
 	private static CompilationUnit baseCompilationUnit = null;
-	private static HashMap<Integer,ArrayList<Integer>> lineNoMap = new HashMap<Integer,ArrayList<Integer>>();
-
+	private static HashMap<Integer,ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer,ArrayList<Integer>>();
 
 	private CommandLine testCommand = null;
 	private String javaRuntime;
@@ -66,7 +74,7 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 
 	protected void instrumentForFaultLocalization(){
 		String coverageOutputDir = "coverage";
-		filterClass = "clegoues.genprog4java.util.CoverageFilter";
+		this.filterClass = "clegoues.genprog4java.util.CoverageFilter";
 
 		String classPath = coverageOutputDir + File.separator + 0
 				+ System.getProperty("path.separator") + libs;
@@ -129,14 +137,19 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 	// this all comes originally from CoverageRuntime, where I learned to use jacoco
 
 	private static String coverageFile = "jacoco.exec";
+	private IRuntime runtime = null;
+	private ExecutionDataStore executionData = null;
+	
+	private int maxAtomID = 0;
 
-	private IRuntime runtime;
-
-	private ExecutionDataStore executionData;
+	protected ArrayList<Integer> atomIDofSourceLine(int lineno) {
+		return lineNoToAtomIDMap.get(lineno);
+	}
 
 	public TreeSet<Integer> getCoverageInfo() throws IOException
 	{
 		InputStream targetClass = null; // FIXME 
+
 		if(executionData == null) {
 			executionData = new ExecutionDataStore();
 		}
@@ -164,26 +177,30 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 		analyzer.analyzeClass(targetClass);
 
 		TreeSet<Integer> coveredLines = new TreeSet<Integer>();
-// OK I get this now - this indexes by line number.  Now, how are we mapping between that and ASTNodes again?
 		for (final IClassCoverage cc : coverageBuilder.getClasses())
 		{
 			for (int i = cc.getFirstLine(); i <= cc.getLastLine(); i++)
 			{
 				//System.err.println("Covered? ["+i+"]: " + isCovered(cc.getLine(i).getStatus()));
-				if(isCovered(cc.getLine(i).getStatus()))
+				if(JavaRepresentation.isCovered(cc.getLine(i).getStatus()))
 				{
 					coveredLines.add(i);
 				}
 			}
 		}
-// FIXME: now we need to map from covered lines back to statement IDs!
+		TreeSet<Integer> atoms = new TreeSet<Integer>();
+		for(int line : coveredLines) {
+			ArrayList<Integer> atomIds = this.atomIDofSourceLine(line);
+			if(atomIds.size() >= 0) {
+			atoms.addAll(atomIds); 
+			}
+		}
 
-		return coveredLines;
+		return atoms;
 	}
-// OK, getCoverageInfo goes...one class at a time? We get classcoverage, which gives the lines in a class that are covered
-	// we can map from that back to source, right?
 
-	private boolean isCovered(final int status) {
+
+	private static boolean isCovered(final int status) {
 		switch (status) {
 		case ICounter.NOT_COVERED:
 			return false;
@@ -197,27 +214,24 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 
 
 
-	// FIXME: this originally had a lot of stuff about coverage in it that I don't think we need.
-
 	public void load(String fname) throws IOException
 	{
-		StatementParser parser = new StatementParser();
 		//  FIXME: proposed flow:
 		// load here, get all statements and the compilation unit saved
-		// get covered lines
+		// parser can visit at the same time to collect numvisiting info
 		// then do a visit over the AST
 		// there, do the num visitor, scopevisit, namevisit, etc
-		
-			parser.parse(fname, this.libs.split(File.pathSeparator)); 
-			List<ASTNode> stmts = parser.getStatements();
+		JavaParser myParser = new JavaParser();
+			myParser.parse(fname, this.libs.split(File.pathSeparator)); 
+			List<ASTNode> stmts = myParser.getStatements();
 			if(base == null) {
 				base = new ArrayList<JavaStatement>();
 			}
-			baseCompilationUnit = parser.getCompilationUnit();
+			baseCompilationUnit = myParser.getCompilationUnit();
 			int stmtCounter = 0;
 			for(ASTNode node : stmts)
 			{
-				if(this.canRepair(node)) {
+				if(JavaRepresentation.canRepair(node)) {
 				JavaStatement s = new JavaStatement();
 				s.setStmtId(stmtCounter);
 				stmtCounter++;
@@ -229,30 +243,33 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 				ASTNode copy = ASTNode.copySubtree(node.getAST(), node);
 				s.setASTNode(copy);
 				ArrayList<Integer> lineNoList = null;
-				if(lineNoMap.containsKey(lineNo)) {
-					lineNoList = lineNoMap.get(lineNo);
+				if(lineNoToAtomIDMap.containsKey(lineNo)) {
+					lineNoList = lineNoToAtomIDMap.get(lineNo);
 				} else {
 					lineNoList = new ArrayList<Integer>();
 				}
 				lineNoList.add(s.getStmtId());
-				lineNoMap.put(lineNo,  lineNoList);
+				lineNoToAtomIDMap.put(lineNo,  lineNoList);
 				base.add(s); // FIXME: list or map? Hmm.
-				codeBank.put(s.getStmtId(), s.getASTNode());
+				codeBank.put(s.getStmtId(), s.getASTNode()); // FIXME: possibly a copy here as well
 				}
 		}
+			this.maxAtomID = stmtCounter - 1;
 
 	}
 
 
-	private static boolean canRepair(ASTNode node) {
-		throw new UnsupportedOperationException();
-
+	public static boolean canRepair(ASTNode node) {
+		return node instanceof ExpressionStatement || node instanceof AssertStatement
+				|| node instanceof BreakStatement || node instanceof ContinueStatement
+				|| node instanceof LabeledStatement || node instanceof ReturnStatement
+				|| node instanceof ThrowStatement || node instanceof VariableDeclarationStatement
+				|| node instanceof IfStatement; // FIXME: I don't think we actually want to repair some of these things
 	}
 
-	@Override
+
 	public ArrayList<EditOperation> getGenome() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.genome;
 	}
 
 	@Override
@@ -261,16 +278,14 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 		
 	}
 
-	@Override
 	public void setGenome(List<EditOperation> genome) {
-		// TODO Auto-generated method stub
-		
+		this.genome = (ArrayList<EditOperation>) genome;
 	}
 
 	@Override
 	public int genomeLength() {
-		// TODO Auto-generated method stub
-		return 0;
+		if(genome == null) { return 0 ; }
+		return genome.size();
 	}
 
 	@Override
@@ -279,16 +294,11 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 		
 	}
 
-	@Override
-	public void debugInfo() {
-		// TODO Auto-generated method stub
-		
-	}
+
 
 	@Override
 	public int maxAtom() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.maxAtomID;
 	}
 
 	@Override
@@ -309,11 +319,6 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 		
 	}
 
-	@Override
-	public double getFitness() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 
 	@Override
 	public boolean fitnessIsValid() {
@@ -327,11 +332,6 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 		return null;
 	}
 
-	@Override
-	public void reduceSearchSpace() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public Representation<EditOperation> copy() {
@@ -351,11 +351,6 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 		return 0;
 	}
 
-	@Override
-	protected int atomIDofSourceLine(int lineno) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 
 	@Override
 	protected List<Pair<String, String>> internalComputeSourceBuffers() {

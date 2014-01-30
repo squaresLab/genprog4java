@@ -17,7 +17,7 @@ public abstract class CachingRepresentation<G> implements Representation<G> {
       recomputing/reserializing *)
   val already_source_buffers = ref None */
 
-
+	public double getFitness() { return this.fitness; }
 	private List<String> alreadySourced; // initialize to empty
 	  // TODO: private List<Digest> alreadyDigest; // Digest.t in OCaml
 	  private String alreadyCompiled; // initialized to ref None in ocaml
@@ -277,5 +277,7 @@ public abstract class CachingRepresentation<G> implements Representation<G> {
 				throw new UnsupportedOperationException();
 			}
 
+public void reduceSearchSpace() {
+} // subclasses can override as desired
 
 }

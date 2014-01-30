@@ -1,50 +1,40 @@
 package clegoues.genprog4java.java;
 
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AssertStatement;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ContinueStatement;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Initializer;
-import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-// FIXME: grabbed from PAR
+import clegoues.genprog4java.rep.JavaRepresentation;
 
-public class StatementVisitor extends ASTVisitor
+// FIXME: still too PAR-y for my taste, come back to it.
+
+public class SemanticInfoVisitor extends ASTVisitor
 {
 	
 	private String sourcePath;
 	
 	private List<ASTNode> nodeSet;
-	private HashMap<Integer, ASTNode> buggyStmt;
 	private ScopeInfo scopes;
 	
 	private TreeSet<String> fieldName;
 	private TreeSet<String> currentMethodScope;
 	
-	private boolean isExp = true;
 	
-	private int count = 0;
-
+// FIXME possibly: for the time being, we number *after* parsing, and not here
+	// unlike in the OCaml implementation, this only collects the statements and the
+	// semantic information.  It doesn't number.
 	private CompilationUnit cu;
 
 	
@@ -53,7 +43,7 @@ public class StatementVisitor extends ASTVisitor
 		this.sourcePath = p;
 	}
 	
-	public StatementVisitor()
+	public SemanticInfoVisitor()
 	{
 		this.fieldName = new TreeSet<String>();
 		this.fieldName.add("this");
@@ -165,42 +155,23 @@ public class StatementVisitor extends ASTVisitor
 		return super.visit(node);
 	}
 
-	public void setBuggySet(HashMap<Integer, ASTNode> buggyStmt)
-	{
-		this.buggyStmt = buggyStmt;
-	}
 
 	
-	@Override
+	// there was a preVisit method here that initially set up the statements we were considering for repair and put their info
+	// somewhere.  Let's do that post-parse/numvisit/semantic collection setup.
+	
 	public void preVisit(ASTNode node)
 	{	
-		for(int bugPos : Constants.buggy)
-		{
-			if(ASTUtils.getStatementLineNo(node) == bugPos && node instanceof Statement && !(node instanceof Block))
-			{
-				this.buggyStmt.put(bugPos, node);
-				logger.info("Buggy Node: " + node.toString() + "\n");
-				
+
+			if(JavaRepresentation.canRepair(node))
+			{				
 				// add scope information
 				TreeSet<String> newScope = new TreeSet<String>();
 				//newScope.addAll(this.fieldName);
 				newScope.addAll(this.currentMethodScope);
-				this.scopes.addScope4Stmt(node, newScope);
+				this.scopes.addScope4Stmt(node, newScope); // FIXME: possibly we only need this info for faulty statements, but whatever
+				this.nodeSet.add(node);
 			}
-		}
-	
-		if(node instanceof ExpressionStatement || node instanceof AssertStatement
-				|| node instanceof BreakStatement || node instanceof ContinueStatement
-				|| node instanceof LabeledStatement || node instanceof ReturnStatement
-				|| node instanceof ThrowStatement || node instanceof VariableDeclarationStatement
-				|| node instanceof IfStatement)
-			this.nodeSet.add(node);
-		/*else if (node instanceof Statement)
-		{
-			this.nodeSet.add(node.getAST().newIfStatement());
-		}*/
-			
-		
 		
 		
 		super.preVisit(node);
