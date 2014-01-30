@@ -16,9 +16,9 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	private static int popsize = 40;
 	private static double crossp = 0.5; 
 
-	private String incomingPop = "";
+	private static String incomingPop = "";
 	private int tournamentK = 2;
-	private String outputFormat = "txt";
+	private static String outputFormat = "txt";
 	private double tournamentP = 1.0;
 
 	private ArrayList<Representation<G>> population = new ArrayList<Representation<G>>(this.popsize);

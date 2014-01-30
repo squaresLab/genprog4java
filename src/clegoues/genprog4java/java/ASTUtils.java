@@ -1,11 +1,18 @@
 package clegoues.genprog4java.java;
 
 
+import java.net.URI;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.tools.SimpleJavaFileObject;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+
+import clegoues.genprog4java.main.Configuration;
 
 
 
@@ -59,4 +66,58 @@ public class ASTUtils
 		
 		return scope;
 	}
+	
+	public static Iterable<JavaSourceFromString> getJavaSourceFromString(String code)
+	{
+		final JavaSourceFromString jsfs;
+		jsfs = new JavaSourceFromString("code", code);
+		
+		return new Iterable<JavaSourceFromString>()
+		{
+			public Iterator<JavaSourceFromString> iterator()
+			{
+				return new Iterator<JavaSourceFromString>()
+				{
+					boolean isNext = true;
+
+					public boolean hasNext()
+					{
+						return isNext;
+					}
+
+					public JavaSourceFromString next()
+					{
+						if (!isNext)
+							throw new NoSuchElementException();
+						isNext = false;
+						return jsfs;
+					}
+
+					public void remove()
+					{
+						throw new UnsupportedOperationException();
+					}
+				};
+			}
+		};
+	}
 }
+
+
+
+class JavaSourceFromString extends SimpleJavaFileObject
+{
+	final String code;
+
+	JavaSourceFromString(String name, String code)
+	{
+		super(URI.create(name.replace(".", "/")+"/"+Configuration.targetClassName+Kind.SOURCE.extension), Kind.SOURCE);
+		this.code = code;
+	}
+
+	public CharSequence getCharContent(boolean ignoreEncodingErrors)
+	{
+		return code;
+	}
+}
+

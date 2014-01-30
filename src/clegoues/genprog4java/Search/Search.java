@@ -35,6 +35,12 @@ public class Search<G extends EditOperation> {
 	private static int maxEvals = 0;
 	private static String startingGenome = "";
 
+	private Fitness<G> fitnessEngine = null;
+	private int generationsRun = 0;
+	
+	public Search(Fitness<G> engine) {
+		this.fitnessEngine = engine;
+	}
 	public static void configure(Properties props) {
 		if(props.getProperty("generations") != null) {
 			Search.generations = Integer.parseInt(props.getProperty("generations").trim());
@@ -52,8 +58,7 @@ public class Search<G extends EditOperation> {
 			Search.maxEvals = Integer.parseInt(props.getProperty("max").trim());
 		}
 	}
-	private Fitness<G> fitnessEngine;
-	private int generationsRun = 0;
+
 
 	/* CLG is not convinced that the responsibility for writing out the successful
 		   repair should lie in search, but she does think it's better to have it here
