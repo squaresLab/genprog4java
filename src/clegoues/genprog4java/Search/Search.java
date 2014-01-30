@@ -8,7 +8,6 @@ import java.util.TreeSet;
 
 import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.main.Main;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.rep.Representation;
@@ -34,23 +33,24 @@ public class Search<G extends EditOperation> {
 	private static double swapProb = 0.33333;
 	private static double repProb = 0.0;
 	private static int maxEvals = 0;
-
+	private static String startingGenome = "";
 
 	public static void configure(Properties props) {
-
-			if(props.getProperty("generations") != null) {
+		if(props.getProperty("generations") != null) {
 			Search.generations = Integer.parseInt(props.getProperty("generations").trim());
-			}
-			
-			if(props.getProperty("promut") != null) {
+		}
+		if(props.getProperty("oracleGenome") != null) {
+			Search.startingGenome = props.getProperty("startingGenome").trim();
+		}
+		if(props.getProperty("promut") != null) {
 			Search.promut = Double.parseDouble(props.getProperty("pMutation").trim());
-			}	
-			if(props.getProperty("continue") != null) {
-				Search.continueSearch = true;
-			}
-			if(props.getProperty("max") != null) {
-				Search.maxEvals = Integer.parseInt(props.getProperty("max").trim());
-			}
+		}	
+		if(props.getProperty("continue") != null) {
+			Search.continueSearch = true;
+		}
+		if(props.getProperty("max") != null) {
+			Search.maxEvals = Integer.parseInt(props.getProperty("max").trim());
+		}
 	}
 	private Fitness<G> fitnessEngine;
 	private int generationsRun = 0;
@@ -70,7 +70,7 @@ public class Search<G extends EditOperation> {
     @param orig original variant
     @param generation generation in which the repair was found */
 	void noteSuccess(Representation<G> rep, Representation<G> original, int generation) throws RepairFoundException {
-// FIXME: print out edit list somehow
+		// FIXME: print out edit list somehow
 		System.out.printf("\nRepair Found: " + rep.getName());
 
 		Calendar endTime = Calendar.getInstance(); // TODO do something with this
@@ -128,11 +128,11 @@ public class Search<G extends EditOperation> {
 
 		variant.registerMutations(availableMutations);
 	}
-	public void bruteForceOne(Representation<G> original) throws RepairFoundException {
+	public void bruteForceOne(Representation<G> original) throws RepairFoundException, CloneNotSupportedException {
 
 		original.reduceFixSpace();
 		registerMutations(original);
-		
+
 		int count = 0;
 		TreeSet<WeightedAtom> allFaultyAtoms = new TreeSet<WeightedAtom>(original.getFaultyAtoms());
 
@@ -183,7 +183,7 @@ public class Search<G extends EditOperation> {
 				System.out.printf("%3g %3g", weight, prob);
 
 				if(mut == Mutation.DELETE) {
-					Representation<G> rep = original.copy();
+					Representation<G> rep = (Representation<G>) original.clone();
 					if(this.doWork(rep, original, mut, stmt, stmt)) {
 						wins++;
 					}
@@ -191,7 +191,7 @@ public class Search<G extends EditOperation> {
 					TreeSet<WeightedAtom> appendSources = this.rescaleAtomPairs(original.appendSources(stmt));
 					// FIXME: source in DESCENDING order by weight!
 					for(WeightedAtom append : appendSources) {
-						Representation<G> rep = original.copy();
+						Representation<G> rep = (Representation<G>) original.clone();
 						if(this.doWork(rep, original, mut, stmt, append.getAtom())) {
 							wins++;
 						}
@@ -200,7 +200,7 @@ public class Search<G extends EditOperation> {
 					TreeSet<WeightedAtom> replaceSources = this.rescaleAtomPairs(original.replaceSources(stmt));
 					// FIXME: source in DESCENDING order by weight!
 					for(WeightedAtom replace : replaceSources) {
-						Representation<G> rep = original.copy();
+						Representation<G> rep = (Representation<G>) original.clone();
 						if(this.doWork(rep, original, mut, stmt, replace.getAtom())) {
 							wins++;
 						}
@@ -210,7 +210,7 @@ public class Search<G extends EditOperation> {
 					TreeSet<WeightedAtom> swapSources = this.rescaleAtomPairs(original.swapSources(stmt));
 					// FIXME: source in DESCENDING order by weight!
 					for(WeightedAtom swap : swapSources) {
-						Representation<G> rep = original.copy();
+						Representation<G> rep = original.clone();
 						if(this.doWork(rep, original, mut, stmt, swap.getAtom())) {
 							wins++;
 						}
@@ -241,7 +241,7 @@ public class Search<G extends EditOperation> {
 	 */
 	void mutate(Representation<G> variant) { // FIXME: don't need to return, right? 
 		List<WeightedAtom> faultyAtoms = variant.getFaultyAtoms();
-		List<WeightedAtom> proMutList = null;
+		ArrayList<WeightedAtom> proMutList = new ArrayList<WeightedAtom>();
 		for(int i = 0; i < Search.promut; i++) {
 			proMutList.add(GlobalUtils.chooseOneWeighted(faultyAtoms));
 
@@ -303,17 +303,17 @@ public class Search<G extends EditOperation> {
 			    @param original original variant
 			    @param incoming_pop possibly empty, incoming population
 			    @return initial_population generated by mutating the original */
-	private Population<G> initializeGa(Representation<G> original, Population<G> incomingPopulation) throws MaximumEvalsException, RepairFoundException {
+	private Population<G> initializeGa(Representation<G> original, Population<G> incomingPopulation) throws MaximumEvalsException, RepairFoundException, CloneNotSupportedException {
 		original.reduceSearchSpace(); // FIXME: this had arguments originally
 		this.registerMutations(original);
-	
+
 		Population<G> initialPopulation = incomingPopulation;
 		if(incomingPopulation.size() > incomingPopulation.getPopsize()) {
 			initialPopulation = incomingPopulation.firstN(incomingPopulation.getPopsize());
 		} // FIXME: this is too functional I think. 
 		int stillNeed = initialPopulation.getPopsize() - initialPopulation.size();
 		if(stillNeed > 0) {
-			initialPopulation.add(original.copy());
+			initialPopulation.add(original.clone());
 		}
 		/*
 		 *  FIXME
@@ -333,8 +333,8 @@ public class Search<G extends EditOperation> {
 		}
 		return initialPopulation;
 	}
-	/*
-		 runs the genetic algorithm for a certain number of iterations, given the
+
+	/* runs the genetic algorithm for a certain number of iterations, given the
 			    most recent/previous generation as input.  Returns the last generation, unless it
 			    is killed early by the search strategy/fitness evaluation.  The optional
 			    parameters are set to the obvious defaults if omitted. 
@@ -371,44 +371,42 @@ public class Search<G extends EditOperation> {
 		}
 	}
 
-
-
 	/* {b genetic_algorithm } is parametric with respect to a number of choices
 	(e.g., population size, selection method, fitness function, fault localization,
 	many of which are set at the command line or at the representation level.
-			    May exit early if exceptions are thrown in fitness evalution ([Max_Evals])
+			    May exit early if exceptions are thrown in fitness evaluation ([Max_Evals])
 			    or a repair is found [Found_Repair].
 
 			    @param original original variant
 			    @param incoming_pop incoming population, possibly empty
 			    @raise Found_Repair if a repair is found
 			    @raise Max_evals if the maximum fitness evaluation count is set and then reached */
-	public void geneticAlgorithm(Representation<G> original, Population<G> incomingPopulation) throws RepairFoundException {
+	public void geneticAlgorithm(Representation<G> original, Population<G> incomingPopulation) throws RepairFoundException, CloneNotSupportedException {
 		System.out.printf("search: genetic algorithm begins (|original| = \n"); // %g MB)\n" (debug_size_in_mb original);
-		assert(this.generations >= 0);
+		assert(Search.generations >= 0);
 		try {
 			Population<G> initialPopulation = this.initializeGa(original, incomingPopulation);
 			generationsRun++;
 			try {
-				this.runGa(1, this.generations, initialPopulation, original);
+				this.runGa(1, Search.generations, initialPopulation, original);
 			} catch(MaximumEvalsException e) {
-		        System.out.printf("reached maximum evals (%d)\n", this.maxEvals);
+				System.out.printf("reached maximum evals (%d)\n", Search.maxEvals);
 			}
 		} catch(MaximumEvalsException e) {
-			System.out.printf("reached maximum evals (%d) during population initialization\n", this.maxEvals);
+			System.out.printf("reached maximum evals (%d) during population initialization\n", Search.maxEvals);
 		}
 	}
-	
+
 	/*	 constructs a representation out of the genome as specified at the command
     line and tests to first failure.  This assumes that the oracle genome
     corresponds to a maximally fit variant.
 
     @param original individual representation
     @param starting_genome string; a string representation of the genome 
-  */
-	void oracleSearch(Representation<G> original, String startingGenome) throws RepairFoundException {
-		Representation<G> theRepair = original.copy();
-		theRepair.loadGenomeFromString(startingGenome);
+	 */
+	public void oracleSearch(Representation<G> original) throws RepairFoundException, CloneNotSupportedException {
+		Representation<G> theRepair = original.clone();
+		theRepair.loadGenomeFromString(Search.startingGenome);
 		assert(fitnessEngine.testToFirstFailure(theRepair));
 		this.noteSuccess(theRepair, original, 1);
 	}

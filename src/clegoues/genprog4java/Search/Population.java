@@ -22,7 +22,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	private double tournamentP = 1.0;
 
 	private ArrayList<Representation<G>> population = new ArrayList<Representation<G>>(this.popsize);
-	
+
 	public Population(ArrayList<Representation<G>> smallerPop) {
 		this.population = smallerPop;
 	}
@@ -30,21 +30,21 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	protected ArrayList<Representation<G>> getPopulation() {
 		return this.population;
 	}
-	
+
 	public int getPopsize() {
 		return Population.popsize;
 	}
-	
+
 
 	/* I think that generate makes no sense in java */
 
-	  /* {b serialize} serializes a population to disk.  The first variant is
+	/* {b serialize} serializes a population to disk.  The first variant is
 	      optionally instructed to print out the global information necessary for a
 	      collection of representations.  The remaining variants print out only
 	      their variant-specific local information */
 	void serialize() {
 		throw new UnsupportedOperationException();
-	/*
+		/*
 			  let serialize ?out_channel (population : ('a,'b) t) (filename : string) =
 			    match !output_format with
 			      "bin" | "binary" ->
@@ -64,20 +64,20 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 			            output_string fout (name^"\n"))
 			          population;
 			        if out_channel = None then close_out fout
-*/
+		 */
 	}
-	
 
-	  /* {b deserialize} deserializes a population from disk, to be used as
+
+	/* {b deserialize} deserializes a population from disk, to be used as
 	      incoming_pop.  The incoming variant is assumed to have loaded the global
 	      state (which CLG doesn't love so she might change it).  Remaining variants
 	      are read in individually, using only their own local information */
-	  /* deserialize can fail if the file does not conform to the expected format
+	/* deserialize can fail if the file does not conform to the expected format
 	     for Marshal or if there is a version mismatch between the population module
 	     that wrote the binary file and this one (that is loading it). */
 	void deserialize(String filename) {
 		throw new UnsupportedOperationException();
-	/*
+		/*
 			  let deserialize ?in_channel filename original = 
 			    (* the original should have loaded the global state *)
 			    let fin = 
@@ -115,9 +115,9 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 			              ) individuals; !pop
 			        with End_of_file -> !pop
 			      end
-*/
+		 */
 	}
-	
+
 	/* {b tournament_selection} variant_comparison_function population
     desired_pop_size uses tournament selction to select desired_pop_size
     variants from population using variant_comparison_function to compare
@@ -145,8 +145,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 				return indiv;
 			} else {
 				step += 1.0;
-				
-		}
+			}
 		}
 		return population.get(0); // FIXME: this should never happen, right?
 	}
@@ -157,23 +156,23 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		assert(this.tournamentP <= 1.0) ;
 		assert(population.size() >= 0);
 		ArrayList<Representation<G>> result = new ArrayList<Representation<G>>();
-		
+
 		for(int i = 0 ; i < desired; i++) {
 			result.add(selectOne());
 		}
 		return result; 
 	}
-	
+
 
 	public void add (Representation<G> newItem) {
 
-	population.add(newItem);
+		population.add(newItem);
 	}
-	
-	public void crossover(Representation<G> original) {
-throw new UnsupportedOperationException();
 
-/*
+	public void crossover(Representation<G> original) {
+		throw new UnsupportedOperationException();
+
+		/*
 
 
 (** Crossover is an operation on more than one variant, which is why it
@@ -358,12 +357,12 @@ end*/
 
 	public void selection(int popsize) {
 		this.tournamentSelection(popsize);
-		
+
 	}
 
 	public static void configure(Properties prop) {
 		if(prop.getProperty("crossp") != null) {
-		crossp = Double.parseDouble(prop.getProperty("crossp").trim());
+			crossp = Double.parseDouble(prop.getProperty("crossp").trim());
 		}
 		if(prop.getProperty("popsize") != null) {
 			popsize = Integer.parseInt(prop.getProperty("pop_size").trim());

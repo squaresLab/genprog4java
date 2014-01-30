@@ -9,40 +9,45 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.TreeSet;
-
-
-
-
-
-
-
-
-
 
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.main.Main;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
 
 public abstract class FaultLocRepresentation<G extends EditOperation> extends CachingRepresentation<G> {
-	private ArrayList<WeightedAtom> faultLocalization;
-	private ArrayList<WeightedAtom> fixLocalization;
+	protected ArrayList<WeightedAtom> faultLocalization = new ArrayList<WeightedAtom>();
+	protected ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
+	private static double positivePathWeight = 0.1; 
+	private static double negativePathWeight = 1.0;
+	private static boolean allowCoverageFail = false;
+	
+	public static void configure(Properties prop) {
+		if(prop.getProperty("positivePathWeight") != null) {
+			positivePathWeight = Double.parseDouble(prop.getProperty("positivePathWeight").trim());
+		}
+		if(prop.getProperty("negativePathWeight") != null) {
+			negativePathWeight = Double.parseDouble(prop.getProperty("negativePathWeight").trim());
+		}
+		if(prop.getProperty("allowCoverageFail") != null) {
+			allowCoverageFail = true;
+		}
+	}
+	
+	public FaultLocRepresentation<G> clone() throws CloneNotSupportedException {
+		FaultLocRepresentation<G> clone = (FaultLocRepresentation<G>) super.clone();
+		clone.faultLocalization = new ArrayList<WeightedAtom>(this.faultLocalization);
+		clone.fixLocalization = new ArrayList<WeightedAtom>(this.fixLocalization);
+		return clone;
+	}
 	/*
-
-		
-			  method internal_copy () : 'self_type = 
-			    ({< fault_localization = ref !fault_localization ; 
-			        fix_localization = ref !fix_localization ;
-			     >})
-
 
 			  (** [deserialize] can fail if the version saved in the binary file does not
 			      match the current [faultLocRep_version].  As it can call
@@ -84,7 +89,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			  (***********************************)
 			  (* Concrete methods implementing the interface *)
 			  (***********************************)
-	
+
 			  method serialize ?out_channel ?global_info (filename : string) =
 			    let fout = 
 			      match out_channel with
@@ -106,24 +111,18 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			        super#serialize ~out_channel:fout filename ;
 			        debug "faultlocRep: %s: saved\n" filename ; 
 			        if out_channel = None then close_out fout 
-*/
-			  public List<WeightedAtom> getFaultyAtoms () {
-				  return this.faultLocalization; 
-			  }
+	 */
+	public List<WeightedAtom> getFaultyAtoms () {
+		return this.faultLocalization; 
+	}
 
-			  public List<WeightedAtom> getFixSourceAtoms() {
-				  return this.fixLocalization;
-			  }
-			  
-			  /* particular representations, such as Cilrep, can override this
-			   * method to reduce the fix space */
-			  
-			  public void reduceFixSpace() {
-				  
-			  }
-			
-/*
-	
+	public List<WeightedAtom> getFixSourceAtoms() {
+		return this.fixLocalization;
+	}
+
+
+	/*
+
 			  method reduce_search_space split_fun do_uniq =
 			    (* there's no reason this can't do something to fix localization as well but
 			       for now I'm only implementing the stuff we currently need *)
@@ -132,73 +131,70 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			      else !fault_localization 
 			    in
 			      fault_localization := (lfilt split_fun fault_localization')
-*/
-			  private TreeSet<Pair<Mutation,Double>> mutations = null;
+	 */
+	private TreeSet<Pair<Mutation,Double>> mutations = null;
 
-private double positivePathWeight; // FIXME: these should be options
-private double negativePathWeight;
-private boolean allowCoverageFail = false;
-			  
-				public void registerMutations(TreeSet<Pair<Mutation,Double>> availableMutations) {
-					
-				this.mutations = new TreeSet<Pair<Mutation,Double>> ();
-					for(Pair<Mutation,Double> candidateMut : availableMutations) {
-						if(candidateMut.getSecond() > 0.0) {
-							this.mutations.add(candidateMut);
-						}
-					}
-					
-				}
-			  
-				public TreeSet<Pair<Mutation, Double>> availableMutations(int atomId) {
-					TreeSet<Pair<Mutation,Double>> retVal = new TreeSet<Pair<Mutation,Double>>();
-					for(Pair<Mutation,Double> mutation : this.mutations){
-						boolean addToSet = false;
-						switch(mutation.getFirst()) {
-						case DELETE: addToSet = true; 
-							break;
-						case APPEND:
-							addToSet = this.appendSources(atomId).size() > 0;
-							break;
-						case REPLACE:
-							addToSet = this.replaceSources(atomId).size() > 0;
-							break;
-						case SWAP:
-							addToSet = this.swapSources(atomId).size() > 0;
-							break;
-						}
-						if(addToSet) {
-							retVal.add(mutation);
-						}
-					}
-					return retVal;
-				}
-				
-				// you probably want to override these for semantic legality check
-				public TreeSet<WeightedAtom> appendSources(int stmtId) {
-					TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-					for(WeightedAtom item : this.fixLocalization) {
-						retVal.add(item);
-					}
-					return retVal;
-				}
-				public TreeSet<WeightedAtom> swapSources(int stmtId) {
-					TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-					for(WeightedAtom item : this.fixLocalization) {
-						retVal.add(item);
-					}
-					return retVal;
-				}
-				public TreeSet<WeightedAtom> replaceSources(int stmtId) {
-					TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-					for(WeightedAtom item : this.fixLocalization) {
-						retVal.add(item);
-					}
-					return retVal;
-				}
-				
-		
-				/*
+
+	public void registerMutations(TreeSet<Pair<Mutation,Double>> availableMutations) {
+
+		this.mutations = new TreeSet<Pair<Mutation,Double>> ();
+		for(Pair<Mutation,Double> candidateMut : availableMutations) {
+			if(candidateMut.getSecond() > 0.0) {
+				this.mutations.add(candidateMut);
+			}
+		}
+
+	}
+
+	public TreeSet<Pair<Mutation, Double>> availableMutations(int atomId) {
+		TreeSet<Pair<Mutation,Double>> retVal = new TreeSet<Pair<Mutation,Double>>();
+		for(Pair<Mutation,Double> mutation : this.mutations){
+			boolean addToSet = false;
+			switch(mutation.getFirst()) {
+			case DELETE: addToSet = true; 
+			break;
+			case APPEND:
+				addToSet = this.appendSources(atomId).size() > 0;
+				break;
+			case REPLACE:
+				addToSet = this.replaceSources(atomId).size() > 0;
+				break;
+			case SWAP:
+				addToSet = this.swapSources(atomId).size() > 0;
+				break;
+			}
+			if(addToSet) {
+				retVal.add(mutation);
+			}
+		}
+		return retVal;
+	}
+
+	// you probably want to override these for semantic legality check
+	public TreeSet<WeightedAtom> appendSources(int stmtId) {
+		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+		for(WeightedAtom item : this.fixLocalization) {
+			retVal.add(item);
+		}
+		return retVal;
+	}
+	public TreeSet<WeightedAtom> swapSources(int stmtId) {
+		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+		for(WeightedAtom item : this.fixLocalization) {
+			retVal.add(item);
+		}
+		return retVal;
+	}
+	public TreeSet<WeightedAtom> replaceSources(int stmtId) {
+		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+		for(WeightedAtom item : this.fixLocalization) {
+			retVal.add(item);
+		}
+		return retVal;
+	}
+
+
+	/*
 
 			  (** run the instrumented code to attain coverage information.  Writes the
 			      generated paths to disk (the fault and fix path files respectively) but
@@ -212,134 +208,134 @@ private boolean allowCoverageFail = false;
 			      @raise Fail("abort") if variant produces produces unexpected behavior on
 			      either positive or negative test cases and [--allow-coverage-fail] is not on.
 			     get_coverage will abort if allow_coverage_fail is not toggled and the variant
-			  *)
-			  *
-			  *Traditional "weighted path" or "set difference" or Reiss-Renieris fault
-			     * localization involves finding all of the statements visited while
-			     * executing the negative test case(s) and removing/down-weighting
-			     * statements visited while executing the positive test case(s). 
-			  **/
-				private void cleanCoverage()
-				{
-						File coverageRaw = new File("jacoco.exec"); // FIXME: likely/possibly a mistake to put this in this class 
-						
-						if(coverageRaw.exists())
-						{
-							coverageRaw.delete();
-						}
-					}
+	 *)
+	 *
+	 *Traditional "weighted path" or "set difference" or Reiss-Renieris fault
+	 * localization involves finding all of the statements visited while
+	 * executing the negative test case(s) and removing/down-weighting
+	 * statements visited while executing the positive test case(s). 
+	 **/
+	private void cleanCoverage()
+	{
+		File coverageRaw = new File("jacoco.exec"); // FIXME: likely/possibly a mistake to put this in this class 
 
-				protected abstract ArrayList<Integer> atomIDofSourceLine(int lineno);
-				
-				private TreeSet<Integer> runTestsCoverage(String path, TestType testT, int numTests, boolean expectedResult, String wd) throws IOException, UnexpectedCoverageResultException {
-					String pathFile = wd + File.separator + path;
-					TreeSet<Integer> atoms = new TreeSet<Integer>();
-					for(int i = 1; i <= numTests; i++) {
-						this.cleanCoverage();
-						TestCase newTest = new TestCase(testT, i);
-				
+		if(coverageRaw.exists())
+		{
+			coverageRaw.delete();
+		}
+	}
 
-						if(this.testCase(newTest) != expectedResult && !this.allowCoverageFail) {
-							throw new UnexpectedCoverageResultException("FaultLocRep: unexpected coverage result: " + newTest.toString());
-						}
-						TreeSet<Integer> thisTestResult = this.getCoverageInfo();
-						atoms.addAll(thisTestResult);
-					}
-								
-					BufferedWriter out = new BufferedWriter(new FileWriter(new File(pathFile)));
-					
-					for(int atom : atoms)
-					{
-						out.write(""+atom+"\n");
-					}
-					
-					out.flush();
-					out.close();
-					
-					return atoms;
+	protected abstract ArrayList<Integer> atomIDofSourceLine(int lineno);
+
+	private TreeSet<Integer> runTestsCoverage(String path, TestType testT, int numTests, boolean expectedResult, String wd) throws IOException, UnexpectedCoverageResultException {
+		String pathFile = wd + File.separator + path;
+		TreeSet<Integer> atoms = new TreeSet<Integer>();
+		for(int i = 1; i <= numTests; i++) {
+			this.cleanCoverage();
+			TestCase newTest = new TestCase(testT, i);
+
+
+			if(this.testCase(newTest) != expectedResult && !this.allowCoverageFail) {
+				throw new UnexpectedCoverageResultException("FaultLocRep: unexpected coverage result: " + newTest.toString());
+			}
+			TreeSet<Integer> thisTestResult = this.getCoverageInfo();
+			atoms.addAll(thisTestResult);
+		}
+
+		BufferedWriter out = new BufferedWriter(new FileWriter(new File(pathFile)));
+
+		for(int atom : atoms)
+		{
+			out.write(""+atom+"\n");
+		}
+
+		out.flush();
+		out.close();
+
+		return atoms;
+	}
+
+	protected abstract TreeSet<Integer> getCoverageInfo() throws FileNotFoundException, IOException;
+
+	private TreeSet<Integer> readPathFile(String pathFile) {
+		TreeSet<Integer> retVal = new TreeSet<Integer>();
+		Scanner reader = new Scanner(pathFile); 
+		while(reader.hasNextInt()) {
+			int i = reader.nextInt();
+			retVal.add(i);
+		}
+		reader.close();
+		return retVal;
+
+	}
+	@Override
+
+	public void computeLocalization() throws IOException, UnexpectedCoverageResultException {
+		// FIXME: THIS ONLY DOES STANDARD PATH FILE localization
+		/* FIXME: add regen-paths
+		 * Default "ICSE'09"-style fault and fix localization from path files.  The
+		 * weighted path fault localization is a list of <atom,weight> pairs. The fix
+		 * weights are a hash table mapping atom_ids to weights.
+		 */
+		//FIXME: add subdirectory for coverage
+
+		TreeSet<Integer> positivePath = null;
+		TreeSet<Integer> negativePath = null;
+		File positivePathFile = new File(Configuration.posCoverageFile);
+		// OK, we don't instrument Java programs, rather, use java library that computes coverage for us.
+		// which means either instrumentFaultLocalization should still exist and change the commands used for test case execution
+		// or we don't pretend this is trying to match OCaml exactly?
+		this.instrumentForFaultLocalization();
+		this.compile(this.getName(), "coverage/coverage.out");
+		if(positivePathFile.exists()) {
+			positivePath = readPathFile(Configuration.posCoverageFile);
+		} else {
+			positivePath = runTestsCoverage(Configuration.posCoverageFile, TestType.POSITIVE, Configuration.numPositiveTests, true, "coverage/"); 
+		}
+		File negativePathFile = new File(Configuration.negCoverageFile);
+
+		if(negativePathFile.exists()) {
+			negativePath = readPathFile(Configuration.negCoverageFile);
+
+		} else {
+			negativePath = runTestsCoverage(Configuration.negCoverageFile, TestType.NEGATIVE, Configuration.numNegativeTests, false, "coverage/");
+		}
+		HashMap<Integer,Double> fw = new HashMap<Integer,Double>(); 
+		TreeSet<Integer> negHt = new TreeSet<Integer>();
+		TreeSet<Integer> posHt = new TreeSet<Integer> ();
+
+		for(Integer i : positivePath) {// FIXME: this is negative path in the OCaml code and I think that may be wrong. 
+			fw.put(i,this.positivePathWeight);
+		}
+		for(Integer i : positivePath) {
+			posHt.add(i);
+			fw.put(i, 0.5);
+		}
+		for(Integer i : negativePath) {
+			if(!negHt.contains(i)) {
+				double negWeight = this.negativePathWeight;
+				if(posHt.contains(i)) {
+					negWeight = this.positivePathWeight;
 				}
-				
-				protected abstract TreeSet<Integer> getCoverageInfo() throws FileNotFoundException, IOException;
-				
-				private TreeSet<Integer> readPathFile(String pathFile) {
-					TreeSet<Integer> retVal = new TreeSet<Integer>();
-							Scanner reader = new Scanner(pathFile); 
-							while(reader.hasNextInt()) {
-								int i = reader.nextInt();
-								retVal.add(i);
-							}
-							reader.close();
-							return retVal;
-							
-				}
-				@Override
-				
-				public void computeLocalization() throws IOException, UnexpectedCoverageResultException {
-					// FIXME: THIS ONLY DOES STANDARD PATH FILE localization
-					/* FIXME: add regen-paths
-					 * Default "ICSE'09"-style fault and fix localization from path files.  The
-				     * weighted path fault localization is a list of <atom,weight> pairs. The fix
-				     * weights are a hash table mapping atom_ids to weights.
-					 */
-					//FIXME: add subdirectory for coverage
+				negHt.add(i);
+				fw.put(i,  0.5);
+				faultLocalization.add(new WeightedAtom(i,negWeight));
+			}
+		} 					for(Map.Entry<Integer,Double> entry : fw.entrySet()) {
+			Integer key = entry.getKey();
+			Double value = entry.getValue();
+			fixLocalization.add(new WeightedAtom(key,value));
+		}
 
-					TreeSet<Integer> positivePath = null;
-					TreeSet<Integer> negativePath = null;
-					File positivePathFile = new File(Configuration.posCoverageFile);
-					// OK, we don't instrument Java programs, rather, use java library that computes coverage for us.
-					// which means either instrumentFaultLocalization should still exist and change the commands used for test case execution
-					// or we don't pretend this is trying to match OCaml exactly?
-					this.instrumentForFaultLocalization();
-					this.compile(this.getName(), "coverage/coverage.out");
-					if(positivePathFile.exists()) {
-						positivePath = readPathFile(Configuration.posCoverageFile);
-					} else {
-						positivePath = runTestsCoverage(Configuration.posCoverageFile, TestType.POSITIVE, Configuration.numPositiveTests, true, "coverage/"); 
-					}
-					File negativePathFile = new File(Configuration.negCoverageFile);
-					
-					if(negativePathFile.exists()) {
-					negativePath = readPathFile(Configuration.negCoverageFile);
-					
-					} else {
-						negativePath = runTestsCoverage(Configuration.negCoverageFile, TestType.NEGATIVE, Configuration.numNegativeTests, false, "coverage/");
-					}
-					HashMap<Integer,Double> fw = new HashMap<Integer,Double>(); 
-					TreeSet<Integer> negHt = new TreeSet<Integer>();
-					TreeSet<Integer> posHt = new TreeSet<Integer> ();
-					
-					for(Integer i : positivePath) {// FIXME: this is negative path in the OCaml code and I think that may be wrong. 
-						fw.put(i,this.positivePathWeight);
-					}
-					for(Integer i : positivePath) {
-						posHt.add(i);
-						fw.put(i, 0.5);
-					}
-					for(Integer i : negativePath) {
-						if(!negHt.contains(i)) {
-							double negWeight = this.negativePathWeight;
-							if(posHt.contains(i)) {
-								negWeight = this.positivePathWeight;
-							}
-							negHt.add(i);
-							fw.put(i,  0.5);
-							faultLocalization.add(new WeightedAtom(i,negWeight));
-						}
-					} 					for(Map.Entry<Integer,Double> entry : fw.entrySet()) {
-						Integer key = entry.getKey();
-						Double value = entry.getValue();
-						fixLocalization.add(new WeightedAtom(key,value));
-					}
+	}
 
-				}
+	protected abstract void instrumentForFaultLocalization();
 
-				protected abstract void instrumentForFaultLocalization();
-		
-				@Override
-				public void load(String fname) throws IOException, UnexpectedCoverageResultException {
-					super.load(fname); // calling super so that the code is loaded and the sanity check happens before localization is computed
-				this.computeLocalization();	
-				}
-				
-		
+	@Override
+	public void load(String fname) throws IOException, UnexpectedCoverageResultException {
+		super.load(fname); // calling super so that the code is loaded and the sanity check happens before localization is computed
+		this.computeLocalization();	
+	}
+
+
 }
