@@ -1,6 +1,8 @@
 package clegoues.genprog4java.main;
 
 public class Configuration {
+	public static final String packageName = null; // FIXME hmmm
+	public static final String outputDir = null;
 	// FIXME: rename these, and also figure out what they mean
 	public static String libs;
 	public static String sourceVersion;

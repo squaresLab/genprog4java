@@ -20,11 +20,9 @@ public interface Representation<G> extends Comparable<Representation<G>> {
 		void load(String filename) throws IOException;
 		void serialize(String filename);
 		boolean deserialize(String filename);
-		int maxAtom(); // atomid type?
 		List<WeightedAtom> getFaultyAtoms();
 		List<WeightedAtom> getFixSourceAtoms();
 		boolean sanityCheck() throws SanityCheckException;
-		void computeLocalization();
 		void fromSource(String filename);
 		void outputSource(String filename);
 		List<String> sourceName();
@@ -54,5 +52,7 @@ public interface Representation<G> extends Comparable<Representation<G>> {
 // also leaving out hash unless we need it
 		Representation<G> copy();
 		int num_test_evals_ignore_cache(); // FIXME this really needs to not be here
+		void computeLocalization(String wd) throws IOException,
+				UnexpectedCoverageResultException;
 
 }
