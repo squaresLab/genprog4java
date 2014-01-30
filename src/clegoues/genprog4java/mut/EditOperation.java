@@ -1,8 +1,6 @@
 package clegoues.genprog4java.mut;
 
 
-// FIXME: grabbed exactly from PAR, fix me
-
 public interface EditOperation<G,R> {
 
 	public Mutation getType();

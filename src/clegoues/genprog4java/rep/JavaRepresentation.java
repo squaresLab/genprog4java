@@ -7,12 +7,10 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
 
-import javax.swing.text.BadLocationException;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
@@ -24,7 +22,7 @@ import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.main.Main;
-import clegoues.genprog4java.mut.EditOperation;
+import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
 import org.apache.commons.exec.CommandLine;
@@ -40,6 +38,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
@@ -61,8 +60,8 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 	// compile assumes that it's been written to disk.  Should it continue to assume that
 	// the subdirectory has already been created?
-	public static HashMap<Integer,ASTNode> codeBank = new HashMap<Integer,ASTNode>();
-	private static ArrayList<JavaStatement> base = new ArrayList<JavaStatement>(); // FIXME: wondering if I need this
+	public static HashMap<Integer,JavaStatement> codeBank = new HashMap<Integer,JavaStatement>();
+	private static HashMap<Integer,JavaStatement> base = new HashMap<Integer,JavaStatement>();
 	private static CompilationUnit baseCompilationUnit = null;
 	private static HashMap<Integer,ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer,ArrayList<Integer>>();
 	private static String originalSource = "";
@@ -215,9 +214,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		JavaParser myParser = new JavaParser();
 			myParser.parse(fname, this.libs.split(File.pathSeparator)); 
 			List<ASTNode> stmts = myParser.getStatements();
-			if(base == null) {
-				base = new ArrayList<JavaStatement>();
-			}
+
 			baseCompilationUnit = myParser.getCompilationUnit();
 			int stmtCounter = 0;
 			for(ASTNode node : stmts)
@@ -241,8 +238,8 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 				}
 				lineNoList.add(s.getStmtId());
 				lineNoToAtomIDMap.put(lineNo,  lineNoList);
-				base.add(s); // FIXME: list or map? Hmm.
-				codeBank.put(s.getStmtId(), s.getASTNode()); // FIXME: possibly a copy here as well
+				base.put(s.getStmtId(),s);
+				codeBank.put(s.getStmtId(), s); // FIXME: possibly a copy here as well
 				}
 		}
 
@@ -263,7 +260,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	}
 
 	@Override
-	public void LoadGenomeFromString(String genome) {
+	public void loadGenomeFromString(String genome) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -313,7 +310,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 
 	@Override
-	public Representation<EditOperation> copy() {
+	public Representation<JavaEditOperation> copy() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -357,7 +354,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			e.printStackTrace();
 		} catch (ClassCastException e) {
 			e.printStackTrace();
-		}
+		} 
 		ArrayList<Pair<String,String>> retVal = new ArrayList<Pair<String,String>>();
 		retVal.add(new Pair<String,String>(this.classUnderRepair, doc.get()));
 		return retVal;
@@ -368,5 +365,34 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			String sanityFilename, TestCase thisTest) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void delete(int location) {
+		JavaStatement locationStatement = base.get(location);
+		JavaEditOperation newEdit = new JavaEditOperation(locationStatement);
+		this.genome.add(newEdit);
+	}
+
+	private void editHelper(int location, int fixCode, Mutation mutType) {
+		JavaStatement locationStatement = base.get(location);
+		JavaStatement fixCodeStatement = codeBank.get(fixCode); // FIXME correct for Swap? Hm.
+		JavaEditOperation newEdit = new JavaEditOperation(mutType,locationStatement,fixCodeStatement);
+		this.genome.add(newEdit);
+	}
+	@Override
+	public void append(int whereToAppend, int whatToAppend) {
+		this.editHelper(whereToAppend,whatToAppend,Mutation.APPEND); 
+	}
+
+	@Override
+	public void swap(int swap1, int swap2) {
+		this.editHelper(swap1,swap2,Mutation.SWAP); 
+
+	}
+
+	@Override
+	public void replace(int whatToReplace, int whatToReplaceWith) {
+		this.editHelper(whatToReplace,whatToReplaceWith,Mutation.REPLACE);		
 	}
 }
