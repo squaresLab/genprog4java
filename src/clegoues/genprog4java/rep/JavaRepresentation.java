@@ -18,16 +18,20 @@ import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
 
-import clegoues.genprog4java.java.SingleStatement;
+import clegoues.genprog4java.Fitness.TestCase;
+import clegoues.genprog4java.java.ASTUtils;
+import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.java.StatementParser;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.main.Main;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.util.GlobalUtils;
+import clegoues.genprog4java.util.Pair;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IClassCoverage;
@@ -41,14 +45,16 @@ import org.jacoco.core.data.SessionInfo;
 import org.jacoco.core.runtime.IRuntime;
 import org.jacoco.core.runtime.LoggerRuntime;
 
+// this can handle ONE FILE right now
 
 public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 
 	// compile assumes that it's been written to disk.  Should it continue to assume that
 	// the subdirectory has already been created?
 	public static HashMap<Integer,ASTNode> codeBank = new HashMap<Integer,ASTNode>();
-	private static HashMap<String,ArrayList<SingleStatement>> base = new HashMap<String,ArrayList<SingleStatement>>();
-
+	private static ArrayList<JavaStatement> base = new ArrayList<JavaStatement>(); // FIXME: wondering if I need this
+	private static CompilationUnit baseCompilationUnit = null;
+	private static HashMap<Integer,ArrayList<Integer>> lineNoMap = new HashMap<Integer,ArrayList<Integer>>();
 
 
 	private CommandLine testCommand = null;
@@ -86,7 +92,7 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 	{
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
-		Iterable<? extends JavaFileObject> fileObjects = this.computeSourceBuffers();
+		Iterable<? extends JavaFileObject> fileObjects = null ; // FIXME: this.computeSourceBuffers();
 
 		LinkedList<String> options = new LinkedList<String>();
 
@@ -158,7 +164,7 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 		analyzer.analyzeClass(targetClass);
 
 		TreeSet<Integer> coveredLines = new TreeSet<Integer>();
-
+// OK I get this now - this indexes by line number.  Now, how are we mapping between that and ASTNodes again?
 		for (final IClassCoverage cc : coverageBuilder.getClasses())
 		{
 			for (int i = cc.getFirstLine(); i <= cc.getLastLine(); i++)
@@ -170,10 +176,12 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 				}
 			}
 		}
+// FIXME: now we need to map from covered lines back to statement IDs!
 
 		return coveredLines;
 	}
-
+// OK, getCoverageInfo goes...one class at a time? We get classcoverage, which gives the lines in a class that are covered
+	// we can map from that back to source, right?
 
 	private boolean isCovered(final int status) {
 		switch (status) {
@@ -191,34 +199,180 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 
 	// FIXME: this originally had a lot of stuff about coverage in it that I don't think we need.
 
-	public void load(ArrayList<String> fileNames) throws IOException
+	public void load(String fname) throws IOException
 	{
 		StatementParser parser = new StatementParser();
-		for(String fname : fileNames) {
-			String source = FileUtils.readFileToString(new File(fname));
-			parseJavaFile(fname);
-			ArrayList<SingleStatement> thisFile = new ArrayList<SingleStatement>();
+		//  FIXME: proposed flow:
+		// load here, get all statements and the compilation unit saved
+		// get covered lines
+		// then do a visit over the AST
+		// there, do the num visitor, scopevisit, namevisit, etc
+		
+			parser.parse(fname, this.libs.split(File.pathSeparator)); 
 			List<ASTNode> stmts = parser.getStatements();
-
+			if(base == null) {
+				base = new ArrayList<JavaStatement>();
+			}
+			baseCompilationUnit = parser.getCompilationUnit();
+			int stmtCounter = 0;
 			for(ASTNode node : stmts)
 			{
-				SingleStatement s = new SingleStatement();
-				s.setLineno(ASTUtils.getStatementLineNo(node));
+				if(this.canRepair(node)) {
+				JavaStatement s = new JavaStatement();
+				s.setStmtId(stmtCounter);
+				stmtCounter++;
+				int lineNo = ASTUtils.getStatementLineNo(node);
+				s.setLineno(lineNo);
 				s.setNames(ASTUtils.getNames(node));
 				s.setTypes(ASTUtils.getTypes(node));
-				s.setNecessaryScopeNames(ASTUtils.getScope(node));
+				s.setScopes(ASTUtils.getScope(node));
 				ASTNode copy = ASTNode.copySubtree(node.getAST(), node);
-				s.setNode(copy);
-				thisFile.add(s);
-			}
+				s.setASTNode(copy);
+				ArrayList<Integer> lineNoList = null;
+				if(lineNoMap.containsKey(lineNo)) {
+					lineNoList = lineNoMap.get(lineNo);
+				} else {
+					lineNoList = new ArrayList<Integer>();
+				}
+				lineNoList.add(s.getStmtId());
+				lineNoMap.put(lineNo,  lineNoList);
+				base.add(s); // FIXME: list or map? Hmm.
+				codeBank.put(s.getStmtId(), s.getASTNode());
+				}
 		}
-
 
 	}
 
 
-	private void parseJavaFile(String FileName)
-	{
-		this.parser.parse(FileName, Main.config.libs.split(File.pathSeparator));
+	private static boolean canRepair(ASTNode node) {
+		throw new UnsupportedOperationException();
+
+	}
+
+	@Override
+	public ArrayList<EditOperation> getGenome() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void LoadGenomeFromString(String genome) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setGenome(List<EditOperation> genome) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int genomeLength() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void serialize(String filename) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void debugInfo() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int maxAtom() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void computeLocalization() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void fromSource(String filename) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void outputSource(String filename) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public double getFitness() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public boolean fitnessIsValid() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void reduceSearchSpace() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Representation<EditOperation> copy() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int num_test_evals_ignore_cache() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int compareTo(Representation<EditOperation> o) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected int atomIDofSourceLine(int lineno) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected List<Pair<String, String>> internalComputeSourceBuffers() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected Iterable<?> computeSourceBuffers() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected boolean internalTestCase(String sanityExename,
+			String sanityFilename, TestCase thisTest) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

@@ -1,8 +1,8 @@
 package clegoues.genprog4java.rep;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
 
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
@@ -37,7 +37,7 @@ public abstract class CachingRepresentation<G> implements Representation<G> {
 // OCaml has a copy method here.  Do we need?
 	
 
-	public void load(String base) { 
+	public void load(String base) throws IOException { 
 		throw new UnsupportedOperationException();
 /*
 			    let cache_file = if !rep_cache_file = "" then (base^".cache") else !rep_cache_file in

@@ -1,5 +1,6 @@
 package clegoues.genprog4java.rep;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
@@ -16,7 +17,7 @@ public interface Representation<G> extends Comparable<Representation<G>> {
 		void setGenome(List<G> genome);
 		int genomeLength();
 		void noteSuccess();
-		void load(String filename);
+		void load(String filename) throws IOException;
 		void serialize(String filename);
 		boolean deserialize(String filename);
 		void debugInfo();
