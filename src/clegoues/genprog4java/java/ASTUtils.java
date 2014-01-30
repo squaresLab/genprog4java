@@ -36,6 +36,7 @@ public class ASTUtils
 		
 		return names;
 	}
+	// FUXNE this feels wicked inefficient to me, but possibly that's a low-order bit
 	
 	public static Set<String> getTypes(ASTNode node)
 	{
