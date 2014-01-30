@@ -1,13 +1,12 @@
 package clegoues.genprog4java.rep;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
+import clegoues.genprog4java.util.Pair;
 
 public abstract class CachingRepresentation<G extends EditOperation> extends Representation<G> {
 
@@ -19,7 +18,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	public double getFitness() { return this.fitness; }
 	private ArrayList<String> alreadySourced = new ArrayList<String>(); // initialize to empty
 	// TODO: private List<Digest> alreadyDigest; // Digest.t in OCaml
-	private String alreadyCompiled = ""; 
+	private Pair<Boolean,String> alreadyCompiled = null; 
 
 	public CachingRepresentation<G> clone() throws CloneNotSupportedException {
 		CachingRepresentation<G> clone = (CachingRepresentation<G>) super.clone();
@@ -28,12 +27,11 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	}
 
 	public boolean getVariableLength() { return true; }
-
+	
 	public void noteSuccess() { } // default does nothing.  OCaml version takes the original representation here.  Probably should do same 
-	// OCaml has a copy method here.  Do we need?
 
 
-	public void load(String base) throws IOException, UnexpectedCoverageResultException { 
+	public void load(String base) throws IOException { 
 		// FIXME: try deserialize first
 		this.fromSource(base); 
 		if(Configuration.doSanity){
@@ -41,7 +39,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 				assert(this.sanityCheck());
 			} catch(SanityCheckException e) {
 				System.err.println("cachingRep: Sanity check failed");
-				Runtime.getRuntime().exit(1);;
+				Runtime.getRuntime().exit(1);
 			}
 			// FIXME: serialize
 		}
@@ -159,10 +157,13 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	public boolean compile(String sourceName, String exeName) {
 		// assuming that the subclass has done something (see above); here we just
 		// cache
-		this.alreadyCompiled = exeName;
-		return true;
+		boolean result = this.internalCompile(sourceName,exeName);
+		this.alreadyCompiled = new Pair<Boolean,String>(result,exeName);
+		return result;
 	}
 
+
+	protected abstract boolean internalCompile(String sourceName, String exeName);
 
 	public boolean testCase(TestCase test) {
 		/* I need to figure out digests before I can do this
@@ -198,7 +199,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 					    already_digest := None ; 
 					  */
 		alreadySourced = new ArrayList<String>();
-		alreadyCompiled = "";
+		alreadyCompiled = null;
 		fitness = -1.0;
 	}
 

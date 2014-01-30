@@ -1,4 +1,5 @@
 package clegoues.genprog4java.main;
+import java.io.File;
 import java.io.IOException;
 
 import clegoues.genprog4java.Fitness.Fitness;
@@ -21,11 +22,14 @@ public class Main {
 		long startTime = System.currentTimeMillis();
 
 		Configuration.setProperties(args[0]);
+		File workDir = new File(Configuration.outputDir);
+		if(!workDir.exists())
+			workDir.mkdir();
 		System.out.println("Configuration file loaded");
 		if(Configuration.globalExtension == ".java") {
 			baseRep = (Representation) new JavaRepresentation();
-			searchEngine = new Search<JavaEditOperation>();
 			fitnessEngine = new Fitness<JavaEditOperation>();
+			searchEngine = new Search<JavaEditOperation>(fitnessEngine);
 		}
 		baseRep.load(Configuration.sourceDir + "/" + Configuration.targetClassName + ".java");
 		try {
@@ -36,8 +40,10 @@ public class Main {
 			} else if (Configuration.searchStrategy == "oracle") {
 				searchEngine.oracleSearch(baseRep);
 			}
-		} catch(RepairFoundException | CloneNotSupportedException e) {
-			e.printStackTrace(); // FIXME: this is stupid
+		} catch(RepairFoundException e) {
+			// FIXME: this is stupid
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace(); 
 		}
 		int elapsed = getElapsedTime(startTime);
 		System.out.printf("\nTotal elapsed time: " + elapsed + "\n");

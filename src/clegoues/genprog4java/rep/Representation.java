@@ -17,9 +17,23 @@ import clegoues.genprog4java.util.Pair;
 
 public abstract class Representation<G extends EditOperation> implements Comparable<Representation<G>>, Cloneable {
 // will compare on fitness!
+	private String name = null;
 		public Representation<G> clone() throws CloneNotSupportedException {
-			return (Representation<G>) super.clone();
+			Representation<G> clone = (Representation<G>) super.clone();
+			clone.name = newName();
+			return clone;
 		}
+		public Representation() {
+			this.name = newName();
+		}
+		public static int sequence = 0;
+		public static String newName() {
+			String result = String.format("%6d", sequence);
+			sequence++;
+			return result;
+		}
+		public String getName() { return name; } // this won't give the history, which I should fix
+		public void setName(String newName) { this.name = newName; }
 		
 		public abstract boolean getVariableLength();
 		public abstract ArrayList<G> getGenome();
@@ -41,7 +55,6 @@ public abstract class Representation<G extends EditOperation> implements Compara
 		public abstract double getFitness();
 		public abstract boolean compile(String sourceName, String exeName);
 		public abstract boolean testCase(TestCase test);
-		public abstract String getName();
 		public abstract void reduceSearchSpace(); // do this?
 		public abstract void reduceFixSpace(); 
 		public abstract TreeSet<Pair<Mutation, Double>> availableMutations(int atomId);

@@ -25,6 +25,7 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
 import org.apache.commons.exec.CommandLine;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.BreakStatement;
@@ -66,12 +67,9 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	private static String originalSource = "";
 			
 	private CommandLine testCommand = null;
-	private String javaRuntime;
-	private String javaVM; // FIXME
-	private String libs; // FIXME
 	private String filterClass = "";
-	private ArrayList<JavaEditOperation> genome = null;
-	private String classUnderRepair = "";
+	
+	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
 
 	private static String getOriginalSource() { return originalSource; }
 	
@@ -80,9 +78,9 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		this.filterClass = "clegoues.genprog4java.util.CoverageFilter";
 
 		String classPath = coverageOutputDir + File.separator + 0
-				+ System.getProperty("path.separator") + libs;
+				+ System.getProperty("path.separator") + Configuration.libs;
 
-		CommandLine command = CommandLine.parse(javaRuntime);
+		CommandLine command = CommandLine.parse(Configuration.javaRuntime);
 		command.addArgument("-classpath");
 		command.addArgument(classPath);
 
@@ -99,42 +97,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 	}
 
-	public boolean compile(String sourceName, String exeName, String wd)
-	{
-		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-
-		Iterable<? extends JavaFileObject> fileObjects = null ; // FIXME: this.computeSourceBuffers();
-
-		LinkedList<String> options = new LinkedList<String>();
-
-		options.add("-cp");
-		options.add(Configuration.libs);
-
-		options.add("-source");
-		options.add(Configuration.sourceVersion);
-
-		options.add("-target");
-		options.add(Configuration.targetVersion);
-
-		options.add("-d");
-		options.add(wd);  // e.g., tmp/10210/
-
-		File outDir = new File(wd + File.separator);
-		if(!outDir.exists())
-			outDir.mkdir();		
-
-		StringWriter compilerErrorWriter = new StringWriter();
-
-		if(!compiler.getTask(compilerErrorWriter, null, null, options, null, fileObjects).call())
-		{
-			compilerErrorWriter.flush();
-			System.err.println(compilerErrorWriter.getBuffer().toString());
-			return false;
-		}
-
-		return true;
-	}
-
 	// Java-specific coverage stuff:
 
 	private ExecutionDataStore executionData = null;
@@ -147,7 +109,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	public TreeSet<Integer> getCoverageInfo() throws IOException
 	{
 		InputStream targetClass = new FileInputStream(new File(Configuration.outputDir + File.separator + "coverage"+File.separator+Configuration.packageName.replace(".","/")
-				+ File.separator + this.classUnderRepair + ".class"));
+				+ File.separator + Configuration.targetClassName + ".class"));
 		
 		if(executionData == null) {
 			executionData = new ExecutionDataStore();
@@ -208,13 +170,14 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		// load here, get all statements and the compilation unit saved
 		// parser can visit at the same time to collect scope info
 		// apparently names and types and scopes are visited here below in
-		// the calls to ASTUTils
+		// the calls to ASTUtils
 		
 		JavaParser myParser = new JavaParser();
-			myParser.parse(fname, this.libs.split(File.pathSeparator)); 
+		 JavaRepresentation.originalSource = FileUtils.readFileToString(new File(fname));
+			myParser.parse(fname, Configuration.libs.split(File.pathSeparator)); 
 			List<ASTNode> stmts = myParser.getStatements();
-
 			baseCompilationUnit = myParser.getCompilationUnit();
+			
 			int stmtCounter = 0;
 			for(ASTNode node : stmts)
 			{
@@ -338,7 +301,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			e.printStackTrace();
 		} 
 		ArrayList<Pair<String,String>> retVal = new ArrayList<Pair<String,String>>();
-		retVal.add(new Pair<String,String>(this.classUnderRepair, doc.get()));
+		retVal.add(new Pair<String,String>(Configuration.targetClassName, doc.get()));
 		return retVal;
 	}
 
@@ -380,7 +343,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	
 	public JavaRepresentation clone() throws CloneNotSupportedException {
 		JavaRepresentation clone = (JavaRepresentation) super.clone();
-		// FIXME: copy or clear something?
+		clone.genome = new ArrayList<JavaEditOperation>(this.genome);
 		return clone;
 	}
 
@@ -389,4 +352,45 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	protected boolean internalCompile(String sourceName, String exeName) {
+		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+		System.out.println("exename: " + exeName);
+		// FIXME: this will recompile the original over and over which is no bueno
+		String program = JavaRepresentation.originalSource;
+		Iterable<? extends JavaFileObject> fileObjects = ASTUtils.getJavaSourceFromString(program) ; // FIXME: this.computeSourceBuffers();
+
+		LinkedList<String> options = new LinkedList<String>();
+
+		options.add("-cp");
+		options.add(Configuration.libs);
+
+		options.add("-source");
+		options.add(Configuration.sourceVersion);
+
+		options.add("-target");
+		options.add(Configuration.targetVersion);
+
+		options.add("-d");
+		String outDirName = Configuration.outputDir + File.separatorChar + this.getName() + File.separatorChar; //FIXME testing
+		File outDir = new File(outDirName);
+		if(!outDir.exists()) 
+			outDir.mkdir();
+		options.add(outDirName);  //FIXME? e.g., tmp/10210/
+
+
+		StringWriter compilerErrorWriter = new StringWriter();
+
+		if(!compiler.getTask(compilerErrorWriter, null, null, options, null, fileObjects).call())
+		{
+			compilerErrorWriter.flush();
+			System.err.println(compilerErrorWriter.getBuffer().toString());
+			return false;
+		}
+
+		return true;
+	}
+	
+
 }

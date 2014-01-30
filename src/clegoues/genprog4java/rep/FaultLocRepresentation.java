@@ -235,7 +235,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			TestCase newTest = new TestCase(testT, i);
 
 
-			if(this.testCase(newTest) != expectedResult && !this.allowCoverageFail) {
+			if(this.testCase(newTest) != expectedResult && !FaultLocRepresentation.allowCoverageFail) {
 				throw new UnexpectedCoverageResultException("FaultLocRep: unexpected coverage result: " + newTest.toString());
 			}
 			TreeSet<Integer> thisTestResult = this.getCoverageInfo();
@@ -286,6 +286,9 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		// which means either instrumentFaultLocalization should still exist and change the commands used for test case execution
 		// or we don't pretend this is trying to match OCaml exactly?
 		this.instrumentForFaultLocalization();
+		File covDir = new File("coverage/");
+		if(!covDir.exists())
+			covDir.mkdir();
 		this.compile(this.getName(), "coverage/coverage.out");
 		if(positivePathFile.exists()) {
 			positivePath = readPathFile(Configuration.posCoverageFile);
@@ -305,7 +308,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		TreeSet<Integer> posHt = new TreeSet<Integer> ();
 
 		for(Integer i : positivePath) {// FIXME: this is negative path in the OCaml code and I think that may be wrong. 
-			fw.put(i,this.positivePathWeight);
+			fw.put(i,FaultLocRepresentation.positivePathWeight);
 		}
 		for(Integer i : positivePath) {
 			posHt.add(i);
@@ -313,9 +316,9 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		}
 		for(Integer i : negativePath) {
 			if(!negHt.contains(i)) {
-				double negWeight = this.negativePathWeight;
+				double negWeight = FaultLocRepresentation.negativePathWeight;
 				if(posHt.contains(i)) {
-					negWeight = this.positivePathWeight;
+					negWeight = FaultLocRepresentation.positivePathWeight;
 				}
 				negHt.add(i);
 				fw.put(i,  0.5);
@@ -332,9 +335,14 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	protected abstract void instrumentForFaultLocalization();
 
 	@Override
-	public void load(String fname) throws IOException, UnexpectedCoverageResultException {
+	public void load(String fname) throws IOException {
 		super.load(fname); // calling super so that the code is loaded and the sanity check happens before localization is computed
-		this.computeLocalization();	
+		try {
+		this.computeLocalization();
+		} catch (UnexpectedCoverageResultException e) {
+			System.err.println("FaultLocRep: UnexpectedCoverageResult");
+			Runtime.getRuntime().exit(1);
+		}
 	}
 
 

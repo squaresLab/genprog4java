@@ -14,7 +14,7 @@ public class JavaEditOperation implements EditOperation<JavaStatement,ASTRewrite
 	private Mutation mutType;
 	private JavaStatement location = null;
 	private JavaStatement fixCode = null;
-	
+
 	public JavaEditOperation(JavaStatement location) {
 		this.mutType = Mutation.DELETE;
 		this.location = location;
@@ -46,39 +46,36 @@ public class JavaEditOperation implements EditOperation<JavaStatement,ASTRewrite
 	public JavaStatement getFixCode() {
 		return this.fixCode;
 	}
-	
+
 	protected static ListRewrite getListRewriter(ASTNode origin, ASTRewrite rewriter)
 	{
 		ASTNode parent = origin.getParent();
-		
+
 		while(!(parent instanceof Block))
 		{
 			parent = parent.getParent(); // FIXME: need to understand why this is a Thing
 		}
-		
+
 		return rewriter.getListRewrite(parent, Block.STATEMENTS_PROPERTY);
 	}
-	
+
 	@Override
 	public void edit(ASTRewrite rewriter) {
-			ListRewrite lrw = getListRewriter(this.getLocation().getASTNode(), rewriter);
-						ASTNode locationNode = this.getLocation().getASTNode();
-			switch(this.getType())
-			{
-		
-			
-			case APPEND:
-				lrw.insertAfter(locationNode, this.getFixCode().getASTNode(), null); 
-				break;
-			case REPLACE:
-				lrw.replace(locationNode, this.getFixCode().getASTNode(), null); 
-				break;
-			case SWAP: throw new UnsupportedOperationException() ; // FIXME
-			case DELETE:
-				lrw.remove(locationNode, null);
-				break;
-
-			}
+		ListRewrite lrw = getListRewriter(this.getLocation().getASTNode(), rewriter);
+		ASTNode locationNode = this.getLocation().getASTNode();
+		switch(this.getType())
+		{
+		case APPEND:
+			lrw.insertAfter(locationNode, this.getFixCode().getASTNode(), null); 
+			break;
+		case REPLACE:
+			lrw.replace(locationNode, this.getFixCode().getASTNode(), null); 
+			break;
+		case SWAP: throw new UnsupportedOperationException() ; // FIXME
+		case DELETE:
+			lrw.remove(locationNode, null);
+			break;
 		}
+	}
 
 }

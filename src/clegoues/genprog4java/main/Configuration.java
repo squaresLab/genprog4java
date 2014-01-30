@@ -21,8 +21,9 @@ public class Configuration {
 	public static String sanityFilename = "repair.sanity.java";
 	public static String sanityExename = "repair.sanity";
 	public static String globalExtension = ".java";
-	public static String targetClassName;
+	public static String targetClassName = "";
 	public static String searchStrategy = "ga";
+	public static String javaRuntime = "";
 	public static String javaVM;
 	public static String posCoverageFile = "coverage.path.pos";
 	public static String negCoverageFile = "coverage.path.neg";
@@ -62,6 +63,7 @@ public class Configuration {
 		if(prop.getProperty("sourceDir") != null) {
 		sourceDir = prop.getProperty("sourceDir").trim();
 		}
+		javaRuntime = Runtime.getRuntime().toString(); 
 		libs = prop.getProperty("libs").trim();
 		
 		if(prop.getProperty("sourceVersion") != null) {
