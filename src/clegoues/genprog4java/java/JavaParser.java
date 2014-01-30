@@ -1,6 +1,5 @@
 package clegoues.genprog4java.java;
 
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -11,29 +10,21 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-// FIXME: grabbed from PAR
-public class StatementParser
+
+public class JavaParser
 {
 	private LinkedList<ASTNode> stmts;
-	private StatementVisitor visitor;
+	private SemanticInfoVisitor visitor;
 	private CompilationUnit compilationUnit;
 	
-	private HashMap<Integer, ASTNode> buggyStmt;
 	private ScopeInfo scopeList;
 	
-	public HashMap<Integer, ASTNode> getBuggyStmt()
-	{
-		return buggyStmt;
-	}
 
-	public StatementParser()
+	public JavaParser()
 	{
-		this.buggyStmt = new HashMap<Integer, ASTNode>();
 		this.stmts = new LinkedList<ASTNode>();
-		this.visitor = new StatementVisitor();
-		this.visitor.setNodeSet(this.stmts);
-		this.visitor.setBuggySet(buggyStmt);
-		
+		this.visitor = new SemanticInfoVisitor();
+		this.visitor.setNodeSet(this.stmts);		
 		this.scopeList = new ScopeInfo();
 		this.visitor.setScopeList(this.scopeList);
 	}
@@ -53,17 +44,12 @@ public class StatementParser
 	{
 		return this.compilationUnit;
 	}
+
 	
-	
-	// FIXME: this gets scope info for all "buggy" statements at once.  Do it properly (with coverage)
 	public void parse(String file, String[] libs)
 	{
 		ASTParser parser = ASTParser.newParser(AST.JLS3);
 		parser.setEnvironment(libs, new String[] {}, null, true);
-		
-		// FIXME hmmmmm is it better to just do single file?  It looks like that's what they did.
-		// I think it's doable to do more than one at a time with ASTParser, but it may be worth getting the one-class implementation working
-		// before killing myself with the Eclipse JDT documentation.
 		
 		Map options = JavaCore.getOptions();
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_6, options);
@@ -77,11 +63,8 @@ public class StatementParser
 		parser.createASTs(new String[]{file}, null, new String[0], new ParserRequestor(visitor), null);
 		
 		this.compilationUnit = visitor.getCompilationUnit();
-		
-		for(ASTNode buggy : this.buggyStmt.values())
-		{
-			this.scopeList.addScope4Stmt(buggy, visitor.getFieldSet());
-		}
+	for(ASTNode stmt : this.stmts) { // possible FIXME: this was originally for buggy statements only
+			this.scopeList.addScope4Stmt(stmt, visitor.getFieldSet());
+		} 
 	}
 }
-

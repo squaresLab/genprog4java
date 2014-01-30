@@ -20,7 +20,6 @@ public interface Representation<G> extends Comparable<Representation<G>> {
 		void load(String filename) throws IOException;
 		void serialize(String filename);
 		boolean deserialize(String filename);
-		void debugInfo();
 		int maxAtom(); // atomid type?
 		List<WeightedAtom> getFaultyAtoms();
 		List<WeightedAtom> getFixSourceAtoms();

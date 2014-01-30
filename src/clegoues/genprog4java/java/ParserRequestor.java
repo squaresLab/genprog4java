@@ -4,12 +4,13 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FileASTRequestor;
 
 // FIXME: grabbed from PAR directly
+// possibly unfixable cause it's so short
 
 public class ParserRequestor extends FileASTRequestor
 {
-	private StatementVisitor visitor;
+	private SemanticInfoVisitor visitor;
 	
-	public ParserRequestor(StatementVisitor v)
+	public ParserRequestor(SemanticInfoVisitor v)
 	{
 		this.visitor = v;
 	}
