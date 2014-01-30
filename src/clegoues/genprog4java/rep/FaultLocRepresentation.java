@@ -269,6 +269,8 @@ private boolean allowCoverageFail;
 							return retVal;
 							
 				}
+				@Override
+				
 				public void computeLocalization(String wd) throws IOException, UnexpectedCoverageResultException {
 					// FIXME: THIS ONLY DOES STANDARD PATH FILE localization
 					/* FIXME: add regen-paths
