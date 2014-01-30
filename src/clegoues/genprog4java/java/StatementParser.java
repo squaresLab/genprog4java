@@ -61,6 +61,10 @@ public class StatementParser
 		ASTParser parser = ASTParser.newParser(AST.JLS3);
 		parser.setEnvironment(libs, new String[] {}, null, true);
 		
+		// FIXME hmmmmm is it better to just do single file?  It looks like that's what they did.
+		// I think it's doable to do more than one at a time with ASTParser, but it may be worth getting the one-class implementation working
+		// before killing myself with the Eclipse JDT documentation.
+		
 		Map options = JavaCore.getOptions();
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_6, options);
 		parser.setCompilerOptions(options);

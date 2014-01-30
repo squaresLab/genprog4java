@@ -225,10 +225,11 @@ FIXME, maybe: coverage-per-test stuff?
 						}
 					}
 
+				protected abstract int atomIDofSourceLine(int lineno);
 				
 				private TreeSet<Integer> runTestsCoverage(String path, TestType testT, int numTests, boolean expectedResult, String wd) throws IOException {
 					String pathFile = wd + File.separator + path;
-					TreeSet<Integer> atoms = new TreeSet<Integer>();
+					TreeSet<Integer> lines = new TreeSet<Integer>();
 					for(int i = 1; i <= numTests; i++) {
 						this.cleanCoverage();
 						TestCase newTest = new TestCase(testT, i);
@@ -236,11 +237,18 @@ FIXME, maybe: coverage-per-test stuff?
 
 						this.testCase(newTest); // FIXME: check return values of these
 						TreeSet<Integer> thisTestResult = this.getCoverageInfo();
-						atoms.addAll(thisTestResult);
+						lines.addAll(thisTestResult);
 					}
 			
 					// FIXME: output path to disk, via pathFile
-					return atoms;
+					TreeSet<Integer> atoms = new TreeSet<Integer>();
+					for(int line : lines) {
+						int atomId = this.atomIDofSourceLine(line);
+						if(atomId >= 0) {
+						atoms.add(atomId); 
+						}
+					}
+					return lines;
 				}
 				
 				protected abstract TreeSet<Integer> getCoverageInfo() throws FileNotFoundException, IOException;
