@@ -20,6 +20,7 @@ import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.main.Main;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.util.Pair;
 
@@ -45,8 +46,7 @@ import org.jacoco.core.data.ExecutionDataStore;
 import org.jacoco.core.data.IExecutionDataVisitor;
 import org.jacoco.core.data.ISessionInfoVisitor;
 import org.jacoco.core.data.SessionInfo;
-import org.jacoco.core.runtime.IRuntime;
-import org.jacoco.core.runtime.LoggerRuntime;
+
 
 // this can handle ONE FILE right now
 
@@ -65,6 +65,7 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 	private String libs; // FIXME
 	private String filterClass = "";
 	private ArrayList<EditOperation> genome = null;
+	private String classUnderRepair = "";
 
 	protected void instrumentForFaultLocalization(){
 		String coverageOutputDir = "coverage";
@@ -130,11 +131,8 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 
 	// this all comes originally from CoverageRuntime, where I learned to use jacoco
 
-	private static String coverageFile = "jacoco.exec";
-	private IRuntime runtime = null;
 	private ExecutionDataStore executionData = null;
 	
-	private int maxAtomID = 0;
 
 	protected ArrayList<Integer> atomIDofSourceLine(int lineno) {
 		return lineNoToAtomIDMap.get(lineno);
@@ -142,16 +140,15 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 
 	public TreeSet<Integer> getCoverageInfo() throws IOException
 	{
-		InputStream targetClass = null; // FIXME 
-
+		InputStream targetClass = new FileInputStream(new File(Main.config.outputDir + File.separator + 0+File.separator+Main.config.packageName.replace(".","/")
+				+ File.separator + this.classUnderRepair + ".class"));
+		
 		if(executionData == null) {
 			executionData = new ExecutionDataStore();
 		}
-		if(runtime == null) {
-			runtime = new LoggerRuntime();
-		}
 
-		final FileInputStream in = new FileInputStream(new File(coverageFile));
+
+		final FileInputStream in = new FileInputStream(new File("jacoco.exec"));
 		final ExecutionDataReader reader = new ExecutionDataReader(in);
 		reader.setSessionInfoVisitor(new ISessionInfoVisitor() {
 			public void visitSessionInfo(final SessionInfo info) {
@@ -175,9 +172,15 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 		{
 			for (int i = cc.getFirstLine(); i <= cc.getLastLine(); i++)
 			{
-				//System.err.println("Covered? ["+i+"]: " + isCovered(cc.getLine(i).getStatus()));
-				if(JavaRepresentation.isCovered(cc.getLine(i).getStatus()))
-				{
+				boolean covered = false;
+				switch(cc.getLine(i).getStatus()) {
+				case ICounter.PARTLY_COVERED: covered = true;
+				break;
+				case ICounter.FULLY_COVERED: covered = true;
+				break;
+				default: break;
+				}
+				if(covered) {
 					coveredLines.add(i);
 				}
 			}
@@ -192,20 +195,6 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 
 		return atoms;
 	}
-
-
-	private static boolean isCovered(final int status) {
-		switch (status) {
-		case ICounter.NOT_COVERED:
-			return false;
-		case ICounter.PARTLY_COVERED:
-			return true;
-		case ICounter.FULLY_COVERED:
-			return true;
-		}
-		return false;
-	}
-
 
 
 	public void load(String fname) throws IOException
@@ -248,7 +237,6 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 				codeBank.put(s.getStmtId(), s.getASTNode()); // FIXME: possibly a copy here as well
 				}
 		}
-			this.maxAtomID = stmtCounter - 1;
 
 	}
 
@@ -258,7 +246,7 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 				|| node instanceof BreakStatement || node instanceof ContinueStatement
 				|| node instanceof LabeledStatement || node instanceof ReturnStatement
 				|| node instanceof ThrowStatement || node instanceof VariableDeclarationStatement
-				|| node instanceof IfStatement; // FIXME: I don't think we actually want to repair some of these things
+				|| node instanceof IfStatement; // FIXME: I  think we actually don't want to repair some of these things
 	}
 
 
@@ -289,17 +277,6 @@ public class JavaRepresentation extends FaultLocRepresentation<EditOperation> {
 	}
 
 
-
-	@Override
-	public int maxAtom() {
-		return this.maxAtomID;
-	}
-
-	@Override
-	public void computeLocalization() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public void fromSource(String filename) {
