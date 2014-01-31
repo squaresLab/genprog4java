@@ -13,6 +13,7 @@ import java.util.Properties;
 import java.util.Scanner;
 import java.util.TreeSet;
 
+import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
 import clegoues.genprog4java.main.Configuration;
@@ -227,12 +228,12 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 
 	protected abstract ArrayList<Integer> atomIDofSourceLine(int lineno);
 
-	private TreeSet<Integer> runTestsCoverage(String path, TestType testT, int numTests, boolean expectedResult, String wd) throws IOException, UnexpectedCoverageResultException {
+	private TreeSet<Integer> runTestsCoverage(String path, TestType testT, ArrayList<String> tests, boolean expectedResult, String wd) throws IOException, UnexpectedCoverageResultException {
 		String pathFile = wd + File.separator + path;
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
-		for(int i = 1; i <= numTests; i++) {
+		for(String test : tests)  {
 			this.cleanCoverage();
-			TestCase newTest = new TestCase(testT, i);
+			TestCase newTest = new TestCase(testT, test);
 
 
 			if(this.testCase(newTest) != expectedResult && !FaultLocRepresentation.allowCoverageFail) {
@@ -289,11 +290,14 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		File covDir = new File("coverage/");
 		if(!covDir.exists())
 			covDir.mkdir();
-		this.compile(this.getName(), "coverage/coverage.out");
+		if(!this.compile(this.getName(), "coverage/coverage.out")) {
+			System.err.println("faultLocRep: Coverage failed to compile");
+			throw new UnexpectedCoverageResultException("compilation failure");
+		}
 		if(positivePathFile.exists()) {
 			positivePath = readPathFile(Configuration.posCoverageFile);
 		} else {
-			positivePath = runTestsCoverage(Configuration.posCoverageFile, TestType.POSITIVE, Configuration.numPositiveTests, true, "coverage/"); 
+			positivePath = runTestsCoverage(Configuration.posCoverageFile, TestType.POSITIVE, Fitness.positiveTests, true, "coverage/"); 
 		}
 		File negativePathFile = new File(Configuration.negCoverageFile);
 
@@ -301,7 +305,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			negativePath = readPathFile(Configuration.negCoverageFile);
 
 		} else {
-			negativePath = runTestsCoverage(Configuration.negCoverageFile, TestType.NEGATIVE, Configuration.numNegativeTests, false, "coverage/");
+			negativePath = runTestsCoverage(Configuration.negCoverageFile, TestType.NEGATIVE, Fitness.negativeTests, false, "coverage/");
 		}
 		HashMap<Integer,Double> fw = new HashMap<Integer,Double>(); 
 		TreeSet<Integer> negHt = new TreeSet<Integer>();

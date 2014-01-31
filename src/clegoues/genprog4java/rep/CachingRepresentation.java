@@ -1,7 +1,9 @@
 package clegoues.genprog4java.rep;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import clegoues.genprog4java.Fitness.FitnessValue;
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
 import clegoues.genprog4java.main.Configuration;
@@ -10,12 +12,17 @@ import clegoues.genprog4java.util.Pair;
 
 public abstract class CachingRepresentation<G extends EditOperation> extends Representation<G> {
 
-	private double fitness = -1.0; // in repair, this is a hashtable
+	private HashMap<String,FitnessValue> fitness = new HashMap<String,FitnessValue>(); // in repair, this is a hashtable mapping fitness keys to values, for
+	// multi-parameter searches.  Here, for java, I'm mapping test class names to values, but you can do what you like
+	// (including the original behavior)
+	
 	/*  (** cached file contents from [internal_compute_source_buffers]; avoid
       recomputing/reserializing *)
   val already_source_buffers = ref None */
 
-	public double getFitness() { return this.fitness; }
+	@Override
+	
+	public HashMap<String,FitnessValue> getFitness() { return this.fitness; }
 	private ArrayList<String> alreadySourced = new ArrayList<String>(); // initialize to empty
 	// TODO: private List<Digest> alreadyDigest; // Digest.t in OCaml
 	private Pair<Boolean,String> alreadyCompiled = null; 
@@ -144,8 +151,9 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		// TODO: remove applicable subdirectories from disk
 	}
 
-	public void setFitness(double fitness) {
-		this.fitness = fitness; 
+	@Override
+	public void setFitness(String key, FitnessValue fitness) {
+		this.fitness.put(key, fitness);  
 	}
 
 	// TODO: OK, as above, I think compiling Java programs is different from our 
@@ -165,7 +173,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 
 	protected abstract boolean internalCompile(String sourceName, String exeName);
 
-	public boolean testCase(TestCase test) {
+	/*public boolean testCase(TestCase test) { // FIXME: add caching to testing
 		/* I need to figure out digests before I can do this
 			      let tpr = self#prepare_for_test_case test in
 			      let digest_list, result = 
@@ -179,9 +187,9 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 			        test_cache_add digest_list (test,!test_condition) result ;
 			        Hashtbl.replace tested (digest_list,(test,!test_condition)) () ;
 			        result 
-			    end 	*/
+			    end 	*//*
 		throw new UnsupportedOperationException();
-	}
+	}*/
 
 	// FIXME: unique name thing, I guess we'll deal with that in the subclasses?
 
@@ -200,7 +208,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 					  */
 		alreadySourced = new ArrayList<String>();
 		alreadyCompiled = null;
-		fitness = -1.0;
+		fitness = new HashMap<String,FitnessValue>();
 	}
 
 	public void reduceSearchSpace() {
