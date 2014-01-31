@@ -33,7 +33,8 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	private static String posCoverageFile = "coverage.path.pos";
 	private static String negCoverageFile = "coverage.path.neg";
 	private static boolean regenPaths = false;
-	
+	protected boolean doingCoverage = false;
+
 	public static void configure(Properties prop) {
 		if(prop.getProperty("positivePathWeight") != null) {
 			positivePathWeight = Double.parseDouble(prop.getProperty("positivePathWeight").trim());
@@ -306,7 +307,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		 * weights are a hash table mapping atom_ids to weights.
 		 */
 		//FIXME: add subdirectory for coverage
-
+		this.doingCoverage = true;
 		TreeSet<Integer> positivePath = null;
 		TreeSet<Integer> negativePath = null;
 		File positivePathFile = new File(FaultLocRepresentation.posCoverageFile);
@@ -362,6 +363,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		}
 		assert(faultLocalization.size() > 0);
 		assert(fixLocalization.size() > 0);
+		this.doingCoverage = false;
 	}
 
 	protected abstract void instrumentForFaultLocalization();

@@ -14,17 +14,17 @@ import clegoues.genprog4java.util.Pair;
 
 public abstract class CachingRepresentation<G extends EditOperation> extends Representation<G> {
 
-	private HashMap<String,FitnessValue> fitness = new HashMap<String,FitnessValue>(); // in repair, this is a hashtable mapping fitness keys to values, for
+	private HashMap<String,FitnessValue> fitnessTable = new HashMap<String,FitnessValue>(); // in repair, this is a hashtable mapping fitness keys to values, fo
 	// multi-parameter searches.  Here, for java, I'm mapping test class names to values, but you can do what you like
 	// (including the original behavior)
-	
+	private double fitness = -1.0;
 	/*  (** cached file contents from [internal_compute_source_buffers]; avoid
       recomputing/reserializing *)
   val already_source_buffers = ref None */
 
 	@Override
 	
-	public HashMap<String,FitnessValue> getFitness() { return this.fitness; }
+	public double getFitness() { return this.fitness; }
 	private ArrayList<String> alreadySourced = new ArrayList<String>(); // initialize to empty
 	// TODO: private List<Digest> alreadyDigest; // Digest.t in OCaml
 	private Pair<Boolean,String> alreadyCompiled = null; 
@@ -126,8 +126,14 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	}
 
 	public boolean testCase(TestCase test) {
-		// FIXME: cachingRepresentation should check the cache and only call the test if necessary!
+		if(fitnessTable.containsKey(test.toString())) {
+			return fitnessTable.get(test.toString()).isAllPassed();
+		}
 		return this.internalTestCase(this.getName(), this.getName() + Configuration.globalExtension, test);
+
+		// kind of think internal test case should return here to save in fitnessTable,
+		// but wtfever for now
+		
 	}
 	// compile assumes that the source has already been serialized to disk.
 	// FIXME: add compile to do the generic thing it does in the OCaml, but
@@ -165,10 +171,13 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	}
 
 	@Override
-	public void setFitness(String key, FitnessValue fitness) {
-		this.fitness.put(key, fitness);  
+	public void setFitness(double fitness) {
+		this.fitness = fitness; 
 	}
 
+	public void recordFitness(String key, FitnessValue val) {
+		this.fitnessTable.put(key,val);
+	}
 	// TODO: OK, as above, I think compiling Java programs is different from our 
 	// usual MO.  So while the OCaml implementation does compile in CachingRepresentation
 	// assuming that it's always a call to an external script, I'm leaving that off from here for the 
@@ -178,31 +187,18 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	public boolean compile(String sourceName, String exeName) {
 		// assuming that the subclass has done something (see above); here we just
 		// cache
+		if(this.alreadyCompiled != null) {
+			return alreadyCompiled.getFirst();
+		} else {
 		boolean result = this.internalCompile(sourceName,exeName);
 		this.alreadyCompiled = new Pair<Boolean,String>(result,exeName);
 		return result;
+		}
 	}
 
 
 	protected abstract boolean internalCompile(String sourceName, String exeName);
 
-	/*public boolean testCase(TestCase test) { // FIXME: add caching to testing
-		/* I need to figure out digests before I can do this
-			      let tpr = self#prepare_for_test_case test in
-			      let digest_list, result = 
-			        match tpr with
-			        | Must_Run_Test(digest_list,exe_name,source_name,test) -> 
-			          let result = self#internal_test_case exe_name source_name test in
-			            digest_list, result 
-			        | Have_Test_Result(digest_list,result) -> 
-			          digest_list, result 
-			      in 
-			        test_cache_add digest_list (test,!test_condition) result ;
-			        Hashtbl.replace tested (digest_list,(test,!test_condition)) () ;
-			        result 
-			    end 	*//*
-		throw new UnsupportedOperationException();
-	}*/
 
 	// FIXME: unique name thing, I guess we'll deal with that in the subclasses?
 
@@ -221,7 +217,8 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 					  */
 		alreadySourced = new ArrayList<String>();
 		alreadyCompiled = null;
-		fitness = new HashMap<String,FitnessValue>();
+		fitnessTable = new HashMap<String,FitnessValue>();
+		fitness = -1.0;
 	}
 
 	public void reduceSearchSpace() {
