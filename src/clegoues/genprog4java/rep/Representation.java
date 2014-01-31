@@ -26,7 +26,7 @@ public abstract class Representation<G extends EditOperation> implements Compara
 			return clone;
 		}
 		public Representation() {
-			this.name = newName();
+			this.name = "original"; // FIXME: naming needs some work right about now.
 		}
 		public static int sequence = 0;
 		public static String newName() {

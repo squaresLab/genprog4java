@@ -260,13 +260,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 
 	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
 	public int num_test_evals_ignore_cache() {
 		// TODO Auto-generated method stub
 		return 0;
@@ -337,10 +330,10 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		posCommand.addArgument(test.toString());
 		posCommand.addArgument("clegoues.genprog4java.Fitness.CoverageFilter"); // FIXME
 
-
+		System.out.printf("positiveCommandString: " + posCommand.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(60*6000);
 		DefaultExecutor executor = new DefaultExecutor();
-		executor.setWorkingDirectory(new File(Configuration.outputDir));
+		executor.setWorkingDirectory(new File(Configuration.outputDir + File.separatorChar + this.getName()));
 		executor.setWatchdog(watchdog);
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream(); 
