@@ -1,4 +1,5 @@
 package clegoues.genprog4java.rep;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,15 +42,15 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	public void load(String base) throws IOException { 
 		// FIXME: try deserialize first
 		this.fromSource(base); 
+		System.out.println("loaded from source " + base);
 		if(Configuration.doSanity){
-			try {
-				assert(this.sanityCheck());
-			} catch(SanityCheckException e) {
-				System.err.println("cachingRep: Sanity check failed");
+			System.out.println("I really expect to be in this if block");
+				if(!this.sanityCheck()) { // FIXME: assert doesn't seem to have the semantics I expect
+				System.err.println("cacheRep: Sanity check failed, giving up");
 				Runtime.getRuntime().exit(1);
 			}
-			// FIXME: serialize
 		}
+			// FIXME: serialize
 		/*
 
 			  method serialize ?out_channel ?global_info (filename : string) = 
@@ -87,25 +88,33 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 			  end 
 	 */
 
-	public boolean sanityCheck() throws SanityCheckException {
-		// TODO: createSubDirectory("sanity");
+	public boolean sanityCheck()  {
+		System.out.println("I assume I made it here?");
+
+		File sanityDir = new File("sanity/");
+		if(!sanityDir.exists()) {
+			sanityDir.mkdir();
+		}
 		String sanityFilename = "sanity/" + Configuration.sanityFilename + Configuration.globalExtension; 
 		String sanityExename = "sanity/" + Configuration.sanityExename;
 		this.outputSource(sanityFilename);
 		if(!this.compile(sanityFilename,sanityExename))
 		{
-			throw new SanityCheckException("sanity: " + sanityFilename + " does not compile.");
+			System.err.println("cacheRep: sanity: " + sanityFilename + " does not compile.");
+			return false;
 		}
 		for(int i = 1; i <= Configuration.numPositiveTests; i++) {
 			TestCase thisTest = new TestCase(TestType.POSITIVE, i);
 			if(!this.internalTestCase(sanityExename,sanityFilename, thisTest)) {
-				throw new SanityCheckException("sanity: " + sanityFilename + " failed " + thisTest.toString());
+				System.err.println("cacheRep: sanity: " + sanityFilename + " failed positive test " + thisTest.toString()); 
+				return false; 
 			}
 		}
 		for(int i = 1; i <= Configuration.numNegativeTests; i++) {
 			TestCase thisTest = new TestCase(TestType.NEGATIVE, i);
-			if(this.internalTestCase(sanityExename,sanityFilename, thisTest)) {
-				throw new SanityCheckException("sanity: " + sanityFilename + " passed " + thisTest.toString());
+			if(this.internalTestCase(sanityExename,sanityFilename, thisTest)) {				
+				System.err.println("cacheRep: sanity: " + sanityFilename + " passed negative test " + thisTest.toString()); 
+			return false; 
 			}
 		}
 		// TODO: printout endTime - startTime.
