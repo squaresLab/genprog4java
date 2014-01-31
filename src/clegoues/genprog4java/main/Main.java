@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.Search.JavaEditOperation;
+import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.RepairFoundException;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.rep.JavaRepresentation;
@@ -17,7 +18,7 @@ public class Main {
 		Search searchEngine = null;
 		Representation baseRep = null;
 		Fitness fitnessEngine = null;
-
+		Population incomingPopulation = null;
 		assert(args.length > 0);
 		long startTime = System.currentTimeMillis();
 
@@ -30,11 +31,12 @@ public class Main {
 			baseRep = (Representation) new JavaRepresentation();
 			fitnessEngine = new Fitness<JavaEditOperation>();
 			searchEngine = new Search<JavaEditOperation>(fitnessEngine);
+			incomingPopulation = new Population<JavaEditOperation>(); // FIXME: read from incoming if applicable!
 		}
 		baseRep.load(Configuration.sourceDir + "/" + Configuration.targetClassName + ".java");
 		try {
 			if(Configuration.searchStrategy == "ga") {
-				searchEngine.geneticAlgorithm(baseRep, null);
+				searchEngine.geneticAlgorithm(baseRep, incomingPopulation);
 			} else if (Configuration.searchStrategy == "brute") {
 				searchEngine.bruteForceOne(baseRep);
 			} else if (Configuration.searchStrategy == "oracle") {

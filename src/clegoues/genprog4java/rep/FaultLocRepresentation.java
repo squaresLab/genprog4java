@@ -2,6 +2,7 @@ package clegoues.genprog4java.rep;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -29,6 +30,9 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	private static double positivePathWeight = 0.1; 
 	private static double negativePathWeight = 1.0;
 	private static boolean allowCoverageFail = false;
+	private static String posCoverageFile = "coverage.path.pos";
+	private static String negCoverageFile = "coverage.path.neg";
+	private static boolean regenPaths = false;
 	
 	public static void configure(Properties prop) {
 		if(prop.getProperty("positivePathWeight") != null) {
@@ -40,6 +44,20 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		if(prop.getProperty("allowCoverageFail") != null) {
 			allowCoverageFail = true;
 		}
+		
+		if(prop.getProperty("posCoverageFile") != null)
+		{
+			posCoverageFile = prop.getProperty("posCoverageFile").trim();
+		}
+		
+		if(prop.getProperty("negCoverageFile") != null)
+		{
+			negCoverageFile = prop.getProperty("negCoverageFile").trim();
+		}
+		if(prop.getProperty("regenPaths") != null) {
+			regenPaths = true;
+		}
+		
 	}
 	
 	public FaultLocRepresentation<G> clone() throws CloneNotSupportedException {
@@ -228,8 +246,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 
 	protected abstract ArrayList<Integer> atomIDofSourceLine(int lineno);
 
-	private TreeSet<Integer> runTestsCoverage(String path, TestType testT, ArrayList<String> tests, boolean expectedResult, String wd) throws IOException, UnexpectedCoverageResultException {
-		String pathFile = wd + File.separator + path;
+	private TreeSet<Integer> runTestsCoverage(String pathFile, TestType testT, ArrayList<String> tests, boolean expectedResult, String wd) throws IOException, UnexpectedCoverageResultException {
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
 		for(String test : tests)  {
 			this.cleanCoverage();
@@ -259,14 +276,24 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	protected abstract TreeSet<Integer> getCoverageInfo() throws FileNotFoundException, IOException;
 
 	private TreeSet<Integer> readPathFile(String pathFile) {
+		System.out.println("reading from " + pathFile);
 		TreeSet<Integer> retVal = new TreeSet<Integer>();
-		Scanner reader = new Scanner(pathFile); 
-		while(reader.hasNextInt()) {
-			int i = reader.nextInt();
-			retVal.add(i);
+		Scanner reader = null;
+		try {
+			reader = new Scanner(new FileInputStream(pathFile));
+			while(reader.hasNextInt()) {
+				int i = reader.nextInt();
+				retVal.add(i);
+			}
+			reader.close();
+		} catch (FileNotFoundException e) {
+			System.err.println("coverage file " + pathFile + " not found");
+			e.printStackTrace();
+		} finally {
+			if(reader != null) reader.close();
+			return retVal;
 		}
-		reader.close();
-		return retVal;
+
 
 	}
 	@Override
@@ -282,7 +309,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 
 		TreeSet<Integer> positivePath = null;
 		TreeSet<Integer> negativePath = null;
-		File positivePathFile = new File(Configuration.posCoverageFile);
+		File positivePathFile = new File(FaultLocRepresentation.posCoverageFile);
 		// OK, we don't instrument Java programs, rather, use java library that computes coverage for us.
 		// which means either instrumentFaultLocalization should still exist and change the commands used for test case execution
 		// or we don't pretend this is trying to match OCaml exactly?
@@ -294,18 +321,18 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			System.err.println("faultLocRep: Coverage failed to compile");
 			throw new UnexpectedCoverageResultException("compilation failure");
 		}
-		if(positivePathFile.exists()) {
-			positivePath = readPathFile(Configuration.posCoverageFile);
+		if(positivePathFile.exists() && !FaultLocRepresentation.regenPaths) {
+			positivePath = readPathFile(FaultLocRepresentation.posCoverageFile);
 		} else {
-			positivePath = runTestsCoverage(Configuration.posCoverageFile, TestType.POSITIVE, Fitness.positiveTests, true, "coverage/"); 
+			positivePath = runTestsCoverage(FaultLocRepresentation.posCoverageFile, TestType.POSITIVE, Fitness.positiveTests, true, "coverage/"); 
 		}
-		File negativePathFile = new File(Configuration.negCoverageFile);
+		File negativePathFile = new File(FaultLocRepresentation.negCoverageFile);
 
-		if(negativePathFile.exists()) {
-			negativePath = readPathFile(Configuration.negCoverageFile);
+		if(negativePathFile.exists() && !FaultLocRepresentation.regenPaths) {
+			negativePath = readPathFile(FaultLocRepresentation.negCoverageFile);
 
 		} else {
-			negativePath = runTestsCoverage(Configuration.negCoverageFile, TestType.NEGATIVE, Fitness.negativeTests, false, "coverage/");
+			negativePath = runTestsCoverage(FaultLocRepresentation.negCoverageFile, TestType.NEGATIVE, Fitness.negativeTests, false, "coverage/");
 		}
 		HashMap<Integer,Double> fw = new HashMap<Integer,Double>(); 
 		TreeSet<Integer> negHt = new TreeSet<Integer>();

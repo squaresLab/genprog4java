@@ -1,7 +1,7 @@
 package clegoues.genprog4java.rep;
 import clegoues.genprog4java.util.*;
 
-public class WeightedAtom extends Pair<Integer,Double> implements Comparable<WeightedAtom> {
+public class WeightedAtom extends Pair<Integer,Double> {
 
 
 	public WeightedAtom(Integer atomid) {

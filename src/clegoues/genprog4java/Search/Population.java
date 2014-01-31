@@ -23,6 +23,9 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 
 	private ArrayList<Representation<G>> population = new ArrayList<Representation<G>>(this.popsize);
 
+	public Population() {
+		
+	}
 	public Population(ArrayList<Representation<G>> smallerPop) {
 		this.population = smallerPop;
 	}
