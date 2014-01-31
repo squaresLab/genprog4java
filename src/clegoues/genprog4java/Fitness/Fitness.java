@@ -1,10 +1,17 @@
 package clegoues.genprog4java.Fitness;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Random;
+import java.util.Set;
 
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
@@ -17,7 +24,22 @@ public class Fitness<G extends EditOperation> {
 	private static double negativeTestWeight = 2.0; 
 	private static double sample = 1.0;
 	private static String sampleStrategy = "variant"; // options: all, generation, variant
-
+	public static String posTestFile = "pos.tests";
+	public static String negTestFile = "neg.tests";
+	public static ArrayList<String> positiveTests = new ArrayList<String>();
+	public static ArrayList<String> negativeTests = new ArrayList<String>();
+	
+	private static ArrayList<String> getTests(String filename) throws IOException {
+		BufferedReader br = new BufferedReader(new FileReader(filename));
+		String line;
+		ArrayList<String> allLines = new ArrayList<String>();
+		while ((line = br.readLine()) != null) {
+		   // print the line.
+			allLines.add(line);
+		}
+		br.close();
+		return allLines;
+	}
 	public static void configure(Properties prop) {
 		if(prop.getProperty("negativeTestWeight") != null) {
 			Fitness.negativeTestWeight = Double.parseDouble(prop.getProperty("negativeTestWeight").trim());
@@ -27,6 +49,28 @@ public class Fitness<G extends EditOperation> {
 		}
 		if(prop.getProperty("sampleStrategy") != null) {
 			Fitness.sampleStrategy = prop.getProperty("sampleStrategy").trim();
+		}
+		if(prop.getProperty("positiveTests") != null)
+		{
+			posTestFile = prop.getProperty("positiveTests").trim();
+		}
+		
+		if(prop.getProperty("negativeTests") != null)
+		{
+			negTestFile = prop.getProperty("negativeTests").trim();
+		}
+
+		try {
+			positiveTests.addAll(getTests(posTestFile));
+		} catch (IOException e) {
+			System.err.println("failed to read " + posTestFile + " giving up");
+			Runtime.getRuntime().exit(1);
+		}
+		try {
+		negativeTests.addAll(getTests(negTestFile));
+		} catch (IOException e) {
+			System.err.println("failed to read " + negTestFile + " giving up");
+			Runtime.getRuntime().exit(1);
 		}
 	}
 
@@ -105,9 +149,18 @@ public class Fitness<G extends EditOperation> {
 		double fac = Configuration.numPositiveTests * Fitness.negativeTestWeight / Configuration.numNegativeTests;
 
 		double maxFitness = Configuration.numPositiveTests + ((Configuration.numNegativeTests * fac));
-		if(rep.getFitness() > -1.0) {
-			System.out.printf("\t%3g %s\n", rep.getFitness(), rep.getName());
-			return !(rep.getFitness() < maxFitness);
+		HashMap<String,FitnessValue> curFit = rep.getFitness();
+		if(!curFit.isEmpty()) {
+			Set<Entry<String,FitnessValue>> entrySet = curFit.entrySet();
+			double totalFitness = 0.0; // FIXME the problem here is that the fitness entries don't know if they're positive or negative so the weighting will be wrong. 
+			for(Entry<String,FitnessValue> fitnessEntry : entrySet) {
+				if(fitnessEntry.getValue().isAllPassed()) {
+					totalFitness += 1.0; 
+				}
+			}
+			System.out.printf("\t%3g %s\n", totalFitness, rep.getName());
+
+			return !(totalFitness < maxFitness);
 		}
 
 		Pair<Double,Double> fitnessPair = new Pair<Double,Double>(-1.0, -1.0); 
@@ -123,7 +176,7 @@ public class Fitness<G extends EditOperation> {
 			fitnessPair = this.testFitnessFull(rep);
 		}
 		System.out.printf("\t%3g %s\n", fitnessPair.getFirst(), rep.getName());
-		rep.setFitness(fitnessPair.getFirst());
+		// OK I don't think I need to set fitness here like we do in OCaml b/c rep.testCase will store it
 		rep.cleanup();
 		return !(fitnessPair.getSecond() < maxFitness);
 

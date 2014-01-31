@@ -27,8 +27,7 @@ public class Configuration {
 	public static String javaVM;
 	public static String posCoverageFile = "coverage.path.pos";
 	public static String negCoverageFile = "coverage.path.neg";
-	public static String posTestFile = "pos.test";
-	public static String negTestFile = "neg.test";
+
 	public static boolean doSanity = true;
 	public static String packageName;
 	
@@ -90,15 +89,7 @@ public class Configuration {
 		}
 		
 		
-		if(prop.getProperty("positiveTests") != null)
-		{
-			posTestFile = prop.getProperty("positiveTests").trim();
-		}
-		
-		if(prop.getProperty("negativeTests") != null)
-		{
-			negTestFile = prop.getProperty("negativeTests").trim();
-		}
+
 		
 		targetClassName = prop.getProperty("targetClassName").trim();
 

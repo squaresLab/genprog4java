@@ -1,5 +1,6 @@
 package clegoues.genprog4java.rep;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
 
+import clegoues.genprog4java.Fitness.FitnessValue;
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Search.JavaEditOperation;
 import clegoues.genprog4java.java.ASTUtils;
@@ -25,6 +27,10 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
 import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AssertStatement;
@@ -65,14 +71,14 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	private static CompilationUnit baseCompilationUnit = null;
 	private static HashMap<Integer,ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer,ArrayList<Integer>>();
 	private static String originalSource = "";
-			
+
 	private CommandLine testCommand = null;
 	private String filterClass = "";
-	
+
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
 
 	private static String getOriginalSource() { return originalSource; }
-	
+
 	protected void instrumentForFaultLocalization(){
 		String coverageOutputDir = "coverage";
 		this.filterClass = "clegoues.genprog4java.util.CoverageFilter";
@@ -100,7 +106,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	// Java-specific coverage stuff:
 
 	private ExecutionDataStore executionData = null;
-	
+
 
 	protected ArrayList<Integer> atomIDofSourceLine(int lineno) {
 		return lineNoToAtomIDMap.get(lineno);
@@ -110,7 +116,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	{
 		InputStream targetClass = new FileInputStream(new File(Configuration.outputDir + File.separator + "coverage"+File.separator+Configuration.packageName.replace(".","/")
 				+ File.separator + Configuration.targetClassName + ".class"));
-		
+
 		if(executionData == null) {
 			executionData = new ExecutionDataStore();
 		}
@@ -157,7 +163,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		for(int line : coveredLines) {
 			ArrayList<Integer> atomIds = this.atomIDofSourceLine(line);
 			if(atomIds.size() >= 0) {
-			atoms.addAll(atomIds); 
+				atoms.addAll(atomIds); 
 			}
 		}
 
@@ -171,17 +177,17 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		// parser can visit at the same time to collect scope info
 		// apparently names and types and scopes are visited here below in
 		// the calls to ASTUtils
-		
+
 		JavaParser myParser = new JavaParser();
-		 JavaRepresentation.originalSource = FileUtils.readFileToString(new File(fname));
-			myParser.parse(fname, Configuration.libs.split(File.pathSeparator)); 
-			List<ASTNode> stmts = myParser.getStatements();
-			baseCompilationUnit = myParser.getCompilationUnit();
-			
-			int stmtCounter = 0;
-			for(ASTNode node : stmts)
-			{
-				if(JavaRepresentation.canRepair(node)) { // FIXME: I think this check was already done in the parser, but whatever
+		JavaRepresentation.originalSource = FileUtils.readFileToString(new File(fname));
+		myParser.parse(fname, Configuration.libs.split(File.pathSeparator)); 
+		List<ASTNode> stmts = myParser.getStatements();
+		baseCompilationUnit = myParser.getCompilationUnit();
+
+		int stmtCounter = 0;
+		for(ASTNode node : stmts)
+		{
+			if(JavaRepresentation.canRepair(node)) { // FIXME: I think this check was already done in the parser, but whatever
 				JavaStatement s = new JavaStatement();
 				s.setStmtId(stmtCounter);
 				stmtCounter++;
@@ -202,7 +208,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 				lineNoToAtomIDMap.put(lineNo,  lineNoList);
 				base.put(s.getStmtId(),s);
 				codeBank.put(s.getStmtId(), s); // FIXME: possibly a copy here as well
-				}
+			}
 		}
 
 	}
@@ -224,7 +230,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	@Override
 	public void loadGenomeFromString(String genome) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void setGenome(List<JavaEditOperation> genome) {
@@ -240,7 +246,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	@Override
 	public void serialize(String filename) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 
@@ -249,7 +255,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	@Override
 	public void outputSource(String filename) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 
@@ -280,15 +286,15 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 		Document doc = new Document(JavaRepresentation.getOriginalSource()); // FIXME: SET ORIGINAL SOURCE IN LOAD
 		ASTRewrite rewriter = ASTRewrite.create(cu.getAST());
-		
+
 		try
 		{
 			for(JavaEditOperation edit : genome) { 
 				edit.edit(rewriter);
 			}
-			
+
 			TextEdit edits = null;
-			
+
 			edits = rewriter.rewriteAST(doc, null);
 			edits.apply(doc);
 		} catch (IllegalArgumentException e) {
@@ -340,7 +346,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	public void replace(int whatToReplace, int whatToReplaceWith) {
 		this.editHelper(whatToReplace,whatToReplaceWith,Mutation.REPLACE);		
 	}
-	
+
 	public JavaRepresentation clone() throws CloneNotSupportedException {
 		JavaRepresentation clone = (JavaRepresentation) super.clone();
 		clone.genome = new ArrayList<JavaEditOperation>(this.genome);
@@ -350,7 +356,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	@Override
 	public void reduceFixSpace() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -391,6 +397,135 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 		return true;
 	}
-	
 
+	@Override
+	public boolean testCase(TestCase test) {
+		// read in the test files to get a list of test class names
+		// store it in the testcase object, which will be the name
+		// this is a little strange because each test class has multiple
+		// test cases in it.  I think we can actually change this behavior through various
+		// hacks on StackOverflow, but for the time being I just want something that works at all
+		// rather than a perfect implementation.  One thing at a time, but FIXME eventually
+
+		// Positive tests
+		CommandLine posCommand = CommandLine.parse(Configuration.javaVM);
+		posCommand.addArgument("-classpath");
+		posCommand.addArgument( Configuration.outputDir + File.separator + this.getName()
+				+ System.getProperty("path.separator") + Configuration.libs);
+
+		posCommand.addArgument("-Xms128m");
+		posCommand.addArgument("-Xmx256m");
+		posCommand.addArgument("-client");
+		//posCommand.addArgument("-Xshare:on");
+		//posCommand.addArgument("-Xquickstart");
+
+		posCommand.addArgument("clegoues.genprog4java.Fitness.UnitTestRunner");
+
+		posCommand.addArgument(test.toString());
+		posCommand.addArgument("clegoues.genprog4java.Fitness.CoverageFilter"); // FIXME
+
+
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(60*6000);
+		DefaultExecutor executor = new DefaultExecutor();
+		executor.setWorkingDirectory(new File(Configuration.outputDir));
+		executor.setWatchdog(watchdog);
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream(); 
+
+		executor.setExitValue(0);
+
+		executor.setStreamHandler(new PumpStreamHandler(out));
+		FitnessValue posFit = new FitnessValue();
+
+		try {
+			int exitValue = executor.execute(posCommand);		
+			out.flush();
+			String output = out.toString();
+			out.reset();
+
+			 posFit = JavaRepresentation.parseTestResults(output);
+
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException exception) {
+				//ignore exception
+			}
+
+
+			this.setFitness(test.toString(), posFit); 
+
+
+		} catch (ExecuteException exception) {
+			//int exitValue = exception.getExitValue();
+			//String output = out.toString();
+			// FIXME
+			exception.printStackTrace();
+		} catch (Exception e)
+		{
+			// FIXME
+			//String output = out.toString();
+			//e.printStackTrace();
+		}
+		finally
+		{
+			if(out!=null)
+				try {
+					out.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+		return posFit.isAllPassed();
+
+	}
+
+	private static FitnessValue parseTestResults(String output)
+	{
+		String[] lines = output.split("\n");
+		FitnessValue ret = new FitnessValue();
+		for(String line : lines)
+		{
+			try
+			{
+				if(line.startsWith("[SUCCESS]:"))
+				{
+					String[] tokens = line.split("[:\\s]+");
+					ret.setAllPassed(Boolean.parseBoolean(tokens[1]));
+				}
+			} catch (Exception e)
+			{
+				ret.setAllPassed(false);
+				// originally: setCompilable was false.  Necessary? FIXME
+			}
+
+			try
+			{
+				if(line.startsWith("[TOTAL]:"))
+				{
+					String[] tokens = line.split("[:\\s]+");
+					ret.setNumberTests(Integer.parseInt(tokens[1]));
+				}
+			} catch (NumberFormatException e)
+			{
+			 // setCompilable was false.  Why? FIXME
+			}
+
+			try
+			{
+				if(line.startsWith("[FAILURE]:"))
+				{
+					String[] tokens = line.split("[:\\s]+");
+					ret.setNumTestsFailed(Integer.parseInt(tokens[1]));
+				}
+			} catch (NumberFormatException e)
+			{
+			// originally: setCompilable was false.  Why? FIXME
+				// I have an inkling, having thought about it...
+			}
+		}
+
+		return ret;
+	}
 }
+

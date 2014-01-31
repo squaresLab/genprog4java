@@ -2,10 +2,12 @@ package clegoues.genprog4java.rep;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
 
+import clegoues.genprog4java.Fitness.FitnessValue;
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
@@ -51,8 +53,7 @@ public abstract class Representation<G extends EditOperation> implements Compara
 		public abstract void outputSource(String filename);
 		public abstract List<String> sourceName();
 		public abstract void cleanup();
-		public abstract void setFitness(double fitness);
-		public abstract double getFitness();
+		public abstract HashMap<String, FitnessValue> getFitness();
 		public abstract boolean compile(String sourceName, String exeName);
 		public abstract boolean testCase(TestCase test);
 		public abstract void reduceSearchSpace(); // do this?
@@ -73,5 +74,7 @@ public abstract class Representation<G extends EditOperation> implements Compara
 		}
 		public abstract void computeLocalization() throws IOException,
 				UnexpectedCoverageResultException;
+		public abstract void setFitness(String key, FitnessValue fitness); 
+
 
 }
