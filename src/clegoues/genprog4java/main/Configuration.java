@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Random;
 
 import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.Search.Population;
@@ -25,9 +26,10 @@ public class Configuration {
 	public static String searchStrategy = "ga";
 	public static String javaRuntime = "";
 	public static String javaVM;
-
+	public static long seed;
 	public static boolean doSanity = true;
 	public static String packageName;
+	public static Random randomizer = null;
 	
 	public Configuration() {}
 
@@ -75,8 +77,12 @@ public class Configuration {
 				doSanity = false;
 			}
 		}
-
-
+		if(prop.getProperty("seed") != null) {
+			seed = (long) Integer.parseInt(prop.getProperty("seed").trim());
+		} else {
+			seed = System.currentTimeMillis();
+		}
+		randomizer = new Random(seed);
 		
 		targetClassName = prop.getProperty("targetClassName").trim();
 

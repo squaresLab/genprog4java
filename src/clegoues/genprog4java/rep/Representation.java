@@ -46,8 +46,8 @@ public abstract class Representation<G extends EditOperation> implements Compara
 		public abstract void load(String filename) throws IOException, UnexpectedCoverageResultException;
 		public abstract void serialize(String filename);
 		public abstract boolean deserialize(String filename);
-		public abstract List<WeightedAtom> getFaultyAtoms();
-		public abstract List<WeightedAtom> getFixSourceAtoms();
+		public abstract ArrayList<WeightedAtom> getFaultyAtoms();
+		public abstract ArrayList<WeightedAtom> getFixSourceAtoms();
 		public abstract boolean sanityCheck();
 		public abstract void fromSource(String filename) throws IOException;
 		public abstract void outputSource(String filename);
