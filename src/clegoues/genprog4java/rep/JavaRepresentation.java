@@ -369,134 +369,132 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		return posFit.isAllPassed();	
 	}
 
-@Override
-public void delete(int location) {
-	JavaStatement locationStatement = base.get(location);
-	JavaEditOperation newEdit = new JavaEditOperation(locationStatement);
-	this.genome.add(newEdit);
-}
-
-private void editHelper(int location, int fixCode, Mutation mutType) {
-	JavaStatement locationStatement = base.get(location);
-	JavaStatement fixCodeStatement = codeBank.get(fixCode); // FIXME correct for Swap? Hm.
-	JavaEditOperation newEdit = new JavaEditOperation(mutType,locationStatement,fixCodeStatement);
-	this.genome.add(newEdit);
-}
-@Override
-public void append(int whereToAppend, int whatToAppend) {
-	this.editHelper(whereToAppend,whatToAppend,Mutation.APPEND); 
-}
-
-@Override
-public void swap(int swap1, int swap2) {
-	this.editHelper(swap1,swap2,Mutation.SWAP); 
-
-}
-
-@Override
-public void replace(int whatToReplace, int whatToReplaceWith) {
-	this.editHelper(whatToReplace,whatToReplaceWith,Mutation.REPLACE);		
-}
-
-public JavaRepresentation clone() throws CloneNotSupportedException {
-	JavaRepresentation clone = (JavaRepresentation) super.clone();
-	clone.genome = new ArrayList<JavaEditOperation>(this.genome);
-	return clone;
-}
-
-@Override
-public void reduceFixSpace() {
-	// TODO Auto-generated method stub
-
-}
-
-@Override
-protected boolean internalCompile(String sourceName, String exeName) {
-	JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-	System.out.println("exename: " + exeName);
-	// FIXME: this will recompile the original over and over which is no bueno
-	String program = JavaRepresentation.originalSource;
-	Iterable<? extends JavaFileObject> fileObjects = ASTUtils.getJavaSourceFromString(program) ; // FIXME: this.computeSourceBuffers();
-
-	LinkedList<String> options = new LinkedList<String>();
-
-	options.add("-cp");
-	options.add(Configuration.libs);
-
-	options.add("-source");
-	options.add(Configuration.sourceVersion);
-
-	options.add("-target");
-	options.add(Configuration.targetVersion);
-
-	options.add("-d");
-	String outDirName = Configuration.outputDir + File.separatorChar + sourceName + File.separatorChar; //FIXME testing
-	File outDir = new File(outDirName);
-	if(!outDir.exists()) 
-		outDir.mkdir();
-	options.add(outDirName);  //FIXME? e.g., tmp/10210/
-
-
-	StringWriter compilerErrorWriter = new StringWriter();
-
-	if(!compiler.getTask(compilerErrorWriter, null, null, options, null, fileObjects).call())
-	{
-		compilerErrorWriter.flush();
-		System.err.println(compilerErrorWriter.getBuffer().toString());
-		return false;
+	@Override
+	public void delete(int location) {
+		super.delete(location);
+		JavaStatement locationStatement = base.get(location);
+		JavaEditOperation newEdit = new JavaEditOperation(locationStatement);
+		this.genome.add(newEdit);
 	}
 
-	return true;
-}
-
-
-private static FitnessValue parseTestResults(String testClassName, String output)
-{
-	String[] lines = output.split("\n");
-	FitnessValue ret = new FitnessValue();
-	ret.setTestClassName(testClassName);
-	for(String line : lines)
-	{
-		try
-		{
-			if(line.startsWith("[SUCCESS]:"))
-			{
-				String[] tokens = line.split("[:\\s]+");
-				ret.setAllPassed(Boolean.parseBoolean(tokens[1]));
-			}
-		} catch (Exception e)
-		{
-			ret.setAllPassed(false);
-			// originally: setCompilable was false.  Necessary? FIXME
-		}
-
-		try
-		{
-			if(line.startsWith("[TOTAL]:"))
-			{
-				String[] tokens = line.split("[:\\s]+");
-				ret.setNumberTests(Integer.parseInt(tokens[1]));
-			}
-		} catch (NumberFormatException e)
-		{
-			// setCompilable was false.  Why? FIXME
-		}
-
-		try
-		{
-			if(line.startsWith("[FAILURE]:"))
-			{
-				String[] tokens = line.split("[:\\s]+");
-				ret.setNumTestsFailed(Integer.parseInt(tokens[1]));
-			}
-		} catch (NumberFormatException e)
-		{
-			// originally: setCompilable was false.  Why? FIXME
-			// I have an inkling, having thought about it...
-		}
+	private void editHelper(int location, int fixCode, Mutation mutType) {
+		JavaStatement locationStatement = base.get(location);
+		JavaStatement fixCodeStatement = codeBank.get(fixCode); // FIXME correct for Swap? Hm.
+		JavaEditOperation newEdit = new JavaEditOperation(mutType,locationStatement,fixCodeStatement);
+		this.genome.add(newEdit);
+	}
+	@Override
+	public void append(int whereToAppend, int whatToAppend) {
+		super.append(whereToAppend,whatToAppend);
+		this.editHelper(whereToAppend,whatToAppend,Mutation.APPEND); 
 	}
 
-	return ret;
-}
+	@Override
+	public void swap(int swap1, int swap2) {
+		super.append(swap1,swap2);
+		this.editHelper(swap1,swap2,Mutation.SWAP); 
+
+	}
+
+	@Override
+	public void replace(int whatToReplace, int whatToReplaceWith) {
+		super.append(whatToReplace, whatToReplaceWith);
+		this.editHelper(whatToReplace,whatToReplaceWith,Mutation.REPLACE);		
+	}
+
+	public JavaRepresentation clone() throws CloneNotSupportedException {
+		JavaRepresentation clone = (JavaRepresentation) super.clone();
+		clone.genome = new ArrayList<JavaEditOperation>(this.genome);
+		return clone;
+	}
+
+	@Override
+	protected boolean internalCompile(String sourceName, String exeName) {
+		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+		System.out.println("exename: " + exeName);
+		// FIXME: this will recompile the original over and over which is no bueno
+		String program = JavaRepresentation.originalSource;
+		Iterable<? extends JavaFileObject> fileObjects = ASTUtils.getJavaSourceFromString(program) ; // FIXME: this.computeSourceBuffers();
+
+		LinkedList<String> options = new LinkedList<String>();
+
+		options.add("-cp");
+		options.add(Configuration.libs);
+
+		options.add("-source");
+		options.add(Configuration.sourceVersion);
+
+		options.add("-target");
+		options.add(Configuration.targetVersion);
+
+		options.add("-d");
+		String outDirName = Configuration.outputDir + File.separatorChar + sourceName + File.separatorChar; //FIXME testing
+		File outDir = new File(outDirName);
+		if(!outDir.exists()) 
+			outDir.mkdir();
+		options.add(outDirName);  //FIXME? e.g., tmp/10210/
+
+
+		StringWriter compilerErrorWriter = new StringWriter();
+
+		if(!compiler.getTask(compilerErrorWriter, null, null, options, null, fileObjects).call())
+		{
+			compilerErrorWriter.flush();
+			System.err.println(compilerErrorWriter.getBuffer().toString());
+			return false;
+		}
+
+		return true;
+	}
+
+
+	private static FitnessValue parseTestResults(String testClassName, String output)
+	{
+		String[] lines = output.split("\n");
+		FitnessValue ret = new FitnessValue();
+		ret.setTestClassName(testClassName);
+		for(String line : lines)
+		{
+			try
+			{
+				if(line.startsWith("[SUCCESS]:"))
+				{
+					String[] tokens = line.split("[:\\s]+");
+					ret.setAllPassed(Boolean.parseBoolean(tokens[1]));
+				}
+			} catch (Exception e)
+			{
+				ret.setAllPassed(false);
+				// originally: setCompilable was false.  Necessary? FIXME
+			}
+
+			try
+			{
+				if(line.startsWith("[TOTAL]:"))
+				{
+					String[] tokens = line.split("[:\\s]+");
+					ret.setNumberTests(Integer.parseInt(tokens[1]));
+				}
+			} catch (NumberFormatException e)
+			{
+				// setCompilable was false.  Why? FIXME
+			}
+
+			try
+			{
+				if(line.startsWith("[FAILURE]:"))
+				{
+					String[] tokens = line.split("[:\\s]+");
+					ret.setNumTestsFailed(Integer.parseInt(tokens[1]));
+				}
+			} catch (NumberFormatException e)
+			{
+				// originally: setCompilable was false.  Why? FIXME
+				// I have an inkling, having thought about it...
+			}
+		}
+
+		return ret;
+	}
 }
 

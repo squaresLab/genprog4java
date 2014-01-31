@@ -31,7 +31,6 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 
 	public CachingRepresentation<G> clone() throws CloneNotSupportedException {
 		CachingRepresentation<G> clone = (CachingRepresentation<G>) super.clone();
-		clone.updated();
 		return clone;
 	}
 
@@ -90,7 +89,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	 */
 
 	public boolean sanityCheck()  {
-		System.out.println("I assume I made it here?");
+		long startTime = System.currentTimeMillis();
 
 		File sanityDir = new File("sanity/");
 		if(!sanityDir.exists()) {
@@ -118,14 +117,18 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 			return false; 
 			}
 		}
-		// TODO: printout endTime - startTime.
 		this.cleanup();
 		this.updated();
+		System.out.println("cacheRepresentation: sanity checking passed (time taken = " + (System.currentTimeMillis() - startTime) + ")"); 
 		return true;
-		// debug "cachingRepresentation: sanity checking passed (time_taken = %g)\n" (time_now -. time_start) ; 
 	}
 
 	public boolean testCase(TestCase test) {
+		if(!this.compile(this.getName(), this.getName())) {
+			this.setFitness(0.0);
+			System.out.printf(this.getName() + " fails to compile\n");
+			return false;
+		}
 		if(fitnessTable.containsKey(test.toString())) {
 			return fitnessTable.get(test.toString()).isAllPassed();
 		}
@@ -136,7 +139,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		
 	}
 	// compile assumes that the source has already been serialized to disk.
-	// FIXME: add compile to do the generic thing it does in the OCaml, but
+
 	// I think for here, it's best to put it down in Java representation
 
 	// FIXME: OK, in OCaml there's an outputSource declaration here that assumes that 
@@ -178,15 +181,12 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	public void recordFitness(String key, FitnessValue val) {
 		this.fitnessTable.put(key,val);
 	}
-	// TODO: OK, as above, I think compiling Java programs is different from our 
-	// usual MO.  So while the OCaml implementation does compile in CachingRepresentation
+	//  while the OCaml implementation does compile in CachingRepresentation
 	// assuming that it's always a call to an external script, I'm leaving that off from here for the 
-	// time being.  Remember to save already_compiled when applicable.  Perhaps do that here
-	// as the superclass thing?
+	// time being and just doing the caching, which makes sense anyway
 
 	public boolean compile(String sourceName, String exeName) {
-		// assuming that the subclass has done something (see above); here we just
-		// cache
+
 		if(this.alreadyCompiled != null) {
 			return alreadyCompiled.getFirst();
 		} else {
@@ -200,14 +200,10 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	protected abstract boolean internalCompile(String sourceName, String exeName);
 
 
-	// FIXME: unique name thing, I guess we'll deal with that in the subclasses?
-
 	// TODO: ignoring available crossover points for now
 
 	// TODO:			  method hash () = Hashtbl.hash (self#get_history ()) 
 
-	// TODO: many internal methods for getting commands that are used in compiling and testing, which may
-	// or may not be necessary for Java, we'll see
 /* indicates that cached information based on our AST structure is no longer valid*/
 	void updated() {
 		/*
@@ -223,5 +219,27 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 
 	public void reduceSearchSpace() {
 	} // subclasses can override as desired
+	public void reduceFixSpace() {
+	
+	}
+	@Override
+	public void swap(int swap1, int swap2) {
+	// FIXME store history?
+		this.updated();
+	}
+	@Override
+	public void append(int one, int two) {
+		//FIXME store history?
+		this.updated();
+	}
+	@Override
+	public void delete(int one) {
+		// FIXME store history?
+		this.updated();
+	}
+	public void replace(int one, int two) {
+		// FIXME store history?
+		this.updated();
+	}
 
 }
