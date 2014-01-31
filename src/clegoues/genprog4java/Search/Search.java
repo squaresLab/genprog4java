@@ -396,7 +396,7 @@ public class Search<G extends EditOperation> {
 			    @raise Found_Repair if a repair is found
 			    @raise Max_evals if the maximum fitness evaluation count is set and then reached */
 	public void geneticAlgorithm(Representation<G> original, Population<G> incomingPopulation) throws RepairFoundException, CloneNotSupportedException {
-		System.out.printf("search: genetic algorithm begins (|original| = \n"); // %g MB)\n" (debug_size_in_mb original);
+		System.out.printf("search: genetic algorithm begins\n");
 		assert(Search.generations >= 0);
 		try {
 			Population<G> initialPopulation = this.initializeGa(original, incomingPopulation);

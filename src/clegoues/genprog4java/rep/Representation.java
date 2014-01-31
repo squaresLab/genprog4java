@@ -30,7 +30,7 @@ public abstract class Representation<G extends EditOperation> implements Compara
 		}
 		public static int sequence = 0;
 		public static String newName() {
-			String result = String.format("%6d", sequence);
+			String result = String.format("variant%d", sequence);
 			sequence++;
 			return result;
 		}
@@ -53,7 +53,7 @@ public abstract class Representation<G extends EditOperation> implements Compara
 		public abstract void outputSource(String filename);
 		public abstract List<String> sourceName();
 		public abstract void cleanup();
-		public abstract HashMap<String, FitnessValue> getFitness();
+		public abstract double getFitness();
 		public abstract boolean compile(String sourceName, String exeName);
 		public abstract boolean testCase(TestCase test);
 		public abstract void reduceSearchSpace(); // do this?
@@ -74,7 +74,8 @@ public abstract class Representation<G extends EditOperation> implements Compara
 		}
 		public abstract void computeLocalization() throws IOException,
 				UnexpectedCoverageResultException;
-		public abstract void setFitness(String key, FitnessValue fitness); 
+		public abstract void recordFitness(String key, FitnessValue fitness); 
+		public abstract void setFitness(double fitness);  
 
 
 }

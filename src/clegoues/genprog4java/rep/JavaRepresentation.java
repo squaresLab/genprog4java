@@ -73,13 +73,12 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	private static String originalSource = "";
 
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
-	private boolean doingCoverage = false;
 
 	private static String getOriginalSource() { return originalSource; }
 
 	protected void instrumentForFaultLocalization(){
-		this.doingCoverage  = true; // FIXME OH GOD
-
+		// needs nothing for Java.  Don't love the "doing coverage" boolean flag 
+		// thing, but it's possible I just decided it's fine.
 
 	}
 
@@ -325,7 +324,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		command.addArgument(test.toString());
 		command.addArgument(filterClass);
 
-		System.out.printf("testCommand string: " + command.toString() + "\n");
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(60*6000);
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");
@@ -347,14 +345,11 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 			posFit = JavaRepresentation.parseTestResults(test.toString(), output);
 
-			this.setFitness(test.toString(), posFit); 
+			this.recordFitness(test.toString(), posFit); 
 
 
 		} catch (ExecuteException exception) {
-			//int exitValue = exception.getExitValue();
-			//String output = out.toString();
-			// FIXME
-			exception.printStackTrace();
+			posFit.setAllPassed(false);
 		} catch (Exception e)
 		{
 			// FIXME

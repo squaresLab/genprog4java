@@ -163,18 +163,10 @@ public class Fitness<G extends EditOperation> {
 		double fac = Configuration.numPositiveTests * Fitness.negativeTestWeight / Configuration.numNegativeTests;
 
 		double maxFitness = Configuration.numPositiveTests + ((Configuration.numNegativeTests * fac));
-		HashMap<String,FitnessValue> curFit = rep.getFitness();
-		if(!curFit.isEmpty()) {
-			Set<Entry<String,FitnessValue>> entrySet = curFit.entrySet();
-			double totalFitness = 0.0; // FIXME the problem here is that the fitness entries don't know if they're positive or negative so the weighting will be wrong. 
-			for(Entry<String,FitnessValue> fitnessEntry : entrySet) {
-				if(fitnessEntry.getValue().isAllPassed()) {
-					totalFitness += 1.0; 
-				}
-			}
-			System.out.printf("\t%3g %s\n", totalFitness, rep.getName());
-
-			return !(totalFitness < maxFitness);
+		double curFit = rep.getFitness();
+		if(curFit > -1.0) {
+			System.out.printf("\t%3g %s\n", curFit, rep.getName());
+			return !(curFit < maxFitness);
 		}
 
 		Pair<Double,Double> fitnessPair = new Pair<Double,Double>(-1.0, -1.0); 
@@ -190,7 +182,7 @@ public class Fitness<G extends EditOperation> {
 			fitnessPair = this.testFitnessFull(rep, fac);
 		}
 		System.out.printf("\t%3g %s\n", fitnessPair.getFirst(), rep.getName());
-		// OK I don't think I need to set fitness here like we do in OCaml b/c rep.testCase will store it
+		rep.setFitness(fitnessPair.getSecond());
 		rep.cleanup();
 		return !(fitnessPair.getSecond() < maxFitness);
 
