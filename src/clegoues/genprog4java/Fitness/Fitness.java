@@ -132,8 +132,22 @@ public class Fitness<G extends EditOperation> {
 		throw new UnsupportedOperationException();
 	}
 
-	private Pair<Double,Double> testFitnessFull(Representation<G> rep) {
-		throw new UnsupportedOperationException();
+	private Pair<Double,Double> testFitnessFull(Representation<G> rep, double fac) {
+		double fitness = 0.0;
+		for(String test :Fitness.positiveTests){
+			TestCase thisTest = new TestCase(TestType.POSITIVE, test);
+			if(rep.testCase(thisTest)) { 
+				fitness += 1.0;
+			}
+
+		}
+		for(String test : Fitness.negativeTests) {
+			TestCase thisTest = new TestCase(TestType.NEGATIVE, test);
+			if(rep.testCase(thisTest)) {
+				fitness += fac;
+			}
+		}
+		return new Pair<Double,Double>(fitness,fitness);
 	}
 	/* {b test_fitness} generation variant returns true if the variant passes all
 	    test cases and false otherwise.  Only tests fitness if the rep has not
@@ -173,7 +187,7 @@ public class Fitness<G extends EditOperation> {
 				throw new UnsupportedOperationException(); // not doing all right now because don't see a need for those experiments any time soon
 			}
 		} else {
-			fitnessPair = this.testFitnessFull(rep);
+			fitnessPair = this.testFitnessFull(rep, fac);
 		}
 		System.out.printf("\t%3g %s\n", fitnessPair.getFirst(), rep.getName());
 		// OK I don't think I need to set fitness here like we do in OCaml b/c rep.testCase will store it

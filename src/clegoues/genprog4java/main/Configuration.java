@@ -25,8 +25,6 @@ public class Configuration {
 	public static String searchStrategy = "ga";
 	public static String javaRuntime = "";
 	public static String javaVM;
-	public static String posCoverageFile = "coverage.path.pos";
-	public static String negCoverageFile = "coverage.path.neg";
 
 	public static boolean doSanity = true;
 	public static String packageName;
@@ -77,18 +75,7 @@ public class Configuration {
 				doSanity = false;
 			}
 		}
-		
-		if(prop.getProperty("posCoverageFile") != null)
-		{
-			posCoverageFile = prop.getProperty("posCoverageFile").trim();
-		}
-		
-		if(prop.getProperty("negCoverageFile") != null)
-		{
-			negCoverageFile = prop.getProperty("negCoverageFile").trim();
-		}
-		
-		
+
 
 		
 		targetClassName = prop.getProperty("targetClassName").trim();

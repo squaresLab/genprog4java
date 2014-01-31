@@ -2,9 +2,13 @@ package clegoues.genprog4java.Search;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
+
+import org.jacoco.core.data.ISessionInfoVisitor;
+import org.jacoco.core.data.SessionInfo;
 
 import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
@@ -125,7 +129,17 @@ public class Search<G extends EditOperation> {
 	}
 
 	private void registerMutations(Representation<G> variant) {
-		TreeSet<Pair<Mutation,Double>> availableMutations = new TreeSet<Pair<Mutation,Double>>();
+		Comparator<Pair<Mutation,Double>> myComp = new Comparator<Pair<Mutation,Double>>() {
+			@Override
+			public int compare(Pair<Mutation,Double> one, Pair<Mutation,Double> two) {
+				if(one.getFirst().compareTo(two.getFirst()) == 0) {
+					return one.getSecond().compareTo(two.getSecond());
+				} 
+				return one.getFirst().compareTo(two.getFirst());
+			}
+		};
+		TreeSet<Pair<Mutation,Double>> availableMutations = 
+				new TreeSet<Pair<Mutation,Double>>(myComp);
 		availableMutations.add(new Pair<Mutation,Double>(Mutation.DELETE,Search.delProb));
 		availableMutations.add(new Pair<Mutation,Double>(Mutation.APPEND,Search.appProb));
 		availableMutations.add(new Pair<Mutation,Double>(Mutation.SWAP,Search.swapProb));
@@ -313,7 +327,8 @@ public class Search<G extends EditOperation> {
 		this.registerMutations(original);
 
 		Population<G> initialPopulation = incomingPopulation;
-		if(incomingPopulation.size() > incomingPopulation.getPopsize()) {
+
+		if(incomingPopulation != null && incomingPopulation.size() > incomingPopulation.getPopsize()) {
 			initialPopulation = incomingPopulation.firstN(incomingPopulation.getPopsize());
 		} // FIXME: this is too functional I think. 
 		int stillNeed = initialPopulation.getPopsize() - initialPopulation.size();
