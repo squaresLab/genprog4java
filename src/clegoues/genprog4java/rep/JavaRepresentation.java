@@ -330,10 +330,10 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		posCommand.addArgument(test.toString());
 		posCommand.addArgument("clegoues.genprog4java.Fitness.CoverageFilter"); // FIXME
 
-		System.out.printf("positiveCommandString: " + posCommand.toString());
+		System.out.printf("positiveCommandString: " + posCommand.toString() + "\n");
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(60*6000);
 		DefaultExecutor executor = new DefaultExecutor();
-		executor.setWorkingDirectory(new File(Configuration.outputDir + File.separatorChar + this.getName()));
+		executor.setWorkingDirectory(new File("/Applications/eclipse/workspace/GenProg4Java/tests/mathTest"));
 		executor.setWatchdog(watchdog);
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream(); 
@@ -349,14 +349,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			String output = out.toString();
 			out.reset();
 
-			 posFit = JavaRepresentation.parseTestResults(output);
-
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException exception) {
-				//ignore exception
-			}
-
+			 posFit = JavaRepresentation.parseTestResults(test.toString(), output);
 
 			this.setFitness(test.toString(), posFit); 
 
@@ -466,10 +459,11 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	}
 
 
-	private static FitnessValue parseTestResults(String output)
+	private static FitnessValue parseTestResults(String testClassName, String output)
 	{
 		String[] lines = output.split("\n");
 		FitnessValue ret = new FitnessValue();
+		ret.setTestClassName(testClassName);
 		for(String line : lines)
 		{
 			try

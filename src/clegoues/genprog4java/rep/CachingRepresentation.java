@@ -159,7 +159,6 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 
 
 	public void cleanup() {
-		throw new UnsupportedOperationException();
 		// TODO: remove source code from disk
 		// TODO: remove compiled binary from disk
 		// TODO: remove applicable subdirectories from disk

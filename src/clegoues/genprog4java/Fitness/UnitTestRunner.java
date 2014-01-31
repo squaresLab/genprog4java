@@ -26,9 +26,9 @@ public class UnitTestRunner
 			
 			Class<?> filterClazz = Class.forName(args[1]);
 			Filter filter = (Filter)filterClazz.newInstance();
-			//System.err.println("Filter Class: "+ filter.getClass().toString());
+			System.err.println("Filter Class: "+ filter.getClass().toString());
 		
-				//System.err.println("Test Class: " + className);
+				System.err.println("Test Class: " + className);
 				Class<?> clazz = Class.forName(className);
 				testClassList.add(clazz);
 
@@ -36,10 +36,9 @@ public class UnitTestRunner
 					new Class[testClassList.size()]);
 			
 			Request total = Request.classes(testClasses);
-			//System.out.println("Requested #: " + total.getRunner().testCount());
+			System.out.println("Requested #: " + total.getRunner().testCount());
 			
 			Request sampled = total.filterWith(filter);
-			//System.out.println("Sampled #: " + sampled.testCount());
 			
 			JUnitCore runner = new JUnitCore();
 			//runner.addListener(new Listener());
@@ -56,7 +55,7 @@ public class UnitTestRunner
 				System.out.println(f.getTrace());
 			}
 			
-			//System.out.println("\n"+r.getFailures().toString());
+			System.out.println("\n"+r.getFailures().toString());
 							
 		} catch (Exception e) {
 			//System.out.println("Sampled");
