@@ -259,16 +259,16 @@ public class Search<G extends EditOperation> {
 			    @return variant' modified/potentially mutated variant
 	 */
 	void mutate(Representation<G> variant) { // FIXME: don't need to return, right? 
-		List<WeightedAtom> faultyAtoms = variant.getFaultyAtoms();
+		ArrayList faultyAtoms =variant.getFaultyAtoms();
 		ArrayList<WeightedAtom> proMutList = new ArrayList<WeightedAtom>();
 		for(int i = 0; i < Search.promut; i++) {
-			proMutList.add(GlobalUtils.chooseOneWeighted(faultyAtoms));
+			proMutList.add((WeightedAtom) GlobalUtils.chooseOneWeighted(faultyAtoms));
 
 		}
 		for(WeightedAtom atom : proMutList) {	
 			int stmtid = atom.getAtom();
 			TreeSet<Pair<Mutation,Double>> availableMutations = variant.availableMutations(stmtid);
-			Pair<Mutation,Double> chosenMutation = null; // FIXME = GlobalUtils.chooseOneWeighted(new List(availableMutations));
+			Pair<Mutation,Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(new ArrayList(availableMutations));
 			Mutation mut = chosenMutation.getFirst();
 			// FIXME: make sure the mutation list isn't empty before choosing?
 			switch(mut) {
@@ -276,17 +276,17 @@ public class Search<G extends EditOperation> {
 			break;
 			case APPEND:
 				TreeSet<WeightedAtom> allowed = variant.appendSources(stmtid);
-				WeightedAtom after = GlobalUtils.chooseOneWeighted((List<WeightedAtom>) allowed);
+				WeightedAtom after = (WeightedAtom) GlobalUtils.chooseOneWeighted(new ArrayList(allowed));
 				variant.append(stmtid,  after.getAtom());
 				break;
 			case SWAP:
 				TreeSet<WeightedAtom> swapAllowed = variant.swapSources(stmtid);
-				WeightedAtom swapWith = GlobalUtils.chooseOneWeighted((List<WeightedAtom>) swapAllowed);
+				WeightedAtom swapWith = (WeightedAtom) GlobalUtils.chooseOneWeighted(new ArrayList(swapAllowed));
 				variant.swap(stmtid, swapWith.getAtom());
 				break;
 			case REPLACE:
 				TreeSet<WeightedAtom> replaceAllowed = variant.replaceSources(stmtid);
-				WeightedAtom replaceWith = GlobalUtils.chooseOneWeighted((List<WeightedAtom>) replaceAllowed);
+				WeightedAtom replaceWith = (WeightedAtom) GlobalUtils.chooseOneWeighted(new ArrayList(replaceAllowed));
 				variant.replace(stmtid, replaceWith.getAtom());
 				break;
 			}
@@ -335,19 +335,13 @@ public class Search<G extends EditOperation> {
 		if(stillNeed > 0) {
 			initialPopulation.add(original.clone());
 		}
-		/*
-		 *  FIXME
-		 *     let remainder = !popsize - (llen incoming_pop) in
+		stillNeed--;
+		for(int i = 0; i < stillNeed; i++ ) {
+			Representation<G> newItem = original.clone();
+			this.mutate(newItem);
+			initialPopulation.add(newItem);
+		}
 
-			      (* initialize the population to a bunch of random mutants *)
-			      pop :=
-			        GPPopulation.generate !pop  (fun () -> mutate original) !popsize;
-			      debug ~force_gui:true 
-			        "search: initial population (sizeof one variant = %g MB)\n"
-			        (debug_size_in_mb (List.hd !pop));
-			      (* compute the fitness of the initial population *)
-			      GPPopulation.map !pop (calculate_fitness 0 original) FIXME: not done
-		 */
 		for(Representation<G> item : initialPopulation) {
 			this.calculateFitness(0, original, item);
 		}

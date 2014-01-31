@@ -131,11 +131,11 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			        debug "faultlocRep: %s: saved\n" filename ; 
 			        if out_channel = None then close_out fout 
 	 */
-	public List<WeightedAtom> getFaultyAtoms () {
+	public ArrayList<WeightedAtom> getFaultyAtoms () {
 		return this.faultLocalization; 
 	}
 
-	public List<WeightedAtom> getFixSourceAtoms() {
+	public ArrayList<WeightedAtom> getFixSourceAtoms() {
 		return this.fixLocalization;
 	}
 

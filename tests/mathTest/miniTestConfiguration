@@ -1,3 +1,4 @@
+seed = 0
 javaVM = /usr/bin/java
 workingDir = ./
 sourceDir = source/
