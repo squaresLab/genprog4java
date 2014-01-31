@@ -312,10 +312,84 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	}
 
 	@Override
-	protected boolean internalTestCase(String sanityExename,
-			String sanityFilename, TestCase thisTest) {
-		// TODO Auto-generated method stub
-		return false;
+	protected boolean internalTestCase(String exeName, String fileName, TestCase test) { 
+		// read in the test files to get a list of test class names
+		// store it in the testcase object, which will be the name
+		// this is a little strange because each test class has multiple
+		// test cases in it.  I think we can actually change this behavior through various
+		// hacks on StackOverflow, but for the time being I just want something that works at all
+		// rather than a perfect implementation.  One thing at a time, but FIXME eventually
+
+		// Positive tests
+		CommandLine posCommand = CommandLine.parse(Configuration.javaVM);
+		posCommand.addArgument("-classpath");
+		posCommand.addArgument( Configuration.outputDir + File.separator + this.getName()
+				+ System.getProperty("path.separator") + Configuration.libs);
+
+		posCommand.addArgument("-Xms128m");
+		posCommand.addArgument("-Xmx256m");
+		posCommand.addArgument("-client");
+		//posCommand.addArgument("-Xshare:on");
+		//posCommand.addArgument("-Xquickstart");
+
+		posCommand.addArgument("clegoues.genprog4java.Fitness.UnitTestRunner");
+
+		posCommand.addArgument(test.toString());
+		posCommand.addArgument("clegoues.genprog4java.Fitness.CoverageFilter"); // FIXME
+
+
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(60*6000);
+		DefaultExecutor executor = new DefaultExecutor();
+		executor.setWorkingDirectory(new File(Configuration.outputDir));
+		executor.setWatchdog(watchdog);
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream(); 
+
+		executor.setExitValue(0);
+
+		executor.setStreamHandler(new PumpStreamHandler(out));
+		FitnessValue posFit = new FitnessValue();
+
+		try {
+			int exitValue = executor.execute(posCommand);		
+			out.flush();
+			String output = out.toString();
+			out.reset();
+
+			 posFit = JavaRepresentation.parseTestResults(output);
+
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException exception) {
+				//ignore exception
+			}
+
+
+			this.setFitness(test.toString(), posFit); 
+
+
+		} catch (ExecuteException exception) {
+			//int exitValue = exception.getExitValue();
+			//String output = out.toString();
+			// FIXME
+			exception.printStackTrace();
+		} catch (Exception e)
+		{
+			// FIXME
+			//String output = out.toString();
+			//e.printStackTrace();
+		}
+		finally
+		{
+			if(out!=null)
+				try {
+					out.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+		return posFit.isAllPassed();	
 	}
 
 	@Override
@@ -398,87 +472,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		return true;
 	}
 
-	@Override
-	public boolean testCase(TestCase test) {
-		// read in the test files to get a list of test class names
-		// store it in the testcase object, which will be the name
-		// this is a little strange because each test class has multiple
-		// test cases in it.  I think we can actually change this behavior through various
-		// hacks on StackOverflow, but for the time being I just want something that works at all
-		// rather than a perfect implementation.  One thing at a time, but FIXME eventually
-
-		// Positive tests
-		CommandLine posCommand = CommandLine.parse(Configuration.javaVM);
-		posCommand.addArgument("-classpath");
-		posCommand.addArgument( Configuration.outputDir + File.separator + this.getName()
-				+ System.getProperty("path.separator") + Configuration.libs);
-
-		posCommand.addArgument("-Xms128m");
-		posCommand.addArgument("-Xmx256m");
-		posCommand.addArgument("-client");
-		//posCommand.addArgument("-Xshare:on");
-		//posCommand.addArgument("-Xquickstart");
-
-		posCommand.addArgument("clegoues.genprog4java.Fitness.UnitTestRunner");
-
-		posCommand.addArgument(test.toString());
-		posCommand.addArgument("clegoues.genprog4java.Fitness.CoverageFilter"); // FIXME
-
-
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(60*6000);
-		DefaultExecutor executor = new DefaultExecutor();
-		executor.setWorkingDirectory(new File(Configuration.outputDir));
-		executor.setWatchdog(watchdog);
-
-		ByteArrayOutputStream out = new ByteArrayOutputStream(); 
-
-		executor.setExitValue(0);
-
-		executor.setStreamHandler(new PumpStreamHandler(out));
-		FitnessValue posFit = new FitnessValue();
-
-		try {
-			int exitValue = executor.execute(posCommand);		
-			out.flush();
-			String output = out.toString();
-			out.reset();
-
-			 posFit = JavaRepresentation.parseTestResults(output);
-
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException exception) {
-				//ignore exception
-			}
-
-
-			this.setFitness(test.toString(), posFit); 
-
-
-		} catch (ExecuteException exception) {
-			//int exitValue = exception.getExitValue();
-			//String output = out.toString();
-			// FIXME
-			exception.printStackTrace();
-		} catch (Exception e)
-		{
-			// FIXME
-			//String output = out.toString();
-			//e.printStackTrace();
-		}
-		finally
-		{
-			if(out!=null)
-				try {
-					out.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		}
-		return posFit.isAllPassed();
-
-	}
 
 	private static FitnessValue parseTestResults(String output)
 	{
