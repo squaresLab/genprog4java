@@ -18,7 +18,7 @@ public class Configuration {
 	public static String targetVersion = "1.5";
 	public static int numPositiveTests = 5;
 	public static int numNegativeTests = 1;
-	public static String sanityFilename = "repair.sanity.java";
+	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
 	public static String globalExtension = ".java";
 	public static String targetClassName = "";

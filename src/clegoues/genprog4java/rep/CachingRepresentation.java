@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.Fitness.FitnessValue;
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
@@ -103,15 +104,15 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 			System.err.println("cacheRep: sanity: " + sanityFilename + " does not compile.");
 			return false;
 		}
-		for(int i = 1; i <= Configuration.numPositiveTests; i++) {
-			TestCase thisTest = new TestCase(TestType.POSITIVE, i);
+		for(String posTest : Fitness.positiveTests) {
+			TestCase thisTest = new TestCase(TestType.POSITIVE, posTest);
 			if(!this.internalTestCase(sanityExename,sanityFilename, thisTest)) {
 				System.err.println("cacheRep: sanity: " + sanityFilename + " failed positive test " + thisTest.toString()); 
 				return false; 
 			}
 		}
-		for(int i = 1; i <= Configuration.numNegativeTests; i++) {
-			TestCase thisTest = new TestCase(TestType.NEGATIVE, i);
+		for(String negTest : Fitness.negativeTests) { 
+			TestCase thisTest = new TestCase(TestType.NEGATIVE, negTest);
 			if(this.internalTestCase(sanityExename,sanityFilename, thisTest)) {				
 				System.err.println("cacheRep: sanity: " + sanityFilename + " passed negative test " + thisTest.toString()); 
 			return false; 
@@ -124,6 +125,10 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		// debug "cachingRepresentation: sanity checking passed (time_taken = %g)\n" (time_now -. time_start) ; 
 	}
 
+	public boolean testCase(TestCase test) {
+		// FIXME: cachingRepresentation should check the cache and only call the test if necessary!
+		return this.internalTestCase(this.getName(), this.getName() + Configuration.globalExtension, test);
+	}
 	// compile assumes that the source has already been serialized to disk.
 	// FIXME: add compile to do the generic thing it does in the OCaml, but
 	// I think for here, it's best to put it down in Java representation

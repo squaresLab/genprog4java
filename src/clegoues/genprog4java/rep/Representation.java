@@ -48,7 +48,7 @@ public abstract class Representation<G extends EditOperation> implements Compara
 		public abstract boolean deserialize(String filename);
 		public abstract List<WeightedAtom> getFaultyAtoms();
 		public abstract List<WeightedAtom> getFixSourceAtoms();
-		public abstract boolean sanityCheck() throws SanityCheckException;
+		public abstract boolean sanityCheck();
 		public abstract void fromSource(String filename) throws IOException;
 		public abstract void outputSource(String filename);
 		public abstract List<String> sourceName();
