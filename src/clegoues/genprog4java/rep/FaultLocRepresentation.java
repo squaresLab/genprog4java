@@ -290,7 +290,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		File covDir = new File("coverage/");
 		if(!covDir.exists())
 			covDir.mkdir();
-		if(!this.compile(this.getName(), "coverage/coverage.out")) {
+		if(!this.compile("coverage", "coverage/coverage.out")) {
 			System.err.println("faultLocRep: Coverage failed to compile");
 			throw new UnexpectedCoverageResultException("compilation failure");
 		}
@@ -333,7 +333,8 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			Double value = entry.getValue();
 			fixLocalization.add(new WeightedAtom(key,value));
 		}
-
+		assert(faultLocalization.size() > 0);
+		assert(fixLocalization.size() > 0);
 	}
 
 	protected abstract void instrumentForFaultLocalization();

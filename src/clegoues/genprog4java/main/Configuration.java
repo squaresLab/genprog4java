@@ -73,7 +73,7 @@ public class Configuration {
 		}
 		if(prop.getProperty("sanity") != null) {
 			String sanity = prop.getProperty("sanity").trim();
-			if(sanity == "no") {
+			if(sanity.equals("no")) { 
 				doSanity = false;
 			}
 		}

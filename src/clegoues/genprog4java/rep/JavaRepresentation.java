@@ -72,33 +72,13 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	private static HashMap<Integer,ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer,ArrayList<Integer>>();
 	private static String originalSource = "";
 
-	private CommandLine testCommand = null;
-	private String filterClass = "";
-
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
+	private boolean doingCoverage = false;
 
 	private static String getOriginalSource() { return originalSource; }
 
 	protected void instrumentForFaultLocalization(){
-		String coverageOutputDir = "coverage";
-		this.filterClass = "clegoues.genprog4java.util.CoverageFilter";
-
-		String classPath = coverageOutputDir + File.separator + 0
-				+ System.getProperty("path.separator") + Configuration.libs;
-
-		CommandLine command = CommandLine.parse(Configuration.javaRuntime);
-		command.addArgument("-classpath");
-		command.addArgument(classPath);
-
-		command.addArgument("-Xmx1024m");
-		command.addArgument(
-				"-javaagent:../lib/jacocoagent.jar=excludes=org.junit.*,append=false");
-
-		command.addArgument("clegoues.genprog4java.Fitness.UnitTestRunner");
-
-		//	command.addArgument(testFile);
-
-		//	command.addArgument(filterClass);
+		this.doingCoverage  = true; // FIXME OH GOD
 
 
 	}
@@ -162,7 +142,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
 		for(int line : coveredLines) {
 			ArrayList<Integer> atomIds = this.atomIDofSourceLine(line);
-			if(atomIds.size() >= 0) {
+			if(atomIds != null && atomIds.size() >= 0) {
 				atoms.addAll(atomIds); 
 			}
 		}
@@ -312,28 +292,44 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		// test cases in it.  I think we can actually change this behavior through various
 		// hacks on StackOverflow, but for the time being I just want something that works at all
 		// rather than a perfect implementation.  One thing at a time, but FIXME eventually
+		CommandLine command = CommandLine.parse(Configuration.javaVM);
+		String filterClass = "";
+		String outputDir = "";
 
+		if(this.doingCoverage){ 
+			filterClass = "clegoues.genprog4java.Fitness.CoverageFilter";
+			outputDir = Configuration.outputDir + File.separator + "coverage/";
+		} else {
+			filterClass = "clegoues.genprog4java.Fitness.CoverageFilter"; // FIXME
+			outputDir =  Configuration.outputDir + File.separator + this.getName();
+		}
+		String classPath = outputDir + System.getProperty("path.separator") + Configuration.libs;
 		// Positive tests
-		CommandLine posCommand = CommandLine.parse(Configuration.javaVM);
-		posCommand.addArgument("-classpath");
-		posCommand.addArgument( Configuration.outputDir + File.separator + this.getName()
-				+ System.getProperty("path.separator") + Configuration.libs);
+		command.addArgument("-classpath");
+		command.addArgument(classPath); 
 
-		posCommand.addArgument("-Xms128m");
-		posCommand.addArgument("-Xmx256m");
-		posCommand.addArgument("-client");
-		//posCommand.addArgument("-Xshare:on");
-		//posCommand.addArgument("-Xquickstart");
+		if(this.doingCoverage) {
 
-		posCommand.addArgument("clegoues.genprog4java.Fitness.UnitTestRunner");
+			command.addArgument("-Xmx1024m");
+			command.addArgument(
+					"-javaagent:./lib/jacocoagent.jar=excludes=org.junit.*,append=false");
+		} else {
+			command.addArgument("-Xms128m");
+			command.addArgument("-Xmx256m");
+			command.addArgument("-client");
+		}
 
-		posCommand.addArgument(test.toString());
-		posCommand.addArgument("clegoues.genprog4java.Fitness.CoverageFilter"); // FIXME
 
-		System.out.printf("positiveCommandString: " + posCommand.toString() + "\n");
+		command.addArgument("clegoues.genprog4java.Fitness.UnitTestRunner");
+
+		command.addArgument(test.toString());
+		command.addArgument(filterClass);
+
+		System.out.printf("testCommand string: " + command.toString() + "\n");
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(60*6000);
 		DefaultExecutor executor = new DefaultExecutor();
-		executor.setWorkingDirectory(new File("/Applications/eclipse/workspace/GenProg4Java/tests/mathTest"));
+		String workingDirectory = System.getProperty("user.dir");
+		executor.setWorkingDirectory(new File(workingDirectory));
 		executor.setWatchdog(watchdog);
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream(); 
@@ -344,12 +340,12 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		FitnessValue posFit = new FitnessValue();
 
 		try {
-			int exitValue = executor.execute(posCommand);		
+			int exitValue = executor.execute(command);		
 			out.flush();
 			String output = out.toString();
 			out.reset();
 
-			 posFit = JavaRepresentation.parseTestResults(test.toString(), output);
+			posFit = JavaRepresentation.parseTestResults(test.toString(), output);
 
 			this.setFitness(test.toString(), posFit); 
 
@@ -378,134 +374,134 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		return posFit.isAllPassed();	
 	}
 
-	@Override
-	public void delete(int location) {
-		JavaStatement locationStatement = base.get(location);
-		JavaEditOperation newEdit = new JavaEditOperation(locationStatement);
-		this.genome.add(newEdit);
-	}
+@Override
+public void delete(int location) {
+	JavaStatement locationStatement = base.get(location);
+	JavaEditOperation newEdit = new JavaEditOperation(locationStatement);
+	this.genome.add(newEdit);
+}
 
-	private void editHelper(int location, int fixCode, Mutation mutType) {
-		JavaStatement locationStatement = base.get(location);
-		JavaStatement fixCodeStatement = codeBank.get(fixCode); // FIXME correct for Swap? Hm.
-		JavaEditOperation newEdit = new JavaEditOperation(mutType,locationStatement,fixCodeStatement);
-		this.genome.add(newEdit);
-	}
-	@Override
-	public void append(int whereToAppend, int whatToAppend) {
-		this.editHelper(whereToAppend,whatToAppend,Mutation.APPEND); 
-	}
+private void editHelper(int location, int fixCode, Mutation mutType) {
+	JavaStatement locationStatement = base.get(location);
+	JavaStatement fixCodeStatement = codeBank.get(fixCode); // FIXME correct for Swap? Hm.
+	JavaEditOperation newEdit = new JavaEditOperation(mutType,locationStatement,fixCodeStatement);
+	this.genome.add(newEdit);
+}
+@Override
+public void append(int whereToAppend, int whatToAppend) {
+	this.editHelper(whereToAppend,whatToAppend,Mutation.APPEND); 
+}
 
-	@Override
-	public void swap(int swap1, int swap2) {
-		this.editHelper(swap1,swap2,Mutation.SWAP); 
+@Override
+public void swap(int swap1, int swap2) {
+	this.editHelper(swap1,swap2,Mutation.SWAP); 
 
-	}
+}
 
-	@Override
-	public void replace(int whatToReplace, int whatToReplaceWith) {
-		this.editHelper(whatToReplace,whatToReplaceWith,Mutation.REPLACE);		
-	}
+@Override
+public void replace(int whatToReplace, int whatToReplaceWith) {
+	this.editHelper(whatToReplace,whatToReplaceWith,Mutation.REPLACE);		
+}
 
-	public JavaRepresentation clone() throws CloneNotSupportedException {
-		JavaRepresentation clone = (JavaRepresentation) super.clone();
-		clone.genome = new ArrayList<JavaEditOperation>(this.genome);
-		return clone;
-	}
+public JavaRepresentation clone() throws CloneNotSupportedException {
+	JavaRepresentation clone = (JavaRepresentation) super.clone();
+	clone.genome = new ArrayList<JavaEditOperation>(this.genome);
+	return clone;
+}
 
-	@Override
-	public void reduceFixSpace() {
-		// TODO Auto-generated method stub
+@Override
+public void reduceFixSpace() {
+	// TODO Auto-generated method stub
 
-	}
+}
 
-	@Override
-	protected boolean internalCompile(String sourceName, String exeName) {
-		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-		System.out.println("exename: " + exeName);
-		// FIXME: this will recompile the original over and over which is no bueno
-		String program = JavaRepresentation.originalSource;
-		Iterable<? extends JavaFileObject> fileObjects = ASTUtils.getJavaSourceFromString(program) ; // FIXME: this.computeSourceBuffers();
+@Override
+protected boolean internalCompile(String sourceName, String exeName) {
+	JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+	System.out.println("exename: " + exeName);
+	// FIXME: this will recompile the original over and over which is no bueno
+	String program = JavaRepresentation.originalSource;
+	Iterable<? extends JavaFileObject> fileObjects = ASTUtils.getJavaSourceFromString(program) ; // FIXME: this.computeSourceBuffers();
 
-		LinkedList<String> options = new LinkedList<String>();
+	LinkedList<String> options = new LinkedList<String>();
 
-		options.add("-cp");
-		options.add(Configuration.libs);
+	options.add("-cp");
+	options.add(Configuration.libs);
 
-		options.add("-source");
-		options.add(Configuration.sourceVersion);
+	options.add("-source");
+	options.add(Configuration.sourceVersion);
 
-		options.add("-target");
-		options.add(Configuration.targetVersion);
+	options.add("-target");
+	options.add(Configuration.targetVersion);
 
-		options.add("-d");
-		String outDirName = Configuration.outputDir + File.separatorChar + this.getName() + File.separatorChar; //FIXME testing
-		File outDir = new File(outDirName);
-		if(!outDir.exists()) 
-			outDir.mkdir();
-		options.add(outDirName);  //FIXME? e.g., tmp/10210/
-
-
-		StringWriter compilerErrorWriter = new StringWriter();
-
-		if(!compiler.getTask(compilerErrorWriter, null, null, options, null, fileObjects).call())
-		{
-			compilerErrorWriter.flush();
-			System.err.println(compilerErrorWriter.getBuffer().toString());
-			return false;
-		}
-
-		return true;
-	}
+	options.add("-d");
+	String outDirName = Configuration.outputDir + File.separatorChar + sourceName + File.separatorChar; //FIXME testing
+	File outDir = new File(outDirName);
+	if(!outDir.exists()) 
+		outDir.mkdir();
+	options.add(outDirName);  //FIXME? e.g., tmp/10210/
 
 
-	private static FitnessValue parseTestResults(String testClassName, String output)
+	StringWriter compilerErrorWriter = new StringWriter();
+
+	if(!compiler.getTask(compilerErrorWriter, null, null, options, null, fileObjects).call())
 	{
-		String[] lines = output.split("\n");
-		FitnessValue ret = new FitnessValue();
-		ret.setTestClassName(testClassName);
-		for(String line : lines)
+		compilerErrorWriter.flush();
+		System.err.println(compilerErrorWriter.getBuffer().toString());
+		return false;
+	}
+
+	return true;
+}
+
+
+private static FitnessValue parseTestResults(String testClassName, String output)
+{
+	String[] lines = output.split("\n");
+	FitnessValue ret = new FitnessValue();
+	ret.setTestClassName(testClassName);
+	for(String line : lines)
+	{
+		try
 		{
-			try
+			if(line.startsWith("[SUCCESS]:"))
 			{
-				if(line.startsWith("[SUCCESS]:"))
-				{
-					String[] tokens = line.split("[:\\s]+");
-					ret.setAllPassed(Boolean.parseBoolean(tokens[1]));
-				}
-			} catch (Exception e)
-			{
-				ret.setAllPassed(false);
-				// originally: setCompilable was false.  Necessary? FIXME
+				String[] tokens = line.split("[:\\s]+");
+				ret.setAllPassed(Boolean.parseBoolean(tokens[1]));
 			}
-
-			try
-			{
-				if(line.startsWith("[TOTAL]:"))
-				{
-					String[] tokens = line.split("[:\\s]+");
-					ret.setNumberTests(Integer.parseInt(tokens[1]));
-				}
-			} catch (NumberFormatException e)
-			{
-			 // setCompilable was false.  Why? FIXME
-			}
-
-			try
-			{
-				if(line.startsWith("[FAILURE]:"))
-				{
-					String[] tokens = line.split("[:\\s]+");
-					ret.setNumTestsFailed(Integer.parseInt(tokens[1]));
-				}
-			} catch (NumberFormatException e)
-			{
-			// originally: setCompilable was false.  Why? FIXME
-				// I have an inkling, having thought about it...
-			}
+		} catch (Exception e)
+		{
+			ret.setAllPassed(false);
+			// originally: setCompilable was false.  Necessary? FIXME
 		}
 
-		return ret;
+		try
+		{
+			if(line.startsWith("[TOTAL]:"))
+			{
+				String[] tokens = line.split("[:\\s]+");
+				ret.setNumberTests(Integer.parseInt(tokens[1]));
+			}
+		} catch (NumberFormatException e)
+		{
+			// setCompilable was false.  Why? FIXME
+		}
+
+		try
+		{
+			if(line.startsWith("[FAILURE]:"))
+			{
+				String[] tokens = line.split("[:\\s]+");
+				ret.setNumTestsFailed(Integer.parseInt(tokens[1]));
+			}
+		} catch (NumberFormatException e)
+		{
+			// originally: setCompilable was false.  Why? FIXME
+			// I have an inkling, having thought about it...
+		}
 	}
+
+	return ret;
+}
 }
 
