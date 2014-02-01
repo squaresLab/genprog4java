@@ -33,10 +33,9 @@ public class Search<G extends EditOperation> {
 	private static double promut = 1;
 	private static boolean continueSearch = false;
 	private static double appProb = 0.33333;
-	private static double delProb = 0.33333;
-	private static double swapProb = 0.33333;
-	private static double repProb = 0.0;
-	private static int maxEvals = 0;
+	private static double delProb = 0.0;
+	private static double swapProb = 0.0;
+	private static double repProb = 0.0; // FIXME, also make this an option!
 	private static String startingGenome = "";
 
 	private Fitness<G> fitnessEngine = null;
@@ -58,9 +57,7 @@ public class Search<G extends EditOperation> {
 		if(props.getProperty("continue") != null) {
 			Search.continueSearch = true;
 		}
-		if(props.getProperty("max") != null) {
-			Search.maxEvals = Integer.parseInt(props.getProperty("max").trim());
-		}
+
 	}
 
 
@@ -80,7 +77,7 @@ public class Search<G extends EditOperation> {
     @param generation generation in which the repair was found */
 	void noteSuccess(Representation<G> rep, Representation<G> original, int generation) throws RepairFoundException {
 		// FIXME: print out edit list somehow
-		System.out.printf("\nRepair Found: " + rep.getName());
+		System.out.printf("\nRepair Found: " + rep.getName() + "\n");
 
 		Calendar endTime = Calendar.getInstance(); // TODO do something with this
 		// TODO: createSubDirectory("repair");

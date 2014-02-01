@@ -3,10 +3,10 @@ import java.io.File;
 import java.io.IOException;
 
 import clegoues.genprog4java.Fitness.Fitness;
-import clegoues.genprog4java.Search.JavaEditOperation;
 import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.RepairFoundException;
 import clegoues.genprog4java.Search.Search;
+import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;

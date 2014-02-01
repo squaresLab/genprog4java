@@ -1,7 +1,10 @@
 package clegoues.genprog4java.mut;
 
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-public interface EditOperation<G,R> {
+
+public interface EditOperation<G,R,S> { // FIXME: this is a hack to see if I can get rewriting to work at all
 
 	public Mutation getType();
 
@@ -14,5 +17,6 @@ public interface EditOperation<G,R> {
 	public G getLocation();
 	public void setLocation(G location);
 	
-	public void edit(R rewriter);
+	public void edit(R rewriter, S ast);
+
 }

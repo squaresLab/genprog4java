@@ -1,8 +1,10 @@
 package clegoues.genprog4java.rep;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -10,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 
 import javax.tools.JavaCompiler;
@@ -18,12 +21,12 @@ import javax.tools.ToolProvider;
 
 import clegoues.genprog4java.Fitness.FitnessValue;
 import clegoues.genprog4java.Fitness.TestCase;
-import clegoues.genprog4java.Search.JavaEditOperation;
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.HistoryEle;
+import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
@@ -33,7 +36,10 @@ import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -187,8 +193,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 				s.setNames(ASTUtils.getNames(node));
 				s.setTypes(ASTUtils.getTypes(node));
 				s.setScopes(ASTUtils.getScope(node));
-				ASTNode copy = ASTNode.copySubtree(node.getAST(), node);
-				s.setASTNode(copy);
+				s.setASTNode(node);
 				ArrayList<Integer> lineNoList = null;
 				if(lineNoToAtomIDMap.containsKey(lineNo)) {
 					lineNoList = lineNoToAtomIDMap.get(lineNo);
@@ -198,7 +203,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 				lineNoList.add(s.getStmtId());
 				lineNoToAtomIDMap.put(lineNo,  lineNoList);
 				base.put(s.getStmtId(),s);
-				codeBank.put(s.getStmtId(), s); // FIXME: possibly a copy here as well
+				codeBank.put(s.getStmtId(), s); 
 			}
 		}
 
@@ -260,21 +265,27 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 	@Override
 	protected List<Pair<String,String>> computeSourceBuffers() {
-		CompilationUnit cu = (CompilationUnit) ASTNode.copySubtree(baseCompilationUnit.getAST(), baseCompilationUnit); // FIXME: possibly a disaster
+		// FIXME: make this cache up in cacheRep
+		CompilationUnit cu = baseCompilationUnit;
+		Document original = new Document(JavaRepresentation.getOriginalSource()); 
 
-		Document doc = new Document(JavaRepresentation.getOriginalSource()); // FIXME: SET ORIGINAL SOURCE IN LOAD
+
+		// shit OK, the problem is that the location node is from the original AST
+		// and we need it in the compilation unit AST.
+		// how to deal without making 1000 copies of the original AST?
 		ASTRewrite rewriter = ASTRewrite.create(cu.getAST());
+		
 
 		try
 		{
 			for(JavaEditOperation edit : genome) { 
-				edit.edit(rewriter);
+				edit.edit(rewriter, cu.getAST());
 			}
 
 			TextEdit edits = null;
 
-			edits = rewriter.rewriteAST(doc, null);
-			edits.apply(doc);
+			edits = rewriter.rewriteAST(original, null);
+			edits.apply(original);
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (MalformedTreeException e) {
@@ -285,7 +296,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			e.printStackTrace();
 		} 
 		ArrayList<Pair<String,String>> retVal = new ArrayList<Pair<String,String>>();
-		retVal.add(new Pair<String,String>(Configuration.targetClassName, doc.get()));
+		retVal.add(new Pair<String,String>(Configuration.targetClassName, original.get()));
 		return retVal;
 	}
 
@@ -417,10 +428,9 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	@Override
 	protected boolean internalCompile(String sourceName, String exeName) {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-		System.out.println("exename: " + exeName);
-		// FIXME: this will recompile the original over and over which is no bueno
-		String program = JavaRepresentation.originalSource;
-		Iterable<? extends JavaFileObject> fileObjects = ASTUtils.getJavaSourceFromString(program) ; // FIXME: this.computeSourceBuffers();
+		System.out.println("JavaRep internalCompile: exename: " + exeName);
+		String program = this.computeSourceBuffers().get(0).getSecond();
+		Iterable<? extends JavaFileObject> fileObjects = ASTUtils.getJavaSourceFromString(program) ; 
 
 		LinkedList<String> options = new LinkedList<String>();
 
@@ -434,11 +444,21 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		options.add(Configuration.targetVersion);
 
 		options.add("-d");
-		String outDirName = Configuration.outputDir + File.separatorChar + sourceName + File.separatorChar; //FIXME testing
+		String outDirName = Configuration.outputDir + File.separatorChar + sourceName + File.separatorChar;
 		File outDir = new File(outDirName);
 		if(!outDir.exists()) 
 			outDir.mkdir();
-		options.add(outDirName);  //FIXME? e.g., tmp/10210/
+		options.add(outDirName);  
+		try {
+			// FIXME: can I write this in the folders to match where the class file is compiled?
+			BufferedWriter bw = new BufferedWriter(new FileWriter(outDirName + File.separatorChar + sourceName + Configuration.globalExtension));
+			bw.write(program);
+			bw.flush();
+			bw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 
 		StringWriter compilerErrorWriter = new StringWriter();

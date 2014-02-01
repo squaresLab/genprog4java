@@ -8,10 +8,10 @@ import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.Fitness.FitnessValue;
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
-import clegoues.genprog4java.Search.JavaEditOperation;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
+import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.util.Pair;
 
 public abstract class CachingRepresentation<G extends EditOperation> extends Representation<G> {
@@ -209,7 +209,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		if(this.alreadyCompiled != null) {
 			return alreadyCompiled.getFirst();
 		} else {
-			
+			System.out.println("compiling: " + this.getName());
 		boolean result = this.internalCompile(sourceName,exeName);
 		this.alreadyCompiled = new Pair<Boolean,String>(result,exeName);
 		return result;
@@ -249,7 +249,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	}
 	@Override
 	public void append(int one, int two) {
-		super.swap(one, two);
+		super.append(one, two);
 		this.updated();
 	}
 	@Override
