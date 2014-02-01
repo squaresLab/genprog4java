@@ -26,8 +26,8 @@ public abstract class Representation<G extends EditOperation> implements Compara
 
 	
 	public Representation(ArrayList<HistoryEle> history, ArrayList<JavaEditOperation> genome2) {
-		this.setGenome((List<G>) genome2);
-		this.setHistory(history);
+		this.setGenome(new ArrayList<G>(((List<G>) genome2)));
+		this.setHistory(new ArrayList<HistoryEle>(history));
 	}
 	public String getName() {
 		String result = "";
