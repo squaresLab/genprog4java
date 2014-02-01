@@ -1,15 +1,14 @@
-package clegoues.genprog4java.Search;
+package clegoues.genprog4java.mut;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.mut.EditOperation;
-import clegoues.genprog4java.mut.Mutation;
 
-public class JavaEditOperation implements EditOperation<JavaStatement,ASTRewrite> {
+public class JavaEditOperation implements EditOperation<JavaStatement,ASTRewrite, AST> {
 
 	private Mutation mutType;
 	private JavaStatement location = null;
@@ -60,13 +59,17 @@ public class JavaEditOperation implements EditOperation<JavaStatement,ASTRewrite
 	}
 
 	@Override
-	public void edit(ASTRewrite rewriter) {
+	public void edit(ASTRewrite rewriter, AST ast) {
 		ListRewrite lrw = getListRewriter(this.getLocation().getASTNode(), rewriter);
-		ASTNode locationNode = this.getLocation().getASTNode();
+		ASTNode locationNode = this.getLocation().getASTNode(); 
+		ASTNode fixCodeNode = null;
+		if(this.fixCode != null) {
+			fixCodeNode = ASTNode.copySubtree(locationNode.getAST(), this.getFixCode().getASTNode());
+		}
 		switch(this.getType())
 		{
 		case APPEND:
-			lrw.insertAfter(locationNode, this.getFixCode().getASTNode(), null); 
+			lrw.insertAfter(fixCodeNode, locationNode, null); 
 			break;
 		case REPLACE:
 			lrw.replace(locationNode, this.getFixCode().getASTNode(), null); 

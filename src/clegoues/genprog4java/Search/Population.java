@@ -368,7 +368,7 @@ end*/
 			crossp = Double.parseDouble(prop.getProperty("crossp").trim());
 		}
 		if(prop.getProperty("popsize") != null) {
-			popsize = Integer.parseInt(prop.getProperty("pop_size").trim());
+			popsize = Integer.parseInt(prop.getProperty("popsize").trim());
 		}		
 	}
 

@@ -17,10 +17,10 @@ import java.util.TreeSet;
 import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
-import clegoues.genprog4java.Search.JavaEditOperation;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
+import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
