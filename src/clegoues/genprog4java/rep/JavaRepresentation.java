@@ -23,6 +23,7 @@ import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
@@ -73,6 +74,17 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	private static String originalSource = "";
 
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
+
+	public JavaRepresentation(ArrayList<HistoryEle> history,
+			ArrayList<JavaEditOperation> genome2) {
+		super(history,genome2);
+	}
+
+
+	public JavaRepresentation() {
+		super();
+	}
+
 
 	private static String getOriginalSource() { return originalSource; }
 
@@ -237,12 +249,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 	}
 
-
-	@Override
-	public int num_test_evals_ignore_cache() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 
 	@Override
 	public int compareTo(Representation<JavaEditOperation> o) {
@@ -495,6 +501,12 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		}
 
 		return ret;
+	}
+	
+	public JavaRepresentation copy() {
+		JavaRepresentation copy = new JavaRepresentation(this.getHistory(), this.getGenome());
+
+		return copy;
 	}
 }
 

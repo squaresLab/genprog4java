@@ -17,15 +17,18 @@ import java.util.TreeSet;
 import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
+import clegoues.genprog4java.Search.JavaEditOperation;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
+import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
 
 public abstract class FaultLocRepresentation<G extends EditOperation> extends CachingRepresentation<G> {
-	protected ArrayList<WeightedAtom> faultLocalization = new ArrayList<WeightedAtom>();
-	protected ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
+	// FIXME: making these static is lazy of me, but whatever, I'm tired of this clone/copy debacle
+	protected static ArrayList<WeightedAtom> faultLocalization = new ArrayList<WeightedAtom>();  
+	protected static ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
 	private static double positivePathWeight = 0.1; 
 	private static double negativePathWeight = 1.0;
@@ -34,6 +37,15 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	private static String negCoverageFile = "coverage.path.neg";
 	private static boolean regenPaths = false;
 	protected boolean doingCoverage = false;
+
+	public FaultLocRepresentation(ArrayList<HistoryEle> history,
+			ArrayList<JavaEditOperation> genome2) {
+		super(history,genome2);
+	}
+
+	public FaultLocRepresentation() {
+		super();
+	}
 
 	public static void configure(Properties prop) {
 		if(prop.getProperty("positivePathWeight") != null) {
@@ -61,12 +73,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		
 	}
 	
-	public FaultLocRepresentation<G> clone() throws CloneNotSupportedException {
-		FaultLocRepresentation<G> clone = (FaultLocRepresentation<G>) super.clone();
-		clone.faultLocalization = new ArrayList<WeightedAtom>(this.faultLocalization);
-		clone.fixLocalization = new ArrayList<WeightedAtom>(this.fixLocalization);
-		return clone;
-	}
+
 	/*
 
 			  (** [deserialize] can fail if the version saved in the binary file does not
@@ -133,11 +140,11 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			        if out_channel = None then close_out fout 
 	 */
 	public ArrayList<WeightedAtom> getFaultyAtoms () {
-		return this.faultLocalization; 
+		return FaultLocRepresentation.faultLocalization; 
 	}
 
 	public ArrayList<WeightedAtom> getFixSourceAtoms() {
-		return this.fixLocalization;
+		return FaultLocRepresentation.fixLocalization;
 	}
 
 
@@ -152,23 +159,10 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			    in
 			      fault_localization := (lfilt split_fun fault_localization')
 	 */
-	private TreeSet<Pair<Mutation,Double>> mutations = null;
-
-
-	public void registerMutations(TreeSet<Pair<Mutation,Double>> availableMutations) {
-
-		this.mutations = new TreeSet<Pair<Mutation,Double>> ();
-		for(Pair<Mutation,Double> candidateMut : availableMutations) {
-			if(candidateMut.getSecond() > 0.0) {
-				this.mutations.add(candidateMut);
-			}
-		}
-
-	}
 
 	public TreeSet<Pair<Mutation, Double>> availableMutations(int atomId) {
 		TreeSet<Pair<Mutation,Double>> retVal = new TreeSet<Pair<Mutation,Double>>();
-		for(Pair<Mutation,Double> mutation : this.mutations){
+		for(Pair<Mutation,Double> mutation : Representation.mutations){
 			boolean addToSet = false;
 			switch(mutation.getFirst()) {
 			case DELETE: addToSet = true; 
@@ -193,21 +187,21 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	// you probably want to override these for semantic legality check
 	public TreeSet<WeightedAtom> appendSources(int stmtId) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for(WeightedAtom item : this.fixLocalization) {
+		for(WeightedAtom item : FaultLocRepresentation.fixLocalization) {
 			retVal.add(item);
 		}
 		return retVal;
 	}
 	public TreeSet<WeightedAtom> swapSources(int stmtId) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for(WeightedAtom item : this.fixLocalization) {
+		for(WeightedAtom item : FaultLocRepresentation.fixLocalization) {
 			retVal.add(item);
 		}
 		return retVal;
 	}
 	public TreeSet<WeightedAtom> replaceSources(int stmtId) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for(WeightedAtom item : this.fixLocalization) {
+		for(WeightedAtom item : FaultLocRepresentation.fixLocalization) {
 			retVal.add(item);
 		}
 		return retVal;
