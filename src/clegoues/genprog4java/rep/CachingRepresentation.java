@@ -8,8 +8,10 @@ import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.Fitness.FitnessValue;
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
+import clegoues.genprog4java.Search.JavaEditOperation;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
+import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.util.Pair;
 
 public abstract class CachingRepresentation<G extends EditOperation> extends Representation<G> {
@@ -21,7 +23,19 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	/*  (** cached file contents from [internal_compute_source_buffers]; avoid
       recomputing/reserializing *)
   val already_source_buffers = ref None */
-
+	public static int sequence = 0;
+	public CachingRepresentation(ArrayList<HistoryEle> history,
+			ArrayList<JavaEditOperation> genome2) {
+		super(history,genome2);
+	}
+	public CachingRepresentation() {
+		super();
+	}
+	public static String newVariant() {
+		String result = String.format("variant%d", sequence);
+		sequence++;
+		return result;
+	}
 	@Override
 	
 	public double getFitness() { return this.fitness; }
@@ -124,16 +138,21 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	}
 
 	public boolean testCase(TestCase test) {
-		if(!this.compile(this.getName(), this.getName())) {
+		if(fitnessTable.containsKey(test.toString())) {
+			return fitnessTable.get(test.toString()).isAllPassed();
+		}
+		if(this.alreadyCompiled != null) {
+			return alreadyCompiled.getFirst();
+		} else {
+			String newName = CachingRepresentation.newVariant();
+		if(!this.compile(newName,newName)) {
 			this.setFitness(0.0);
 			System.out.printf(this.getName() + " fails to compile\n");
 			return false;
 		}
-		if(fitnessTable.containsKey(test.toString())) {
-			return fitnessTable.get(test.toString()).isAllPassed();
-		}
+		
 		return this.internalTestCase(this.getName(), this.getName() + Configuration.globalExtension, test);
-
+		}
 		// kind of think internal test case should return here to save in fitnessTable,
 		// but wtfever for now
 		
@@ -190,6 +209,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		if(this.alreadyCompiled != null) {
 			return alreadyCompiled.getFirst();
 		} else {
+			
 		boolean result = this.internalCompile(sourceName,exeName);
 		this.alreadyCompiled = new Pair<Boolean,String>(result,exeName);
 		return result;
@@ -224,21 +244,21 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	}
 	@Override
 	public void swap(int swap1, int swap2) {
-	// FIXME store history?
+		super.swap(swap1,swap2);
 		this.updated();
 	}
 	@Override
 	public void append(int one, int two) {
-		//FIXME store history?
+		super.swap(one, two);
 		this.updated();
 	}
 	@Override
 	public void delete(int one) {
-		// FIXME store history?
+		super.delete(one);
 		this.updated();
 	}
 	public void replace(int one, int two) {
-		// FIXME store history?
+		super.replace(one,two);
 		this.updated();
 	}
 
