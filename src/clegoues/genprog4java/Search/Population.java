@@ -8,8 +8,10 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.TreeSet;
 
+import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
+import clegoues.genprog4java.util.GlobalUtils;
 
 public class Population<G extends EditOperation> implements Iterable<Representation<G>>{
 
@@ -20,11 +22,11 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	private int tournamentK = 2;
 	private static String outputFormat = "txt";
 	private double tournamentP = 1.0;
-
+	private static String crossover = "onepoint";
 	private ArrayList<Representation<G>> population = new ArrayList<Representation<G>>(this.popsize);
 
 	public Population() {
-		
+
 	}
 	public Population(ArrayList<Representation<G>> smallerPop) {
 		this.population = smallerPop;
@@ -37,7 +39,17 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	public int getPopsize() {
 		return Population.popsize;
 	}
-
+	public static void configure(Properties prop) {
+		if(prop.getProperty("crossp") != null) {
+			crossp = Double.parseDouble(prop.getProperty("crossp").trim());
+		}
+		if(prop.getProperty("popsize") != null) {
+			popsize = Integer.parseInt(prop.getProperty("popsize").trim());
+		}
+		if(prop.getProperty("crossover") != null) {
+			crossover = prop.getProperty("crossover").trim();
+		}
+	}
 
 	/* I think that generate makes no sense in java */
 
@@ -131,7 +143,6 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		List<Representation<G>> pool = population.subList(0, tournamentK);
 		// FIXME: in what order should this be sorted?  Ascending, or D?
 		TreeSet<Representation<G>> sorted = new TreeSet<Representation<G>>(pool);
-		Random r = new Random();
 		double step = 0.0;
 		for(Representation<G> indiv : sorted) {
 			boolean taken = false;
@@ -139,7 +150,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 				taken = true;
 			} else {
 				double requiredProb = this.tournamentP * Math.pow((1.0 - this.tournamentP), step);
-				double random = r.nextDouble();
+				double random = Configuration.randomizer.nextDouble();
 				if(random <= requiredProb) {
 					taken = true;
 				}
@@ -168,181 +179,131 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 
 
 	public void add (Representation<G> newItem) {
-
 		population.add(newItem);
 	}
 
+	/* Crossover is an operation on more than one variant, which is why it
+			appears here.  We currently have one-point crossover implemented on
+			variants of both stable and variable length, patch_subset_crossover, which
+			is something like uniform crossover (but which works on all
+			representations now, not just cilRep patch) and "ast_old_behavior", which
+			Claire hasn't fixed yet.  The nitty-gritty of how to combine
+			representation genomes to accomplish crossover has been mostly moved to
+			the representation classes, so this implementation doesn't know much about
+			particular genomes.  Crossback implements one-point between variants and
+			the original. *)
+			(* this implements the old AST/WP crossover behavior, typically intended to be
+			used on the patch representation.  I don't like keeping it around, since
+			the point of refactoring is to decouple the evolutionary behavior from the
+			representation.  I'm still thinking about it *)
+			(* this can fail if the edit histories contain unexpected elements, such as
+			crossover, or if load_genome_from_string fails (which is likely, since it's
+			not implemented across the board, which is why I'm mentioning it in this
+			comment) */
+	// I have not implemented crossoverPatchOldBehavior
+
+
+	//  Patch Subset Crossover; works on all representations even though it was
+	// originally designed just for cilrep patch
+	private ArrayList<Representation<G>> crossoverPatchSubset(Representation<G> original, Representation<G> variant1, Representation<G> variant2) {
+		ArrayList<G> g1 = variant1.getGenome();
+		ArrayList<G> g2 = variant2.getGenome();
+		ArrayList<G> g1g2 = new ArrayList<G>(g1);
+		g1g2.addAll(g2);
+		ArrayList<G> g2g1 = new ArrayList<G>(g2);
+		g2g1.addAll(g1);
+
+		ArrayList<G> newG1 = new ArrayList<G>();
+		ArrayList<G> newG2 = new ArrayList<G>();
+
+		for(G ele : g1g2) {
+			if(GlobalUtils.probability(crossp)) {
+				newG1.add(ele);
+			}
+		}
+		for(G ele : g2g1) {
+			if(GlobalUtils.probability(crossp)) {
+				newG2.add(ele);
+			}
+		}
+		Representation<G> c1 = original.copy();
+		Representation<G> c2 = original.copy();
+		c1.setGenome(newG1);
+		c2.setGenome(newG2);
+		ArrayList<Representation<G>> retval = new ArrayList<Representation<G>>();
+		retval.add(c1);
+		retval.add(c2);
+		return retval;
+	}
+
+	private ArrayList<Representation<G>> crossoverOnePoint(Representation<G> original, Representation<G> variant1, Representation<G> variant2) {
+		Representation<G> child1 = original.copy();
+		Representation<G> child2 = original.copy();
+		// in the OCaml, to support the flat crossover on binRep for Eric, I had a convoluted thing
+		// where you had to query variants to figure out which crossover points were legal
+		// as I have no plans to support binary repair in Java at the moment, I'm doing
+		// the easy thing here instead.
+		ArrayList<G> g1 = variant1.getGenome();
+		ArrayList<G> g2 = variant2.getGenome();
+		int point1 = Configuration.randomizer.nextInt(g1.size());
+		int point2 = point1;
+		if(original.getVariableLength()) {
+			point2 = Configuration.randomizer.nextInt(g2.size());
+		}
+
+		ArrayList<G> newg1 = new ArrayList<G>();
+		ArrayList<G> newg2 = new ArrayList<G>();
+		newg1.addAll(g1.subList(0, point1));
+		newg1.addAll(g2.subList(point2,g2.size()));
+		newg2.addAll(g2.subList(0, point2));
+		newg2.addAll(g1.subList(point1, g1.size())); // FIXME: inclusive?
+
+		// FIXME: add crossover to history?
+		child1.setGenome(newg1);
+		child2.setGenome(newg2);
+		ArrayList<Representation<G>> retval = new ArrayList<Representation<G>>();
+		retval.add(child1);
+		retval.add(child2);
+		return retval;
+	}
+
+	/* do_cross original variant1 variant2 performs crossover on variant1 and
+	variant2, producing two children [child1;child2] as a result.  Dispatches
+	to the appropriate crossover function based on command-line options *)
+	do_cross can fail if given an unexpected crossover option from the command
+	line */
+	private ArrayList<Representation<G>> doCross(Representation<G> original, Representation<G> variant1, Representation<G> variant2) {
+		if(crossover.equals("one") || crossover.equals("onepoint") || crossover.equals("pstch-one-point")) {
+			return crossoverOnePoint(original,variant1,variant2);
+		}
+		if(crossover.equals("back")) {
+			return crossoverOnePoint(original, variant1, original);
+		}
+		if(crossover.equals("uniform")) {
+			return crossoverPatchSubset(original,variant1,variant2);
+		}
+		throw new UnsupportedOperationException("Population: unrecognized crossover: " + crossover);
+
+	}
+/* crossover population original_variant performs crossover over the entire
+			population, returning a new population with both the old and the new
+			variants */
+	
 	public void crossover(Representation<G> original) {
-		throw new UnsupportedOperationException();
-
-		/*
-
-
-(** Crossover is an operation on more than one variant, which is why it
-appears here.  We currently have one-point crossover implemented on
-variants of both stable and variable length, patch_subset_crossover, which
-is something like uniform crossover (but which works on all
-representations now, not just cilRep patch) and "ast_old_behavior", which
-Claire hasn't fixed yet.  The nitty-gritty of how to combine
-representation genomes to accomplish crossover has been mostly moved to
-the representation classes, so this implementation doesn't know much about
-particular genomes.  Crossback implements one-point between variants and
-the original. *)
-(* this implements the old AST/WP crossover behavior, typically intended to be
-used on the patch representation.  I don't like keeping it around, since
-the point of refactoring is to decouple the evolutionary behavior from the
-representation.  I'm still thinking about it *)
-(* this can fail if the edit histories contain unexpected elements, such as
-crossover, or if load_genome_from_string fails (which is likely, since it's
-not implemented across the board, which is why I'm mentioning it in this
-comment) *)
-let crossover_patch_old_behavior ?(test = 0)
-(original :('a,'b) Rep.representation)
-(variant1 :('a,'b) Rep.representation)
-(variant2 :('a,'b) Rep.representation)
-: (('a,'b) representation) list = 
-let h1 = variant1#get_history () in
-let h2 = variant2#get_history () in 
-let wp = lmap fst (variant1#get_faulty_atoms ()) in
-let point = if test=0 then Random.int (llen wp) else test in
-let first_half,second_half = split_nth wp point in
-let c_one = original#copy () in
-let c_two = original#copy () in
-let h11, h12 = 
-List.partition
-(fun edit ->
-  match edit with
-  | Delete(num)
-  | Append(num, _) 
-  | Swap(num,_) 
-  | Replace(num,_) -> List.mem num first_half
-  | _ -> 
-    abort "unexpected edit in history in patch_old_behavior crossover") 
-h1
-in
-let h21, h22 = 
-List.partition
-(fun edit ->
-  match edit with
-  | Delete(num) | Append(num, _) 
-  | Swap(num,_) | Replace(num,_)  -> 
-    List.mem num first_half
-  | _ -> 
-    abort "unexpected edit in history in patch_old_behavior crossover") 
-h2
-in
-let new_h1 = lmap (c_one#history_element_to_str) (h11 @ h22) in
-let new_h2 = lmap (c_two#history_element_to_str) (h21 @ h12) in
-let new_h1 = lfoldl (fun acc str -> acc^str^" ") "" new_h1 in
-let new_h2 = lfoldl (fun acc str -> acc^str^" ") "" new_h2 in
-c_one#load_genome_from_string new_h1 ;
-c_two#load_genome_from_string new_h2 ;
-[ c_one ; c_two ]
-
-(* Patch Subset Crossover; works on all representations even though it was
-originally designed just for cilrep patch *)
-let crossover_patch_subset
-(original :('a,'b) Rep.representation)
-(variant1 :('a,'b) Rep.representation)
-(variant2 :('a,'b) Rep.representation)
-: (('a,'b) representation) list =
-let g1 = variant1#get_genome () in
-let g2 = variant2#get_genome () in
-let new_g1 = List.fold_left (fun acc elt ->
-if probability !crossp then acc @ [elt] else acc
-) [] (g1 @ g2) in
-let new_g2 = List.fold_left (fun acc elt ->
-if probability !crossp then acc @ [elt] else acc
-) [] (g2 @ g1) in
-let c_one = original#copy () in
-let c_two = original#copy () in
-c_one#set_genome new_g1 ;
-c_two#set_genome new_g2 ;
-[ c_one ; c_two ]
-
-(* One point crossover *)
-let crossover_one_point ?(test = 0)
-(original :('a,'b) Rep.representation)
-(variant1 :('a,'b) Rep.representation)
-(variant2 :('a,'b) Rep.representation)
-: (('a,'b) representation) list =
-let child1 = original#copy () in
-let child2 = original#copy () in
-let point1,point2 = 
-if test <> 0 then test,test 
-else 
-(* this is a little squirrly.  available_crossover_points returns a
-   set of legal crossover points along the genome list and a function
-   to combine the variant's legal crossover points with another
-   variant's legal crossover points *)
-let legal1,interfun1 = variant1#available_crossover_points () in
-let legal2,interfun2 = variant2#available_crossover_points () in
-let legal1' = interfun1 legal1 legal2 in
-let legal2' = interfun2 legal2 legal1 in
-  (* if variants are of stable length, we only need to choose one
-     point *)
-  if not variant1#variable_length then 
-    let rand = List.hd (random_order legal1') in
-      rand,rand
-  else 
-    let rand1 = List.hd (random_order legal1') in
-    let rand2 = List.hd (random_order legal2') in
-      rand1,rand2
-in
-let g1a,g1b = split_nth (variant1#get_genome()) point1 in
-let g2a,g2b = split_nth (variant2#get_genome()) point2 in
-child1#add_history (Crossover((Some point1),None)) ;
-child2#add_history (Crossover(None,(Some point2))) ;
-child1#set_genome (g1a@g2b);
-(* do we care that the history info is destroyed for patch representation
- here? *)
-child2#set_genome (g2a@g1b);
-[child1;child2]
-
-(** do_cross original variant1 variant2 performs crossover on variant1 and
-variant2, producing two children [child1;child2] as a result.  Dispatches
-to the appropriate crossover function based on command-line options *)
-(* do_cross can fail if given an unexpected crossover option from the command
-line *)
-let do_cross ?(test = 0)
-(original :('a,'b) Rep.representation)
-(variant1 :('a,'b) Rep.representation)
-(variant2 :('a,'b) Rep.representation)
-: (('a,'b) representation) list =
-match !crossover with
-(* CLG: flat crossover is now implemented by default on elfrep based on
-available_crossover_points *)
-| "flat" | "flatten"
-| "one" | "patch-one-point" -> 
-crossover_one_point ~test original variant1 variant2
-| "back" -> crossover_one_point ~test original variant1 original
-| "patch" | "subset"
-| "uniform" -> crossover_patch_subset original variant1 variant2 
-| "patch-old" -> 
-crossover_patch_old_behavior ~test original variant1 variant2 
-| x -> abort "unknown --crossover %s\n" x
-
-(** crossover population original_variant performs crossover over the entire
-population, returning a new population with both the old and the new
-variants *)
-let crossover population original =
-let mating_list = random_order population in
-(* should we cross an individual? *)
-let maybe_cross () = Random.float 1.0 <= !crossp in
-let output = ref [] in
-let half = (List.length mating_list) / 2 in
-for it = 0 to (half - 1) do
-let parent1 = List.nth mating_list it in
-let parent2 = List.nth mating_list (half + it) in
-  if maybe_cross () then
-    output := (do_cross original parent1 parent2) @ 
-      [parent1;parent2] @ !output
-  else
-    output := parent1 :: parent2 :: !output
-done ;
-!output
-
-end*/
+		Collections.shuffle(population,Configuration.randomizer);
+		ArrayList<Representation<G>> output = new ArrayList<Representation<G>>();
+		int half = population.size() / 2;
+		for(int it = 0 ; it < half-1; it++) {
+			Representation<G> parent1 = population.get(it);
+			Representation<G> parent2 = population.get(it + half);
+			if(GlobalUtils.probability(crossp)) {
+				ArrayList<Representation<G>> children = this.doCross(original, parent1, parent2);
+				output.add(parent1);
+				output.add(parent2);
+				output.addAll(children);
+			}
+		}
+		this.population = output; // FIXME I think
 	}
 
 	public Population<G> firstN(int desiredSize) {
@@ -363,13 +324,6 @@ end*/
 
 	}
 
-	public static void configure(Properties prop) {
-		if(prop.getProperty("crossp") != null) {
-			crossp = Double.parseDouble(prop.getProperty("crossp").trim());
-		}
-		if(prop.getProperty("popsize") != null) {
-			popsize = Integer.parseInt(prop.getProperty("popsize").trim());
-		}		
-	}
+
 
 }

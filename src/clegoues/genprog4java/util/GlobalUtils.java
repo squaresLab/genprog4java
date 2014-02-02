@@ -39,4 +39,9 @@ public class GlobalUtils {
 		return null;
 	}
 
+	public static boolean probability(double p) {
+		if(p < 0.0) return false;
+		if(p > 1.0) return true;
+		return Configuration.randomizer.nextDouble() <= p;
+	}
 }
