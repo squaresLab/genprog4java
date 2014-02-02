@@ -2,16 +2,18 @@ package clegoues.genprog4java.Search;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.Random;
 import java.util.TreeSet;
 
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
+import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.util.GlobalUtils;
+import clegoues.genprog4java.util.Pair;
 
 public class Population<G extends EditOperation> implements Iterable<Representation<G>>{
 
@@ -141,8 +143,14 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	private Representation<G> selectOne() {
 		Collections.shuffle(population);
 		List<Representation<G>> pool = population.subList(0, tournamentK);
-		// FIXME: in what order should this be sorted?  Ascending, or D?
-		TreeSet<Representation<G>> sorted = new TreeSet<Representation<G>>(pool);
+		Comparator<Representation<G>> myComp = new Comparator<Representation<G>>() {
+			@Override
+			public int compare(Representation<G> one, Representation<G> two) { 
+				return new Double(two.getFitness()).compareTo(new Double(one.getFitness())); 
+			}
+		}; // we sort in descending order by fitness
+		TreeSet<Representation<G>> sorted = new TreeSet<Representation<G>>(myComp);
+		sorted.addAll(pool);
 		double step = 0.0;
 		for(Representation<G> indiv : sorted) {
 			boolean taken = false;
@@ -239,12 +247,14 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	private ArrayList<Representation<G>> crossoverOnePoint(Representation<G> original, Representation<G> variant1, Representation<G> variant2) {
 		Representation<G> child1 = original.copy();
 		Representation<G> child2 = original.copy();
-		// in the OCaml, to support the flat crossover on binRep for Eric, I had a convoluted thing
+		// in the OCaml, to support the flat crossover on binRep, I had a convoluted thing
 		// where you had to query variants to figure out which crossover points were legal
 		// as I have no plans to support binary repair in Java at the moment, I'm doing
 		// the easy thing here instead.
+		// the only trick is if one of the two variants is "original"
 		ArrayList<G> g1 = variant1.getGenome();
 		ArrayList<G> g2 = variant2.getGenome();
+		
 		int point1 = Configuration.randomizer.nextInt(g1.size());
 		int point2 = point1;
 		if(original.getVariableLength()) {
@@ -291,16 +301,14 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	
 	public void crossover(Representation<G> original) {
 		Collections.shuffle(population,Configuration.randomizer);
-		ArrayList<Representation<G>> output = new ArrayList<Representation<G>>();
+		ArrayList<Representation<G>> output = new ArrayList<Representation<G>>(this.population);
 		int half = population.size() / 2;
 		for(int it = 0 ; it < half-1; it++) {
 			Representation<G> parent1 = population.get(it);
 			Representation<G> parent2 = population.get(it + half);
 			if(GlobalUtils.probability(crossp)) {
 				ArrayList<Representation<G>> children = this.doCross(original, parent1, parent2);
-				output.add(parent1);
-				output.add(parent2);
-				output.addAll(children);
+				output.addAll(children); // I *think* this is OK, because we include all the parents in output above, so we don't need to add them here
 			}
 		}
 		this.population = output; // FIXME I think
