@@ -15,7 +15,9 @@ import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.util.Pair;
 
 public abstract class CachingRepresentation<G extends EditOperation> extends Representation<G> {
-
+	public static String sanityFilename = "repair.sanity";
+	public static String sanityExename = "repair.sanity";
+	
 	private HashMap<String,FitnessValue> fitnessTable = new HashMap<String,FitnessValue>(); // in repair, this is a hashtable mapping fitness keys to values, fo
 	// multi-parameter searches.  Here, for java, I'm mapping test class names to values, but you can do what you like
 	// (including the original behavior)
@@ -58,8 +60,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		this.fromSource(base); 
 		System.out.println("loaded from source " + base);
 		if(Configuration.doSanity){
-			System.out.println("I really expect to be in this if block");
-				if(!this.sanityCheck()) { // FIXME: assert doesn't seem to have the semantics I expect
+				if(!this.sanityCheck()) { 
 				System.err.println("cacheRep: Sanity check failed, giving up");
 				Runtime.getRuntime().exit(1);
 			}
@@ -109,27 +110,37 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		if(!sanityDir.exists()) {
 			sanityDir.mkdir();
 		}
-		String sanityFilename = "sanity/" + Configuration.sanityFilename + Configuration.globalExtension; 
-		String sanityExename = "sanity/" + Configuration.sanityExename;
-		this.outputSource(sanityFilename);
-		if(!this.compile(sanityFilename,sanityExename))
+
+		this.outputSource(CachingRepresentation.sanityFilename);
+		System.out.println("cachingRepresentation: sanity checking begins");
+		if(!this.compile(CachingRepresentation.sanityFilename,CachingRepresentation.sanityExename))
 		{
-			System.err.println("cacheRep: sanity: " + sanityFilename + " does not compile.");
+			System.err.println("cacheRep: sanity: " + CachingRepresentation.sanityFilename + " does not compile.");
 			return false;
 		}
+		int testNum = 1;
 		for(String posTest : Fitness.positiveTests) {
+			System.out.printf("\tp" + testNum + ": ");
 			TestCase thisTest = new TestCase(TestType.POSITIVE, posTest);
-			if(!this.internalTestCase(sanityExename,sanityFilename, thisTest)) {
-				System.err.println("cacheRep: sanity: " + sanityFilename + " failed positive test " + thisTest.toString()); 
+			if(!this.internalTestCase(CachingRepresentation.sanityExename,CachingRepresentation.sanityFilename, thisTest)) {
+				System.out.printf("false (0)\n"); 
+				System.err.println("cacheRep: sanity: " + CachingRepresentation.sanityFilename + " failed positive test " + thisTest.toString()); 
 				return false; 
 			}
+			System.out.printf("true (1)\n");
+			testNum++;
 		}
+		testNum = 1;
 		for(String negTest : Fitness.negativeTests) { 
+			System.out.printf("\tn" + testNum + ": ");
 			TestCase thisTest = new TestCase(TestType.NEGATIVE, negTest);
-			if(this.internalTestCase(sanityExename,sanityFilename, thisTest)) {				
-				System.err.println("cacheRep: sanity: " + sanityFilename + " passed negative test " + thisTest.toString()); 
+			if(this.internalTestCase(CachingRepresentation.sanityExename,CachingRepresentation.sanityFilename, thisTest)) {				
+				System.out.printf("true (1)\n");
+				System.err.println("cacheRep: sanity: " + CachingRepresentation.sanityFilename + " passed negative test " + thisTest.toString()); 
 			return false; 
 			}
+			System.out.printf("false (0)\n"); 
+			testNum++;
 		}
 		this.cleanup();
 		this.updated();
@@ -141,13 +152,19 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		if(fitnessTable.containsKey(test.toString())) {
 			return fitnessTable.get(test.toString()).isAllPassed();
 		}
-		if(this.alreadyCompiled != null) {
-			return alreadyCompiled.getFirst();
-		} else {
+		if(this.alreadyCompiled == null) {
 			String newName = CachingRepresentation.newVariant();
 		if(!this.compile(newName,newName)) {
-			this.setFitness(0.0);
+			this.setFitness(0.0); // FIXME: this is probably why I don't want to do this here: coverage?
 			System.out.printf(this.getName() + " fails to compile\n");
+			return false;
+		}
+		} else if (!this.alreadyCompiled.getFirst()) {
+			FitnessValue compileFail = new FitnessValue();
+			compileFail.setTestClassName(test.toString());
+			compileFail.setAllPassed(false);
+			fitnessTable.put(test.toString(),compileFail);
+			this.setFitness(0.0);
 			return false;
 		}
 		
@@ -156,7 +173,6 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		// kind of think internal test case should return here to save in fitnessTable,
 		// but wtfever for now
 		
-	}
 	// compile assumes that the source has already been serialized to disk.
 
 	// I think for here, it's best to put it down in Java representation
@@ -209,18 +225,14 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		if(this.alreadyCompiled != null) {
 			return alreadyCompiled.getFirst();
 		} else {
-			System.out.println("compiling: " + this.getName());
 		boolean result = this.internalCompile(sourceName,exeName);
 		this.alreadyCompiled = new Pair<Boolean,String>(result,exeName);
 		return result;
 		}
 	}
 
-
 	protected abstract boolean internalCompile(String sourceName, String exeName);
 
-
-	// TODO: ignoring available crossover points for now
 
 	// TODO:			  method hash () = Hashtbl.hash (self#get_history ()) 
 
@@ -239,6 +251,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 
 	public void reduceSearchSpace() {
 	} // subclasses can override as desired
+	
 	public void reduceFixSpace() {
 	
 	}

@@ -10,6 +10,10 @@ import java.util.Random;
 import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.Search;
+import clegoues.genprog4java.rep.CachingRepresentation;
+import clegoues.genprog4java.rep.FaultLocRepresentation;
+import clegoues.genprog4java.rep.JavaRepresentation;
+import clegoues.genprog4java.rep.Representation;
 
 public class Configuration {
 	public static String sourceDir = "./";
@@ -17,10 +21,6 @@ public class Configuration {
 	public static String libs;
 	public static String sourceVersion = "1.5";
 	public static String targetVersion = "1.5";
-	public static int numPositiveTests = 5;
-	public static int numNegativeTests = 1;
-	public static String sanityFilename = "repair.sanity";
-	public static String sanityExename = "repair.sanity";
 	public static String globalExtension = ".java";
 	public static String targetClassName = "";
 	public static String searchStrategy = "ga";
@@ -89,6 +89,8 @@ public class Configuration {
 		Search.configure(prop);
 		Population.configure(prop);
 		Fitness.configure(prop);
+		FaultLocRepresentation.configure(prop); // FIXME probably there's a better way to do this?
+		CachingRepresentation.configure(prop);
 
 	}
 }
