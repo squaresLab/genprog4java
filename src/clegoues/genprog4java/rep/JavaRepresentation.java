@@ -443,13 +443,14 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		options.add(Configuration.targetVersion);
 
 		options.add("-d");
-		String outDirName = Configuration.outputDir + File.separatorChar + sourceName + File.separatorChar;
+		String outDirName = Configuration.outputDir + File.separatorChar + exeName + File.separatorChar;
 		File outDir = new File(outDirName);
 		if(!outDir.exists()) 
 			outDir.mkdir();
 		options.add(outDirName);  
 		try {
 			// FIXME: can I write this in the folders to match where the class file is compiled?
+			
 			BufferedWriter bw = new BufferedWriter(new FileWriter(outDirName + File.separatorChar + sourceName + Configuration.globalExtension));
 			bw.write(program);
 			bw.flush();

@@ -295,12 +295,11 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 
 	public void computeLocalization() throws IOException, UnexpectedCoverageResultException {
 		// FIXME: THIS ONLY DOES STANDARD PATH FILE localization
-		/* FIXME: add regen-paths
-		 * Default "ICSE'09"-style fault and fix localization from path files.  The
+		/*
+		* Default "ICSE'09"-style fault and fix localization from path files.  The
 		 * weighted path fault localization is a list of <atom,weight> pairs. The fix
 		 * weights are a hash table mapping atom_ids to weights.
 		 */
-		//FIXME: add subdirectory for coverage
 		this.doingCoverage = true;
 		TreeSet<Integer> positivePath = null;
 		TreeSet<Integer> negativePath = null;

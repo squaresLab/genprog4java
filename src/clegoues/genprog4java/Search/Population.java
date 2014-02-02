@@ -10,10 +10,8 @@ import java.util.TreeSet;
 
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
-import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.util.GlobalUtils;
-import clegoues.genprog4java.util.Pair;
 
 public class Population<G extends EditOperation> implements Iterable<Representation<G>>{
 
@@ -255,23 +253,40 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		ArrayList<G> g1 = variant1.getGenome();
 		ArrayList<G> g2 = variant2.getGenome();
 		
-		int point1 = Configuration.randomizer.nextInt(g1.size());
-		int point2 = point1;
-		if(original.getVariableLength()) {
-			point2 = Configuration.randomizer.nextInt(g2.size());
-		}
-
 		ArrayList<G> newg1 = new ArrayList<G>();
 		ArrayList<G> newg2 = new ArrayList<G>();
-		newg1.addAll(g1.subList(0, point1));
-		newg1.addAll(g2.subList(point2,g2.size()));
-		newg2.addAll(g2.subList(0, point2));
-		newg2.addAll(g1.subList(point1, g1.size())); // FIXME: inclusive?
+		ArrayList<Representation<G>> retval = new ArrayList<Representation<G>>();
+
+		ArrayList<G> firstHalfG1 = new ArrayList<G>();
+		ArrayList<G> secondHalfG1 = new ArrayList<G>();
+		ArrayList<G> firstHalfG2 = new ArrayList<G>();
+		ArrayList<G> secondHalfG2 = new ArrayList<G>();
+		int point1 = 0, point2 = 0;
+		
+		if(g1.size() > 0) {
+			 point1 = Configuration.randomizer.nextInt(g1.size());
+			 firstHalfG1 = new ArrayList<G>(g1.subList(0,point1));
+			 secondHalfG1 = new ArrayList<G>(g1.subList(point1 + 1, g1.size()));
+		} 
+		if(g2.size() > 0) {
+			if(original.getVariableLength() || g1.size() == 0) {
+				point2 =  Configuration.randomizer.nextInt(g2.size());
+			} else if(g1.size() > 0) {
+				point2 = point1;
+			} 
+			firstHalfG2 = new ArrayList<G>(g2.subList(0, point2));
+			secondHalfG2 = new ArrayList<G>(g2.subList(point2 + 1,  g2.size()));
+		}
+
+		newg1.addAll(firstHalfG1);
+		newg1.addAll(secondHalfG2);
+		newg2.addAll(firstHalfG2);
+		newg2.addAll(secondHalfG1); 
 
 		// FIXME: add crossover to history?
 		child1.setGenome(newg1);
 		child2.setGenome(newg2);
-		ArrayList<Representation<G>> retval = new ArrayList<Representation<G>>();
+
 		retval.add(child1);
 		retval.add(child2);
 		return retval;

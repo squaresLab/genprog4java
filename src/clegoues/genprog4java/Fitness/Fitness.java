@@ -28,6 +28,8 @@ public class Fitness<G extends EditOperation> {
 	public static String negTestFile = "neg.tests";
 	public static ArrayList<String> positiveTests = new ArrayList<String>();
 	public static ArrayList<String> negativeTests = new ArrayList<String>();
+	public static int numPositiveTests = 5;
+	public static int numNegativeTests = 1;
 	
 	private static ArrayList<String> getTests(String filename) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(filename));
@@ -72,6 +74,16 @@ public class Fitness<G extends EditOperation> {
 			System.err.println("failed to read " + negTestFile + " giving up");
 			Runtime.getRuntime().exit(1);
 		}
+		if(prop.getProperty("pos-tests") != null) {
+			Fitness.numPositiveTests = Integer.parseInt(prop.getProperty("pos-tests"));
+		} else {
+			Fitness.numPositiveTests = Fitness.positiveTests.size();
+		}
+		if(prop.getProperty("neg-tests") != null) {
+			Fitness.numNegativeTests = Integer.parseInt(prop.getProperty("neg-tests"));
+		} else {
+			Fitness.numNegativeTests = Fitness.negativeTests.size();
+		}
 	}
 
 	/* {b test_to_first_failure} variant returns true if the variant passes all
@@ -83,18 +95,18 @@ public class Fitness<G extends EditOperation> {
 	public boolean testToFirstFailure(Representation<G> rep) {
 		boolean retVal = true;
 		try {
-			for( int i = 1; i <= Configuration.numNegativeTests; i++) {
+			for( int i = 1; i <= Fitness.numNegativeTests; i++) {
 				TestCase thisTest = new TestCase(TestType.NEGATIVE, i);
 				if(!rep.testCase(thisTest)) {
 					throw new TestFailedException();
 				}
 			} 
-			Long L = Math.round(sample * Configuration.numPositiveTests);
+			Long L = Math.round(sample * Fitness.numPositiveTests);
 			int sampleSize = Integer.valueOf(L.intValue());
 
-			ArrayList<Integer> allPositiveTests = GlobalUtils.range(1,Configuration.numPositiveTests);
+			ArrayList<Integer> allPositiveTests = GlobalUtils.range(1,Fitness.numPositiveTests);
 			List<Integer> positiveSample;
-			if(sampleSize == Configuration.numPositiveTests) {
+			if(sampleSize == Fitness.numPositiveTests) {
 				positiveSample = allPositiveTests;
 			} else {
 				long seed = System.nanoTime();
@@ -160,9 +172,9 @@ public class Fitness<G extends EditOperation> {
 		 * worth twice as much, total, as the positive tests. This is the old
 		 * ICSE'09 behavior, where there were 5 positives tests (worth 1 each) and
 		 * 1 negative test (worth 10 points). 10:5 == 2:1. */
-		double fac = Configuration.numPositiveTests * Fitness.negativeTestWeight / Configuration.numNegativeTests;
+		double fac = Fitness.numPositiveTests * Fitness.negativeTestWeight / Fitness.numNegativeTests;
 
-		double maxFitness = Configuration.numPositiveTests + ((Configuration.numNegativeTests * fac));
+		double maxFitness = Fitness.numPositiveTests + ((Fitness.numNegativeTests * fac));
 		double curFit = rep.getFitness();
 		if(curFit > -1.0) {
 			System.out.printf("\t%3g %s\n", curFit, rep.getName());
