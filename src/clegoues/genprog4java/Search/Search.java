@@ -1,5 +1,6 @@
 package clegoues.genprog4java.Search;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -33,9 +34,9 @@ public class Search<G extends EditOperation> {
 	private static double promut = 1;
 	private static boolean continueSearch = false;
 	private static double appProb = 0.33333;
-	private static double delProb = 0.0;
+	private static double delProb = 0.33333;
 	private static double swapProb = 0.0;
-	private static double repProb = 0.0; // FIXME, also make this an option!
+	private static double repProb = 0.33333; // FIXME, also make this an option!
 	private static String startingGenome = "";
 
 	private Fitness<G> fitnessEngine = null;
@@ -57,7 +58,18 @@ public class Search<G extends EditOperation> {
 		if(props.getProperty("continue") != null) {
 			Search.continueSearch = true;
 		}
-
+		if(props.getProperty("appp") != null) {
+			Search.appProb = Double.parseDouble(props.getProperty("appp").trim());
+		}
+		if(props.getProperty("repp") != null) {
+			Search.repProb = Double.parseDouble(props.getProperty("repp").trim());
+		}
+		if(props.getProperty("delp") != null) {
+			Search.delProb = Double.parseDouble(props.getProperty("delp").trim());
+		}
+		if(props.getProperty("swapp") != null) {
+			Search.swapProb = Double.parseDouble(props.getProperty("swapp").trim());
+		}
 	}
 
 
@@ -80,7 +92,9 @@ public class Search<G extends EditOperation> {
 		System.out.printf("\nRepair Found: " + rep.getName() + "\n");
 
 		Calendar endTime = Calendar.getInstance(); // TODO do something with this
-		// TODO: createSubDirectory("repair");
+		File repairDir = new File("repair/");
+		if(!repairDir.exists()) 
+			repairDir.mkdir();
 		String repairFilename = "repair/repair." + Configuration.globalExtension;
 		rep.outputSource(repairFilename);
 		rep.noteSuccess();
@@ -347,8 +361,9 @@ public class Search<G extends EditOperation> {
 			     UNM team */	
 		int gen = startGen;
 		while(gen < startGen + numGens) { // FIXME: gensRun vs. generationsRun?
-			System.out.printf("search: generation" + gen); // FIXME: (sizeof one variant = %g MB) (debug_size_in_mb (List.hd incoming_population));
+			System.out.println("search: generation" + gen); 
 			generationsRun++;
+			assert(incomingPopulation.getPopsize() > 0);
 			// Step 1: selection
 			incomingPopulation.selection(incomingPopulation.getPopsize());
 			// step 2: crossover

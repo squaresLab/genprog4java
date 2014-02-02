@@ -82,7 +82,7 @@ public abstract class Representation<G extends EditOperation> implements Compara
 		}
 		
 	}
-	// TODO: do we need  availableCrossoverPoints? Crossover is so stupid.
+
 	public void delete(int atomId) {
 		history.add(new HistoryEle(Mutation.DELETE, atomId));
 	}

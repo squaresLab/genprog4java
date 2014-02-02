@@ -428,7 +428,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	@Override
 	protected boolean internalCompile(String sourceName, String exeName) {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-		System.out.println("JavaRep internalCompile: exename: " + exeName);
 		String program = this.computeSourceBuffers().get(0).getSecond();
 		Iterable<? extends JavaFileObject> fileObjects = ASTUtils.getJavaSourceFromString(program) ; 
 
@@ -457,7 +456,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			bw.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("HERE\n");
 		}
 
 
@@ -466,7 +465,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		if(!compiler.getTask(compilerErrorWriter, null, null, options, null, fileObjects).call())
 		{
 			compilerErrorWriter.flush();
-			System.err.println(compilerErrorWriter.getBuffer().toString());
 			return false;
 		}
 
