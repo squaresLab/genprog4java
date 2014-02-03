@@ -282,7 +282,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 				node instanceof ThrowStatement ||
 				node instanceof TryStatement ||
 				node instanceof TypeDeclarationStatement ||
-				node instanceof VariableDeclarationStatement || 
 				node instanceof WhileStatement;
 	}
 

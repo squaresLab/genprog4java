@@ -351,7 +351,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		// which means either instrumentFaultLocalization should still exist and change the commands used for test case execution
 		// or we don't pretend this is trying to match OCaml exactly?
 		this.instrumentForFaultLocalization();
-		File covDir = new File("coverage/");
+		File covDir = new File("tmp/coverage/");
 		if(!covDir.exists())
 			covDir.mkdir();
 		if(!this.compile("coverage", "coverage/coverage.out")) {
@@ -400,7 +400,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		assert(faultLocalization.size() > 0);
 		assert(fixLocalization.size() > 0);
 		this.doingCoverage = false;
-		this.printDebugInfo();
+		//this.printDebugInfo();
 	}
 
 	protected abstract void printDebugInfo();
