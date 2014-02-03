@@ -33,12 +33,20 @@
 
 package clegoues.genprog4java.java;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
-public class JavaStatement
+public class JavaStatement implements Serializable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -9053826138990827966L;
+	/**
+	 * 
+	 */
 	private ASTNode astNode;
 	private int lineno;
 	private int stmtId; // unique

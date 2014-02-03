@@ -113,9 +113,7 @@ import org.jacoco.core.data.SessionInfo;
 
 public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation> {
 
-	// compile assumes that it's been written to disk.  Should it continue to assume that
-	// the subdirectory has already been created?
-	public static HashMap<Integer,JavaStatement> codeBank = new HashMap<Integer,JavaStatement>();
+	private static HashMap<Integer,JavaStatement> codeBank = new HashMap<Integer,JavaStatement>();
 	private static HashMap<Integer,JavaStatement> base = new HashMap<Integer,JavaStatement>();
 	private static CompilationUnit baseCompilationUnit = null;
 	private static HashMap<Integer,ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer,ArrayList<Integer>>();
@@ -319,25 +317,26 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 				out = fout;
 			}
 			super.serialize(filename, out, globalinfo);
-			if(globalinfo) {
-				out.writeObject(JavaRepresentation.codeBank);
-				out.writeObject(JavaRepresentation.base);
-				out.writeObject(JavaRepresentation.baseCompilationUnit);
-				out.writeObject(JavaRepresentation.lineNoToAtomIDMap);
-				out.writeObject(JavaRepresentation.originalSource);
-				out.writeObject(JavaRepresentation.inScopeSourceMap);
-			}
-			out.writeObject(this.genome); // FIXME: where's history written out?
-			if(fout == null) {
-				out.close();
-				fileOut.close();
-			}
+			out.writeObject(this.genome);
+
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			try {
+			if(fout == null) {
+				if(out != null)
+					out.close();
+				if(fileOut != null)
+						fileOut.close();
+			}		
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 	}
@@ -358,12 +357,11 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			}
 			if(super.deserialize(filename, in, globalinfo)) {
 				if(globalinfo) {
-					JavaRepresentation.codeBank = (HashMap<Integer, JavaStatement>) in.readObject();
-					JavaRepresentation.base = (HashMap<Integer, JavaStatement>) in.readObject();
-					JavaRepresentation.baseCompilationUnit = (CompilationUnit) in.readObject();
-					JavaRepresentation.lineNoToAtomIDMap = (HashMap<Integer, ArrayList<Integer>>) in.readObject();
-					JavaRepresentation.originalSource = (String) in.readObject();
-					JavaRepresentation.inScopeSourceMap = (HashMap<Integer, TreeSet<WeightedAtom>>) in.readObject();
+					// OK, tragically none of the dom.ASTNode stuff is serializable, and it's *really* not obvious
+					// how to fix that. So we need to parse the file again, which is a total bummer.
+					// this is still worth doing for the genome thing below, I guess, in particular
+					// because it allows us to serialize/deserialize incoming populations
+					this.fromSource(Configuration.sourceDir + File.separatorChar + filename + Configuration.globalExtension);
 				}
 				this.genome.addAll((ArrayList<JavaEditOperation>)(in.readObject()));  
 				System.out.println("javaRepresentation: " + filename + "loaded\n");
@@ -380,8 +378,10 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		} finally {
 			try {
 				if(fin == null) {
-					in.close();
-					fileIn.close();
+					if(in != null)
+						in.close();
+					if(fileIn != null)
+						fileIn.close();
 				}
 			} catch  (IOException e) {
 				System.err.println("javaRepresentation: IOException in file close in deserialize " + filename + " which is weird?");

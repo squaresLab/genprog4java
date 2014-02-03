@@ -130,8 +130,10 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		} finally {
 			if(fout == null) {
 				try {
-					out.close();
-					fileOut.close();
+					if(out != null)
+						out.close();
+					if(fileOut != null)
+						fileOut.close();
 				} catch (IOException e) {
 					System.err.println("faultLocRep: largely unexpected failure in serialization.");
 					e.printStackTrace();
@@ -181,8 +183,10 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		} finally {
 			try {
 				if(fin == null) {
-					in.close();
-					fileIn.close();
+					if(in != null)
+						in.close();
+					if(fileIn != null)
+						fileIn.close();
 				}
 			} catch (IOException e) {
 				succeeded = false;

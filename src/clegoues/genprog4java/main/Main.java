@@ -66,7 +66,7 @@ public class Main {
 			searchEngine = new Search<JavaEditOperation>(fitnessEngine);
 			incomingPopulation = new Population<JavaEditOperation>(); // FIXME: read from incoming if applicable!
 		}
-		baseRep.load(Configuration.sourceDir + "/" + Configuration.targetClassName + ".java");
+		baseRep.load(Configuration.targetClassName);
 		try {
 			if(Configuration.searchStrategy == "ga") {
 				searchEngine.geneticAlgorithm(baseRep, incomingPopulation);
