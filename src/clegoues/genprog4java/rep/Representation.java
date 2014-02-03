@@ -33,6 +33,9 @@
 
 package clegoues.genprog4java.rep;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -60,7 +63,7 @@ public abstract class Representation<G extends EditOperation> implements Compara
 	private ArrayList<HistoryEle> history = new ArrayList<HistoryEle>();
 	public Representation() { }
 
-	
+
 	public Representation(ArrayList<HistoryEle> history, ArrayList<JavaEditOperation> genome2) {
 		this.setGenome(new ArrayList<G>(((List<G>) genome2)));
 		this.setHistory(new ArrayList<HistoryEle>(history));
@@ -78,7 +81,7 @@ public abstract class Representation<G extends EditOperation> implements Compara
 			result += hstr;
 		}
 		return result; 
-		} 
+	} 
 
 
 	public ArrayList<HistoryEle> getHistory() { return history; }
@@ -91,8 +94,70 @@ public abstract class Representation<G extends EditOperation> implements Compara
 	public abstract int genomeLength();
 	public abstract void noteSuccess();
 	public abstract void load(String filename) throws IOException, UnexpectedCoverageResultException;
-	public abstract void serialize(String filename, ObjectOutputStream fout); // second parameter is optional
-	public abstract boolean deserialize(String filename, ObjectInputStream fin) throws UnexpectedCoverageResultException; // second parameter is optional
+	
+	public void serialize(String filename, ObjectOutputStream fout, boolean globalinfo) { // second parameter is optional
+		ObjectOutputStream out = null;
+		FileOutputStream fileOut = null;
+		try {
+			if(fout == null) {
+				fileOut = new FileOutputStream(filename + ".ser");
+				out = new ObjectOutputStream(fileOut);
+			} else {
+				out = fout;
+			}
+			out.writeObject(this.history);
+		} catch (IOException e) {
+			System.err.println("Representation: largely unexpected failure in serialization.");
+			e.printStackTrace();
+		} finally {
+			if(fout == null) {
+				try {
+					out.close();
+					fileOut.close();
+				} catch (IOException e) {
+					System.err.println("Representation: largely unexpected failure in serialization.");
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public boolean deserialize(String filename, ObjectInputStream fin, boolean globalinfo) { // second parameter is optional
+		FileInputStream fileIn = null;
+		ObjectInputStream in = null;
+		boolean succeeded = true;
+		try {
+			if(fin == null) {
+				fileIn = new FileInputStream(filename + ".ser");
+				in = new ObjectInputStream(fileIn);
+			} else {
+				in = fin;
+			}
+			this.history = (ArrayList<HistoryEle>) in.readObject();
+		} catch (IOException e) {
+			System.err.println("Representation: IOException in deserialize " + filename + " which is probably OK");
+			e.printStackTrace();
+			succeeded = false;
+		} catch (ClassNotFoundException e) {
+			System.err.println("Representation: ClassNotFoundException in deserialize " + filename + " which is probably *not* OK");
+			e.printStackTrace();
+			succeeded = false;
+		} finally {
+			try {
+				if(fin == null) {
+					in.close();
+					fileIn.close();
+				}
+			} catch (IOException e) {
+				System.err.println("Representation: IOException in file close in deserialize " + filename + " which is weird?");
+				succeeded = false;
+				e.printStackTrace();
+			}
+		}
+		return succeeded;
+	}
+	
 	public abstract ArrayList<WeightedAtom> getFaultyAtoms();
 	public abstract ArrayList<WeightedAtom> getFixSourceAtoms();
 	public abstract boolean sanityCheck();
@@ -116,7 +181,7 @@ public abstract class Representation<G extends EditOperation> implements Compara
 				Representation.mutations.add(candidateMut);
 			}
 		}
-		
+
 	}
 
 	public void delete(int atomId) {
@@ -126,12 +191,12 @@ public abstract class Representation<G extends EditOperation> implements Compara
 		history.add(new HistoryEle(Mutation.APPEND, whereToAppend, whatToAppend));
 	}
 	public abstract TreeSet<WeightedAtom> appendSources(int atomId);
-	
+
 	public void swap(int swap1, int swap2) {
 		history.add(new HistoryEle(Mutation.SWAP, swap1, swap2));
 	}
 	public abstract TreeSet<WeightedAtom>  swapSources(int atomId);
-	
+
 	public void replace(int whatToReplace, int whatToReplaceWith) {
 		history.add(new HistoryEle(Mutation.REPLACE, whatToReplace, whatToReplaceWith));
 	}

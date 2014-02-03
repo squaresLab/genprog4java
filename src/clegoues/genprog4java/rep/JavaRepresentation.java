@@ -34,7 +34,6 @@
 package clegoues.genprog4java.rep;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -57,7 +56,6 @@ import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
 
-import clegoues.genprog4java.Fitness.FitnessValue;
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaParser;
@@ -69,10 +67,6 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
 import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.exec.ExecuteWatchdog;
-import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AssertStatement;
@@ -258,36 +252,36 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 				lineNoList.add(s.getStmtId());
 				lineNoToAtomIDMap.put(lineNo,  lineNoList);
 				if(semanticCheck.equals("scope") || semanticCheck.equals("none") || semanticCheck.equals("javaspecial")) {
-				base.put(s.getStmtId(),s);
-				codeBank.put(s.getStmtId(), s); 
+					base.put(s.getStmtId(),s);
+					codeBank.put(s.getStmtId(), s); 
+				}
 			}
-		}
 
-	}
+		}
 	}
 	public static boolean canRepair(ASTNode node) {
 		return node instanceof AssertStatement ||
-		node instanceof Block ||
-		node instanceof BreakStatement ||
-		node instanceof ConstructorInvocation ||
-		node instanceof ContinueStatement || 
-		node instanceof DoStatement ||
-		node instanceof EmptyStatement ||
-		node instanceof EnhancedForStatement ||
-		node instanceof ExpressionStatement ||
-		node instanceof ForStatement ||
-		node instanceof IfStatement ||
-		node instanceof LabeledStatement ||
-		node instanceof ReturnStatement ||
-		node instanceof SuperConstructorInvocation ||
-		node instanceof SwitchCase ||
-		node instanceof SwitchStatement ||
-		node instanceof SynchronizedStatement ||
-		node instanceof ThrowStatement ||
-		node instanceof TryStatement ||
-		node instanceof TypeDeclarationStatement ||
-		node instanceof VariableDeclarationStatement || 
-		node instanceof WhileStatement;
+				node instanceof Block ||
+				node instanceof BreakStatement ||
+				node instanceof ConstructorInvocation ||
+				node instanceof ContinueStatement || 
+				node instanceof DoStatement ||
+				node instanceof EmptyStatement ||
+				node instanceof EnhancedForStatement ||
+				node instanceof ExpressionStatement ||
+				node instanceof ForStatement ||
+				node instanceof IfStatement ||
+				node instanceof LabeledStatement ||
+				node instanceof ReturnStatement ||
+				node instanceof SuperConstructorInvocation ||
+				node instanceof SwitchCase ||
+				node instanceof SwitchStatement ||
+				node instanceof SynchronizedStatement ||
+				node instanceof ThrowStatement ||
+				node instanceof TryStatement ||
+				node instanceof TypeDeclarationStatement ||
+				node instanceof VariableDeclarationStatement || 
+				node instanceof WhileStatement;
 	}
 
 
@@ -313,7 +307,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	}
 
 	@Override
-	public void serialize(String filename, ObjectOutputStream fout) {
+	public void serialize(String filename, ObjectOutputStream fout, boolean globalinfo) {
 		// fout is going to be null for sure until I implement a subclass, but whatever
 		ObjectOutputStream out = null;
 		FileOutputStream fileOut = null;
@@ -324,14 +318,15 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			} else {
 				out = fout;
 			}
-			super.serialize(filename, fout);
-			// globalinfo?  hmm.
-			out.writeObject(JavaRepresentation.codeBank);
-			out.writeObject(JavaRepresentation.base);
-			out.writeObject(JavaRepresentation.baseCompilationUnit);
-			out.writeObject(JavaRepresentation.lineNoToAtomIDMap);
-			out.writeObject(JavaRepresentation.originalSource);
-			out.writeObject(JavaRepresentation.inScopeSourceMap);
+			super.serialize(filename, out, globalinfo);
+			if(globalinfo) {
+				out.writeObject(JavaRepresentation.codeBank);
+				out.writeObject(JavaRepresentation.base);
+				out.writeObject(JavaRepresentation.baseCompilationUnit);
+				out.writeObject(JavaRepresentation.lineNoToAtomIDMap);
+				out.writeObject(JavaRepresentation.originalSource);
+				out.writeObject(JavaRepresentation.inScopeSourceMap);
+			}
 			out.writeObject(this.genome); // FIXME: where's history written out?
 			if(fout == null) {
 				out.close();
@@ -348,10 +343,52 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	}
 
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public boolean deserialize(String filename, ObjectInputStream fin) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean deserialize(String filename, ObjectInputStream fin, boolean globalinfo) {
+		ObjectInputStream in = null;
+		FileInputStream fileIn = null;
+		boolean succeeded = true;
+		try {
+			if(fin == null) {
+				fileIn = new FileInputStream(filename + ".ser");
+				in = new ObjectInputStream(fileIn);
+			} else {
+				in = fin;
+			}
+			if(super.deserialize(filename, in, globalinfo)) {
+				if(globalinfo) {
+					JavaRepresentation.codeBank = (HashMap<Integer, JavaStatement>) in.readObject();
+					JavaRepresentation.base = (HashMap<Integer, JavaStatement>) in.readObject();
+					JavaRepresentation.baseCompilationUnit = (CompilationUnit) in.readObject();
+					JavaRepresentation.lineNoToAtomIDMap = (HashMap<Integer, ArrayList<Integer>>) in.readObject();
+					JavaRepresentation.originalSource = (String) in.readObject();
+					JavaRepresentation.inScopeSourceMap = (HashMap<Integer, TreeSet<WeightedAtom>>) in.readObject();
+				}
+				this.genome.addAll((ArrayList<JavaEditOperation>)(in.readObject()));  
+				System.out.println("javaRepresentation: " + filename + "loaded\n");
+			} else {
+				succeeded = false;
+			}
+		} catch (ClassNotFoundException e) {
+			System.err.println("javaRepresentation: ClassNotFoundException in deserialize " + filename + " which is probably *not* OK");
+			e.printStackTrace();		
+			succeeded = false;
+		} catch (IOException e) {
+			System.err.println("javaRepresentation: IOException in deserialize " + filename + " which is probably OK");
+			succeeded = false;
+		} finally {
+			try {
+				if(fin == null) {
+					in.close();
+					fileIn.close();
+				}
+			} catch  (IOException e) {
+				System.err.println("javaRepresentation: IOException in file close in deserialize " + filename + " which is weird?");
+				e.printStackTrace();
+			}
+		}
+		return succeeded;
 	}
 
 	@Override
@@ -368,7 +405,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		Document original = new Document(JavaRepresentation.getOriginalSource()); 
 
 		ASTRewrite rewriter = ASTRewrite.create(cu.getAST());
-		
+
 		try
 		{
 			for(JavaEditOperation edit : genome) { 
@@ -492,58 +529,58 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		if(sourceBuffers == null) {
 			return false;
 		} else {
-		String program = this.computeSourceBuffers().get(0).getSecond();
-		Iterable<? extends JavaFileObject> fileObjects = ASTUtils.getJavaSourceFromString(program) ; 
-		// FIXME: why does an append that fails in computeSourceBuffers have a fitness of 204?
-		LinkedList<String> options = new LinkedList<String>();
+			String program = this.computeSourceBuffers().get(0).getSecond();
+			Iterable<? extends JavaFileObject> fileObjects = ASTUtils.getJavaSourceFromString(program) ; 
+			// FIXME: why does an append that fails in computeSourceBuffers have a fitness of 204?
+			LinkedList<String> options = new LinkedList<String>();
 
-		options.add("-cp");
-		options.add(Configuration.libs);
+			options.add("-cp");
+			options.add(Configuration.libs);
 
-		options.add("-source");
-		options.add(Configuration.sourceVersion);
+			options.add("-source");
+			options.add(Configuration.sourceVersion);
 
-		options.add("-target");
-		options.add(Configuration.targetVersion);
+			options.add("-target");
+			options.add(Configuration.targetVersion);
 
-		options.add("-d");
-		String outDirName = Configuration.outputDir + File.separatorChar + exeName + File.separatorChar;
-		File outDir = new File(outDirName);
-		if(!outDir.exists()) 
-			outDir.mkdir();
-		options.add(outDirName);  
-		try {
-			// FIXME: can I write this in the folders to match where the class file is compiled?
-			
-			BufferedWriter bw = new BufferedWriter(new FileWriter(outDirName + File.separatorChar + sourceName + Configuration.globalExtension));
-			bw.write(program);
-			bw.flush();
-			bw.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-		}
+			options.add("-d");
+			String outDirName = Configuration.outputDir + File.separatorChar + exeName + File.separatorChar;
+			File outDir = new File(outDirName);
+			if(!outDir.exists()) 
+				outDir.mkdir();
+			options.add(outDirName);  
+			try {
+				// FIXME: can I write this in the folders to match where the class file is compiled?
+
+				BufferedWriter bw = new BufferedWriter(new FileWriter(outDirName + File.separatorChar + sourceName + Configuration.globalExtension));
+				bw.write(program);
+				bw.flush();
+				bw.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+			}
 
 
-		StringWriter compilerErrorWriter = new StringWriter();
+			StringWriter compilerErrorWriter = new StringWriter();
 
-		if(!compiler.getTask(compilerErrorWriter, null, null, options, null, fileObjects).call())
-		{
-			System.err.println(compilerErrorWriter.toString());
-			compilerErrorWriter.flush();
-			return false;
-		}
+			if(!compiler.getTask(compilerErrorWriter, null, null, options, null, fileObjects).call())
+			{
+				System.err.println(compilerErrorWriter.toString());
+				compilerErrorWriter.flush();
+				return false;
+			}
 
-		return true;
+			return true;
 		}
 	}
 
 
-	
+
 	public JavaRepresentation copy() {
 		JavaRepresentation copy = new JavaRepresentation(this.getHistory(), this.getGenome(), this.getFaultyAtoms(), this.getFixSourceAtoms());
 		return copy;
 	}
-	
+
 	private TreeSet<WeightedAtom> scopeHelper(int stmtId) {
 		if(JavaRepresentation.inScopeSourceMap.containsKey(stmtId)) {
 			return JavaRepresentation.inScopeSourceMap.get(stmtId);
@@ -567,12 +604,12 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			if(ok) {
 				retVal.add(atom);
 			}
-			
+
 		}
 		JavaRepresentation.inScopeSourceMap.put(stmtId,retVal);
 		return retVal;
 	}
-	
+
 	@Override
 	// you probably want to override these for semantic legality check
 	public TreeSet<WeightedAtom> appendSources(int stmtId) {
@@ -582,7 +619,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			return super.appendSources(stmtId);
 		}
 	}
-	
+
 	@Override
 	public TreeSet<WeightedAtom> swapSources(int stmtId) {
 		if(JavaRepresentation.semanticCheck.equals("scope")) {
@@ -592,7 +629,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			return super.swapSources(stmtId);
 		}
 	}
-	
+
 	@Override
 	public TreeSet<WeightedAtom> replaceSources(int stmtId) {
 		if(JavaRepresentation.semanticCheck.equals("scope")) {
