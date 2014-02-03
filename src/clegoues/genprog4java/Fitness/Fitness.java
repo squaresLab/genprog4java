@@ -1,19 +1,47 @@
+/*
+ * Copyright (c) 2014-2015, 
+ *  Claire Le Goues     <clegoues@cs.cmu.edu>
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *
+ * 3. The names of the contributors may not be used to endorse or promote
+ * products derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package clegoues.genprog4java.Fitness;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Random;
-import java.util.Set;
 
-import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.util.GlobalUtils;
@@ -149,7 +177,6 @@ public class Fitness<G extends EditOperation> {
 			if(rep.testCase(thisTest)) { 
 				fitness += 1.0;
 			}
-
 		}
 		for(String test : Fitness.negativeTests) {
 			TestCase thisTest = new TestCase(TestType.NEGATIVE, test);
@@ -159,6 +186,7 @@ public class Fitness<G extends EditOperation> {
 		}
 		return new Pair<Double,Double>(fitness,fitness);
 	}
+	
 	/* {b test_fitness} generation variant returns true if the variant passes all
 	    test cases and false otherwise.  Only tests fitness if the rep has not
 	    cached it.  Postcondition: records fitness in rep, calls rep#cleanup(). May
@@ -186,7 +214,7 @@ public class Fitness<G extends EditOperation> {
 			} else if (Fitness.sampleStrategy == "variant") {
 				fitnessPair = this.testFitnessVariant(rep);
 			} else {
-				throw new UnsupportedOperationException(); // not doing all right now because don't see a need for those experiments any time soon
+				throw new UnsupportedOperationException("Fitness: Claire did not implement the \"all\" strategy, or you asked for something totally bonkers (requested sample strategy: " + Fitness.sampleStrategy + ")\n"); // not doing all right now because don't see a need for those experiments any time soon
 			}
 		} else {
 			fitnessPair = this.testFitnessFull(rep, fac);
