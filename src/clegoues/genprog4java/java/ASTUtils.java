@@ -14,14 +14,11 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import clegoues.genprog4java.main.Configuration;
 
-
-
-// FIXME: direct copy from PAR
 public class ASTUtils
 {
 	
-	public static int getStatementLineNo(ASTNode node)
-	{
+	public static int getLineNumber(ASTNode node)
+	{ // FIXME: I think we should be able to just get this from the CU saved in javarepresentation, right?
 		ASTNode root = node.getRoot();
 		int lineno = -1;
 		if(root instanceof CompilationUnit)
@@ -36,14 +33,11 @@ public class ASTUtils
 	public static Set<String> getNames(ASTNode node)     // it does not count.
 	{
 		TreeSet<String> names = new TreeSet<String>();
-		
 		NameCollector visitor = new NameCollector(names);
-		
 		node.accept(visitor);
-		
 		return names;
 	}
-	// FUXNE this feels wicked inefficient to me, but possibly that's a low-order bit
+	// FIXME this feels wicked inefficient to me, but possibly that's a low-order bit
 	
 	public static Set<String> getTypes(ASTNode node)
 	{

@@ -184,6 +184,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		return retVal;
 	}
 
+	@Override
 	// you probably want to override these for semantic legality check
 	public TreeSet<WeightedAtom> appendSources(int stmtId) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
@@ -192,6 +193,8 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		}
 		return retVal;
 	}
+	
+	@Override
 	public TreeSet<WeightedAtom> swapSources(int stmtId) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
 		for(WeightedAtom item : FaultLocRepresentation.fixLocalization) {
@@ -199,6 +202,8 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		}
 		return retVal;
 	}
+	
+	@Override
 	public TreeSet<WeightedAtom> replaceSources(int stmtId) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
 		for(WeightedAtom item : FaultLocRepresentation.fixLocalization) {

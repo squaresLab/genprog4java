@@ -90,10 +90,12 @@ public abstract class Representation<G extends EditOperation> implements Compara
 		history.add(new HistoryEle(Mutation.APPEND, whereToAppend, whatToAppend));
 	}
 	public abstract TreeSet<WeightedAtom> appendSources(int atomId);
+	
 	public void swap(int swap1, int swap2) {
 		history.add(new HistoryEle(Mutation.SWAP, swap1, swap2));
 	}
 	public abstract TreeSet<WeightedAtom>  swapSources(int atomId);
+	
 	public void replace(int whatToReplace, int whatToReplaceWith) {
 		history.add(new HistoryEle(Mutation.REPLACE, whatToReplace, whatToReplaceWith));
 	}
@@ -106,5 +108,11 @@ public abstract class Representation<G extends EditOperation> implements Compara
 	public abstract void recordFitness(String key, FitnessValue fitness); 
 	public abstract void setFitness(double fitness);  
 
+
+	@Override
+	public int compareTo(Representation<G> o) {
+		Double myFitness = new Double(this.getFitness());
+		return myFitness.compareTo(new Double(o.getFitness()));
+	}
 
 }

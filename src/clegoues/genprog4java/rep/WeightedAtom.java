@@ -3,7 +3,6 @@ import clegoues.genprog4java.util.*;
 
 public class WeightedAtom extends Pair<Integer,Double> {
 
-
 	public WeightedAtom(Integer atomid) {
 		super(atomid, 1.0);
 	}
@@ -12,9 +11,8 @@ public class WeightedAtom extends Pair<Integer,Double> {
 	}
 	public int getAtom() { return super.getFirst(); }
 	public double getWeight() { return super.getSecond(); }
-	// FIXME: will sort by weight! mistake?
 
 	public int compareTo(WeightedAtom otherAtomPair) {
-		return (int) (this.getSecond() - otherAtomPair.getSecond());
+		return new Double(this.getSecond()).compareTo(new Double(otherAtomPair.getSecond()));
 	}
 }
