@@ -97,10 +97,12 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 
 
 	public void load(String base) throws IOException { 
-		boolean didDeserialize = this.deserialize(base,null, true); // FIXME: filename is probably wrong
+		String filename = Configuration.sourceDir + File.separatorChar + base + Configuration.globalExtension;
+		String cacheName = base + ".cache";
+		boolean didDeserialize = this.deserialize(cacheName,null, true); 
 		if(!didDeserialize) { 
-			this.fromSource(base); 
-			System.out.println("loaded from source " + base);
+			this.fromSource(filename); 
+			System.out.println("loaded from source " + filename);
 		}
 		if(Configuration.doSanity){
 			if(!this.sanityCheck()) { 
@@ -109,7 +111,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 			}
 		}
 		if(!didDeserialize)
-			this.serialize(base, null, true);
+			this.serialize(cacheName, null, true);
 	}  
 
 	// have ommitted serialize/deserialize at this representation implementation level

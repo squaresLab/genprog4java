@@ -112,8 +112,10 @@ public abstract class Representation<G extends EditOperation> implements Compara
 		} finally {
 			if(fout == null) {
 				try {
-					out.close();
-					fileOut.close();
+					if(out != null)
+						out.close();
+					if(fileOut != null)
+						fileOut.close();
 				} catch (IOException e) {
 					System.err.println("Representation: largely unexpected failure in serialization.");
 					e.printStackTrace();
