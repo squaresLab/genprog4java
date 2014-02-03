@@ -148,4 +148,10 @@ public abstract class Representation<G extends EditOperation> implements Compara
 		return myFitness.compareTo(new Double(o.getFitness()));
 	}
 
+
+	protected List<Pair<String, String>> computeSourceBuffers() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
