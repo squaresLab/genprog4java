@@ -60,6 +60,7 @@ import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.java.ScopeInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.JavaEditOperation;
@@ -122,8 +123,9 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	// semantic check cache stuff, so we don't have to walk stuff a million times unecessarily
 	// should be the same for all of append, replace, and swap, so we only need the one.
 	private static String semanticCheck = "scope";
-	private static HashMap<Integer,TreeSet<WeightedAtom>> inScopeSourceMap = new HashMap<Integer,TreeSet<WeightedAtom>>();
-
+	private static HashMap<Integer,TreeSet<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer,TreeSet<WeightedAtom>>();
+	private static HashMap<Integer,Set<String>> inScopeMap = new HashMap<Integer,Set<String>>();
+	
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
 
 	public static void configure(Properties prop) {
@@ -221,8 +223,8 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		// parser can visit at the same time to collect scope info
 		// apparently names and types and scopes are visited here below in
 		// the calls to ASTUtils
-
-		JavaParser myParser = new JavaParser();
+		ScopeInfo scopeInfo = new ScopeInfo();
+		JavaParser myParser = new JavaParser(scopeInfo);
 		JavaRepresentation.originalSource = FileUtils.readFileToString(new File(fname));
 		myParser.parse(fname, Configuration.libs.split(File.pathSeparator)); 
 		List<ASTNode> stmts = myParser.getStatements();
@@ -239,7 +241,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 				s.setLineno(lineNo);
 				s.setNames(ASTUtils.getNames(node));
 				s.setTypes(ASTUtils.getTypes(node));
-				s.setScopes(ASTUtils.getScope(node));
+				s.setRequiredNames(ASTUtils.getScope(node));
 				s.setASTNode(node);
 				ArrayList<Integer> lineNoList = null;
 				if(lineNoToAtomIDMap.containsKey(lineNo)) {
@@ -253,6 +255,8 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 					base.put(s.getStmtId(),s);
 					codeBank.put(s.getStmtId(), s); 
 				}
+					scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
+					JavaRepresentation.inScopeMap.put(s.getStmtId(),scopeInfo.getScope(s.getASTNode()));
 			}
 
 		}
@@ -513,11 +517,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		this.editHelper(whatToReplace,whatToReplaceWith,Mutation.REPLACE);		
 	}
 
-	public JavaRepresentation clone() throws CloneNotSupportedException {
-		JavaRepresentation clone = (JavaRepresentation) super.clone();
-		clone.genome = new ArrayList<JavaEditOperation>(this.genome);
-		return clone;
-	}
 
 	@Override
 	protected boolean internalCompile(String sourceName, String exeName) {
@@ -582,18 +581,19 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	}
 
 	private TreeSet<WeightedAtom> scopeHelper(int stmtId) {
-		if(JavaRepresentation.inScopeSourceMap.containsKey(stmtId)) {
-			return JavaRepresentation.inScopeSourceMap.get(stmtId);
+		if(JavaRepresentation.scopeSafeAtomMap.containsKey(stmtId)) {
+			return JavaRepresentation.scopeSafeAtomMap.get(stmtId);
 		}
 		JavaStatement locationStmt = codeBank.get(stmtId);
-		Set<String> inScopeAt = locationStmt.getScopes();
+		// I *believe* this is just variable names and doesn't check required types, which are also collected
+		// at parse time and thus could be considered here.
+		Set<String> inScopeAt = JavaRepresentation.inScopeMap.get(locationStmt.getStmtId());
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
 		for(WeightedAtom atom : this.getFixSourceAtoms()) {
 			int index = atom.getAtom();
 			JavaStatement stmt = codeBank.get(index);
-			Set<String> requiredScopes = stmt.getScopes(); // I don't know what the difference is between
-			// getScopes, getNames, and getTypes.  This feels like an oversight.
-			// ...getNecessaryScopeNames?
+			Set<String> requiredScopes = stmt.getRequiredNames();
+
 			boolean ok = true;
 			for(String req : requiredScopes) {
 				if(!inScopeAt.contains(req)) {
@@ -606,7 +606,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			}
 
 		}
-		JavaRepresentation.inScopeSourceMap.put(stmtId,retVal);
+		JavaRepresentation.scopeSafeAtomMap.put(stmtId,retVal);
 		return retVal;
 	}
 
@@ -637,6 +637,30 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		} else {
 			return super.replaceSources(stmtId);
 		}
+	}
+	@Override
+	protected void printDebugInfo() {
+		ArrayList<WeightedAtom> buggyStatements = this.getFaultyAtoms();
+		for(WeightedAtom atom : buggyStatements) {
+			int atomid = atom.getAtom();
+			JavaStatement stmt = JavaRepresentation.base.get(atomid);
+			ASTNode actualStmt = stmt.getASTNode();
+			String stmtStr = actualStmt.toString();
+			System.out.println("statement "+ atomid + " at line " + stmt.getLineno() +  ": " + stmtStr);
+			System.out.println("\t Names:");
+			for(String name : stmt.getNames()) {
+				System.out.println("\t\t" + name);
+			}
+			System.out.println("\t Scopes:");
+			for(String scope : stmt.getRequiredNames()) {
+				System.out.println("\t\t" + scope);
+			}
+			System.out.println("\t Types:");
+			for(String t : stmt.getTypes()) {
+				System.out.println("\t\t" + t);
+			}
+		}
+		
 	}
 
 }

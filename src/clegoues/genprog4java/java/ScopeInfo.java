@@ -42,7 +42,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 public class ScopeInfo
 {
 	
-	private HashMap<ASTNode,Set<String>> stmtScope;
+	private HashMap<ASTNode,Set<String>> stmtScope; // stuff that's IN SCOPE at the statement, not used at the statement
 	
 	public ScopeInfo()
 	{

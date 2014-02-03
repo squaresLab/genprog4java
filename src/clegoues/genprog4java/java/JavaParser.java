@@ -33,9 +33,9 @@
 
 package clegoues.genprog4java.java;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
@@ -49,24 +49,17 @@ public class JavaParser
 	private LinkedList<ASTNode> stmts;
 	private SemanticInfoVisitor visitor;
 	private CompilationUnit compilationUnit;
-	
-	private ScopeInfo scopeList;
+	private Set<String> fields;
 	
 
-	public JavaParser()
+	public JavaParser(ScopeInfo scopeList)
 	{
 		this.stmts = new LinkedList<ASTNode>();
 		this.visitor = new SemanticInfoVisitor();
 		this.visitor.setNodeSet(this.stmts);		
-		this.scopeList = new ScopeInfo();
-		this.visitor.setScopeList(this.scopeList);
+		this.visitor.setScopeList(scopeList);
 	}
 
-	public ScopeInfo getScopeInfo()
-	{
-		return this.scopeList;
-	}
-	
 	
 	public LinkedList<ASTNode> getStatements()
 	{
@@ -97,8 +90,15 @@ public class JavaParser
 		parser.createASTs(new String[]{file}, null, new String[0], req, null);
 		
 		this.compilationUnit = visitor.getCompilationUnit();
-	for(ASTNode stmt : this.stmts) { 
-			this.scopeList.addScope4Stmt(stmt, visitor.getFieldSet());
-		} 
+		this.setFields(visitor.getFieldSet());
+
+	}
+
+	public Set<String> getFields() {
+		return fields;
+	}
+
+	public void setFields(Set<String> fields) {
+		this.fields = fields;
 	}
 }

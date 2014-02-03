@@ -186,27 +186,20 @@ public class SemanticInfoVisitor extends ASTVisitor
 			if(o instanceof VariableDeclarationFragment)
 			{
 				VariableDeclarationFragment v = (VariableDeclarationFragment)o;
-				//logger.info(v.toString() + "[" + ASTUtils.getStatementLineNo(v)+"]");
 				this.currentMethodScope.add(v.getName().getIdentifier());
 			}
 		}
 		return super.visit(node);
 	}
 
-
-	
-	// there was a preVisit method here that initially set up the statements we were considering for repair and put their info
-	// somewhere.  Let's do that post-parse/numvisit/semantic collection setup.
-	
 	public void preVisit(ASTNode node)
 	{				
-	
 				if(JavaRepresentation.canRepair(node)) // FIXME: why is this necessary to not crash and die?
 				{				
 					// add scope information
 					TreeSet<String> newScope = new TreeSet<String>();
 					newScope.addAll(this.currentMethodScope);
-					this.scopes.addScope4Stmt(node, newScope); // FIXME: possibly we only need this info for faulty statements, but whatever
+					this.scopes.addScope4Stmt(node, newScope); 
 					this.nodeSet.add(node);
 				}
 	
