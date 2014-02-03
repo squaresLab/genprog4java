@@ -34,8 +34,10 @@
 package clegoues.genprog4java.rep;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
@@ -88,8 +90,8 @@ public abstract class Representation<G extends EditOperation> implements Compara
 	public abstract int genomeLength();
 	public abstract void noteSuccess();
 	public abstract void load(String filename) throws IOException, UnexpectedCoverageResultException;
-	public abstract void serialize(String filename);
-	public abstract boolean deserialize(String filename);
+	public abstract void serialize(String filename, ObjectOutputStream fout); // second parameter is optional
+	public abstract boolean deserialize(String filename, ObjectInputStream fin) throws UnexpectedCoverageResultException; // second parameter is optional
 	public abstract ArrayList<WeightedAtom> getFaultyAtoms();
 	public abstract ArrayList<WeightedAtom> getFixSourceAtoms();
 	public abstract boolean sanityCheck();

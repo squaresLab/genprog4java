@@ -37,11 +37,13 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
@@ -50,7 +52,6 @@ import java.util.TreeSet;
 import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.Fitness.TestCase;
 import clegoues.genprog4java.Fitness.TestType;
-import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.JavaEditOperation;
@@ -58,8 +59,9 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
 
+@SuppressWarnings("rawtypes")
 public abstract class FaultLocRepresentation<G extends EditOperation> extends CachingRepresentation<G> {
-	// FIXME: making these static is lazy of me, but whatever, I'm tired of this clone/copy debacle
+	// FIXME: making these static is probably lazy of me, but whatever, I'm tired of this clone/copy debacle
 	protected static ArrayList<WeightedAtom> faultLocalization = new ArrayList<WeightedAtom>();  
 	protected static ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
@@ -90,12 +92,12 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		if(prop.getProperty("allowCoverageFail") != null) {
 			allowCoverageFail = true;
 		}
-		
+
 		if(prop.getProperty("posCoverageFile") != null)
 		{
 			posCoverageFile = prop.getProperty("posCoverageFile").trim();
 		}
-		
+
 		if(prop.getProperty("negCoverageFile") != null)
 		{
 			negCoverageFile = prop.getProperty("negCoverageFile").trim();
@@ -103,75 +105,91 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		if(prop.getProperty("regenPaths") != null) {
 			regenPaths = true;
 		}
-		
+
 	}
 	
+	@Override
+	public void serialize(String filename, ObjectOutputStream fout) {
+		ObjectOutputStream out = null;
+		FileOutputStream fileOut = null;
+		try {
+			if(fout == null) {
+				fileOut = new FileOutputStream(filename + ".ser");
+				out = new ObjectOutputStream(fileOut);
+			} else {
+				out = fout;
+			}
+			out.writeObject(FaultLocRepresentation.faultLocalization);
+			out.writeObject(FaultLocRepresentation.fixLocalization);
 
-	/*
+			// doesn't exist yet, but remember when you add it: out.writeObject(FaultLocalization.faultScheme);
+			out.writeObject(FaultLocRepresentation.negativePathWeight);
+			out.writeObject(FaultLocRepresentation.positivePathWeight);
 
-			  (** [deserialize] can fail if the version saved in the binary file does not
-			      match the current [faultLocRep_version].  As it can call
-			      [compute_localization], it may also abort there *)
-			  method deserialize ?in_channel ?global_info (filename : string) = 
-			    let fin = 
-			      match in_channel with
-			      | Some(v) -> v
-			      | None -> assert(false); 
-			    in 
-			    let version = Marshal.from_channel fin in
-			      if version <> faultlocRep_version then begin
-			        debug "faultlocRep: %s has old version\n" filename ;
-			        failwith "version mismatch" 
-			      end ;
-			      fault_localization := Marshal.from_channel fin ; 
-			      fix_localization := Marshal.from_channel fin ; 
-			      per_test_localization := Marshal.from_channel fin ; 
-			      per_atom_covering_tests := Marshal.from_channel fin ; 
+		} catch (FileNotFoundException e) {
+			System.err.println("faultLocRep: largely unexpected failure in serialization.");
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.err.println("faultLocRep: largely unexpected failure in serialization.");
+			e.printStackTrace();
+		} finally {
+			if(fout == null) {
+				try {
+					out.close();
+					fileOut.close();
+				} catch (IOException e) {
+					System.err.println("faultLocRep: largely unexpected failure in serialization.");
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
-			      let gval = match global_info with Some(n) -> n | _ -> false in
-			        if gval then begin
-			          (* CLG isn't sure if this is quite right *)
-			          let fault_scheme' = Marshal.from_channel fin in
-			          let fix_scheme' = Marshal.from_channel fin in
-			          let negative_path_weight' = Marshal.from_channel fin in
-			          let positive_path_weight' = Marshal.from_channel fin in
-			            if fault_scheme' <> !fault_scheme ||
-			              fix_scheme' <> !fix_scheme ||
-			              negative_path_weight' <> !negative_path_weight ||
-			              positive_path_weight' <> !positive_path_weight ||
-			              !regen_paths then
-			              self#compute_localization()
-			        end;
-			        super#deserialize ?in_channel:(Some(fin)) ?global_info:global_info filename ; 
-			        debug "faultlocRep: %s: loaded\n" filename ; 
-			        if in_channel = None then close_in fin 
+	@SuppressWarnings("unchecked")
+	@Override
+	public boolean deserialize(String filename, ObjectInputStream fin) throws UnexpectedCoverageResultException {
+		FileInputStream fileIn = null;
+		ObjectInputStream in = null;
+		boolean succeeded = true;
+		try {
+			if(fin == null) {
+				fileIn = new FileInputStream(filename + ".ser"); 
+				in = new ObjectInputStream(fileIn);
+			} else {
+				in = fin;
+			}
+			FaultLocRepresentation.faultLocalization = (ArrayList<WeightedAtom>) in.readObject();
+			FaultLocRepresentation.fixLocalization = (ArrayList<WeightedAtom>) in.readObject();
+			// doesn't exist yet, but remember when you add it: out.writeObject(FaultLocalization.faultScheme);
+			double negWeight = (double) in.readObject();
+			double posWeight = (double) in.readObject();
+			if(negWeight != FaultLocRepresentation.negativePathWeight ||
+					posWeight != FaultLocRepresentation.positivePathWeight ||
+					FaultLocRepresentation.regenPaths) {
+				this.computeLocalization(); // I remember needing to do this in OCaml but I don't remember why?
+			}
+			System.out.println("faultLocRepresentation: " + filename + "loaded\n");
+		} catch(IOException e) {
+			System.err.println("faultLocRepresentation: IOException in deserialize " + filename + " which is probably OK");
+			succeeded = false;
+		} catch (ClassNotFoundException e) {
+			System.err.println("faultLocRepresentation: ClassNotFoundException in deserialize " + filename + " which is probably *not* OK");
+			e.printStackTrace();
+			succeeded = false;
+		} finally {
+			try {
+				if(fin == null) {
+					in.close();
+					fileIn.close();
+				}
+			} catch (IOException e) {
+				System.err.println("faultLocRepresentation: IOException in file close in deserialize " + filename + " which is weird?");
+				e.printStackTrace();
+			}
+		}
+		return succeeded;
+	}
 
-			  (***********************************)
-			  (* Concrete methods implementing the interface *)
-			  (***********************************)
-
-			  method serialize ?out_channel ?global_info (filename : string) =
-			    let fout = 
-			      match out_channel with
-			      | Some(v) -> v
-			      | None -> assert(false); 
-			    in 
-			      Marshal.to_channel fout (faultlocRep_version) [] ; 
-			      Marshal.to_channel fout (!fault_localization) [] ;
-			      Marshal.to_channel fout (!fix_localization) [] ;
-			      Marshal.to_channel fout (!per_test_localization) [] ;
-			      Marshal.to_channel fout (!per_atom_covering_tests) [] ;
-			      let gval = match global_info with Some(n) -> n | _ -> false in 
-			        if gval then begin
-			          Marshal.to_channel fout !fault_scheme [] ; 
-			          Marshal.to_channel fout !fix_scheme [] ; 
-			          Marshal.to_channel fout !negative_path_weight [] ; 
-			          Marshal.to_channel fout !positive_path_weight [] ; 
-			        end;
-			        super#serialize ~out_channel:fout filename ;
-			        debug "faultlocRep: %s: saved\n" filename ; 
-			        if out_channel = None then close_out fout 
-	 */
 	public ArrayList<WeightedAtom> getFaultyAtoms () {
 		return FaultLocRepresentation.faultLocalization; 
 	}
@@ -226,7 +244,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		}
 		return retVal;
 	}
-	
+
 	@Override
 	public TreeSet<WeightedAtom> swapSources(int stmtId) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
@@ -235,7 +253,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		}
 		return retVal;
 	}
-	
+
 	@Override
 	public TreeSet<WeightedAtom> replaceSources(int stmtId) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
@@ -334,7 +352,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	public void computeLocalization() throws IOException, UnexpectedCoverageResultException {
 		// FIXME: THIS ONLY DOES STANDARD PATH FILE localization
 		/*
-		* Default "ICSE'09"-style fault and fix localization from path files.  The
+		 * Default "ICSE'09"-style fault and fix localization from path files.  The
 		 * weighted path fault localization is a list of <atom,weight> pairs. The fix
 		 * weights are a hash table mapping atom_ids to weights.
 		 */
@@ -403,7 +421,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	public void load(String fname) throws IOException {
 		super.load(fname); // calling super so that the code is loaded and the sanity check happens before localization is computed
 		try {
-		this.computeLocalization();
+			this.computeLocalization();
 		} catch (UnexpectedCoverageResultException e) {
 			System.err.println("FaultLocRep: UnexpectedCoverageResult");
 			Runtime.getRuntime().exit(1);

@@ -34,7 +34,10 @@
 package clegoues.genprog4java.rep;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,16 +62,18 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
 	
-	private HashMap<String,FitnessValue> fitnessTable = new HashMap<String,FitnessValue>(); // in repair, this is a hashtable mapping fitness keys to values, fo
+	private HashMap<String,FitnessValue> fitnessTable = new HashMap<String,FitnessValue>(); 
+	// in repair, this is a hashtable mapping fitness keys to values, for
 	// multi-parameter searches.  Here, for java, I'm mapping test class names to values, but you can do what you like
 	// (including the original behavior)
 	private double fitness = -1.0;
+	
 	/*  cached file contents from [internal_compute_source_buffers]; avoid
       recomputing/reserializing */
-	
 	public ArrayList<Pair<String,String>> alreadySourceBuffers = null;
 	
 	public static int sequence = 0;
+	
 	public CachingRepresentation(ArrayList<HistoryEle> history,
 			ArrayList<JavaEditOperation> genome2) {
 		super(history,genome2);
@@ -88,11 +93,6 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	// TODO: private List<Digest> alreadyDigest; // Digest.t in OCaml
 	private Pair<Boolean,String> alreadyCompiled = null; 
 
-	public CachingRepresentation<G> clone() throws CloneNotSupportedException {
-		CachingRepresentation<G> clone = (CachingRepresentation<G>) super.clone();
-		return clone;
-	}
-
 	public boolean getVariableLength() { return true; }
 	
 	public void noteSuccess() { } // default does nothing.  OCaml version takes the original representation here.  Probably should do same 
@@ -108,43 +108,11 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 				Runtime.getRuntime().exit(1);
 			}
 		}
-			// FIXME: serialize
-		/*
-
-			  method serialize ?out_channel ?global_info (filename : string) = 
-			    let fout = 
-			      match out_channel with
-			      | Some(v) -> v
-			      | None -> open_out_bin filename 
-			    in 
-			      Marshal.to_channel fout (cachingRep_version) [] ; 
-			      debug "cachingRep: %s: saved\n" filename ; 
-			      if out_channel = None then close_out fout 
-		 */
 	}
-
-	public boolean deserialize(String filename) {
-		throw new UnsupportedOperationException();
-	}
-	// did not implement the version thing
-	/*
-			  (** @raise Fail("version mismatch") if the version of the binary being read
-			      does not match the current [cachingRep_version]  *)
-			  method deserialize ?in_channel ?global_info (filename : string) = begin
-			    let fin = 
-			      match in_channel with
-			      | Some(v) -> v
-			      | None -> open_in_bin filename 
-			    in 
-			    let version = Marshal.from_channel fin in
-			      if version <> cachingRep_version then begin
-			        debug "cachingRep: %s has old version\n" filename ;
-			        failwith "version mismatch" 
-			      end ;
-			      debug "cachingRep: %s: loaded\n" filename ; 
-			      if in_channel = None then close_in fin ;
-			  end 
-	 */
+		
+	// have ommitted serialize/deserialize at this representation implementation level
+	// because I haven't done the version thing, which is the only thing the ocaml version of
+	// this representation implementation does
 
 	public boolean sanityCheck()  {
 		long startTime = System.currentTimeMillis();
@@ -319,8 +287,6 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 
 			posFit = CachingRepresentation.parseTestResults(thisTest.toString(), output);
 
-
-
 		} catch (ExecuteException exception) {
 			posFit.setAllPassed(false);
 		} catch (Exception e) { }
@@ -356,6 +322,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	public void recordFitness(String key, FitnessValue val) {
 		this.fitnessTable.put(key,val);
 	}
+	
 	//  while the OCaml implementation does compile in CachingRepresentation
 	// assuming that it's always a call to an external script, I'm leaving that off from here for the 
 	// time being and just doing the caching, which makes sense anyway
