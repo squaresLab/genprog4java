@@ -30,18 +30,7 @@ public class Fitness<G extends EditOperation> {
 	public static ArrayList<String> negativeTests = new ArrayList<String>();
 	public static int numPositiveTests = 5;
 	public static int numNegativeTests = 1;
-	
-	private static ArrayList<String> getTests(String filename) throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader(filename));
-		String line;
-		ArrayList<String> allLines = new ArrayList<String>();
-		while ((line = br.readLine()) != null) {
-		   // print the line.
-			allLines.add(line);
-		}
-		br.close();
-		return allLines;
-	}
+
 	public static void configure(Properties prop) {
 		if(prop.getProperty("negativeTestWeight") != null) {
 			Fitness.negativeTestWeight = Double.parseDouble(prop.getProperty("negativeTestWeight").trim());
@@ -56,7 +45,7 @@ public class Fitness<G extends EditOperation> {
 		{
 			posTestFile = prop.getProperty("positiveTests").trim();
 		}
-		
+
 		if(prop.getProperty("negativeTests") != null)
 		{
 			negTestFile = prop.getProperty("negativeTests").trim();
@@ -69,7 +58,7 @@ public class Fitness<G extends EditOperation> {
 			Runtime.getRuntime().exit(1);
 		}
 		try {
-		negativeTests.addAll(getTests(negTestFile));
+			negativeTests.addAll(getTests(negTestFile));
 		} catch (IOException e) {
 			System.err.println("failed to read " + negTestFile + " giving up");
 			Runtime.getRuntime().exit(1);
@@ -86,6 +75,18 @@ public class Fitness<G extends EditOperation> {
 		}
 	}
 
+	private static ArrayList<String> getTests(String filename) throws IOException {
+		BufferedReader br = new BufferedReader(new FileReader(filename));
+		String line;
+		ArrayList<String> allLines = new ArrayList<String>();
+		while ((line = br.readLine()) != null) {
+			// print the line.
+			allLines.add(line);
+		}
+		br.close();
+		return allLines;
+	}
+
 	/* {b test_to_first_failure} variant returns true if the variant passes all
 	    test cases and false otherwise; unlike other search strategies and as an
 	    optimization for brute_force search, gives up on a variant as soon as it
@@ -93,47 +94,44 @@ public class Fitness<G extends EditOperation> {
 	    single_fitness being true won't break it.  Does do sampling if specified. */
 
 	public boolean testToFirstFailure(Representation<G> rep) {
-		boolean retVal = true;
-		try {
-			for( int i = 1; i <= Fitness.numNegativeTests; i++) {
-				TestCase thisTest = new TestCase(TestType.NEGATIVE, i);
-				if(!rep.testCase(thisTest)) {
-					throw new TestFailedException();
-				}
-			} 
-			Long L = Math.round(sample * Fitness.numPositiveTests);
-			int sampleSize = Integer.valueOf(L.intValue());
-
-			ArrayList<Integer> allPositiveTests = GlobalUtils.range(1,Fitness.numPositiveTests);
-			List<Integer> positiveSample;
-			if(sampleSize == Fitness.numPositiveTests) {
-				positiveSample = allPositiveTests;
-			} else {
-				long seed = System.nanoTime();
-				Collections.shuffle(allPositiveTests, new Random(seed));
-				positiveSample = allPositiveTests.subList(0,sampleSize);
+		for( int i = 1; i <= Fitness.numNegativeTests; i++) {
+			TestCase thisTest = new TestCase(TestType.NEGATIVE, i);
+			if(!rep.testCase(thisTest)) {
+				rep.cleanup();
+				return false;
 			}
-			for(Integer testNum : positiveSample) {
+		} 
+		Long L = Math.round(sample * Fitness.numPositiveTests);
+		int sampleSize = Integer.valueOf(L.intValue());
+
+		ArrayList<Integer> allPositiveTests = GlobalUtils.range(1,Fitness.numPositiveTests);
+		List<Integer> positiveSample;
+		if(sampleSize == Fitness.numPositiveTests) {
+			positiveSample = allPositiveTests;
+		} else {
+			long seed = System.nanoTime();
+			Collections.shuffle(allPositiveTests, new Random(seed));
+			positiveSample = allPositiveTests.subList(0,sampleSize);
+		}
+		for(Integer testNum : positiveSample) {
+			TestCase thisTest = new TestCase(TestType.POSITIVE, testNum);
+			if(!rep.testCase(thisTest)) {
+				rep.cleanup();
+				return false;
+			}
+		}
+		if(Fitness.sample < 1.0) {
+			List<Integer> restOfSample = allPositiveTests.subList(sampleSize+1, allPositiveTests.size());
+			for(Integer testNum : restOfSample) {
 				TestCase thisTest = new TestCase(TestType.POSITIVE, testNum);
 				if(!rep.testCase(thisTest)) {
-					throw new TestFailedException();
+					rep.cleanup();
+					return false;
 				}
 			}
-			if(Fitness.sample < 1.0) {
-				List<Integer> restOfSample = allPositiveTests.subList(sampleSize+1, allPositiveTests.size());
-				for(Integer testNum : restOfSample) {
-					TestCase thisTest = new TestCase(TestType.POSITIVE, testNum);
-					if(!rep.testCase(thisTest)) {
-						throw new TestFailedException();
-					}
-				}
-			}
-		} catch (TestFailedException e) {
-			retVal = false;
-		} finally {
-			rep.cleanup();
 		}
-		return retVal;
+
+		return true;
 	}
 
 	private  Pair<Double,Double> testFitnessGeneration(Representation<G> rep, int generation) {

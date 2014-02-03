@@ -19,6 +19,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import clegoues.genprog4java.rep.JavaRepresentation;
 
 // FIXME: still too PAR-y for my taste, come back to it.
+// FIXME: my concern about this is that 
+// I'm not 100% certain that it collects what is actually in scope
+// at each statement, or if it only collects the variables that are actually
+// *used* at each statement.
+// the latter is needlessly restrictive.
 
 public class SemanticInfoVisitor extends ASTVisitor
 {
