@@ -205,19 +205,6 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		return this.fixLocalization;
 	}
 
-
-	/*
-
-			  method reduce_search_space split_fun do_uniq =
-			    (* there's no reason this can't do something to fix localization as well but
-			       for now I'm only implementing the stuff we currently need *)
-			    let fault_localization' = 
-			      if do_uniq then uniq !fault_localization
-			      else !fault_localization 
-			    in
-			      fault_localization := (lfilt split_fun fault_localization')
-	 */
-
 	public TreeSet<Pair<Mutation, Double>> availableMutations(int atomId) {
 		TreeSet<Pair<Mutation,Double>> retVal = new TreeSet<Pair<Mutation,Double>>();
 		for(Pair<Mutation,Double> mutation : Representation.mutations){
@@ -413,7 +400,10 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		assert(faultLocalization.size() > 0);
 		assert(fixLocalization.size() > 0);
 		this.doingCoverage = false;
+		this.printDebugInfo();
 	}
+
+	protected abstract void printDebugInfo();
 
 	protected abstract void instrumentForFaultLocalization();
 

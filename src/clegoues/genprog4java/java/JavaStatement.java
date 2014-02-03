@@ -33,27 +33,20 @@
 
 package clegoues.genprog4java.java;
 
-import java.io.Serializable;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
-public class JavaStatement implements Serializable
+public class JavaStatement
 {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -9053826138990827966L;
-	/**
-	 * 
-	 */
+
 	private ASTNode astNode;
 	private int lineno;
 	private int stmtId; // unique
 	private Set<String> names;
 	private Set<String> types;
 	
-	private Set<String> scopes;
+	private Set<String> mustBeInScope;
 
 	public void setStmtId(int id) {
 		this.stmtId = id;
@@ -103,14 +96,14 @@ public class JavaStatement implements Serializable
 		this.types = types;
 	}
 
-	public Set<String> getScopes()
+	public Set<String> getRequiredNames()
 	{
-		return scopes;
+		return mustBeInScope;
 	}
 
-	public void setScopes(Set<String> scopes)
+	public void setRequiredNames(Set<String> scopes)
 	{
-		this.scopes = scopes;
+		this.mustBeInScope = scopes;
 	}
 	
 	public String toString()
