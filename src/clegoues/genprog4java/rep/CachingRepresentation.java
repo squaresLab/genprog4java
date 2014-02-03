@@ -86,8 +86,8 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		sequence++;
 		return result;
 	}
-	@Override
 	
+	@Override
 	public double getFitness() { return this.fitness; }
 	private ArrayList<String> alreadySourced = new ArrayList<String>(); // initialize to empty
 	// TODO: private List<Digest> alreadyDigest; // Digest.t in OCaml

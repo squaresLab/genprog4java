@@ -37,12 +37,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
-
-import org.jacoco.core.data.ISessionInfoVisitor;
-import org.jacoco.core.data.SessionInfo;
 
 import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
@@ -54,13 +50,7 @@ import clegoues.genprog4java.util.GlobalUtils;
 import clegoues.genprog4java.util.Pair;
 
 
-/* let random atom_set = 
-  let elts = List.map fst (WeightSet.elements atom_set) in 
-  let size = List.length elts in 
-    List.nth elts (Random.int size) 
- */
-
-
+@SuppressWarnings("rawtypes")
 public class Search<G extends EditOperation> {
 
 	private static int generations = 10;
@@ -69,7 +59,7 @@ public class Search<G extends EditOperation> {
 	private static double appProb = 0.33333;
 	private static double delProb = 0.33333;
 	private static double swapProb = 0.0;
-	private static double repProb = 0.33333; // FIXME, also make this an option!
+	private static double repProb = 0.33333; 
 	private static String startingGenome = "";
 
 	private Fitness<G> fitnessEngine = null;

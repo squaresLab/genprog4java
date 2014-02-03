@@ -139,9 +139,8 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			JavaRepresentation.semanticCheck = prop.getProperty("semantic-check").trim(); // options: scope, none
 		}
 	}
-	public JavaRepresentation(ArrayList<HistoryEle> history,
-			ArrayList<JavaEditOperation> genome2) {
-		super(history,genome2);
+	public JavaRepresentation(ArrayList<HistoryEle> history, ArrayList<JavaEditOperation> genome2, ArrayList<WeightedAtom> arrayList, ArrayList<WeightedAtom> arrayList2) {
+		super(history,genome2, arrayList, arrayList2);
 	}
 
 
@@ -541,7 +540,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 	
 	public JavaRepresentation copy() {
-		JavaRepresentation copy = new JavaRepresentation(this.getHistory(), this.getGenome());
+		JavaRepresentation copy = new JavaRepresentation(this.getHistory(), this.getGenome(), this.getFaultyAtoms(), this.getFixSourceAtoms());
 		return copy;
 	}
 	

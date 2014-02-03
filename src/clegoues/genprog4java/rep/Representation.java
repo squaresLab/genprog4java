@@ -54,8 +54,9 @@ import clegoues.genprog4java.util.Pair;
 // it basically forces the patch representation.  Possibly it's flexible and the naming scheme is 
 // just bad.  I'll have to think about it.
 
+@SuppressWarnings("rawtypes")
 public abstract class Representation<G extends EditOperation> implements Comparable<Representation<G>> {
-	// will compare on fitness!
+
 	private ArrayList<HistoryEle> history = new ArrayList<HistoryEle>();
 	public Representation() { }
 
@@ -138,8 +139,7 @@ public abstract class Representation<G extends EditOperation> implements Compara
 
 	public static void configure(Properties prop) {
 	}
-	public abstract void computeLocalization() throws IOException,
-	UnexpectedCoverageResultException;
+
 	public abstract void recordFitness(String key, FitnessValue fitness); 
 	public abstract void setFitness(double fitness);  
 
