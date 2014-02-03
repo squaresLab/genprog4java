@@ -3,9 +3,6 @@ package clegoues.genprog4java.java;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FileASTRequestor;
 
-// FIXME: grabbed from PAR directly
-// possibly unfixable cause it's so short
-
 public class ParserRequestor extends FileASTRequestor
 {
 	private SemanticInfoVisitor visitor;
@@ -15,7 +12,6 @@ public class ParserRequestor extends FileASTRequestor
 		this.visitor = v;
 	}
 	 
-	
 	@Override
 	public void acceptAST(String sourceFilePath, CompilationUnit ast)
 	{

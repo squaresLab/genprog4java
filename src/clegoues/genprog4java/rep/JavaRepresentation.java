@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.TreeSet;
 
 import javax.tools.JavaCompiler;
@@ -36,20 +37,13 @@ import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AssertStatement;
-import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.ThrowStatement;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -79,8 +73,18 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	private static HashMap<Integer,ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer,ArrayList<Integer>>();
 	private static String originalSource = "";
 
+	// semantic check cache stuff, so we don't have to walk stuff a million times unecessarily
+	// should be the same for all of append, replace, and swap, so we only need the one.
+	private static String semanticCheck = "scope";
+	private static HashMap<Integer,TreeSet<WeightedAtom>> inScopeSourceMap = new HashMap<Integer,TreeSet<WeightedAtom>>();
+
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
 
+	public static void configure(Properties prop) {
+		if(prop.getProperty("semantic-check") != null) {
+			JavaRepresentation.semanticCheck = prop.getProperty("semantic-check").trim();
+		}
+	}
 	public JavaRepresentation(ArrayList<HistoryEle> history,
 			ArrayList<JavaEditOperation> genome2) {
 		super(history,genome2);
@@ -91,13 +95,11 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		super();
 	}
 
-
 	private static String getOriginalSource() { return originalSource; }
 
 	protected void instrumentForFaultLocalization(){
 		// needs nothing for Java.  Don't love the "doing coverage" boolean flag 
 		// thing, but it's possible I just decided it's fine.
-
 	}
 
 	// Java-specific coverage stuff:
@@ -184,11 +186,11 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		int stmtCounter = 0;
 		for(ASTNode node : stmts)
 		{
-			if(JavaRepresentation.canRepair(node)) { // FIXME: I think this check was already done in the parser, but whatever
+			if(JavaRepresentation.canRepair(node)) { 
 				JavaStatement s = new JavaStatement();
 				s.setStmtId(stmtCounter);
 				stmtCounter++;
-				int lineNo = ASTUtils.getStatementLineNo(node);
+				int lineNo = ASTUtils.getLineNumber(node);
 				s.setLineno(lineNo);
 				s.setNames(ASTUtils.getNames(node));
 				s.setTypes(ASTUtils.getTypes(node));
@@ -211,11 +213,14 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 
 	public static boolean canRepair(ASTNode node) {
+		// removed from the PAR list: VariableDeclarationStatement, Continue, Break, and Throw statements
+		// might add back in some of those later with more sensible legality checks, or possibly just
+		// in the code bank?
+		// FIXME: might make sense to make these legal location targets, but not
+		// legal for the code bank.
 		return node instanceof ExpressionStatement || node instanceof AssertStatement
-				|| node instanceof BreakStatement || node instanceof ContinueStatement
 				|| node instanceof LabeledStatement || node instanceof ReturnStatement
-				|| node instanceof ThrowStatement || node instanceof VariableDeclarationStatement
-				|| node instanceof IfStatement; // FIXME: I  think we actually don't want to repair some of these things
+				|| node instanceof IfStatement;
 	}
 
 
@@ -230,7 +235,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	}
 
 	public void setGenome(List<JavaEditOperation> genome) {
-		this.genome = (ArrayList<JavaEditOperation>) genome;
+		this.genome = new ArrayList<JavaEditOperation>(genome);
 	}
 
 	@Override
@@ -252,13 +257,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	public void outputSource(String filename) {
 		// TODO Auto-generated method stub
 
-	}
-
-
-	@Override
-	public int compareTo(Representation<JavaEditOperation> o) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 
@@ -307,16 +305,13 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		// this is a little strange because each test class has multiple
 		// test cases in it.  I think we can actually change this behavior through various
 		// hacks on StackOverflow, but for the time being I just want something that works at all
-		// rather than a perfect implementation.  One thing at a time, but FIXME eventually
+		// rather than a perfect implementation.  One thing at a time.
 		CommandLine command = CommandLine.parse(Configuration.javaVM);
-		String filterClass = "";
 		String outputDir = "";
 
 		if(this.doingCoverage){ 
-			filterClass = "clegoues.genprog4java.Fitness.CoverageFilter";
 			outputDir = Configuration.outputDir + File.separator + "coverage/";
 		} else {
-			filterClass = "clegoues.genprog4java.Fitness.CoverageFilter"; // FIXME
 			outputDir =  Configuration.outputDir + File.separator + this.getName();
 		}
 		String classPath = outputDir + System.getProperty("path.separator") + Configuration.libs;
@@ -336,10 +331,9 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		}
 
 
-		command.addArgument("clegoues.genprog4java.Fitness.UnitTestRunner");
+		command.addArgument("clegoues.genprog4java.Fitness.JUnitTestRunner");
 
 		command.addArgument(test.toString());
-		command.addArgument(filterClass);
 
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(60*6000);
 		DefaultExecutor executor = new DefaultExecutor();
@@ -367,12 +361,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 		} catch (ExecuteException exception) {
 			posFit.setAllPassed(false);
-		} catch (Exception e)
-		{
-			// FIXME
-			//String output = out.toString();
-			//e.printStackTrace();
-		}
+		} catch (Exception e) { }
 		finally
 		{
 			if(out!=null)
@@ -396,7 +385,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 	private void editHelper(int location, int fixCode, Mutation mutType) {
 		JavaStatement locationStatement = base.get(location);
-		JavaStatement fixCodeStatement = codeBank.get(fixCode); // FIXME correct for Swap? Hm.
+		JavaStatement fixCodeStatement = codeBank.get(fixCode); 
 		JavaEditOperation newEdit = new JavaEditOperation(mutType,locationStatement,fixCodeStatement);
 		this.genome.add(newEdit);
 	}
@@ -409,7 +398,10 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	@Override
 	public void swap(int swap1, int swap2) {
 		super.append(swap1,swap2);
-		this.editHelper(swap1,swap2,Mutation.SWAP); 
+		JavaStatement locationStatement = base.get(swap1);
+		JavaStatement fixCodeStatement = base.get(swap2); 
+		JavaEditOperation newEdit = new JavaEditOperation(Mutation.SWAP,locationStatement,fixCodeStatement);
+		this.genome.add(newEdit);
 
 	}
 
@@ -457,7 +449,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			bw.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			System.err.println("HERE\n");
 		}
 
 
@@ -465,6 +456,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 		if(!compiler.getTask(compilerErrorWriter, null, null, options, null, fileObjects).call())
 		{
+			System.err.println(compilerErrorWriter.toString());
 			compilerErrorWriter.flush();
 			return false;
 		}
@@ -500,9 +492,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 					String[] tokens = line.split("[:\\s]+");
 					ret.setNumberTests(Integer.parseInt(tokens[1]));
 				}
-			} catch (NumberFormatException e)
-			{
-				// setCompilable was false.  Why? FIXME
+			} catch (NumberFormatException e) {
 			}
 
 			try
@@ -512,11 +502,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 					String[] tokens = line.split("[:\\s]+");
 					ret.setNumTestsFailed(Integer.parseInt(tokens[1]));
 				}
-			} catch (NumberFormatException e)
-			{
-				// originally: setCompilable was false.  Why? FIXME
-				// I have an inkling, having thought about it...
-			}
+			} catch (NumberFormatException e) { }
 		}
 
 		return ret;
@@ -524,8 +510,65 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	
 	public JavaRepresentation copy() {
 		JavaRepresentation copy = new JavaRepresentation(this.getHistory(), this.getGenome());
-
 		return copy;
+	}
+	
+	private TreeSet<WeightedAtom> scopeHelper(int stmtId) {
+		if(JavaRepresentation.inScopeSourceMap.containsKey(stmtId)) {
+			return JavaRepresentation.inScopeSourceMap.get(stmtId);
+		}
+		JavaStatement locationStmt = codeBank.get(stmtId);
+		Set<String> inScopeAt = locationStmt.getScopes();
+		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+		for(WeightedAtom atom : this.getFixSourceAtoms()) {
+			int index = atom.getAtom();
+			JavaStatement stmt = codeBank.get(index);
+			Set<String> requiredScopes = stmt.getScopes(); // I don't know what the difference is between
+			// getScopes, getNames, and getTypes.  This feels like an oversight.
+			// ...getNecessaryScopeNames?
+			boolean ok = true;
+			for(String req : requiredScopes) {
+				if(!inScopeAt.contains(req)) {
+					ok = false;
+					break;
+				}
+			}
+			if(ok) {
+				retVal.add(atom);
+			}
+			
+		}
+		JavaRepresentation.inScopeSourceMap.put(stmtId,retVal);
+		return retVal;
+	}
+	
+	@Override
+	// you probably want to override these for semantic legality check
+	public TreeSet<WeightedAtom> appendSources(int stmtId) {
+		if(JavaRepresentation.semanticCheck.equals("scope")) {
+			return this.scopeHelper(stmtId);
+		} else {
+			return super.appendSources(stmtId);
+		}
+	}
+	
+	@Override
+	public TreeSet<WeightedAtom> swapSources(int stmtId) {
+		if(JavaRepresentation.semanticCheck.equals("scope")) {
+			// FIXME
+			throw new UnsupportedOperationException();
+		} else {
+			return super.swapSources(stmtId);
+		}
+	}
+	
+	@Override
+	public TreeSet<WeightedAtom> replaceSources(int stmtId) {
+		if(JavaRepresentation.semanticCheck.equals("scope")) {
+			return this.scopeHelper(stmtId);
+		} else {
+			return super.replaceSources(stmtId);
+		}
 	}
 }
 

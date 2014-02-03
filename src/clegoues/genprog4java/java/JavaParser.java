@@ -63,7 +63,7 @@ public class JavaParser
 		parser.createASTs(new String[]{file}, null, new String[0], new ParserRequestor(visitor), null);
 		
 		this.compilationUnit = visitor.getCompilationUnit();
-	for(ASTNode stmt : this.stmts) { // possible FIXME: this was originally for buggy statements only
+	for(ASTNode stmt : this.stmts) { 
 			this.scopeList.addScope4Stmt(stmt, visitor.getFieldSet());
 		} 
 	}

@@ -326,7 +326,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 				output.addAll(children); // I *think* this is OK, because we include all the parents in output above, so we don't need to add them here
 			}
 		}
-		this.population = output; // FIXME I think
+		this.population = output; 
 	}
 
 	public Population<G> firstN(int desiredSize) {
