@@ -349,7 +349,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		FitnessValue posFit = new FitnessValue();
 
 		try {
-			int exitValue = executor.execute(command);		
+			executor.execute(command);		
 			out.flush();
 			String output = out.toString();
 			out.reset();
@@ -368,8 +368,8 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 				try {
 					out.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					// you know, having to either catch or throw
+					// all exceptions is really tedious.
 				}
 		}
 		return posFit.isAllPassed();	
