@@ -120,8 +120,7 @@ public class Search<G extends EditOperation> {
     @param rep successful variant
     @param orig original variant
     @param generation generation in which the repair was found */
-	void noteSuccess(Representation<G> rep, Representation<G> original, int generation) throws RepairFoundException {
-		// FIXME: print out edit list somehow
+	void noteSuccess(Representation<G> rep, Representation<G> original, int generation) {
 		System.out.printf("\nRepair Found: " + rep.getName() + "\n");
 
 		Calendar endTime = Calendar.getInstance(); // TODO do something with this
@@ -148,7 +147,7 @@ public class Search<G extends EditOperation> {
 		return retVal; 
 	}
 
-	private boolean doWork(Representation<G> rep, Representation<G> original, Mutation mut, int first, int second) throws RepairFoundException {
+	private boolean doWork(Representation<G> rep, Representation<G> original, Mutation mut, int first, int second) {
 		switch(mut) {
 		case DELETE: rep.delete(first);
 		break;	
@@ -166,7 +165,7 @@ public class Search<G extends EditOperation> {
 		if(fitnessEngine.testToFirstFailure(rep)) {
 			this.noteSuccess(rep,original,1);
 			if(!Search.continueSearch) { 
-				throw new RepairFoundException(rep.getName());
+				return true;
 			}
 		}
 		return false;
@@ -191,7 +190,7 @@ public class Search<G extends EditOperation> {
 
 		Representation.registerMutations(availableMutations);
 	}
-	public void bruteForceOne(Representation<G> original) throws RepairFoundException, CloneNotSupportedException {
+	public boolean bruteForceOne(Representation<G> original) {
 
 		original.reduceFixSpace();
 		registerMutations(original);
@@ -218,6 +217,7 @@ public class Search<G extends EditOperation> {
 
 		int wins = 0;
 		int sofar = 1;
+		boolean repairFound = false;
 
 		TreeSet<WeightedAtom> rescaledAtoms = rescaleAtomPairs(allFaultyAtoms); 
 
@@ -225,10 +225,15 @@ public class Search<G extends EditOperation> {
 		for(WeightedAtom faultyAtom : rescaledAtoms) {
 			int stmt = faultyAtom.getAtom();
 			double weight = faultyAtom.getWeight();
-
+			Comparator<Pair<Mutation,Double>> descendingMutations = new Comparator<Pair<Mutation,Double>>() {
+				@Override
+				public int compare(Pair<Mutation,Double> one, Pair<Mutation,Double> two) {
+					return (new Double(two.getSecond())).compareTo((new Double(one.getSecond())));
+				}
+			};
 			//  wouldn't real polymorphism be the actual legitimate best right here?
 			TreeSet<Pair<Mutation,Double>> availableMutations = original.availableMutations(stmt);
-			TreeSet<Pair<Mutation,Double>> rescaledMutations = new TreeSet<Pair<Mutation,Double>>();
+			TreeSet<Pair<Mutation,Double>> rescaledMutations = new TreeSet<Pair<Mutation,Double>>(descendingMutations);
 			double sumMutScale = 0.0;
 			for(Pair<Mutation,Double> item : availableMutations) {
 				sumMutScale += item.getSecond();
@@ -240,50 +245,63 @@ public class Search<G extends EditOperation> {
 
 			// rescaled Mutations gives us the mutation,weight pairs available at this atom
 			// which itself has its own weight
+			Comparator<WeightedAtom> descendingAtom = new Comparator<WeightedAtom>() {
+				@Override
+				public int compare(WeightedAtom one, WeightedAtom two) {
+					return (new Double(two.getWeight())).compareTo((new Double(one.getWeight())));
+				}
+			};
 			for(Pair<Mutation,Double> mutation : rescaledMutations) {
 				Mutation mut = mutation.getFirst();
 				double prob = mutation.getSecond();
 				System.out.printf("%3g %3g", weight, prob);
-
 				if(mut == Mutation.DELETE) {
 					Representation<G> rep = original.copy(); 
 					if(this.doWork(rep, original, mut, stmt, stmt)) {
 						wins++;
+						repairFound = true;
 					}
 				} else if (mut == Mutation.APPEND) {
-					TreeSet<WeightedAtom> appendSources = this.rescaleAtomPairs(original.appendSources(stmt));
-					// FIXME: source in DESCENDING order by weight!
+					TreeSet<WeightedAtom> appendSources = new TreeSet<WeightedAtom>(descendingAtom);
+					appendSources.addAll(this.rescaleAtomPairs(original.appendSources(stmt)));
 					for(WeightedAtom append : appendSources) {
 						Representation<G> rep = original.copy(); 
 						if(this.doWork(rep, original, mut, stmt, append.getAtom())) {
 							wins++;
+							repairFound = true;
 						}
 					}
 				} else if (mut == Mutation.REPLACE) {
-					TreeSet<WeightedAtom> replaceSources = this.rescaleAtomPairs(original.replaceSources(stmt));
-					// FIXME: source in DESCENDING order by weight!
+					TreeSet<WeightedAtom> replaceSources = new TreeSet<WeightedAtom>(descendingAtom);
+					replaceSources.addAll(this.rescaleAtomPairs(original.replaceSources(stmt)));
 					for(WeightedAtom replace : replaceSources) {
 						Representation<G> rep = original.copy();
 						if(this.doWork(rep, original, mut, stmt, replace.getAtom())) {
 							wins++;
+							repairFound = true;
 						}
 					}
 
 				} else if (mut == Mutation.SWAP ) {
-					TreeSet<WeightedAtom> swapSources = this.rescaleAtomPairs(original.swapSources(stmt));
-					// FIXME: source in DESCENDING order by weight!
+					TreeSet<WeightedAtom> swapSources = new TreeSet<WeightedAtom>(descendingAtom);
+					swapSources.addAll(this.rescaleAtomPairs(original.swapSources(stmt)));
 					for(WeightedAtom swap : swapSources) {
 						Representation<G> rep = original.copy();
 						if(this.doWork(rep, original, mut, stmt, swap.getAtom())) {
 							wins++;
+							repairFound = true;
 						}
 					}
 				}
 				// FIXME: debug output System.out.printf("\t variant " + wins + "/" + sofar + "/" + count + "(w: " + probs +")" + rep.getName());
 				sofar++;
+				if(repairFound && !Search.continueSearch){
+					return true;
+				}
 			}
 		}
 		System.out.printf("search: brute_force_1 ends\n");
+		return repairFound;
 	}
 	/*
 
@@ -347,7 +365,8 @@ public class Search<G extends EditOperation> {
 			    @param original original variant
 			    @param incoming_pop possibly empty, incoming population
 			    @return initial_population generated by mutating the original */
-	private Population<G> initializeGa(Representation<G> original, Population<G> incomingPopulation) throws RepairFoundException, CloneNotSupportedException {
+	// FIXME hm there has got to be way to lose the RepairFoundException, hmmmmm
+	private Population<G> initializeGa(Representation<G> original, Population<G> incomingPopulation) throws RepairFoundException {
 		original.reduceSearchSpace(); // FIXME: this had arguments originally
 		this.registerMutations(original);
 
