@@ -200,13 +200,16 @@ public class SemanticInfoVisitor extends ASTVisitor
 	
 	public void preVisit(ASTNode node)
 	{				
-				// add scope information
-				TreeSet<String> newScope = new TreeSet<String>();
-				newScope.addAll(this.currentMethodScope);
-				this.scopes.addScope4Stmt(node, newScope); 
-				this.nodeSet.add(node);
-		
-		
+	
+				if(JavaRepresentation.canRepair(node)) // FIXME: why is this necessary to not crash and die?
+				{				
+					// add scope information
+					TreeSet<String> newScope = new TreeSet<String>();
+					newScope.addAll(this.currentMethodScope);
+					this.scopes.addScope4Stmt(node, newScope); // FIXME: possibly we only need this info for faulty statements, but whatever
+					this.nodeSet.add(node);
+				}
+	
 		super.preVisit(node);
 	}
 

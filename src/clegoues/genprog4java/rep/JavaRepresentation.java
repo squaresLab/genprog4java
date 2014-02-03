@@ -37,9 +37,13 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -310,13 +314,46 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	}
 
 	@Override
-	public void serialize(String filename) {
-		// TODO Auto-generated method stub
+	public void serialize(String filename, ObjectOutputStream fout) {
+		// fout is going to be null for sure until I implement a subclass, but whatever
+		ObjectOutputStream out = null;
+		FileOutputStream fileOut = null;
+		try {
+			if(fout == null) {
+				fileOut = new FileOutputStream(filename + ".ser");
+				out = new ObjectOutputStream(fileOut);
+			} else {
+				out = fout;
+			}
+			super.serialize(filename, fout);
+			// globalinfo?  hmm.
+			out.writeObject(JavaRepresentation.codeBank);
+			out.writeObject(JavaRepresentation.base);
+			out.writeObject(JavaRepresentation.baseCompilationUnit);
+			out.writeObject(JavaRepresentation.lineNoToAtomIDMap);
+			out.writeObject(JavaRepresentation.originalSource);
+			out.writeObject(JavaRepresentation.inScopeSourceMap);
+			out.writeObject(this.genome); // FIXME: where's history written out?
+			if(fout == null) {
+				out.close();
+				fileOut.close();
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
 
-
+	@Override
+	public boolean deserialize(String filename, ObjectInputStream fin) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
 	@Override
 	public void outputSource(String filename) {
@@ -448,6 +485,9 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 	@Override
 	protected boolean internalCompile(String sourceName, String exeName) {
+		// OK, it might be possible to turn this into something closer to the
+		// OCaml implementation (as was done with testCaseCommand), but I don't know that I
+		// care enough to bother at the moment.
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 		List<Pair<String, String>> sourceBuffers = this.computeSourceBuffers();
 		if(sourceBuffers == null) {
@@ -562,5 +602,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			return super.replaceSources(stmtId);
 		}
 	}
+
 }
 
