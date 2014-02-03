@@ -72,11 +72,28 @@ import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AssertStatement;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EmptyStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.SynchronizedStatement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -115,7 +132,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 	public static void configure(Properties prop) {
 		if(prop.getProperty("semantic-check") != null) {
-			JavaRepresentation.semanticCheck = prop.getProperty("semantic-check").trim();
+			JavaRepresentation.semanticCheck = prop.getProperty("semantic-check").trim(); // options: scope, none
 		}
 	}
 	public JavaRepresentation(ArrayList<HistoryEle> history,
@@ -237,24 +254,39 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 				}
 				lineNoList.add(s.getStmtId());
 				lineNoToAtomIDMap.put(lineNo,  lineNoList);
+				if(semanticCheck.equals("scope") || semanticCheck.equals("none") || semanticCheck.equals("javaspecial")) {
 				base.put(s.getStmtId(),s);
 				codeBank.put(s.getStmtId(), s); 
 			}
 		}
 
 	}
-
-
-	public static boolean canRepair(ASTNode node) {
-		// removed from the PAR list: VariableDeclarationStatement, Continue, Break, and Throw statements
-		// might add back in some of those later with more sensible legality checks, or possibly just
-		// in the code bank?
-		// FIXME: might make sense to make these legal location targets, but not
-		// legal for the code bank.
-		return node instanceof ExpressionStatement || node instanceof AssertStatement
-				|| node instanceof LabeledStatement || node instanceof ReturnStatement
-				|| node instanceof IfStatement;
 	}
+	public static boolean canRepair(ASTNode node) {
+		return node instanceof AssertStatement ||
+		node instanceof Block ||
+		node instanceof BreakStatement ||
+		node instanceof ConstructorInvocation ||
+		node instanceof ContinueStatement || 
+		node instanceof DoStatement ||
+		node instanceof EmptyStatement ||
+		node instanceof EnhancedForStatement ||
+		node instanceof ExpressionStatement ||
+		node instanceof ForStatement ||
+		node instanceof IfStatement ||
+		node instanceof LabeledStatement ||
+		node instanceof ReturnStatement ||
+		node instanceof SuperConstructorInvocation ||
+		node instanceof SwitchCase ||
+		node instanceof SwitchStatement ||
+		node instanceof SynchronizedStatement ||
+		node instanceof ThrowStatement ||
+		node instanceof TryStatement ||
+		node instanceof TypeDeclarationStatement ||
+		node instanceof VariableDeclarationStatement || 
+		node instanceof WhileStatement;
+	}
+
 
 
 	public ArrayList<JavaEditOperation> getGenome() {
@@ -295,18 +327,12 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 
 	@Override
-	protected List<Pair<String,String>> computeSourceBuffers() {
-		// FIXME: make this cache up in cacheRep
+	protected ArrayList<Pair<String, String>> internalComputeSourceBuffers() {
 		CompilationUnit cu = baseCompilationUnit;
 		Document original = new Document(JavaRepresentation.getOriginalSource()); 
 
-
-		// shit OK, the problem is that the location node is from the original AST
-		// and we need it in the compilation unit AST.
-		// how to deal without making 1000 copies of the original AST?
 		ASTRewrite rewriter = ASTRewrite.create(cu.getAST());
 		
-
 		try
 		{
 			for(JavaEditOperation edit : genome) { 
@@ -319,20 +345,26 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			edits.apply(original);
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
+			return null;
 		} catch (MalformedTreeException e) {
 			e.printStackTrace();
+			return null;
 		} catch (BadLocationException e) {
 			e.printStackTrace();
+			return null;
 		} catch (ClassCastException e) {
 			e.printStackTrace();
+			return null;
 		} 
+		// FIXME: I sense there's a better way to signify that computeSourceBuffers failed than
+		// to return null at those catch blocks
 		ArrayList<Pair<String,String>> retVal = new ArrayList<Pair<String,String>>();
 		retVal.add(new Pair<String,String>(Configuration.targetClassName, original.get()));
 		return retVal;
 	}
 
 	@Override
-	protected boolean internalTestCase(String exeName, String fileName, TestCase test) { 
+	protected CommandLine internalTestCaseCommand(String exeName, String fileName, TestCase test) {
 		// read in the test files to get a list of test class names
 		// store it in the testcase object, which will be the name
 		// this is a little strange because each test class has multiple
@@ -368,44 +400,8 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 		command.addArgument(test.toString());
 
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(60*6000);
-		DefaultExecutor executor = new DefaultExecutor();
-		String workingDirectory = System.getProperty("user.dir");
-		executor.setWorkingDirectory(new File(workingDirectory));
-		executor.setWatchdog(watchdog);
+		return command;
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream(); 
-
-		executor.setExitValue(0);
-
-		executor.setStreamHandler(new PumpStreamHandler(out));
-		FitnessValue posFit = new FitnessValue();
-
-		try {
-			executor.execute(command);		
-			out.flush();
-			String output = out.toString();
-			out.reset();
-
-			posFit = JavaRepresentation.parseTestResults(test.toString(), output);
-
-			this.recordFitness(test.toString(), posFit); 
-
-
-		} catch (ExecuteException exception) {
-			posFit.setAllPassed(false);
-		} catch (Exception e) { }
-		finally
-		{
-			if(out!=null)
-				try {
-					out.close();
-				} catch (IOException e) {
-					// you know, having to either catch or throw
-					// all exceptions is really tedious.
-				}
-		}
-		return posFit.isAllPassed();	
 	}
 
 	@Override
@@ -453,9 +449,13 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	@Override
 	protected boolean internalCompile(String sourceName, String exeName) {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+		List<Pair<String, String>> sourceBuffers = this.computeSourceBuffers();
+		if(sourceBuffers == null) {
+			return false;
+		} else {
 		String program = this.computeSourceBuffers().get(0).getSecond();
 		Iterable<? extends JavaFileObject> fileObjects = ASTUtils.getJavaSourceFromString(program) ; 
-
+		// FIXME: why does an append that fails in computeSourceBuffers have a fitness of 204?
 		LinkedList<String> options = new LinkedList<String>();
 
 		options.add("-cp");
@@ -495,51 +495,10 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		}
 
 		return true;
-	}
-
-
-	private static FitnessValue parseTestResults(String testClassName, String output)
-	{
-		String[] lines = output.split("\n");
-		FitnessValue ret = new FitnessValue();
-		ret.setTestClassName(testClassName);
-		for(String line : lines)
-		{
-			try
-			{
-				if(line.startsWith("[SUCCESS]:"))
-				{
-					String[] tokens = line.split("[:\\s]+");
-					ret.setAllPassed(Boolean.parseBoolean(tokens[1]));
-				}
-			} catch (Exception e)
-			{
-				ret.setAllPassed(false);
-				// originally: setCompilable was false.  Necessary? FIXME
-			}
-
-			try
-			{
-				if(line.startsWith("[TOTAL]:"))
-				{
-					String[] tokens = line.split("[:\\s]+");
-					ret.setNumberTests(Integer.parseInt(tokens[1]));
-				}
-			} catch (NumberFormatException e) {
-			}
-
-			try
-			{
-				if(line.startsWith("[FAILURE]:"))
-				{
-					String[] tokens = line.split("[:\\s]+");
-					ret.setNumTestsFailed(Integer.parseInt(tokens[1]));
-				}
-			} catch (NumberFormatException e) { }
 		}
-
-		return ret;
 	}
+
+
 	
 	public JavaRepresentation copy() {
 		JavaRepresentation copy = new JavaRepresentation(this.getHistory(), this.getGenome());

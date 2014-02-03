@@ -32,10 +32,18 @@
  */
 
 package clegoues.genprog4java.rep;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.commons.exec.PumpStreamHandler;
 
 import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.Fitness.FitnessValue;
@@ -55,9 +63,11 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	// multi-parameter searches.  Here, for java, I'm mapping test class names to values, but you can do what you like
 	// (including the original behavior)
 	private double fitness = -1.0;
-	/*  (** cached file contents from [internal_compute_source_buffers]; avoid
-      recomputing/reserializing *)
-  val already_source_buffers = ref None */
+	/*  cached file contents from [internal_compute_source_buffers]; avoid
+      recomputing/reserializing */
+	
+	public ArrayList<Pair<String,String>> alreadySourceBuffers = null;
+	
 	public static int sequence = 0;
 	public CachingRepresentation(ArrayList<HistoryEle> history,
 			ArrayList<JavaEditOperation> genome2) {
@@ -155,7 +165,8 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		for(String posTest : Fitness.positiveTests) {
 			System.out.printf("\tp" + testNum + ": ");
 			TestCase thisTest = new TestCase(TestType.POSITIVE, posTest);
-			if(!this.internalTestCase(CachingRepresentation.sanityExename,CachingRepresentation.sanityFilename, thisTest)) {
+			FitnessValue res = this.internalTestCase(CachingRepresentation.sanityExename,CachingRepresentation.sanityFilename, thisTest);
+			if(!res.isAllPassed()) {
 				System.out.printf("false (0)\n"); 
 				System.err.println("cacheRep: sanity: " + CachingRepresentation.sanityFilename + " failed positive test " + thisTest.toString()); 
 				return false; 
@@ -167,7 +178,8 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		for(String negTest : Fitness.negativeTests) { 
 			System.out.printf("\tn" + testNum + ": ");
 			TestCase thisTest = new TestCase(TestType.NEGATIVE, negTest);
-			if(this.internalTestCase(CachingRepresentation.sanityExename,CachingRepresentation.sanityFilename, thisTest)) {				
+			FitnessValue res = this.internalTestCase(CachingRepresentation.sanityExename,CachingRepresentation.sanityFilename, thisTest);
+			if(res.isAllPassed()) {				
 				System.out.printf("true (1)\n");
 				System.err.println("cacheRep: sanity: " + CachingRepresentation.sanityFilename + " passed negative test " + thisTest.toString()); 
 			return false; 
@@ -200,8 +212,10 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 			this.setFitness(0.0);
 			return false;
 		}
-		
-		return this.internalTestCase(this.getName(), this.getName() + Configuration.globalExtension, test);
+		FitnessValue fitness = this.internalTestCase(this.getName(), this.getName() + Configuration.globalExtension, test); 
+		this.recordFitness(test.toString(), fitness); 
+
+		return fitness.isAllPassed();
 		}
 		// kind of think internal test case should return here to save in fitnessTable,
 		// but wtfever for now
@@ -221,17 +235,110 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		for(Pair<String,String> element : sourceBuffers) {
 			String sourcename = element.getFirst();
 			String outBuffer = element.getSecond;
-	 	// output to disk.
+	 	// output to disk
 	 	 }
 	 	// alreadySourced := Some(lmap (fun (sname,_) -> sname) many_files);
 		}*/
 
-	protected abstract Iterable<?> computeSourceBuffers();
+	@Override
+	protected List<Pair<String,String>> computeSourceBuffers()
+	{
+		if(this.alreadySourceBuffers != null) {
+			return this.alreadySourceBuffers;
+		} else {
+		this.alreadySourceBuffers =  this.internalComputeSourceBuffers();
+		return this.alreadySourceBuffers;
+		}
+	}
+	private static FitnessValue parseTestResults(String testClassName, String output)
+	{
+		String[] lines = output.split("\n");
+		FitnessValue ret = new FitnessValue();
+		ret.setTestClassName(testClassName);
+		for(String line : lines)
+		{
+			try
+			{
+				if(line.startsWith("[SUCCESS]:"))
+				{
+					String[] tokens = line.split("[:\\s]+");
+					ret.setAllPassed(Boolean.parseBoolean(tokens[1]));
+				}
+			} catch (Exception e)
+			{
+				ret.setAllPassed(false);
+				// originally: setCompilable was false.  Necessary? FIXME
+			}
 
-	protected abstract boolean internalTestCase(String sanityExename, String sanityFilename, TestCase thisTest);
+			try
+			{
+				if(line.startsWith("[TOTAL]:"))
+				{
+					String[] tokens = line.split("[:\\s]+");
+					ret.setNumberTests(Integer.parseInt(tokens[1]));
+				}
+			} catch (NumberFormatException e) {
+			}
+
+			try
+			{
+				if(line.startsWith("[FAILURE]:"))
+				{
+					String[] tokens = line.split("[:\\s]+");
+					ret.setNumTestsFailed(Integer.parseInt(tokens[1]));
+				}
+			} catch (NumberFormatException e) { }
+		}
+
+		return ret;
+	}
+	
+	protected abstract ArrayList<Pair<String, String>> internalComputeSourceBuffers();
+
+	protected FitnessValue internalTestCase(String sanityExename, String sanityFilename, TestCase thisTest) 
+	{
+		CommandLine command = this.internalTestCaseCommand(sanityExename, sanityFilename, thisTest);
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(60*6000);
+		DefaultExecutor executor = new DefaultExecutor();
+		String workingDirectory = System.getProperty("user.dir");
+		executor.setWorkingDirectory(new File(workingDirectory));
+		executor.setWatchdog(watchdog);
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream(); 
+
+		executor.setExitValue(0);
+
+		executor.setStreamHandler(new PumpStreamHandler(out));
+		FitnessValue posFit = new FitnessValue();
+
+		try {
+			executor.execute(command);		
+			out.flush();
+			String output = out.toString();
+			out.reset();
+
+			posFit = CachingRepresentation.parseTestResults(thisTest.toString(), output);
+
+
+
+		} catch (ExecuteException exception) {
+			posFit.setAllPassed(false);
+		} catch (Exception e) { }
+		finally
+		{
+			if(out!=null)
+				try {
+					out.close();
+				} catch (IOException e) {
+					// you know, having to either catch or throw
+					// all exceptions is really tedious.
+				}
+		}
+		return posFit;	
+	}
 
 	@Override
-	public ArrayList<String> sourceName() { return this.alreadySourced; }
+	public ArrayList<String> sourceName() { return this.alreadySourced; } // FIXME: I don't even understand what's going on here.
 
 
 
@@ -272,10 +379,10 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 /* indicates that cached information based on our AST structure is no longer valid*/
 	void updated() {
 		/*
-					  method private updated () = 
-					    already_source_buffers := None ; 
+					 
 					    already_digest := None ; 
 					  */
+		alreadySourceBuffers = null;
 		alreadySourced = new ArrayList<String>();
 		alreadyCompiled = null;
 		fitnessTable = new HashMap<String,FitnessValue>();
@@ -307,5 +414,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		super.replace(one,two);
 		this.updated();
 	}
+	protected abstract CommandLine internalTestCaseCommand(String exeName,
+			String fileName, TestCase test) ;
 
 }
