@@ -58,12 +58,8 @@ import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
-
 @SuppressWarnings("rawtypes")
 public abstract class FaultLocRepresentation<G extends EditOperation> extends CachingRepresentation<G> {
-	// FIXME: making these static is probably lazy of me, but whatever, I'm tired of this clone/copy debacle
-	protected static ArrayList<WeightedAtom> faultLocalization = new ArrayList<WeightedAtom>();  
-	protected static ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
 	private static double positivePathWeight = 0.1; 
 	private static double negativePathWeight = 1.0;
@@ -71,11 +67,16 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	private static String posCoverageFile = "coverage.path.pos";
 	private static String negCoverageFile = "coverage.path.neg";
 	private static boolean regenPaths = false;
+	
 	protected boolean doingCoverage = false;
+	private ArrayList<WeightedAtom> faultLocalization = new ArrayList<WeightedAtom>();  
+	private ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
 	public FaultLocRepresentation(ArrayList<HistoryEle> history,
-			ArrayList<JavaEditOperation> genome2) {
+			ArrayList<JavaEditOperation> genome2, ArrayList<WeightedAtom> arrayList, ArrayList<WeightedAtom> arrayList2) {
 		super(history,genome2);
+		this.faultLocalization = new ArrayList<WeightedAtom>(arrayList);
+		this.fixLocalization = new ArrayList<WeightedAtom>(arrayList2);
 	}
 
 	public FaultLocRepresentation() {
@@ -92,20 +93,15 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		if(prop.getProperty("allowCoverageFail") != null) {
 			allowCoverageFail = true;
 		}
-
-		if(prop.getProperty("posCoverageFile") != null)
-		{
+		if(prop.getProperty("posCoverageFile") != null) {
 			posCoverageFile = prop.getProperty("posCoverageFile").trim();
 		}
-
-		if(prop.getProperty("negCoverageFile") != null)
-		{
+		if(prop.getProperty("negCoverageFile") != null) {
 			negCoverageFile = prop.getProperty("negCoverageFile").trim();
 		}
 		if(prop.getProperty("regenPaths") != null) {
 			regenPaths = true;
 		}
-
 	}
 	
 	@Override
@@ -119,8 +115,8 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			} else {
 				out = fout;
 			}
-			out.writeObject(FaultLocRepresentation.faultLocalization);
-			out.writeObject(FaultLocRepresentation.fixLocalization);
+			out.writeObject(this.faultLocalization);
+			out.writeObject(this.fixLocalization);
 
 			// doesn't exist yet, but remember when you add it: out.writeObject(FaultLocalization.faultScheme);
 			out.writeObject(FaultLocRepresentation.negativePathWeight);
@@ -158,8 +154,8 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			} else {
 				in = fin;
 			}
-			FaultLocRepresentation.faultLocalization = (ArrayList<WeightedAtom>) in.readObject();
-			FaultLocRepresentation.fixLocalization = (ArrayList<WeightedAtom>) in.readObject();
+			this.faultLocalization = (ArrayList<WeightedAtom>) in.readObject();
+			this.fixLocalization = (ArrayList<WeightedAtom>) in.readObject();
 			// doesn't exist yet, but remember when you add it: out.writeObject(FaultLocalization.faultScheme);
 			double negWeight = (double) in.readObject();
 			double posWeight = (double) in.readObject();
@@ -191,11 +187,11 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	}
 
 	public ArrayList<WeightedAtom> getFaultyAtoms () {
-		return FaultLocRepresentation.faultLocalization; 
+		return this.faultLocalization; 
 	}
 
 	public ArrayList<WeightedAtom> getFixSourceAtoms() {
-		return FaultLocRepresentation.fixLocalization;
+		return this.fixLocalization;
 	}
 
 
@@ -239,7 +235,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	// you probably want to override these for semantic legality check
 	public TreeSet<WeightedAtom> appendSources(int stmtId) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for(WeightedAtom item : FaultLocRepresentation.fixLocalization) {
+		for(WeightedAtom item : this.fixLocalization) {
 			retVal.add(item);
 		}
 		return retVal;
@@ -248,7 +244,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	@Override
 	public TreeSet<WeightedAtom> swapSources(int stmtId) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for(WeightedAtom item : FaultLocRepresentation.fixLocalization) {
+		for(WeightedAtom item : this.fixLocalization) {
 			retVal.add(item);
 		}
 		return retVal;
@@ -257,7 +253,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	@Override
 	public TreeSet<WeightedAtom> replaceSources(int stmtId) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for(WeightedAtom item : FaultLocRepresentation.fixLocalization) {
+		for(WeightedAtom item : this.fixLocalization) {
 			retVal.add(item);
 		}
 		return retVal;
@@ -285,22 +281,18 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	 * executing the negative test case(s) and removing/down-weighting
 	 * statements visited while executing the positive test case(s). 
 	 **/
-	private void cleanCoverage()
-	{
-		File coverageRaw = new File("jacoco.exec"); // FIXME: likely/possibly a mistake to put this in this class 
-
-		if(coverageRaw.exists())
-		{
-			coverageRaw.delete();
-		}
-	}
 
 	protected abstract ArrayList<Integer> atomIDofSourceLine(int lineno);
 
 	private TreeSet<Integer> runTestsCoverage(String pathFile, TestType testT, ArrayList<String> tests, boolean expectedResult, String wd) throws IOException, UnexpectedCoverageResultException {
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
 		for(String test : tests)  {
-			this.cleanCoverage();
+			File coverageRaw = new File("jacoco.exec"); // FIXME: likely/possibly a mistake to put this in this class 
+
+			if(coverageRaw.exists())
+			{
+				coverageRaw.delete();
+			}
 			TestCase newTest = new TestCase(testT, test);
 
 
@@ -327,7 +319,6 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	protected abstract TreeSet<Integer> getCoverageInfo() throws FileNotFoundException, IOException;
 
 	private TreeSet<Integer> readPathFile(String pathFile) {
-		System.out.println("reading from " + pathFile);
 		TreeSet<Integer> retVal = new TreeSet<Integer>();
 		Scanner reader = null;
 		try {
@@ -342,14 +333,12 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			e.printStackTrace();
 		} finally {
 			if(reader != null) reader.close();
-			return retVal;
 		}
-
+		return retVal;
 
 	}
-	@Override
 
-	public void computeLocalization() throws IOException, UnexpectedCoverageResultException {
+	private void computeLocalization() throws IOException, UnexpectedCoverageResultException {
 		// FIXME: THIS ONLY DOES STANDARD PATH FILE localization
 		/*
 		 * Default "ICSE'09"-style fault and fix localization from path files.  The
@@ -380,7 +369,6 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 
 		if(negativePathFile.exists() && !FaultLocRepresentation.regenPaths) {
 			negativePath = readPathFile(FaultLocRepresentation.negCoverageFile);
-
 		} else {
 			negativePath = runTestsCoverage(FaultLocRepresentation.negCoverageFile, TestType.NEGATIVE, Fitness.negativeTests, false, "coverage/");
 		}
@@ -388,7 +376,8 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		TreeSet<Integer> negHt = new TreeSet<Integer>();
 		TreeSet<Integer> posHt = new TreeSet<Integer> ();
 
-		for(Integer i : positivePath) {// FIXME: this is negative path in the OCaml code and I think that may be wrong. 
+		for(Integer i : positivePath) {
+			// this is negative path in the OCaml code and I think that may be wrong. 
 			fw.put(i,FaultLocRepresentation.positivePathWeight);
 		}
 		for(Integer i : positivePath) {
