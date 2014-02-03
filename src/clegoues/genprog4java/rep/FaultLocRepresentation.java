@@ -67,7 +67,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	private static String posCoverageFile = "coverage.path.pos";
 	private static String negCoverageFile = "coverage.path.neg";
 	private static boolean regenPaths = false;
-	
+
 	protected boolean doingCoverage = false;
 	private ArrayList<WeightedAtom> faultLocalization = new ArrayList<WeightedAtom>();  
 	private ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
@@ -103,9 +103,9 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			regenPaths = true;
 		}
 	}
-	
+
 	@Override
-	public void serialize(String filename, ObjectOutputStream fout) {
+	public void serialize(String filename, ObjectOutputStream fout, boolean globalinfo) {
 		ObjectOutputStream out = null;
 		FileOutputStream fileOut = null;
 		try {
@@ -115,16 +115,15 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			} else {
 				out = fout;
 			}
+			super.serialize(filename, out, globalinfo);
 			out.writeObject(this.faultLocalization);
 			out.writeObject(this.fixLocalization);
 
 			// doesn't exist yet, but remember when you add it: out.writeObject(FaultLocalization.faultScheme);
-			out.writeObject(FaultLocRepresentation.negativePathWeight);
-			out.writeObject(FaultLocRepresentation.positivePathWeight);
-
-		} catch (FileNotFoundException e) {
-			System.err.println("faultLocRep: largely unexpected failure in serialization.");
-			e.printStackTrace();
+			if(globalinfo) {
+				out.writeObject(FaultLocRepresentation.negativePathWeight);
+				out.writeObject(FaultLocRepresentation.positivePathWeight);
+			}
 		} catch (IOException e) {
 			System.err.println("faultLocRep: largely unexpected failure in serialization.");
 			e.printStackTrace();
@@ -143,7 +142,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean deserialize(String filename, ObjectInputStream fin) throws UnexpectedCoverageResultException {
+	public boolean deserialize(String filename, ObjectInputStream fin, boolean globalinfo)  {
 		FileInputStream fileIn = null;
 		ObjectInputStream in = null;
 		boolean succeeded = true;
@@ -154,6 +153,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			} else {
 				in = fin;
 			}
+			if(super.deserialize(filename, in, globalinfo)) {
 			this.faultLocalization = (ArrayList<WeightedAtom>) in.readObject();
 			this.fixLocalization = (ArrayList<WeightedAtom>) in.readObject();
 			// doesn't exist yet, but remember when you add it: out.writeObject(FaultLocalization.faultScheme);
@@ -165,6 +165,9 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 				this.computeLocalization(); // I remember needing to do this in OCaml but I don't remember why?
 			}
 			System.out.println("faultLocRepresentation: " + filename + "loaded\n");
+			} else { 
+				succeeded = false; 
+			}
 		} catch(IOException e) {
 			System.err.println("faultLocRepresentation: IOException in deserialize " + filename + " which is probably OK");
 			succeeded = false;
@@ -172,6 +175,9 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			System.err.println("faultLocRepresentation: ClassNotFoundException in deserialize " + filename + " which is probably *not* OK");
 			e.printStackTrace();
 			succeeded = false;
+		} catch (UnexpectedCoverageResultException e) {
+			System.err.println("faultLocRepresentation: reran coverage in faultLocRep deserialize and something unexpected happened, so I'm giving up."); 
+			Runtime.getRuntime().exit(1);
 		} finally {
 			try {
 				if(fin == null) {
@@ -179,6 +185,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 					fileIn.close();
 				}
 			} catch (IOException e) {
+				succeeded = false;
 				System.err.println("faultLocRepresentation: IOException in file close in deserialize " + filename + " which is weird?");
 				e.printStackTrace();
 			}

@@ -34,10 +34,7 @@
 package clegoues.genprog4java.rep;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,22 +55,23 @@ import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.util.Pair;
 
+@SuppressWarnings("rawtypes")
 public abstract class CachingRepresentation<G extends EditOperation> extends Representation<G> {
 	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
-	
+
 	private HashMap<String,FitnessValue> fitnessTable = new HashMap<String,FitnessValue>(); 
 	// in repair, this is a hashtable mapping fitness keys to values, for
 	// multi-parameter searches.  Here, for java, I'm mapping test class names to values, but you can do what you like
 	// (including the original behavior)
 	private double fitness = -1.0;
-	
+
 	/*  cached file contents from [internal_compute_source_buffers]; avoid
       recomputing/reserializing */
 	public ArrayList<Pair<String,String>> alreadySourceBuffers = null;
-	
+
 	public static int sequence = 0;
-	
+
 	public CachingRepresentation(ArrayList<HistoryEle> history,
 			ArrayList<JavaEditOperation> genome2) {
 		super(history,genome2);
@@ -86,7 +84,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		sequence++;
 		return result;
 	}
-	
+
 	@Override
 	public double getFitness() { return this.fitness; }
 	private ArrayList<String> alreadySourced = new ArrayList<String>(); // initialize to empty
@@ -94,22 +92,26 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	private Pair<Boolean,String> alreadyCompiled = null; 
 
 	public boolean getVariableLength() { return true; }
-	
+
 	public void noteSuccess() { } // default does nothing.  OCaml version takes the original representation here.  Probably should do same 
 
 
 	public void load(String base) throws IOException { 
-		// FIXME: try deserialize first
-		this.fromSource(base); 
-		System.out.println("loaded from source " + base);
+		boolean didDeserialize = this.deserialize(base,null, true); // FIXME: filename is probably wrong
+		if(!didDeserialize) { 
+			this.fromSource(base); 
+			System.out.println("loaded from source " + base);
+		}
 		if(Configuration.doSanity){
-				if(!this.sanityCheck()) { 
+			if(!this.sanityCheck()) { 
 				System.err.println("cacheRep: Sanity check failed, giving up");
 				Runtime.getRuntime().exit(1);
 			}
 		}
-	}
-		
+		if(!didDeserialize)
+			this.serialize(base, null, true);
+	}  
+
 	// have ommitted serialize/deserialize at this representation implementation level
 	// because I haven't done the version thing, which is the only thing the ocaml version of
 	// this representation implementation does
@@ -150,7 +152,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 			if(res.isAllPassed()) {				
 				System.out.printf("true (1)\n");
 				System.err.println("cacheRep: sanity: " + CachingRepresentation.sanityFilename + " passed negative test " + thisTest.toString()); 
-			return false; 
+				return false; 
 			}
 			System.out.printf("false (0)\n"); 
 			testNum++;
@@ -167,11 +169,11 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		}
 		if(this.alreadyCompiled == null) {
 			String newName = CachingRepresentation.newVariant();
-		if(!this.compile(newName,newName)) {
-			this.setFitness(0.0); // FIXME: this is probably why I don't want to do this here: coverage?
-			System.out.printf(this.getName() + " fails to compile\n");
-			return false;
-		}
+			if(!this.compile(newName,newName)) {
+				this.setFitness(0.0); // FIXME: this is probably why I don't want to do this here: coverage?
+				System.out.printf(this.getName() + " fails to compile\n");
+				return false;
+			}
 		} else if (!this.alreadyCompiled.getFirst()) {
 			FitnessValue compileFail = new FitnessValue();
 			compileFail.setTestClassName(test.toString());
@@ -184,10 +186,10 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		this.recordFitness(test.toString(), fitness); 
 
 		return fitness.isAllPassed();
-		}
-		// kind of think internal test case should return here to save in fitnessTable,
-		// but wtfever for now
-		
+	}
+	// kind of think internal test case should return here to save in fitnessTable,
+	// but wtfever for now
+
 	// compile assumes that the source has already been serialized to disk.
 
 	// I think for here, it's best to put it down in Java representation
@@ -214,8 +216,8 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		if(this.alreadySourceBuffers != null) {
 			return this.alreadySourceBuffers;
 		} else {
-		this.alreadySourceBuffers =  this.internalComputeSourceBuffers();
-		return this.alreadySourceBuffers;
+			this.alreadySourceBuffers =  this.internalComputeSourceBuffers();
+			return this.alreadySourceBuffers;
 		}
 	}
 	private static FitnessValue parseTestResults(String testClassName, String output)
@@ -260,7 +262,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 
 		return ret;
 	}
-	
+
 	protected abstract ArrayList<Pair<String, String>> internalComputeSourceBuffers();
 
 	protected FitnessValue internalTestCase(String sanityExename, String sanityFilename, TestCase thisTest) 
@@ -322,7 +324,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	public void recordFitness(String key, FitnessValue val) {
 		this.fitnessTable.put(key,val);
 	}
-	
+
 	//  while the OCaml implementation does compile in CachingRepresentation
 	// assuming that it's always a call to an external script, I'm leaving that off from here for the 
 	// time being and just doing the caching, which makes sense anyway
@@ -332,9 +334,9 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		if(this.alreadyCompiled != null) {
 			return alreadyCompiled.getFirst();
 		} else {
-		boolean result = this.internalCompile(sourceName,exeName);
-		this.alreadyCompiled = new Pair<Boolean,String>(result,exeName);
-		return result;
+			boolean result = this.internalCompile(sourceName,exeName);
+			this.alreadyCompiled = new Pair<Boolean,String>(result,exeName);
+			return result;
 		}
 	}
 
@@ -343,12 +345,12 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 
 	// TODO:			  method hash () = Hashtbl.hash (self#get_history ()) 
 
-/* indicates that cached information based on our AST structure is no longer valid*/
+	/* indicates that cached information based on our AST structure is no longer valid*/
 	void updated() {
 		/*
-					 
+
 					    already_digest := None ; 
-					  */
+		 */
 		alreadySourceBuffers = null;
 		alreadySourced = new ArrayList<String>();
 		alreadyCompiled = null;
@@ -358,9 +360,9 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 
 	public void reduceSearchSpace() {
 	} // subclasses can override as desired
-	
+
 	public void reduceFixSpace() {
-	
+
 	}
 	@Override
 	public void swap(int swap1, int swap2) {
