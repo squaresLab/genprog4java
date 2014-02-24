@@ -45,8 +45,8 @@ import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
-import clegoues.genprog4java.search.Population;
-import clegoues.genprog4java.search.Search;
+import clegoues.genprog4java.Search.Population;
+import clegoues.genprog4java.Search.Search;
 
 public class Configuration {
 	public static String sourceDir = "./";
