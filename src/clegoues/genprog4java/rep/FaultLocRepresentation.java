@@ -49,9 +49,9 @@ import java.util.Properties;
 import java.util.Scanner;
 import java.util.TreeSet;
 
-import clegoues.genprog4java.fitness_temp.Fitness;
-import clegoues.genprog4java.fitness_temp.TestCase;
-import clegoues.genprog4java.fitness_temp.TestType;
+import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.fitness.TestCase;
+import clegoues.genprog4java.fitness.TestType;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.JavaEditOperation;

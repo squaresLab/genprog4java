@@ -45,8 +45,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
 
-import clegoues.genprog4java.fitness_temp.FitnessValue;
-import clegoues.genprog4java.fitness_temp.TestCase;
+import clegoues.genprog4java.fitness.FitnessValue;
+import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.JavaEditOperation;
