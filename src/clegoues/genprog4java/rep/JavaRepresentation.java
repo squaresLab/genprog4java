@@ -457,11 +457,11 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		}
 		String classPath = outputDir + System.getProperty("path.separator") + Configuration.libs;
 		// Positive tests
+		command.addArgument("daikon.Chicory");
 		command.addArgument("-classpath");
 		command.addArgument(classPath); 
 
 		if(this.doingCoverage) {
-
 			command.addArgument("-Xmx1024m");
 			command.addArgument(
 					"-javaagent:./lib/jacocoagent.jar=excludes=org.junit.*,append=false");
@@ -472,10 +472,10 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		}
 
 
-		command.addArgument("clegoues.genprog4java.Fitness.JUnitTestRunner");
+		command.addArgument("clegoues.genprog4java.fitness.JUnitTestRunner");
 
 		command.addArgument(test.toString());
-
+		System.out.println("command string: " + command.toString());
 		return command;
 
 	}

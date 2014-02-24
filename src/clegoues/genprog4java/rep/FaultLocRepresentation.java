@@ -63,10 +63,10 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 
 	private static double positivePathWeight = 0.1; 
 	private static double negativePathWeight = 1.0;
-	private static boolean allowCoverageFail = false;
-	private static String posCoverageFile = "coverage.path.pos";
-	private static String negCoverageFile = "coverage.path.neg";
-	private static boolean regenPaths = false;
+	protected static boolean allowCoverageFail = false;
+	protected static String posCoverageFile = "coverage.path.pos";
+	protected static String negCoverageFile = "coverage.path.neg";
+	protected static boolean regenPaths = false;
 
 	protected boolean doingCoverage = false;
 	private ArrayList<WeightedAtom> faultLocalization = new ArrayList<WeightedAtom>();  
@@ -336,7 +336,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 
 	}
 
-	private void computeLocalization() throws IOException, UnexpectedCoverageResultException {
+	protected void computeLocalization() throws IOException, UnexpectedCoverageResultException {
 		// FIXME: THIS ONLY DOES STANDARD PATH FILE localization
 		/*
 		 * Default "ICSE'09"-style fault and fix localization from path files.  The

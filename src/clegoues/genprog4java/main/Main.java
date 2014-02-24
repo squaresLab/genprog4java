@@ -38,6 +38,7 @@ import java.io.IOException;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
+import clegoues.genprog4java.rep.LocalizationRep;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 import clegoues.genprog4java.search.Population;
@@ -61,19 +62,26 @@ public class Main {
 			workDir.mkdir();
 		System.out.println("Configuration file loaded");
 		if(Configuration.globalExtension == ".java") {
+			if(Search.searchStrategy == "io") {
+				baseRep = (Representation) new LocalizationRep();
+			} else {
 			baseRep = (Representation) new JavaRepresentation();
+			}
 			fitnessEngine = new Fitness<JavaEditOperation>();
 			searchEngine = new Search<JavaEditOperation>(fitnessEngine);
 			incomingPopulation = new Population<JavaEditOperation>(); // FIXME: read from incoming if applicable!
 		}
 		baseRep.load(Configuration.targetClassName);
 		try {
-			if(Configuration.searchStrategy == "ga") {
-				searchEngine.geneticAlgorithm(baseRep, incomingPopulation);
-			} else if (Configuration.searchStrategy == "brute") {
-				searchEngine.bruteForceOne(baseRep);
-			} else if (Configuration.searchStrategy == "oracle") {
-				searchEngine.oracleSearch(baseRep);
+			switch(Search.searchStrategy) {
+			case "ga": searchEngine.geneticAlgorithm(baseRep, incomingPopulation);
+				break;
+			case "brute": searchEngine.bruteForceOne(baseRep);
+				break;
+			case "oracle": searchEngine.oracleSearch(baseRep);
+				break;
+			case "io" : searchEngine.ioSearch(baseRep);
+				break;
 			}
 		} catch(RepairFoundException e) {
 			// FIXME: this is stupid
