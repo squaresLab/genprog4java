@@ -31,7 +31,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package clegoues.genprog4java.Fitness;
+package clegoues.genprog4java.fitness_temp;
 
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;

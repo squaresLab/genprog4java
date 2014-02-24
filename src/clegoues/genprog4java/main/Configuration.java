@@ -42,7 +42,7 @@ import java.util.Random;
 
 import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.Search;
-import clegoues.genprog4java.Fitness.Fitness;
+import clegoues.genprog4java.fitness_temp.Fitness;
 import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
