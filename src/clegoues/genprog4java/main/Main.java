@@ -38,7 +38,7 @@ import java.io.IOException;
 import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.RepairFoundException;
 import clegoues.genprog4java.Search.Search;
-import clegoues.genprog4java.fitness_temp.Fitness;
+import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;

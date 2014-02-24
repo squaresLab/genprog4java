@@ -31,29 +31,58 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package clegoues.genprog4java.fitness_temp;
+package clegoues.genprog4java.fitness;
 
+public class FitnessValue {
+	private String testClassName = null;
+	private int numberTests = 0;
+	private int numTestsPassed = 0;
+	private int numTestsFailed = 0;
+	private boolean allPassed = false; 
+	
+	public FitnessValue() { }
+	
+	public FitnessValue(String name, int numT, int numP, int numF, boolean allPassed) {
+		this.setTestClassName(name);
+		this.setNumberTests(numT);
+		this.setNumTestsFailed(numF);
+		this.setNumTestsPassed(numP);
+		this.setAllPassed(allPassed);
+	}
+	public String getTestClassName() {
+		return testClassName;
+	}
+	public void setTestClassName(String testClassName) {
+		this.testClassName = testClassName;
+	}
+	public int getNumberTests() {
+		return numberTests;
+	}
+	public void setNumberTests(int numberTests) {
+		this.numberTests = numberTests;
+	}
+	public int getNumTestsPassed() {
+		return numTestsPassed;
+	}
+	public void setNumTestsPassed(int numTestsPassed) {
+		this.numTestsPassed = numTestsPassed;
+	}
 
-public class TestCase {
-	private TestType posOrNeg;
-	private int testNum = -1;
-	private String testName = null;
-	public TestCase(TestType t, int num) {
-		this.posOrNeg = t;
-		this.testNum = num;
+	public boolean isAllPassed() {
+		return allPassed;
 	}
-	public TestCase(TestType t, String name) {
-		this.posOrNeg = t;
-		this.testName = name; 
+
+	public void setAllPassed(boolean allPassed) {
+		this.allPassed = allPassed;
 	}
-	public String toString () {
-		if(this.testName != null)
-			return this.testName;
-		if(posOrNeg == TestType.POSITIVE) {
-			return "p" + this.testNum;
-		} else {
-			return "n" + this.testNum;
-		}
+
+	public int getNumTestsFailed() {
+		return numTestsFailed;
 	}
+
+	public void setNumTestsFailed(int numTestsFailed) {
+		this.numTestsFailed = numTestsFailed;
+	}
+
 	
 }
