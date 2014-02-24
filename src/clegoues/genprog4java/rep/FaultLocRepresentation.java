@@ -295,6 +295,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 
 
 			if(this.testCase(newTest) != expectedResult && !FaultLocRepresentation.allowCoverageFail) {
+				System.err.println("FaultLocRep: unexpected coverage result: " + newTest.toString());
 				throw new UnexpectedCoverageResultException("FaultLocRep: unexpected coverage result: " + newTest.toString());
 			}
 			TreeSet<Integer> thisTestResult = this.getCoverageInfo();
