@@ -56,7 +56,6 @@ public class Configuration {
 	public static String targetVersion = "1.5";
 	public static String globalExtension = ".java";
 	public static String targetClassName = "";
-	public static String searchStrategy = "ga";
 	public static String javaRuntime = "";
 	public static String javaVM;
 	public static long seed;
@@ -86,9 +85,6 @@ public class Configuration {
 		}
 		if(prop.getProperty("outputDir") != null) {
 			outputDir = prop.getProperty("outputDir").trim();
-		}
-		if(prop.getProperty("search") != null) {
-			searchStrategy = prop.getProperty("search").trim();
 		}
 		packageName = prop.getProperty("packageName").trim();
 		javaVM = prop.getProperty("javaVM").trim();
