@@ -40,13 +40,13 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.Random;
 
-import clegoues.genprog4java.Search.Population;
-import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
+import clegoues.genprog4java.search.Population;
+import clegoues.genprog4java.search.Search;
 
 public class Configuration {
 	public static String sourceDir = "./";
