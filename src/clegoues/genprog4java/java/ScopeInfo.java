@@ -75,7 +75,6 @@ public class ScopeInfo
 				break;
 			}
 		}
-		
 		return isSafe;
 	}
 	
