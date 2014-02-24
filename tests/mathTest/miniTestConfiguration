@@ -9,5 +9,4 @@ classDir = bin/
 packageName = org.apache.commons.math.fraction
 targetClassName = BigFraction
 sanity = no
-
-
+search = io

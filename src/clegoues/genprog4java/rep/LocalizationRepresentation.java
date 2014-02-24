@@ -16,7 +16,7 @@ import clegoues.genprog4java.fitness.TestType;
 
 
 
-public class LocalizationRep extends JavaRepresentation {
+public class LocalizationRepresentation extends JavaRepresentation {
 	
 	private HashMap<String,TreeSet<Integer>> testAtomMap = new HashMap<String,TreeSet<Integer>>();
 	private TreeSet<String> interestingPositiveTests = new TreeSet<String>();
@@ -88,6 +88,9 @@ public class LocalizationRep extends JavaRepresentation {
 			if(!intersection.isEmpty()) {
 				interestingPositiveTests.add(positiveTest);
 			}
+		}
+		for(String interestingTest : interestingPositiveTests) {
+			System.out.println(interestingTest);
 		}
 		super.computeLocalization();
 		this.doingCoverage = false;
