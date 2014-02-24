@@ -44,6 +44,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StringWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -160,7 +162,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 	public TreeSet<Integer> getCoverageInfo() throws IOException
 	{
-		InputStream targetClass = new FileInputStream(new File(Configuration.outputDir + File.separator + "coverage"+File.separator+Configuration.packageName.replace(".","/")
+		InputStream targetClass = new FileInputStream(new File(Configuration.outputDir + File.separator + "coverage/coverage.out"+File.separator+Configuration.packageName.replace(".","/")
 				+ File.separator + Configuration.targetClassName + ".class"));
 
 		if(executionData == null) {
@@ -451,15 +453,17 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		String outputDir = "";
 
 		if(this.doingCoverage){ 
-			outputDir = Configuration.outputDir + File.separator + "coverage/";
+			outputDir = Configuration.outputDir + File.separator + "coverage/coverage.out/" + System.getProperty("path.separator") + Configuration.outputDir + File.separator + exeName + "/";
 		} else {
-			outputDir =  Configuration.outputDir + File.separator + this.getName();
+			outputDir =  Configuration.outputDir + File.separator + this.getName() + System.getProperty("path.separator") + Configuration.outputDir + File.separator + exeName + "/";
 		}
 		String classPath = outputDir + System.getProperty("path.separator") + Configuration.libs;
+		// Positive tests
 		command.addArgument("-classpath");
 		command.addArgument(classPath); 
 
 		if(this.doingCoverage) {
+
 			command.addArgument("-Xmx1024m");
 			command.addArgument(
 					"-javaagent:./lib/jacocoagent.jar=excludes=org.junit.*,append=false");
@@ -474,6 +478,8 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 		command.addArgument(test.toString());
 		return command;
+
+
 
 	}
 
@@ -557,7 +563,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 
 			StringWriter compilerErrorWriter = new StringWriter();
-
+			System.out.println(options.toString());
 			if(!compiler.getTask(compilerErrorWriter, null, null, options, null, fileObjects).call())
 			{
 				System.err.println(compilerErrorWriter.toString());

@@ -99,19 +99,19 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	public void load(String base) throws IOException { 
 		String filename = Configuration.sourceDir + File.separatorChar + base + Configuration.globalExtension;
 		String cacheName = base + ".cache";
-		boolean didDeserialize = this.deserialize(cacheName,null, true); 
-		if(!didDeserialize) { 
+		//boolean didDeserialize = this.deserialize(cacheName,null, true); 
+		//if(!didDeserialize) { 
 			this.fromSource(filename); 
 			System.out.println("loaded from source " + filename);
-		}
+		//}
 		if(Configuration.doSanity){
 			if(!this.sanityCheck()) { 
 				System.err.println("cacheRep: Sanity check failed, giving up");
 				Runtime.getRuntime().exit(1);
 			}
 		}
-		if(!didDeserialize)
-			this.serialize(cacheName, null, true);
+		//if(!didDeserialize)
+		//	this.serialize(cacheName, null, true);
 	}  
 
 	// have ommitted serialize/deserialize at this representation implementation level
@@ -270,6 +270,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	protected FitnessValue internalTestCase(String sanityExename, String sanityFilename, TestCase thisTest) 
 	{
 		CommandLine command = this.internalTestCaseCommand(sanityExename, sanityFilename, thisTest);
+		System.out.println("command: " + command.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(60*6000);
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");
