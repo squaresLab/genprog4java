@@ -40,7 +40,7 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.Random;
 
-import clegoues.genprog4java.Fitness.Fitness.Fitness;
+import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.rep.CachingRepresentation;

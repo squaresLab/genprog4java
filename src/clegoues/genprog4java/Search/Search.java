@@ -40,7 +40,7 @@ import java.util.Comparator;
 import java.util.Properties;
 import java.util.TreeSet;
 
-import clegoues.genprog4java.Fitness.Fitness.Fitness;
+import clegoues.genprog4java.Fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
