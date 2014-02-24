@@ -31,7 +31,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package clegoues.genprog4java.Fitness.Fitness;
+package clegoues.genprog4java.Fitness;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
