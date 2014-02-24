@@ -51,62 +51,55 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import clegoues.genprog4java.rep.JavaRepresentation;
 
-// FIXME: still too PAR-y for my taste, come back to it.
-// FIXME: my concern about this is that 
-// I'm not 100% certain that it collects what is actually in scope
-// at each statement, or if it only collects the variables that are actually
-// *used* at each statement.
-// the latter is needlessly restrictive.
-
 public class SemanticInfoVisitor extends ASTVisitor
 {
-	
+
 	private String sourcePath;
-	
+
 	private List<ASTNode> nodeSet;
 	private ScopeInfo scopes;
-	
+
 	private TreeSet<String> fieldName;
 	private TreeSet<String> currentMethodScope;
-	
-	
-// FIXME possibly: for the time being, we number *after* parsing, and not here
+
+
+	// FIXME possibly: for the time being, we number *after* parsing, and not here
 	// unlike in the OCaml implementation, this only collects the statements and the
 	// semantic information.  It doesn't number.
 	private CompilationUnit cu;
 
-	
+
 	public void init(String p)
 	{
 		this.sourcePath = p;
 	}
-	
+
 	public SemanticInfoVisitor()
 	{
 		this.fieldName = new TreeSet<String>();
 		this.fieldName.add("this");
 	}
-	
+
 	public Set<String> getFieldSet()
 	{
 		return this.fieldName;
 	}
-	
+
 	public void setNodeSet( List<ASTNode> o )
 	{
 		this.nodeSet = o;
 	}
-	
+
 	public List<ASTNode> getNodeSet()
 	{
 		return this.nodeSet;
 	}
-	
+
 	public void setScopeList(ScopeInfo scopeList)
 	{
 		this.scopes = scopeList;
 	}
-	
+
 	@Override
 	public boolean visit(FieldDeclaration node)
 	{
@@ -120,15 +113,15 @@ public class SemanticInfoVisitor extends ASTVisitor
 		}
 		return super.visit(node);
 	}
-	
-	
-	
-	
+
+
+
+
 	@Override
 	public boolean visit(MethodDeclaration node)
 	{
 		this.currentMethodScope = new TreeSet<String>();
-		
+
 		for(Object o : node.parameters())
 		{
 			if(o instanceof SingleVariableDeclaration)
@@ -137,11 +130,11 @@ public class SemanticInfoVisitor extends ASTVisitor
 				this.currentMethodScope.add(v.getName().getIdentifier());
 			}
 		}
-		
+
 		return super.visit(node);
 	}
-	
-	
+
+
 
 	@Override
 	public boolean visit(Initializer node)
@@ -158,12 +151,12 @@ public class SemanticInfoVisitor extends ASTVisitor
 				}
 			}
 		}
-			
+
 		return super.visit(node);
 	}
 
-	
-	
+
+
 	@Override
 	public void endVisit(Initializer node)
 	{
@@ -176,8 +169,8 @@ public class SemanticInfoVisitor extends ASTVisitor
 		super.endVisit(node);
 	}
 
-	
-	
+
+
 	@Override
 	public boolean visit(VariableDeclarationStatement node)
 	{
@@ -194,15 +187,15 @@ public class SemanticInfoVisitor extends ASTVisitor
 
 	public void preVisit(ASTNode node)
 	{				
-				if(JavaRepresentation.canRepair(node)) // FIXME: why is this necessary to not crash and die?
-				{				
-					// add scope information
-					TreeSet<String> newScope = new TreeSet<String>();
-					newScope.addAll(this.currentMethodScope);
-					this.scopes.addScope4Stmt(node, newScope); 
-					this.nodeSet.add(node);
-				}
-	
+		if(JavaRepresentation.canRepair(node)) // FIXME: why is this necessary to not crash and die?
+		{				
+			// add scope information
+			TreeSet<String> newScope = new TreeSet<String>();
+			newScope.addAll(this.currentMethodScope);
+			this.scopes.addScope4Stmt(node, newScope); 
+			this.nodeSet.add(node);
+		}
+
 		super.preVisit(node);
 	}
 
@@ -210,7 +203,7 @@ public class SemanticInfoVisitor extends ASTVisitor
 	{
 		this.cu = ast;
 	}
-	
+
 	public CompilationUnit getCompilationUnit()
 	{
 		return this.cu;
