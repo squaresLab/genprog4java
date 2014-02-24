@@ -35,14 +35,14 @@ package clegoues.genprog4java.main;
 import java.io.File;
 import java.io.IOException;
 
-import clegoues.genprog4java.Search.Population;
-import clegoues.genprog4java.Search.RepairFoundException;
-import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
+import clegoues.genprog4java.search.Population;
+import clegoues.genprog4java.search.RepairFoundException;
+import clegoues.genprog4java.search.Search;
 
 public class Main {
 
