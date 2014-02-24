@@ -38,7 +38,7 @@ import java.io.IOException;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
-import clegoues.genprog4java.rep.LocalizationRep;
+import clegoues.genprog4java.rep.LocalizationRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 import clegoues.genprog4java.search.Population;
@@ -62,14 +62,14 @@ public class Main {
 			workDir.mkdir();
 		System.out.println("Configuration file loaded");
 		if(Configuration.globalExtension == ".java") {
-			if(Search.searchStrategy == "io") {
-				baseRep = (Representation) new LocalizationRep();
+			if(Search.searchStrategy.equals("io")) {
+				baseRep = (Representation) new LocalizationRepresentation();
 			} else {
 			baseRep = (Representation) new JavaRepresentation();
 			}
 			fitnessEngine = new Fitness<JavaEditOperation>();
 			searchEngine = new Search<JavaEditOperation>(fitnessEngine);
-			incomingPopulation = new Population<JavaEditOperation>(); // FIXME: read from incoming if applicable!
+			incomingPopulation = new Population<JavaEditOperation>(); // FIXME: read from incoming if applicable?
 		}
 		baseRep.load(Configuration.targetClassName);
 		try {
