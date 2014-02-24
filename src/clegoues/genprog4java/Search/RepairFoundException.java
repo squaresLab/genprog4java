@@ -31,7 +31,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package clegoues.genprog4java.search;
+package clegoues.genprog4java.Search;
 
 public class RepairFoundException extends Exception {
 	RepairFoundException(String msg) { throw new UnsupportedOperationException(); }

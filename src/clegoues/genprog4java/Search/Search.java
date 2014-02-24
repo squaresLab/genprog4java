@@ -31,7 +31,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package clegoues.genprog4java.search;
+package clegoues.genprog4java.Search;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class Search<G extends EditOperation> {
 	private static double swapProb = 0.0;
 	private static double repProb = 0.33333; 
 	private static String startingGenome = "";
-
+	public static String searchStrategy = "ga";
 	private Fitness<G> fitnessEngine = null;
 	private int generationsRun = 0;
 
@@ -92,6 +92,9 @@ public class Search<G extends EditOperation> {
 		}
 		if(props.getProperty("swapp") != null) {
 			Search.swapProb = Double.parseDouble(props.getProperty("swapp").trim());
+		}
+		if(props.getProperty("search") != null) {
+			Search.searchStrategy = props.getProperty("search").trim();
 		}
 	}
 
@@ -456,6 +459,10 @@ public class Search<G extends EditOperation> {
 		theRepair.loadGenomeFromString(Search.startingGenome);
 		assert(fitnessEngine.testToFirstFailure(theRepair));
 		this.noteSuccess(theRepair, original, 1);
+	}
+	
+	public void ioSearch(Representation<G> original) {
+		throw new UnsupportedOperationException();
 	}
 
 }
