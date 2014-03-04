@@ -8,5 +8,5 @@ libs = ./lib/junittestrunner.jar:./lib/commons-io-1.4.jar:./lib/junit-4.10.jar:.
 classDir = bin/
 packageName = org.apache.commons.math.fraction
 targetClassName = BigFraction
-sanity = yes
+sanity = no
 regenPaths
