@@ -270,7 +270,6 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	protected FitnessValue internalTestCase(String sanityExename, String sanityFilename, TestCase thisTest) 
 	{
 		CommandLine command = this.internalTestCaseCommand(sanityExename, sanityFilename, thisTest);
-		System.out.println("command: " + command.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(60*6000);
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");
