@@ -477,6 +477,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		command.addArgument("clegoues.genprog4java.fitness.JUnitTestRunner");
 
 		command.addArgument(test.toString());
+		System.out.println(command.toString());
 		return command;
 
 
