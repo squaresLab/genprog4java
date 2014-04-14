@@ -10,12 +10,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 public class GCDTestsPos {
 	private ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-	
-	
-	public static void main(String[] args) throws Exception {                    
-	       JUnitCore.main(
-	         "com.stackoverflow.MyTestSuite");            
-	}
+//	
+//	
+//	public static void main(String[] args) throws Exception {                    
+//	       JUnitCore.main(
+//	         "com.stackoverflow.MyTestSuite");            
+//	}
 	
 	@Before
 	public void setUpStreams() {

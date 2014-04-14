@@ -271,7 +271,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	{
 		CommandLine command = this.internalTestCaseCommand(sanityExename, sanityFilename, thisTest);
 		System.out.println("command: " + command.toString());
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(60*6000);
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(6000);
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");
 		executor.setWorkingDirectory(new File(workingDirectory));
@@ -289,7 +289,6 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 			out.flush();
 			String output = out.toString();
 			out.reset();
-
 			posFit = CachingRepresentation.parseTestResults(thisTest.toString(), output);
 
 		} catch (ExecuteException exception) {
@@ -346,7 +345,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	protected abstract boolean internalCompile(String sourceName, String exeName);
 
 
-	// TODO:			  method hash () = Hashtbl.hash (self#get_history ()) 
+	// TODO: method hash () = Hashtbl.hash (self#get_history ()) 
 
 	/* indicates that cached information based on our AST structure is no longer valid*/
 	void updated() {

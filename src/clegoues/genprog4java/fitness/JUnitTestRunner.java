@@ -65,9 +65,9 @@ public class JUnitTestRunner
 				System.out.println(f.toString());
 				System.out.println(f.getTrace());
 			}
-
+			
 			System.out.println("\n"+r.getFailures().toString());
-
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}	
