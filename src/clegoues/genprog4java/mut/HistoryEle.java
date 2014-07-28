@@ -71,12 +71,13 @@ public class HistoryEle {
 		case APPEND:
 			result += "a(" + this.location + "," + this.fixCode + ")";
 			break;
-		case DELETE: result += "d(" + this.location + ")";
+		case DELETE:     result += "d(" + this.location + ")";
 			break;
-		case SWAP: result += "s(" + this.location + "," + this.fixCode + ")";
+		case SWAP:       result += "s(" + this.location + "," + this.fixCode + ")";
 			break;
-		case REPLACE: result += "r(" + this.location + "," + this.fixCode + ")";
+		case REPLACE:    result += "r(" + this.location + "," + this.fixCode + ")";
 			break;
+		case NULLINSERT: result += "n(" + this.location + ")";
 		}
 		return result;
 	}

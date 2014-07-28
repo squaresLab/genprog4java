@@ -183,7 +183,6 @@ public abstract class Representation<G extends EditOperation> implements Compara
 				Representation.mutations.add(candidateMut);
 			}
 		}
-
 	}
 
 	public void delete(int atomId) {
@@ -207,6 +206,10 @@ public abstract class Representation<G extends EditOperation> implements Compara
 	public static void configure(Properties prop) {
 	}
 
+	public void nullInsert(int atomId){
+		history.add(new HistoryEle(Mutation.NULLINSERT, atomId));
+	}
+	
 	public abstract void recordFitness(String key, FitnessValue fitness); 
 	public abstract void setFitness(double fitness);  
 
