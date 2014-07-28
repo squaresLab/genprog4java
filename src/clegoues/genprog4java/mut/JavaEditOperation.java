@@ -47,8 +47,8 @@ public class JavaEditOperation implements EditOperation<JavaStatement,ASTRewrite
 	private JavaStatement location = null;
 	private JavaStatement fixCode = null;
 
-	public JavaEditOperation(JavaStatement location) {
-		this.mutType = Mutation.DELETE;
+	public JavaEditOperation(JavaStatement location, Mutation mutType) {
+		this.mutType = mutType;
 		this.location = location;
 	}
 	public JavaEditOperation(Mutation mutType, JavaStatement location, JavaStatement fixCode) {
@@ -109,6 +109,10 @@ public class JavaEditOperation implements EditOperation<JavaStatement,ASTRewrite
 			break;
 		case SWAP: throw new UnsupportedOperationException() ; // FIXME
 		case DELETE:
+			lrw.remove(locationNode, null);
+			break;
+		case NULLINSERT:
+			//TODO:Have to figure this out
 			lrw.remove(locationNode, null);
 			break;
 		}

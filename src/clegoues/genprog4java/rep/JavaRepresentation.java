@@ -488,7 +488,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	public void delete(int location) {
 		super.delete(location);
 		JavaStatement locationStatement = base.get(location);
-		JavaEditOperation newEdit = new JavaEditOperation(locationStatement);
+		JavaEditOperation newEdit = new JavaEditOperation(locationStatement, Mutation.DELETE);
 		this.genome.add(newEdit);
 	}
 
@@ -519,7 +519,18 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		super.append(whatToReplace, whatToReplaceWith);
 		this.editHelper(whatToReplace,whatToReplaceWith,Mutation.REPLACE);		
 	}
-
+	
+	//TODO: insert this statement wherever it can:
+	// if(??? != null){
+	//	   the reference ??? 
+	// }
+	public void nullInsert(int location){
+		super.nullInsert(location);
+		JavaStatement locationStatement = base.get(location);
+		JavaEditOperation newEdit = new JavaEditOperation(locationStatement, Mutation.NULLINSERT);
+		this.genome.add(newEdit);
+	}
+	
 
 	@Override
 	protected boolean internalCompile(String sourceName, String exeName) {
