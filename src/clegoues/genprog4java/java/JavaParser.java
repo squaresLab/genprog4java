@@ -85,6 +85,7 @@ public class JavaParser
 		parser.setResolveBindings(true);
 		parser.setBindingsRecovery(true);
 		parser.setStatementsRecovery(true);
+		
 		ParserRequestor req = new ParserRequestor(visitor);
 		
 		parser.createASTs(new String[]{file}, null, new String[0], req, null);
