@@ -228,7 +228,8 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		ScopeInfo scopeInfo = new ScopeInfo();
 		JavaParser myParser = new JavaParser(scopeInfo);
 		JavaRepresentation.originalSource = FileUtils.readFileToString(new File(fname));
-		myParser.parse(fname, Configuration.libs.split(File.pathSeparator)); 
+		myParser.parse(fname, Configuration.libs.split(File.pathSeparator));
+		// where do the statements come from??
 		List<ASTNode> stmts = myParser.getStatements();
 		baseCompilationUnit = myParser.getCompilationUnit();
 
