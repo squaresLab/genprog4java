@@ -218,7 +218,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		return atoms;
 	}
 
-
 	public void fromSource(String fname) throws IOException
 	{
 		// load here, get all statements and the compilation unit saved
@@ -227,6 +226,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		// the calls to ASTUtils
 		ScopeInfo scopeInfo = new ScopeInfo();
 		JavaParser myParser = new JavaParser(scopeInfo);
+		//originalSource entire class file written as a string
 		JavaRepresentation.originalSource = FileUtils.readFileToString(new File(fname));
 		myParser.parse(fname, Configuration.libs.split(File.pathSeparator)); 
 		List<ASTNode> stmts = myParser.getStatements();
@@ -257,12 +257,13 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 					base.put(s.getStmtId(),s);
 					codeBank.put(s.getStmtId(), s); 
 				}
-					scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
-					JavaRepresentation.inScopeMap.put(s.getStmtId(),scopeInfo.getScope(s.getASTNode()));
+				scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
+				JavaRepresentation.inScopeMap.put(s.getStmtId(),scopeInfo.getScope(s.getASTNode()));
 			}
 
 		}
 	}
+	
 	public static boolean canRepair(ASTNode node) {
 		return node instanceof AssertStatement ||
 				node instanceof Block ||
@@ -675,6 +676,11 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			}
 		}
 		
+	}
+	
+	public void test(){
+		String newName = CachingRepresentation.newVariant();
+		internalCompile(newName, newName);
 	}
 
 }
