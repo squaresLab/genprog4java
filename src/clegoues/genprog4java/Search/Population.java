@@ -61,6 +61,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	public Population() {
 
 	}
+	
 	public Population(ArrayList<Representation<G>> smallerPop) {
 		this.population = smallerPop;
 	}
