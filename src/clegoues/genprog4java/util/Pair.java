@@ -55,7 +55,4 @@ public class Pair<A extends Comparable<A>,B extends Comparable<B>> implements Co
 		}
 		return this.getSecond().compareTo(o.getSecond());
 	}
-
-
-
 }

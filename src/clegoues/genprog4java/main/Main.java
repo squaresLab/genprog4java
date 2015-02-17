@@ -71,6 +71,10 @@ public class Main {
 			searchEngine = new Search<JavaEditOperation>(fitnessEngine);
 			incomingPopulation = new Population<JavaEditOperation>(); // FIXME: read from incoming if applicable?
 		}
+		// loads the class file into the representation. 
+		// Does the Following:
+		// 1) If "yes" in sanity check in Configuration file, then does sanity check. 
+		// 2) 
 		baseRep.load(Configuration.targetClassName);
 		try {
 			switch(Search.searchStrategy) {
@@ -91,7 +95,6 @@ public class Main {
 		int elapsed = getElapsedTime(startTime);
 		System.out.printf("\nTotal elapsed time: " + elapsed + "\n");
 		Runtime.getRuntime().exit(0);
-
 	}
 
 	private static int getElapsedTime(long start)

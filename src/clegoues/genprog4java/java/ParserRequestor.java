@@ -44,7 +44,7 @@ public class ParserRequestor extends FileASTRequestor
 	{
 		this.visitor = v;
 	}
-	 
+
 	@Override
 	public void acceptAST(String sourceFilePath, CompilationUnit ast)
 	{

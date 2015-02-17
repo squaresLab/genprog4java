@@ -218,7 +218,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		return atoms;
 	}
 
-
 	public void fromSource(String fname) throws IOException
 	{
 		// load here, get all statements and the compilation unit saved
@@ -227,6 +226,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		// the calls to ASTUtils
 		ScopeInfo scopeInfo = new ScopeInfo();
 		JavaParser myParser = new JavaParser(scopeInfo);
+		//originalSource entire class file written as a string
 		JavaRepresentation.originalSource = FileUtils.readFileToString(new File(fname));
 		myParser.parse(fname, Configuration.libs.split(File.pathSeparator));
 		// where do the statements come from??
@@ -265,9 +265,12 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 					System.out.println(str);
 				// why did we have to get the scope from scope info and not just myParser.getFields()?
 				inScopeMap.put(s.getStmtId(), scopeInfo.getScope(s.getASTNode()));
+				// JavaRepresentation.inScopeMap.put(s.getStmtId(),scopeInfo.getScope(s.getASTNode()));
+                // ALEX: not sure whether you want the line above this one, or the debug stuff above it
 			}
 		}
 	}
+	
 	public static boolean canRepair(ASTNode node) {
 		return node instanceof AssertStatement ||
 				node instanceof Block ||
@@ -679,6 +682,11 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			}
 		}
 		
+	}
+	
+	public void test(){
+		String newName = CachingRepresentation.newVariant();
+		internalCompile(newName, newName);
 	}
 
 }

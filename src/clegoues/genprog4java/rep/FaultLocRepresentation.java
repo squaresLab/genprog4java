@@ -397,7 +397,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 				fw.put(i,  0.5);
 				faultLocalization.add(new WeightedAtom(i,negWeight));
 			}
-		}
+		} 
 		for(Map.Entry<Integer,Double> entry : fw.entrySet()) {
 			Integer key = entry.getKey();
 			Double value = entry.getValue();
@@ -406,6 +406,8 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		assert(faultLocalization.size() > 0);
 		assert(fixLocalization.size() > 0);
 		this.doingCoverage = false;
+		this.printDebugInfo();
+		System.exit(0);
 	}
 
 	protected abstract void printDebugInfo();
