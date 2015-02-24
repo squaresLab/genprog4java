@@ -175,9 +175,12 @@ public abstract class Representation<G extends EditOperation> implements Compara
 	public abstract TreeSet<Pair<Mutation, Double>> availableMutations(int atomId);
 	protected static TreeSet<Pair<Mutation,Double>> mutations = null;
 
-	// FIXME: this static mutation thing is so lazy of me, I can't even.  But I'm tired of this clone/copy debacle and just want it to Go Away. 
+	// FIXME: this static mutation thing is so lazy of me, I can't even.  
+	// But I'm tired of this clone/copy debacle and just want it to Go Away. 
 	public static void registerMutations(TreeSet<Pair<Mutation,Double>> availableMutations) { 
 		Representation.mutations = new TreeSet<Pair<Mutation,Double>> ();
+		//does the order that we put these in matter? If not, then why did we make the 
+		//comparator in registerMutations in initializeGa?
 		for(Pair<Mutation,Double> candidateMut : availableMutations) {
 			if(candidateMut.getSecond() > 0.0) {
 				Representation.mutations.add(candidateMut);

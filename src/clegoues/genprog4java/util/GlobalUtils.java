@@ -59,7 +59,7 @@ public class GlobalUtils {
 		for(Pair<?,Double> atom : atoms) {
 			totalWeight += atom.getSecond();
 		}
-		assert(totalWeight > 0.0) ;
+		assert(totalWeight > 0.0);
 		double wanted = Configuration.randomizer.nextDouble() * totalWeight;
 		double sofar = 0.0;
 		for(Pair<?,Double> atom : atoms) {
