@@ -271,7 +271,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	{
 		CommandLine command = this.internalTestCaseCommand(sanityExename, sanityFilename, thisTest);
 		System.out.println("command: " + command.toString());
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(6000);
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);//Mau had to change this to be able to run longer tests. It was on 6000 originally
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");
 		executor.setWorkingDirectory(new File(workingDirectory));

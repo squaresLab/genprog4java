@@ -467,7 +467,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 			command.addArgument("-Xmx1024m");
 			command.addArgument(
-					"-javaagent:./lib/jacocoagent.jar=excludes=org.junit.*,append=false");
+					"-javaagent:"+Configuration.jacocoPath+"=excludes=org.junit.*,append=false");
 		} else {
 			command.addArgument("-Xms128m");
 			command.addArgument("-Xmx256m");
@@ -547,7 +547,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			Iterable<? extends JavaFileObject> fileObjects = ASTUtils.getJavaSourceFromString(program) ; 
 			// FIXME: why does an append that fails in computeSourceBuffers have a fitness of 204?
 			LinkedList<String> options = new LinkedList<String>();
-
+			
 			options.add("-cp");
 			options.add(Configuration.libs);
 
@@ -556,6 +556,10 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 			options.add("-target");
 			options.add(Configuration.targetVersion);
+			
+			//CODE ADDED BY MAU TO TEST BUG LANG1 FROM DEFECTS4J
+			//options.add("-Xlint:unchecked");
+			//END OF ADDED CODE TO TEST LANG1
 
 			options.add("-d");
 			String outDirName = Configuration.outputDir + File.separatorChar + exeName + File.separatorChar;
@@ -577,6 +581,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 			StringWriter compilerErrorWriter = new StringWriter();
 			System.out.println(options.toString());
+			//Here is where it runs the command to compile the code
 			if(!compiler.getTask(compilerErrorWriter, null, null, options, null, fileObjects).call())
 			{
 				System.err.println(compilerErrorWriter.toString());
