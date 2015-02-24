@@ -166,6 +166,7 @@ public class Search<G extends EditOperation> {
 	}
 
 	private void registerMutations(Representation<G> variant) {
+		//compares based on the Mutation, and if they are the same, compares Double.
 		Comparator<Pair<Mutation,Double>> myComp = new Comparator<Pair<Mutation,Double>>() {
 			@Override
 			public int compare(Pair<Mutation,Double> one, Pair<Mutation,Double> two) {
@@ -177,13 +178,14 @@ public class Search<G extends EditOperation> {
 		};
 		TreeSet<Pair<Mutation,Double>> availableMutations = 
 				new TreeSet<Pair<Mutation,Double>>(myComp);
-		availableMutations.add(new Pair<Mutation,Double>(Mutation.DELETE,Search.delProb));
-		availableMutations.add(new Pair<Mutation,Double>(Mutation.APPEND,Search.appProb));
-		availableMutations.add(new Pair<Mutation,Double>(Mutation.SWAP,Search.swapProb));
-		availableMutations.add(new Pair<Mutation,Double>(Mutation.REPLACE,Search.repProb));
+		availableMutations.add(new Pair<Mutation,Double>(Mutation.DELETE, 	  Search.delProb));
+		availableMutations.add(new Pair<Mutation,Double>(Mutation.APPEND, 	  Search.appProb));
+		availableMutations.add(new Pair<Mutation,Double>(Mutation.SWAP,   	  Search.swapProb));
+		availableMutations.add(new Pair<Mutation,Double>(Mutation.REPLACE,    Search.repProb));
 		availableMutations.add(new Pair<Mutation,Double>(Mutation.NULLINSERT, Search.nullProb));
 		Representation.registerMutations(availableMutations);
 	}
+	
 	public boolean bruteForceOne(Representation<G> original) {
 
 		original.reduceFixSpace();
@@ -310,17 +312,15 @@ public class Search<G extends EditOperation> {
 			    probabilities, such as the node weights or the probabilities associated with
 			    each operator. If applicable for the given experiment/representation, may
 			    use subatom mutation. 
-			    @param test optional; force a mutation on every atom of the variant
 			    @param variant individual to mutate
 			    @return variant' modified/potentially mutated variant
 	 */
 	void mutate(Representation<G> variant) { // FIXME: don't need to return, right? 
-		ArrayList faultyAtoms =variant.getFaultyAtoms();
+		ArrayList faultyAtoms = variant.getFaultyAtoms();
 		ArrayList<WeightedAtom> proMutList = new ArrayList<WeightedAtom>();
-		for(int i = 0; i < Search.promut; i++) {
+		for(int i = 0; i < Search.promut; i++) 
 			proMutList.add((WeightedAtom) GlobalUtils.chooseOneWeighted(faultyAtoms));
-
-		}
+		
 		for(WeightedAtom atom : proMutList) {	
 			int stmtid = atom.getAtom();
 			TreeSet<Pair<Mutation,Double>> availableMutations = variant.availableMutations(stmtid);
@@ -367,13 +367,18 @@ public class Search<G extends EditOperation> {
 	private Population<G> initializeGa(Representation<G> original, Population<G> incomingPopulation) throws RepairFoundException {
 		//TODO: This doesnt do anything right now?
 		original.reduceSearchSpace(); // FIXME: this had arguments originally 
+		
 		this.registerMutations(original);
 
+		//Aren't we just making another pointer that points to the same object here?
 		Population<G> initialPopulation = incomingPopulation;
 
-		if(incomingPopulation != null && incomingPopulation.size() > incomingPopulation.getPopsize()) {
+		//isn't incomingPopulation.size() always 0? and incomingPopulation.getPopsize() always 40?
+		//and so the code never takes this branch?
+		if(incomingPopulation != null && incomingPopulation.size() > incomingPopulation.getPopsize())
+			//takes subset of the population, so we getPopsize() objects in our population
 			initialPopulation = incomingPopulation.firstN(incomingPopulation.getPopsize());
-		} // FIXME: this is too functional I think. 
+		// FIXME: this is too functional I think. 
 		int stillNeed = initialPopulation.getPopsize() - initialPopulation.size();
 		if(stillNeed > 0) {
 			initialPopulation.add(original.copy());

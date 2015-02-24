@@ -75,7 +75,6 @@ public class Main {
 		try {
 			switch(Search.searchStrategy) {
 			case "ga": searchEngine.geneticAlgorithm(baseRep, incomingPopulation);
-			this won't compile now
 				break;
 			case "brute": searchEngine.bruteForceOne(baseRep);
 				break;
