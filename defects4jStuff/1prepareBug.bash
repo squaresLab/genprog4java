@@ -2,6 +2,12 @@
 # 1st param is the package in upper case (ex: Lang, Chart, Closure, Math, Time)
 # 2nd param is the bug number (ex: 1,2,3,4,...)
 
+#copy these two bash files to the source control
+cd ~/Research/
+cp 1prepareBug.bash ./genprog4java/defects4jStuff/
+cp 2prepareBug.bash ./genprog4java/defects4jStuff/
+
+
 #This transforms the first parameter to lower case. Ex: lang, chart, closure, math or time
 LOWERCASEPACKAGE="${1,,}"
 
