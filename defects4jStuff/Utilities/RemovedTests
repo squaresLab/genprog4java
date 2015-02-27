@@ -1,3 +1,14 @@
+chart2:
+org.jfree.chart.junit.JFreeChartTestSuite
+org.jfree.chart.junit.TestUtilities
+org.jfree.chart.plot.dial.junit.MyDialLayerChangeListener
+org.jfree.chart.plot.junit.MyPlotChangeListener
+org.jfree.chart.renderer.junit.RendererChangeDetector
+org.jfree.data.general.junit.DataGeneralPackageTests
+org.jfree.data.general.junit.IntervalDataItem
+org.jfree.data.general.junit.TestIntervalCategoryDataset
+
+
 lang1:
 org.apache.commons.lang3.concurrent.AbstractConcurrentInitializerTest
 org.apache.commons.lang3.exception.AbstractExceptionContextTest

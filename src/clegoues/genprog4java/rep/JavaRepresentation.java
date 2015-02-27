@@ -556,10 +556,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 			options.add("-target");
 			options.add(Configuration.targetVersion);
-			
-			//CODE ADDED BY MAU TO TEST BUG LANG1 FROM DEFECTS4J
-			//options.add("-Xlint:unchecked");
-			//END OF ADDED CODE TO TEST LANG1
 
 			options.add("-d");
 			String outDirName = Configuration.outputDir + File.separatorChar + exeName + File.separatorChar;

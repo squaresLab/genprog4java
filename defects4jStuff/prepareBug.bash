@@ -13,36 +13,34 @@ cp -r ./defects4j/ExamplesCheckedOut/Utilities/ ./genprog4java/defects4jStuff/
 #This transforms the first parameter to lower case. Ex: lang, chart, closure, math or time
 LOWERCASEPACKAGE="${1,,}"
 
-
-
-
-
-
-
-
 #Specific variables per every project
 #JAVADIR is the working directory of the project
 if [ $LOWERCASEPACKAGE = "chart" ]; then
+  WD=source
   JAVADIR=org/jfree
-  CONFIGLIBS=" .:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/chartAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/chartAllTestClasses.jar:"
+  CONFIGLIBS="/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/chartAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/chartAllTestClasses.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/Research/defects4j/framework/projects/lib/junit-4.11.jar"
 
 elif [ $LOWERCASEPACKAGE = "closure" ]; then
+  WD=src
   JAVADIR=com/google
-  CONFIGLIBS=" .:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/closureAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/closureAllTestClasses.jar:"
+  CONFIGLIBS="/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/closureAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/closureAllTestClasses.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/Research/defects4j/framework/projects/lib/junit-4.11.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/*.jar"
 
 elif [ $LOWERCASEPACKAGE = "lang" ]; then
+  WD=src/main/java
   JAVADIR=org/apache/commons/lang3 
-  CONFIGLIBS=" .:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/langAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/langAllTestClasses.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/Research/defects4j/framework/projects/lib/junit-4.11.jar:/home/mau/Research/defects4j/projects/Lang/lib/easymock.jar:/home/mau/Research/defects4j/projects/Lang/lib/asm.jar:/home/mau/Research/defects4j/projects/Lang/lib/cglib.jar:/home/mau/Research/defects4j/projects/Lang/lib/org/easymock/easymock/easymock-2.5.2.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/lang1Buggy/easymock-3.3.1.jar"
+  CONFIGLIBS="/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/langAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/langAllTestClasses.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/Research/defects4j/framework/projects/lib/junit-4.11.jar:/home/mau/Research/defects4j/projects/Lang/lib/easymock.jar:/home/mau/Research/defects4j/projects/Lang/lib/asm.jar:/home/mau/Research/defects4j/projects/Lang/lib/cglib.jar:/home/mau/Research/defects4j/projects/Lang/lib/org/easymock/easymock/easymock-2.5.2.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/lang1Buggy/easymock-3.3.1.jar"
 
 cp /home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/EntityArrays.java /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/src/main/java/org/apache/commons/lang3/text/translate/
 
 elif [ $LOWERCASEPACKAGE = "math" ]; then 
+  WD=src/main/java
   JAVADIR=org/apache/commons/math3
-  CONFIGLIBS=" .:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/mathAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/mathAllTestClasses.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/Research/defects4j/framework/projects/lib/junit-4.11.jar:/home/mau/Research/defects4j/projects/Math/lib/commons-discovery-0.5.jar"
+  CONFIGLIBS="/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/mathAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/mathAllTestClasses.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/Research/defects4j/framework/projects/lib/junit-4.11.jar:/home/mau/Research/defects4j/projects/Math/lib/commons-discovery-0.5.jar"
 
 elif [ $LOWERCASEPACKAGE = "time" ]; then
+  WD=src/main/java
   JAVADIR=org/joda/time
-  CONFIGLIBS=" .:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/timeAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/timeAllTestClasses.jar:/home/mau/Research/defects4j/framework/projects/Time/lib/joda-convert-1.2.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/Research/defects4j/framework/projects/lib/junit-4.11.jar:/home/mau/Research/defects4j/framework/projects/lib/easymock-3.3.1.jar "
+  CONFIGLIBS="/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/timeAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/timeAllTestClasses.jar:/home/mau/Research/defects4j/framework/projects/Time/lib/joda-convert-1.2.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/Research/defects4j/framework/projects/lib/junit-4.11.jar:/home/mau/Research/defects4j/framework/projects/lib/easymock-3.3.1.jar "
 
 fi
 
@@ -62,7 +60,7 @@ defects4j checkout -p $1 -v "$2"b -w ~/Research/defects4j/ExamplesCheckedOut/$LO
 cd ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy
 
 #Compile the buggy code
-#defects4j compile
+defects4j compile
 
 #Run the buggy code
 #defects4j test
@@ -72,14 +70,6 @@ cp /home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/"$LOWERCASEPACKAGE"
 
 #Create a file neg.tests
 touch /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/neg.tests
-
-
-
-
-
-
-
-
 
 cd ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy
 
@@ -94,7 +84,7 @@ sourceDir = $JAVADIR
 popsize = 5
 seed = 0
 javaVM = /usr/bin/java
-workingDir = /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/src/main/java/
+workingDir = /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD
 outputDir = ./tmp
 libs = $CONFIGLIBS
 classDir = bin/
@@ -108,16 +98,17 @@ EOM
 #info about the bug
 defects4j info -p $1 -v $2
 
-
+#Need to modify these three files
 gedit ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/configDefects4j
-gedit /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/pos.tests 
 gedit /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/neg.tests 
+gedit /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/pos.tests 
 
 
 #I then go to pos.tests, move the failing tests that appear in the "Root cause in triggering tests" in the console, to the neg.tests
 echo Yo Mau, 
 echo 1. Go to ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy, look for pos.tests, move the failing tests that appear in the \"Root cause in triggering tests\" in the console, to the neg.tests
 echo 2. Now go to the config file in ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/configDefects4j and change the first three lines
+echo 3. Copy paste the working directory from the config file to eclipse.
 
 
 
