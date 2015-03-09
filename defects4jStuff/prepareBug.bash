@@ -23,7 +23,7 @@ if [ $LOWERCASEPACKAGE = "chart" ]; then
 elif [ $LOWERCASEPACKAGE = "closure" ]; then
   WD=src
   JAVADIR=com/google
-  CONFIGLIBS="/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/closureAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/closureAllTestClasses.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/Research/defects4j/framework/projects/lib/junit-4.11.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/*.jar"
+  CONFIGLIBS="/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/closureAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/closureAllTestClasses.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/Research/defects4j/framework/projects/lib/junit-4.11.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/ant.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/ant-launcher.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/args4j.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/caja-r4314.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/guava.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/jarjar.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/json.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/jsr305.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/junit.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/protobuf-java.jar"
 
 elif [ $LOWERCASEPACKAGE = "lang" ]; then
   WD=src/main/java
@@ -65,8 +65,33 @@ defects4j compile
 #Run the buggy code
 #defects4j test
 
-#copy the standard list of positive tests to the current bug directory
+#Create the file with all the tests names in a file
+#find $JAVADIR/ -name "*.java" | tr / . | rev | cut -c 6- | rev  &> ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/pos.tests 
+
+#copy the standard list of all tests to the current bug directory
 cp /home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/"$LOWERCASEPACKAGE"Pos.tests /home/mau/Research/defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
+
+#cd /home/mau/Research/defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/
+
+#create new list of Passing tests 
+#touch /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/passingTests.tests
+
+#go through all the entries of the file and the test passes insert it in the passing list (sanitize out of scope tests)
+#while read e; do
+#  echo $e
+#java -cp .:/home/mau/Research/defects4j/ExamplesCheckedOut/#Utilities/"$LOWERCASEPACKAGE"AllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/#Utilities/"$LOWERCASEPACKAGE"AllTestClasses.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/#junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/#Research/defects4j/framework/projects/lib/junit-4.11.jar org.junit.runner.JUnitCore $e
+
+#if the test passes, added to the passing list
+#if [ $? -eq 0 ]
+#then
+#    echo $e >> /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/#passingTests.tests
+#fi
+#done < pos.tests
+
+#replace the list with all the tests, with the one with just the passing tests
+#mv /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/passingTests.tests /home/mau/Research/defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
+
+
 
 #Create a file neg.tests
 touch /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/neg.tests
@@ -101,13 +126,22 @@ defects4j info -p $1 -v $2
 #Need to modify these three files
 gedit ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/configDefects4j
 gedit /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/neg.tests 
-gedit /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/pos.tests 
+#gedit /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/pos.tests 
+
+
+#PASSSINGTESTS=/home/mau/Research/defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
+
+#if [[ -s $PASSSINGTESTS ]] ; then
+#echo "Passing tests file has data, all good :D"
+#else
+#echo "ERROR!!! $PASSSINGTESTS is empty, means that all unit tests failed, so the file of the positive tests at $PASSSINGTESTS is empty. ERROR!!!"
+#fi ;
 
 
 #I then go to pos.tests, move the failing tests that appear in the "Root cause in triggering tests" in the console, to the neg.tests
 echo Yo Mau, 
-echo 1. Go to ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy, look for pos.tests, move the failing tests that appear in the \"Root cause in triggering tests\" in the console, to the neg.tests
-echo 2. Now go to the config file in ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/configDefects4j and change the first three lines
+echo 1. Go to ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy, insert the failing tests that appear in the \"Root cause in triggering tests\" in the console, to the neg.tests
+echo 2. Now go to the config file in ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/configDefects4j and change the first three lines with the data in "List of modified sources"
 echo 3. Copy paste the working directory from the config file to eclipse.
 
 

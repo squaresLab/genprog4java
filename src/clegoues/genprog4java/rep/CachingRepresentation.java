@@ -134,6 +134,31 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 			return false;
 		}
 		int testNum = 1;
+		/////////////////////////ADDED FOR DEFECTS4J EXPERIMENT
+		ArrayList<String> passingTests = new ArrayList<String>();
+		//make list of passing files (sanitizing out of scope tests)
+		for(String posTest : Fitness.positiveTests) {
+			System.out.printf("\tout of scope: p" + testNum + ": ");
+			TestCase thisTest = new TestCase(TestType.POSITIVE, posTest);
+			FitnessValue res = this.internalTestCase(CachingRepresentation.sanityExename,CachingRepresentation.sanityFilename, thisTest);
+			if(!res.isAllPassed()) {
+				System.out.printf("false (0)\n"); 
+				System.err.println("cacheRep: sanity: " + CachingRepresentation.sanityFilename + " failed positive test " + thisTest.toString()); 
+				//return false; 
+			}else{
+				passingTests.add(posTest);
+			}
+			System.out.printf("true (1)\n");
+			testNum++;
+		}
+		Fitness.positiveTests = passingTests;
+		testNum = 1;
+		if(passingTests.size() < 2){
+			System.err.println("List of possitive tests is empty ERROR!!!!");
+			return false;
+		}
+		//////////////////
+		
 		for(String posTest : Fitness.positiveTests) {
 			System.out.printf("\tp" + testNum + ": ");
 			TestCase thisTest = new TestCase(TestType.POSITIVE, posTest);
@@ -146,6 +171,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 			System.out.printf("true (1)\n");
 			testNum++;
 		}
+		System.out.println("This is the list of passing tests:" + passingTests);
 		testNum = 1;
 		for(String negTest : Fitness.negativeTests) { 
 			System.out.printf("\tn" + testNum + ": ");
