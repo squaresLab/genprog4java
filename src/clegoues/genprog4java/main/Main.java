@@ -75,7 +75,9 @@ public class Main {
 		// Does the Following:
 		// 1) If "yes" in sanity check in Configuration file, then does sanity check. 
 		// 2) 
-		baseRep.load(Configuration.targetClassName);
+		for(String className: Configuration.targetClassNames){
+			baseRep.load(className);
+		}
 		try {
 			switch(Search.searchStrategy) {
 			case "ga": searchEngine.geneticAlgorithm(baseRep, incomingPopulation);

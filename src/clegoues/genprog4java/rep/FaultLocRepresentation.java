@@ -33,11 +33,13 @@
 
 package clegoues.genprog4java.rep;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -52,6 +54,7 @@ import java.util.TreeSet;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.fitness.TestType;
+import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.JavaEditOperation;
@@ -412,13 +415,37 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 
 	@Override
 	public void load(String fname) throws IOException {
+		
+		//SHOULD I DO SOMETHING SO THAT THE FAULT LOCALIZATION ALSO CONSIDERS MULTIPLE FILES TO LOCATE THE FAULT?
+		//ArrayList<String> targetClassNames = new ArrayList<String>();
+		//targetClassNames.addAll(getClasses(classList));
+		
+		//for(String fname : targetClassNames){
+			
+			//String filename = fname.substring(fname.lastIndexOf(".")+1,fname.length());
+			//filename += Configuration.globalExtension;
+			
+			//super.load(filename); // calling super so that the code is loaded and the sanity check happens before localization is computed
 		super.load(fname); // calling super so that the code is loaded and the sanity check happens before localization is computed
 		try {
-			this.computeLocalization();
-		} catch (UnexpectedCoverageResultException e) {
-			System.err.println("FaultLocRep: UnexpectedCoverageResult");
-			Runtime.getRuntime().exit(1);
+				this.computeLocalization();
+			} catch (UnexpectedCoverageResultException e) {
+				System.err.println("FaultLocRep: UnexpectedCoverageResult");
+				Runtime.getRuntime().exit(1);
+			}
+		//}
+	}
+	
+	private static ArrayList<String> getClasses(String filename) throws IOException {
+		BufferedReader br = new BufferedReader(new FileReader(filename));
+		String line;
+		ArrayList<String> allLines = new ArrayList<String>();
+		while ((line = br.readLine()) != null) {
+			// print the line.
+			allLines.add(line);
 		}
+		br.close();
+		return allLines;
 	}
 
 

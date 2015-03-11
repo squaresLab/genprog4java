@@ -33,11 +33,13 @@
 
 package clegoues.genprog4java.rep;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -121,6 +123,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	private static CompilationUnit baseCompilationUnit = null;
 	private static HashMap<Integer,ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer,ArrayList<Integer>>();
 	private static String originalSource = "";
+	public static ArrayList<String> originalSources = new ArrayList<String>();
 
 	// semantic check cache stuff, so we don't have to walk stuff a million times unecessarily
 	// should be the same for all of append, replace, and swap, so we only need the one.
@@ -218,17 +221,29 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		return atoms;
 	}
 
-	public void fromSource(String fname) throws IOException
+	public void fromSource(String filename) throws IOException
 	{
 		// load here, get all statements and the compilation unit saved
 		// parser can visit at the same time to collect scope info
 		// apparently names and types and scopes are visited here below in
 		// the calls to ASTUtils
+		ArrayList<String> classesList = new ArrayList<String>();
 		ScopeInfo scopeInfo = new ScopeInfo();
 		JavaParser myParser = new JavaParser(scopeInfo);
 		//originalSource entire class file written as a string
-		JavaRepresentation.originalSource = FileUtils.readFileToString(new File(fname));
-		myParser.parse(fname, Configuration.libs.split(File.pathSeparator)); 
+		/*
+		try{
+			classesList.addAll(getClasses(filename));
+		} catch (IOException e) {
+			System.err.println("failed to read " + originalSources + " giving up");
+			Runtime.getRuntime().exit(1);
+		}
+		
+		for(String fname : classesList){
+		*/
+		JavaRepresentation.originalSource = FileUtils.readFileToString(new File(filename));
+		//JavaRepresentation.originalSources = FileUtils.readFileToString(new File(fname));
+		myParser.parse(filename, Configuration.libs.split(File.pathSeparator)); 
 		List<ASTNode> stmts = myParser.getStatements();
 		baseCompilationUnit = myParser.getCompilationUnit();
 
@@ -262,6 +277,19 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			}
 
 		}
+		//}
+	}
+	
+	private static ArrayList<String> getClasses(String filename) throws IOException {
+		BufferedReader br = new BufferedReader(new FileReader(filename));
+		String line;
+		ArrayList<String> allLines = new ArrayList<String>();
+		while ((line = br.readLine()) != null) {
+			// print the line.
+			allLines.add(line);
+		}
+		br.close();
+		return allLines;
 	}
 	
 	public static boolean canRepair(ASTNode node) {
