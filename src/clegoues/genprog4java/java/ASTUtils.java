@@ -33,7 +33,11 @@
 
 package clegoues.genprog4java.java;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -95,39 +99,61 @@ public class ASTUtils
 	
 	public static Iterable<JavaSourceFromString> getJavaSourceFromString(String code)
 	{
-		final JavaSourceFromString jsfs;
-		jsfs = new JavaSourceFromString("code", code);
+		ArrayList<String> classList = new ArrayList<String>();
+		try{
+			classList.addAll(getClasses(Configuration.targetClassName));
+		} catch (IOException e) {
+			System.err.println("failed to read " + classList + " giving up");
+			Runtime.getRuntime().exit(1);
+		}
 		
-		return new Iterable<JavaSourceFromString>()
-		{
-			public Iterator<JavaSourceFromString> iterator()
+			final JavaSourceFromString jsfs;
+			jsfs = new JavaSourceFromString("code", code, classList.get(0)); //	THIS GET(0) SHOULD BE CHANGED, THIS IS JUST THE FIRST CLASS, IT SHOULD TAKE ALL CLASSES
+			
+			return new Iterable<JavaSourceFromString>()
 			{
-				return new Iterator<JavaSourceFromString>()
+				public Iterator<JavaSourceFromString> iterator()
 				{
-					boolean isNext = true;
-
-					public boolean hasNext()
+					return new Iterator<JavaSourceFromString>()
 					{
-						return isNext;
-					}
-
-					public JavaSourceFromString next()
-					{
-						if (!isNext)
-							throw new NoSuchElementException();
-						isNext = false;
-						return jsfs;
-					}
-
-					public void remove()
-					{
-						throw new UnsupportedOperationException();
-					}
-				};
-			}
-		};
+						boolean isNext = true;
+	
+						public boolean hasNext()
+						{
+							return isNext;
+						}
+	
+						public JavaSourceFromString next()
+						{
+							if (!isNext)
+								throw new NoSuchElementException();
+							isNext = false;
+							return jsfs;
+						}
+	
+						public void remove()
+						{
+							throw new UnsupportedOperationException();
+						}
+					};
+				}
+			};
+		
+	}
+	
+	private static ArrayList<String> getClasses(String filename) throws IOException {
+		BufferedReader br = new BufferedReader(new FileReader(filename));
+		String line;
+		ArrayList<String> allLines = new ArrayList<String>();
+		while ((line = br.readLine()) != null) {
+			// print the line.
+			allLines.add(line);
+		}
+		br.close();
+		return allLines;
 	}
 }
+
 
 
 
@@ -135,9 +161,10 @@ class JavaSourceFromString extends SimpleJavaFileObject
 {
 	final String code;
 
-	JavaSourceFromString(String name, String code)
+	JavaSourceFromString(String name, String code, String targetClassName)
 	{
-		super(URI.create(name.replace(".", "/")+"/"+Configuration.targetClassName+Kind.SOURCE.extension), Kind.SOURCE);
+		//super(URI.create(name.replace(".", "/")+"/"+Configuration.targetClassName+Kind.SOURCE.extension), Kind.SOURCE);
+		super(URI.create(targetClassName.replace(".", "/")+Kind.SOURCE.extension), Kind.SOURCE);
 		this.code = code;
 	}
 

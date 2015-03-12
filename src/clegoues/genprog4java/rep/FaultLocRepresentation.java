@@ -435,18 +435,6 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			}
 		//}
 	}
-	
-	private static ArrayList<String> getClasses(String filename) throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader(filename));
-		String line;
-		ArrayList<String> allLines = new ArrayList<String>();
-		while ((line = br.readLine()) != null) {
-			// print the line.
-			allLines.add(line);
-		}
-		br.close();
-		return allLines;
-	}
 
 
 }
