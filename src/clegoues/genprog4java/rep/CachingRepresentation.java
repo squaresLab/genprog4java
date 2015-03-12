@@ -32,10 +32,8 @@
  */
 
 package clegoues.genprog4java.rep;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -98,20 +96,15 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	public void noteSuccess() { } // default does nothing.  OCaml version takes the original representation here.  Probably should do same 
 
 
-	public void load(String classList) throws IOException { 
-		ArrayList<String> targetClassNames = new ArrayList<String>();
-		targetClassNames.addAll(getClasses(classList));
-		
-		for(String base : targetClassNames){
-			//String filename = Configuration.sourceDir + File.separatorChar + base + Configuration.globalExtension;
-			String filename = base.replace(".","/");
-			filename += Configuration.globalExtension;
-			String cacheName = base + ".cache";
-			//boolean didDeserialize = this.deserialize(cacheName,null, true); 
-			//if(!didDeserialize) { 
+	public void load(String base) throws IOException { 
+		//String filename = Configuration.sourceDir + File.separatorChar + base + Configuration.globalExtension;
+		String filename = base.replace(".","/");	
+		filename += Configuration.globalExtension;
+		String cacheName = base + ".cache";
+		//boolean didDeserialize = this.deserialize(cacheName,null, true); 
+		//if(!didDeserialize) { 
 			this.fromSource(filename); 
 			System.out.println("loaded from source " + filename);
-		}
 		//}
 		if(Configuration.doSanity){
 			if(!this.sanityCheck()) { 
@@ -122,18 +115,6 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		//if(!didDeserialize)
 		//	this.serialize(cacheName, null, true);
 	}  
-	
-	private static ArrayList<String> getClasses(String filename) throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader(filename));
-		String line;
-		ArrayList<String> allLines = new ArrayList<String>();
-		while ((line = br.readLine()) != null) {
-			// print the line.
-			allLines.add(line);
-		}
-		br.close();
-		return allLines;
-	}
 
 	// have ommitted serialize/deserialize at this representation implementation level
 	// because I haven't done the version thing, which is the only thing the ocaml version of

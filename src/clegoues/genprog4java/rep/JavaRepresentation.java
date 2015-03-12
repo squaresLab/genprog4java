@@ -227,7 +227,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		// parser can visit at the same time to collect scope info
 		// apparently names and types and scopes are visited here below in
 		// the calls to ASTUtils
-		ArrayList<String> classesList = new ArrayList<String>();
+		//ArrayList<String> classesList = new ArrayList<String>();
 		ScopeInfo scopeInfo = new ScopeInfo();
 		JavaParser myParser = new JavaParser(scopeInfo);
 		//originalSource entire class file written as a string
@@ -279,18 +279,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		}
 		//}
 	}
-	
-	private static ArrayList<String> getClasses(String filename) throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader(filename));
-		String line;
-		ArrayList<String> allLines = new ArrayList<String>();
-		while ((line = br.readLine()) != null) {
-			// print the line.
-			allLines.add(line);
-		}
-		br.close();
-		return allLines;
-	}
+
 	
 	public static boolean canRepair(ASTNode node) {
 		return node instanceof AssertStatement ||
@@ -492,10 +481,25 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		command.addArgument(classPath); 
 
 		if(this.doingCoverage) {
+			
+			ArrayList<String> targetClasses = new ArrayList<String>();
+			try{
+				targetClasses.addAll(getClasses(Configuration.targetClassName));
+			} catch (IOException e) {
+				System.err.println("failed to read " + targetClasses + " giving up");
+				Runtime.getRuntime().exit(1);
+			}
+			String targetClassString = "";
+			for(String s : targetClasses){
+				targetClassString += s + ",";
+			}
+			
 
 			command.addArgument("-Xmx1024m");
+			//I THINK ALL THE EXCLUDES ARE WRONG BECAUSE THE WORKING DIRECTORY STARTS IN A DIFFERENT ADDRESS, SO WITH THIS EXCLUDES ADDRESS, IT WON'T BE ABLE TO KNOW WHERE THE EXCLUDE FILES ARE
 			command.addArgument(
-					"-javaagent:"+Configuration.jacocoPath+"=excludes=org.junit.*,append=false");
+					"-javaagent:"+Configuration.jacocoPath+"=excludes=" + Configuration.testsDir+".*" + ",includes="+targetClassString +",append=false");
+			
 		} else {
 			command.addArgument("-Xms128m");
 			command.addArgument("-Xmx256m");

@@ -64,6 +64,7 @@ public class Configuration {
 	public static String javaRuntime = "";
 	public static String javaVM;
 	public static String jacocoPath = "";
+	public static String testsDir = "";
 	public static long seed;
 	public static boolean doSanity = true;
 	public static String packageName;
@@ -108,6 +109,9 @@ public class Configuration {
 		}
 		if(prop.getProperty("jacocoPath") != null) {
 			jacocoPath = prop.getProperty("jacocoPath").trim();
+		}
+		if(prop.getProperty("testsDir") != null) {
+			testsDir = prop.getProperty("testsDir").trim();
 		}
 		if(prop.getProperty("sanity") != null) {
 			String sanity = prop.getProperty("sanity").trim();
