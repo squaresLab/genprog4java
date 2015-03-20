@@ -52,7 +52,7 @@ import clegoues.genprog4java.main.Configuration;
 
 public class ASTUtils
 {
-	
+
 	public static int getLineNumber(ASTNode node)
 	{ // FIXME: I think we should be able to just get this from the CU saved in javarepresentation, right?
 		ASTNode root = node.getRoot();
@@ -62,10 +62,10 @@ public class ASTUtils
 			CompilationUnit cu = (CompilationUnit)root;
 			lineno = cu.getLineNumber(node.getStartPosition());
 		}
-	
+
 		return lineno;
 	}
-	
+
 	public static Set<String> getNames(ASTNode node)     // it does not count.
 	{
 		TreeSet<String> names = new TreeSet<String>();
@@ -74,29 +74,29 @@ public class ASTUtils
 		return names;
 	}
 	// FIXME this feels wicked inefficient to me, but possibly that's a low-order bit
-	
+
 	public static Set<String> getTypes(ASTNode node)
 	{
 		TreeSet<String> types = new TreeSet<String>();
-		
+
 		TypeCollector visitor = new TypeCollector(types);
-		
+
 		node.accept(visitor);
-		
+
 		return types;
 	}
-	
+
 	public static Set<String> getScope(ASTNode node)
 	{
 		TreeSet<String> scope = new TreeSet<String>();
-		
+
 		ScopeCollector visitor = new ScopeCollector(scope);
-		
+
 		node.accept(visitor);
-		
+
 		return scope;
 	}
-	
+
 	public static Iterable<JavaSourceFromString> getJavaSourceFromString(String code)
 	{
 		ArrayList<String> classList = new ArrayList<String>();
@@ -106,41 +106,56 @@ public class ASTUtils
 			System.err.println("failed to read " + classList + " giving up");
 			Runtime.getRuntime().exit(1);
 		}
+
 		
-			final JavaSourceFromString jsfs;
-			jsfs = new JavaSourceFromString("code", code, classList.get(0)); //	THIS GET(0) SHOULD BE CHANGED, THIS IS JUST THE FIRST CLASS, IT SHOULD TAKE ALL CLASSES
-			
-			return new Iterable<JavaSourceFromString>()
+//		jsfs = new ArrayList<JavaSourceFromString>();
+//		jsfs = new JavaSourceFromString("code", code, classList.get(0)); //	THIS GET(0) SHOULD BE CHANGED, THIS IS JUST THE FIRST CLASS, IT SHOULD TAKE ALL CLASSES
+		ArrayList<JavaSourceFromString> jsfsNF = new ArrayList<JavaSourceFromString>();
+		for (int i = 0; i < classList.size(); i++) {
+			jsfsNF.add(i, new JavaSourceFromString("code", code, classList.get(i)));
+		}
+		
+		final ArrayList<JavaSourceFromString> jsfs = jsfsNF;
+		
+		return new Iterable<JavaSourceFromString>()
+		{
+			public Iterator<JavaSourceFromString> iterator()
 			{
-				public Iterator<JavaSourceFromString> iterator()
+				return new Iterator<JavaSourceFromString>()
 				{
-					return new Iterator<JavaSourceFromString>()
+					boolean hasNext = true;
+					int currentIndex = -1;
+
+					public boolean hasNext()
 					{
-						boolean isNext = true;
-	
-						public boolean hasNext()
-						{
-							return isNext;
+						return hasNext;
+					}
+
+					public JavaSourceFromString next()
+					{
+						if (hasNext){
+							currentIndex++;
+							if((jsfs.size()-1)==currentIndex){
+								hasNext=false;
+							}
+							
+						}else{
+							throw new NoSuchElementException();
 						}
-	
-						public JavaSourceFromString next()
-						{
-							if (!isNext)
-								throw new NoSuchElementException();
-							isNext = false;
-							return jsfs;
-						}
-	
-						public void remove()
-						{
-							throw new UnsupportedOperationException();
-						}
-					};
-				}
-			};
-		
+						return jsfs.get(currentIndex);
+					}
+
+					public void remove()
+					{
+						throw new UnsupportedOperationException();
+					}
+				};
+			}
+		};
+
+
 	}
-	
+
 	private static ArrayList<String> getClasses(String filename) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(filename));
 		String line;

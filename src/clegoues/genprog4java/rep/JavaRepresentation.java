@@ -165,8 +165,11 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 	public TreeSet<Integer> getCoverageInfo() throws IOException
 	{
-		InputStream targetClass = new FileInputStream(new File(Configuration.outputDir + File.separator + "coverage/coverage.out"+File.separator+Configuration.packageName.replace(".","/")
-				+ File.separator + Configuration.targetClassName + ".class"));
+		//InputStream targetClass = new FileInputStream(new File(Configuration.outputDir + File.separator + "coverage/coverage.out"+File.separator+Configuration.packageName.replace(".","/")
+		//		+ File.separator + Configuration.targetClassName + ".class"));
+		
+		//looks like this name here might be irrelevant, so I just changed it for a generic one "coverageInfo", I might be wrong, and maybe there needs to be a coverage file per every target class.
+		InputStream targetClass = new FileInputStream(new File(Configuration.outputDir + File.separator + "coverage/coverage.out"+File.separator + "coverageInfo.class"));
 
 		if(executionData == null) {
 			executionData = new ExecutionDataStore();
@@ -384,7 +387,8 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 					// how to fix that. So we need to parse the file again, which is a total bummer.
 					// this is still worth doing for the genome thing below, I guess, in particular
 					// because it allows us to serialize/deserialize incoming populations
-					this.fromSource(Configuration.sourceDir + File.separatorChar + filename + Configuration.globalExtension);
+					//this.fromSource(Configuration.sourceDir + File.separatorChar + filename + Configuration.globalExtension);
+					this.fromSource(filename.replace(".", "/") + Configuration.globalExtension);
 				}
 				this.genome.addAll((ArrayList<JavaEditOperation>)(in.readObject()));  
 				System.out.println("javaRepresentation: " + filename + "loaded\n");
