@@ -52,7 +52,6 @@ public class GlobalUtils {
 
 	}
 
-
 	public static Pair<?,Double> chooseOneWeighted(ArrayList<Pair<?,Double>> atoms) {
 		assert(atoms.size() > 0);
 		double totalWeight = 0.0;

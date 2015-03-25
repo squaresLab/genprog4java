@@ -224,6 +224,9 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			case SWAP:
 				addToSet = this.swapSources(atomId).size() > 0;
 				break;
+			default:
+				addToSet = this.swapSources(atomId).size() > 0;
+				break;
 			}
 			if(addToSet) {
 				retVal.add(mutation);
@@ -260,9 +263,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		return retVal;
 	}
 
-
 	/*
-
 			  (** run the instrumented code to attain coverage information.  Writes the
 			      generated paths to disk (the fault and fix path files respectively) but
 			      does not otherwise return.
@@ -397,7 +398,6 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 				faultLocalization.add(new WeightedAtom(i,negWeight));
 			}
 		}
-		
 		for(Map.Entry<Integer,Double> entry : fw.entrySet()) {
 			Integer key = entry.getKey();
 			Double value = entry.getValue();
@@ -406,7 +406,6 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		assert(faultLocalization.size() > 0);
 		assert(fixLocalization.size() > 0);
 		this.doingCoverage = false;
-		//this.printDebugInfo();
 	}
 
 	protected abstract void printDebugInfo();
