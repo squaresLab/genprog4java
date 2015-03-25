@@ -178,6 +178,7 @@ public class Fitness<G extends EditOperation> {
 				fitness += 1.0;
 			}
 		}
+		
 		for(String test : Fitness.negativeTests) {
 			TestCase thisTest = new TestCase(TestType.NEGATIVE, test);
 			if(rep.testCase(thisTest)) {
@@ -202,6 +203,8 @@ public class Fitness<G extends EditOperation> {
 
 		double maxFitness = Fitness.numPositiveTests + ((Fitness.numNegativeTests * fac));
 		double curFit = rep.getFitness();
+		
+		//why do we have to do this?
 		if(curFit > -1.0) {
 			System.out.printf("\t%3g %s\n", curFit, rep.getName());
 			return !(curFit < maxFitness);
@@ -223,6 +226,5 @@ public class Fitness<G extends EditOperation> {
 		rep.setFitness(fitnessPair.getSecond());
 		rep.cleanup();
 		return !(fitnessPair.getSecond() < maxFitness);
-
 	}
 }

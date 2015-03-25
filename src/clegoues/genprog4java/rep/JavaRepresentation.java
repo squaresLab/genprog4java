@@ -498,6 +498,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		JavaEditOperation newEdit = new JavaEditOperation(mutType,locationStatement,fixCodeStatement);
 		this.genome.add(newEdit);
 	}
+	
 	@Override
 	public void append(int whereToAppend, int whatToAppend) {
 		super.append(whereToAppend,whatToAppend);
