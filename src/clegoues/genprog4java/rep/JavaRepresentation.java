@@ -257,10 +257,14 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 					base.put(s.getStmtId(),s);
 					codeBank.put(s.getStmtId(), s); 
 				}
-					scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
-					JavaRepresentation.inScopeMap.put(s.getStmtId(),scopeInfo.getScope(s.getASTNode()));
+				scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
+				
+				//TODO: delete this statement
+				for (String str: myParser.getFields())
+					System.out.println(str);
+				// why did we have to get the scope from scope info and not just myParser.getFields()?
+				inScopeMap.put(s.getStmtId(), scopeInfo.getScope(s.getASTNode()));
 			}
-
 		}
 	}
 	public static boolean canRepair(ASTNode node) {
@@ -525,8 +529,8 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	// if(??? != null){
 	//	   the reference ??? 
 	// }
-	public void nullInsert(int location){
-		super.nullInsert(location);
+	public void nullCheck(int location){
+		super.nullCheck(location);
 		JavaStatement locationStatement = base.get(location);
 		JavaEditOperation newEdit = new JavaEditOperation(locationStatement, Mutation.NULLINSERT);
 		this.genome.add(newEdit);
@@ -587,8 +591,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			return true;
 		}
 	}
-
-
 
 	public JavaRepresentation copy() {
 		JavaRepresentation copy = new JavaRepresentation(this.getHistory(), this.getGenome(), this.getFaultyAtoms(), this.getFixSourceAtoms());

@@ -320,8 +320,8 @@ public class Search<G extends EditOperation> {
 		ArrayList<WeightedAtom> proMutList = new ArrayList<WeightedAtom>();
 		for(int i = 0; i < Search.promut; i++) 
 			proMutList.add((WeightedAtom) GlobalUtils.chooseOneWeighted(faultyAtoms));
-		
-		for(WeightedAtom atom : proMutList) {	
+		}
+		for(WeightedAtom atom : proMutList) {
 			int stmtid = atom.getAtom();
 			TreeSet<Pair<Mutation,Double>> availableMutations = variant.availableMutations(stmtid);
 			Pair<Mutation,Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(new ArrayList(availableMutations));
