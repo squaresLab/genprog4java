@@ -73,7 +73,9 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	private ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
 	public FaultLocRepresentation(ArrayList<HistoryEle> history,
-			ArrayList<JavaEditOperation> genome2, ArrayList<WeightedAtom> arrayList, ArrayList<WeightedAtom> arrayList2) {
+								  ArrayList<JavaEditOperation> genome2, 
+								  ArrayList<WeightedAtom> arrayList, 
+								  ArrayList<WeightedAtom> arrayList2) {
 		super(history,genome2);
 		this.faultLocalization = new ArrayList<WeightedAtom>(arrayList);
 		this.fixLocalization = new ArrayList<WeightedAtom>(arrayList2);
@@ -210,8 +212,9 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		for(Pair<Mutation,Double> mutation : Representation.mutations){
 			boolean addToSet = false;
 			switch(mutation.getFirst()) {
-			case DELETE: addToSet = true; 
-			break;
+			case DELETE: 
+				addToSet = true; 
+				break;
 			case APPEND:
 				addToSet = this.appendSources(atomId).size() > 0;
 				break;
@@ -393,7 +396,9 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 				fw.put(i,  0.5);
 				faultLocalization.add(new WeightedAtom(i,negWeight));
 			}
-		} 					for(Map.Entry<Integer,Double> entry : fw.entrySet()) {
+		}
+		
+		for(Map.Entry<Integer,Double> entry : fw.entrySet()) {
 			Integer key = entry.getKey();
 			Double value = entry.getValue();
 			fixLocalization.add(new WeightedAtom(key,value));

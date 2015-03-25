@@ -370,11 +370,8 @@ public class Search<G extends EditOperation> {
 		
 		this.registerMutations(original);
 
-		//Aren't we just making another pointer that points to the same object here?
 		Population<G> initialPopulation = incomingPopulation;
 
-		//isn't incomingPopulation.size() always 0? and incomingPopulation.getPopsize() always 40?
-		//and so the code never takes this branch?
 		if(incomingPopulation != null && incomingPopulation.size() > incomingPopulation.getPopsize())
 			//takes subset of the population, so we getPopsize() objects in our population
 			initialPopulation = incomingPopulation.firstN(incomingPopulation.getPopsize());
@@ -453,6 +450,7 @@ public class Search<G extends EditOperation> {
 		assert(Search.generations >= 0);
 
 		Population<G> initialPopulation = this.initializeGa(original, incomingPopulation);
+		//initializeGa does the first generation
 		generationsRun++;
 		this.runGa(1, Search.generations, initialPopulation, original);
 
