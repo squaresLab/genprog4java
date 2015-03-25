@@ -68,8 +68,7 @@ public class HistoryEle {
 	public String toString() {
 		String result = "";
 		switch(this.mtype) {
-		case APPEND:
-			result += "a(" + this.location + "," + this.fixCode + ")";
+		case APPEND: 	 result += "a(" + this.location + "," + this.fixCode + ")";
 			break;
 		case DELETE:     result += "d(" + this.location + ")";
 			break;
@@ -77,7 +76,33 @@ public class HistoryEle {
 			break;
 		case REPLACE:    result += "r(" + this.location + "," + this.fixCode + ")";
 			break;
-		case NULLINSERT: result += "n(" + this.location + ")";
+		case FUNREP: 	 result += "fr(" + this.location + ")";
+			break;
+		case CASTCHECK:  result += "cc(" + this.location + ")";
+			break;
+		case EXPADD:     result += "ea(" + this.location + ")";
+			break;
+		case EXPREM:     result += "erm(" + this.location + ")";
+			break;
+		case EXPREP:     result += "erp(" + this.location + ")";
+			break;
+		case NULLCHECK:  result += "nc(" + this.location + ")";
+			break;
+		case OBJINIT:	 result += "oi(" + this.location + ")";
+			break;
+		case PARADD:	 result += "pa(" + this.location + ")";
+			break;
+		case PARREM:	 result += "prm(" + this.location + ")";
+			break;
+		case PARREP:	 result += "prp(" + this.location + ")";
+			break;
+		case RANGECHECK: result += "rc(" + this.location + ")";
+			break;
+		case SIZECHECK:	 result += "sc(" + this.location + ")";
+			break;
+		default:
+			break;
+		
 		}
 		return result;
 	}
