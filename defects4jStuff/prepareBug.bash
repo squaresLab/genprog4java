@@ -16,16 +16,19 @@ LOWERCASEPACKAGE="${1,,}"
 #Specific variables per every project
 #JAVADIR is the working directory of the project
 if [ $LOWERCASEPACKAGE = "chart" ]; then
+  TESTSDIR=tests.org.jfree
   WD=source
   JAVADIR=org/jfree
   CONFIGLIBS="/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/chartAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/chartAllTestClasses.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/Research/defects4j/framework/projects/lib/junit-4.11.jar"
 
 elif [ $LOWERCASEPACKAGE = "closure" ]; then
+  TESTSDIR=test.com.google
   WD=src
   JAVADIR=com/google
   CONFIGLIBS="/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/closureAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/closureAllTestClasses.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/Research/defects4j/framework/projects/lib/junit-4.11.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/ant.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/ant-launcher.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/args4j.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/caja-r4314.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/guava.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/jarjar.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/json.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/jsr305.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/junit.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/protobuf-java.jar"
 
 elif [ $LOWERCASEPACKAGE = "lang" ]; then
+  TESTSDIR=src.test.java.org.apache.commons.lang3
   WD=src/main/java
   JAVADIR=org/apache/commons/lang3 
   CONFIGLIBS="/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/langAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/langAllTestClasses.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/Research/defects4j/framework/projects/lib/junit-4.11.jar:/home/mau/Research/defects4j/projects/Lang/lib/easymock.jar:/home/mau/Research/defects4j/projects/Lang/lib/asm.jar:/home/mau/Research/defects4j/projects/Lang/lib/cglib.jar:/home/mau/Research/defects4j/projects/Lang/lib/org/easymock/easymock/easymock-2.5.2.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/lang1Buggy/easymock-3.3.1.jar"
@@ -33,11 +36,13 @@ elif [ $LOWERCASEPACKAGE = "lang" ]; then
 cp /home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/EntityArrays.java /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/src/main/java/org/apache/commons/lang3/text/translate/
 
 elif [ $LOWERCASEPACKAGE = "math" ]; then 
+  TESTSDIR=src.test.java.org.apache.commons.math3
   WD=src/main/java
   JAVADIR=org/apache/commons/math3
   CONFIGLIBS="/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/mathAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/mathAllTestClasses.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/Research/defects4j/framework/projects/lib/junit-4.11.jar:/home/mau/Research/defects4j/projects/Math/lib/commons-discovery-0.5.jar"
 
 elif [ $LOWERCASEPACKAGE = "time" ]; then
+  TESTSDIR=src.test.java.org.joda.time
   WD=src/main/java
   JAVADIR=org/joda/time
   CONFIGLIBS="/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/timeAllSourceClasses.jar:/home/mau/Research/defects4j/ExamplesCheckedOut/Utilities/timeAllTestClasses.jar:/home/mau/Research/defects4j/framework/projects/Time/lib/joda-convert-1.2.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/junittestrunner.jar:/home/mau/Research/genprog4java/tests/mathTest/lib/commons-io-1.4.jar:/home/mau/Research/defects4j/framework/projects/lib/junit-4.11.jar:/home/mau/Research/defects4j/framework/projects/lib/easymock-3.3.1.jar "
@@ -108,6 +113,7 @@ targetClassName = NameOfTheTargetFileWithNoExtension
 sourceDir = $JAVADIR
 popsize = 5
 seed = 0
+testsDir = $TESTSDIR
 javaVM = /usr/bin/java
 workingDir = /home/mau/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD
 outputDir = ./tmp

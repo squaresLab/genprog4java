@@ -164,6 +164,10 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	{
 		InputStream targetClass = new FileInputStream(new File(Configuration.outputDir + File.separator + "coverage/coverage.out"+File.separator+Configuration.packageName.replace(".","/")
 				+ File.separator + Configuration.targetClassName + ".class"));
+		
+		//looks like this name here might be irrelevant, so I just changed it for a generic one "coverageInfo", I might be wrong, and maybe there needs to be a coverage file per every target class.
+		//InputStream targetClass = new FileInputStream(new File(Configuration.outputDir + File.separator + "coverage/coverage.out"+File.separator + "coverageInfo.class"));
+
 
 		if(executionData == null) {
 			executionData = new ExecutionDataStore();
@@ -437,6 +441,14 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		} 
 		// FIXME: I sense there's a better way to signify that computeSourceBuffers failed than
 		// to return null at those catch blocks
+		/*ArrayList<String> classList = new ArrayList<String>();
+		try{
+			classList.addAll(getClasses(Configuration.targetClassName));
+		} catch (IOException e) {
+			System.err.println("failed to read " + classList + " giving up");
+			Runtime.getRuntime().exit(1);
+		}
+		*/
 		ArrayList<Pair<String,String>> retVal = new ArrayList<Pair<String,String>>();
 		retVal.add(new Pair<String,String>(Configuration.targetClassName, original.get()));
 		return retVal;
@@ -465,9 +477,26 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 		if(this.doingCoverage) {
 
+			/*
+			ArrayList<String> targetClasses = new ArrayList<String>();
+			try{
+				targetClasses.addAll(getClasses(Configuration.targetClassName));
+			} catch (IOException e) {
+				System.err.println("failed to read " + targetClasses + " giving up");
+				Runtime.getRuntime().exit(1);
+			}
+			String targetClassString = "";
+			for(String s : targetClasses){
+				targetClassString += s; 
+				if(targetClasses.size() != (targetClasses.lastIndexOf(s)+1)){targetClassString += ",";} 
+			}
+*/
+
 			command.addArgument("-Xmx1024m");
 			command.addArgument(
 					"-javaagent:"+Configuration.jacocoPath+"=excludes=org.junit.*,append=false");
+//					"-javaagent:"+Configuration.jacocoPath/*+"=excludes=" + Configuration.testsDir+".*" */+ ",includes="+targetClassString +",append=false");
+			
 		} else {
 			command.addArgument("-Xms128m");
 			command.addArgument("-Xmx256m");
