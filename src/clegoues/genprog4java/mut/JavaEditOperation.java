@@ -111,33 +111,10 @@ public class JavaEditOperation implements EditOperation<JavaStatement,ASTRewrite
 		case DELETE:
 			lrw.remove(locationNode, null);
 			break;
-		case CASTCHECK:
+		case NULLINSERT:
+			//TODO:Have to figure this out
+			lrw.remove(locationNode, null);
 			break;
-		case EXPADD:
-			break;
-		case EXPREM:
-			break;
-		case EXPREP:
-			break;
-		case FUNREP:
-			break;
-		case NULLCHECK:
-			break;
-		case OBJINIT:
-			break;
-		case PARADD:
-			break;
-		case PARREM:
-			break;
-		case PARREP:
-			break;
-		case RANGECHECK:
-			break;
-		case SIZECHECK:
-			break;
-		default:
-			break;
-	
 		}
 	}
 
