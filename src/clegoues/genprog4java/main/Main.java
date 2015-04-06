@@ -71,7 +71,13 @@ public class Main {
 			searchEngine = new Search<JavaEditOperation>(fitnessEngine);
 			incomingPopulation = new Population<JavaEditOperation>(); // FIXME: read from incoming if applicable?
 		}
-		baseRep.load(Configuration.targetClassName);
+		// loads the class file into the representation. 
+		// Does the Following:
+		// 1) If "yes" in sanity check in Configuration file, then does sanity check. 
+		// 2) 
+		for(String className: Configuration.targetClassNames){
+			baseRep.load(className);
+		}
 		try {
 			switch(Search.searchStrategy) {
 			case "ga": searchEngine.geneticAlgorithm(baseRep, incomingPopulation);
@@ -91,7 +97,6 @@ public class Main {
 		int elapsed = getElapsedTime(startTime);
 		System.out.printf("\nTotal elapsed time: " + elapsed + "\n");
 		Runtime.getRuntime().exit(0);
-
 	}
 
 	private static int getElapsedTime(long start)

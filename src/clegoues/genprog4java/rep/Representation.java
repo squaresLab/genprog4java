@@ -33,9 +33,11 @@
 
 package clegoues.genprog4java.rep;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -224,6 +226,18 @@ public abstract class Representation<G extends EditOperation> implements Compara
 	protected List<Pair<String, String>> computeSourceBuffers() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	protected static ArrayList<String> getClasses(String filename) throws IOException {
+		BufferedReader br = new BufferedReader(new FileReader(filename));
+		String line;
+		ArrayList<String> allLines = new ArrayList<String>();
+		while ((line = br.readLine()) != null) {
+			// print the line.
+			allLines.add(line);
+		}
+		br.close();
+		return allLines;
 	}
 
 }
