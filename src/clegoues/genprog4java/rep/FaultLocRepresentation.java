@@ -210,9 +210,8 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		for(Pair<Mutation,Double> mutation : Representation.mutations){
 			boolean addToSet = false;
 			switch(mutation.getFirst()) {
-			case DELETE: 
-				addToSet = true; 
-				break;
+			case DELETE: addToSet = true; 
+			break;
 			case APPEND:
 				addToSet = this.appendSources(atomId).size() > 0;
 				break;
@@ -220,9 +219,6 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 				addToSet = this.replaceSources(atomId).size() > 0;
 				break;
 			case SWAP:
-				addToSet = this.swapSources(atomId).size() > 0;
-				break;
-			default:
 				addToSet = this.swapSources(atomId).size() > 0;
 				break;
 			}
@@ -261,7 +257,9 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		return retVal;
 	}
 
+
 	/*
+
 			  (** run the instrumented code to attain coverage information.  Writes the
 			      generated paths to disk (the fault and fix path files respectively) but
 			      does not otherwise return.
@@ -395,8 +393,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 				fw.put(i,  0.5);
 				faultLocalization.add(new WeightedAtom(i,negWeight));
 			}
-		}
-		for(Map.Entry<Integer,Double> entry : fw.entrySet()) {
+		} 					for(Map.Entry<Integer,Double> entry : fw.entrySet()) {
 			Integer key = entry.getKey();
 			Double value = entry.getValue();
 			fixLocalization.add(new WeightedAtom(key,value));
@@ -404,6 +401,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		assert(faultLocalization.size() > 0);
 		assert(fixLocalization.size() > 0);
 		this.doingCoverage = false;
+		//this.printDebugInfo();
 	}
 
 	protected abstract void printDebugInfo();

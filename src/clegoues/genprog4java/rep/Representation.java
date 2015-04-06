@@ -206,52 +206,8 @@ public abstract class Representation<G extends EditOperation> implements Compara
 	public static void configure(Properties prop) {
 	}
 
-	public void funRep(int dst, int source){
-		history.add(new HistoryEle(Mutation.FUNREP, dst, source));
-	}
-	
-	public void parRep(int dst, int source){
-		history.add(new HistoryEle(Mutation.PARREP, dst, source));
-	}
-	
-	public void parAdd(int dst, int source){
-		history.add(new HistoryEle(Mutation.PARADD, dst, source));
-	}
-	
-	public void parRem(int atomId){
-		history.add(new HistoryEle(Mutation.PARREM, atomId));
-	}
-	
-	public void expRep(int dst, int source){
-		history.add(new HistoryEle(Mutation.EXPREP, dst, source));
-	}
-	
-	public void expAdd(int dst, int source){
-		history.add(new HistoryEle(Mutation.EXPADD, dst, source));
-	}
-	
-	public void expRem(int atomId){
-		history.add(new HistoryEle(Mutation.EXPREM, atomId));
-	}
-	
-	public void nullCheck(int atomId){
-		history.add(new HistoryEle(Mutation.NULLCHECK, atomId));
-	}
-	
-	public void objInit(int atomId){
-		history.add(new HistoryEle(Mutation.OBJINIT, atomId));
-	}
-	
-	public void rangeCheck(int atomId){
-		history.add(new HistoryEle(Mutation.RANGECHECK, atomId));
-	}
-	
-	public void sizeCheck(int atomId){
-		history.add(new HistoryEle(Mutation.SIZECHECK, atomId));
-	}
-
-	public void castCheck(int atomId){
-		history.add(new HistoryEle(Mutation.CASTCHECK, atomId));
+	public void nullInsert(int atomId){
+		history.add(new HistoryEle(Mutation.NULLINSERT, atomId));
 	}
 	
 	public abstract void recordFitness(String key, FitnessValue fitness); 
