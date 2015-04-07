@@ -536,7 +536,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	public void nullCheck(int location){
 		super.nullCheck(location);
 		JavaStatement locationStatement = base.get(location);
-		JavaEditOperation newEdit = new JavaEditOperation(locationStatement, Mutation.NULLINSERT);
+		JavaEditOperation newEdit = new JavaEditOperation(locationStatement, Mutation.NULLCHECK);
 		this.genome.add(newEdit);
 	}
 	
