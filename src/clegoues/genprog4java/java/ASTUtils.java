@@ -151,15 +151,12 @@ public class ASTUtils
 		super(URI.create(name.replace(".", "/")+"/"+Configuration.targetClassName+Kind.SOURCE.extension), Kind.SOURCE);
  		this.code = code;
  	}
- }
+ 
 
 
 
 /*
-=======
 
-
->>>>>>> other
 class JavaSourceFromString extends SimpleJavaFileObject
 {
 	final String code;
@@ -169,10 +166,10 @@ class JavaSourceFromString extends SimpleJavaFileObject
 		super(URI.create(name.replace(".", "/")+"/"+Configuration.targetClassName+Kind.SOURCE.extension), Kind.SOURCE);
 		this.code = code;
 	}
-
+*/
 	public CharSequence getCharContent(boolean ignoreEncodingErrors)
 	{
 		return code;
 	}
-}*/
+}
 
