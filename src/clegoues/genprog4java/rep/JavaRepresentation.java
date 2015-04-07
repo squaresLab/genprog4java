@@ -465,9 +465,28 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 		if(this.doingCoverage) {
 
+			
+			/*ArrayList<String> targetClasses = new ArrayList<String>();
+			try{
+				targetClasses.addAll(getClasses(Configuration.targetClassName));
+			} catch (IOException e) {
+				System.err.println("failed to read " + targetClasses + " giving up");
+				Runtime.getRuntime().exit(1);
+			}
+			String targetClassString = "";
+			for(String s : targetClasses){
+				targetClassString += s + ",";
+			}*/
+			
+
+
 			command.addArgument("-Xmx1024m");
 			command.addArgument(
 					"-javaagent:"+Configuration.jacocoPath+"=excludes=org.junit.*,append=false");
+
+//					"-javaagent:"+Configuration.jacocoPath+"=excludes=" + Configuration.testsDir+".*" + ",includes="+targetClassString +",append=false");
+			
+
 		} else {
 			command.addArgument("-Xms128m");
 			command.addArgument("-Xmx256m");
