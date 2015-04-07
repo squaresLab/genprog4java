@@ -182,7 +182,7 @@ public class Search<G extends EditOperation> {
 		availableMutations.add(new Pair<Mutation,Double>(Mutation.APPEND, 	  Search.appProb));
 		availableMutations.add(new Pair<Mutation,Double>(Mutation.SWAP,   	  Search.swapProb));
 		availableMutations.add(new Pair<Mutation,Double>(Mutation.REPLACE,    Search.repProb));
-		availableMutations.add(new Pair<Mutation,Double>(Mutation.NULLINSERT, Search.nullProb));
+		availableMutations.add(new Pair<Mutation,Double>(Mutation.NULLCHECK, Search.nullProb));
 		Representation.registerMutations(availableMutations);
 	}
 	
@@ -320,7 +320,6 @@ public class Search<G extends EditOperation> {
 		ArrayList<WeightedAtom> proMutList = new ArrayList<WeightedAtom>();
 		for(int i = 0; i < Search.promut; i++) 
 			proMutList.add((WeightedAtom) GlobalUtils.chooseOneWeighted(faultyAtoms));
-		}
 		for(WeightedAtom atom : proMutList) {
 			int stmtid = atom.getAtom();
 			TreeSet<Pair<Mutation,Double>> availableMutations = variant.availableMutations(stmtid);
@@ -346,8 +345,8 @@ public class Search<G extends EditOperation> {
 				WeightedAtom replaceWith = (WeightedAtom) GlobalUtils.chooseOneWeighted(new ArrayList(replaceAllowed));
 				variant.replace(stmtid, replaceWith.getAtom());
 				break;
-			case NULLINSERT:
-				variant.nullInsert(stmtid);
+			case NULLCHECK:
+				variant.nullCheck(stmtid);
 				break;
 			}
 		}
