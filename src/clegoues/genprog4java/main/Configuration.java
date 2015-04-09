@@ -33,14 +33,18 @@
 
 package clegoues.genprog4java.main;
  
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.Random;
 
 import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
@@ -55,9 +59,12 @@ public class Configuration {
 	public static String targetVersion = "1.5";
 	public static String globalExtension = ".java";
 	public static String targetClassName = "";
+	//private static HashMap<Integer,String> targetClassNames = new HashMap<Integer,String>();
+	public static ArrayList<String> targetClassNames = new ArrayList<String>();
 	public static String javaRuntime = "";
 	public static String javaVM;
 	public static String jacocoPath = "";
+	public static String testsDir = "";
 	public static long seed;
 	public static boolean doSanity = true;
 	public static String packageName;
@@ -103,6 +110,9 @@ public class Configuration {
 		if(prop.getProperty("jacocoPath") != null) {
 			jacocoPath = prop.getProperty("jacocoPath").trim();
 		}
+		if(prop.getProperty("testsDir") != null) {
+			testsDir = prop.getProperty("testsDir").trim();
+		}
 		if(prop.getProperty("sanity") != null) {
 			String sanity = prop.getProperty("sanity").trim();
 			if(sanity.equals("no")) { 
@@ -117,17 +127,28 @@ public class Configuration {
 		randomizer = new Random(seed);
 		
 		targetClassName = prop.getProperty("targetClassName").trim();
+<<<<<<< local
 
 		/*
+=======
+		
+>>>>>>> other
 		try{
 			targetClassNames.addAll(getClasses(targetClassName));
 		} catch (IOException e) {
 			System.err.println("failed to read " + targetClassNames + " giving up");
 			Runtime.getRuntime().exit(1);
 		}
+<<<<<<< local
 		*/
+=======
+>>>>>>> other
 		
+<<<<<<< local
 
+=======
+		
+>>>>>>> other
 		Search.configure(prop);
 		Population.configure(prop);
 		Fitness.configure(prop);
@@ -136,4 +157,17 @@ public class Configuration {
 		CachingRepresentation.configure(prop);
 
 	}
+	
+	private static ArrayList<String> getClasses(String filename) throws IOException {
+		BufferedReader br = new BufferedReader(new FileReader(filename));
+		String line;
+		ArrayList<String> allLines = new ArrayList<String>();
+		while ((line = br.readLine()) != null) {
+			// print the line.
+			allLines.add(line);
+		}
+		br.close();
+		return allLines;
+	}
+	
 }
