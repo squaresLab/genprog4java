@@ -33,11 +33,7 @@
 
 package clegoues.genprog4java.java;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -52,7 +48,7 @@ import clegoues.genprog4java.main.Configuration;
 
 public class ASTUtils
 {
-
+	
 	public static int getLineNumber(ASTNode node)
 	{ // FIXME: I think we should be able to just get this from the CU saved in javarepresentation, right?
 		ASTNode root = node.getRoot();
@@ -62,10 +58,10 @@ public class ASTUtils
 			CompilationUnit cu = (CompilationUnit)root;
 			lineno = cu.getLineNumber(node.getStartPosition());
 		}
-
+	
 		return lineno;
 	}
-
+	
 	public static Set<String> getNames(ASTNode node)     // it does not count.
 	{
 		TreeSet<String> names = new TreeSet<String>();
@@ -74,106 +70,62 @@ public class ASTUtils
 		return names;
 	}
 	// FIXME this feels wicked inefficient to me, but possibly that's a low-order bit
-
+	
 	public static Set<String> getTypes(ASTNode node)
 	{
 		TreeSet<String> types = new TreeSet<String>();
-
+		
 		TypeCollector visitor = new TypeCollector(types);
-
+		
 		node.accept(visitor);
-
+		
 		return types;
 	}
-
+	
 	public static Set<String> getScope(ASTNode node)
 	{
 		TreeSet<String> scope = new TreeSet<String>();
-
+		
 		ScopeCollector visitor = new ScopeCollector(scope);
-
+		
 		node.accept(visitor);
-
+		
 		return scope;
 	}
-<<<<<<< local
 	
-=======
->>>>>>> other
 
-<<<<<<< local
 	
  	public static Iterable<JavaSourceFromString> getJavaSourceFromString(String code)
  	{
-=======
-	public static Iterable<JavaSourceFromString> getJavaSourceFromString(String code)
-	{
-		ArrayList<String> classList = new ArrayList<String>();
-		try{
-			classList.addAll(getClasses(Configuration.targetClassName));
-		} catch (IOException e) {
-			System.err.println("failed to read " + classList + " giving up");
-			Runtime.getRuntime().exit(1);
-		}
->>>>>>> other
 
-<<<<<<< local
 		final JavaSourceFromString jsfs;
 		jsfs = new JavaSourceFromString("code", code);
 
-=======
-		
-//		jsfs = new ArrayList<JavaSourceFromString>();
-//		jsfs = new JavaSourceFromString("code", code, classList.get(0)); //	THIS GET(0) SHOULD BE CHANGED, THIS IS JUST THE FIRST CLASS, IT SHOULD TAKE ALL CLASSES
-		ArrayList<JavaSourceFromString> jsfsNF = new ArrayList<JavaSourceFromString>();
-		for (int i = 0; i < classList.size(); i++) {
-			jsfsNF.add(i, new JavaSourceFromString("code", code, classList.get(i)));
-		}
-		
-		final ArrayList<JavaSourceFromString> jsfs = jsfsNF;
-		
->>>>>>> other
 		return new Iterable<JavaSourceFromString>()
 		{
 			public Iterator<JavaSourceFromString> iterator()
 
  			{
 				return new Iterator<JavaSourceFromString>()
-<<<<<<< local
 
 
  				{
 
 					boolean isNext = true;
-=======
-				{
-					boolean hasNext = true;
-					int currentIndex = -1;
->>>>>>> other
 
 					public boolean hasNext()
 
 					{
-<<<<<<< local
 
 						return isNext;
-=======
-						return hasNext;
->>>>>>> other
 					}
 
 					public JavaSourceFromString next()
 					{
-						if (hasNext){
-							currentIndex++;
-							if((jsfs.size()-1)==currentIndex){
-								hasNext=false;
-							}
-							
-						}else{
+						if (!isNext)
 							throw new NoSuchElementException();
-						}
-						return jsfs.get(currentIndex);
+						isNext = false;
+						return jsfs;
 					}
 
 					public void remove()
@@ -183,25 +135,6 @@ public class ASTUtils
 				};
 			}
 		};
-<<<<<<< local
-=======
-
-
-	}
-
-	private static ArrayList<String> getClasses(String filename) throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader(filename));
-		String line;
-		ArrayList<String> allLines = new ArrayList<String>();
-		while ((line = br.readLine()) != null) {
-			// print the line.
-			allLines.add(line);
-		}
-		br.close();
-		return allLines;
-	}
-}
->>>>>>> other
 
 
  	}
@@ -224,15 +157,13 @@ public class ASTUtils
 
 /*
 
-
 class JavaSourceFromString extends SimpleJavaFileObject
 {
 	final String code;
 
-	JavaSourceFromString(String name, String code, String targetClassName)
+	JavaSourceFromString(String name, String code)
 	{
-		//super(URI.create(name.replace(".", "/")+"/"+Configuration.targetClassName+Kind.SOURCE.extension), Kind.SOURCE);
-		super(URI.create(targetClassName.replace(".", "/")+Kind.SOURCE.extension), Kind.SOURCE);
+		super(URI.create(name.replace(".", "/")+"/"+Configuration.targetClassName+Kind.SOURCE.extension), Kind.SOURCE);
 		this.code = code;
 	}
 */
@@ -241,4 +172,3 @@ class JavaSourceFromString extends SimpleJavaFileObject
 		return code;
 	}
 }
-
