@@ -118,6 +118,16 @@ public class Configuration {
 		
 		targetClassName = prop.getProperty("targetClassName").trim();
 
+		/*
+		try{
+			targetClassNames.addAll(getClasses(targetClassName));
+		} catch (IOException e) {
+			System.err.println("failed to read " + targetClassNames + " giving up");
+			Runtime.getRuntime().exit(1);
+		}
+		*/
+		
+
 		Search.configure(prop);
 		Population.configure(prop);
 		Fitness.configure(prop);

@@ -44,8 +44,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StringWriter;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -57,17 +55,6 @@ import java.util.TreeSet;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
-
-import clegoues.genprog4java.fitness.TestCase;
-import clegoues.genprog4java.java.ASTUtils;
-import clegoues.genprog4java.java.JavaParser;
-import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.java.ScopeInfo;
-import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.mut.HistoryEle;
-import clegoues.genprog4java.mut.JavaEditOperation;
-import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.util.Pair;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
@@ -93,7 +80,6 @@ import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.BadLocationException;
@@ -110,6 +96,17 @@ import org.jacoco.core.data.ExecutionDataStore;
 import org.jacoco.core.data.IExecutionDataVisitor;
 import org.jacoco.core.data.ISessionInfoVisitor;
 import org.jacoco.core.data.SessionInfo;
+
+import clegoues.genprog4java.fitness.TestCase;
+import clegoues.genprog4java.java.ASTUtils;
+import clegoues.genprog4java.java.JavaParser;
+import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.java.ScopeInfo;
+import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.mut.HistoryEle;
+import clegoues.genprog4java.mut.JavaEditOperation;
+import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.util.Pair;
 
 
 // this can handle ONE FILE right now
@@ -164,10 +161,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	{
 		InputStream targetClass = new FileInputStream(new File(Configuration.outputDir + File.separator + "coverage/coverage.out"+File.separator+Configuration.packageName.replace(".","/")
 				+ File.separator + Configuration.targetClassName + ".class"));
-		
-		//looks like this name here might be irrelevant, so I just changed it for a generic one "coverageInfo", I might be wrong, and maybe there needs to be a coverage file per every target class.
-		//InputStream targetClass = new FileInputStream(new File(Configuration.outputDir + File.separator + "coverage/coverage.out"+File.separator + "coverageInfo.class"));
-
 
 		if(executionData == null) {
 			executionData = new ExecutionDataStore();
@@ -441,14 +434,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		} 
 		// FIXME: I sense there's a better way to signify that computeSourceBuffers failed than
 		// to return null at those catch blocks
-		/*ArrayList<String> classList = new ArrayList<String>();
-		try{
-			classList.addAll(getClasses(Configuration.targetClassName));
-		} catch (IOException e) {
-			System.err.println("failed to read " + classList + " giving up");
-			Runtime.getRuntime().exit(1);
-		}
-		*/
 		ArrayList<Pair<String,String>> retVal = new ArrayList<Pair<String,String>>();
 		retVal.add(new Pair<String,String>(Configuration.targetClassName, original.get()));
 		return retVal;
@@ -477,8 +462,8 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 		if(this.doingCoverage) {
 
-			/*
-			ArrayList<String> targetClasses = new ArrayList<String>();
+			
+			/*ArrayList<String> targetClasses = new ArrayList<String>();
 			try{
 				targetClasses.addAll(getClasses(Configuration.targetClassName));
 			} catch (IOException e) {
@@ -487,16 +472,18 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			}
 			String targetClassString = "";
 			for(String s : targetClasses){
-				targetClassString += s; 
-				if(targetClasses.size() != (targetClasses.lastIndexOf(s)+1)){targetClassString += ",";} 
-			}
-*/
+				targetClassString += s + ",";
+			}*/
+			
+
 
 			command.addArgument("-Xmx1024m");
 			command.addArgument(
 					"-javaagent:"+Configuration.jacocoPath+"=excludes=org.junit.*,append=false");
-//					"-javaagent:"+Configuration.jacocoPath/*+"=excludes=" + Configuration.testsDir+".*" */+ ",includes="+targetClassString +",append=false");
+
+//					"-javaagent:"+Configuration.jacocoPath+"=excludes=" + Configuration.testsDir+".*" + ",includes="+targetClassString +",append=false");
 			
+
 		} else {
 			command.addArgument("-Xms128m");
 			command.addArgument("-Xmx256m");

@@ -280,6 +280,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	 * statements visited while executing the positive test case(s). 
 	 **/
 
+	int counterCoverageErrors = 0;
 	protected abstract ArrayList<Integer> atomIDofSourceLine(int lineno);
 
 	private TreeSet<Integer> runTestsCoverage(String pathFile, TestType testT, ArrayList<String> tests, boolean expectedResult, String wd) throws IOException, UnexpectedCoverageResultException {
@@ -296,7 +297,9 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 
 			if(this.testCase(newTest) != expectedResult && !FaultLocRepresentation.allowCoverageFail) {
 				System.err.println("FaultLocRep: unexpected coverage result: " + newTest.toString());
-				throw new UnexpectedCoverageResultException("FaultLocRep: unexpected coverage result: " + newTest.toString());
+				System.err.println("Amount of coverage errors so far: " + ++counterCoverageErrors);
+				//LETING COVERAGE ERRORS PASS
+				//throw new UnexpectedCoverageResultException("FaultLocRep: unexpected coverage result: " + newTest.toString());
 			}
 			TreeSet<Integer> thisTestResult = this.getCoverageInfo();
 			atoms.addAll(thisTestResult);
@@ -402,8 +405,8 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		assert(faultLocalization.size() > 0);
 		assert(fixLocalization.size() > 0);
 		this.doingCoverage = false;
-		this.printDebugInfo();
-		System.exit(0);
+		//this.printDebugInfo();
+		//System.exit(0);
 	}
 
 	protected abstract void printDebugInfo();

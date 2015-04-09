@@ -97,7 +97,11 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 
 
 	public void load(String base) throws IOException { 
-		String filename = Configuration.sourceDir + File.separatorChar + base + Configuration.globalExtension;
+
+		String filename = Configuration.sourceDir + File.separatorChar + base;// + Configuration.globalExtension;
+		//String filename = base.replace(".","/");	
+		filename += Configuration.globalExtension;
+
 		String cacheName = base + ".cache";
 		//boolean didDeserialize = this.deserialize(cacheName,null, true); 
 		//if(!didDeserialize) { 
@@ -138,7 +142,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		ArrayList<String> passingTests = new ArrayList<String>();
 		//make list of passing files (sanitizing out of scope tests)
 		for(String posTest : Fitness.positiveTests) {
-			System.out.printf("\tout of scope: p" + testNum + ": ");
+			System.out.printf("\tChecking if test is out of scope: p" + testNum + ": ");
 			TestCase thisTest = new TestCase(TestType.POSITIVE, posTest);
 			FitnessValue res = this.internalTestCase(CachingRepresentation.sanityExename,CachingRepresentation.sanityFilename, thisTest);
 			if(!res.isAllPassed()) {
@@ -158,7 +162,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 			return false;
 		}
 		//////////////////
-		
+		/*
 		for(String posTest : Fitness.positiveTests) {
 			System.out.printf("\tp" + testNum + ": ");
 			TestCase thisTest = new TestCase(TestType.POSITIVE, posTest);
@@ -170,7 +174,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 			}
 			System.out.printf("true (1)\n");
 			testNum++;
-		}
+		}*/
 		System.out.println("This is the list of passing tests:" + passingTests);
 		testNum = 1;
 		for(String negTest : Fitness.negativeTests) { 
