@@ -33,13 +33,11 @@
 
 package clegoues.genprog4java.rep;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -120,7 +118,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	private static CompilationUnit baseCompilationUnit = null;
 	private static HashMap<Integer,ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer,ArrayList<Integer>>();
 	private static String originalSource = "";
-	public static ArrayList<String> originalSources = new ArrayList<String>();
 
 	// semantic check cache stuff, so we don't have to walk stuff a million times unecessarily
 	// should be the same for all of append, replace, and swap, so we only need the one.
@@ -162,11 +159,8 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 	public TreeSet<Integer> getCoverageInfo() throws IOException
 	{
-		//InputStream targetClass = new FileInputStream(new File(Configuration.outputDir + File.separator + "coverage/coverage.out"+File.separator+Configuration.packageName.replace(".","/")
-		//		+ File.separator + Configuration.targetClassName + ".class"));
-		
-		//looks like this name here might be irrelevant, so I just changed it for a generic one "coverageInfo", I might be wrong, and maybe there needs to be a coverage file per every target class.
-		InputStream targetClass = new FileInputStream(new File(Configuration.outputDir + File.separator + "coverage/coverage.out"+File.separator + "coverageInfo.class"));
+		InputStream targetClass = new FileInputStream(new File(Configuration.outputDir + File.separator + "coverage/coverage.out"+File.separator+Configuration.packageName.replace(".","/")
+				+ File.separator + Configuration.targetClassName + ".class"));
 
 		if(executionData == null) {
 			executionData = new ExecutionDataStore();
@@ -221,29 +215,17 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		return atoms;
 	}
 
-	public void fromSource(String filename) throws IOException
+	public void fromSource(String fname) throws IOException
 	{
 		// load here, get all statements and the compilation unit saved
 		// parser can visit at the same time to collect scope info
 		// apparently names and types and scopes are visited here below in
 		// the calls to ASTUtils
-		//ArrayList<String> classesList = new ArrayList<String>();
 		ScopeInfo scopeInfo = new ScopeInfo();
 		JavaParser myParser = new JavaParser(scopeInfo);
 		//originalSource entire class file written as a string
-		/*
-		try{
-			classesList.addAll(getClasses(filename));
-		} catch (IOException e) {
-			System.err.println("failed to read " + originalSources + " giving up");
-			Runtime.getRuntime().exit(1);
-		}
-		
-		for(String fname : classesList){
-		*/
-		JavaRepresentation.originalSource = FileUtils.readFileToString(new File(filename));
-		//JavaRepresentation.originalSources = FileUtils.readFileToString(new File(fname));
-		myParser.parse(filename, Configuration.libs.split(File.pathSeparator)); 
+		JavaRepresentation.originalSource = FileUtils.readFileToString(new File(fname));
+		myParser.parse(fname, Configuration.libs.split(File.pathSeparator)); 
 		List<ASTNode> stmts = myParser.getStatements();
 		baseCompilationUnit = myParser.getCompilationUnit();
 
@@ -277,9 +259,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			}
 
 		}
-		//}
 	}
-
 	
 	public static boolean canRepair(ASTNode node) {
 		return node instanceof AssertStatement ||
@@ -384,8 +364,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 					// how to fix that. So we need to parse the file again, which is a total bummer.
 					// this is still worth doing for the genome thing below, I guess, in particular
 					// because it allows us to serialize/deserialize incoming populations
-					//this.fromSource(Configuration.sourceDir + File.separatorChar + filename + Configuration.globalExtension);
-					this.fromSource(filename.replace(".", "/") + Configuration.globalExtension);
+					this.fromSource(Configuration.sourceDir + File.separatorChar + filename + Configuration.globalExtension);
 				}
 				this.genome.addAll((ArrayList<JavaEditOperation>)(in.readObject()));  
 				System.out.println("javaRepresentation: " + filename + "loaded\n");
@@ -482,19 +461,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		command.addArgument(classPath); 
 
 		if(this.doingCoverage) {
-			
-			ArrayList<String> targetClasses = new ArrayList<String>();
-			try{
-				targetClasses.addAll(getClasses(Configuration.targetClassName));
-			} catch (IOException e) {
-				System.err.println("failed to read " + targetClasses + " giving up");
-				Runtime.getRuntime().exit(1);
-			}
-			String targetClassString = "";
-			for(String s : targetClasses){
-				targetClassString += s + ",";
-			}
-			
 
 			
 			/*ArrayList<String> targetClasses = new ArrayList<String>();
@@ -512,20 +478,12 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 
 
 			command.addArgument("-Xmx1024m");
-			//I THINK ALL THE EXCLUDES ARE WRONG BECAUSE THE WORKING DIRECTORY STARTS IN A DIFFERENT ADDRESS, SO WITH THIS EXCLUDES ADDRESS, IT WON'T BE ABLE TO KNOW WHERE THE EXCLUDE FILES ARE
 			command.addArgument(
-<<<<<<< local
 					"-javaagent:"+Configuration.jacocoPath+"=excludes=org.junit.*,append=false");
 
 //					"-javaagent:"+Configuration.jacocoPath+"=excludes=" + Configuration.testsDir+".*" + ",includes="+targetClassString +",append=false");
-=======
-					"-javaagent:"+Configuration.jacocoPath+"=excludes=" + Configuration.testsDir+".*" + ",includes="+targetClassString +",append=false");
->>>>>>> other
 			
-<<<<<<< local
 
-=======
->>>>>>> other
 		} else {
 			command.addArgument("-Xms128m");
 			command.addArgument("-Xmx256m");
@@ -743,4 +701,3 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	}
 
 }
-

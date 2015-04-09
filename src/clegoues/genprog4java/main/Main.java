@@ -75,20 +75,13 @@ public class Main {
 		// Does the Following:
 		// 1) If "yes" in sanity check in Configuration file, then does sanity check. 
 		// 2) 
-<<<<<<< local
 		baseRep.load(Configuration.targetClassName);
 
 		/*
-=======
->>>>>>> other
 		for(String className: Configuration.targetClassNames){
 			baseRep.load(className);
-<<<<<<< local
 		}*/
 
-=======
-		}
->>>>>>> other
 		try {
 			switch(Search.searchStrategy) {
 			case "ga": searchEngine.geneticAlgorithm(baseRep, incomingPopulation);
