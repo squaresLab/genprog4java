@@ -93,21 +93,30 @@ public class ASTUtils
 		return scope;
 	}
 	
-	public static Iterable<JavaSourceFromString> getJavaSourceFromString(String code)
-	{
+
+	
+ 	public static Iterable<JavaSourceFromString> getJavaSourceFromString(String code)
+ 	{
+
 		final JavaSourceFromString jsfs;
 		jsfs = new JavaSourceFromString("code", code);
-		
+
 		return new Iterable<JavaSourceFromString>()
 		{
 			public Iterator<JavaSourceFromString> iterator()
-			{
+
+ 			{
 				return new Iterator<JavaSourceFromString>()
-				{
+
+
+ 				{
+
 					boolean isNext = true;
 
 					public boolean hasNext()
+
 					{
+
 						return isNext;
 					}
 
@@ -126,10 +135,27 @@ public class ASTUtils
 				};
 			}
 		};
-	}
-}
 
 
+ 	}
+ }
+ 
+ 
+ class JavaSourceFromString extends SimpleJavaFileObject
+ {
+ 	final String code;
+ 
+	JavaSourceFromString(String name, String code)
+
+ 	{
+		super(URI.create(name.replace(".", "/")+"/"+Configuration.targetClassName+Kind.SOURCE.extension), Kind.SOURCE);
+ 		this.code = code;
+ 	}
+ 
+
+
+
+/*
 
 class JavaSourceFromString extends SimpleJavaFileObject
 {
@@ -140,7 +166,7 @@ class JavaSourceFromString extends SimpleJavaFileObject
 		super(URI.create(name.replace(".", "/")+"/"+Configuration.targetClassName+Kind.SOURCE.extension), Kind.SOURCE);
 		this.code = code;
 	}
-
+*/
 	public CharSequence getCharContent(boolean ignoreEncodingErrors)
 	{
 		return code;
