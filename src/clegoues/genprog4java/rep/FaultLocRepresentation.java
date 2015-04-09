@@ -406,7 +406,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		assert(fixLocalization.size() > 0);
 		this.doingCoverage = false;
 		//this.printDebugInfo();
-		System.exit(0);
+		//System.exit(0);
 	}
 
 	protected abstract void printDebugInfo();
