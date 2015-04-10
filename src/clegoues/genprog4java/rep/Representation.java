@@ -251,6 +251,7 @@ public abstract class Representation<G extends EditOperation> implements
 	public abstract TreeSet<WeightedAtom> replaceSources(int atomId);
 
 	public static void configure(Properties prop) {
+		// FIXME: this is dumb, do it all in configuration
 	}
 
 	public void nullInsert(int atomId) {
