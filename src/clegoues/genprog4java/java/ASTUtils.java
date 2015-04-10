@@ -143,7 +143,8 @@ public class ASTUtils {
 class JavaSourceFromString extends SimpleJavaFileObject {
 	final String code;
 
-	// FIXME: I strong suspect that we can override the name to put it somewhere
+	// FIXME: I strongly suspect that we can override the name to put it
+	// somewhere
 	// that's not "code" or that is in a reasonable location wrt where it's
 	// being compiled. Hmm.
 

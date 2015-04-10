@@ -119,14 +119,9 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		// if(!didDeserialize)
 		// this.serialize(cacheName, null, true);
 		for (String base : bases) {
-			String filename = Configuration.sourceDir + File.separatorChar
-					+ base;
-			// String filename = base.replace(".","/"); // FIXME: I suspect we
-			// need this.
-			filename += Configuration.globalExtension;
 
-			this.fromSource(filename);
-			System.out.println("loaded from source " + filename);
+			this.fromSource(base);
+			System.out.println("loaded from source " + base);
 
 		}
 		if (Configuration.doSanity) {
