@@ -116,11 +116,7 @@ public class JavaRepresentation extends
 	private static HashMap<Integer, JavaStatement> base = new HashMap<Integer, JavaStatement>();
 	private static HashMap<String, CompilationUnit> baseCompilationUnits = new HashMap<String, CompilationUnit>();
 	private static HashMap<Integer, ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer, ArrayList<Integer>>();
-	private static HashMap<String, String> originalSource = new HashMap<String, String>(); // maps
-																							// filename
-																							// to
-																							// original
-																							// source
+	private static HashMap<String, String> originalSource = new HashMap<String, String>();
 
 	// semantic check cache stuff, so we don't have to walk stuff a million
 	// times unnecessarily
@@ -171,8 +167,7 @@ public class JavaRepresentation extends
 
 	public TreeSet<Integer> getCoverageInfo() throws IOException {
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
-		// potential FIXME: I'm not totally certain this is going to work
-		// (multiple files change)
+
 		for (Map.Entry<String, String> ele : JavaRepresentation.originalSource
 				.entrySet()) {
 			String targetClassName = ele.getKey();
@@ -236,20 +231,25 @@ public class JavaRepresentation extends
 		return atoms;
 	}
 
-	public void fromSource(String fname) throws IOException {
+	public void fromSource(String className) throws IOException {
 		// load here, get all statements and the compilation unit saved
 		// parser can visit at the same time to collect scope info
 		// apparently names and types and scopes are visited here below in
 		// the calls to ASTUtils
+
+		String fname = Configuration.sourceDir + File.separatorChar
+				+ className.replace(".", "/") + ".java";
+		// we can assume that that's what Configuration.globalExtension is,
+		// because we're in JavaRepresentation
 		ScopeInfo scopeInfo = new ScopeInfo();
 		JavaParser myParser = new JavaParser(scopeInfo);
 		// originalSource entire class file written as a string
 		String source = FileUtils.readFileToString(new File(fname));
-		JavaRepresentation.originalSource.put(fname, source);
+		JavaRepresentation.originalSource.put(className, source);
 
 		myParser.parse(fname, Configuration.libs.split(File.pathSeparator));
 		List<ASTNode> stmts = myParser.getStatements();
-		baseCompilationUnits.put(fname, myParser.getCompilationUnit());
+		baseCompilationUnits.put(className, myParser.getCompilationUnit());
 
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
