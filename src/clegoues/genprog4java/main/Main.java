@@ -32,79 +32,91 @@
  */
 
 package clegoues.genprog4java.main;
+
+// FIXME: remove creation of sanity/ directory since everything is getting made in tmp/
+
 import java.io.File;
 import java.io.IOException;
 
+import clegoues.genprog4java.Search.Population;
+import clegoues.genprog4java.Search.RepairFoundException;
+import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.LocalizationRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
-import clegoues.genprog4java.Search.Population;
-import clegoues.genprog4java.Search.RepairFoundException;
-import clegoues.genprog4java.Search.Search;
 
 public class Main {
 
-	public static void main(String[] args) throws IOException, UnexpectedCoverageResultException
-	{
+	public static void main(String[] args) throws IOException,
+			UnexpectedCoverageResultException {
 		Search searchEngine = null;
 		Representation baseRep = null;
 		Fitness fitnessEngine = null;
 		Population incomingPopulation = null;
-		assert(args.length > 0);
+		assert (args.length > 0);
 		long startTime = System.currentTimeMillis();
 
 		Configuration.setProperties(args[0]);
 		File workDir = new File(Configuration.outputDir);
-		if(!workDir.exists())
+		if (!workDir.exists())
 			workDir.mkdir();
 		System.out.println("Configuration file loaded");
-		if(Configuration.globalExtension == ".java") {
-			if(Search.searchStrategy.equals("io")) {
+		if (Configuration.globalExtension == ".java") {
+			if (Search.searchStrategy.equals("io")) {
 				baseRep = (Representation) new LocalizationRepresentation();
 			} else {
-			baseRep = (Representation) new JavaRepresentation();
+				baseRep = (Representation) new JavaRepresentation();
 			}
 			fitnessEngine = new Fitness<JavaEditOperation>();
 			searchEngine = new Search<JavaEditOperation>(fitnessEngine);
-			incomingPopulation = new Population<JavaEditOperation>(); // FIXME: read from incoming if applicable?
+			incomingPopulation = new Population<JavaEditOperation>(); // FIXME:
+																		// read
+																		// from
+																		// incoming
+																		// if
+																		// applicable?
 		}
-		// loads the class file into the representation. 
+		// loads the class file into the representation.
 		// Does the Following:
-		// 1) If "yes" in sanity check in Configuration file, then does sanity check. 
-		// 2) 
-		baseRep.load(Configuration.targetClassName);
+		// 1) If "yes" in sanity check in Configuration file, then does sanity
+		// check.
+		// 2)
+		baseRep.load(Configuration.targetClassNames);
 
 		/*
-		for(String className: Configuration.targetClassNames){
-			baseRep.load(className);
-		}*/
+		 * for(String className: Configuration.targetClassNames){
+		 * baseRep.load(className); }
+		 */
 
 		try {
-			switch(Search.searchStrategy) {
-			case "ga": searchEngine.geneticAlgorithm(baseRep, incomingPopulation);
+			switch (Search.searchStrategy) {
+			case "ga":
+				searchEngine.geneticAlgorithm(baseRep, incomingPopulation);
 				break;
-			case "brute": searchEngine.bruteForceOne(baseRep);
+			case "brute":
+				searchEngine.bruteForceOne(baseRep);
 				break;
-			case "oracle": searchEngine.oracleSearch(baseRep);
+			case "oracle":
+				searchEngine.oracleSearch(baseRep);
 				break;
-			case "io" : searchEngine.ioSearch(baseRep);
+			case "io":
+				searchEngine.ioSearch(baseRep);
 				break;
 			}
-		} catch(RepairFoundException e) {
+		} catch (RepairFoundException e) {
 			// FIXME: this is stupid
 		} catch (CloneNotSupportedException e) {
-			e.printStackTrace(); 
+			e.printStackTrace();
 		}
 		int elapsed = getElapsedTime(startTime);
 		System.out.printf("\nTotal elapsed time: " + elapsed + "\n");
 		Runtime.getRuntime().exit(0);
 	}
 
-	private static int getElapsedTime(long start)
-	{
-		return (int) ( System.currentTimeMillis() - start ) / 1000;
+	private static int getElapsedTime(long start) {
+		return (int) (System.currentTimeMillis() - start) / 1000;
 	}
 }

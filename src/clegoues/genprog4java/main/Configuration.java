@@ -32,29 +32,35 @@
  */
 
 package clegoues.genprog4java.main;
- 
+
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Random;
 
+import org.apache.commons.io.FilenameUtils;
+
+import clegoues.genprog4java.Search.Population;
+import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
-import clegoues.genprog4java.Search.Population;
-import clegoues.genprog4java.Search.Search;
 
 public class Configuration {
 	public static String sourceDir = "./";
 	public static String outputDir = "./";
 	public static String libs;
-	public static String sourceVersion = "1.5";
-	public static String targetVersion = "1.5";
+	public static String sourceVersion = "1.6";
+	public static String targetVersion = "1.6";
 	public static String globalExtension = ".java";
-	public static String targetClassName = "";
+	public static ArrayList<String> targetClassNames = new ArrayList<String>();
 	public static String javaRuntime = "";
 	public static String javaVM;
 	public static String jacocoPath = "";
@@ -62,78 +68,92 @@ public class Configuration {
 	public static boolean doSanity = true;
 	public static String packageName;
 	public static Random randomizer = null;
-	
-	public Configuration() {}
+
+	public Configuration() {
+	}
 
 	public Configuration(String configFile) {
 		Configuration.setProperties(configFile);
 	}
 
-
-	public static void setProperties(String name)
-	{
+	public static void setProperties(String name) {
 		Properties prop = new Properties();
-		try
-		{
+		try {
 			prop.load(new FileReader(new File(name)));
-		} catch (FileNotFoundException e)
-		{
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch (IOException e)
-		{
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		if(prop.getProperty("outputDir") != null) {
+		if (prop.getProperty("outputDir") != null) {
 			outputDir = prop.getProperty("outputDir").trim();
 		}
 		packageName = prop.getProperty("packageName").trim();
 		javaVM = prop.getProperty("javaVM").trim();
-		if(prop.getProperty("sourceDir") != null) {
-		sourceDir = prop.getProperty("sourceDir").trim();
+		if (prop.getProperty("sourceDir") != null) {
+			sourceDir = prop.getProperty("sourceDir").trim();
 		}
-		javaRuntime = Runtime.getRuntime().toString(); 
+		javaRuntime = Runtime.getRuntime().toString();
 		libs = prop.getProperty("libs").trim();
-		
-		if(prop.getProperty("sourceVersion") != null) {
-		sourceVersion = prop.getProperty("sourceVersion").trim();
+
+		if (prop.getProperty("sourceVersion") != null) {
+			sourceVersion = prop.getProperty("sourceVersion").trim();
 		}
-		if(prop.getProperty("targetVersion") != null) {
-		targetVersion = prop.getProperty("targetVersion").trim();
+		if (prop.getProperty("targetVersion") != null) {
+			targetVersion = prop.getProperty("targetVersion").trim();
 		}
-		if(prop.getProperty("jacocoPath") != null) {
+		if (prop.getProperty("jacocoPath") != null) {
 			jacocoPath = prop.getProperty("jacocoPath").trim();
 		}
-		if(prop.getProperty("sanity") != null) {
+		if (prop.getProperty("sanity") != null) {
 			String sanity = prop.getProperty("sanity").trim();
-			if(sanity.equals("no")) { 
+			if (sanity.equals("no")) {
 				doSanity = false;
 			}
 		}
-		if(prop.getProperty("seed") != null) {
+		if (prop.getProperty("seed") != null) {
 			seed = (long) Integer.parseInt(prop.getProperty("seed").trim());
 		} else {
 			seed = System.currentTimeMillis();
 		}
 		randomizer = new Random(seed);
-		
-		targetClassName = prop.getProperty("targetClassName").trim();
 
-		/*
-		try{
-			targetClassNames.addAll(getClasses(targetClassName));
-		} catch (IOException e) {
-			System.err.println("failed to read " + targetClassNames + " giving up");
-			Runtime.getRuntime().exit(1);
+		try {
+			targetClassNames.addAll(getClasses(prop.getProperty(
+					"targetClassName").trim()));
+		} catch (Exception e) {
+			// FIXME handle exception
+			e.printStackTrace();
 		}
-		*/
-		
 
 		Search.configure(prop);
 		Population.configure(prop);
 		Fitness.configure(prop);
 		JavaRepresentation.configure(prop);
-		FaultLocRepresentation.configure(prop); // FIXME probably there's a better way to do this?
+		FaultLocRepresentation.configure(prop); // FIXME probably there's a
+												// better way to do this?
 		CachingRepresentation.configure(prop);
 
+	}
+
+	public static ArrayList<String> getClasses(String filename)
+			throws IOException, FileNotFoundException {
+		ArrayList<String> returnValue = new ArrayList<String>();
+		String ext = FilenameUtils.getExtension(filename);
+		if (ext.equals("txt")) {
+			FileInputStream fis;
+			fis = new FileInputStream(filename);
+			BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+			String line = null;
+			while ((line = br.readLine()) != null) {
+				returnValue.add(line.trim());
+				System.out.println(line.trim());
+			}
+
+			br.close();
+		} else {
+			returnValue.add(filename);
+		}
+		return returnValue;
 	}
 }
