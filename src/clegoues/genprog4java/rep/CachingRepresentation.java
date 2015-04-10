@@ -46,6 +46,8 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.FitnessValue;
@@ -60,6 +62,8 @@ import clegoues.genprog4java.util.Pair;
 @SuppressWarnings("rawtypes")
 public abstract class CachingRepresentation<G extends EditOperation> extends
 		Representation<G> {
+	protected Logger logger = LogManager.getLogger(this.getClass());
+
 	public static boolean skipFailedSanity = false;
 	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
@@ -129,12 +133,12 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		for (String base : bases) {
 
 			this.fromSource(base);
-			System.out.println("loaded from source " + base);
+			logger.info("loaded from source " + base);
 
 		}
 		if (Configuration.doSanity) {
 			if (!this.sanityCheck()) {
-				System.err.println("cacheRep: Sanity check failed, giving up");
+				logger.error("Sanity check failed, giving up");
 				Runtime.getRuntime().exit(1);
 			}
 		}
@@ -150,11 +154,10 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		long startTime = System.currentTimeMillis();
 
 		this.outputSource(CachingRepresentation.sanityFilename);
-		System.out.println("cachingRepresentation: sanity checking begins");
+		logger.info("sanity checking begins");
 		if (!this.compile(CachingRepresentation.sanityFilename,
 				CachingRepresentation.sanityExename)) {
-			System.err.println("cacheRep: sanity: "
-					+ CachingRepresentation.sanityFilename
+			logger.error("sanity: " + CachingRepresentation.sanityFilename
 					+ " does not compile.");
 			return false;
 		}
@@ -168,8 +171,8 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 					CachingRepresentation.sanityExename,
 					CachingRepresentation.sanityFilename, thisTest);
 			if (!res.isAllPassed()) {
-				System.out.printf("false (0)\n");
-				System.err.println("cacheRep: sanity: "
+				logger.info("false (0)\n");
+				logger.error("cacheRep: sanity: "
 						+ CachingRepresentation.sanityFilename
 						+ " failed positive test " + thisTest.toString());
 				if (!skipFailedSanity) {
@@ -178,39 +181,37 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 			} else {
 				passingTests.add(posTest);
 			}
-			System.out.printf("true (1)\n");
+			logger.info("true (1)\n");
 			testNum++;
 		}
 		Fitness.positiveTests = passingTests;
 		testNum = 1;
 		if (passingTests.size() < 1) {
-			System.err
-					.println("Error: CacheRepresentation: no positive tests pass.");
+			logger.error("no positive tests pass.");
 			return false;
 		}
 
 		testNum = 1;
 		for (String negTest : Fitness.negativeTests) {
-			System.out.printf("\tn" + testNum + ": ");
+			logger.info("\tn" + testNum + ": ");
 			TestCase thisTest = new TestCase(TestType.NEGATIVE, negTest);
 			FitnessValue res = this.internalTestCase(
 					CachingRepresentation.sanityExename,
 					CachingRepresentation.sanityFilename, thisTest);
 			if (res.isAllPassed()) {
-				System.out.printf("true (1)\n");
-				System.err.println("cacheRep: sanity: "
+				logger.info("true (1)\n");
+				logger.error("cacheRep: sanity: "
 						+ CachingRepresentation.sanityFilename
 						+ " passed negative test " + thisTest.toString());
 				return false;
 			}
-			System.out.printf("false (0)\n");
+			logger.info("false (0)\n");
 			testNum++;
 		}
 		this.cleanup();
 		this.updated();
-		System.out
-				.println("cacheRepresentation: sanity checking completed (time taken = "
-						+ (System.currentTimeMillis() - startTime) + ")");
+		logger.info("sanity checking completed (time taken = "
+				+ (System.currentTimeMillis() - startTime) + ")");
 		return true;
 	}
 
@@ -230,7 +231,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 			String newName = CachingRepresentation.newVariant();
 			if (!this.compile(newName, newName)) {
 				this.setFitness(0.0);
-				System.out.printf(this.getName() + " fails to compile\n");
+				logger.info(this.getName() + " fails to compile\n");
 				return false;
 			}
 		} else if (!this.alreadyCompiled.getFirst()) {
@@ -324,7 +325,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 			String sanityFilename, TestCase thisTest) {
 		CommandLine command = this.internalTestCaseCommand(sanityExename,
 				sanityFilename, thisTest);
-		System.out.println("command: " + command.toString());
+		// System.out.println("command: " + command.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);// Mau had to
 																// change this
 																// to be able to
