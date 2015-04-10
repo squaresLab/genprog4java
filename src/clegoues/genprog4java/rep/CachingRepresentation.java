@@ -32,6 +32,7 @@
  */
 
 package clegoues.genprog4java.rep;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -56,29 +57,35 @@ import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.util.Pair;
 
 @SuppressWarnings("rawtypes")
-public abstract class CachingRepresentation<G extends EditOperation> extends Representation<G> {
+public abstract class CachingRepresentation<G extends EditOperation> extends
+		Representation<G> {
 	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
 
-	private HashMap<String,FitnessValue> fitnessTable = new HashMap<String,FitnessValue>(); 
+	private HashMap<String, FitnessValue> fitnessTable = new HashMap<String, FitnessValue>();
 	// in repair, this is a hashtable mapping fitness keys to values, for
-	// multi-parameter searches.  Here, for java, I'm mapping test class names to values, but you can do what you like
+	// multi-parameter searches. Here, for java, I'm mapping test class names to
+	// values, but you can do what you like
 	// (including the original behavior)
 	private double fitness = -1.0;
 
-	/*  cached file contents from [internal_compute_source_buffers]; avoid
-      recomputing/reserializing */
-	public ArrayList<Pair<String,String>> alreadySourceBuffers = null;
+	/*
+	 * cached file contents from [internal_compute_source_buffers]; avoid
+	 * recomputing/reserializing
+	 */
+	public ArrayList<Pair<String, String>> alreadySourceBuffers = null;
 
 	public static int sequence = 0;
 
 	public CachingRepresentation(ArrayList<HistoryEle> history,
 			ArrayList<JavaEditOperation> genome2) {
-		super(history,genome2);
+		super(history, genome2);
 	}
+
 	public CachingRepresentation() {
 		super();
 	}
+
 	public static String newVariant() {
 		String result = String.format("variant%d", sequence);
 		sequence++;
@@ -86,70 +93,91 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	}
 
 	@Override
-	public double getFitness() { return this.fitness; }
-	private ArrayList<String> alreadySourced = new ArrayList<String>(); // initialize to empty
+	public double getFitness() {
+		return this.fitness;
+	}
+
+	private ArrayList<String> alreadySourced = new ArrayList<String>(); // initialize
+																		// to
+																		// empty
 	// TODO: private List<Digest> alreadyDigest; // Digest.t in OCaml
-	private Pair<Boolean,String> alreadyCompiled = null; 
+	private Pair<Boolean, String> alreadyCompiled = null;
 
-	public boolean getVariableLength() { return true; }
+	public boolean getVariableLength() {
+		return true;
+	}
 
-	public void noteSuccess() { } // default does nothing.  OCaml version takes the original representation here.  Probably should do same 
+	public void noteSuccess() {
+	} // default does nothing. OCaml version takes the original representation
+		// here. Probably should do same
 
+	public void load(ArrayList<String> bases) throws IOException {
 
-	public void load(String base) throws IOException { 
+		// FIXME: do deserializing String cacheName = base + ".cache";
+		// boolean didDeserialize = this.deserialize(cacheName,null, true);
+		// if(!didDeserialize) {
+		// if(!didDeserialize)
+		// this.serialize(cacheName, null, true);
+		for (String base : bases) {
+			String filename = Configuration.sourceDir + File.separatorChar
+					+ base;
+			// String filename = base.replace(".","/"); // FIXME: I suspect we
+			// need this.
+			filename += Configuration.globalExtension;
 
-		String filename = Configuration.sourceDir + File.separatorChar + base;// + Configuration.globalExtension;
-		//String filename = base.replace(".","/");	
-		filename += Configuration.globalExtension;
-
-		String cacheName = base + ".cache";
-		//boolean didDeserialize = this.deserialize(cacheName,null, true); 
-		//if(!didDeserialize) { 
-			this.fromSource(filename); 
+			this.fromSource(filename);
 			System.out.println("loaded from source " + filename);
-		//}
-		if(Configuration.doSanity){
-			if(!this.sanityCheck()) { 
+
+		}
+		if (Configuration.doSanity) {
+			if (!this.sanityCheck()) {
 				System.err.println("cacheRep: Sanity check failed, giving up");
 				Runtime.getRuntime().exit(1);
 			}
 		}
-		//if(!didDeserialize)
-		//	this.serialize(cacheName, null, true);
-	}  
+	}
 
-	// have ommitted serialize/deserialize at this representation implementation level
-	// because I haven't done the version thing, which is the only thing the ocaml version of
+	// have ommitted serialize/deserialize at this representation implementation
+	// level
+	// because I haven't done the version thing, which is the only thing the
+	// ocaml version of
 	// this representation implementation does
 
-	public boolean sanityCheck()  {
+	public boolean sanityCheck() {
 		long startTime = System.currentTimeMillis();
 
 		File sanityDir = new File("sanity/");
-		if(!sanityDir.exists()) {
+		if (!sanityDir.exists()) {
 			sanityDir.mkdir();
 		}
 
 		this.outputSource(CachingRepresentation.sanityFilename);
 		System.out.println("cachingRepresentation: sanity checking begins");
-		if(!this.compile(CachingRepresentation.sanityFilename,CachingRepresentation.sanityExename))
-		{
-			System.err.println("cacheRep: sanity: " + CachingRepresentation.sanityFilename + " does not compile.");
+		if (!this.compile(CachingRepresentation.sanityFilename,
+				CachingRepresentation.sanityExename)) {
+			System.err.println("cacheRep: sanity: "
+					+ CachingRepresentation.sanityFilename
+					+ " does not compile.");
 			return false;
 		}
 		int testNum = 1;
-		/////////////////////////ADDED FOR DEFECTS4J EXPERIMENT
+		// ///////////////////////ADDED FOR DEFECTS4J EXPERIMENT
 		ArrayList<String> passingTests = new ArrayList<String>();
-		//make list of passing files (sanitizing out of scope tests)
-		for(String posTest : Fitness.positiveTests) {
-			System.out.printf("\tChecking if test is out of scope: p" + testNum + ": ");
+		// make list of passing files (sanitizing out of scope tests)
+		for (String posTest : Fitness.positiveTests) {
+			System.out.printf("\tChecking if test is out of scope: p" + testNum
+					+ ": ");
 			TestCase thisTest = new TestCase(TestType.POSITIVE, posTest);
-			FitnessValue res = this.internalTestCase(CachingRepresentation.sanityExename,CachingRepresentation.sanityFilename, thisTest);
-			if(!res.isAllPassed()) {
-				System.out.printf("false (0)\n"); 
-				System.err.println("cacheRep: sanity: " + CachingRepresentation.sanityFilename + " failed positive test " + thisTest.toString()); 
-				//return false; 
-			}else{
+			FitnessValue res = this.internalTestCase(
+					CachingRepresentation.sanityExename,
+					CachingRepresentation.sanityFilename, thisTest);
+			if (!res.isAllPassed()) {
+				System.out.printf("false (0)\n");
+				System.err.println("cacheRep: sanity: "
+						+ CachingRepresentation.sanityFilename
+						+ " failed positive test " + thisTest.toString());
+				// return false;
+			} else {
 				passingTests.add(posTest);
 			}
 			System.out.printf("true (1)\n");
@@ -157,52 +185,59 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		}
 		Fitness.positiveTests = passingTests;
 		testNum = 1;
-		if(passingTests.size() < 2){
+		if (passingTests.size() < 2) {
 			System.err.println("List of possitive tests is empty ERROR!!!!");
 			return false;
 		}
-		//////////////////
+		// ////////////////
 		/*
-		for(String posTest : Fitness.positiveTests) {
-			System.out.printf("\tp" + testNum + ": ");
-			TestCase thisTest = new TestCase(TestType.POSITIVE, posTest);
-			FitnessValue res = this.internalTestCase(CachingRepresentation.sanityExename,CachingRepresentation.sanityFilename, thisTest);
-			if(!res.isAllPassed()) {
-				System.out.printf("false (0)\n"); 
-				System.err.println("cacheRep: sanity: " + CachingRepresentation.sanityFilename + " failed positive test " + thisTest.toString()); 
-				return false; 
-			}
-			System.out.printf("true (1)\n");
-			testNum++;
-		}*/
+		 * for(String posTest : Fitness.positiveTests) { System.out.printf("\tp"
+		 * + testNum + ": "); TestCase thisTest = new
+		 * TestCase(TestType.POSITIVE, posTest); FitnessValue res =
+		 * this.internalTestCase
+		 * (CachingRepresentation.sanityExename,CachingRepresentation
+		 * .sanityFilename, thisTest); if(!res.isAllPassed()) {
+		 * System.out.printf("false (0)\n");
+		 * System.err.println("cacheRep: sanity: " +
+		 * CachingRepresentation.sanityFilename + " failed positive test " +
+		 * thisTest.toString()); return false; }
+		 * System.out.printf("true (1)\n"); testNum++; }
+		 */
 		System.out.println("This is the list of passing tests:" + passingTests);
 		testNum = 1;
-		for(String negTest : Fitness.negativeTests) { 
+		for (String negTest : Fitness.negativeTests) {
 			System.out.printf("\tn" + testNum + ": ");
 			TestCase thisTest = new TestCase(TestType.NEGATIVE, negTest);
-			FitnessValue res = this.internalTestCase(CachingRepresentation.sanityExename,CachingRepresentation.sanityFilename, thisTest);
-			if(res.isAllPassed()) {				
+			FitnessValue res = this.internalTestCase(
+					CachingRepresentation.sanityExename,
+					CachingRepresentation.sanityFilename, thisTest);
+			if (res.isAllPassed()) {
 				System.out.printf("true (1)\n");
-				System.err.println("cacheRep: sanity: " + CachingRepresentation.sanityFilename + " passed negative test " + thisTest.toString()); 
-				return false; 
+				System.err.println("cacheRep: sanity: "
+						+ CachingRepresentation.sanityFilename
+						+ " passed negative test " + thisTest.toString());
+				return false;
 			}
-			System.out.printf("false (0)\n"); 
+			System.out.printf("false (0)\n");
 			testNum++;
 		}
 		this.cleanup();
 		this.updated();
-		System.out.println("cacheRepresentation: sanity checking passed (time taken = " + (System.currentTimeMillis() - startTime) + ")"); 
+		System.out
+				.println("cacheRepresentation: sanity checking passed (time taken = "
+						+ (System.currentTimeMillis() - startTime) + ")");
 		return true;
 	}
 
 	public boolean testCase(TestCase test) {
-		if(fitnessTable.containsKey(test.toString())) {
+		if (fitnessTable.containsKey(test.toString())) {
 			return fitnessTable.get(test.toString()).isAllPassed();
 		}
-		if(this.alreadyCompiled == null) {
+		if (this.alreadyCompiled == null) {
 			String newName = CachingRepresentation.newVariant();
-			if(!this.compile(newName,newName)) {
-				this.setFitness(0.0); // FIXME: this is probably why I don't want to do this here: coverage?
+			if (!this.compile(newName, newName)) {
+				this.setFitness(0.0); // FIXME: this is probably why I don't
+										// want to do this here: coverage?
 				System.out.printf(this.getName() + " fails to compile\n");
 				return false;
 			}
@@ -210,86 +245,83 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 			FitnessValue compileFail = new FitnessValue();
 			compileFail.setTestClassName(test.toString());
 			compileFail.setAllPassed(false);
-			fitnessTable.put(test.toString(),compileFail);
+			fitnessTable.put(test.toString(), compileFail);
 			this.setFitness(0.0);
 			return false;
 		}
-		FitnessValue fitness = this.internalTestCase(this.getName(), this.getName() + Configuration.globalExtension, test); 
-		this.recordFitness(test.toString(), fitness); 
+		FitnessValue fitness = this.internalTestCase(this.getName(),
+				this.getName() + Configuration.globalExtension, test);
+		this.recordFitness(test.toString(), fitness);
 
 		return fitness.isAllPassed();
 	}
-	// kind of think internal test case should return here to save in fitnessTable,
+
+	// kind of think internal test case should return here to save in
+	// fitnessTable,
 	// but wtfever for now
 
 	// compile assumes that the source has already been serialized to disk.
 
 	// I think for here, it's best to put it down in Java representation
 
-	// FIXME: OK, in OCaml there's an outputSource declaration here that assumes that 
-	// the way we output code is to compute the source buffers AS STRINGS and then print out one per file.
-	// it's possible this is the same in Java, but unlikely, so I'm going to not implement this here yet
+	// FIXME: OK, in OCaml there's an outputSource declaration here that assumes
+	// that
+	// the way we output code is to compute the source buffers AS STRINGS and
+	// then print out one per file.
+	// it's possible this is the same in Java, but unlikely, so I'm going to not
+	// implement this here yet
 	// and figure out how java files are manipulated first
-	// it would be nice if this, as the caching representation superclass, cached the "already sourced" info somehow, as with compile below
+	// it would be nice if this, as the caching representation superclass,
+	// cached the "already sourced" info somehow, as with compile below
 	/*
-	void outputSource(String filename) {
-		List<Pair<String,String>> sourceBuffers = this.computeSourceBuffers();
-		for(Pair<String,String> element : sourceBuffers) {
-			String sourcename = element.getFirst();
-			String outBuffer = element.getSecond;
-	 	// output to disk
-	 	 }
-	 	// alreadySourced := Some(lmap (fun (sname,_) -> sname) many_files);
-		}*/
+	 * void outputSource(String filename) { List<Pair<String,String>>
+	 * sourceBuffers = this.computeSourceBuffers(); for(Pair<String,String>
+	 * element : sourceBuffers) { String sourcename = element.getFirst(); String
+	 * outBuffer = element.getSecond; // output to disk } // alreadySourced :=
+	 * Some(lmap (fun (sname,_) -> sname) many_files); }
+	 */
 
 	@Override
-	protected List<Pair<String,String>> computeSourceBuffers()
-	{
-		if(this.alreadySourceBuffers != null) {
+	protected List<Pair<String, String>> computeSourceBuffers() {
+		if (this.alreadySourceBuffers != null) {
 			return this.alreadySourceBuffers;
 		} else {
-			this.alreadySourceBuffers =  this.internalComputeSourceBuffers();
+			this.alreadySourceBuffers = this.internalComputeSourceBuffers();
 			return this.alreadySourceBuffers;
 		}
 	}
-	private static FitnessValue parseTestResults(String testClassName, String output)
-	{
+
+	private static FitnessValue parseTestResults(String testClassName,
+			String output) {
 		String[] lines = output.split("\n");
 		FitnessValue ret = new FitnessValue();
 		ret.setTestClassName(testClassName);
-		for(String line : lines)
-		{
-			try
-			{
-				if(line.startsWith("[SUCCESS]:"))
-				{
+		for (String line : lines) {
+			try {
+				if (line.startsWith("[SUCCESS]:")) {
 					String[] tokens = line.split("[:\\s]+");
 					ret.setAllPassed(Boolean.parseBoolean(tokens[1]));
 				}
-			} catch (Exception e)
-			{
+			} catch (Exception e) {
 				ret.setAllPassed(false);
-				// originally: setCompilable was false.  Necessary? FIXME
+				// originally: setCompilable was false. Necessary? FIXME
 			}
 
-			try
-			{
-				if(line.startsWith("[TOTAL]:"))
-				{
+			try {
+				if (line.startsWith("[TOTAL]:")) {
 					String[] tokens = line.split("[:\\s]+");
 					ret.setNumberTests(Integer.parseInt(tokens[1]));
 				}
 			} catch (NumberFormatException e) {
 			}
 
-			try
-			{
-				if(line.startsWith("[FAILURE]:"))
-				{
+			try {
+				if (line.startsWith("[FAILURE]:")) {
 					String[] tokens = line.split("[:\\s]+");
 					ret.setNumTestsFailed(Integer.parseInt(tokens[1]));
 				}
-			} catch (NumberFormatException e) { }
+			} catch (NumberFormatException e) {
+			}
 		}
 
 		return ret;
@@ -297,17 +329,24 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 
 	protected abstract ArrayList<Pair<String, String>> internalComputeSourceBuffers();
 
-	protected FitnessValue internalTestCase(String sanityExename, String sanityFilename, TestCase thisTest) 
-	{
-		CommandLine command = this.internalTestCaseCommand(sanityExename, sanityFilename, thisTest);
+	protected FitnessValue internalTestCase(String sanityExename,
+			String sanityFilename, TestCase thisTest) {
+		CommandLine command = this.internalTestCaseCommand(sanityExename,
+				sanityFilename, thisTest);
 		System.out.println("command: " + command.toString());
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);//Mau had to change this to be able to run longer tests. It was on 6000 originally
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);// Mau had to
+																// change this
+																// to be able to
+																// run longer
+																// tests. It was
+																// on 6000
+																// originally
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");
 		executor.setWorkingDirectory(new File(workingDirectory));
 		executor.setWatchdog(watchdog);
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream(); 
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 		executor.setExitValue(0);
 
@@ -315,18 +354,18 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		FitnessValue posFit = new FitnessValue();
 
 		try {
-			executor.execute(command);		
+			executor.execute(command);
 			out.flush();
 			String output = out.toString();
 			out.reset();
-			posFit = CachingRepresentation.parseTestResults(thisTest.toString(), output);
+			posFit = CachingRepresentation.parseTestResults(
+					thisTest.toString(), output);
 
 		} catch (ExecuteException exception) {
 			posFit.setAllPassed(false);
-		} catch (Exception e) { }
-		finally
-		{
-			if(out!=null)
+		} catch (Exception e) {
+		} finally {
+			if (out != null)
 				try {
 					out.close();
 				} catch (IOException e) {
@@ -334,13 +373,13 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 					// all exceptions is really tedious.
 				}
 		}
-		return posFit;	
+		return posFit;
 	}
 
 	@Override
-	public ArrayList<String> sourceName() { return this.alreadySourced; } // FIXME: I don't even understand what's going on here.
-
-
+	public ArrayList<String> sourceName() {
+		return this.alreadySourced;
+	} // FIXME: I don't even understand what's going on here.
 
 	public void cleanup() {
 		// TODO: remove source code from disk
@@ -350,43 +389,46 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 
 	@Override
 	public void setFitness(double fitness) {
-		this.fitness = fitness; 
+		this.fitness = fitness;
 	}
 
 	public void recordFitness(String key, FitnessValue val) {
-		this.fitnessTable.put(key,val);
+		this.fitnessTable.put(key, val);
 	}
 
-	//  while the OCaml implementation does compile in CachingRepresentation
-	// assuming that it's always a call to an external script, I'm leaving that off from here for the 
+	// while the OCaml implementation does compile in CachingRepresentation
+	// assuming that it's always a call to an external script, I'm leaving that
+	// off from here for the
 	// time being and just doing the caching, which makes sense anyway
 
 	public boolean compile(String sourceName, String exeName) {
 
-		if(this.alreadyCompiled != null) {
+		if (this.alreadyCompiled != null) {
 			return alreadyCompiled.getFirst();
 		} else {
-			boolean result = this.internalCompile(sourceName,exeName);
-			this.alreadyCompiled = new Pair<Boolean,String>(result,exeName);
+			boolean result = this.internalCompile(sourceName, exeName);
+			this.alreadyCompiled = new Pair<Boolean, String>(result, exeName);
 			return result;
 		}
 	}
 
 	protected abstract boolean internalCompile(String sourceName, String exeName);
 
+	// TODO: method hash () = Hashtbl.hash (self#get_history ())
 
-	// TODO: method hash () = Hashtbl.hash (self#get_history ()) 
-
-	/* indicates that cached information based on our AST structure is no longer valid*/
+	/*
+	 * indicates that cached information based on our AST structure is no longer
+	 * valid
+	 */
 	void updated() {
 		/*
-
-					    already_digest := None ; 
+		 * 
+		 * already_digest := None ;
 		 */
 		alreadySourceBuffers = null;
 		alreadySourced = new ArrayList<String>();
 		alreadyCompiled = null;
-		fitnessTable = new HashMap<String,FitnessValue>();
+		fitnessTable = new HashMap<String, FitnessValue>();
 		fitness = -1.0;
 	}
 
@@ -396,26 +438,31 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	public void reduceFixSpace() {
 
 	}
+
 	@Override
 	public void swap(int swap1, int swap2) {
-		super.swap(swap1,swap2);
+		super.swap(swap1, swap2);
 		this.updated();
 	}
+
 	@Override
 	public void append(int one, int two) {
 		super.append(one, two);
 		this.updated();
 	}
+
 	@Override
 	public void delete(int one) {
 		super.delete(one);
 		this.updated();
 	}
+
 	public void replace(int one, int two) {
-		super.replace(one,two);
+		super.replace(one, two);
 		this.updated();
 	}
+
 	protected abstract CommandLine internalTestCaseCommand(String exeName,
-			String fileName, TestCase test) ;
+			String fileName, TestCase test);
 
 }
