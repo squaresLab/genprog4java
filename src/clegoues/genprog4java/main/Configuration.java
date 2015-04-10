@@ -136,8 +136,7 @@ public class Configuration {
 		Population.configure(prop);
 		Fitness.configure(prop);
 		JavaRepresentation.configure(prop);
-		FaultLocRepresentation.configure(prop); // FIXME probably there's a
-												// better way to do this?
+		FaultLocRepresentation.configure(prop);
 		CachingRepresentation.configure(prop);
 
 	}

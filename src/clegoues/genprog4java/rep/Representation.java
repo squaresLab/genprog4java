@@ -195,8 +195,6 @@ public abstract class Representation<G extends EditOperation> implements
 
 	public abstract void outputSource(String filename);
 
-	public abstract List<String> sourceName();
-
 	public abstract void cleanup();
 
 	public abstract double getFitness();

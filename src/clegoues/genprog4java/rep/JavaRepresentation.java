@@ -573,10 +573,6 @@ public class JavaRepresentation extends
 		this.editHelper(whatToReplace, whatToReplaceWith, Mutation.REPLACE);
 	}
 
-	// TODO: insert this statement wherever it can:
-	// if(??? != null){
-	// the reference ???
-	// }
 	public void nullInsert(int location) {
 		super.nullInsert(location);
 		JavaStatement locationStatement = base.get(location);
@@ -585,13 +581,11 @@ public class JavaRepresentation extends
 		this.genome.add(newEdit);
 	}
 
-	// FIXME: TEST. CACHE
 	@Override
 	protected boolean internalCompile(String progName, String exeName) {
 		// OK, it might be possible to turn this into something closer to the
 		// OCaml implementation (as was done with testCaseCommand), but I don't
-		// know that I
-		// care enough to bother at the moment.
+		// know that I care enough to bother at the moment.
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 		List<Pair<String, String>> sourceBuffers = this.computeSourceBuffers();
 		if (sourceBuffers == null) {
