@@ -41,7 +41,8 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
 
-public class JavaEditOperation implements EditOperation<JavaStatement,ASTRewrite, AST> {
+public class JavaEditOperation implements
+		EditOperation<JavaStatement, ASTRewrite, AST> {
 
 	private Mutation mutType;
 	private JavaStatement location = null;
@@ -51,11 +52,14 @@ public class JavaEditOperation implements EditOperation<JavaStatement,ASTRewrite
 		this.mutType = mutType;
 		this.location = location;
 	}
-	public JavaEditOperation(Mutation mutType, JavaStatement location, JavaStatement fixCode) {
+
+	public JavaEditOperation(Mutation mutType, JavaStatement location,
+			JavaStatement fixCode) {
 		this.mutType = mutType;
 		this.location = location;
 		this.fixCode = fixCode;
 	}
+
 	@Override
 	public Mutation getType() {
 		return this.mutType;
@@ -69,23 +73,26 @@ public class JavaEditOperation implements EditOperation<JavaStatement,ASTRewrite
 	public JavaStatement getLocation() {
 		return this.location;
 	}
+
 	public void setLocation(JavaStatement location) {
 		this.location = location;
 	}
+
 	public void setFixCode(JavaStatement fixCode) {
 		this.fixCode = fixCode;
 	}
+
 	public JavaStatement getFixCode() {
 		return this.fixCode;
 	}
 
-	protected static ListRewrite getListRewriter(ASTNode origin, ASTRewrite rewriter)
-	{
+	protected static ListRewrite getListRewriter(ASTNode origin,
+			ASTRewrite rewriter) {
 		ASTNode parent = origin.getParent();
 
-		while(!(parent instanceof Block))
-		{
-			parent = parent.getParent(); // FIXME: need to understand why this is a Thing
+		while (!(parent instanceof Block)) {
+			parent = parent.getParent(); // FIXME: need to understand why this
+											// is a Thing
 		}
 
 		return rewriter.getListRewrite(parent, Block.STATEMENTS_PROPERTY);
@@ -93,26 +100,32 @@ public class JavaEditOperation implements EditOperation<JavaStatement,ASTRewrite
 
 	@Override
 	public void edit(ASTRewrite rewriter, AST ast) {
-		ListRewrite lrw = getListRewriter(this.getLocation().getASTNode(), rewriter);
-		ASTNode locationNode = this.getLocation().getASTNode(); 
+		ListRewrite lrw = getListRewriter(this.getLocation().getASTNode(),
+				rewriter);
+		ASTNode locationNode = this.getLocation().getASTNode();
 		ASTNode fixCodeNode = null;
-		if(this.fixCode != null) {
-			fixCodeNode = ASTNode.copySubtree(locationNode.getAST(), this.getFixCode().getASTNode());
+		if (this.fixCode != null) {
+			fixCodeNode = ASTNode.copySubtree(locationNode.getAST(), this
+					.getFixCode().getASTNode());
 		}
-		switch(this.getType())
-		{
+		switch (this.getType()) {
 		case APPEND:
-			lrw.insertAfter(fixCodeNode, locationNode, null); 
+			lrw.insertAfter(fixCodeNode, locationNode, null);
 			break;
 		case REPLACE:
-			lrw.replace(locationNode, this.getFixCode().getASTNode(), null); 
+			lrw.replace(locationNode, fixCodeNode, null);
 			break;
-		case SWAP: throw new UnsupportedOperationException() ; // FIXME
+		case SWAP:
+			lrw.replace(locationNode, fixCodeNode, null);
+			lrw.replace(this.getFixCode().getASTNode(), ASTNode.copySubtree(
+					locationNode.getAST(), this.getLocation().getASTNode()),
+					null);
+			break;
 		case DELETE:
 			lrw.remove(locationNode, null);
 			break;
 		case NULLINSERT:
-			//TODO:Have to figure this out
+			// TODO:Have to figure this out
 			lrw.remove(locationNode, null);
 			break;
 		}
