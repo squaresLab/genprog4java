@@ -361,8 +361,7 @@ public class Search<G extends EditOperation> {
 	 * 
 	 * @return variant' modified/potentially mutated variant
 	 */
-	void mutate(Representation<G> variant) { // FIXME: don't need to return,
-												// right?
+	void mutate(Representation<G> variant) {
 		ArrayList faultyAtoms = variant.getFaultyAtoms();
 		ArrayList<WeightedAtom> proMutList = new ArrayList<WeightedAtom>();
 		for (int i = 0; i < Search.promut; i++) {
@@ -483,7 +482,7 @@ public class Search<G extends EditOperation> {
 		 * UNM team
 		 */
 		int gen = startGen;
-		while (gen < startGen + numGens) { // FIXME: gensRun vs. generationsRun?
+		while (gen < startGen + numGens) {
 			System.out.println("search: generation" + gen);
 			generationsRun++;
 			assert (incomingPopulation.getPopsize() > 0);

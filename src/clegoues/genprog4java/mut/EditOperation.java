@@ -33,19 +33,20 @@
 
 package clegoues.genprog4java.mut;
 
-public interface EditOperation<G,R,S> { // FIXME: this is a hack to see if I can get rewriting to work at all
+public interface EditOperation<G, R, S> {
 
 	public Mutation getType();
 
 	public void setType(Mutation type);
-	
-	
+
 	public G getFixCode();
-	
+
 	public void setFixCode(G target);
+
 	public G getLocation();
+
 	public void setLocation(G location);
-	
+
 	public void edit(R rewriter, S ast);
 
 }

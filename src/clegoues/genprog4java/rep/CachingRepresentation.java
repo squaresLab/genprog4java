@@ -108,10 +108,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		return this.fitness;
 	}
 
-	private ArrayList<String> alreadySourced = new ArrayList<String>(); // initialize
-																		// to
-																		// empty
-	// TODO: private List<Digest> alreadyDigest; // Digest.t in OCaml
+	private ArrayList<String> alreadySourced = new ArrayList<String>();
 	private Pair<Boolean, String> alreadyCompiled = null;
 
 	public boolean getVariableLength() {
@@ -369,11 +366,6 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		}
 		return posFit;
 	}
-
-	@Override
-	public ArrayList<String> sourceName() {
-		return this.alreadySourced;
-	} // FIXME: I don't even understand what's going on here.
 
 	public void cleanup() {
 		// TODO: remove source code from disk
