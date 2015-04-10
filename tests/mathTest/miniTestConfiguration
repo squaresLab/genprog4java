@@ -1,0 +1,16 @@
+popsize = 5
+seed = 0
+javaVM = /usr/bin/java
+workingDir = /home/mau/Research/genprog4java/tests/mathTest/
+sourceDir = source/
+outputDir = ./tmp/
+libs = ./lib/junittestrunner.jar:./lib/commons-io-1.4.jar:./lib/junit-4.10.jar:./lib/math-340.jar:./lib/Math340Test.jar:./lib/commons-math-test-2.1.jar 
+classDir = bin/
+packageName = org.apache.commons.math.fraction
+targetClassName = program.txt
+sanity = yes
+regenPaths
+positiveTests = ./smallerPos.tests
+negativeTests = ./neg.tests
+jacocoPath = ./lib/jacocoagent.jar
+
