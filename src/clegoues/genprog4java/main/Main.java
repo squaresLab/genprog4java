@@ -33,8 +33,6 @@
 
 package clegoues.genprog4java.main;
 
-// FIXME: remove creation of sanity/ directory since everything is getting made in tmp/
-
 import java.io.File;
 import java.io.IOException;
 

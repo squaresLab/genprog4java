@@ -60,11 +60,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private TreeSet<String> fieldName;
 	private TreeSet<String> currentMethodScope;
 
-	// FIXME possibly: for the time being, we number *after* parsing, and not
-	// here
 	// unlike in the OCaml implementation, this only collects the statements and
-	// the
-	// semantic information. It doesn't number.
+	// the semantic information. It doesn't number.
 	private CompilationUnit cu;
 
 	public void init(String p) {
