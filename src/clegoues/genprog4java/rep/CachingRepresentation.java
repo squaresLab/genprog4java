@@ -64,6 +64,9 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
 
+	// persistent test cache
+	private static HashMap<List<Integer>, HashMap<String, FitnessValue>> fitnessCache = new HashMap<List<Integer>, HashMap<String, FitnessValue>>();
+
 	public static void configure(Properties prop) {
 		if (prop.getProperty("skipFailedSanity") != null) {
 			String sanity = prop.getProperty("skipFailedSanity").trim();
@@ -75,11 +78,6 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		}
 	}
 
-	private HashMap<String, FitnessValue> fitnessTable = new HashMap<String, FitnessValue>();
-	// in repair, this is a hashtable mapping fitness keys to values, for
-	// multi-parameter searches. Here, for java, I'm mapping test class names to
-	// values, but you can do what you like
-	// (including the original behavior)
 	private double fitness = -1.0;
 
 	/*
@@ -220,9 +218,17 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 	}
 
 	public boolean testCase(TestCase test) {
-		if (fitnessTable.containsKey(test.toString())) {
-			return fitnessTable.get(test.toString()).isAllPassed();
+		List<Integer> hash = astHash();
+		HashMap<String, FitnessValue> thisVariantsFitness = null;
+		if (fitnessCache.containsKey(hash)) {
+			thisVariantsFitness = fitnessCache.get(hash);
+			if (thisVariantsFitness.containsKey(test.toString()))
+				return thisVariantsFitness.get(test.toString()).isAllPassed();
+		} else {
+			thisVariantsFitness = new HashMap<String, FitnessValue>();
+			fitnessCache.put(hash, thisVariantsFitness);
 		}
+
 		if (this.alreadyCompiled == null) {
 			String newName = CachingRepresentation.newVariant();
 			if (!this.compile(newName, newName)) {
@@ -234,14 +240,14 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 			FitnessValue compileFail = new FitnessValue();
 			compileFail.setTestClassName(test.toString());
 			compileFail.setAllPassed(false);
-			fitnessTable.put(test.toString(), compileFail);
+			thisVariantsFitness.put(test.toString(), compileFail);
+			// this WILL update it in the fitness cache, right, because state?
 			this.setFitness(0.0);
 			return false;
 		}
 		FitnessValue fitness = this.internalTestCase(this.getName(),
 				this.getName() + Configuration.globalExtension, test);
-		this.recordFitness(test.toString(), fitness);
-
+		thisVariantsFitness.put(test.toString(), fitness);
 		return fitness.isAllPassed();
 	}
 
@@ -381,10 +387,6 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		this.fitness = fitness;
 	}
 
-	public void recordFitness(String key, FitnessValue val) {
-		this.fitnessTable.put(key, val);
-	}
-
 	// while the OCaml implementation does compile in CachingRepresentation
 	// assuming that it's always a call to an external script, I'm leaving that
 	// off from here for the
@@ -403,6 +405,20 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 
 	protected abstract boolean internalCompile(String sourceName, String exeName);
 
+	private List<Integer> astHashCode = null;
+
+	protected List<Integer> astHash() {
+		if (astHashCode != null)
+			return astHashCode;
+		astHashCode = new ArrayList<Integer>();
+		List<Pair<String, String>> sourceBuffers = computeSourceBuffers();
+		for (Pair<String, String> ele : sourceBuffers) {
+			String code = ele.getSecond();
+			astHashCode.add(code.hashCode());
+		}
+		return astHashCode;
+	}
+
 	// TODO: method hash () = Hashtbl.hash (self#get_history ())
 
 	/*
@@ -417,8 +433,8 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		alreadySourceBuffers = null;
 		alreadySourced = new ArrayList<String>();
 		alreadyCompiled = null;
-		fitnessTable = new HashMap<String, FitnessValue>();
 		fitness = -1.0;
+		astHashCode = null;
 	}
 
 	public void reduceSearchSpace() {
