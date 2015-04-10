@@ -57,8 +57,8 @@ public class Configuration {
 	public static String sourceDir = "./";
 	public static String outputDir = "./";
 	public static String libs;
-	public static String sourceVersion = "1.5";
-	public static String targetVersion = "1.5";
+	public static String sourceVersion = "1.6";
+	public static String targetVersion = "1.6";
 	public static String globalExtension = ".java";
 	public static ArrayList<String> targetClassNames = new ArrayList<String>();
 	public static String javaRuntime = "";

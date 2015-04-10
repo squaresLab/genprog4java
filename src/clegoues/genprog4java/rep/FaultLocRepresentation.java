@@ -306,13 +306,13 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 	 * statements visited while executing the positive test case(s).
 	 */
 
-	int counterCoverageErrors = 0;
-
 	protected abstract ArrayList<Integer> atomIDofSourceLine(int lineno);
 
 	private TreeSet<Integer> runTestsCoverage(String pathFile, TestType testT,
 			ArrayList<String> tests, boolean expectedResult, String wd)
 			throws IOException, UnexpectedCoverageResultException {
+		int counterCoverageErrors = 0;
+
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
 		for (String test : tests) {
 			File coverageRaw = new File("jacoco.exec"); // FIXME:
@@ -329,7 +329,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 					&& !FaultLocRepresentation.allowCoverageFail) {
 				System.err.println("FaultLocRep: unexpected coverage result: "
 						+ newTest.toString());
-				System.err.println("Amount of coverage errors so far: "
+				System.err.println("Number of coverage errors so far: "
 						+ ++counterCoverageErrors);
 
 			}

@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
 
-import clegoues.genprog4java.fitness.FitnessValue;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
@@ -257,8 +256,6 @@ public abstract class Representation<G extends EditOperation> implements
 	public void nullInsert(int atomId) {
 		history.add(new HistoryEle(Mutation.NULLINSERT, atomId));
 	}
-
-	public abstract void recordFitness(String key, FitnessValue fitness);
 
 	public abstract void setFitness(double fitness);
 
