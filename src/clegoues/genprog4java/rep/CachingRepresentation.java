@@ -299,7 +299,6 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 				}
 			} catch (Exception e) {
 				ret.setAllPassed(false);
-				// originally: setCompilable was false. Necessary? FIXME
 			}
 
 			try {
@@ -419,17 +418,11 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		return astHashCode;
 	}
 
-	// TODO: method hash () = Hashtbl.hash (self#get_history ())
-
 	/*
 	 * indicates that cached information based on our AST structure is no longer
 	 * valid
 	 */
 	void updated() {
-		/*
-		 * 
-		 * already_digest := None ;
-		 */
 		alreadySourceBuffers = null;
 		alreadySourced = new ArrayList<String>();
 		alreadyCompiled = null;

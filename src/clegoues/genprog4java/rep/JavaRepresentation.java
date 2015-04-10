@@ -715,8 +715,21 @@ public class JavaRepresentation extends
 	@Override
 	public TreeSet<WeightedAtom> swapSources(int stmtId) {
 		if (JavaRepresentation.semanticCheck.equals("scope")) {
-			// FIXME
-			throw new UnsupportedOperationException();
+			TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+			for (WeightedAtom item : this.scopeHelper(stmtId)) {
+				int atom = item.getAtom();
+				TreeSet<WeightedAtom> inScopeThere = this.scopeHelper(atom);
+				boolean containsThisAtom = false;
+				for (WeightedAtom there : inScopeThere) {
+					if (there.getAtom() == stmtId) {
+						containsThisAtom = true;
+						break;
+					}
+				}
+				if (containsThisAtom)
+					retVal.add(item);
+			}
+			return retVal;
 		} else {
 			return super.swapSources(stmtId);
 		}
