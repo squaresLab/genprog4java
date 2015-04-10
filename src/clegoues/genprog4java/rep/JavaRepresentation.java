@@ -59,6 +59,8 @@ import javax.tools.ToolProvider;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Block;
@@ -111,6 +113,7 @@ import clegoues.genprog4java.util.Pair;
 
 public class JavaRepresentation extends
 		FaultLocRepresentation<JavaEditOperation> {
+	protected Logger logger = LogManager.getLogger(this.getClass());
 
 	private static HashMap<Integer, JavaStatement> codeBank = new HashMap<Integer, JavaStatement>();
 	private static HashMap<Integer, JavaStatement> base = new HashMap<Integer, JavaStatement>();
@@ -397,21 +400,18 @@ public class JavaRepresentation extends
 				}
 				this.genome.addAll((ArrayList<JavaEditOperation>) (in
 						.readObject()));
-				System.out.println("javaRepresentation: " + filename
-						+ "loaded\n");
+				logger.info("javaRepresentation: " + filename + "loaded\n");
 			} else {
 				succeeded = false;
 			}
 		} catch (ClassNotFoundException e) {
-			System.err
-					.println("javaRepresentation: ClassNotFoundException in deserialize "
-							+ filename + " which is probably *not* OK");
+			logger.error("ClassNotFoundException in deserialize " + filename
+					+ " which is probably *not* OK");
 			e.printStackTrace();
 			succeeded = false;
 		} catch (IOException e) {
-			System.err
-					.println("javaRepresentation: IOException in deserialize "
-							+ filename + " which is probably OK");
+			logger.error("IOException in deserialize " + filename
+					+ " which is probably OK");
 			succeeded = false;
 		} finally {
 			try {
@@ -511,19 +511,10 @@ public class JavaRepresentation extends
 
 		if (this.doingCoverage) {
 
-			/*
-			 * ArrayList<String> targetClasses = new ArrayList<String>(); try{
-			 * targetClasses.addAll(getClasses(Configuration.targetClassName));
-			 * } catch (IOException e) { System.err.println("failed to read " +
-			 * targetClasses + " giving up"); Runtime.getRuntime().exit(1); }
-			 * String targetClassString = ""; for(String s : targetClasses){
-			 * targetClassString += s + ","; }
-			 */
-
 			command.addArgument("-Xmx1024m");
 			command.addArgument("-javaagent:" + Configuration.jacocoPath
 					+ "=excludes=org.junit.*,append=false");
-
+			// FIXME: I actually think we need this, no?
 			// "-javaagent:"+Configuration.jacocoPath+"=excludes=" +
 			// Configuration.testsDir+".*" + ",includes="+targetClassString
 			// +",append=false");
@@ -537,7 +528,7 @@ public class JavaRepresentation extends
 		command.addArgument("clegoues.genprog4java.fitness.JUnitTestRunner");
 
 		command.addArgument(test.toString());
-		System.out.println(command.toString());
+		// System.out.println(command.toString());
 		return command;
 
 	}
@@ -650,7 +641,7 @@ public class JavaRepresentation extends
 			}
 
 			StringWriter compilerErrorWriter = new StringWriter();
-			System.out.println(options.toString());
+
 			// Here is where it runs the command to compile the code
 			if (!compiler.getTask(compilerErrorWriter, null, null, options,
 					null, fileObjects).call()) {
@@ -752,19 +743,19 @@ public class JavaRepresentation extends
 			JavaStatement stmt = JavaRepresentation.base.get(atomid);
 			ASTNode actualStmt = stmt.getASTNode();
 			String stmtStr = actualStmt.toString();
-			System.out.println("statement " + atomid + " at line "
-					+ stmt.getLineno() + ": " + stmtStr);
-			System.out.println("\t Names:");
+			logger.debug("statement " + atomid + " at line " + stmt.getLineno()
+					+ ": " + stmtStr);
+			logger.debug("\t Names:");
 			for (String name : stmt.getNames()) {
-				System.out.println("\t\t" + name);
+				logger.debug("\t\t" + name);
 			}
-			System.out.println("\t Scopes:");
+			logger.debug("\t Scopes:");
 			for (String scope : stmt.getRequiredNames()) {
-				System.out.println("\t\t" + scope);
+				logger.debug("\t\t" + scope);
 			}
-			System.out.println("\t Types:");
+			logger.debug("\t Types:");
 			for (String t : stmt.getTypes()) {
-				System.out.println("\t\t" + t);
+				logger.debug("\t\t" + t);
 			}
 		}
 

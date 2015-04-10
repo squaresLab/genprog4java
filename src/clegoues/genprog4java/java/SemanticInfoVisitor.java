@@ -33,7 +33,6 @@
 
 package clegoues.genprog4java.java;
 
-
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -51,8 +50,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import clegoues.genprog4java.rep.JavaRepresentation;
 
-public class SemanticInfoVisitor extends ASTVisitor
-{
+public class SemanticInfoVisitor extends ASTVisitor {
 
 	private String sourcePath;
 
@@ -62,71 +60,56 @@ public class SemanticInfoVisitor extends ASTVisitor
 	private TreeSet<String> fieldName;
 	private TreeSet<String> currentMethodScope;
 
-
-	// FIXME possibly: for the time being, we number *after* parsing, and not here
-	// unlike in the OCaml implementation, this only collects the statements and the
-	// semantic information.  It doesn't number.
+	// FIXME possibly: for the time being, we number *after* parsing, and not
+	// here
+	// unlike in the OCaml implementation, this only collects the statements and
+	// the
+	// semantic information. It doesn't number.
 	private CompilationUnit cu;
 
-
-	public void init(String p)
-	{
+	public void init(String p) {
 		this.sourcePath = p;
 	}
 
-	public SemanticInfoVisitor()
-	{
+	public SemanticInfoVisitor() {
 		this.fieldName = new TreeSet<String>();
 		this.fieldName.add("this");
 	}
 
-	public Set<String> getFieldSet()
-	{
+	public Set<String> getFieldSet() {
 		return this.fieldName;
 	}
 
-	public void setNodeSet( List<ASTNode> o )
-	{
+	public void setNodeSet(List<ASTNode> o) {
 		this.nodeSet = o;
 	}
 
-	public List<ASTNode> getNodeSet()
-	{
+	public List<ASTNode> getNodeSet() {
 		return this.nodeSet;
 	}
 
-	public void setScopeList(ScopeInfo scopeList)
-	{
+	public void setScopeList(ScopeInfo scopeList) {
 		this.scopes = scopeList;
 	}
 
 	@Override
-	public boolean visit(FieldDeclaration node)
-	{
-		for(Object o : node.fragments())
-		{
-			if(o instanceof VariableDeclarationFragment)
-			{
-				VariableDeclarationFragment v = (VariableDeclarationFragment)o;
+	public boolean visit(FieldDeclaration node) {
+		for (Object o : node.fragments()) {
+			if (o instanceof VariableDeclarationFragment) {
+				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
 				this.fieldName.add(v.getName().getIdentifier());
 			}
 		}
 		return super.visit(node);
 	}
 
-
-
-
 	@Override
-	public boolean visit(MethodDeclaration node)
-	{
+	public boolean visit(MethodDeclaration node) {
 		this.currentMethodScope = new TreeSet<String>();
 
-		for(Object o : node.parameters())
-		{
-			if(o instanceof SingleVariableDeclaration)
-			{
-				SingleVariableDeclaration v = (SingleVariableDeclaration)o;
+		for (Object o : node.parameters()) {
+			if (o instanceof SingleVariableDeclaration) {
+				SingleVariableDeclaration v = (SingleVariableDeclaration) o;
 				this.currentMethodScope.add(v.getName().getIdentifier());
 			}
 		}
@@ -134,19 +117,13 @@ public class SemanticInfoVisitor extends ASTVisitor
 		return super.visit(node);
 	}
 
-
-
 	@Override
-	public boolean visit(Initializer node)
-	{
+	public boolean visit(Initializer node) {
 		List mods = node.modifiers();
 
-		for(Object o : mods)
-		{
-			if(o instanceof Modifier)
-			{
-				if(((Modifier) o).isStatic())
-				{
+		for (Object o : mods) {
+			if (o instanceof Modifier) {
+				if (((Modifier) o).isStatic()) {
 					this.currentMethodScope = new TreeSet<String>();
 				}
 			}
@@ -155,57 +132,46 @@ public class SemanticInfoVisitor extends ASTVisitor
 		return super.visit(node);
 	}
 
-
-
 	@Override
-	public void endVisit(Initializer node)
-	{
+	public void endVisit(Initializer node) {
 		super.endVisit(node);
 	}
 
 	@Override
-	public void endVisit(MethodDeclaration node)
-	{
+	public void endVisit(MethodDeclaration node) {
 		super.endVisit(node);
 	}
 
-
-
 	@Override
-	public boolean visit(VariableDeclarationStatement node)
-	{
-		for(Object o : node.fragments())
-		{
-			if(o instanceof VariableDeclarationFragment)
-			{
-				VariableDeclarationFragment v = (VariableDeclarationFragment)o;
+	public boolean visit(VariableDeclarationStatement node) {
+		for (Object o : node.fragments()) {
+			if (o instanceof VariableDeclarationFragment) {
+				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
 				this.currentMethodScope.add(v.getName().getIdentifier());
 			}
 		}
 		return super.visit(node);
 	}
 
-	public void preVisit(ASTNode node)
-	{				
-		if(JavaRepresentation.canRepair(node)) // FIXME: why is this necessary to not crash and die?
-		{				
+	public void preVisit(ASTNode node) {
+		if (JavaRepresentation.canRepair(node)) // FIXME: why is this necessary
+												// to not crash and die?
+		{
 			// add scope information
 			TreeSet<String> newScope = new TreeSet<String>();
 			newScope.addAll(this.currentMethodScope);
-			this.scopes.addScope4Stmt(node, newScope); 
+			this.scopes.addScope4Stmt(node, newScope);
 			this.nodeSet.add(node);
 		}
 
 		super.preVisit(node);
 	}
 
-	public void setCompilationUnit(CompilationUnit ast)
-	{
+	public void setCompilationUnit(CompilationUnit ast) {
 		this.cu = ast;
 	}
 
-	public CompilationUnit getCompilationUnit()
-	{
+	public CompilationUnit getCompilationUnit() {
 		return this.cu;
 	}
 }

@@ -45,6 +45,9 @@ import java.util.Properties;
 import java.util.Random;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.Search;
@@ -54,6 +57,8 @@ import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 
 public class Configuration {
+	protected Logger logger = LogManager.getLogger(this.getClass());
+
 	public static String sourceDir = "./";
 	public static String outputDir = "./";
 	public static String libs;
@@ -73,6 +78,7 @@ public class Configuration {
 	}
 
 	public Configuration(String configFile) {
+		BasicConfigurator.configure();
 		Configuration.setProperties(configFile);
 	}
 

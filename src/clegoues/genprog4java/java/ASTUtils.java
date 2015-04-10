@@ -99,43 +99,17 @@ public class ASTUtils {
 
 		ArrayList<JavaSourceFromString> jsfs = new ArrayList<JavaSourceFromString>();
 		for (Pair<String, String> ele : code) {
-			// possible FIXME: I changed this from "code" to progName, not
-			// certain what that will do...
+
 			JavaSourceFromString oneSource = new JavaSourceFromString(progName,
 					ele.getFirst(), ele.getSecond());
 			jsfs.add(oneSource);
 
 		}
-		// FIXME: this originally turned off remove with an unsupported
+		// this originally turned off remove with an unsupported
 		// operation exception;
 		// do we really need that behavior?
 
 		return jsfs;
-		//
-		// Iterable<JavaSourceFromString> retval = new
-		// Iterable<JavaSourceFromString> ();
-		// return new Iterable<JavaSourceFromString>() {
-		// public Iterator<JavaSourceFromString> iterator() {
-		// return new Iterator<JavaSourceFromString>() {
-		// boolean isNext = true;
-		//
-		// public boolean hasNext() {
-		// return isNext;
-		// }
-		//
-		// public JavaSourceFromString next() {
-		// if (!isNext)
-		// throw new NoSuchElementException();
-		// isNext = false;
-		// return jsfs;
-		// }
-		//
-		// public void remove() {
-		// throw new UnsupportedOperationException();
-		// }
-		// };
-		// }
-		// };
 
 	}
 }
@@ -154,14 +128,6 @@ class JavaSourceFromString extends SimpleJavaFileObject {
 		this.code = code;
 	}
 
-	/*
-	 * 
-	 * class JavaSourceFromString extends SimpleJavaFileObject { final String
-	 * code; JavaSourceFromString(String name, String code) {
-	 * super(URI.create(name.replace(".",
-	 * "/")+"/"+Configuration.targetClassName+Kind.SOURCE.extension),
-	 * Kind.SOURCE); this.code = code; }
-	 */
 	public CharSequence getCharContent(boolean ignoreEncodingErrors) {
 		return code;
 	}
