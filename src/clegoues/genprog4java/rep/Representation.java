@@ -35,13 +35,11 @@ package clegoues.genprog4java.rep;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -60,48 +58,66 @@ import clegoues.genprog4java.util.Pair;
 // just bad.  I'll have to think about it.
 
 @SuppressWarnings("rawtypes")
-public abstract class Representation<G extends EditOperation> implements Comparable<Representation<G>> {
+public abstract class Representation<G extends EditOperation> implements
+		Comparable<Representation<G>> {
 
 	private ArrayList<HistoryEle> history = new ArrayList<HistoryEle>();
-	public Representation() { }
 
+	public Representation() {
+	}
 
-	public Representation(ArrayList<HistoryEle> history, ArrayList<JavaEditOperation> genome2) {
+	public Representation(ArrayList<HistoryEle> history,
+			ArrayList<JavaEditOperation> genome2) {
 		this.setGenome(new ArrayList<G>(((List<G>) genome2)));
 		this.setHistory(new ArrayList<HistoryEle>(history));
 	}
+
 	public String getName() {
 		String result = "";
-		if(history.size() == 0) {
+		if (history.size() == 0) {
 			return "original";
 		}
-		for(HistoryEle h : history) {
-			if(result.length() > 0) {
+		for (HistoryEle h : history) {
+			if (result.length() > 0) {
 				result += " ";
 			}
 			String hstr = h.toString();
 			result += hstr;
 		}
-		return result; 
-	} 
+		return result;
+	}
 
+	public ArrayList<HistoryEle> getHistory() {
+		return history;
+	}
 
-	public ArrayList<HistoryEle> getHistory() { return history; }
-	public void setHistory(ArrayList<HistoryEle> history) { this.history = history; }
+	public void setHistory(ArrayList<HistoryEle> history) {
+		this.history = history;
+	}
+
 	public abstract Representation<G> copy();
+
 	public abstract boolean getVariableLength();
+
 	public abstract ArrayList<G> getGenome();
+
 	public abstract void loadGenomeFromString(String genome);
+
 	public abstract void setGenome(List<G> genome);
+
 	public abstract int genomeLength();
+
 	public abstract void noteSuccess();
-	public abstract void load(String filename) throws IOException, UnexpectedCoverageResultException;
-	
-	public void serialize(String filename, ObjectOutputStream fout, boolean globalinfo) { // second parameter is optional
+
+	public abstract void load(ArrayList<String> classNames) throws IOException,
+			UnexpectedCoverageResultException;
+
+	public void serialize(String filename, ObjectOutputStream fout,
+			boolean globalinfo) { // second parameter is optional
 		ObjectOutputStream out = null;
 		FileOutputStream fileOut = null;
 		try {
-			if(fout == null) {
+			if (fout == null) {
 				fileOut = new FileOutputStream(filename + ".ser");
 				out = new ObjectOutputStream(fileOut);
 			} else {
@@ -109,30 +125,33 @@ public abstract class Representation<G extends EditOperation> implements Compara
 			}
 			out.writeObject(this.history);
 		} catch (IOException e) {
-			System.err.println("Representation: largely unexpected failure in serialization.");
+			System.err
+					.println("Representation: largely unexpected failure in serialization.");
 			e.printStackTrace();
 		} finally {
-			if(fout == null) {
+			if (fout == null) {
 				try {
-					if(out != null)
+					if (out != null)
 						out.close();
-					if(fileOut != null)
+					if (fileOut != null)
 						fileOut.close();
 				} catch (IOException e) {
-					System.err.println("Representation: largely unexpected failure in serialization.");
+					System.err
+							.println("Representation: largely unexpected failure in serialization.");
 					e.printStackTrace();
 				}
 			}
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public boolean deserialize(String filename, ObjectInputStream fin, boolean globalinfo) { // second parameter is optional
+	public boolean deserialize(String filename, ObjectInputStream fin,
+			boolean globalinfo) { // second parameter is optional
 		FileInputStream fileIn = null;
 		ObjectInputStream in = null;
 		boolean succeeded = true;
 		try {
-			if(fin == null) {
+			if (fin == null) {
 				fileIn = new FileInputStream(filename + ".ser");
 				in = new ObjectInputStream(fileIn);
 			} else {
@@ -140,48 +159,69 @@ public abstract class Representation<G extends EditOperation> implements Compara
 			}
 			this.history = (ArrayList<HistoryEle>) in.readObject();
 		} catch (IOException e) {
-			System.err.println("Representation: IOException in deserialize " + filename + " which is probably OK");
+			System.err.println("Representation: IOException in deserialize "
+					+ filename + " which is probably OK");
 			e.printStackTrace();
 			succeeded = false;
 		} catch (ClassNotFoundException e) {
-			System.err.println("Representation: ClassNotFoundException in deserialize " + filename + " which is probably *not* OK");
+			System.err
+					.println("Representation: ClassNotFoundException in deserialize "
+							+ filename + " which is probably *not* OK");
 			e.printStackTrace();
 			succeeded = false;
 		} finally {
 			try {
-				if(fin == null) {
+				if (fin == null) {
 					in.close();
 					fileIn.close();
 				}
 			} catch (IOException e) {
-				System.err.println("Representation: IOException in file close in deserialize " + filename + " which is weird?");
+				System.err
+						.println("Representation: IOException in file close in deserialize "
+								+ filename + " which is weird?");
 				succeeded = false;
 				e.printStackTrace();
 			}
 		}
 		return succeeded;
 	}
-	
-	public abstract ArrayList<WeightedAtom> getFaultyAtoms();
-	public abstract ArrayList<WeightedAtom> getFixSourceAtoms();
-	public abstract boolean sanityCheck();
-	public abstract void fromSource(String filename) throws IOException;
-	public abstract void outputSource(String filename);
-	public abstract List<String> sourceName();
-	public abstract void cleanup();
-	public abstract double getFitness();
-	public abstract boolean compile(String sourceName, String exeName);
-	public abstract boolean testCase(TestCase test);
-	public abstract void reduceSearchSpace(); // do this?
-	public abstract void reduceFixSpace(); 
-	public abstract TreeSet<Pair<Mutation, Double>> availableMutations(int atomId);
-	protected static TreeSet<Pair<Mutation,Double>> mutations = null;
 
-	// FIXME: this static mutation thing is so lazy of me, I can't even.  But I'm tired of this clone/copy debacle and just want it to Go Away. 
-	public static void registerMutations(TreeSet<Pair<Mutation,Double>> availableMutations) { 
-		Representation.mutations = new TreeSet<Pair<Mutation,Double>> ();
-		for(Pair<Mutation,Double> candidateMut : availableMutations) {
-			if(candidateMut.getSecond() > 0.0) {
+	public abstract ArrayList<WeightedAtom> getFaultyAtoms();
+
+	public abstract ArrayList<WeightedAtom> getFixSourceAtoms();
+
+	public abstract boolean sanityCheck();
+
+	public abstract void fromSource(String filename) throws IOException;
+
+	public abstract void outputSource(String filename);
+
+	public abstract List<String> sourceName();
+
+	public abstract void cleanup();
+
+	public abstract double getFitness();
+
+	public abstract boolean compile(String sourceName, String exeName);
+
+	public abstract boolean testCase(TestCase test);
+
+	public abstract void reduceSearchSpace(); // do this?
+
+	public abstract void reduceFixSpace();
+
+	public abstract TreeSet<Pair<Mutation, Double>> availableMutations(
+			int atomId);
+
+	protected static TreeSet<Pair<Mutation, Double>> mutations = null;
+
+	// FIXME: this static mutation thing is so lazy of me, I can't even. But I'm
+	// tired of this clone/copy debacle and just want it to Go Away.
+	public static void registerMutations(
+			TreeSet<Pair<Mutation, Double>> availableMutations) {
+		Representation.mutations = new TreeSet<Pair<Mutation, Double>>();
+		for (Pair<Mutation, Double> candidateMut : availableMutations) {
+			if (candidateMut.getSecond() > 0.0) {
 				Representation.mutations.add(candidateMut);
 			}
 		}
@@ -190,31 +230,36 @@ public abstract class Representation<G extends EditOperation> implements Compara
 	public void delete(int atomId) {
 		history.add(new HistoryEle(Mutation.DELETE, atomId));
 	}
+
 	public void append(int whereToAppend, int whatToAppend) {
 		history.add(new HistoryEle(Mutation.APPEND, whereToAppend, whatToAppend));
 	}
+
 	public abstract TreeSet<WeightedAtom> appendSources(int atomId);
 
 	public void swap(int swap1, int swap2) {
 		history.add(new HistoryEle(Mutation.SWAP, swap1, swap2));
 	}
-	public abstract TreeSet<WeightedAtom>  swapSources(int atomId);
+
+	public abstract TreeSet<WeightedAtom> swapSources(int atomId);
 
 	public void replace(int whatToReplace, int whatToReplaceWith) {
-		history.add(new HistoryEle(Mutation.REPLACE, whatToReplace, whatToReplaceWith));
+		history.add(new HistoryEle(Mutation.REPLACE, whatToReplace,
+				whatToReplaceWith));
 	}
-	public abstract TreeSet<WeightedAtom>  replaceSources(int atomId);
+
+	public abstract TreeSet<WeightedAtom> replaceSources(int atomId);
 
 	public static void configure(Properties prop) {
 	}
 
-	public void nullInsert(int atomId){
+	public void nullInsert(int atomId) {
 		history.add(new HistoryEle(Mutation.NULLINSERT, atomId));
 	}
-	
-	public abstract void recordFitness(String key, FitnessValue fitness); 
-	public abstract void setFitness(double fitness);  
 
+	public abstract void recordFitness(String key, FitnessValue fitness);
+
+	public abstract void setFitness(double fitness);
 
 	@Override
 	public int compareTo(Representation<G> o) {
@@ -222,13 +267,13 @@ public abstract class Representation<G extends EditOperation> implements Compara
 		return myFitness.compareTo(new Double(o.getFitness()));
 	}
 
-
 	protected List<Pair<String, String>> computeSourceBuffers() {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	protected static ArrayList<String> getClasses(String filename) throws IOException {
+
+	protected static ArrayList<String> getClasses(String filename)
+			throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(filename));
 		String line;
 		ArrayList<String> allLines = new ArrayList<String>();
