@@ -59,8 +59,8 @@ import javax.tools.ToolProvider;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Block;
@@ -113,7 +113,7 @@ import clegoues.genprog4java.util.Pair;
 
 public class JavaRepresentation extends
 		FaultLocRepresentation<JavaEditOperation> {
-	protected Logger logger = LogManager.getLogger(this.getClass());
+	protected Logger logger = LogManager.getLogger(JavaRepresentation.class);
 
 	private static HashMap<Integer, JavaStatement> codeBank = new HashMap<Integer, JavaStatement>();
 	private static HashMap<Integer, JavaStatement> base = new HashMap<Integer, JavaStatement>();
