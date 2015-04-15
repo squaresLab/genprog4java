@@ -1,8 +1,8 @@
 #!/bin/bash
 # 1st param is the package in upper case (ex: Lang, Chart, Closure, Math, Time)
 # 2nd param is the bug number (ex: 1,2,3,4,...)
-# 3rd param is the folder where the project is (ex: "/home/mau/Research" )
-# 4td param is the folder where defects4j is installed (ex: "/home/mau/Research/defects4j" )
+# 3rd param is the folder where the project is (ex: "/home/mau/Research/" )
+# 4td param is the folder where defects4j is installed (ex: "/home/mau/Research/defects4j/" )
 
 # in case it helps, in my machine, I Have:
 # /home/mau/Research/genprog4j where the source code for genprog is
