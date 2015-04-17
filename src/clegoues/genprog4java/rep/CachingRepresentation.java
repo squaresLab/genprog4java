@@ -60,7 +60,7 @@ import clegoues.genprog4java.util.Pair;
 @SuppressWarnings("rawtypes")
 public abstract class CachingRepresentation<G extends EditOperation> extends
 		Representation<G> {
-	public static boolean skipFailedSanity = false;
+	public static boolean skipFailedSanity = true;
 	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
 
