@@ -11,9 +11,9 @@
 
 
 #copy these files to the source control
-cd "$3"
-cp prepareBug.sh ./genprog4java/defects4jStuff/
-cp -r ./genprog4java/defects4jStuff/Utilities/ ./defects4j/ExamplesCheckedOut/
+#cd "$3"
+#cp prepareBug.sh ./genprog4java/defects4jStuff/
+#cp -r ./genprog4java/defects4jStuff/Utilities/ ./defects4j/ExamplesCheckedOut/
 
 
 #This transforms the first parameter to lower case. Ex: lang, chart, closure, math or time
@@ -37,9 +37,9 @@ elif [ $LOWERCASEPACKAGE = "lang" ]; then
   TESTSDIR=src.test.java.org.apache.commons.lang3
   WD=src/main/java
   JAVADIR=org/apache/commons/lang3 
-  CONFIGLIBS=""$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/langAllSourceClasses.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/langAllTestClasses.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"genprog4java/tests/mathTest/lib/junit-4.10.jar:"$3"defects4j/projects/Lang/lib/easymock.jar:"$3"defects4j/projects/Lang/lib/asm.jar:"$3"defects4j/projects/Lang/lib/cglib.jar:"$3"defects4j/projects/Lang/lib/org/easymock/easymock/easymock-2.5.2.jar:"$3"defects4j/ExamplesCheckedOut/lang1Buggy/easymock-3.3.1.jar"
+  CONFIGLIBS=""$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/langAllSourceClasses.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/langAllTestClasses.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"defects4j/framework/projects/lib/junit-4.11.jar:"$3"defects4j/projects/Lang/lib/easymock.jar:"$3"defects4j/projects/Lang/lib/asm.jar:"$3"defects4j/projects/Lang/lib/cglib.jar:"$3"defects4j/framework/projects/lib/easymock-3.3.1.jar"
+  LIBSTESTS="-cp \".:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"defects4j/framework/projects/lib/junit-4.11.jar:"$3"defects4j/projects/Lang/lib/easymock.jar:"$3"defects4j/framework/projects/lib/easymock-3.3.1.jar\" "
 
-cp "$3"defects4j/ExamplesCheckedOut/Utilities/EntityArrays.java "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/src/main/java/org/apache/commons/lang3/text/translate/
 
 elif [ $LOWERCASEPACKAGE = "math" ]; then 
   TESTSDIR=src.test.java.org.apache.commons.math3
@@ -83,6 +83,11 @@ defects4j compile
 
 #copy the standard list of all tests to the current bug directory
 cp "$3"defects4j/ExamplesCheckedOut/Utilities/"$LOWERCASEPACKAGE"Pos.tests "$3"defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
+
+#for the lang project copy a fixed file
+if [ $LOWERCASEPACKAGE = "lang" ]; then
+cp "$3"genprog4java/defects4jStuff/Utilities/EntityArrays.java "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/src/main/java/org/apache/commons/lang3/text/translate/
+fi
 
 #cd "$3"defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/
 
@@ -141,9 +146,17 @@ rm sources.txt
 #where the .class files are
 #DIROFCLASSFILES=org/$JAVADIR
 
+
+if [ $LOWERCASEPACKAGE = "lang" ]; then
+SOURCES="org/apache/commons/lang3/"
+elif [ $LOWERCASEPACKAGE = "math" ]; then
+SOURCES="org/apache/commons/math3/"
+fi
+
 #Jar all the .class's
 #TODO maybe: change this to insert only the class files recursively, NOT the .java files also. Same thing in tests
-jar cf ../../../"$LOWERCASEPACKAGE"AllSourceClasses.jar org/apache/commons/math3/* #$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
+jar cf ../../../"$LOWERCASEPACKAGE"AllSourceClasses.jar "$SOURCES"* 
+#$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
 
 echo Jar of source files created successfully.
 
@@ -172,7 +185,8 @@ echo Compilation of test java classes successful
 
 
 #Jar all the test class's
-jar cf ../../../"$LOWERCASEPACKAGE"AllTestClasses.jar org/apache/commons/math3/* #$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
+jar cf ../../../"$LOWERCASEPACKAGE"AllTestClasses.jar "$SOURCES"* 
+#$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
 
 echo Jar of tests created successfully.
 
