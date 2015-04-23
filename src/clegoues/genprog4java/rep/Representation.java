@@ -63,11 +63,11 @@ public abstract class Representation<G extends EditOperation> implements Compara
 	private ArrayList<HistoryEle> history = new ArrayList<HistoryEle>();
 	public Representation() { }
 
-
 	public Representation(ArrayList<HistoryEle> history, ArrayList<JavaEditOperation> genome2) {
-		this.setGenome(new ArrayList<G>(((List<G>) genome2)));
+		this.setGenome(new ArrayList<G>(((List<G>)genome2)));
 		this.setHistory(new ArrayList<HistoryEle>(history));
 	}
+	
 	public String getName() {
 		String result = "";
 		if(history.size() == 0) {
@@ -82,7 +82,6 @@ public abstract class Representation<G extends EditOperation> implements Compara
 		}
 		return result; 
 	} 
-
 
 	public ArrayList<HistoryEle> getHistory() { return history; }
 	public void setHistory(ArrayList<HistoryEle> history) { this.history = history; }
@@ -199,6 +198,7 @@ public abstract class Representation<G extends EditOperation> implements Compara
 	public void swap(int swap1, int swap2) {
 		history.add(new HistoryEle(Mutation.SWAP, swap1, swap2));
 	}
+	
 	public abstract TreeSet<WeightedAtom>  swapSources(int atomId);
 
 	public void replace(int whatToReplace, int whatToReplaceWith) {

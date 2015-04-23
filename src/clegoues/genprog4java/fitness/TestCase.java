@@ -38,6 +38,7 @@ public class TestCase {
 	private TestType posOrNeg;
 	private int testNum = -1;
 	private String testName = null;
+	
 	public TestCase(TestType t, int num) {
 		this.posOrNeg = t;
 		this.testNum = num;

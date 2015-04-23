@@ -114,9 +114,6 @@ public class SemanticInfoVisitor extends ASTVisitor
 		return super.visit(node);
 	}
 
-
-
-
 	@Override
 	public boolean visit(MethodDeclaration node)
 	{
@@ -133,8 +130,6 @@ public class SemanticInfoVisitor extends ASTVisitor
 
 		return super.visit(node);
 	}
-
-
 
 	@Override
 	public boolean visit(Initializer node)

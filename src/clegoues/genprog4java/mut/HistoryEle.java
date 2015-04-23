@@ -37,7 +37,9 @@ public class HistoryEle {
 	private Mutation mtype = null;
 	private int location = -1;
 	private int fixCode = -1;
+	
 	public HistoryEle() { }
+	
 	public HistoryEle(Mutation m, int location) {
 		this.mtype = m;
 		this.location = location;

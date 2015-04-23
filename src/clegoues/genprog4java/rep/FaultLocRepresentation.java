@@ -73,12 +73,12 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	private ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
 	public FaultLocRepresentation(ArrayList<HistoryEle> history,
-								  ArrayList<JavaEditOperation> genome2, 
-								  ArrayList<WeightedAtom> arrayList, 
-								  ArrayList<WeightedAtom> arrayList2) {
-		super(history,genome2);
-		this.faultLocalization = new ArrayList<WeightedAtom>(arrayList);
-		this.fixLocalization = new ArrayList<WeightedAtom>(arrayList2);
+								  ArrayList<JavaEditOperation> genome, 
+								  ArrayList<WeightedAtom> faultLoc, 
+								  ArrayList<WeightedAtom> fixLoc) {
+		super(history,genome);
+		this.faultLocalization = new ArrayList<WeightedAtom>(faultLoc);
+		this.fixLocalization = new ArrayList<WeightedAtom>(fixLoc);
 	}
 
 	public FaultLocRepresentation() {
@@ -199,14 +199,17 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		return succeeded;
 	}
 
+	@Override
 	public ArrayList<WeightedAtom> getFaultyAtoms () {
 		return this.faultLocalization; 
 	}
 
+	@Override
 	public ArrayList<WeightedAtom> getFixSourceAtoms() {
 		return this.fixLocalization;
 	}
-
+	
+	@Override
 	public TreeSet<Pair<Mutation, Double>> availableMutations(int atomId) {
 		TreeSet<Pair<Mutation,Double>> retVal = new TreeSet<Pair<Mutation,Double>>();
 		for(Pair<Mutation,Double> mutation : Representation.mutations){
@@ -235,8 +238,13 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		return retVal;
 	}
 
+	
+	/**
+	 * you probably want to override these for semantic legality check
+	 * "Mutation OP"Sources just simply returns the entire fixLocalization
+	 * TreeSet here.
+	 */
 	@Override
-	// you probably want to override these for semantic legality check
 	public TreeSet<WeightedAtom> appendSources(int stmtId) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
 		for(WeightedAtom item : this.fixLocalization) {
@@ -286,17 +294,20 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 
 	protected abstract ArrayList<Integer> atomIDofSourceLine(int lineno);
 
-	private TreeSet<Integer> runTestsCoverage(String pathFile, TestType testT, ArrayList<String> tests, boolean expectedResult, String wd) throws IOException, UnexpectedCoverageResultException {
+	private TreeSet<Integer> runTestsCoverage(String pathFile, TestType testT, 
+											  ArrayList<String> tests, boolean expectedResult, String wd) 
+											  throws IOException, UnexpectedCoverageResultException
+	{
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
+		File coverageRaw = new File("jacoco.exec"); // FIXME: likely/possibly a mistake to put this in this class 
+
+		//TODO: is this the part I can comment out if I don't want to delete the coverage results?
+		// if so, I want to make it so I can prompt the user for to delete the coverage result or not. 
+		if(coverageRaw.exists())
+			coverageRaw.delete();
+		
 		for(String test : tests)  {
-			File coverageRaw = new File("jacoco.exec"); // FIXME: likely/possibly a mistake to put this in this class 
-
-			if(coverageRaw.exists())
-			{
-				coverageRaw.delete();
-			}
 			TestCase newTest = new TestCase(testT, test);
-
 
 			if(this.testCase(newTest) != expectedResult && !FaultLocRepresentation.allowCoverageFail) {
 				System.err.println("FaultLocRep: unexpected coverage result: " + newTest.toString());
@@ -309,9 +320,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		BufferedWriter out = new BufferedWriter(new FileWriter(new File(pathFile)));
 
 		for(int atom : atoms)
-		{
 			out.write(""+atom+"\n");
-		}
 
 		out.flush();
 		out.close();
