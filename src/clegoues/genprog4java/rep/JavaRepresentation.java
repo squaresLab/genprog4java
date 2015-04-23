@@ -258,6 +258,10 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 					base.put(s.getStmtId(),s);
 					codeBank.put(s.getStmtId(), s); 
 				}
+<<<<<<< local
+				scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
+				JavaRepresentation.inScopeMap.put(s.getStmtId(),scopeInfo.getScope(s.getASTNode()));
+=======
 				scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
 				
 				//TODO: delete this statement
@@ -267,6 +271,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 				inScopeMap.put(s.getStmtId(), scopeInfo.getScope(s.getASTNode()));
 				// JavaRepresentation.inScopeMap.put(s.getStmtId(),scopeInfo.getScope(s.getASTNode()));
                 // ALEX: not sure whether you want the line above this one, or the debug stuff above it
+>>>>>>> other
 			}
 		}
 	}
@@ -353,7 +358,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		}
 
 	}
-
 
 	@SuppressWarnings("unchecked")
 	@Override

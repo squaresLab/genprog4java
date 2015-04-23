@@ -60,7 +60,8 @@ import clegoues.genprog4java.util.Pair;
 public abstract class CachingRepresentation<G extends EditOperation> extends Representation<G> {
 	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
-
+	public static int sequence = 0;
+	
 	private HashMap<String,FitnessValue> fitnessTable = new HashMap<String,FitnessValue>(); 
 	// in repair, this is a hashtable mapping fitness keys to values, for
 	// multi-parameter searches.  Here, for java, I'm mapping test class names to values, but you can do what you like
@@ -71,8 +72,10 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
       recomputing/reserializing */
 	public ArrayList<Pair<String,String>> alreadySourceBuffers = null;
 
-	public static int sequence = 0;
-
+	private ArrayList<String> alreadySourced = new ArrayList<String>(); // initialize to empty
+	// TODO: private List<Digest> alreadyDigest; // Digest.t in OCaml
+	private Pair<Boolean,String> alreadyCompiled = null; 
+	
 	public CachingRepresentation(ArrayList<HistoryEle> history,
 			ArrayList<JavaEditOperation> genome2) {
 		super(history,genome2);
@@ -88,15 +91,15 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 
 	@Override
 	public double getFitness() { return this.fitness; }
-	private ArrayList<String> alreadySourced = new ArrayList<String>(); // initialize to empty
-	// TODO: private List<Digest> alreadyDigest; // Digest.t in OCaml
-	private Pair<Boolean,String> alreadyCompiled = null; 
 
+	@Override
 	public boolean getVariableLength() { return true; }
 
-	public void noteSuccess() { } // default does nothing.  OCaml version takes the original representation here.  Probably should do same 
+	// default does nothing.  OCaml version takes the original representation here.  Probably should do same
+	@Override
+	public void noteSuccess() { }  
 
-
+	@Override
 	public void load(String base) throws IOException { 
 		String filename = Configuration.sourceDir + File.separatorChar + base + Configuration.globalExtension;
 		String cacheName = base + ".cache";
@@ -119,6 +122,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	// because I haven't done the version thing, which is the only thing the ocaml version of
 	// this representation implementation does
 
+	@Override
 	public boolean sanityCheck()  {
 		long startTime = System.currentTimeMillis();
 
@@ -138,7 +142,9 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		for(String posTest : Fitness.positiveTests) {
 			System.out.printf("\tp" + testNum + ": ");
 			TestCase thisTest = new TestCase(TestType.POSITIVE, posTest);
-			FitnessValue res = this.internalTestCase(CachingRepresentation.sanityExename,CachingRepresentation.sanityFilename, thisTest);
+			FitnessValue res = this.internalTestCase(CachingRepresentation.sanityExename,
+													 CachingRepresentation.sanityFilename, 
+													 thisTest);
 			if(!res.isAllPassed()) {
 				System.out.printf("false (0)\n"); 
 				System.err.println("cacheRep: sanity: " + CachingRepresentation.sanityFilename + " failed positive test " + thisTest.toString()); 
@@ -166,6 +172,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		return true;
 	}
 
+	@Override
 	public boolean testCase(TestCase test) {
 		if(fitnessTable.containsKey(test.toString())) {
 			return fitnessTable.get(test.toString()).isAllPassed();
@@ -223,6 +230,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 			return this.alreadySourceBuffers;
 		}
 	}
+	
 	private static FitnessValue parseTestResults(String testClassName, String output)
 	{
 		String[] lines = output.split("\n");
@@ -267,7 +275,10 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 	}
 
 	protected abstract ArrayList<Pair<String, String>> internalComputeSourceBuffers();
-
+	
+	protected abstract CommandLine internalTestCaseCommand(String exeName,
+			String fileName, TestCase test) ;
+	
 	protected FitnessValue internalTestCase(String sanityExename, String sanityFilename, TestCase thisTest) 
 	{
 		CommandLine command = this.internalTestCaseCommand(sanityExename, sanityFilename, thisTest);
@@ -308,11 +319,12 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		return posFit;	
 	}
 
+	
+	//??
 	@Override
 	public ArrayList<String> sourceName() { return this.alreadySourced; } // FIXME: I don't even understand what's going on here.
 
-
-
+	@Override
 	public void cleanup() {
 		// TODO: remove source code from disk
 		// TODO: remove compiled binary from disk
@@ -361,12 +373,14 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		fitness = -1.0;
 	}
 
+	@Override
 	public void reduceSearchSpace() {
 	} // subclasses can override as desired
 
+	@Override
 	public void reduceFixSpace() {
-
 	}
+	
 	@Override
 	public void swap(int swap1, int swap2) {
 		super.swap(swap1,swap2);
@@ -459,8 +473,5 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 		super.castCheck(atomId);
 		this.updated();
 	}
-	
-	protected abstract CommandLine internalTestCaseCommand(String exeName,
-			String fileName, TestCase test) ;
 
 }

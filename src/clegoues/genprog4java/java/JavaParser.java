@@ -59,7 +59,6 @@ public class JavaParser
 		this.visitor.setNodeSet(this.stmts);		
 		this.visitor.setScopeList(scopeList);
 	}
-
 	
 	public LinkedList<ASTNode> getStatements()
 	{
@@ -70,7 +69,6 @@ public class JavaParser
 	{
 		return this.compilationUnit;
 	}
-
 	
 	public void parse(String file, String[] libs)
 	{
