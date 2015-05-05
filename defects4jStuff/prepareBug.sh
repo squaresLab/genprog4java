@@ -3,6 +3,10 @@
 # 2nd param is the bug number (ex: 1,2,3,4,...)
 # 3rd param is the folder where the project is (ex: "/home/mau/Research/" )
 # 4td param is the folder where defects4j is installed (ex: "/home/mau/Research/defects4j/" )
+# 5th param is the option of running it (ex: allHuman, oneHuman, oneGenerated)
+
+#Mau runs it like this:
+#./prepareBug.sh Math 2 /home/mau/Research/ /home/mau/Research/defects4j/ allHuman
 
 # in case it helps, in my machine, I Have:
 # /home/mau/Research/genprog4j where the source code for genprog is
@@ -69,6 +73,15 @@ export PATH=$PATH:"$4"framework/bin
 #Checkout the buggy version of the code
 defects4j checkout -p $1 -v "$2"b -w "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy
 
+#Checkout the fixed version of the code to make the seccond test suite
+defects4j checkout -p $1 -v "$2"f -w "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Fixed
+
+#Go to the created folder
+cd "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Fixed
+
+#Compile the buggy code
+defects4j compile
+
 #Go to the created folder
 cd "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy
 
@@ -81,8 +94,16 @@ defects4j compile
 #Create the file with all the tests names in a file
 #find $JAVADIR/ -name "*.java" | tr / . | rev | cut -c 6- | rev  &> ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/pos.tests 
 
-#copy the standard list of all tests to the current bug directory
-cp "$3"defects4j/ExamplesCheckedOut/Utilities/"$LOWERCASEPACKAGE"Pos.tests "$3"defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
+if [ $5 = "allHuman" ]; then
+  #copy the standard list of all tests to the current bug directory
+  cp "$3"defects4j/ExamplesCheckedOut/Utilities/"$LOWERCASEPACKAGE"Pos.tests "$3"defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
+elif [ $5 = "oneHuman" ]; then
+  echo write in this file: "$3"defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the human made test in the bug info
+  gedit "$3"defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
+elif [ $5 = "oneGenerated" ]; then
+  echo write in this file: "$3"defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the generated test called NAMEOFTHETARGETFILEEvoSuite_Branch.java
+  gedit "$3"defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
+fi
 
 #for the lang project copy a fixed file
 if [ $LOWERCASEPACKAGE = "lang" ]; then
@@ -116,12 +137,19 @@ fi
 
 
 
+if [ $LOWERCASEPACKAGE = "lang" ]; then
+SOURCES="org/apache/commons/lang3/"
+elif [ $LOWERCASEPACKAGE = "math" ]; then
+SOURCES="org/apache/commons/math3/"
+fi
 
+#Create the new test suite
+echo Creating new test suite...
+"$4"framework/bin/run_evosuite.pl -p $1 -v "$2"f -n 1 -o "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/src/test/java/outputOfEvoSuite/ -c branch => 100s
 
-
-
-
-
+#Untar the generated test into the tests folder
+cd "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/src/test/java/
+tar xvjf outputOfEvoSuite/$1/evosuite-branch/1/"$1"-"$2"f-evosuite-branch.1.tar.bz2
 
 #Go to the bug folder
 cd "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD/
@@ -147,11 +175,7 @@ rm sources.txt
 #DIROFCLASSFILES=org/$JAVADIR
 
 
-if [ $LOWERCASEPACKAGE = "lang" ]; then
-SOURCES="org/apache/commons/lang3/"
-elif [ $LOWERCASEPACKAGE = "math" ]; then
-SOURCES="org/apache/commons/math3/"
-fi
+
 
 #Jar all the .class's
 #TODO maybe: change this to insert only the class files recursively, NOT the .java files also. Same thing in tests
