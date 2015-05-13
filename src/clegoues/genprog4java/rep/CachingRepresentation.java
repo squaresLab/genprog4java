@@ -101,7 +101,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends Rep
 
 	@Override
 	public void load(String base) throws IOException { 
-		String filename = Configuration.sourceDir + File.separatorChar + base + Configuration.globalExtension;
+		String filename = Configuration.sourceDir + base + Configuration.globalExtension;
 		String cacheName = base + ".cache";
 		//boolean didDeserialize = this.deserialize(cacheName,null, true); 
 		//if(!didDeserialize) { 

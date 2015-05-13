@@ -4,6 +4,7 @@ public class GCD {
 	public static void main(String[] args) {
 		double a, b, c;
 		double r1, r2;
+		
 		a = Double.parseDouble(args[1]);
 		b = Double.parseDouble(args[2]);
 

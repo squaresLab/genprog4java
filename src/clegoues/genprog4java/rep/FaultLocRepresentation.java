@@ -66,6 +66,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	protected static boolean allowCoverageFail = false;
 	protected static String posCoverageFile = "coverage.path.pos";
 	protected static String negCoverageFile = "coverage.path.neg";
+	//if we don't want to run coverage again, set to true.
 	protected static boolean regenPaths = false;
 
 	protected boolean doingCoverage = false;
@@ -227,8 +228,12 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 			case SWAP:
 				addToSet = this.swapSources(atomId).size() > 0;
 				break;
+			case NULLCHECK:
+				addToSet = true;
+				break;
+			
 			default:
-				addToSet = this.swapSources(atomId).size() > 0;
+				addToSet = this.replaceSources(atomId).size() > 0;
 				break;
 			}
 			if(addToSet) {
@@ -271,6 +276,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		return retVal;
 	}
 
+	
 	/*
 			  (** run the instrumented code to attain coverage information.  Writes the
 			      generated paths to disk (the fault and fix path files respectively) but
@@ -416,7 +422,6 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 		assert(fixLocalization.size() > 0);
 		this.doingCoverage = false;
 		this.printDebugInfo();
-		System.exit(0);
 	}
 
 	protected abstract void printDebugInfo();
@@ -426,6 +431,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends Ca
 	@Override
 	public void load(String fname) throws IOException {
 		super.load(fname); // calling super so that the code is loaded and the sanity check happens before localization is computed
+
 		try {
 			this.computeLocalization();
 		} catch (UnexpectedCoverageResultException e) {

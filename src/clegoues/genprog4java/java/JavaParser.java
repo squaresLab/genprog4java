@@ -51,7 +51,6 @@ public class JavaParser
 	private CompilationUnit compilationUnit;
 	private Set<String> fields;
 	
-
 	public JavaParser(ScopeInfo scopeList)
 	{
 		this.stmts = new LinkedList<ASTNode>();
