@@ -111,7 +111,6 @@ import org.jacoco.core.data.IExecutionDataVisitor;
 import org.jacoco.core.data.ISessionInfoVisitor;
 import org.jacoco.core.data.SessionInfo;
 
-
 // this can handle ONE FILE right now
 
 public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation> {
@@ -135,10 +134,10 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			JavaRepresentation.semanticCheck = prop.getProperty("semantic-check").trim(); // options: scope, none
 		}
 	}
+	
 	public JavaRepresentation(ArrayList<HistoryEle> history, ArrayList<JavaEditOperation> genome2, ArrayList<WeightedAtom> arrayList, ArrayList<WeightedAtom> arrayList2) {
 		super(history,genome2, arrayList, arrayList2);
 	}
-
 
 	public JavaRepresentation() {
 		super();
@@ -152,7 +151,6 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 	}
 
 	// Java-specific coverage stuff:
-
 	private ExecutionDataStore executionData = null;
 
 
@@ -258,20 +256,9 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 					base.put(s.getStmtId(),s);
 					codeBank.put(s.getStmtId(), s); 
 				}
-<<<<<<< local
+				
 				scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
 				JavaRepresentation.inScopeMap.put(s.getStmtId(),scopeInfo.getScope(s.getASTNode()));
-=======
-				scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
-				
-				//TODO: delete this statement
-				for (String str: myParser.getFields())
-					System.out.println(str);
-				// why did we have to get the scope from scope info and not just myParser.getFields()?
-				inScopeMap.put(s.getStmtId(), scopeInfo.getScope(s.getASTNode()));
-				// JavaRepresentation.inScopeMap.put(s.getStmtId(),scopeInfo.getScope(s.getASTNode()));
-                // ALEX: not sure whether you want the line above this one, or the debug stuff above it
->>>>>>> other
 			}
 		}
 	}
@@ -552,7 +539,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		// care enough to bother at the moment.
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 		List<Pair<String, String>> sourceBuffers = this.computeSourceBuffers();
-		if(sourceBuffers == null) {
+		if (sourceBuffers == null) {
 			return false;
 		} else {
 			String program = this.computeSourceBuffers().get(0).getSecond();
@@ -663,6 +650,7 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 			return super.replaceSources(stmtId);
 		}
 	}
+	
 	@Override
 	protected void printDebugInfo() {
 		ArrayList<WeightedAtom> buggyStatements = this.getFaultyAtoms();
@@ -687,11 +675,5 @@ public class JavaRepresentation extends FaultLocRepresentation<JavaEditOperation
 		}
 		
 	}
-	
-	public void test(){
-		String newName = CachingRepresentation.newVariant();
-		internalCompile(newName, newName);
-	}
-
 }
 

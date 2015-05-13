@@ -158,7 +158,6 @@ public class Fitness<G extends EditOperation> {
 				}
 			}
 		}
-
 		return true;
 	}
 

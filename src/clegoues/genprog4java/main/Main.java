@@ -65,7 +65,7 @@ public class Main {
 			if(Search.searchStrategy.equals("io")) {
 				baseRep = (Representation) new LocalizationRepresentation();
 			} else {
-			baseRep = (Representation) new JavaRepresentation();
+				baseRep = (Representation) new JavaRepresentation();
 			}
 			fitnessEngine = new Fitness<JavaEditOperation>();
 			searchEngine = new Search<JavaEditOperation>(fitnessEngine);

@@ -107,7 +107,8 @@ public class JavaEditOperation implements EditOperation<JavaStatement,ASTRewrite
 		case REPLACE:
 			lrw.replace(locationNode, this.getFixCode().getASTNode(), null); 
 			break;
-		case SWAP: throw new UnsupportedOperationException() ; // FIXME
+		case SWAP: 
+			throw new UnsupportedOperationException() ; // FIXME
 		case DELETE:
 			lrw.remove(locationNode, null);
 			break;

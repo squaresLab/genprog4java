@@ -204,8 +204,9 @@ public abstract class Representation<G extends EditOperation> implements Compara
 	public void replace(int whatToReplace, int whatToReplaceWith) {
 		history.add(new HistoryEle(Mutation.REPLACE, whatToReplace, whatToReplaceWith));
 	}
+	
 	public abstract TreeSet<WeightedAtom>  replaceSources(int atomId);
-
+	
 	public static void configure(Properties prop) {
 	}
 

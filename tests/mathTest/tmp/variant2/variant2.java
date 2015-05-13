@@ -1102,6 +1102,10 @@ public class BigFraction
             num = (numerator.multiply(fraction.denominator)).subtract((fraction.numerator).multiply(denominator));
             den = denominator.multiply(fraction.denominator);
         }
+        {
+			throw MathRuntimeException
+					.createIllegalArgumentException("cannot convert infinite value");
+		}
 
     }
 
