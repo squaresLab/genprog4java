@@ -153,7 +153,8 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		long startTime = System.currentTimeMillis();
 
 		this.outputSource(CachingRepresentation.sanityFilename);
-		System.out.println("cachingRepresentation: sanity checking begins");
+		System.out.println("Start Sanity Check");
+		System.out.println("cachingRepresentation:");
 		if (!this.compile(CachingRepresentation.sanityFilename,
 				CachingRepresentation.sanityExename)) {
 			System.err.println("cacheRep: sanity: "
@@ -171,7 +172,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 					CachingRepresentation.sanityExename,
 					CachingRepresentation.sanityFilename, thisTest);
 			if (!res.isAllPassed()) {
-				System.out.printf("false (0)\n");
+				System.out.printf("false (0). ERROR: A positive test had a NEGATIVE result. \n");
 				System.err.println("cacheRep: sanity: "
 						+ CachingRepresentation.sanityFilename
 						+ " failed positive test " + thisTest.toString());
@@ -181,7 +182,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 			} else {
 				passingTests.add(posTest);
 			}
-			System.out.printf("true (1)\n");
+			System.out.printf("true (1). A positive test had a positive result. This is good. \n");
 			testNum++;
 		}
 		Fitness.positiveTests = passingTests;
@@ -200,13 +201,13 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 					CachingRepresentation.sanityExename,
 					CachingRepresentation.sanityFilename, thisTest);
 			if (res.isAllPassed()) {
-				System.out.printf("true (1)\n");
+				System.out.printf("true (1). ERROR: A negative test had a POSITIVE result. \n");
 				System.err.println("cacheRep: sanity: "
 						+ CachingRepresentation.sanityFilename
 						+ " passed negative test " + thisTest.toString());
 				return false;
 			}
-			System.out.printf("false (0)\n");
+			System.out.printf("false (0). A negative test had a negative result. This is good. \n");
 			testNum++;
 		}
 		this.cleanup();
@@ -214,6 +215,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		System.out
 				.println("cacheRepresentation: sanity checking completed (time taken = "
 						+ (System.currentTimeMillis() - startTime) + ")");
+		System.out.println("Finish Sanity Check");
 		return true;
 	}
 
@@ -327,7 +329,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 			String sanityFilename, TestCase thisTest) {
 		CommandLine command = this.internalTestCaseCommand(sanityExename,
 				sanityFilename, thisTest);
-		System.out.println("command: " + command.toString());
+		//System.out.println("command: " + command.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);// Mau had to
 																// change this
 																// to be able to
@@ -348,9 +350,11 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		FitnessValue posFit = new FitnessValue();
 
 		try {
+			
 			executor.execute(command);
 			out.flush();
 			String output = out.toString();
+			//System.out.println(output);
 			out.reset();
 			posFit = CachingRepresentation.parseTestResults(
 					thisTest.toString(), output);
@@ -396,6 +400,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		if (this.alreadyCompiled != null) {
 			return alreadyCompiled.getFirst();
 		} else {
+			//In this method internalCompile, the code is compiled, and returns if the method compiled correctly or not
 			boolean result = this.internalCompile(sourceName, exeName);
 			this.alreadyCompiled = new Pair<Boolean, String>(result, exeName);
 			return result;

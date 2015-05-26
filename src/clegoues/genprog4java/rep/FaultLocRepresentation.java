@@ -325,6 +325,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 			}
 			TestCase newTest = new TestCase(testT, test);
 
+			//this expectedResult is just 'true' for positive tests and 'false' for neg tests
 			if (this.testCase(newTest) != expectedResult
 					&& !FaultLocRepresentation.allowCoverageFail) {
 				System.err.println("FaultLocRep: unexpected coverage result: "
@@ -382,6 +383,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 		 * The weighted path fault localization is a list of <atom,weight>
 		 * pairs. The fix weights are a hash table mapping atom_ids to weights.
 		 */
+		System.out.println("Start Fault Localization");
 		this.doingCoverage = true;
 		TreeSet<Integer> positivePath = null;
 		TreeSet<Integer> negativePath = null;
@@ -447,6 +449,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 		assert (faultLocalization.size() > 0);
 		assert (fixLocalization.size() > 0);
 		this.doingCoverage = false;
+		System.out.println("Finish Fault Localization");
 		// this.printDebugInfo();
 		// System.exit(0);
 	}
@@ -458,7 +461,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 	@Override
 	public void load(ArrayList<String> bases) throws IOException {
 
-		// SHOULD I DO SOMETHING SO THAT THE FAULT LOCALIZATION ALSO CONSIDERS
+		// SHOULD WE DO SOMETHING SO THAT THE FAULT LOCALIZATION ALSO CONSIDERS
 		// MULTIPLE FILES TO LOCATE THE FAULT?
 		// ArrayList<String> targetClassNames = new ArrayList<String>();
 		// targetClassNames.addAll(getClasses(classList));
