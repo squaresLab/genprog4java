@@ -537,7 +537,7 @@ public class JavaRepresentation extends
 		command.addArgument("clegoues.genprog4java.fitness.JUnitTestRunner");
 
 		command.addArgument(test.toString());
-		System.out.println(command.toString());
+		System.out.println("Command: " + command.toString());
 		return command;
 
 	}

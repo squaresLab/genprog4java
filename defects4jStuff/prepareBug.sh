@@ -250,7 +250,7 @@ sanity = yes
 regenPaths
 positiveTests = $3defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/pos.tests
 negativeTests = $3defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/neg.tests
-jacocoPath = $4/framework/projects/lib/jacocoagent.jar
+jacocoPath = $4framework/projects/lib/jacocoagent.jar
 EOM
 
 #info about the bug
