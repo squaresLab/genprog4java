@@ -61,6 +61,7 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Block;
@@ -446,11 +447,12 @@ public class JavaRepresentation extends
 			String source = pair.getValue();
 			Document original = new Document(source);
 			CompilationUnit cu = baseCompilationUnits.get(filename);
-			ASTRewrite rewriter = ASTRewrite.create(cu.getAST());
+			AST ast = cu.getAST();
+			ASTRewrite rewriter = ASTRewrite.create(ast);
 
 			try {
 				for (JavaEditOperation edit : genome) {
-					edit.edit(rewriter, cu.getAST());
+					edit.edit(rewriter, ast);
 				}
 
 				TextEdit edits = null;
