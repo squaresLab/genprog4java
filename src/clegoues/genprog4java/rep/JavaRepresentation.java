@@ -512,7 +512,16 @@ public class JavaRepresentation extends
 		command.addArgument(classPath);
 
 		if (this.doingCoverage) {
-
+			
+			/*
+			 * ArrayList<String> targetClasses = new ArrayList<String>(); try{
+			 * targetClasses.addAll(getClasses(Configuration.targetClassName));
+			 * } catch (IOException e) { System.err.println("failed to read " +
+			 * targetClasses + " giving up"); Runtime.getRuntime().exit(1); }
+			 * String targetClassString = ""; for(String s : targetClasses){
+			 * targetClassString += s + ","; }
+			 */
+			
 			command.addArgument("-Xmx1024m");
 			command.addArgument("-javaagent:" + Configuration.jacocoPath
 					+ "=excludes=org.junit.*,append=false");
@@ -530,7 +539,7 @@ public class JavaRepresentation extends
 		command.addArgument("clegoues.genprog4java.fitness.JUnitTestRunner");
 
 		command.addArgument(test.toString());
-		// System.out.println(command.toString());
+		System.out.println("Command: " + command.toString());
 		return command;
 
 	}
