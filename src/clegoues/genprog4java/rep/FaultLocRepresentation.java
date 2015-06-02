@@ -49,18 +49,20 @@ import java.util.Properties;
 import java.util.Scanner;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.fitness.TestType;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
-import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class FaultLocRepresentation<G extends EditOperation> extends
 		CachingRepresentation<G> {
+	protected Logger logger = Logger.getLogger(FaultLocRepresentation.class);
 
 	private static double positivePathWeight = 0.1;
 	private static double negativePathWeight = 1.0;
@@ -74,8 +76,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 	private ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
 	public FaultLocRepresentation(ArrayList<HistoryEle> history,
-			ArrayList<JavaEditOperation> genome2,
-			ArrayList<WeightedAtom> arrayList,
+			ArrayList<G> genome2, ArrayList<WeightedAtom> arrayList,
 			ArrayList<WeightedAtom> arrayList2) {
 		super(history, genome2);
 		this.faultLocalization = new ArrayList<WeightedAtom>(arrayList);
@@ -181,8 +182,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 												// in OCaml but I don't remember
 												// why?
 				}
-				System.out.println("faultLocRepresentation: " + filename
-						+ "loaded\n");
+				logger.info("faultLocRepresentation: " + filename + "loaded\n");
 			} else {
 				succeeded = false;
 			}
@@ -325,12 +325,13 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 			}
 			TestCase newTest = new TestCase(testT, test);
 
-			//this expectedResult is just 'true' for positive tests and 'false' for neg tests
+			// this expectedResult is just 'true' for positive tests and 'false'
+			// for neg tests
 			if (this.testCase(newTest) != expectedResult
 					&& !FaultLocRepresentation.allowCoverageFail) {
-				System.err.println("FaultLocRep: unexpected coverage result: "
+				logger.error("FaultLocRep: unexpected coverage result: "
 						+ newTest.toString());
-				System.err.println("Number of coverage errors so far: "
+				logger.error("Number of coverage errors so far: "
 						+ ++counterCoverageErrors);
 
 			}
@@ -365,7 +366,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 			}
 			reader.close();
 		} catch (FileNotFoundException e) {
-			System.err.println("coverage file " + pathFile + " not found");
+			logger.error("coverage file " + pathFile + " not found");
 			e.printStackTrace();
 		} finally {
 			if (reader != null)
@@ -383,7 +384,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 		 * The weighted path fault localization is a list of <atom,weight>
 		 * pairs. The fix weights are a hash table mapping atom_ids to weights.
 		 */
-		System.out.println("Start Fault Localization");
+		logger.info("Start Fault Localization");
 		this.doingCoverage = true;
 		TreeSet<Integer> positivePath = null;
 		TreeSet<Integer> negativePath = null;
@@ -398,7 +399,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 		if (!covDir.exists())
 			covDir.mkdir();
 		if (!this.compile("coverage", "coverage/coverage.out")) {
-			System.err.println("faultLocRep: Coverage failed to compile");
+			logger.error("faultLocRep: Coverage failed to compile");
 			throw new UnexpectedCoverageResultException("compilation failure");
 		}
 		if (positivePathFile.exists() && !FaultLocRepresentation.regenPaths) {
@@ -449,7 +450,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 		assert (faultLocalization.size() > 0);
 		assert (fixLocalization.size() > 0);
 		this.doingCoverage = false;
-		System.out.println("Finish Fault Localization");
+		logger.info("Finish Fault Localization");
 		// this.printDebugInfo();
 		// System.exit(0);
 	}
@@ -478,7 +479,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 		try {
 			this.computeLocalization();
 		} catch (UnexpectedCoverageResultException e) {
-			System.err.println("FaultLocRep: UnexpectedCoverageResult");
+			logger.error("FaultLocRep: UnexpectedCoverageResult");
 			Runtime.getRuntime().exit(1);
 		}
 		// }

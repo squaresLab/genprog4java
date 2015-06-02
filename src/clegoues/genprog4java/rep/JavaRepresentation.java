@@ -59,8 +59,7 @@ import javax.tools.ToolProvider;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AssertStatement;
@@ -114,7 +113,7 @@ import clegoues.genprog4java.util.Pair;
 
 public class JavaRepresentation extends
 		FaultLocRepresentation<JavaEditOperation> {
-	protected Logger logger = LogManager.getLogger(JavaRepresentation.class);
+	protected Logger logger = Logger.getLogger(JavaRepresentation.class);
 
 	private static HashMap<Integer, JavaStatement> codeBank = new HashMap<Integer, JavaStatement>();
 	private static HashMap<Integer, JavaStatement> base = new HashMap<Integer, JavaStatement>();
@@ -512,7 +511,7 @@ public class JavaRepresentation extends
 		command.addArgument(classPath);
 
 		if (this.doingCoverage) {
-			
+
 			/*
 			 * ArrayList<String> targetClasses = new ArrayList<String>(); try{
 			 * targetClasses.addAll(getClasses(Configuration.targetClassName));
@@ -521,7 +520,7 @@ public class JavaRepresentation extends
 			 * String targetClassString = ""; for(String s : targetClasses){
 			 * targetClassString += s + ","; }
 			 */
-			
+
 			command.addArgument("-Xmx1024m");
 			command.addArgument("-javaagent:" + Configuration.jacocoPath
 					+ "=excludes=org.junit.*,append=false");
@@ -539,7 +538,7 @@ public class JavaRepresentation extends
 		command.addArgument("clegoues.genprog4java.fitness.JUnitTestRunner");
 
 		command.addArgument(test.toString());
-		System.out.println("Command: " + command.toString());
+		logger.info("Command: " + command.toString());
 		return command;
 
 	}
@@ -650,7 +649,7 @@ public class JavaRepresentation extends
 			// Here is where it runs the command to compile the code
 			if (!compiler.getTask(compilerErrorWriter, null, null, options,
 					null, fileObjects).call()) {
-				System.err.println(compilerErrorWriter.toString());
+				logger.error(compilerErrorWriter.toString());
 				compilerErrorWriter.flush();
 				return false;
 			}
