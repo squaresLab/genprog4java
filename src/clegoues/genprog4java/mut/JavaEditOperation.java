@@ -91,11 +91,11 @@ public class JavaEditOperation implements
 		ASTNode parent = origin.getParent();
 
 		while (!(parent instanceof Block)) {
-			parent = parent.getParent(); // FIXME: need to understand why this
-											// is a Thing
+			parent = parent.getParent(); 
 		}
 
 		return rewriter.getListRewrite(parent, Block.STATEMENTS_PROPERTY);
+		//return rewriter.getListRewrite(origin, Block.STATEMENTS_PROPERTY);
 	}
 
 	@Override
@@ -103,6 +103,7 @@ public class JavaEditOperation implements
 		ASTNode locationNode = this.getLocation().getASTNode();
 
 		ListRewrite lrw = getListRewriter(locationNode, rewriter);
+
 		ASTNode fixCodeNode = null;
 		if (this.fixCode != null) {
 			fixCodeNode = ASTNode.copySubtree(locationNode.getAST(), this

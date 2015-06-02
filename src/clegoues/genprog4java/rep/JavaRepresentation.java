@@ -288,7 +288,8 @@ public class JavaRepresentation extends
 	}
 
 	public static boolean canRepair(ASTNode node) {
-		return node instanceof AssertStatement || node instanceof Block
+		return node instanceof AssertStatement 
+				//|| node instanceof Block
 				|| node instanceof BreakStatement
 				|| node instanceof ConstructorInvocation
 				|| node instanceof ContinueStatement
@@ -296,7 +297,8 @@ public class JavaRepresentation extends
 				|| node instanceof EmptyStatement
 				|| node instanceof EnhancedForStatement
 				|| node instanceof ExpressionStatement
-				|| node instanceof ForStatement || node instanceof IfStatement
+				|| node instanceof ForStatement 
+				|| node instanceof IfStatement
 				|| node instanceof LabeledStatement
 				|| node instanceof ReturnStatement
 				|| node instanceof SuperConstructorInvocation
