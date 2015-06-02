@@ -100,9 +100,9 @@ public class JavaEditOperation implements
 
 	@Override
 	public void edit(ASTRewrite rewriter, AST ast) {
-		ListRewrite lrw = getListRewriter(this.getLocation().getASTNode(),
-				rewriter);
 		ASTNode locationNode = this.getLocation().getASTNode();
+
+		ListRewrite lrw = getListRewriter(locationNode, rewriter);
 		ASTNode fixCodeNode = null;
 		if (this.fixCode != null) {
 			fixCodeNode = ASTNode.copySubtree(locationNode.getAST(), this
