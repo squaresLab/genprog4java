@@ -45,8 +45,7 @@ import java.util.Properties;
 import java.util.Random;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.Search;
@@ -56,7 +55,7 @@ import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 
 public class Configuration {
-	protected Logger logger = LogManager.getLogger(this.getClass());
+	protected static Logger logger = Logger.getLogger(Configuration.class);
 
 	public static String sourceDir = "./";
 	public static String outputDir = "./";
@@ -150,7 +149,7 @@ public class Configuration {
 			String line = null;
 			while ((line = br.readLine()) != null) {
 				returnValue.add(line.trim());
-				System.out.println(line.trim());
+				logger.info(line.trim());
 			}
 
 			br.close();

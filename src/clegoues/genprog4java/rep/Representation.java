@@ -45,10 +45,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
-import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
@@ -60,13 +61,14 @@ import clegoues.genprog4java.util.Pair;
 public abstract class Representation<G extends EditOperation> implements
 		Comparable<Representation<G>> {
 
+	protected Logger logger = Logger.getLogger(Representation.class);
+
 	private ArrayList<HistoryEle> history = new ArrayList<HistoryEle>();
 
 	public Representation() {
 	}
 
-	public Representation(ArrayList<HistoryEle> history,
-			ArrayList<G> genome2) {
+	public Representation(ArrayList<HistoryEle> history, ArrayList<G> genome2) {
 		this.setGenome(new ArrayList<G>(((List<G>) genome2)));
 		this.setHistory(new ArrayList<HistoryEle>(history));
 	}
@@ -158,7 +160,7 @@ public abstract class Representation<G extends EditOperation> implements
 			}
 			this.history = (ArrayList<HistoryEle>) in.readObject();
 		} catch (IOException e) {
-			System.err.println("Representation: IOException in deserialize "
+			logger.error("Representation: IOException in deserialize "
 					+ filename + " which is probably OK");
 			e.printStackTrace();
 			succeeded = false;

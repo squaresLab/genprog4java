@@ -46,8 +46,7 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.FitnessValue;
@@ -56,13 +55,12 @@ import clegoues.genprog4java.fitness.TestType;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
-import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class CachingRepresentation<G extends EditOperation> extends
 		Representation<G> {
-	protected Logger logger = LogManager.getLogger("CachingRepresentation");
+	protected Logger logger = Logger.getLogger(CachingRepresentation.class);
 
 	public static boolean skipFailedSanity = false;
 	public static String sanityFilename = "repair.sanity";
@@ -93,7 +91,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 	public static int sequence = 0;
 
 	public CachingRepresentation(ArrayList<HistoryEle> history,
-			ArrayList<JavaEditOperation> genome2) {
+			ArrayList<G> genome2) {
 		super(history, genome2);
 	}
 

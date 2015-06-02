@@ -40,6 +40,8 @@ import java.util.Comparator;
 import java.util.Properties;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
@@ -51,6 +53,7 @@ import clegoues.genprog4java.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public class Search<G extends EditOperation> {
+	protected Logger logger = Logger.getLogger(Search.class);
 
 	private static int generations = 10;
 	private static double promut = 1;
@@ -126,7 +129,7 @@ public class Search<G extends EditOperation> {
 	 */
 	void noteSuccess(Representation<G> rep, Representation<G> original,
 			int generation) {
-		System.out.printf("\nRepair Found: " + rep.getName() + "\n");
+		logger.info("\nRepair Found: " + rep.getName() + "\n");
 
 		Calendar endTime = Calendar.getInstance(); // TODO do something with
 													// this
@@ -231,7 +234,7 @@ public class Search<G extends EditOperation> {
 				count += original.swapSources(faultyLocation).size();
 			}
 		}
-		System.out.print("search: bruteForce: " + count
+		logger.info("search: bruteForce: " + count
 				+ " mutants in search space\n");
 
 		int wins = 0;
@@ -280,7 +283,7 @@ public class Search<G extends EditOperation> {
 			for (Pair<Mutation, Double> mutation : rescaledMutations) {
 				Mutation mut = mutation.getFirst();
 				double prob = mutation.getSecond();
-				System.out.printf("%3g %3g", weight, prob);
+				logger.info(weight + " " + prob);
 				if (mut == Mutation.DELETE) {
 					Representation<G> rep = original.copy();
 					if (this.doWork(rep, original, mut, stmt, stmt)) {
@@ -337,7 +340,7 @@ public class Search<G extends EditOperation> {
 				}
 			}
 		}
-		System.out.printf("search: brute_force_1 ends\n");
+		logger.info("search: brute_force_1 ends\n");
 		return repairFound;
 	}
 
@@ -483,7 +486,7 @@ public class Search<G extends EditOperation> {
 		 */
 		int gen = startGen;
 		while (gen < startGen + numGens) {
-			System.out.println("search: generation" + gen);
+			logger.info("search: generation" + gen);
 			generationsRun++;
 			assert (incomingPopulation.getPopsize() > 0);
 			// Step 1: selection
@@ -523,7 +526,7 @@ public class Search<G extends EditOperation> {
 	public void geneticAlgorithm(Representation<G> original,
 			Population<G> incomingPopulation) throws RepairFoundException,
 			CloneNotSupportedException {
-		System.out.printf("search: genetic algorithm begins\n");
+		logger.info("search: genetic algorithm begins\n");
 		assert (Search.generations >= 0);
 
 		Population<G> initialPopulation = this.initializeGa(original,
