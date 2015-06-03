@@ -88,21 +88,17 @@ public class JavaEditOperation implements
 
 	protected static ListRewrite getListRewriter(ASTNode origin,
 			ASTRewrite rewriter) {
-		ASTNode parent = origin.getParent();
-
+		ASTNode parent = origin;
 		while (!(parent instanceof Block)) {
-			parent = parent.getParent(); 
+			parent = parent.getParent();
 		}
 
 		return rewriter.getListRewrite(parent, Block.STATEMENTS_PROPERTY);
-		//return rewriter.getListRewrite(origin, Block.STATEMENTS_PROPERTY);
 	}
 
 	@Override
 	public void edit(ASTRewrite rewriter, AST ast) {
 		ASTNode locationNode = this.getLocation().getASTNode();
-
-		ListRewrite lrw = getListRewriter(locationNode, rewriter);
 
 		ASTNode fixCodeNode = null;
 		if (this.fixCode != null) {
@@ -111,23 +107,24 @@ public class JavaEditOperation implements
 		}
 		switch (this.getType()) {
 		case APPEND:
+			ListRewrite lrw = getListRewriter(locationNode, rewriter);
 			lrw.insertAfter(fixCodeNode, locationNode, null);
 			break;
 		case REPLACE:
-			lrw.replace(locationNode, fixCodeNode, null);
+			rewriter.replace(locationNode, fixCodeNode, null);
 			break;
 		case SWAP:
-			lrw.replace(locationNode, fixCodeNode, null);
-			lrw.replace(this.getFixCode().getASTNode(), ASTNode.copySubtree(
-					locationNode.getAST(), this.getLocation().getASTNode()),
-					null);
+			rewriter.replace(locationNode, fixCodeNode, null);
+			rewriter.replace(this.getFixCode().getASTNode(), ASTNode
+					.copySubtree(locationNode.getAST(), this.getLocation()
+							.getASTNode()), null);
 			break;
 		case DELETE:
-			lrw.remove(locationNode, null);
+			rewriter.remove(locationNode, null);
 			break;
 		case NULLINSERT:
 			// TODO:Have to figure this out
-			lrw.remove(locationNode, null);
+			rewriter.remove(locationNode, null);
 			break;
 		}
 	}
