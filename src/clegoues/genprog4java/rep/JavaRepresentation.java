@@ -460,9 +460,6 @@ public class JavaRepresentation extends
 
 				edits = rewriter.rewriteAST(original, null);
 				edits.apply(original);
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-				return null;
 			} catch (MalformedTreeException e) {
 				e.printStackTrace();
 				return null;
@@ -540,7 +537,7 @@ public class JavaRepresentation extends
 		command.addArgument("clegoues.genprog4java.fitness.JUnitTestRunner");
 
 		command.addArgument(test.toString());
-		logger.info("Command: " + command.toString());
+		// logger.info("Command: " + command.toString());
 		return command;
 
 	}
