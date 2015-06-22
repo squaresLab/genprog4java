@@ -33,9 +33,15 @@
 
 package clegoues.genprog4java.mut;
 
+
+
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -86,18 +92,35 @@ public class JavaEditOperation implements
 		return this.fixCode;
 	}
 
-	protected static ListRewrite getListRewriter(ASTNode origin,
-			ASTRewrite rewriter) {
+	protected static ListRewrite getListRewriter(ASTNode origin, ASTNode fix, ASTRewrite rewriter) {
 		ASTNode parent = origin;
-		while (!(parent instanceof Block)) {
+		
+		/*while (!(parent instanceof Block)) {
 			parent = parent.getParent();
+		}*/
+		
+		
+		//make a new statement with the append (probably a block), and replace the origin in the parent for this new one
+		Block newNode = origin.getAST().newBlock();
+		ASTNode stm1 = (Statement)origin;
+		if(origin instanceof Statement){
+			stm1 = ASTNode.copySubtree(origin.getAST(), stm1);
+			newNode.statements().add(stm1);
 		}
-
+		ASTNode stm2 = (Statement)fix;
+		if(origin instanceof Statement){
+			stm2 = ASTNode.copySubtree(fix.getAST(), stm2);
+			newNode.statements().add(stm2);
+		}
+		
+		rewriter.replace(origin, newNode, null);
+		
+		
 		return rewriter.getListRewrite(parent, Block.STATEMENTS_PROPERTY);
 	}
 
 	@Override
-	public void edit(ASTRewrite rewriter, AST ast) {
+	public void edit(ASTRewrite rewriter, AST ast, CompilationUnit cu) {
 		ASTNode locationNode = this.getLocation().getASTNode();
 
 		ASTNode fixCodeNode = null;
@@ -107,8 +130,55 @@ public class JavaEditOperation implements
 		}
 		switch (this.getType()) {
 		case APPEND:
-			ListRewrite lrw = getListRewriter(locationNode, rewriter);
-			lrw.insertAfter(fixCodeNode, locationNode, null);
+			
+			//ASTNode newNode = ASTNode.copySubtree(locationNode.getAST(), this.getFixCode().getASTNode());
+			
+			//ListRewrite lrw = getListRewriter(locationNode, fixCodeNode, rewriter);
+			//lrw.insertAfter(fixCodeNode, locationNode, null);
+			
+			
+			//make a new statement with the append (probably a block), and replace the origin in the parent for this new one
+			////ASTNode newStatement;
+			//newStatement = ListRewrite.createCopyTarget(locationNode, fixCodeNode);
+			////ASTNode[] targetNodes = {locationNode, fixCodeNode};
+			////newStatement = rewriter.createGroupNode(targetNodes) ;
+			////rewriter.replace(locationNode, newStatement, null);
+			
+			
+			//ImportDeclaration id = ast.newImportDeclaration();
+			//id.setName(ast.newName(new String[] {"java", "util", "Set"}));
+			//ListRewrite lrw = rewriter.getListRewrite(cu, CompilationUnit.IMPORTS_PROPERTY);
+			//lrw.insertAfter(id, locationNode, null);
+			
+			//ASTNode newNode;
+			//Block newStatement = locationNode.getAST().newBlock();
+			//newStatement.statements().add((Statement)locationNode);
+			//newStatement.statements().add(fixCodeNode);
+			//newNode = ASTNode.copySubtree(locationNode.getAST(), newStatement.getASTNode());
+			//rewriter.replace(locationNode, newStatement, null);
+			//locationNode.getParent().setChild();
+			
+			
+			
+			//ListRewrite lrw = rewriter.getListRewrite(locationNode, Block.STATEMENTS_PROPERTY);
+			//lrw.insertAfter(fixCodeNode, locationNode, null);
+			
+			
+			Block newNode = locationNode.getAST().newBlock();
+			ASTNode stm1 = (Statement)locationNode;
+			if(locationNode instanceof Statement){
+				stm1 = ASTNode.copySubtree(locationNode.getAST(), stm1);
+				newNode.statements().add(stm1);
+			}
+			ASTNode stm2 = (Statement)fixCodeNode;
+			if(fixCodeNode instanceof Statement){
+				stm2 = ASTNode.copySubtree(fixCodeNode.getAST(), stm2);
+				newNode.statements().add(stm2);
+			}
+			
+			rewriter.replace(locationNode, newNode, null);
+			
+
 			break;
 		case REPLACE:
 			rewriter.replace(locationNode, fixCodeNode, null);
@@ -124,9 +194,12 @@ public class JavaEditOperation implements
 			break;
 		case NULLINSERT:
 			// TODO:Have to figure this out
+			//This is the same as delete, what is it supposed to be?
 			rewriter.remove(locationNode, null);
 			break;
 		}
 	}
+
+
 
 }

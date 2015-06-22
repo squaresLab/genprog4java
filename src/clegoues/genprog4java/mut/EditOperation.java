@@ -33,6 +33,10 @@
 
 package clegoues.genprog4java.mut;
 
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 public interface EditOperation<G, R, S> {
 
 	public Mutation getType();
@@ -47,6 +51,8 @@ public interface EditOperation<G, R, S> {
 
 	public void setLocation(G location);
 
-	public void edit(R rewriter, S ast);
+	//public void edit(R rewriter, S ast);
+
+	public void edit(ASTRewrite rewriter, AST ast, CompilationUnit cu);
 
 }
