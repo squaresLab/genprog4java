@@ -288,8 +288,10 @@ public class JavaRepresentation extends
 	}
 
 	public static boolean canRepair(ASTNode node) {
+		
+		
 		return node instanceof AssertStatement 
-				//|| node instanceof Block
+				|| node instanceof Block
 				|| node instanceof BreakStatement
 				|| node instanceof ConstructorInvocation
 				|| node instanceof ContinueStatement
@@ -453,7 +455,7 @@ public class JavaRepresentation extends
 
 			try {
 				for (JavaEditOperation edit : genome) {
-					edit.edit(rewriter, ast);
+					edit.edit(rewriter, ast, cu);
 				}
 
 				TextEdit edits = null;
