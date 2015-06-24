@@ -62,7 +62,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		Representation<G> {
 	protected Logger logger = Logger.getLogger(CachingRepresentation.class);
 
-	public static boolean skipFailedSanity = false;
+	public static boolean skipFailedSanity = true;
 	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
 
@@ -163,12 +163,18 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 
 		ArrayList<String> passingTests = new ArrayList<String>();
 		// make list of passing files (sanitizing out of scope tests)
+		int testsOutOfScope = 0;
+		int testNumber = 0;
 		for (String posTest : Fitness.positiveTests) {
+			testNumber++;
+			logger.info("Checking test number " + testNumber + " out of " + Fitness.positiveTests.size());
 			TestCase thisTest = new TestCase(TestType.POSITIVE, posTest);
 			FitnessValue res = this.internalTestCase(
 					CachingRepresentation.sanityExename,
 					CachingRepresentation.sanityFilename, thisTest);
 			if (!res.isAllPassed()) {
+				testsOutOfScope++;
+				logger.info(testsOutOfScope + " tests out of scope so far, out of " + Fitness.positiveTests.size());
 				logger.info("false (0)\n");
 				logger.error("cacheRep: sanity: "
 						+ CachingRepresentation.sanityFilename
