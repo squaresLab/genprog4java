@@ -37,8 +37,12 @@ If it is running the Lang project then it copies a modified file called EntityAr
 
 Then it creates a new test suite different from the one that comes with the project using evosuite (integrataed with defects4j), this is because we need two different test suites to run the experiment.
 
-It then 
+It then compiles all the .java files, and then creates a jar file with all the .class files created from compiling the .java files. This is so genprog can run the different variations without having to compile the whole thing, but just changing one java file and then it takes all the rest of the source from this jar.
 
+Every genprog run needs a config file. This is what it does next. It creates a text file with the configuration needed to be ran by genprog.
+
+Finally it prints out the information about the bug taken from defects4j and opens two files that need to be edited with the info displayed from the bug: neg.tests and configDefects4j
+It dispalys some instructions on how to edit these two files with examples.
 
 
 
