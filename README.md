@@ -13,6 +13,9 @@ http://dijkstra.cs.virginia.edu/genprog/
 
 We've setup two scripts for integrating defects4j with genprog.
 The main script is the one that prepares the bug to be run. This script is called prepareBug.sh and it is located in genprog4j/defects4JStuff/prepareBug.sh
+
+The overall functionality of the script is to set up everything so that genprog can run on the bug taken from defects4j with the parameters specified by the user.
+
 The scripts takes the following parameters:
 
 * 1st param is the package in upper case (ex: Lang, Chart, Closure, Math, Time)
@@ -24,14 +27,21 @@ The scripts takes the following parameters:
 So a typical run would look like this:
 ./prepareBug.sh Math 2 /home/mau/Research/ /home/mau/Research/defects4j/ allHuman
 
+1st param: Defects4j has five projects: Lang, Chart, Closure, Math, Time, you can choose whichever you like. Lang and Math have worked without any issue so far. The other three projects, we are still working on them.
+
+2nd param: bug number of the selected project.
+
+3rd param: where did you download the bitbucket project.
+
+4th param: where is defects4j folder located.
+
+5th param: there are three ways to run this script: allHuman for running genprog with all the human made tests. oneHuman: to run it with just one of the human made tests. oneGenerated: to run it with just one of the generated tests.
+
 It starts by setting up the different paths per every one of the different projects (Lang, Chart, Closure, Math, Time).
 Then uses defects4j's scripts to checkout the buggy and fixed version of the code of the bug indicated in the parameters.
 Then it compiles the checkedout versions.
 
-It then makes the difference from the last parameter which goes as follows:
-allHuman:
-oneHuman:
-oneGenerated:
+It then makes the difference from the last parameter as explained before.
 
 If it is running the Lang project then it copies a modified file called EntityArrays.java to the working directory. This is because this file contains a lot of non ascii characters in the comments that were causing issues with compilation.
 
@@ -45,7 +55,8 @@ Finally it prints out the information about the bug taken from defects4j and ope
 It dispalys some instructions on how to edit these two files with examples.
 
 
-
+The second script is still under construction.
+It is called runGenProgForGug.sh
 
 
 
