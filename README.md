@@ -14,11 +14,11 @@ http://dijkstra.cs.virginia.edu/genprog/
 We've setup two scripts for integrating defects4j with genprog.
 The main script is the one that prepares the bug to be run. This script is called prepareBug.sh and it is located in genprog4j/defects4JStuff/prepareBug.sh
 The scripts takes the following parameters:
-# 1st param is the package in upper case (ex: Lang, Chart, Closure, Math, Time)
-# 2nd param is the bug number (ex: 1,2,3,4,...)
-# 3rd param is the folder where the project is (ex: "/home/mau/Research/" )
-# 4td param is the folder where defects4j is installed (ex: "/home/mau/Research/defects4j/" )
-# 5th param is the option of running it (ex: allHuman, oneHuman, oneGenerated)
+ 1st param is the package in upper case (ex: Lang, Chart, Closure, Math, Time)
+ 2nd param is the bug number (ex: 1,2,3,4,...)
+ 3rd param is the folder where the project is (ex: "/home/mau/Research/" )
+ 4td param is the folder where defects4j is installed (ex: "/home/mau/Research/defects4j/" )
+ 5th param is the option of running it (ex: allHuman, oneHuman, oneGenerated)
 
 So a typical run would look like this:
 ./prepareBug.sh Math 2 /home/mau/Research/ /home/mau/Research/defects4j/ allHuman
