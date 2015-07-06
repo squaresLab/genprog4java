@@ -73,5 +73,7 @@ Then it creates a configuration file everytime that it runs a new configuration 
 ### Who do I talk to? ###
 
 Repo owner or admin
+
 * Claire Le Goues (clegoues at cs dot cmu dot edu )
+
 * Mauricio Soto (mauriciosoto at cmu dot edu)
