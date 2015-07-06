@@ -56,27 +56,22 @@ It dispalys some instructions on how to edit these two files with examples.
 
 
 The second script is still under construction.
-It is called runGenProgForGug.sh
+It is called runGenProgForBug.sh and its overall purpose is to be able to run genprog on a certain defects4j bug with certain different seeds until it it able to either find a patch or get a to a certain number of generations or wallclock time.
 
+It takes in two parameters:
 
+*  1st param is the package in upper case (ex: Lang, Chart, Closure, Math, Time)
+*  2nd param is the bug number (ex: 1,2,3,4,...)
 
+Same as the one before, first parameter is to specify the project from defects4j and the second one is to specify the bug from that particular project.
 
-### How do I get set up? ###
+Starts off by setting up some directories and then it creates a loop from 0 - 20 with increments of 2 to set up the seeds that genprog will use to generate the variations. This is just a particular way of setting up the seeds, we just need seed variety, and way of running it would work.
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+Then it creates a configuration file everytime that it runs a new configuration with a different seed, and runs it.
 
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
 
 ### Who do I talk to? ###
 
 * Repo owner or admin
-* Other community or team contact
+Claire Le Goues (clegoues at cs dot cmu dot edu )
+Mauricio Soto (mauriciosoto at cmu dot edu)
