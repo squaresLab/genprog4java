@@ -24,39 +24,51 @@
 LOWERCASEPACKAGE="${1,,}"
 
 #Specific variables per every project
-#JAVADIR is the working directory of the project
+#TESTWD is the address from the root to the address where JAVADIR starts, for the TEST files 
+#WD is the address from the root to the address where JAVADIR starts,  for the SOURCE files 
+#JAVADIR is the address from the WD or TESTWD, to the address where all the java files are for both source and test files 
+#It is usually used TESTWD/JAVADIR or WD/JAVADIR
+#CONFIGLIBS are the libraries to be included in the configuration file so that GenProg can run it.
+#LIBSTESTS are the libraries needed to compile the  tests (dependencies of the project)
+#LIBSMAIN are the libraries nneeded to compile the project (dependencies of the project)
 if [ $LOWERCASEPACKAGE = "chart" ]; then
-  TESTSDIR=tests.org.jfree
+  TESTWD=tests
   WD=source
   JAVADIR=org/jfree
-  CONFIGLIBS="$2/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/chartAllSourceClasses.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/chartAllTestClasses.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"genprog4java/tests/mathTest/lib/junit-4.10.jar"
-
+  CONFIGLIBS=""$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/chartAllSourceClasses.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/chartAllTestClasses.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"genprog4java/tests/mathTest/lib/junit-4.10.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/itext-2.0.6.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/servlet.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/junit.jar"
+  LIBSTESTS="-cp \".:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/chartAllSourceClasses.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"genprog4java/tests/mathTest/lib/junit-4.10.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/itext-2.0.6.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/servlet.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/junit.jar\" "
+  LIBSMAIN="-cp \".:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/itext-2.0.6.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/servlet.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/junit.jar\" "
 elif [ $LOWERCASEPACKAGE = "closure" ]; then
-  TESTSDIR=test.com.google
+  TESTWD=test
   WD=src
   JAVADIR=com/google
   CONFIGLIBS=""$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/closureAllSourceClasses.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/closureAllTestClasses.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"genprog4java/tests/mathTest/lib/junit-4.10.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/ant.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/ant-launcher.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/args4j.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/caja-r4314.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/guava.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/jarjar.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/json.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/jsr305.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/junit.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/protobuf-java.jar"
+  LIBSTESTS="-cp \".:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/closureAllSourceClasses.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"genprog4java/tests/mathTest/lib/junit-4.10.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/ant.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/ant-launcher.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/args4j.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/caja-r4314.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/guava.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/jarjar.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/json.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/jsr305.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/junit.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/protobuf-java.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/build/lib/rhino.jar\" "
+  LIBSMAIN="-cp \".:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/ant.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/ant-launcher.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/args4j.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/caja-r4313.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/guava.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/jarjar.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/json.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/jsr305.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/junit.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/protobuf-java.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/build/lib/rhino.jar\" "
 
 elif [ $LOWERCASEPACKAGE = "lang" ]; then
-  TESTSDIR=src.test.java.org.apache.commons.lang3
+  TESTWD=src/test/java
   WD=src/main/java
   JAVADIR=org/apache/commons/lang3 
   CONFIGLIBS=""$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/langAllSourceClasses.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/langAllTestClasses.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"defects4j/framework/projects/lib/junit-4.11.jar:"$3"defects4j/projects/Lang/lib/easymock.jar:"$3"defects4j/projects/Lang/lib/asm.jar:"$3"defects4j/projects/Lang/lib/cglib.jar:"$3"defects4j/framework/projects/lib/easymock-3.3.1.jar"
   LIBSTESTS="-cp \".:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"defects4j/framework/projects/lib/junit-4.11.jar:"$3"defects4j/projects/Lang/lib/easymock.jar:"$3"defects4j/framework/projects/lib/easymock-3.3.1.jar\" "
-
+  LIBSMAIN=""
 
 elif [ $LOWERCASEPACKAGE = "math" ]; then 
-  TESTSDIR=src.test.java.org.apache.commons.math3
+  TESTWD=src/test/java
   WD=src/main/java
   JAVADIR=org/apache/commons/math3
-  CONFIGLIBS=""$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/mathAllSourceClasses.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/mathAllTestClasses.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"genprog4java/tests/mathTest/lib/junit-4.10.jar:"$3"defects4j/projects/Math/lib/commons-discovery-0.5.jar"
-  LIBSTESTS="-cp \".:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"genprog4java/tests/mathTest/lib/junit-4.10.jar:"$3"defects4j/projects/Math/lib/commons-discovery-0.5.jar\" "
+  CONFIGLIBS=""$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/mathAllSourceClasses.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/mathAllTestClasses.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"genprog4java/tests/mathTest/lib/junit-4.10.jar:"$3"defects4j/framework/projects/Math/lib/commons-discovery-0.5.jar"
+  LIBSTESTS="-cp \".:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/mathAllSourceClasses.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"genprog4java/tests/mathTest/lib/junit-4.10.jar:"$3"defects4j/framework/projects/Math/lib/commons-discovery-0.5.jar\" "
+  LIBSMAIN=""
 
 elif [ $LOWERCASEPACKAGE = "time" ]; then
-  TESTSDIR=src.test.java.org.joda.time
+  TESTWD=src/test/java
   WD=src/main/java
   JAVADIR=org/joda/time
-  CONFIGLIBS=""$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/timeAllSourceClasses.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/timeAllTestClasses.jar:"$3"defects4j/framework/projects/Time/lib/joda-convert-1.2.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"genprog4java/tests/mathTest/lib/junit-4.10.jar:"$3"defects4j/framework/projects/lib/easymock-3.3.1.jar "
+  CONFIGLIBS=""$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/timeAllSourceClasses.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/timeAllTestClasses.jar:"$3"defects4j/framework/projects/Time/lib/joda-convert-1.2.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"genprog4java/tests/mathTest/lib/junit-4.10.jar:"$3"defects4j/framework/projects/lib/easymock-3.3.1.jar"
+  LIBSTESTS="-cp \".:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/timeAllSourceClasses.jar:"$3"defects4j/framework/projects/Time/lib/joda-convert-1.2.jar:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"genprog4java/tests/mathTest/lib/junit-4.10.jar:"$3"defects4j/framework/projects/lib/easymock-3.3.1.jar\" "
+  LIBSMAIN="-cp \".:"$3"/defects4j/framework/projects/Time/lib/joda-convert-1.2.jar\" "
 
 fi
 
@@ -94,13 +106,13 @@ defects4j compile
 #Create the file with all the tests names in a file
 #find $JAVADIR/ -name "*.java" | tr / . | rev | cut -c 6- | rev  &> ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/pos.tests 
 
-if [ $5 = "allHuman" ]; then
+if [ "$5" = "allHuman" ]; then
   #copy the standard list of all tests to the current bug directory
   cp "$3"defects4j/ExamplesCheckedOut/Utilities/"$LOWERCASEPACKAGE"Pos.tests "$3"defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
-elif [ $5 = "oneHuman" ]; then
+elif [ "$5" = "oneHuman" ]; then
   echo write in this file: "$3"defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the human made test in the bug info
   gedit "$3"defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
-elif [ $5 = "oneGenerated" ]; then
+elif [ "$5" = "oneGenerated" ]; then
   echo write in this file: "$3"defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the generated test called NAMEOFTHETARGETFILEEvoSuite_Branch.java
   gedit "$3"defects4j/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
 fi
@@ -134,52 +146,50 @@ fi
 
 
 
-
-
-
-if [ $LOWERCASEPACKAGE = "lang" ]; then
-SOURCES="org/apache/commons/lang3/"
-elif [ $LOWERCASEPACKAGE = "math" ]; then
-SOURCES="org/apache/commons/math3/"
-fi
-
+#TEMPORALY DISABLED TO RUN FASTER!!!! TURN BACK ON!!!
 #Create the new test suite
-echo Creating new test suite...
-"$4"framework/bin/run_evosuite.pl -p $1 -v "$2"f -n 1 -o "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/src/test/java/outputOfEvoSuite/ -c branch => 100s
+#echo Creating new test suite...
+#"$4"framework/bin/run_evosuite.pl -p $1 -v "$2"f -n 1 -o "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/src/test/java/outputOfEvoSuite/ -c branch => 100s
 
 #Untar the generated test into the tests folder
-cd "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/src/test/java/
-tar xvjf outputOfEvoSuite/$1/evosuite-branch/1/"$1"-"$2"f-evosuite-branch.1.tar.bz2
+#cd "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/"$TESTWD"
+#tar xvjf outputOfEvoSuite/$1/evosuite-branch/1/"$1"-"$2"f-evosuite-branch.1.tar.bz2
+
+EXTRACLASSES=""
+if [ $LOWERCASEPACKAGE = "closure" ]; then
+EXTRACLASSES="$3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInfo.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMap.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMapOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/Instrumentation.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationTemplate.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/debugging/sourcemap/proto/Mapping.java"
+fi
 
 #Go to the bug folder
 cd "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD/
 
+echo Compiling source files...
 #create file to run compilation
 FILENAME=sources.txt
 exec 3<>$FILENAME
 # Write to file
-#echo $LIBSMAIN >&3
+echo $LIBSMAIN >&3
 find -name "*.java" >&3
+echo $EXTRACLASSES >&3
 exec 3>&-
+
 
 #Compile the project
 javac @sources.txt
+
 
 echo Compilation of main java classes successful
 
 rm sources.txt
 
-#cd ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/src/main/java
 
 #where the .class files are
 #DIROFCLASSFILES=org/$JAVADIR
 
 
-
-
 #Jar all the .class's
 #TODO maybe: change this to insert only the class files recursively, NOT the .java files also. Same thing in tests
-jar cf ../../../"$LOWERCASEPACKAGE"AllSourceClasses.jar "$SOURCES"* 
+jar cf "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar "$JAVADIR"* 
 #$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
 
 echo Jar of source files created successfully.
@@ -188,13 +198,16 @@ echo Jar of source files created successfully.
 #--------------------------------
 
 #Compile test classes
-cd "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/src/test/java/
+cd "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/$TESTWD
+
+echo Compiling test files...
 
 FILENAME=sources.txt
 exec 3<>$FILENAME
 # Write to file
 echo $LIBSTESTS >&3
 find -name "*.java" >&3
+echo $EXTRACLASSES >&3
 exec 3>&-
 
 javac @sources.txt
@@ -209,7 +222,7 @@ echo Compilation of test java classes successful
 
 
 #Jar all the test class's
-jar cf ../../../"$LOWERCASEPACKAGE"AllTestClasses.jar "$SOURCES"* 
+jar cf "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/"$LOWERCASEPACKAGE"AllTestClasses.jar "$JAVADIR"* 
 #$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
 
 echo Jar of tests created successfully.
@@ -240,7 +253,7 @@ targetClassName = NameOfTheTargetFileWithNoExtension
 sourceDir = $JAVADIR
 popsize = 5
 seed = 0
-testsDir = $TESTSDIR
+testsDir = $TESTWD/$JAVADIR
 javaVM = /usr/bin/java
 workingDir = $3defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD
 outputDir = ./tmp
@@ -272,15 +285,18 @@ gedit "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/neg.tests
 
 
 #I then go to pos.tests, move the failing tests that appear in the "Root cause in triggering tests" in the console, to the neg.tests
+echo 
 echo Dear user: 
-echo 1. I have created and opened a file called neg.tests in this directory: "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy, please insert the package of the failing tests that appear in the \"Root cause in triggering tests\" above in this console, and copy that into the file that I have opened.
+echo 1. It has been created and opened a file called neg.tests in this directory: "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy, please insert the package of the failing tests that appear in the \"Root cause in triggering tests\" above in this console, and copy that into the file that has been opened.
 echo Example: org.apache.commons.math3.distribution.HypergeometricDistributionTest
-echo 2. Now I have created and opened a second file called configDefects4j in this location: "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/ . Please go to that file and change the first three lines with the data in the section "List of modified sources" above in this console.
+echo 
+echo 2. Now it has been created and opened a second file called configDefects4j in this location: "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/ . Please go to that file and change the first three lines with the data in the section "List of modified sources" above in this console.
 echo In the package name, add the package where the target file is. In the sourceDir, do the same but with slashes instead of periods. And in the targetClassName, insert the name of the class without the extension of the file.
 echo For example:
 echo packageName = org.apache.commons.math3.distribution
 echo targetClassName = HypergeometricDistribution
 echo sourceDir = org/apache/commons/math3/distribution
+echo
 echo 3. If running on Eclipse, copy paste the working directory from the config file into the working directory in the configuration of eclipse.
 
 
