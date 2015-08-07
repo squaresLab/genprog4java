@@ -133,6 +133,14 @@ public class Search<G extends EditOperation> {
 
 		Calendar endTime = Calendar.getInstance(); // TODO do something with
 													// this
+		
+		//COPY THIS FILE INTO THE SOURCE TREE
+		
+		
+		
+		
+		
+		
 		File repairDir = new File("repair/");
 		if (!repairDir.exists())
 			repairDir.mkdir();
