@@ -33,6 +33,7 @@
 
 package clegoues.genprog4java.rep;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,9 +42,9 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -643,12 +644,27 @@ public class JavaRepresentation extends
 					bw.write(program);
 					bw.flush();
 					bw.close();
+					
+					
+					/////////////For defects4j purposes, we will write this program in the defects4j source folder deleting the original file
+					
+					BufferedWriter bw2 = new BufferedWriter(new FileWriter(
+							Configuration.sourceDir + File.separatorChar + sourceName
+									+ Configuration.globalExtension));
+					bw2.write(program);
+					bw2.flush();
+					bw2.close();
+					
+					//////////////
+					
+					
+					
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 			}
 
-			StringWriter compilerErrorWriter = new StringWriter();
+/*			StringWriter compilerErrorWriter = new StringWriter();
 
 			// Here is where it runs the command to compile the code
 			if (!compiler.getTask(compilerErrorWriter, null, null, options,
@@ -657,7 +673,49 @@ public class JavaRepresentation extends
 				compilerErrorWriter.flush();
 				return false;
 			}
-
+*/
+			
+			//////////For defects4j purposes we will run the command "defects4j compile" instead of the normal java -cp jars:etc
+			String s = null;
+			String commandToRun = "ps -ef";
+			 
+	        try {
+	             
+	        // run the Unix "ps -ef" command
+	        	
+	            // using the Runtime exec method:
+	            Process p = Runtime.getRuntime().exec(commandToRun);
+	             
+	            BufferedReader stdInput = new BufferedReader(new
+	                 InputStreamReader(p.getInputStream()));
+	 
+	            BufferedReader stdError = new BufferedReader(new
+	                 InputStreamReader(p.getErrorStream()));
+	 
+	            // read the output from the command
+	            System.out.println("Here is the standard output of the command:\n");
+	            while ((s = stdInput.readLine()) != null) {
+	                System.out.println(s);
+	            }
+	             
+	            // read any errors from the attempted command
+	            System.out.println("Here is the standard error of the command (if any):\n");
+	            while ((s = stdError.readLine()) != null) {
+	                System.out.println(s);
+	            }
+	             
+	            System.exit(0);
+	        }
+	        catch (IOException e) {
+	            System.out.println("Exception happened with the command: ");
+	            e.printStackTrace();
+	            //System.exit(-1);
+	        }			
+			/////////////////////
+			
+			
+			
+			
 			return true;
 		}
 	}

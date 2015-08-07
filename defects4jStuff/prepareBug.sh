@@ -146,14 +146,14 @@ fi
 
 
 
-#TEMPORALY DISABLED TO RUN FASTER!!!! TURN BACK ON!!!
+
 #Create the new test suite
-#echo Creating new test suite...
-#"$4"framework/bin/run_evosuite.pl -p $1 -v "$2"f -n 1 -o "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/src/test/java/outputOfEvoSuite/ -c branch => 100s
+echo Creating new test suite...
+"$4"framework/bin/run_evosuite.pl -p $1 -v "$2"f -n 1 -o "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/"$TESTWD"/outputOfEvoSuite/ -c branch => 100s
 
 #Untar the generated test into the tests folder
-#cd "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/"$TESTWD"
-#tar xvjf outputOfEvoSuite/$1/evosuite-branch/1/"$1"-"$2"f-evosuite-branch.1.tar.bz2
+cd "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/"$TESTWD"
+tar xvjf outputOfEvoSuite/$1/evosuite-branch/1/"$1"-"$2"f-evosuite-branch.1.tar.bz2
 
 EXTRACLASSES=""
 if [ $LOWERCASEPACKAGE = "closure" ]; then
