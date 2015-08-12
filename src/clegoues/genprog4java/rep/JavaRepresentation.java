@@ -45,6 +45,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -176,10 +177,13 @@ public class JavaRepresentation extends
 				.entrySet()) {
 			String targetClassName = ele.getKey();
 			InputStream targetClass = new FileInputStream(new File(
+					Configuration.sourceDir + File.separatorChar + targetClassName
+					+ ".class"
+					/*
 					Configuration.outputDir + File.separator
 							+ "coverage/coverage.out" + File.separator
 							+ Configuration.packageName.replace(".", "/")
-							+ File.separator + targetClassName + ".class"));
+							+ File.separator + targetClassName + ".class"*/));
 
 			if (executionData == null) {
 				executionData = new ExecutionDataStore();
@@ -654,7 +658,7 @@ public class JavaRepresentation extends
 					bw2.write(program);
 					bw2.flush();
 					bw2.close();
-					
+				
 					//////////////
 					
 					
@@ -664,62 +668,96 @@ public class JavaRepresentation extends
 				// TODO Auto-generated catch block
 			}
 
-/*			StringWriter compilerErrorWriter = new StringWriter();
+			StringWriter compilerErrorWriter = new StringWriter();
 
 			// Here is where it runs the command to compile the code
-			if (!compiler.getTask(compilerErrorWriter, null, null, options,
+			/*if (!compiler.getTask(compilerErrorWriter, null, null, options,
 					null, fileObjects).call()) {
 				logger.error(compilerErrorWriter.toString());
 				compilerErrorWriter.flush();
 				return false;
-			}
-*/
+			}*/
+
 			
 			//////////For defects4j purposes we will run the command "defects4j compile" instead of the normal java -cp jars:etc
-			String s = null;
-			String commandToRun = "ps -ef";
-			 
-	        try {
-	             
-	        // run the Unix "ps -ef" command
-	        	
-	            // using the Runtime exec method:
-	            Process p = Runtime.getRuntime().exec(commandToRun);
-	             
-	            BufferedReader stdInput = new BufferedReader(new
-	                 InputStreamReader(p.getInputStream()));
-	 
-	            BufferedReader stdError = new BufferedReader(new
-	                 InputStreamReader(p.getErrorStream()));
-	 
-	            // read the output from the command
-	            System.out.println("Here is the standard output of the command:\n");
-	            while ((s = stdInput.readLine()) != null) {
-	                System.out.println(s);
-	            }
-	             
-	            // read any errors from the attempted command
-	            System.out.println("Here is the standard error of the command (if any):\n");
-	            while ((s = stdError.readLine()) != null) {
-	                System.out.println(s);
-	            }
-	             
-	            System.exit(0);
-	        }
-	        catch (IOException e) {
-	            System.out.println("Exception happened with the command: ");
-	            e.printStackTrace();
-	            //System.exit(-1);
-	        }			
+			//runCommand("/bin/bash -e /bin/cd " + Configuration.defects4jBugFolder + "/");
+			//setCurrentDirectory(Configuration.defects4jBugFolder + "/");
+			//System.out.println("Current working directory:");
+			//System.out.println(System.getProperty("user.dir"));
+			//System.setProperty("user.dir", Configuration.defects4jBugFolder + "/");
+			//System.out.println("Current working directory:");
+			//System.out.println(System.getProperty("user.dir"));
+			//runCommand(Configuration.defects4jFolder +"defects4j compile");
+			
+  			if (!runCommand("/bin/sh runCompile.sh")) {
+				logger.error(compilerErrorWriter.toString());
+				compilerErrorWriter.flush();
+				return false;
+			}
+			//FIXME: if this thing fails it should return false
+			
 			/////////////////////
-			
-			
-			
 			
 			return true;
 		}
 	}
+	
+	private boolean runCommand(String commandToRun){
+		boolean compilationSuccessful = true;
+		String s = null;
+	
+        try {
+        	
+            // using the Runtime exec method:
+            Process p = Runtime.getRuntime().exec(commandToRun);
+             
+            BufferedReader stdInput = new BufferedReader(new
+                 InputStreamReader(p.getInputStream()));
+ 
+            BufferedReader stdError = new BufferedReader(new
+                 InputStreamReader(p.getErrorStream()));
+ 
+            // read the output from the command
+            System.out.println("Here is the standard output of the command:\n");
+            while ((s = stdInput.readLine()) != null) {
+                System.out.println(s);
+            }
+             
+            // read any errors from the attempted                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm          mmmmm,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,                      mn     command
+            System.out.println("Here is the standard error of the command (if any):\n");
+            while ((s = stdError.readLine()) != null) {
+                System.out.println(s);
+                compilationSuccessful = false;
+            }
+            if (!compilationSuccessful){
+            	return false;
+            }
+             
+            //System.exit(0);
+        }
+        catch (IOException e) {
+            System.out.println("Exception happened with the command: ");
+            e.printStackTrace();
+            return false;
+            //System.exit(-1);
+        }	
+        return true;
+	}
+	/*
+	public static boolean setCurrentDirectory(String directory_name)
+    {
+        boolean result = false;  // Boolean indicating whether directory was set
+        File    directory;       // Desired current working directory
 
+        directory = new File(directory_name).getAbsoluteFile();
+        if (directory.exists() || directory.mkdirs())
+        {
+            result = (System.setProperty("user.dir", directory.getAbsolutePath()) != null);
+        }
+
+        return result;
+    }
+*/
 	public JavaRepresentation copy() {
 		JavaRepresentation copy = new JavaRepresentation(this.getHistory(),
 				this.getGenome(), this.getFaultyAtoms(),

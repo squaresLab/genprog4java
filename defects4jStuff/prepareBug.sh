@@ -146,14 +146,14 @@ fi
 
 
 
-
+#UNCOMMENT!!!!!!!!!
 #Create the new test suite
-echo Creating new test suite...
-"$4"framework/bin/run_evosuite.pl -p $1 -v "$2"f -n 1 -o "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/"$TESTWD"/outputOfEvoSuite/ -c branch => 100s
+#echo Creating new test suite...
+#"$4"framework/bin/run_evosuite.pl -p $1 -v "$2"f -n 1 -o "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/"$TESTWD"/outputOfEvoSuite/ -c branch => 100s
 
 #Untar the generated test into the tests folder
-cd "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/"$TESTWD"
-tar xvjf outputOfEvoSuite/$1/evosuite-branch/1/"$1"-"$2"f-evosuite-branch.1.tar.bz2
+#cd "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/"$TESTWD"
+#tar xvjf outputOfEvoSuite/$1/evosuite-branch/1/"$1"-"$2"f-evosuite-branch.1.tar.bz2
 
 EXTRACLASSES=""
 if [ $LOWERCASEPACKAGE = "closure" ]; then
@@ -234,7 +234,17 @@ echo Jar of tests created successfully.
 
 
 
+cd "$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/$WD
 
+#Create file to run defects4j compiile
+FILE="$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD/runCompile.sh
+/bin/cat <<EOM >$FILE
+#!/bin/bash
+cd $3defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
+$4framework/bin/defects4j compile
+EOM
+
+chmod 777 runCompile.sh
 
 
 
@@ -256,7 +266,7 @@ seed = 0
 testsDir = $TESTWD/$JAVADIR
 javaVM = /usr/bin/java
 workingDir = $3defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD
-outputDir = ./tmp
+outputDir = $3defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/tmp
 libs = $CONFIGLIBS
 classDir = bin/
 sanity = yes
@@ -264,6 +274,8 @@ regenPaths
 positiveTests = $3defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/pos.tests
 negativeTests = $3defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/neg.tests
 jacocoPath = $4framework/projects/lib/jacocoagent.jar
+defects4jFolder = $4framework/bin/
+defects4jBugFolder = $3defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy
 EOM
 
 #info about the bug

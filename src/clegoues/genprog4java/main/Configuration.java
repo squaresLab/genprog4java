@@ -70,6 +70,8 @@ public class Configuration {
 	public static long seed;
 	public static boolean doSanity = true;
 	public static String packageName;
+	public static String defects4jFolder;
+	public static String defects4jBugFolder;
 	public static Random randomizer = null;
 
 	public Configuration() {
@@ -120,6 +122,13 @@ public class Configuration {
 			seed = System.currentTimeMillis();
 		}
 		randomizer = new Random(seed);
+		
+		if (prop.getProperty("defects4jFolder") != null) {
+			defects4jFolder = prop.getProperty("defects4jFolder").trim();
+		}
+		if (prop.getProperty("defects4jBugFolder") != null) {
+			defects4jBugFolder = prop.getProperty("defects4jBugFolder").trim();
+		}
 
 		try {
 			targetClassNames.addAll(getClasses(prop.getProperty(

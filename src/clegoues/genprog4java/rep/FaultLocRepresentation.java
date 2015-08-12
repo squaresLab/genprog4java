@@ -54,6 +54,7 @@ import org.apache.log4j.Logger;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.fitness.TestType;
+import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Mutation;
@@ -395,7 +396,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 		// change the commands used for test case execution
 		// or we don't pretend this is trying to match OCaml exactly?
 		this.instrumentForFaultLocalization();
-		File covDir = new File("tmp/coverage/");
+		File covDir = new File(Configuration.outputDir + "/coverage/");
 		if (!covDir.exists())
 			covDir.mkdir();
 		if (!this.compile("coverage", "coverage/coverage.out")) {
