@@ -702,7 +702,7 @@ public class JavaRepresentation extends
 		}
 	}
 	
-	private boolean runCommand(String commandToRun){
+	public static boolean runCommand(String commandToRun){
 		boolean compilationSuccessful = true;
 		String s = null;
 	
@@ -758,6 +758,8 @@ public class JavaRepresentation extends
         return result;
     }
 */
+
+	
 	public JavaRepresentation copy() {
 		JavaRepresentation copy = new JavaRepresentation(this.getHistory(),
 				this.getGenome(), this.getFaultyAtoms(),

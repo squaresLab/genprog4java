@@ -65,6 +65,7 @@ public class Main {
 		if (!workDir.exists())
 			workDir.mkdir();
 		logger.info("Configuration file loaded");
+		
 		if (Configuration.globalExtension == ".java") {
 			if (Search.searchStrategy.equals("io")) {
 				baseRep = (Representation) new LocalizationRepresentation();
