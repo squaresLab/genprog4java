@@ -72,6 +72,7 @@ public class Configuration {
 	public static String packageName;
 	public static String defects4jFolder;
 	public static String defects4jBugFolder;
+	public static String workingDir;
 	public static Random randomizer = null;
 
 	public Configuration() {
@@ -129,7 +130,10 @@ public class Configuration {
 		if (prop.getProperty("defects4jBugFolder") != null) {
 			defects4jBugFolder = prop.getProperty("defects4jBugFolder").trim();
 		}
-
+		if (prop.getProperty("workingDir") != null) {
+			workingDir = prop.getProperty("workingDir").trim();
+		}
+		
 		try {
 			targetClassNames.addAll(getClasses(prop.getProperty(
 					"targetClassName").trim()));
@@ -144,8 +148,35 @@ public class Configuration {
 		JavaRepresentation.configure(prop);
 		FaultLocRepresentation.configure(prop);
 		CachingRepresentation.configure(prop);
+		//Save original target file to an outside folder if it is the first run. Or load it if it is not.
+		saveOrLoadTargetFiles();
 
 	}
+	
+	public static void saveOrLoadTargetFiles(){
+		
+		String safeFolder = Configuration.outputDir  + File.separatorChar + "originalTargetFiles/";
+		String originFolder = Configuration.workingDir + File.separatorChar + Configuration.sourceDir + File.separatorChar;
+		String targetClassName = Configuration.targetClassNames.get(0) + Configuration.globalExtension;
+		
+		//If there is a variant already created in the output folder then it is not the first run
+		File variant0Folder = new File(Configuration.outputDir + "/variant0/");
+		if (variant0Folder.exists()){
+			//overwrite the targetClass with the one saved before
+			JavaRepresentation.runCommand("cp " + safeFolder + targetClassName + " " + originFolder + targetClassName);
+			
+		//else 	it is the first run
+		}else{
+			//create safe folder and save the original target class
+			File createFile = new File(Configuration.outputDir);
+			createFile.mkdir();
+			createFile = new File(safeFolder);
+			createFile.mkdir();
+			JavaRepresentation.runCommand("cp " + originFolder + targetClassName + " " + safeFolder + targetClassName);
+		}
+		
+	}
+	
 
 	public static ArrayList<String> getClasses(String filename)
 			throws IOException, FileNotFoundException {
