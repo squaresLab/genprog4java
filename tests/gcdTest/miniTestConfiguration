@@ -1,0 +1,12 @@
+popsize = 5
+seed = 0
+javaVM = /usr/bin/java
+workingDir = ./
+sourceDir = source/
+outputDir = ./tmp/
+libs = ./lib/junittestrunner.jar:./lib/junit-4.10.jar:./jacocoagent.jar:./lib/gcdTest.jar:./lib/gcdTestPos.jar
+classDir = bin/
+packageName = test
+targetClassName = gcd.txt
+sanity = yes
+regenPaths
