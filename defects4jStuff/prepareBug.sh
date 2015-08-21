@@ -57,60 +57,65 @@ GENLIBS=$GENPROG"/lib/junittestrunner.jar:"$GENPROG"/lib/commons-io-1.4.jar:"$GE
 CONFIGLIBS=$SRCJAR":"$TESTJAR":"$GENLIBS
 
 
-if [ $LOWERCASEPACKAGE = "chart" ]; then
-  TESTWD=tests
-  WD=source
-  JAVADIR=org/jfree
-  CHARTLIBS=$BUGPRE"/lib/itext-2.0.6.jar:"$BUGPRE"/lib/servlet.jar:"$BUGPRE"/lib/junit.jar"
+case "$LOWERCASEPACKAGE" in 
+'chart') 
+        TESTWD=tests
+        WD=source
+        JAVADIR=org/jfree
+        CHARTLIBS=$BUGPRE"/lib/itext-2.0.6.jar:"$BUGPRE"/lib/servlet.jar:"$BUGPRE"/lib/junit.jar"
+        
+        CONFIGLIBS=$CONFIGLIBS":"$CHARTLIBS
+        # CLG wonders if the escaped quote is necessary?  OH I know why!
+        # FIXME check if we need a space after the classpath where these are
+        # eventually used
+        LIBSTESTS="-cp \".:"$SRCJAR":"$GENLIBS":"$CHARTLIBS\"
+        LIBSMAIN="-cp \".:"$CHARTLIBS\"
+        ;;
+'closure')
+        TESTWD=test
+        WD=src
+        JAVADIR=com/google
 
-  CONFIGLIBS=$CONFIGLIBS":"$CHARTLIBS
-  # CLG wonders if the escaped quote is necessary?  OH I know why!
-  # FIXME check if we need a space after the classpath where these are
-  # eventually used
-  LIBSTESTS="-cp \".:"$SRCJAR":"$GENLIBS":"$CHARTLIBS\"
-  LIBSMAIN="-cp \".:"$CHARTLIBS\"
+        CLOSURELIBS=$BUGPRE"/lib/ant.jar:"$BUGPRE"/lib/ant-launcher.jar:"$BUGPRE"/lib/args4j.jar:"$BUGPRE"/lib/caja-r4314.jar:"$BUGPRE"/lib/guava.jar:"$BUGPRE"/lib/jarjar.jar:"$BUGPRE"/lib/json.jar:"$BUGPRE"/lib/jsr305.jar:"$BUGPRE"/lib/junit.jar:"$BUGPRE"/lib/protobuf-java.jar"
+        
+        CONFIGLIBS=$CONFIGLIBS":"$CLOSURELIBS
 
-elif [ $LOWERCASEPACKAGE = "closure" ]; then
-  TESTWD=test
-  WD=src
-  JAVADIR=com/google
+        LIBSTESTS="-cp \".:"$SRCJAR":"$GENLIBS":"$CLOSURELIBS\"
+        LIBSMAIN="-cp \".:"$CLOSURELIBS\"
+        ;;
 
-  CLOSURELIBS=$BUGPRE"/lib/ant.jar:"$BUGPRE"/lib/ant-launcher.jar:"$BUGPRE"/lib/args4j.jar:"$BUGPRE"/lib/caja-r4314.jar:"$BUGPRE"/lib/guava.jar:"$BUGPRE"/lib/jarjar.jar:"$BUGPRE"/lib/json.jar:"$BUGPRE"/lib/jsr305.jar:"$BUGPRE"/lib/junit.jar:"$BUGPRE"/lib/protobuf-java.jar"
+'lang')
+        TESTWD=src/test/java
+        WD=src/main/java
+        JAVADIR=org/apache/commons/lang3 
+        # CLAIRE TO MAU: you alternate these paths between defects4j/framework/projects and
+        # defects4j/projects...but I don't have a defects4j/projects, only a
+        # defects4j/framework/projects.  Are you sure about these paths?  Please check
+        # for me.
+        CONFIGLIBS="$BUGPRE/langAllSourceClasses.jar:$BUGPRE/langAllTestClasses.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$4"framework/projects/lib/junit-4.11.jar:"$4"projects/Lang/lib/easymock.jar:"$4"projects/Lang/lib/asm.jar:"$4"projects/Lang/lib/cglib.jar:"$4"framework/projects/lib/easymock-3.3.1.jar"
+        LIBSTESTS="-cp \".:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$4"framework/projects/lib/junit-4.11.jar:"$4"projects/Lang/lib/easymock.jar:"$4"framework/projects/lib/easymock-3.3.1.jar\" "
+        LIBSMAIN=""
+        ;;
 
-  CONFIGLIBS=$CONFIGLIBS":"$CLOSURELIBS
-
-  LIBSTESTS="-cp \".:"$SRCJAR":"$GENLIBS":"$CLOSURELIBS\"
-  LIBSMAIN="-cp \".:"$CLOSURELIBS\"
-elif [ $LOWERCASEPACKAGE = "lang" ]; then
-  TESTWD=src/test/java
-  WD=src/main/java
-  JAVADIR=org/apache/commons/lang3 
-  # CLAIRE TO MAU: you alternate these paths between defects4j/framework/projects and
-  # defects4j/projects...but I don't have a defects4j/projects, only a
-  # defects4j/framework/projects.  Are you sure about these paths?  Please check
-  # for me.
-  CONFIGLIBS="$BUGPRE/langAllSourceClasses.jar:$BUGPRE/langAllTestClasses.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$4"framework/projects/lib/junit-4.11.jar:"$4"projects/Lang/lib/easymock.jar:"$4"projects/Lang/lib/asm.jar:"$4"projects/Lang/lib/cglib.jar:"$4"framework/projects/lib/easymock-3.3.1.jar"
-  LIBSTESTS="-cp \".:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$4"framework/projects/lib/junit-4.11.jar:"$4"projects/Lang/lib/easymock.jar:"$4"framework/projects/lib/easymock-3.3.1.jar\" "
-  LIBSMAIN=""
-
-elif [ $LOWERCASEPACKAGE = "math" ]; then 
-  TESTWD=src/test/java
-  WD=src/main/java
-  JAVADIR=org/apache/commons/math3
-  CONFIGLIBS=""$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/mathAllSourceClasses.jar:$BUGPRE/mathAllTestClasses.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$GENPROG/lib/junit-4.10.jar:"$4"framework/projects/Math/lib/commons-discovery-0.5.jar"
+'math')
+        TESTWD=src/test/java
+        WD=src/main/java
+        JAVADIR=org/apache/commons/math3
+        CONFIGLIBS=""$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/mathAllSourceClasses.jar:$BUGPRE/mathAllTestClasses.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$GENPROG/lib/junit-4.10.jar:"$4"framework/projects/Math/lib/commons-discovery-0.5.jar"
   LIBSTESTS="-cp \".:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/mathAllSourceClasses.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$GENPROG/lib/junit-4.10.jar:"$4"framework/projects/Math/lib/commons-discovery-0.5.jar\" "
-  LIBSMAIN=""
+        LIBSMAIN=""
+        ;;
 
-elif [ $LOWERCASEPACKAGE = "time" ]; then
-  TESTWD=src/test/java
-  WD=src/main/java
-  JAVADIR=org/joda/time
-  CONFIGLIBS="$BUGPRE/timeAllSourceClasses.jar:$BUGPRE/timeAllTestClasses.jar:"$4"framework/projects/Time/lib/joda-convert-1.2.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$GENPROG/lib/junit-4.10.jar:"$4"framework/projects/lib/easymock-3.3.1.jar"
+'time')
+        TESTWD=src/test/java
+        WD=src/main/java
+        JAVADIR=org/joda/time
+        CONFIGLIBS="$BUGPRE/timeAllSourceClasses.jar:$BUGPRE/timeAllTestClasses.jar:"$4"framework/projects/Time/lib/joda-convert-1.2.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$GENPROG/lib/junit-4.10.jar:"$4"framework/projects/lib/easymock-3.3.1.jar"
   LIBSTESTS="-cp \".:$BUGPRE/timeAllSourceClasses.jar:"$4"framework/projects/Time/lib/joda-convert-1.2.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$GENPROG/lib/junit-4.10.jar:"$4"framework/projects/lib/easymock-3.3.1.jar\" "
-  LIBSMAIN="-cp \".:"$4"framework/projects/Time/lib/joda-convert-1.2.jar\" "
-
-fi
-
+        LIBSMAIN="-cp \".:"$4"framework/projects/Time/lib/joda-convert-1.2.jar\" "
+        
+        ;;
+esac
 
 #Add the path of defects4j so the defects4j's commands run 
 export PATH=$PATH:"$4"framework/bin
