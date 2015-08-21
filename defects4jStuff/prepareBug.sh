@@ -54,7 +54,7 @@ TESTJAR=$BUGPRE"/"$LOWERCASEPACKAGE"AllTestClasses.jar"
 GENLIBS=$GENPROG"/lib/junittestrunner.jar:"$GENPROG"/lib/commons-io-1.4.jar:"$GENPROG"/lib/junit-4.10.jar"
 
 # all libs for a package need at least the source jar, test jar, and generic genprog libs
-CONFIGLIBS=$SRCJAR":"$TESTJAR":"$GENLIBS
+CONFIGLIBS=$SRCJAR":"$TESTJAR
 
 
 case "$LOWERCASEPACKAGE" in 
@@ -62,38 +62,51 @@ case "$LOWERCASEPACKAGE" in
         TESTWD=tests
         WD=source
         JAVADIR=org/jfree
-        CHARTLIBS=$BUGPRE"/lib/itext-2.0.6.jar:"$BUGPRE"/lib/servlet.jar:"$BUGPRE"/lib/junit.jar"
+        CHARTLIBS="$BUGPRE/lib/itext-2.0.6.jar:\
+$BUGPRE/lib/servlet.jar:\
+$BUGPRE/lib/junit.jar"
         
-        CONFIGLIBS=$CONFIGLIBS":"$CHARTLIBS
-        # CLG wonders if the escaped quote is necessary?  OH I know why!
-        # FIXME check if we need a space after the classpath where these are
-        # eventually used
-        LIBSTESTS="-cp \".:"$SRCJAR":"$GENLIBS":"$CHARTLIBS\"
-        LIBSMAIN="-cp \".:"$CHARTLIBS\"
+        CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$CHARTLIBS
+        LIBSTESTS="-cp \".:$SRCJAR:$GENLIBS:$CHARTLIBS\" "
+        LIBSMAIN="-cp \".:$CHARTLIBS\" "
         ;;
 'closure')
         TESTWD=test
         WD=src
         JAVADIR=com/google
 
-        CLOSURELIBS=$BUGPRE"/lib/ant.jar:"$BUGPRE"/lib/ant-launcher.jar:"$BUGPRE"/lib/args4j.jar:"$BUGPRE"/lib/caja-r4314.jar:"$BUGPRE"/lib/guava.jar:"$BUGPRE"/lib/jarjar.jar:"$BUGPRE"/lib/json.jar:"$BUGPRE"/lib/jsr305.jar:"$BUGPRE"/lib/junit.jar:"$BUGPRE"/lib/protobuf-java.jar"
+        CLOSURELIBS="$BUGPRE/lib/ant.jar:$BUGPRE/lib/ant-launcher.jar:\
+$BUGPRE/lib/args4j.jar:$BUGPRE/lib/caja-r4314.jar:\
+$BUGPRE/lib/guava.jar:$BUGPRE/lib/jarjar.jar:\
+$BUGPRE/lib/json.jar:$BUGPRE/lib/jsr305.jar:\
+$BUGPRE/lib/junit.jar:$BUGPRE/lib/protobuf-java.jar"
         
-        CONFIGLIBS=$CONFIGLIBS":"$CLOSURELIBS
+        CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$CLOSURELIBS
 
-        LIBSTESTS="-cp \".:"$SRCJAR":"$GENLIBS":"$CLOSURELIBS\"
-        LIBSMAIN="-cp \".:"$CLOSURELIBS\"
+        LIBSTESTS="-cp \".:$SRCJAR:$GENLIBS:$CLOSURELIBS\" "
+        LIBSMAIN="-cp \".:$CLOSURELIBS\" "
         ;;
 
 'lang')
         TESTWD=src/test/java
         WD=src/main/java
         JAVADIR=org/apache/commons/lang3 
-        # CLAIRE TO MAU: you alternate these paths between defects4j/framework/projects and
+        # CLAIRE TO MAU: you alternate some of these paths between defects4j/framework/projects and 
         # defects4j/projects...but I don't have a defects4j/projects, only a
         # defects4j/framework/projects.  Are you sure about these paths?  Please check
         # for me.
-        CONFIGLIBS="$BUGPRE/langAllSourceClasses.jar:$BUGPRE/langAllTestClasses.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$4"framework/projects/lib/junit-4.11.jar:"$4"projects/Lang/lib/easymock.jar:"$4"projects/Lang/lib/asm.jar:"$4"projects/Lang/lib/cglib.jar:"$4"framework/projects/lib/easymock-3.3.1.jar"
-        LIBSTESTS="-cp \".:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$4"framework/projects/lib/junit-4.11.jar:"$4"projects/Lang/lib/easymock.jar:"$4"framework/projects/lib/easymock-3.3.1.jar\" "
+        LANGLIBS="$GENPROG/lib/junittestrunner.jar:$GENPROG/lib/commons-io-1.4.jar:\
+$DEFECTS4J/framework/projects/lib/junit-4.11.jar:\
+$DEFECTS4J/projects/Lang/lib/easymock.jar:\
+$DEFECTS4J/projects/Lang/lib/asm.jar:\
+$DEFECTS4J/projects/Lang/lib/cglib.jar:\
+$DEFECTS4J/framework/projects/lib/easymock-3.3.1.jar"
+        CONFIGLIBS=$CONFIGLIBS:$LANGLIBS
+        LIBSTESTS="-cp \".:$SRCJAR:\
+$GENPROG/lib/junittestrunner.jar:$GENPROG/lib/commons-io-1.4.jar:\
+$DEFECTS4J/framework/projects/lib/junit-4.11.jar:\
+$DEFECTS4J/projects/Lang/lib/easymock.jar:\
+$DEFECTS4J/framework/projects/lib/easymock-3.3.1.jar\" "
         LIBSMAIN=""
         ;;
 
@@ -101,8 +114,9 @@ case "$LOWERCASEPACKAGE" in
         TESTWD=src/test/java
         WD=src/main/java
         JAVADIR=org/apache/commons/math3
-        CONFIGLIBS=""$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/mathAllSourceClasses.jar:$BUGPRE/mathAllTestClasses.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$GENPROG/lib/junit-4.10.jar:"$4"framework/projects/Math/lib/commons-discovery-0.5.jar"
-  LIBSTESTS="-cp \".:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/mathAllSourceClasses.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$GENPROG/lib/junit-4.10.jar:"$4"framework/projects/Math/lib/commons-discovery-0.5.jar\" "
+        MATHLIBS=$DEFECTS4J"/framework/projects/Math/lib/commons-discovery-0.5.jar"
+        CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$MATHLIBS
+        LIBSTESTS="-cp \".:$SRCJAR:$GENLIBS:$MATHLIBS\" "
         LIBSMAIN=""
         ;;
 
@@ -110,10 +124,11 @@ case "$LOWERCASEPACKAGE" in
         TESTWD=src/test/java
         WD=src/main/java
         JAVADIR=org/joda/time
-        CONFIGLIBS="$BUGPRE/timeAllSourceClasses.jar:$BUGPRE/timeAllTestClasses.jar:"$4"framework/projects/Time/lib/joda-convert-1.2.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$GENPROG/lib/junit-4.10.jar:"$4"framework/projects/lib/easymock-3.3.1.jar"
-  LIBSTESTS="-cp \".:$BUGPRE/timeAllSourceClasses.jar:"$4"framework/projects/Time/lib/joda-convert-1.2.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$GENPROG/lib/junit-4.10.jar:"$4"framework/projects/lib/easymock-3.3.1.jar\" "
-        LIBSMAIN="-cp \".:"$4"framework/projects/Time/lib/joda-convert-1.2.jar\" "
-        
+        TIMELIBS=$DEFECTS4J"/framework/projects/Time/lib/joda-convert-1.2.jar:"$GENLIBS":"$DEFECTS4J/"framework/projects/lib/easymock-3.3.1.jar"
+        CONFIGLIBS=$CONFIGLIBS":"$TIMELIBS
+
+        LIBSTESTS="-cp \".:$SRCJAR:$TIMELIBS\" "
+        LIBSMAIN="-cp \".:$DEFECTS4J/framework/projects/Time/lib/joda-convert-1.2.jar\" "
         ;;
 esac
 
