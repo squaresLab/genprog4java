@@ -14,16 +14,28 @@
 # /home/mau/Research/defects4j/ExamplesCheckedOut where every time that I check out a bug from defects4j, it goes here
 
 
-#copy these files to the source control
-#cd "$3"
-#cp prepareBug.sh ./genprog4java/defects4jStuff/
+# CLG thinks it's nice practice to rename the vars taken from the user to
+# something more readable that corresponds to how they're used.  Makes the
+# script easier to read.
+PACKAGE="$1"
+BUG="$2"
+GENPROG="$3"
+DEFECTS4J="$4"
+OPTION="$5"
 
-mkdir -p "$4"ExamplesCheckedOut
-cp -r -u -p "$3"defects4jStuff/Utilities "$4"ExamplesCheckedOut
+PARENTDIR=$DEFECTS4J"/ExamplesCheckedOut"
+
+#copy these files to the source control
+
+mkdir -p $PARENTDIR
+cp -r $GENPROG"/defects4jStuff/Utilities" $PARENTDIR
 
 #This transforms the first parameter to lower case. Ex: lang, chart, closure, math or time
 # CLG changed the way you did this (which was fine for Bash 4!) so it's a bit more platform-independent
-LOWERCASEPACKAGE=`echo $1 | tr '[:upper:]' '[:lower:]'`
+LOWERCASEPACKAGE=`echo $PACKAGE | tr '[:upper:]' '[:lower:]'`
+
+# directory with the checked out buggy project
+BUGPRE=$PARENTDIR"/"$LOWERCASEPACKAGE"$BUG"Buggy
 
 #Specific variables per every project
 #TESTWD is the address from the root to the address where JAVADIR starts, for the TEST files 
@@ -32,12 +44,18 @@ LOWERCASEPACKAGE=`echo $1 | tr '[:upper:]' '[:lower:]'`
 #It is usually used TESTWD/JAVADIR or WD/JAVADIR
 #CONFIGLIBS are the libraries to be included in the configuration file so that GenProg can run it.
 #LIBSTESTS are the libraries needed to compile the  tests (dependencies of the project)
-#LIBSMAIN are the libraries nneeded to compile the project (dependencies of the project)
+#LIBSMAIN are the libraries needed to compile the project (dependencies of the project)
+
+SRCJAR=$BUGPRE"/"$LOWERCASEPACKAGE"AllSourceClasses.jar"
+TESTJAR=$BUGPRE"/"$LOWERCASEPACKAGE"AllTestClasses.jar"
+
+CONFIGLIBS=$SRCJAR":"$TESTJAR
+
 if [ $LOWERCASEPACKAGE = "chart" ]; then
   TESTWD=tests
   WD=source
   JAVADIR=org/jfree
-  CONFIGLIBS=""$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/chartAllSourceClasses.jar:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/chartAllTestClasses.jar:"$3"tests/mathTest/lib/junittestrunner.jar:"$3"tests/mathTest/lib/commons-io-1.4.jar:"$3"tests/mathTest/lib/junit-4.10.jar:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/itext-2.0.6.jar:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/servlet.jar:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/junit.jar"
+  CONFIGLIBS=$CONFIGLIBS:"$3"tests/mathTest/lib/junittestrunner.jar:"$3"tests/mathTest/lib/commons-io-1.4.jar:"$3"tests/mathTest/lib/junit-4.10.jar:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/itext-2.0.6.jar:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/servlet.jar:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/junit.jar"
   LIBSTESTS="-cp \".:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/chartAllSourceClasses.jar:"$3"tests/mathTest/lib/junittestrunner.jar:"$3"tests/mathTest/lib/commons-io-1.4.jar:"$3"tests/mathTest/lib/junit-4.10.jar:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/itext-2.0.6.jar:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/servlet.jar:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/junit.jar\" "
   LIBSMAIN="-cp \".:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/itext-2.0.6.jar:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/servlet.jar:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/junit.jar\" "
 elif [ $LOWERCASEPACKAGE = "closure" ]; then
