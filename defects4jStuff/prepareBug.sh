@@ -207,19 +207,65 @@ if [ $LOWERCASEPACKAGE = "closure" ]; then
 EXTRACLASSES="$3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInfo.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMap.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMapOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/Instrumentation.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationTemplate.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/debugging/sourcemap/proto/Mapping.java"
 fi
 
-#where the .class files are
-#DIROFCLASSFILES=org/$JAVADIR
+# CLAIRE TO MAU: I thought we didn't have to do this any more, no?
+# Anyway I'm commenting it out b/c it doesn't work on my machine and I don't
+# think we need it, so debugging seems like a waste of time...
+#Go to the bug folder
+# cd "$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD/
+# 
+# echo Compiling source files...
+# #create file to run compilation
+# FILENAME=sources.txt
+# exec 3<>$FILENAME
+# # Write to file
+# echo $LIBSMAIN >&3
+# find -name "*.java" >&3
+# echo $EXTRACLASSES >&3
+# exec 3>&-
+# 
+# 
+# #Compile the project
+# #javac @sources.txt
+# 
+# 
+# echo Compilation of main java classes successful
+# 
+# rm sources.txt
+# 
+# 
+# 
+# 
+
+# Same here:
+#--------------------------------
+
+# #Compile test classes
+# cd $BUGWD/$TESTWD
+# 
+# echo Compiling test files...
+# 
+# FILENAME=sources.txt
+# exec 3<>$FILENAME
+# # Write to file
+# echo $LIBSTESTS >&3
+# find -name "*.java" >&3
+# echo $EXTRACLASSES >&3
+# exec 3>&-
+# 
+# #javac @sources.txt
+# 
+# echo Compilation of test java classes successful
+# #rm sources.txt
+
+#javac *.java */*.java */*/*.java */*/*/*.java */*/*/*/*.java -Xlint:unchecked
+
+#cd ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/src/test/java
 
 
-#Jar all the .classes
-#TODO maybe: change this to insert only the class files recursively, NOT the .java files also. Same thing in tests
-#jar cf $BUGWD/"$LOWERCASEPACKAGE"AllSourceClasses.jar "$JAVADIR"* 
-#$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
-
-#echo "Jar of source files created successfully."
-
-#Jar all the test classes
-#jar cf $BUGWD/"$LOWERCASEPACKAGE"AllTestClasses.jar "$JAVADIR"* 
+# 
+# #Jar all the test class's
+# jar cf $BUGWD/"$LOWERCASEPACKAGE"AllTestClasses.jar "$JAVADIR"* 
+# 
 #$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
 
 #echo "Jar of tests created successfully."
