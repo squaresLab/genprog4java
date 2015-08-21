@@ -85,6 +85,10 @@ elif [ $LOWERCASEPACKAGE = "lang" ]; then
   TESTWD=src/test/java
   WD=src/main/java
   JAVADIR=org/apache/commons/lang3 
+  # CLAIRE TO MAU: you alternate these paths between defects4j/framework/projects and
+  # defects4j/projects...but I don't have a defects4j/projects, only a
+  # defects4j/framework/projects.  Are you sure about these paths?  Please check
+  # for me.
   CONFIGLIBS="$BUGPRE/langAllSourceClasses.jar:$BUGPRE/langAllTestClasses.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$4"framework/projects/lib/junit-4.11.jar:"$4"projects/Lang/lib/easymock.jar:"$4"projects/Lang/lib/asm.jar:"$4"projects/Lang/lib/cglib.jar:"$4"framework/projects/lib/easymock-3.3.1.jar"
   LIBSTESTS="-cp \".:"$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$4"framework/projects/lib/junit-4.11.jar:"$4"projects/Lang/lib/easymock.jar:"$4"framework/projects/lib/easymock-3.3.1.jar\" "
   LIBSMAIN=""
