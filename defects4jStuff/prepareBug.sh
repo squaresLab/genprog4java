@@ -13,6 +13,12 @@
 # /home/mau/Research/defects4j where the defects4j source code is
 # /home/mau/Research/defects4j/ExamplesCheckedOut where every time that I check out a bug from defects4j, it goes here
 
+# note to self for CLG: 
+# for compilation to work, javac really has to be 1.7 and JAVA_HOME set accordingly,
+# even though defects4j ships with a version of the javac compiler.
+# So, don't forget to do the following on your OS X laptop:
+# export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/
+# export PATH=$JAVA_HOME/bin/:$PATH
 
 # CLG thinks it's nice practice to rename the vars taken from the user to
 # something more readable that corresponds to how they're used.  Makes the
@@ -135,35 +141,20 @@ esac
 #Add the path of defects4j so the defects4j's commands run 
 export PATH=$PATH:"$DEFECTS4J"/framework/bin
 
-#Print info about the project
-defects4j info -p $1
-
-#Print info about this bug in particular
-defects4j info -p $1 -v $2
-
 #Checkout the buggy version of the code
 defects4j checkout -p $1 -v "$BUG"b -w $BUGWD
 
 #Checkout the fixed version of the code to make the seccond test suite
-defects4j checkout -p $1 -v "$BUG"f -w "$DEFECTS4J"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Fixed
+defects4j checkout -p $1 -v "$BUG"f -w "$DEFECTS4J/"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Fixed
 
-#Go to the created folder
-cd $BUGWD
 
-#Compile the buggy code
-defects4j compile
-
-#Go to the created folder
-cd $BUGWD
-
-#Compile the buggy code
-defects4j compile
-
-#Run the buggy code
-#defects4j test
-
-#Create the file with all the tests names in a file
-#find $JAVADIR/ -name "*.java" | tr / . | rev | cut -c 6- | rev  &> ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/pos.tests 
+#Compile the buggy and fixed code
+for dir in Buggy Fixed
+do
+    pushd $PARENTDIR"/"$LOWERCASEPACKAGE$BUG$dir
+    defects4j compile
+    popd
+done
 
 if [ "$5" = "allHuman" ]; then
   #copy the standard list of all tests to the current bug directory
@@ -202,9 +193,6 @@ fi
 #mv $BUGWD/passingTests.tests "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
 
 
-
-
-
 #UNCOMMENT!!!!!!!!!
 #Create the new test suite
 #echo Creating new test suite...
@@ -219,78 +207,22 @@ if [ $LOWERCASEPACKAGE = "closure" ]; then
 EXTRACLASSES="$3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInfo.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMap.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMapOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/Instrumentation.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationTemplate.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/debugging/sourcemap/proto/Mapping.java"
 fi
 
-#Go to the bug folder
-cd "$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD/
-
-echo Compiling source files...
-#create file to run compilation
-FILENAME=sources.txt
-exec 3<>$FILENAME
-# Write to file
-echo $LIBSMAIN >&3
-find -name "*.java" >&3
-echo $EXTRACLASSES >&3
-exec 3>&-
-
-
-#Compile the project
-javac @sources.txt
-
-
-echo Compilation of main java classes successful
-
-rm sources.txt
-
-
 #where the .class files are
 #DIROFCLASSFILES=org/$JAVADIR
 
 
-#Jar all the .class's
+#Jar all the .classes
 #TODO maybe: change this to insert only the class files recursively, NOT the .java files also. Same thing in tests
-jar cf $BUGWD/"$LOWERCASEPACKAGE"AllSourceClasses.jar "$JAVADIR"* 
+#jar cf $BUGWD/"$LOWERCASEPACKAGE"AllSourceClasses.jar "$JAVADIR"* 
 #$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
 
-echo Jar of source files created successfully.
+#echo "Jar of source files created successfully."
 
-
-#--------------------------------
-
-#Compile test classes
-cd $BUGWD/$TESTWD
-
-echo Compiling test files...
-
-FILENAME=sources.txt
-exec 3<>$FILENAME
-# Write to file
-echo $LIBSTESTS >&3
-find -name "*.java" >&3
-echo $EXTRACLASSES >&3
-exec 3>&-
-
-javac @sources.txt
-
-echo Compilation of test java classes successful
-#rm sources.txt
-
-#javac *.java */*.java */*/*.java */*/*/*.java */*/*/*/*.java -Xlint:unchecked
-
-#cd ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/src/test/java
-
-
-
-#Jar all the test class's
-jar cf $BUGWD/"$LOWERCASEPACKAGE"AllTestClasses.jar "$JAVADIR"* 
+#Jar all the test classes
+#jar cf $BUGWD/"$LOWERCASEPACKAGE"AllTestClasses.jar "$JAVADIR"* 
 #$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
 
-echo Jar of tests created successfully.
-
-
-
-
-
-
+#echo "Jar of tests created successfully."
 
 
 cd $BUGWD/$WD
@@ -317,7 +249,6 @@ PACKAGEDIR=${JAVADIR//"/"/"."}
 #Create config file TODO:#FIX THIS FILE
 FILE="$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/configDefects4j
 /bin/cat <<EOM >$FILE
-targetClassName = PackageAndNameOfTheTargetFileWithNoExtension
 popsize = 5
 seed = 0
 testsDir = $TESTWD/$JAVADIR
@@ -335,13 +266,6 @@ defects4jFolder = $4framework/bin/
 defects4jBugFolder = $4ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy
 EOM
 
-#info about the bug
-defects4j info -p $1 -v $2
-
-#Need to modify these three files
-gedit $BUGWD/configDefects4j
-gedit $BUGWD/neg.tests 
-#gedit $BUGWD/pos.tests 
 
 
 #PASSSINGTESTS="$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
@@ -354,21 +278,68 @@ gedit $BUGWD/neg.tests
 
 
 #I then go to pos.tests, move the failing tests that appear in the "Root cause in triggering tests" in the console, to the neg.tests
-echo 
-echo Dear user: 
-echo 1. It has been created and opened a file called neg.tests in this directory: $BUGWD, please insert the package of the failing tests that appear in the \"Root cause in triggering tests\" above in this console, and copy that into the file that has been opened.
-echo Example: org.apache.commons.math3.distribution.HypergeometricDistributionTest
-echo 
-echo 2. Now it has been created and opened a second file called configDefects4j in this location: $BUGWD/ . Please go to that file and change the first line with the data in the section "List of modified sources" above in this console.
-echo For example:
-echo targetClassName = org.apache.commons.math3.distribution.HypergeometricDistribution
-echo
-echo 3. If running on Eclipse, copy paste the working directory from the config file into the working directory in the configuration of eclipse.
 
+# programmatically get passing and failing tests as well as files
+#info about the bug
+INFO=`defects4j info -p $PACKAGE -v $BUG`
 
+# gets the content starting at the list of tests
+JUSTTEST=`echo $INFO | sed -n -e 's/.*Root cause in triggering tests: - //p'`
+#gets rid of the information about which assertions are failing, between test class names
+JUSTTEST=`echo $JUSTTEST | sed -e "s/\([a-zA-Z0-9_\.]*\)\(::\)\([a-zA-Z0-9_\.]* --> \)\([a-zA-Z0-9<>: _\.]* - \)/\1 /g"`
+# gets rid of the training bit of info at the end of the test list
+JUSTTEST=`echo $JUSTTEST | sed -n -e 's/\([a-zA-Z0-9_\.]*\)\(::\)\(.*\)/\1/p'`
 
+# I really wish I could come up with a better way to do this, but have not. 
+if [[ -f tmp.txt ]]
+then
+    rm tmp.txt
+fi
+touch tmp.txt
 
+# tests in this var are separated by a space, so this will enumerate over each
+for foo in `echo $JUSTTEST`
+do
+    echo $foo >> tmp.txt
+done
 
+# gets the unique test classes in the list
+UNIQTESTS=`cat tmp.txt | sort -n | uniq`
+
+for FOO in `echo $UNIQTESTS`
+do
+    echo $FOO >> $BUGWD/neg.tests
+done
+
+JUSTSOURCE=`echo $INFO | sed -n -e 's/.*List of modified sources: - //p'`
+
+JUSTSOURCE=`echo $JUSTSOURCE | sed -e 's/ - / /g'`
+JUSTSOURCE=`echo $JUSTSOURCE | cut -d '-' -f1`
+rm tmp.txt
+
+for foo in `echo $JUSTSOURCE`
+do
+    echo $foo >> tmp.txt
+done
+
+UNIQFILES=`cat tmp.txt | sort -n | uniq`
+rm tmp.txt
+
+for FOO in `echo $UNIQFILES`
+do
+    echo $FOO >> tmp.txt
+done
+
+NUM=`wc -l tmp.txt | xargs | cut -d ' ' -f1`
+
+if [[ $NUM -gt 1 ]]
+then
+    mv tmp.txt $BUGWD/bugfiles.txt
+    echo "targetClassName = $BUGWD/bugfiles.txt" >> $BUGWD/configDefects4j
+else
+    rm tmp.txt
+    echo "targetClassName = "$UNIQFILES >> $BUGWD/configDefects4j
+fi
 
 
 
