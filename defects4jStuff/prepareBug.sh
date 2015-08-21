@@ -22,7 +22,8 @@ mkdir -p "$4"ExamplesCheckedOut
 cp -r -u -p "$3"defects4jStuff/Utilities "$4"ExamplesCheckedOut
 
 #This transforms the first parameter to lower case. Ex: lang, chart, closure, math or time
-LOWERCASEPACKAGE="${1,,}"
+# CLG changed the way you did this (which was fine for Bash 4!) so it's a bit more platform-independent
+LOWERCASEPACKAGE=`echo $1 | tr '[:upper:]' '[:lower:]'`
 
 #Specific variables per every project
 #TESTWD is the address from the root to the address where JAVADIR starts, for the TEST files 
