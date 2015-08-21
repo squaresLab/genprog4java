@@ -74,10 +74,13 @@ elif [ $LOWERCASEPACKAGE = "closure" ]; then
   TESTWD=test
   WD=src
   JAVADIR=com/google
-  CONFIGLIBS=$BUGPRE"/closureAllSourceClasses.jar:"$BUGPRE"/closureAllTestClasses.jar:"$GENPROG"/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$GENPROG/lib/junit-4.10.jar:$BUGPRE/lib/ant.jar:$BUGPRE/lib/ant-launcher.jar:$BUGPRE/lib/args4j.jar:$BUGPRE/lib/caja-r4314.jar:$BUGPRE/lib/guava.jar:$BUGPRE/lib/jarjar.jar:$BUGPRE/lib/json.jar:$BUGPRE/lib/jsr305.jar:$BUGPRE/lib/junit.jar:$BUGPRE/lib/protobuf-java.jar"
-  LIBSTESTS="-cp \".:$BUGPRE/closureAllSourceClasses.jar:"$GENPROG/lib/junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:"$GENPROG/lib/junit-4.10.jar:$BUGPRE/lib/ant.jar:$BUGPRE/lib/ant-launcher.jar:$BUGPRE/lib/args4j.jar:$BUGPRE/lib/caja-r4314.jar:$BUGPRE/lib/guava.jar:$BUGPRE/lib/jarjar.jar:$BUGPRE/lib/json.jar:$BUGPRE/lib/jsr305.jar:$BUGPRE/lib/junit.jar:$BUGPRE/lib/protobuf-java.jar:$BUGPRE/build/lib/rhino.jar\" "
-  LIBSMAIN="-cp \".:$BUGPRE/lib/ant.jar:$BUGPRE/lib/ant-launcher.jar:$BUGPRE/lib/args4j.jar:$BUGPRE/lib/caja-r4313.jar:$BUGPRE/lib/guava.jar:$BUGPRE/lib/jarjar.jar:$BUGPRE/lib/json.jar:$BUGPRE/lib/jsr305.jar:$BUGPRE/lib/junit.jar:$BUGPRE/lib/protobuf-java.jar:$BUGPRE/build/lib/rhino.jar\" "
 
+  CLOSURELIBS=$BUGPRE"/lib/ant.jar:"$BUGPRE"/lib/ant-launcher.jar:"$BUGPRE"/lib/args4j.jar:"$BUGPRE"/lib/caja-r4314.jar:"$BUGPRE"/lib/guava.jar:"$BUGPRE"/lib/jarjar.jar:"$BUGPRE"/lib/json.jar:"$BUGPRE"/lib/jsr305.jar:"$BUGPRE"/lib/junit.jar:"$BUGPRE"/lib/protobuf-java.jar"
+
+  CONFIGLIBS=$CONFIGLIBS":"$CLOSURELIBS
+
+  LIBSTESTS="-cp \".:"$SRCJAR":"$GENLIBS":"$CLOSURELIBS\"
+  LIBSMAIN="-cp \".:"$CLOSURELIBS\"
 elif [ $LOWERCASEPACKAGE = "lang" ]; then
   TESTWD=src/test/java
   WD=src/main/java
