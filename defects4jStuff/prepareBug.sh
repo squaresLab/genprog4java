@@ -259,9 +259,7 @@ PACKAGEDIR=${JAVADIR//"/"/"."}
 #Create config file TODO:#FIX THIS FILE
 FILE="$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/configDefects4j
 /bin/cat <<EOM >$FILE
-packageName = $PACKAGEDIR
-targetClassName = NameOfTheTargetFileWithNoExtension
-sourceDir = $JAVADIR
+targetClassName = PackageAndNameOfTheTargetFileWithNoExtension
 popsize = 5
 seed = 0
 testsDir = $TESTWD/$JAVADIR
@@ -303,12 +301,9 @@ echo Dear user:
 echo 1. It has been created and opened a file called neg.tests in this directory: "$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy, please insert the package of the failing tests that appear in the \"Root cause in triggering tests\" above in this console, and copy that into the file that has been opened.
 echo Example: org.apache.commons.math3.distribution.HypergeometricDistributionTest
 echo 
-echo 2. Now it has been created and opened a second file called configDefects4j in this location: "$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/ . Please go to that file and change the first three lines with the data in the section "List of modified sources" above in this console.
-echo In the package name, add the package where the target file is. In the sourceDir, do the same but with slashes instead of periods. And in the targetClassName, insert the name of the class without the extension of the file.
+echo 2. Now it has been created and opened a second file called configDefects4j in this location: "$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/ . Please go to that file and change the first line with the data in the section "List of modified sources" above in this console.
 echo For example:
-echo packageName = org.apache.commons.math3.distribution
-echo targetClassName = HypergeometricDistribution
-echo sourceDir = org/apache/commons/math3/distribution
+echo targetClassName = org.apache.commons.math3.distribution.HypergeometricDistribution
 echo
 echo 3. If running on Eclipse, copy paste the working directory from the config file into the working directory in the configuration of eclipse.
 

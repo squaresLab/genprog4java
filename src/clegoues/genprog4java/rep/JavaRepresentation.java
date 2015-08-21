@@ -177,7 +177,7 @@ public class JavaRepresentation extends
 				.entrySet()) {
 			String targetClassName = ele.getKey();
 			InputStream targetClass = new FileInputStream(new File(
-					Configuration.sourceDir + File.separatorChar + targetClassName
+					targetClassName.replace('.', '/')
 					+ ".class"
 					/*
 					Configuration.outputDir + File.separator
@@ -245,8 +245,8 @@ public class JavaRepresentation extends
 		// apparently names and types and scopes are visited here below in
 		// the calls to ASTUtils
 
-		String fname = Configuration.sourceDir + File.separatorChar
-				+ className.replace(".", "/") + ".java";
+		String fname= className.replace('.', '/') + ".java";
+
 		// we can assume that that's what Configuration.globalExtension is,
 		// because we're in JavaRepresentation
 		ScopeInfo scopeInfo = new ScopeInfo();
@@ -403,8 +403,7 @@ public class JavaRepresentation extends
 					// guess, in particular
 					// because it allows us to serialize/deserialize incoming
 					// populations
-					this.fromSource(Configuration.sourceDir
-							+ File.separatorChar + filename
+					this.fromSource(filename.replace('.', '/')
 							+ Configuration.globalExtension);
 				}
 				this.genome.addAll((ArrayList<JavaEditOperation>) (in
@@ -653,8 +652,7 @@ public class JavaRepresentation extends
 					/////////////For defects4j purposes, we will write this program in the defects4j source folder deleting the original file
 					
 					BufferedWriter bw2 = new BufferedWriter(new FileWriter(
-							Configuration.sourceDir + File.separatorChar + sourceName
-									+ Configuration.globalExtension));
+							sourceName.replace('.', '/') + Configuration.globalExtension));
 					bw2.write(program);
 					bw2.flush();
 					bw2.close();
