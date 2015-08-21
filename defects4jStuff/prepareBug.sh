@@ -49,15 +49,27 @@ BUGPRE=$PARENTDIR"/"$LOWERCASEPACKAGE"$BUG"Buggy
 SRCJAR=$BUGPRE"/"$LOWERCASEPACKAGE"AllSourceClasses.jar"
 TESTJAR=$BUGPRE"/"$LOWERCASEPACKAGE"AllTestClasses.jar"
 
-CONFIGLIBS=$SRCJAR":"$TESTJAR
+# Common genprog libs: junit test runner and the like
+
+GENLIBS=$GENPROG"/lib/junittestrunner.jar:"$GENPROG"/lib/commons-io-1.4.jar:"$GENPROG"/lib/junit-4.10.jar"
+
+# all libs for a package need at least the source jar, test jar, and generic genprog libs
+CONFIGLIBS=$SRCJAR":"$TESTJAR":"$GENLIBS
+
 
 if [ $LOWERCASEPACKAGE = "chart" ]; then
   TESTWD=tests
   WD=source
   JAVADIR=org/jfree
-  CONFIGLIBS=$CONFIGLIBS":"$GENPROG"/lib/junittestrunner.jar:"$GENPROG"/lib/commons-io-1.4.jar:"$GENPROG"/lib/junit-4.10.jar:"$BUGPRE"/lib/itext-2.0.6.jar:"$BUGPRE"/lib/servlet.jar:"$BUGPRE"/lib/junit.jar"
-  LIBSTESTS="-cp \".:$BUGPRE/chartAllSourceClasses.jar:"$GENPROG"/lib/junittestrunner.jar:"$GENPROG"/lib/commons-io-1.4.jar:"$GENPROG"/lib/junit-4.10.jar:"$BUGPRE"/lib/itext-2.0.6.jar:"$BUGPRE"/lib/servlet.jar:"$BUGPRE"/lib/junit.jar\" "
-  LIBSMAIN="-cp \".:"$BUGPRE"/lib/itext-2.0.6.jar:"$BUGPRE"/lib/servlet.jar:"$BUGPRE"/lib/junit.jar\" "
+  CHARTLIBS=$BUGPRE"/lib/itext-2.0.6.jar:"$BUGPRE"/lib/servlet.jar:"$BUGPRE"/lib/junit.jar"
+
+  CONFIGLIBS=$CONFIGLIBS":"$CHARTLIBS
+  # CLG wonders if the escaped quote is necessary?  OH I know why!
+  # FIXME check if we need a space after the classpath where these are
+  # eventually used
+  LIBSTESTS="-cp \".:"$SRCJAR":"$GENLIBS":"$CHARTLIBS\"
+  LIBSMAIN="-cp \".:"$CHARTLIBS\"
+
 elif [ $LOWERCASEPACKAGE = "closure" ]; then
   TESTWD=test
   WD=src
