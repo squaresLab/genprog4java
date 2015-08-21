@@ -35,7 +35,7 @@ cp -r $GENPROG"/defects4jStuff/Utilities" $PARENTDIR
 LOWERCASEPACKAGE=`echo $PACKAGE | tr '[:upper:]' '[:lower:]'`
 
 # directory with the checked out buggy project
-BUGPRE=$PARENTDIR"/"$LOWERCASEPACKAGE"$BUG"Buggy
+BUGWD=$PARENTDIR"/"$LOWERCASEPACKAGE"$BUG"Buggy
 
 #Specific variables per every project
 #TESTWD is the address from the root to the address where JAVADIR starts, for the TEST files 
@@ -46,8 +46,8 @@ BUGPRE=$PARENTDIR"/"$LOWERCASEPACKAGE"$BUG"Buggy
 #LIBSTESTS are the libraries needed to compile the  tests (dependencies of the project)
 #LIBSMAIN are the libraries needed to compile the project (dependencies of the project)
 
-SRCJAR=$BUGPRE"/"$LOWERCASEPACKAGE"AllSourceClasses.jar"
-TESTJAR=$BUGPRE"/"$LOWERCASEPACKAGE"AllTestClasses.jar"
+SRCJAR=$BUGWD"/"$LOWERCASEPACKAGE"AllSourceClasses.jar"
+TESTJAR=$BUGWD"/"$LOWERCASEPACKAGE"AllTestClasses.jar"
 
 # Common genprog libs: junit test runner and the like
 
@@ -62,9 +62,9 @@ case "$LOWERCASEPACKAGE" in
         TESTWD=tests
         WD=source
         JAVADIR=org/jfree
-        CHARTLIBS="$BUGPRE/lib/itext-2.0.6.jar:\
-$BUGPRE/lib/servlet.jar:\
-$BUGPRE/lib/junit.jar"
+        CHARTLIBS="$BUGWD/lib/itext-2.0.6.jar:\
+$BUGWD/lib/servlet.jar:\
+$BUGWD/lib/junit.jar"
         
         CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$CHARTLIBS
         LIBSTESTS="-cp \".:$SRCJAR:$GENLIBS:$CHARTLIBS\" "
@@ -75,11 +75,11 @@ $BUGPRE/lib/junit.jar"
         WD=src
         JAVADIR=com/google
 
-        CLOSURELIBS="$BUGPRE/lib/ant.jar:$BUGPRE/lib/ant-launcher.jar:\
-$BUGPRE/lib/args4j.jar:$BUGPRE/lib/caja-r4314.jar:\
-$BUGPRE/lib/guava.jar:$BUGPRE/lib/jarjar.jar:\
-$BUGPRE/lib/json.jar:$BUGPRE/lib/jsr305.jar:\
-$BUGPRE/lib/junit.jar:$BUGPRE/lib/protobuf-java.jar"
+        CLOSURELIBS="$BUGWD/lib/ant.jar:$BUGWD/lib/ant-launcher.jar:\
+$BUGWD/lib/args4j.jar:$BUGWD/lib/caja-r4314.jar:\
+$BUGWD/lib/guava.jar:$BUGWD/lib/jarjar.jar:\
+$BUGWD/lib/json.jar:$BUGWD/lib/jsr305.jar:\
+$BUGWD/lib/junit.jar:$BUGWD/lib/protobuf-java.jar"
         
         CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$CLOSURELIBS
 
@@ -133,28 +133,28 @@ $DEFECTS4J/framework/projects/lib/easymock-3.3.1.jar\" "
 esac
 
 #Add the path of defects4j so the defects4j's commands run 
-export PATH=$PATH:"$4"framework/bin
+export PATH=$PATH:"$DEFECTS4J"/framework/bin
 
 #Print info about the project
-#defects4j info -p $1
+defects4j info -p $1
 
 #Print info about this bug in particular
-#defects4j info -p $1 -v $2
+defects4j info -p $1 -v $2
 
 #Checkout the buggy version of the code
-defects4j checkout -p $1 -v "$2"b -w $BUGPRE
+defects4j checkout -p $1 -v "$BUG"b -w $BUGWD
 
 #Checkout the fixed version of the code to make the seccond test suite
-defects4j checkout -p $1 -v "$2"f -w "$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Fixed
+defects4j checkout -p $1 -v "$BUG"f -w "$DEFECTS4J"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Fixed
 
 #Go to the created folder
-cd "$4"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Fixed
+cd $BUGWD
 
 #Compile the buggy code
 defects4j compile
 
 #Go to the created folder
-cd $BUGPRE
+cd $BUGWD
 
 #Compile the buggy code
 defects4j compile
@@ -178,13 +178,13 @@ fi
 
 #for the lang project copy a fixed file
 if [ $LOWERCASEPACKAGE = "lang" ]; then
-cp "$3"defects4jStuff/Utilities/EntityArrays.java $BUGPRE/src/main/java/org/apache/commons/lang3/text/translate/
+cp "$3"defects4jStuff/Utilities/EntityArrays.java $BUGWD/src/main/java/org/apache/commons/lang3/text/translate/
 fi
 
 #cd "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/
 
 #create new list of Passing tests 
-#touch $BUGPRE/passingTests.tests
+#touch $BUGWD/passingTests.tests
 
 #go through all the entries of the file and the test passes insert it in the passing list (sanitize out of scope tests)
 #while read e; do
@@ -194,12 +194,12 @@ fi
 #if the test passes, added to the passing list
 #if [ $? -eq 0 ]
 #then
-#    echo $e >> $BUGPRE/#passingTests.tests
+#    echo $e >> $BUGWD/#passingTests.tests
 #fi
 #done < pos.tests
 
 #replace the list with all the tests, with the one with just the passing tests
-#mv $BUGPRE/passingTests.tests "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
+#mv $BUGWD/passingTests.tests "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
 
 
 
@@ -208,10 +208,10 @@ fi
 #UNCOMMENT!!!!!!!!!
 #Create the new test suite
 #echo Creating new test suite...
-#"$4"framework/bin/run_evosuite.pl -p $1 -v "$2"f -n 1 -o $BUGPRE/"$TESTWD"/outputOfEvoSuite/ -c branch => 100s
+#"$4"framework/bin/run_evosuite.pl -p $1 -v "$2"f -n 1 -o $BUGWD/"$TESTWD"/outputOfEvoSuite/ -c branch => 100s
 
 #Untar the generated test into the tests folder
-#cd $BUGPRE/"$TESTWD"
+#cd $BUGWD/"$TESTWD"
 #tar xvjf outputOfEvoSuite/$1/evosuite-branch/1/"$1"-"$2"f-evosuite-branch.1.tar.bz2
 
 EXTRACLASSES=""
@@ -248,7 +248,7 @@ rm sources.txt
 
 #Jar all the .class's
 #TODO maybe: change this to insert only the class files recursively, NOT the .java files also. Same thing in tests
-jar cf $BUGPRE/"$LOWERCASEPACKAGE"AllSourceClasses.jar "$JAVADIR"* 
+jar cf $BUGWD/"$LOWERCASEPACKAGE"AllSourceClasses.jar "$JAVADIR"* 
 #$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
 
 echo Jar of source files created successfully.
@@ -257,7 +257,7 @@ echo Jar of source files created successfully.
 #--------------------------------
 
 #Compile test classes
-cd $BUGPRE/$TESTWD
+cd $BUGWD/$TESTWD
 
 echo Compiling test files...
 
@@ -281,7 +281,7 @@ echo Compilation of test java classes successful
 
 
 #Jar all the test class's
-jar cf $BUGPRE/"$LOWERCASEPACKAGE"AllTestClasses.jar "$JAVADIR"* 
+jar cf $BUGWD/"$LOWERCASEPACKAGE"AllTestClasses.jar "$JAVADIR"* 
 #$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
 
 echo Jar of tests created successfully.
@@ -293,7 +293,7 @@ echo Jar of tests created successfully.
 
 
 
-cd $BUGPRE/$WD
+cd $BUGWD/$WD
 
 #Create file to run defects4j compiile
 FILE="$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD/runCompile.sh
@@ -308,9 +308,9 @@ chmod 777 runCompile.sh
 
 
 #Create a file neg.tests
-touch $BUGPRE/neg.tests
+touch $BUGWD/neg.tests
 
-cd $BUGPRE
+cd $BUGWD
 
 PACKAGEDIR=${JAVADIR//"/"/"."}
 
@@ -339,9 +339,9 @@ EOM
 defects4j info -p $1 -v $2
 
 #Need to modify these three files
-gedit $BUGPRE/configDefects4j
-gedit $BUGPRE/neg.tests 
-#gedit $BUGPRE/pos.tests 
+gedit $BUGWD/configDefects4j
+gedit $BUGWD/neg.tests 
+#gedit $BUGWD/pos.tests 
 
 
 #PASSSINGTESTS="$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
@@ -356,10 +356,10 @@ gedit $BUGPRE/neg.tests
 #I then go to pos.tests, move the failing tests that appear in the "Root cause in triggering tests" in the console, to the neg.tests
 echo 
 echo Dear user: 
-echo 1. It has been created and opened a file called neg.tests in this directory: $BUGPRE, please insert the package of the failing tests that appear in the \"Root cause in triggering tests\" above in this console, and copy that into the file that has been opened.
+echo 1. It has been created and opened a file called neg.tests in this directory: $BUGWD, please insert the package of the failing tests that appear in the \"Root cause in triggering tests\" above in this console, and copy that into the file that has been opened.
 echo Example: org.apache.commons.math3.distribution.HypergeometricDistributionTest
 echo 
-echo 2. Now it has been created and opened a second file called configDefects4j in this location: $BUGPRE/ . Please go to that file and change the first line with the data in the section "List of modified sources" above in this console.
+echo 2. Now it has been created and opened a second file called configDefects4j in this location: $BUGWD/ . Please go to that file and change the first line with the data in the section "List of modified sources" above in this console.
 echo For example:
 echo targetClassName = org.apache.commons.math3.distribution.HypergeometricDistribution
 echo
