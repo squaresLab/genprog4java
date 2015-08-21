@@ -57,7 +57,7 @@ import clegoues.genprog4java.rep.JavaRepresentation;
 public class Configuration {
 	protected static Logger logger = Logger.getLogger(Configuration.class);
 
-	public static String sourceDir = "./";
+	//public static String sourceDir = "./";
 	public static String outputDir = "./";
 	public static String libs;
 	public static String sourceVersion = "1.6";
@@ -69,7 +69,7 @@ public class Configuration {
 	public static String jacocoPath = "";
 	public static long seed;
 	public static boolean doSanity = true;
-	public static String packageName;
+	//public static String packageName;
 	public static String defects4jFolder;
 	public static String defects4jBugFolder;
 	public static String workingDir;
@@ -94,11 +94,11 @@ public class Configuration {
 		if (prop.getProperty("outputDir") != null) {
 			outputDir = prop.getProperty("outputDir").trim();
 		}
-		packageName = prop.getProperty("packageName").trim();
+		//packageName = prop.getProperty("packageName").trim();
 		javaVM = prop.getProperty("javaVM").trim();
-		if (prop.getProperty("sourceDir") != null) {
-			sourceDir = prop.getProperty("sourceDir").trim();
-		}
+		//if (prop.getProperty("sourceDir") != null) {
+			//sourceDir = prop.getProperty("sourceDir").trim();
+		//}
 		javaRuntime = Runtime.getRuntime().toString();
 		libs = prop.getProperty("libs").trim();
 
@@ -156,14 +156,17 @@ public class Configuration {
 	public static void saveOrLoadTargetFiles(){
 		
 		String safeFolder = Configuration.outputDir  + File.separatorChar + "originalTargetFiles/";
-		String originFolder = Configuration.workingDir + File.separatorChar + Configuration.sourceDir + File.separatorChar;
-		String targetClassName = Configuration.targetClassNames.get(0) + Configuration.globalExtension;
 		
 		//If there is a variant already created in the output folder then it is not the first run
 		File variant0Folder = new File(Configuration.outputDir + "/variant0/");
 		if (variant0Folder.exists()){
-			//overwrite the targetClass with the one saved before
-			JavaRepresentation.runCommand("cp " + safeFolder + targetClassName + " " + originFolder + targetClassName);
+			
+			for( String s : Configuration.targetClassNames ){
+				String originFolder = Configuration.workingDir + File.separatorChar + (s.substring(0, s.lastIndexOf('.'))).replace('.', '/') + File.separatorChar;
+				String targetClassName = s.substring(s.lastIndexOf('.')+1) + Configuration.globalExtension;
+				//overwrite the targetClass with the one saved before
+				JavaRepresentation.runCommand("cp " + safeFolder + targetClassName + " " + originFolder + targetClassName);
+			}
 			
 		//else 	it is the first run
 		}else{
@@ -172,7 +175,13 @@ public class Configuration {
 			createFile.mkdir();
 			createFile = new File(safeFolder);
 			createFile.mkdir();
-			JavaRepresentation.runCommand("cp " + originFolder + targetClassName + " " + safeFolder + targetClassName);
+
+			for( String s : Configuration.targetClassNames ){
+				String originFolder = Configuration.workingDir + File.separatorChar + (s.substring(0, s.lastIndexOf('.'))).replace('.', '/') + File.separatorChar;
+				String targetClassName = s.substring(s.lastIndexOf('.')+1) + Configuration.globalExtension;
+				
+				JavaRepresentation.runCommand("cp " + originFolder + targetClassName + " " + safeFolder + targetClassName);
+			}	
 		}
 		
 	}
@@ -187,7 +196,7 @@ public class Configuration {
 			fis = new FileInputStream(filename);
 			BufferedReader br = new BufferedReader(new InputStreamReader(fis));
 			String line = null;
-			while ((line = br.readLine()) != null) {
+			while(!(line = br.readLine()).isEmpty() && (line != null)) {
 				returnValue.add(line.trim());
 				logger.info(line.trim());
 			}
