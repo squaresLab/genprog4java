@@ -642,7 +642,7 @@ public class JavaRepresentation extends
 					// fixme in astutils
 
 					BufferedWriter bw = new BufferedWriter(new FileWriter(
-							outDirName + File.separatorChar + sourceName
+							outDirName + File.separatorChar + sourceName.substring(sourceName.lastIndexOf('.')+1)
 									+ Configuration.globalExtension));
 					bw.write(program);
 					bw.flush();
