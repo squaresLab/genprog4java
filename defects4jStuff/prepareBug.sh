@@ -234,7 +234,7 @@ exec 3>&-
 
 
 #Compile the project
-javac @sources.txt
+#javac @sources.txt
 
 
 echo Compilation of main java classes successful
@@ -269,7 +269,7 @@ find -name "*.java" >&3
 echo $EXTRACLASSES >&3
 exec 3>&-
 
-javac @sources.txt
+#javac @sources.txt
 
 echo Compilation of test java classes successful
 #rm sources.txt
