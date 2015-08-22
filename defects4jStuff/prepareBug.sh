@@ -319,6 +319,11 @@ done
 # gets the unique test classes in the list
 UNIQTESTS=`cat tmp.txt | sort -n | uniq`
 
+if [[ -f neg.tests ]]
+then
+    rm neg.tests
+fi
+
 for FOO in `echo $UNIQTESTS`
 do
     echo $FOO >> $BUGWD/neg.tests
