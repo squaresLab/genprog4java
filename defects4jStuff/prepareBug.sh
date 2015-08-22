@@ -156,81 +156,10 @@ do
     popd
 done
 
-get_pos_tests () {
-    pushd $BUGWD
-    if [[ -f "print.xml" ]] 
-        then
-        rm "print.xml"
-    fi
-    echo "<project name=\"Ant test\">" >> print.xml
-    echo "<import file=\"$DEFECTS4J/framework/projects/defects4j.build.xml\"/>" >> print.xml
-    echo "<import file=\"$DEFECTS4J/framework/projects/Lang/Lang.build.xml\"/>" >> print.xml
-    echo "<echo message=\"Fileset is: \${toString:all.manual.tests}\"/>" >> print.xml
-    echo "</project>" >> print.xml
-    ANTOUTPUT=`ant -buildfile print.xml -Dd4j.home=$DEFECTS4J`
-    rm print.xml
-
-    postests=`echo $ANTOUTPUT | sed -n -e 's/.*Fileset is: //p'`
-    postests=`echo $postests | sed -n -e 's/\(.*\)\( BUILD SUCCESSFUL.*\)/\1/p'`
-    postests=`echo $postests | sed -e 's/;/ /g'`
-    if [[ -f pos.tests ]]
-    then
-        rm pos.tests
-    fi
-    for i in $postests
-    do
-        echo $i >> pos.tests
-    done
-    mv pos.tests $BUGWD
-}
-
-case "$OPTION" in
-"allHuman" )
-  get_pos_tests
-;;
-
-"oneHuman" )
-  echo "write in this file: "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the human made test in the bug info"
-  gedit "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
-
-;;
-
-"onlyRelevant" ) 
-        echo "not implemented yet."
-        ;;
-
-"oneGenerated" )
-  echo "write in this file: "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the generated test called NAMEOFTHETARGETFILEEvoSuite_Branch.java"
-  gedit "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
-
-;;
-
-esac
-
 #for the lang project copy a fixed file
 if [ $LOWERCASEPACKAGE = "lang" ]; then
 cp "$3"defects4jStuff/Utilities/EntityArrays.java $BUGWD/src/main/java/org/apache/commons/lang3/text/translate/
 fi
-
-#cd "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/
-
-#create new list of Passing tests 
-#touch $BUGWD/passingTests.tests
-
-#go through all the entries of the file and the test passes insert it in the passing list (sanitize out of scope tests)
-#while read e; do
-#  echo $e
-#java -cp .:"$4"ExamplesCheckedOut/#Utilities/"$LOWERCASEPACKAGE"AllSourceClasses.jar:"$4"ExamplesCheckedOut/#Utilities/"$LOWERCASEPACKAGE"AllTestClasses.jar:"$GENPROG/lib/#junittestrunner.jar:"$GENPROG/lib/commons-io-1.4.jar:/home/mau/#Research/defects4j/framework/projects/lib/junit-4.11.jar org.junit.runner.JUnitCore $e
-
-#if the test passes, added to the passing list
-#if [ $? -eq 0 ]
-#then
-#    echo $e >> $BUGWD/#passingTests.tests
-#fi
-#done < pos.tests
-
-#replace the list with all the tests, with the one with just the passing tests
-#mv $BUGWD/passingTests.tests "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
 
 
 #UNCOMMENT!!!!!!!!!
@@ -325,8 +254,6 @@ chmod 777 runCompile.sh
 
 
 
-#Create a file neg.tests
-touch $BUGWD/neg.tests
 
 cd $BUGWD
 
@@ -397,11 +324,72 @@ do
     echo $FOO >> $BUGWD/neg.tests
 done
 
+# get positive tests
+case "$OPTION" in
+"allHuman" )
+    pushd $BUGWD
+    if [[ -f "print.xml" ]] 
+        then
+        rm "print.xml"
+    fi
+    echo "<project name=\"Ant test\">" >> print.xml
+    echo "<import file=\"$DEFECTS4J/framework/projects/defects4j.build.xml\"/>" >> print.xml
+    echo "<import file=\"$DEFECTS4J/framework/projects/Lang/Lang.build.xml\"/>" >> print.xml
+    echo "<echo message=\"Fileset is: \${toString:all.manual.tests}\"/>" >> print.xml
+    echo "</project>" >> print.xml
+    ANTOUTPUT=`ant -buildfile print.xml -Dd4j.home=$DEFECTS4J`
+    rm print.xml
+
+    postests=`echo $ANTOUTPUT | sed -n -e 's/.*Fileset is: //p'`
+    postests=`echo $postests | sed -n -e 's/\(.*\)\( BUILD SUCCESSFUL.*\)/\1/p'`
+    postests=`echo $postests | sed -e 's/;/ /g'`
+    if [[ -f pos.tests ]]
+    then
+        rm pos.tests
+    fi
+    for i in $postests
+    do
+        echo $i >> pos.tests
+    done
+
+    for i in $UNIQTESTS
+    do
+        echo $i
+        grep -v "$i" pos.tests > tmp.txt
+        mv tmp.txt pos.tests
+    done
+  popd
+;;
+
+"oneHuman" )
+  echo "write in this file: "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the human made test in the bug info"
+  gedit "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
+
+;;
+
+"onlyRelevant" ) 
+        echo "not implemented yet."
+        ;;
+
+"oneGenerated" )
+  echo "write in this file: "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the generated test called NAMEOFTHETARGETFILEEvoSuite_Branch.java"
+  gedit "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
+
+;;
+
+esac
+
+# get the class names to be repaired
+
 JUSTSOURCE=`echo $INFO | sed -n -e 's/.*List of modified sources: - //p'`
 
 JUSTSOURCE=`echo $JUSTSOURCE | sed -e 's/ - / /g'`
 JUSTSOURCE=`echo $JUSTSOURCE | cut -d '-' -f1`
-rm tmp.txt
+
+if [[ -f tmp.txt ]]
+then
+    rm tmp.txt
+fi
 
 for foo in `echo $JUSTSOURCE`
 do
@@ -426,7 +414,5 @@ else
     rm tmp.txt
     echo "targetClassName = "$UNIQFILES >> $BUGWD/configDefects4j
 fi
-
-
 
 
