@@ -156,16 +156,56 @@ do
     popd
 done
 
-if [ "$5" = "allHuman" ]; then
-  #copy the standard list of all tests to the current bug directory
-  cp "$4"ExamplesCheckedOut/Utilities/"$LOWERCASEPACKAGE"Pos.tests "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
-elif [ "$5" = "oneHuman" ]; then
-  echo write in this file: "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the human made test in the bug info
+get_pos_tests () {
+    pushd $BUGWD
+    if [[ -f "print.xml" ]] 
+        then
+        rm "print.xml"
+    fi
+    echo "<project name=\"Ant test\">" >> print.xml
+    echo "<import file=\"$DEFECTS4J/framework/projects/defects4j.build.xml\"/>" >> print.xml
+    echo "<import file=\"$DEFECTS4J/framework/projects/Lang/Lang.build.xml\"/>" >> print.xml
+    echo "<echo message=\"Fileset is: \${toString:all.manual.tests}\"/>" >> print.xml
+    echo "</project>" >> print.xml
+    ANTOUTPUT=`ant -buildfile print.xml -Dd4j.home=$DEFECTS4J`
+    rm print.xml
+
+    postests=`echo $ANTOUTPUT | sed -n -e 's/.*Fileset is: //p'`
+    postests=`echo $postests | sed -n -e 's/\(.*\)\( BUILD SUCCESSFUL.*\)/\1/p'`
+    postests=`echo $postests | sed -e 's/;/ /g'`
+    if [[ -f pos.tests ]]
+    then
+        rm pos.tests
+    fi
+    for i in $postests
+    do
+        echo $i >> pos.tests
+    done
+    mv pos.tests $BUGWD
+}
+
+case "$OPTION" in
+"allHuman" )
+  get_pos_tests
+;;
+
+"oneHuman" )
+  echo "write in this file: "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the human made test in the bug info"
   gedit "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
-elif [ "$5" = "oneGenerated" ]; then
-  echo write in this file: "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the generated test called NAMEOFTHETARGETFILEEvoSuite_Branch.java
+
+;;
+
+"onlyRelevant" ) 
+        echo "not implemented yet."
+        ;;
+
+"oneGenerated" )
+  echo "write in this file: "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the generated test called NAMEOFTHETARGETFILEEvoSuite_Branch.java"
   gedit "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
-fi
+
+;;
+
+esac
 
 #for the lang project copy a fixed file
 if [ $LOWERCASEPACKAGE = "lang" ]; then
