@@ -701,6 +701,7 @@ public class JavaRepresentation extends
 	}
 	
 	public static boolean runCommand(String commandToRun){
+		Logger logger = Logger.getLogger(JavaRepresentation.class);
 		boolean compilationSuccessful = true;
 		String s = null;
 	
@@ -716,26 +717,31 @@ public class JavaRepresentation extends
                  InputStreamReader(p.getErrorStream()));
  
             // read the output from the command
-            System.out.println("Here is the standard output of the command:\n");
+
+            logger.info("Here is the standard output of the command:\n");
             while ((s = stdInput.readLine()) != null) {
                 System.out.println(s);
             }
              
             // read any errors from the attempted                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm          mmmmm,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,                      mn     command
-            System.out.println("Here is the standard error of the command (if any):\n");
-            while ((s = stdError.readLine()) != null) {
-                System.out.println(s);
-                compilationSuccessful = false;
+            logger.info("Here is the standard error of the command (if any):\n");
+            while ((s = stdError.readLine()) != null) 
+//            if(p.exitValue() != 0)
+        	{
+            	logger.error(s);
+            	compilationSuccessful = false;
             }
-            if (!compilationSuccessful){
+
+            if (!compilationSuccessful)
+            {
             	return false;
             }
              
             //System.exit(0);
         }
         catch (IOException e) {
-            System.out.println("Exception happened with the command: ");
-            e.printStackTrace();
+            logger.error("Exception happened with the command: ");
+            logger.error(e.getStackTrace());
             return false;
             //System.exit(-1);
         }	
