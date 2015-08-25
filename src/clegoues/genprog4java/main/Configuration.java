@@ -74,7 +74,8 @@ public class Configuration {
 	public static String defects4jBugFolder;
 	public static String workingDir;
 	public static Random randomizer = null;
-
+	public static String compileScript = "/bin/sh runCompile.sh";
+	public static String testScript = "/bin/sh runTest.sh";
 	public Configuration() {
 	}
 
@@ -90,6 +91,12 @@ public class Configuration {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+		if(prop.getProperty("compile") != null) {
+			compileScript = prop.getProperty("compile").trim();
+		}
+		if(prop.getProperty("testScript") != null) {
+			testScript = prop.getProperty("testScript").trim();
 		}
 		if (prop.getProperty("outputDir") != null) {
 			outputDir = prop.getProperty("outputDir").trim();
