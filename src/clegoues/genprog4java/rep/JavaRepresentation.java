@@ -115,7 +115,7 @@ import clegoues.genprog4java.util.Pair;
 
 public class JavaRepresentation extends
 		FaultLocRepresentation<JavaEditOperation> {
-	protected Logger logger = Logger.getLogger(JavaRepresentation.class);
+	protected static Logger logger = Logger.getLogger(JavaRepresentation.class);
 
 	private static HashMap<Integer, JavaStatement> codeBank = new HashMap<Integer, JavaStatement>();
 	private static HashMap<Integer, JavaStatement> base = new HashMap<Integer, JavaStatement>();
@@ -245,14 +245,15 @@ public class JavaRepresentation extends
 		// apparently names and types and scopes are visited here below in
 		// the calls to ASTUtils
 
-		String fname= className.replace('.', '/') + ".java";
+		String fname= Configuration.workingDir + "/" + className.replace('.', '/') + ".java";
 
 		// we can assume that that's what Configuration.globalExtension is,
 		// because we're in JavaRepresentation
 		ScopeInfo scopeInfo = new ScopeInfo();
 		JavaParser myParser = new JavaParser(scopeInfo);
 		// originalSource entire class file written as a string
-		String source = FileUtils.readFileToString(new File(fname));
+		logger.info("opening: " + fname);
+		String source = FileUtils.readFileToString(new File( fname));
 		JavaRepresentation.originalSource.put(className, source);
 
 		myParser.parse(fname, Configuration.libs.split(File.pathSeparator));
@@ -499,6 +500,7 @@ public class JavaRepresentation extends
 		// hacks on StackOverflow, but for the time being I just want something
 		// that works at all
 		// rather than a perfect implementation. One thing at a time.
+		
 		CommandLine command = CommandLine.parse(Configuration.javaVM);
 		String outputDir = "";
 
@@ -548,7 +550,6 @@ public class JavaRepresentation extends
 		command.addArgument(test.toString());
 		logger.info("Command: " + command.toString());
 		return command;
-
 	}
 
 	@Override
@@ -687,7 +688,7 @@ public class JavaRepresentation extends
 			//System.out.println(System.getProperty("user.dir"));
 			//runCommand(Configuration.defects4jFolder +"defects4j compile");
 			
-  			if (!runCommand("/bin/sh runCompile.sh")) {
+  			if (!runCommand(Configuration.compileScript)) {
 				logger.error(compilerErrorWriter.toString());
 				compilerErrorWriter.flush();
 				return false;
@@ -701,61 +702,47 @@ public class JavaRepresentation extends
 	}
 	
 	public static boolean runCommand(String commandToRun){
-		boolean compilationSuccessful = true;
-		String s = null;
-	
         try {
         	
             // using the Runtime exec method:
+        	logger.info("Running command: " + commandToRun);
             Process p = Runtime.getRuntime().exec(commandToRun);
-             
             BufferedReader stdInput = new BufferedReader(new
-                 InputStreamReader(p.getInputStream()));
- 
-            BufferedReader stdError = new BufferedReader(new
-                 InputStreamReader(p.getErrorStream()));
- 
+                    InputStreamReader(p.getInputStream()));
+    
+               BufferedReader stdError = new BufferedReader(new
+                    InputStreamReader(p.getErrorStream()));
+               String s = "";
+
+               System.out.println("Here is the standard output of the command:\n");
+               while ((s = stdInput.readLine()) != null) {
+                   System.out.println(s);
+               }
+               
+                
+               // read any errors from the attempted                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm          mmmmm,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,                      mn     command
+               System.out.println("Here is the standard error of the command (if any):\n");
+               while ((s = stdError.readLine()) != null) {
+                   System.out.println(s);
+               }
             // read the output from the command
-            System.out.println("Here is the standard output of the command:\n");
-            while ((s = stdInput.readLine()) != null) {
-                System.out.println(s);
-            }
-             
-            // read any errors from the attempted                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm          mmmmm,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,                      mn     command
-            System.out.println("Here is the standard error of the command (if any):\n");
-            while ((s = stdError.readLine()) != null) {
-                System.out.println(s);
-                compilationSuccessful = false;
-            }
-            if (!compilationSuccessful){
-            	return false;
-            }
-             
-            //System.exit(0);
+            // CLG to mau: you can't rely on output going to log/error to indicate 
+            // process success or failure.  Instead, check the actual exit status of the process.
+            // 0 indicates normal execution, non-zero indicates error, under normal circumstances
+            int status = p.waitFor();
+            p.destroy();
+            return status == 0;
         }
         catch (IOException e) {
-            System.out.println("Exception happened with the command: ");
+            logger.error("Exception happened with the command: ");
             e.printStackTrace();
             return false;
-            //System.exit(-1);
-        }	
-        return true;
+        } catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}	
 	}
-	/*
-	public static boolean setCurrentDirectory(String directory_name)
-    {
-        boolean result = false;  // Boolean indicating whether directory was set
-        File    directory;       // Desired current working directory
-
-        directory = new File(directory_name).getAbsoluteFile();
-        if (directory.exists() || directory.mkdirs())
-        {
-            result = (System.setProperty("user.dir", directory.getAbsolutePath()) != null);
-        }
-
-        return result;
-    }
-*/
 
 	
 	public JavaRepresentation copy() {

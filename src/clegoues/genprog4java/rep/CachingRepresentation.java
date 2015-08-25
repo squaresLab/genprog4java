@@ -33,8 +33,6 @@
 
 package clegoues.genprog4java.rep;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,10 +40,6 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.exec.ExecuteWatchdog;
-import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.fitness.Fitness;
@@ -327,16 +321,19 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 
 	protected FitnessValue internalTestCase(String sanityExename,
 			String sanityFilename, TestCase thisTest) {
+		FitnessValue posFit = new FitnessValue();
+
+		if(JavaRepresentation.runCommand(Configuration.testScript + " " + thisTest.toString().replace("/", "."))) {
+			logger.info("passed, by some definition");
+			return posFit;
+		} else {
+			logger.info("failed, by some definition");
+			return posFit;
+		}
+		/*
 		CommandLine command = this.internalTestCaseCommand(sanityExename,
 				sanityFilename, thisTest);
-		// System.out.println("command: " + command.toString());
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);// Mau had to
-																// change this
-																// to be able to
-																// run longer
-																// tests. It was
-																// on 6000
-																// originally
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");
 		executor.setWorkingDirectory(new File(workingDirectory));
@@ -369,7 +366,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 					// all exceptions is really tedious.
 				}
 		}
-		return posFit;
+		return posFit;*/
 	}
 
 	public void cleanup() {

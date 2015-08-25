@@ -279,19 +279,6 @@ defects4jFolder = $4framework/bin/
 defects4jBugFolder = $4ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy
 EOM
 
-
-
-#PASSSINGTESTS="$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
-
-#if [[ -s $PASSSINGTESTS ]] ; then
-#echo "Passing tests file has data, all good :D"
-#else
-#echo "ERROR!!! $PASSSINGTESTS is empty, means that all unit tests failed, so the file of the positive tests at $PASSSINGTESTS is empty. ERROR!!!"
-#fi ;
-
-
-#I then go to pos.tests, move the failing tests that appear in the "Root cause in triggering tests" in the console, to the neg.tests
-
 # programmatically get passing and failing tests as well as files
 #info about the bug
 INFO=`defects4j info -p $PACKAGE -v $BUG`
