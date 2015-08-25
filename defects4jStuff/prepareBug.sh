@@ -352,7 +352,7 @@ case "$OPTION" in
     fi
     for i in $postests
     do
-        echo $i >> pos.tests
+        echo "$i" | tr '/' '.' | rev | cut -c 6- | rev  >> pos.tests
     done
 
     for i in $UNIQTESTS
