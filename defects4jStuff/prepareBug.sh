@@ -101,17 +101,18 @@ $BUGWD/lib/junit.jar:$BUGWD/lib/protobuf-java.jar"
         # defects4j/projects...but I don't have a defects4j/projects, only a
         # defects4j/framework/projects.  Are you sure about these paths?  Please check
         # for me.
+	# Mau's response: Yeap, looks like a bad path. Fixed now.
         LANGLIBS="$GENPROG/lib/junittestrunner.jar:$GENPROG/lib/commons-io-1.4.jar:\
 $DEFECTS4J/framework/projects/lib/junit-4.11.jar:\
-$DEFECTS4J/projects/Lang/lib/easymock.jar:\
-$DEFECTS4J/projects/Lang/lib/asm.jar:\
-$DEFECTS4J/projects/Lang/lib/cglib.jar:\
+$DEFECTS4J/framework/projects/Lang/lib/easymock.jar:\
+$DEFECTS4J/framework/projects/Lang/lib/asm.jar:\
+$DEFECTS4J/framework/projects/Lang/lib/cglib.jar:\
 $DEFECTS4J/framework/projects/lib/easymock-3.3.1.jar"
         CONFIGLIBS=$CONFIGLIBS:$LANGLIBS
         LIBSTESTS="-cp \".:$SRCJAR:\
 $GENPROG/lib/junittestrunner.jar:$GENPROG/lib/commons-io-1.4.jar:\
 $DEFECTS4J/framework/projects/lib/junit-4.11.jar:\
-$DEFECTS4J/projects/Lang/lib/easymock.jar:\
+$DEFECTS4J/framework/projects/Lang/lib/easymock.jar:\
 $DEFECTS4J/framework/projects/lib/easymock-3.3.1.jar\" "
         LIBSMAIN=""
         ;;
@@ -179,6 +180,8 @@ fi
 # CLAIRE TO MAU: I thought we didn't have to do this any more, no?
 # Anyway I'm commenting it out b/c it doesn't work on my machine and I don't
 # think we need it, so debugging seems like a waste of time...
+# Mau's response: I think we don't need to do it anymore, but I think this might be the cause for the tests not passing.
+
 #Go to the bug folder
 # cd "$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD/
 # 
