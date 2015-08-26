@@ -1,5 +1,5 @@
 #!/bin/bash
-# 1st param is the package in upper case (ex: Lang, Chart, Closure, Math, Time)
+# 1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)
 # 2nd param is the bug number (ex: 1,2,3,4,...)
 # 3rd param is the folder where the genprog project is (ex: "/home/mau/Research/genprog4java/" )
 # 4td param is the folder where defects4j is installed (ex: "/home/mau/Research/defects4j/" )
@@ -23,25 +23,25 @@
 # CLG thinks it's nice practice to rename the vars taken from the user to
 # something more readable that corresponds to how they're used.  Makes the
 # script easier to read.
-PACKAGE="$1"
-BUG="$2"
-GENPROG="$3"
-DEFECTS4J="$4"
+PROJECT="$1"
+BUGNUMBER="$2"
+GENPROGDIR="$3"
+DEFECTS4JDIR="$4"
 OPTION="$5"
 
-PARENTDIR=$DEFECTS4J"/ExamplesCheckedOut"
+PARENTDIR=$DEFECTS4JDIR"/ExamplesCheckedOut"
 
 #copy these files to the source control
 
 mkdir -p $PARENTDIR
-cp -r $GENPROG"/defects4jStuff/Utilities" $PARENTDIR
+cp -r $GENPROGDIR"/defects4jStuff/Utilities" $PARENTDIR
 
 #This transforms the first parameter to lower case. Ex: lang, chart, closure, math or time
 # CLG changed the way you did this (which was fine for Bash 4!) so it's a bit more platform-independent
-LOWERCASEPACKAGE=`echo $PACKAGE | tr '[:upper:]' '[:lower:]'`
+LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 
 # directory with the checked out buggy project
-BUGWD=$PARENTDIR"/"$LOWERCASEPACKAGE"$BUG"Buggy
+BUGWD=$PARENTDIR"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
 
 #Specific variables per every project
 #TESTWD is the address from the root to the address where JAVADIR starts, for the TEST files 
@@ -57,7 +57,7 @@ TESTJAR=$BUGWD"/"$LOWERCASEPACKAGE"AllTestClasses.jar"
 
 # Common genprog libs: junit test runner and the like
 
-GENLIBS=$GENPROG"/lib/junittestrunner.jar:"$GENPROG"/lib/commons-io-1.4.jar:"$GENPROG"/lib/junit-4.10.jar"
+GENLIBS=$GENPROGDIR"/lib/junittestrunner.jar:"$GENPROGDIR"/lib/commons-io-1.4.jar:"$GENPROGDIR"/lib/junit-4.10.jar"
 
 # all libs for a package need at least the source jar, test jar, and generic genprog libs
 CONFIGLIBS=$SRCJAR":"$TESTJAR
@@ -71,6 +71,9 @@ case "$LOWERCASEPACKAGE" in
         CHARTLIBS="$BUGWD/lib/itext-2.0.6.jar:\
 $BUGWD/lib/servlet.jar:\
 $BUGWD/lib/junit.jar"
+
+	SRCFOLDER=build
+	TESTFOLDER=build-tests
         
         CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$CHARTLIBS
         LIBSTESTS="-cp \".:$SRCJAR:$GENLIBS:$CHARTLIBS\" "
@@ -86,6 +89,9 @@ $BUGWD/lib/args4j.jar:$BUGWD/lib/caja-r4314.jar:\
 $BUGWD/lib/guava.jar:$BUGWD/lib/jarjar.jar:\
 $BUGWD/lib/json.jar:$BUGWD/lib/jsr305.jar:\
 $BUGWD/lib/junit.jar:$BUGWD/lib/protobuf-java.jar"
+
+	SRCFOLDER=build/classes
+	TESTFOLDER=build/test
         
         CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$CLOSURELIBS
 
@@ -97,62 +103,67 @@ $BUGWD/lib/junit.jar:$BUGWD/lib/protobuf-java.jar"
         TESTWD=src/test/java
         WD=src/main/java
         JAVADIR=org/apache/commons/lang3 
-        # CLAIRE TO MAU: you alternate some of these paths between defects4j/framework/projects and 
-        # defects4j/projects...but I don't have a defects4j/projects, only a
-        # defects4j/framework/projects.  Are you sure about these paths?  Please check
-        # for me.
-	# Mau's response: Yeap, looks like a bad path. Fixed now.
-        LANGLIBS="$GENPROG/lib/junittestrunner.jar:$GENPROG/lib/commons-io-1.4.jar:\
-$DEFECTS4J/framework/projects/lib/junit-4.11.jar:\
-$DEFECTS4J/framework/projects/Lang/lib/easymock.jar:\
-$DEFECTS4J/framework/projects/Lang/lib/asm.jar:\
-$DEFECTS4J/framework/projects/Lang/lib/cglib.jar:\
-$DEFECTS4J/framework/projects/lib/easymock-3.3.1.jar"
+
+        LANGLIBS="$GENPROGDIR/lib/junittestrunner.jar:$GENPROGDIR/lib/commons-io-1.4.jar:\
+$DEFECTS4JDIR/framework/projects/lib/junit-4.11.jar:\
+$DEFECTS4JDIR/framework/projects/Lang/lib/easymock.jar:\
+$DEFECTS4JDIR/framework/projects/Lang/lib/asm.jar:\
+$DEFECTS4JDIR/framework/projects/Lang/lib/cglib.jar:\
+$DEFECTS4JDIR/framework/projects/lib/easymock-3.3.1.jar"
         CONFIGLIBS=$CONFIGLIBS:$LANGLIBS
         LIBSTESTS="-cp \".:$SRCJAR:\
-$GENPROG/lib/junittestrunner.jar:$GENPROG/lib/commons-io-1.4.jar:\
-$DEFECTS4J/framework/projects/lib/junit-4.11.jar:\
-$DEFECTS4J/framework/projects/Lang/lib/easymock.jar:\
-$DEFECTS4J/framework/projects/lib/easymock-3.3.1.jar\" "
+$GENPROGDIR/lib/junittestrunner.jar:$GENPROGDIR/lib/commons-io-1.4.jar:\
+$DEFECTS4JDIR/framework/projects/lib/junit-4.11.jar:\
+$DEFECTS4JDIR/framework/projects/Lang/lib/easymock.jar:\
+$DEFECTS4JDIR/framework/projects/lib/easymock-3.3.1.jar\" "
         LIBSMAIN=""
+
+	SRCFOLDER=target/classes
+	TESTFOLDER=target/tests
         ;;
 
 'math')
         TESTWD=src/test/java
         WD=src/main/java
         JAVADIR=org/apache/commons/math3
-        MATHLIBS=$DEFECTS4J"/framework/projects/Math/lib/commons-discovery-0.5.jar"
+        MATHLIBS=$DEFECTS4JDIR"/framework/projects/Math/lib/commons-discovery-0.5.jar"
         CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$MATHLIBS
         LIBSTESTS="-cp \".:$SRCJAR:$GENLIBS:$MATHLIBS\" "
         LIBSMAIN=""
+
+	SRCFOLDER=target/classes
+	TESTFOLDER=target/test-classes
         ;;
 
 'time')
         TESTWD=src/test/java
         WD=src/main/java
         JAVADIR=org/joda/time
-        TIMELIBS=$DEFECTS4J"/framework/projects/Time/lib/joda-convert-1.2.jar:"$GENLIBS":"$DEFECTS4J/"framework/projects/lib/easymock-3.3.1.jar"
+        TIMELIBS=$DEFECTS4JDIR"/framework/projects/Time/lib/joda-convert-1.2.jar:"$GENLIBS":"$DEFECTS4JDIR/"framework/projects/lib/easymock-3.3.1.jar"
         CONFIGLIBS=$CONFIGLIBS":"$TIMELIBS
 
+	SRCFOLDER=target/classes
+	TESTFOLDER=target/test-classes
+
         LIBSTESTS="-cp \".:$SRCJAR:$TIMELIBS\" "
-        LIBSMAIN="-cp \".:$DEFECTS4J/framework/projects/Time/lib/joda-convert-1.2.jar\" "
+        LIBSMAIN="-cp \".:$DEFECTS4JDIR/framework/projects/Time/lib/joda-convert-1.2.jar\" "
         ;;
 esac
 
 #Add the path of defects4j so the defects4j's commands run 
-export PATH=$PATH:"$DEFECTS4J"/framework/bin
+export PATH=$PATH:"$DEFECTS4JDIR"/framework/bin
 
 #Checkout the buggy version of the code
-defects4j checkout -p $1 -v "$BUG"b -w $BUGWD
+defects4j checkout -p $1 -v "$BUGNUMBER"b -w $BUGWD
 
 #Checkout the fixed version of the code to make the seccond test suite
-defects4j checkout -p $1 -v "$BUG"f -w "$DEFECTS4J/"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Fixed
+defects4j checkout -p $1 -v "$BUGNUMBER"f -w "$DEFECTS4JDIR/"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Fixed
 
 
 #Compile the buggy and fixed code
 for dir in Buggy Fixed
 do
-    pushd $PARENTDIR"/"$LOWERCASEPACKAGE$BUG$dir
+    pushd $PARENTDIR"/"$LOWERCASEPACKAGE$BUGNUMBER$dir
     defects4j compile
     popd
 done
@@ -206,6 +217,19 @@ fi
 # 
 # 
 # 
+
+
+
+#where the .class files are
+ #DIROFCLASSFILES=org/$JAVADIR
+ 
+ 
+ #Jar all the .class's
+cd "$DEFECTS4JDIR"ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$SRCFOLDER"/ 
+jar cf "$DEFECTS4JDIR"ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar "$JAVADIR"/* 
+ #$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
+ 
+ echo Jar of source files created successfully.
 # 
 
 # Same here:
@@ -228,6 +252,18 @@ fi
 # 
 # echo Compilation of test java classes successful
 # #rm sources.txt
+
+
+ #cd ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/src/test/java
+ 
+ #Jar all the test class's
+cd "$DEFECTS4JDIR"ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$TESTFOLDER"/
+jar cf "$DEFECTS4JDIR"ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllTestClasses.jar "$JAVADIR"/* 
+
+ #$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
+ 
+ echo Jar of test files created successfully.
+
 
 #javac *.java */*.java */*/*.java */*/*/*.java */*/*/*/*.java -Xlint:unchecked
 
@@ -297,7 +333,7 @@ EOM
 
 # programmatically get passing and failing tests as well as files
 #info about the bug
-INFO=`defects4j info -p $PACKAGE -v $BUG`
+INFO=`defects4j info -p $PROJECT -v $BUGNUMBER`
 
 # gets the content starting at the list of tests
 JUSTTEST=`echo $INFO | sed -n -e 's/.*Root cause in triggering tests: - //p'`
@@ -336,11 +372,11 @@ case "$OPTION" in
         rm "print.xml"
     fi
     echo "<project name=\"Ant test\">" >> print.xml
-    echo "<import file=\"$DEFECTS4J/framework/projects/defects4j.build.xml\"/>" >> print.xml
-    echo "<import file=\"$DEFECTS4J/framework/projects/Lang/Lang.build.xml\"/>" >> print.xml
+    echo "<import file=\"$DEFECTS4JDIR/framework/projects/defects4j.build.xml\"/>" >> print.xml
+    echo "<import file=\"$DEFECTS4JDIR/framework/projects/"$PROJECT"/"$PROJECT".build.xml\"/>" >> print.xml
     echo "<echo message=\"Fileset is: \${toString:all.manual.tests}\"/>" >> print.xml
     echo "</project>" >> print.xml
-    ANTOUTPUT=`ant -buildfile print.xml -Dd4j.home=$DEFECTS4J`
+    ANTOUTPUT=`ant -buildfile print.xml -Dd4j.home=$DEFECTS4JDIR`
     rm print.xml
 
     postests=`echo $ANTOUTPUT | sed -n -e 's/.*Fileset is: //p'`
