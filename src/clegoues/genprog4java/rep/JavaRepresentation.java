@@ -177,7 +177,9 @@ public class JavaRepresentation extends
 				.entrySet()) {
 			String targetClassName = ele.getKey();
 			InputStream targetClass = new FileInputStream(new File(
-					targetClassName.replace('.', '/')
+					Configuration.defects4jBugFolder + "/"
+					+ Configuration.classSourceFolder + "/"
+					+ targetClassName.replace('.', '/')
 					+ ".class"
 					/*
 					Configuration.outputDir + File.separator
@@ -726,14 +728,20 @@ public class JavaRepresentation extends
             // read any errors from the attempted                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm          mmmmm,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,                      mn     command
             logger.info("Here is the standard error of the command (if any):\n");
             while ((s = stdError.readLine()) != null) 
-//            if(p.exitValue() != 0)
         	{
             	logger.error(s);
-            	compilationSuccessful = false;
             }
-
-            if (!compilationSuccessful)
+            
+            int retValue = 0;
+            try {
+            	retValue = p.waitFor();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+            
+            if(retValue != 0)
             {
+            	logger.error("Exit value of the command was different from 0");
             	return false;
             }
              
