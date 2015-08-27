@@ -74,6 +74,8 @@ public class Configuration {
 	public static String defects4jBugFolder;
 	public static String workingDir;
 	public static Random randomizer = null;
+	public static String classTestFolder;
+	public static String classSourceFolder;
 
 	public Configuration() {
 	}
@@ -132,6 +134,12 @@ public class Configuration {
 		}
 		if (prop.getProperty("workingDir") != null) {
 			workingDir = prop.getProperty("workingDir").trim();
+		}
+		if (prop.getProperty("classSourceFolder") != null) {
+			classSourceFolder = prop.getProperty("classSourceFolder").trim();
+		}
+		if (prop.getProperty("classTestFolder") != null) {
+			classTestFolder = prop.getProperty("classTestFolder").trim();
 		}
 		
 		try {
