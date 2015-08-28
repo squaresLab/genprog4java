@@ -313,7 +313,7 @@ sanity = yes
 regenPaths
 positiveTests = $4ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/pos.tests
 negativeTests = $4ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/neg.tests
-jacocoPath = $3tests/mathTest/lib/jacocoagent.jar
+jacocoPath = $3lib/jacocoagent.jar
 defects4jFolder = $4framework/bin/
 defects4jBugFolder = $4ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy
 classTestFolder = $TESTFOLDER
