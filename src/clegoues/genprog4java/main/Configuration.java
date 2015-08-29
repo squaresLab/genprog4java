@@ -203,10 +203,11 @@ public class Configuration {
 			FileInputStream fis;
 			fis = new FileInputStream(filename);
 			BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-			String line = null;
-			while(!(line = br.readLine()).isEmpty() && (line != null)) {
+			String line = br.readLine();
+			while((line != null) && !line.isEmpty()) {
 				returnValue.add(line.trim());
 				logger.info(line.trim());
+				line = br.readLine();
 			}
 
 			br.close();

@@ -386,7 +386,7 @@ case "$OPTION" in
     echo "<echo message=\"Fileset is: \${toString:all.manual.tests}\"/>" >> print.xml
     echo "</project>" >> print.xml
     ANTOUTPUT=`ant -buildfile print.xml -Dd4j.home=$DEFECTS4JDIR`
-    #rm print.xml
+    rm print.xml
 
     postests=`echo $ANTOUTPUT | sed -n -e 's/.*Fileset is: //p'`
     postests=`echo $postests | sed -n -e 's/\(.*\)\( BUILD SUCCESSFUL.*\)/\1/p'`
