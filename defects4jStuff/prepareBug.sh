@@ -88,12 +88,19 @@ $BUGWD/lib/junit.jar"
 $BUGWD/lib/args4j.jar:$BUGWD/lib/caja-r4314.jar:\
 $BUGWD/lib/guava.jar:$BUGWD/lib/jarjar.jar:\
 $BUGWD/lib/json.jar:$BUGWD/lib/jsr305.jar:\
-$BUGWD/lib/junit.jar:$BUGWD/lib/protobuf-java.jar"
+$BUGWD/lib/junit.jar:$BUGWD/lib/protobuf-java.jar:\
+$BUGWD/build/lib/rhino.jar:"
 
 	SRCFOLDER=build/classes
 	TESTFOLDER=build/test
         
         CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$CLOSURELIBS
+
+
+ #LIBSTESTS="-cp \".:"$3"genprog4java/tests/mathTest/lib/junittestrunner.jar:"$3"genprog4java/tests/mathTest/lib/commons-io-1.4.jar:"$3"genprog4java/tests/mathTest/lib/junit-4.10.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/ant.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/ant-launcher.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/args4j.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/caja-r4314.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/guava.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/jarjar.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/json.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/jsr305.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/junit.jar:"$3"defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/protobuf-java.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/build/lib/rhino.jar\" "
+#Add a comment to this line
+#LIBSMAIN="-cp \".:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/ant.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/ant-launcher.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/args4j.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/caja-r4313.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/guava.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/jarjar.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/json.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/jsr305.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/junit.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/lib/protobuf-java.jar:"$3"/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/build/lib/rhino.jar\" "
+ 
 
         LIBSTESTS="-cp \".:$SRCJAR:$GENLIBS:$CLOSURELIBS\" "
         LIBSMAIN="-cp \".:$CLOSURELIBS\" "
@@ -379,18 +386,24 @@ case "$OPTION" in
     echo "<echo message=\"Fileset is: \${toString:all.manual.tests}\"/>" >> print.xml
     echo "</project>" >> print.xml
     ANTOUTPUT=`ant -buildfile print.xml -Dd4j.home=$DEFECTS4JDIR`
-    rm print.xml
+    #rm print.xml
 
     postests=`echo $ANTOUTPUT | sed -n -e 's/.*Fileset is: //p'`
     postests=`echo $postests | sed -n -e 's/\(.*\)\( BUILD SUCCESSFUL.*\)/\1/p'`
     postests=`echo $postests | sed -e 's/;/ /g'`
+
+    suffix1=".java"
+    suffix2=".class"
+
     if [[ -f pos.tests ]]
     then
         rm pos.tests
     fi
     for i in $postests
     do
-        echo "$i" | tr '/' '.' | rev | cut -c 6- | rev  >> pos.tests
+        i=`echo "$i" | tr '/' '.'`
+        i=`echo $i | sed "s/$suffix1$//" | sed "s/$suffix2$//"` 
+	echo "$i" >> pos.tests
     done
 
     for i in $UNIQTESTS
@@ -456,4 +469,6 @@ else
     echo "targetClassName = "$UNIQFILES >> $BUGWD/configDefects4j
 fi
 
+echo "This is the working directory: "
+echo $4ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD
 
