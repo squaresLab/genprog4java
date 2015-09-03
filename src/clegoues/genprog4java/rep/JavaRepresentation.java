@@ -245,7 +245,7 @@ public class JavaRepresentation extends
 		// apparently names and types and scopes are visited here below in
 		// the calls to ASTUtils
 
-		String fname= Configuration.workingDir + "/" + className.replace('.', '/') + ".java";
+		String fname = Configuration.workingDir + "/" + className.replace('.', '/') + ".java";
 
 		// we can assume that that's what Configuration.globalExtension is,
 		// because we're in JavaRepresentation
