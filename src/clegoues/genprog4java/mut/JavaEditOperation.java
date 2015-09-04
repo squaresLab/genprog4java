@@ -53,17 +53,20 @@ public class JavaEditOperation implements
 	private Mutation mutType;
 	private JavaStatement location = null;
 	private JavaStatement fixCode = null;
+	private String fileName = null;
 
-	public JavaEditOperation(JavaStatement location, Mutation mutType) {
+	public JavaEditOperation(String fileName, JavaStatement location, Mutation mutType) {
 		this.mutType = mutType;
 		this.location = location;
+		this.fileName = fileName;
 	}
 
-	public JavaEditOperation(Mutation mutType, JavaStatement location,
+	public JavaEditOperation(Mutation mutType, String fileName, JavaStatement location,
 			JavaStatement fixCode) {
 		this.mutType = mutType;
 		this.location = location;
 		this.fixCode = fixCode;
+		this.fileName = fileName;
 	}
 
 	@Override
@@ -92,12 +95,20 @@ public class JavaEditOperation implements
 		return this.fixCode;
 	}
 
-	protected static ListRewrite getListRewriter(ASTNode origin, ASTNode fix, ASTRewrite rewriter) {
+	public String getFileName() {
+		return this.fileName;
+	}
+	
+	public void setFileName(String newFileName){
+		fileName = newFileName;
+	}
+
+	/*protected static ListRewrite getListRewriter(ASTNode origin, ASTNode fix, ASTRewrite rewriter) {
 		ASTNode parent = origin;
 		
-		/*while (!(parent instanceof Block)) {
-			parent = parent.getParent();
-		}*/
+		//while (!(parent instanceof Block)) {
+		//	parent = parent.getParent();
+		//}
 		
 		
 		//make a new statement with the append (probably a block), and replace the origin in the parent for this new one
@@ -117,7 +128,7 @@ public class JavaEditOperation implements
 		
 		
 		return rewriter.getListRewrite(parent, Block.STATEMENTS_PROPERTY);
-	}
+	}*/
 
 	@Override
 	public void edit(ASTRewrite rewriter, AST ast, CompilationUnit cu) {
@@ -164,7 +175,7 @@ public class JavaEditOperation implements
 			//lrw.insertAfter(fixCodeNode, locationNode, null);
 			
 			
-			Block newNode = locationNode.getAST().newBlock();
+			Block newNode = locationNode.getAST().newBlock(); 
 			ASTNode stm1 = (Statement)locationNode;
 			if(locationNode instanceof Statement){
 				stm1 = ASTNode.copySubtree(locationNode.getAST(), stm1);
