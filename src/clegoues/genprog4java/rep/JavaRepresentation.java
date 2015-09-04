@@ -122,6 +122,7 @@ public class JavaRepresentation extends
 	private static HashMap<String, CompilationUnit> baseCompilationUnits = new HashMap<String, CompilationUnit>();
 	private static HashMap<Integer, ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer, ArrayList<Integer>>();
 	private static HashMap<String, String> originalSource = new HashMap<String, String>();
+	private static HashMap<Integer, String> stmtToFile = new HashMap<Integer, String>();
 
 	// semantic check cache stuff, so we don't have to walk stuff a million
 	// times unnecessarily
@@ -286,6 +287,7 @@ public class JavaRepresentation extends
 						|| semanticCheck.equals("javaspecial")) {
 					base.put(s.getStmtId(), s);
 					codeBank.put(s.getStmtId(), s);
+					stmtToFile.put(s.getStmtId(),className);
 				}
 				scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
 				JavaRepresentation.inScopeMap.put(s.getStmtId(),
@@ -462,7 +464,9 @@ public class JavaRepresentation extends
 
 			try {
 				for (JavaEditOperation edit : genome) {
-					edit.edit(rewriter, ast, cu);
+					if(edit.getFileName().equalsIgnoreCase(pair.getKey())){
+						edit.edit(rewriter, ast, cu);
+					}
 				}
 
 				TextEdit edits = null;
@@ -558,7 +562,8 @@ public class JavaRepresentation extends
 	public void delete(int location) {
 		super.delete(location);
 		JavaStatement locationStatement = base.get(location);
-		JavaEditOperation newEdit = new JavaEditOperation(locationStatement,
+		String fileName = stmtToFile.get(location);
+		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
 				Mutation.DELETE);
 		this.genome.add(newEdit);
 	}
@@ -566,7 +571,8 @@ public class JavaRepresentation extends
 	private void editHelper(int location, int fixCode, Mutation mutType) {
 		JavaStatement locationStatement = base.get(location);
 		JavaStatement fixCodeStatement = codeBank.get(fixCode);
-		JavaEditOperation newEdit = new JavaEditOperation(mutType,
+		String fileName = stmtToFile.get(location);
+		JavaEditOperation newEdit = new JavaEditOperation(mutType, fileName,
 				locationStatement, fixCodeStatement);
 		this.genome.add(newEdit);
 	}
@@ -582,7 +588,8 @@ public class JavaRepresentation extends
 		super.append(swap1, swap2);
 		JavaStatement locationStatement = base.get(swap1);
 		JavaStatement fixCodeStatement = base.get(swap2);
-		JavaEditOperation newEdit = new JavaEditOperation(Mutation.SWAP,
+		String fileName = stmtToFile.get(swap1);
+		JavaEditOperation newEdit = new JavaEditOperation(Mutation.SWAP, fileName, 
 				locationStatement, fixCodeStatement);
 		this.genome.add(newEdit);
 
@@ -597,7 +604,8 @@ public class JavaRepresentation extends
 	public void nullInsert(int location) {
 		super.nullInsert(location);
 		JavaStatement locationStatement = base.get(location);
-		JavaEditOperation newEdit = new JavaEditOperation(locationStatement,
+		String fileName = stmtToFile.get(location);
+		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
 				Mutation.NULLINSERT);
 		this.genome.add(newEdit);
 	}
