@@ -8,6 +8,18 @@ This is a java-based version of GenProg, a software for automatically fixing bug
 * [Learn Markdown] 
 http://dijkstra.cs.virginia.edu/genprog/
 
+### Hello, world ###
+
+GenProg takes as input a program with a bug and test cases.  At least one test case should be failing; it encodes the bug to be repaired.  At least one should be passing; it encodes desired functionality that should be maintained.
+
+GenProg4Java takes a configuration file as input.  You can see what flags are available, as well as what is actually straight-up required (many have defaults) in clegoues.genprog4java.main.Configuration.java.
+
+Individual classes also have individual configure methods; you can search for them to find more.
+
+Yes, I realize this is poorly structured/documented.
+
+Your best bet for a Hello, World! example is mathTest, in genprog4java/tests/mathTest.  It has a miniTestConfiguration 
+
 
 ### Integration with Defects4j ###
 
