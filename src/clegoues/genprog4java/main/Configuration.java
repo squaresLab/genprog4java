@@ -57,7 +57,7 @@ import clegoues.genprog4java.rep.JavaRepresentation;
 public class Configuration {
 	protected static Logger logger = Logger.getLogger(Configuration.class);
 
-	//public static String sourceDir = "./";
+	public static String sourceDir = "./";
 	public static String outputDir = "./";
 	public static String libs;
 	public static String sourceVersion = "1.6";
@@ -69,13 +69,9 @@ public class Configuration {
 	public static String jacocoPath = "";
 	public static long seed;
 	public static boolean doSanity = true;
-	//public static String packageName;
-	public static String defects4jFolder;
-	public static String defects4jBugFolder;
-	public static String workingDir;
+	public static String workingDir = "./";
 	public static Random randomizer = null;
-	public static String classTestFolder;
-	public static String classSourceFolder;
+	public static String compileCommand = "";
 
 	public Configuration() {
 	}
@@ -96,11 +92,10 @@ public class Configuration {
 		if (prop.getProperty("outputDir") != null) {
 			outputDir = prop.getProperty("outputDir").trim();
 		}
-		//packageName = prop.getProperty("packageName").trim();
 		javaVM = prop.getProperty("javaVM").trim();
-		//if (prop.getProperty("sourceDir") != null) {
-			//sourceDir = prop.getProperty("sourceDir").trim();
-		//}
+		if (prop.getProperty("sourceDir") != null) {
+			sourceDir = prop.getProperty("sourceDir").trim();
+		}
 		javaRuntime = Runtime.getRuntime().toString();
 		libs = prop.getProperty("libs").trim();
 
@@ -125,23 +120,13 @@ public class Configuration {
 			seed = System.currentTimeMillis();
 		}
 		randomizer = new Random(seed);
-		
-		if (prop.getProperty("defects4jFolder") != null) {
-			defects4jFolder = prop.getProperty("defects4jFolder").trim();
-		}
-		if (prop.getProperty("defects4jBugFolder") != null) {
-			defects4jBugFolder = prop.getProperty("defects4jBugFolder").trim();
-		}
+
+
 		if (prop.getProperty("workingDir") != null) {
 			workingDir = prop.getProperty("workingDir").trim();
 		}
-		if (prop.getProperty("classSourceFolder") != null) {
-			classSourceFolder = prop.getProperty("classSourceFolder").trim();
-		}
-		if (prop.getProperty("classTestFolder") != null) {
-			classTestFolder = prop.getProperty("classTestFolder").trim();
-		}
-		
+
+
 		try {
 			targetClassNames.addAll(getClasses(prop.getProperty(
 					"targetClassName").trim()));
@@ -160,40 +145,46 @@ public class Configuration {
 		saveOrLoadTargetFiles();
 
 	}
-	
-	public static void saveOrLoadTargetFiles(){
-		
-		String safeFolder = Configuration.outputDir  + File.separatorChar + "originalTargetFiles/";
-		
-		//If there is a variant already created in the output folder then it is not the first run
-		File variant0Folder = new File(Configuration.outputDir + "/variant0/");
-		if (variant0Folder.exists()){
-			
-			for( String s : Configuration.targetClassNames ){
-				String originFolder = Configuration.workingDir + File.separatorChar + (s.substring(0, s.lastIndexOf('.'))).replace('.', '/') + File.separatorChar;
-				String targetClassName = s.substring(s.lastIndexOf('.')+1) + Configuration.globalExtension;
-				//overwrite the targetClass with the one saved before
-				JavaRepresentation.runCommand("cp " + safeFolder + targetClassName + " " + originFolder + targetClassName);
-			}
-			
-		//else 	it is the first run
-		}else{
-			//create safe folder and save the original target class
-			File createFile = new File(Configuration.outputDir);
-			createFile.mkdir();
-			createFile = new File(safeFolder);
-			createFile.mkdir();
 
-			for( String s : Configuration.targetClassNames ){
-				String originFolder = Configuration.workingDir + File.separatorChar + (s.substring(0, s.lastIndexOf('.'))).replace('.', '/') + File.separatorChar;
-				String targetClassName = s.substring(s.lastIndexOf('.')+1) + Configuration.globalExtension;
-				
-				JavaRepresentation.runCommand("cp " + originFolder + targetClassName + " " + safeFolder + targetClassName);
-			}	
-		}
-		
+	public static void saveOrLoadTargetFiles(){
+
+ 		String original = Configuration.workingDir + File.separatorChar + Configuration.outputDir  + File.separatorChar + "original" + File.separatorChar;
+
+		//create safe folder and save the original target class
+		File createFile = new File(Configuration.outputDir);
+		createFile.mkdirs();
+		createFile = new File(original);
+		createFile.mkdirs();
+
+		String sourceDirPath =  Configuration.workingDir + File.separatorChar + Configuration.sourceDir + File.separatorChar;
+		for( String s : Configuration.targetClassNames ){
+			String pathToFile = "";
+			String justClass = "";
+			String packagePath = "";
+			int startOfClass = s.lastIndexOf('.');
+			if(startOfClass >= 0) {
+				justClass = s.substring(startOfClass + 1, s.length());
+				packagePath = s.substring(0,startOfClass).replace('.', '/');
+				File packageFile = new File(original+ File.separatorChar + packagePath);
+				if(!packageFile.exists()) {
+					packageFile.mkdirs();
+				}
+			} else {
+				justClass = s;
+			}
+			justClass += ".java";
+			String topLevel = sourceDirPath + justClass;
+			File classFile = new File(topLevel);
+			if(classFile.exists()) {
+				pathToFile = topLevel;
+			} else {
+				pathToFile = sourceDirPath + s.replace('.', '/');
+			}
+			String cmd = "cp " + pathToFile + " " + original + packagePath + File.separatorChar;
+			Utils.runCommand(cmd);
+		}	
 	}
-	
+
 
 	public static ArrayList<String> getClasses(String filename)
 			throws IOException, FileNotFoundException {

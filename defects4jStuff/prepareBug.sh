@@ -372,6 +372,7 @@ do
     echo $FOO >> $BUGWD/neg.tests
 done
 
+
 # get positive tests
 case "$OPTION" in
 "allHuman" )

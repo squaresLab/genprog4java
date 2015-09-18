@@ -142,7 +142,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		}
 	}
 
-	// have ommitted serialize/deserialize at this representation implementation
+	// have omitted serialize/deserialize at this representation implementation
 	// level
 	// because I haven't done the version thing, which is the only thing the
 	// ocaml version of

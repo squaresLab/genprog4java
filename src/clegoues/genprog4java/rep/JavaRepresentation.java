@@ -33,7 +33,6 @@
 
 package clegoues.genprog4java.rep;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,7 +41,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StringWriter;
@@ -108,6 +106,7 @@ import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.java.ScopeInfo;
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.main.Utils;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.mut.Mutation;
@@ -178,15 +177,9 @@ public class JavaRepresentation extends
 				.entrySet()) {
 			String targetClassName = ele.getKey();
 			InputStream targetClass = new FileInputStream(new File(
-					Configuration.defects4jBugFolder + "/"
-					+ Configuration.classSourceFolder + "/"
-					+ targetClassName.replace('.', '/')
-					+ ".class"
-					/*
 					Configuration.outputDir + File.separator
 							+ "coverage/coverage.out" + File.separator
-							+ Configuration.packageName.replace(".", "/")
-							+ File.separator + targetClassName + ".class"*/));
+							+ File.separator + targetClassName.replace(".","/") + ".class"));
 
 			if (executionData == null) {
 				executionData = new ExecutionDataStore();
@@ -612,19 +605,18 @@ public class JavaRepresentation extends
 
 	@Override
 	protected boolean internalCompile(String progName, String exeName) {
-		// OK, it might be possible to turn this into something closer to the
-		// OCaml implementation (as was done with testCaseCommand), but I don't
-		// know that I care enough to bother at the moment.
-		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+
+		// FIXME: why does an append that fails in computeSourceBuffers have
+		// a fitness of 204?
 		List<Pair<String, String>> sourceBuffers = this.computeSourceBuffers();
 		if (sourceBuffers == null) {
 			return false;
-		} else {
+		}
+
+		if(Configuration.compileCommand == "") {
 			Iterable<? extends JavaFileObject> fileObjects = ASTUtils
 					.getJavaSourceFromString(progName, sourceBuffers);
 
-			// FIXME: why does an append that fails in computeSourceBuffers have
-			// a fitness of 204?
 			LinkedList<String> options = new LinkedList<String>();
 
 			options.add("-cp");
@@ -654,132 +646,41 @@ public class JavaRepresentation extends
 
 					BufferedWriter bw = new BufferedWriter(new FileWriter(
 							outDirName + File.separatorChar + sourceName.substring(sourceName.lastIndexOf('.')+1)
-									+ Configuration.globalExtension));
+							+ Configuration.globalExtension));
 					bw.write(program);
 					bw.flush();
 					bw.close();
-					
-					
-					/////////////For defects4j purposes, we will write this program in the defects4j source folder deleting the original file
-					
+
+
 					BufferedWriter bw2 = new BufferedWriter(new FileWriter(
 							sourceName.replace('.', '/') + Configuration.globalExtension));
 					bw2.write(program);
 					bw2.flush();
-					bw2.close();
-				
-					//////////////
-					
-					
-					
+					bw2.close();					
+
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 			}
 
 			StringWriter compilerErrorWriter = new StringWriter();
+			JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
 			// Here is where it runs the command to compile the code
-			/*if (!compiler.getTask(compilerErrorWriter, null, null, options,
+			if (!compiler.getTask(compilerErrorWriter, null, null, options,
 					null, fileObjects).call()) {
 				logger.error(compilerErrorWriter.toString());
 				compilerErrorWriter.flush();
 				return false;
-			}*/
-
-			
-			//////////For defects4j purposes we will run the command "defects4j compile" instead of the normal java -cp jars:etc
-			//runCommand("/bin/bash -e /bin/cd " + Configuration.defects4jBugFolder + "/");
-			//setCurrentDirectory(Configuration.defects4jBugFolder + "/");
-			//System.out.println("Current working directory:");
-			//System.out.println(System.getProperty("user.dir"));
-			//System.setProperty("user.dir", Configuration.defects4jBugFolder + "/");
-			//System.out.println("Current working directory:");
-			//System.out.println(System.getProperty("user.dir"));
-			//runCommand(Configuration.defects4jFolder +"defects4j compile");
-			
-  			if (!runCommand("/bin/sh runCompile.sh")) {
-				logger.error(compilerErrorWriter.toString());
-				compilerErrorWriter.flush();
-				return false;
+			} else {
+				return true;
 			}
-			//FIXME: if this thing fails it should return false
-			
-			/////////////////////
-			
-			return true;
+		} else {
+			return Utils.runCommand(Configuration.compileCommand);
 		}
 	}
+
 	
-	public static boolean runCommand(String commandToRun){
-		Logger logger = Logger.getLogger(JavaRepresentation.class);
-		boolean compilationSuccessful = true;
-		String s = null;
-	
-        try {
-        	
-            // using the Runtime exec method:
-            Process p = Runtime.getRuntime().exec(commandToRun);
-             
-            BufferedReader stdInput = new BufferedReader(new
-                 InputStreamReader(p.getInputStream()));
- 
-            BufferedReader stdError = new BufferedReader(new
-                 InputStreamReader(p.getErrorStream()));
- 
-            // read the output from the command
-
-            logger.info("Here is the standard output of the command:\n");
-            while ((s = stdInput.readLine()) != null) {
-                System.out.println(s);
-            }
-             
-            // read any errors from the attempted                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm          mmmmm,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,                      mn     command
-            logger.info("Here is the standard error of the command (if any):\n");
-            while ((s = stdError.readLine()) != null) 
-        	{
-            	logger.error(s);
-            }
-            
-            int retValue = 0;
-            try {
-            	retValue = p.waitFor();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-            
-            if(retValue != 0)
-            {
-            	logger.error("Exit value of the command was different from 0");
-            	return false;
-            }
-             
-            //System.exit(0);
-        }
-        catch (IOException e) {
-            logger.error("Exception happened with the command: ");
-            logger.error(e.getStackTrace());
-            return false;
-            //System.exit(-1);
-        }	
-        return true;
-	}
-	/*
-	public static boolean setCurrentDirectory(String directory_name)
-    {
-        boolean result = false;  // Boolean indicating whether directory was set
-        File    directory;       // Desired current working directory
-
-        directory = new File(directory_name).getAbsoluteFile();
-        if (directory.exists() || directory.mkdirs())
-        {
-            result = (System.setProperty("user.dir", directory.getAbsolutePath()) != null);
-        }
-
-        return result;
-    }
-*/
-
 	
 	public JavaRepresentation copy() {
 		JavaRepresentation copy = new JavaRepresentation(this.getHistory(),
