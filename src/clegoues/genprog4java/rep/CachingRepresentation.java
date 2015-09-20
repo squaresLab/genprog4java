@@ -52,6 +52,7 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.FitnessValue;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.fitness.TestType;
+import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
@@ -86,7 +87,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 	 * cached file contents from [internal_compute_source_buffers]; avoid
 	 * recomputing/reserializing
 	 */
-	public ArrayList<Pair<String, String>> alreadySourceBuffers = null;
+	public ArrayList<Pair<ClassInfo, String>> alreadySourceBuffers = null;
 
 	public static int sequence = 0;
 
@@ -121,14 +122,14 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 	} // default does nothing. OCaml version takes the original representation
 		// here. Probably should do same
 
-	public void load(ArrayList<Pair<String,String>> bases) throws IOException {
+	public void load(ArrayList<ClassInfo> bases) throws IOException {
 
 		// FIXME: do deserializing String cacheName = base + ".cache";
 		// boolean didDeserialize = this.deserialize(cacheName,null, true);
 		// if(!didDeserialize) {
 		// if(!didDeserialize)
 		// this.serialize(cacheName, null, true);
-		for (Pair<String,String> base : bases) {
+		for (ClassInfo base : bases) {
 
 			this.fromSource(base);
 			logger.info("loaded from source " + base);
@@ -279,7 +280,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 	 */
 
 	@Override
-	protected List<Pair<String, String>> computeSourceBuffers() {
+	protected List<Pair<ClassInfo, String>> computeSourceBuffers() {
 		if (this.alreadySourceBuffers != null) {
 			return this.alreadySourceBuffers;
 		} else {
@@ -323,7 +324,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		return ret;
 	}
 
-	protected abstract ArrayList<Pair<String, String>> internalComputeSourceBuffers();
+	protected abstract ArrayList<Pair<ClassInfo, String>> internalComputeSourceBuffers();
 
 	protected FitnessValue internalTestCase(String sanityExename,
 			String sanityFilename, TestCase thisTest) {
@@ -407,8 +408,8 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		if (astHashCode != null)
 			return astHashCode;
 		astHashCode = new ArrayList<Integer>();
-		List<Pair<String, String>> sourceBuffers = computeSourceBuffers();
-		for (Pair<String, String> ele : sourceBuffers) {
+		List<Pair<ClassInfo, String>> sourceBuffers = computeSourceBuffers();
+		for (Pair<ClassInfo, String> ele : sourceBuffers) {
 			String code = ele.getSecond();
 			astHashCode.add(code.hashCode());
 		}

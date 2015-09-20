@@ -54,6 +54,7 @@ import org.apache.log4j.Logger;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.fitness.TestType;
+import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
@@ -461,7 +462,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 	protected abstract void instrumentForFaultLocalization();
 
 	@Override
-	public void load(ArrayList<Pair<String,String>> bases) throws IOException {
+	public void load(ArrayList<ClassInfo> bases) throws IOException {
 
 		// SHOULD WE DO SOMETHING SO THAT THE FAULT LOCALIZATION ALSO CONSIDERS
 		// MULTIPLE FILES TO LOCATE THE FAULT?
