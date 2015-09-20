@@ -35,17 +35,15 @@ package clegoues.genprog4java.mut;
 
 
 
-import java.util.List;
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.main.ClassInfo;
 
 public class JavaEditOperation implements
 		EditOperation<JavaStatement, ASTRewrite, AST> {
@@ -53,20 +51,20 @@ public class JavaEditOperation implements
 	private Mutation mutType;
 	private JavaStatement location = null;
 	private JavaStatement fixCode = null;
-	private String fileName = null;
+	private ClassInfo fileInfo = null;
 
-	public JavaEditOperation(String fileName, JavaStatement location, Mutation mutType) {
+	public JavaEditOperation(ClassInfo fileName, JavaStatement location, Mutation mutType) {
 		this.mutType = mutType;
 		this.location = location;
-		this.fileName = fileName;
+		this.fileInfo = fileName;
 	}
 
-	public JavaEditOperation(Mutation mutType, String fileName, JavaStatement location,
+	public JavaEditOperation(Mutation mutType, ClassInfo fileName, JavaStatement location,
 			JavaStatement fixCode) {
 		this.mutType = mutType;
 		this.location = location;
 		this.fixCode = fixCode;
-		this.fileName = fileName;
+		this.fileInfo = fileName;
 	}
 
 	@Override
@@ -95,12 +93,12 @@ public class JavaEditOperation implements
 		return this.fixCode;
 	}
 
-	public String getFileName() {
-		return this.fileName;
+	public ClassInfo getFileInfo() {
+		return this.fileInfo;
 	}
 	
-	public void setFileName(String newFileName){
-		fileName = newFileName;
+	public void setFileInfo(ClassInfo newFileName){
+		fileInfo = newFileName;
 	}
 
 	/*protected static ListRewrite getListRewriter(ASTNode origin, ASTNode fix, ASTRewrite rewriter) {

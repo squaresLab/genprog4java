@@ -122,7 +122,7 @@ public class JavaRepresentation extends
 	private static HashMap<ClassInfo, CompilationUnit> baseCompilationUnits = new HashMap<ClassInfo, CompilationUnit>();
 	private static HashMap<Integer, ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer, ArrayList<Integer>>();
 	private static HashMap<ClassInfo, String> originalSource = new HashMap<ClassInfo, String>();
-	private static HashMap<Integer, String> stmtToFile = new HashMap<Integer, String>();
+	private static HashMap<Integer, ClassInfo> stmtToFile = new HashMap<Integer, ClassInfo>();
 
 	// semantic check cache stuff, so we don't have to walk stuff a million
 	// times unnecessarily
@@ -177,12 +177,9 @@ public class JavaRepresentation extends
 		for (Map.Entry<ClassInfo, String> ele : JavaRepresentation.originalSource
 				.entrySet()) {
 			ClassInfo targetClassInfo = ele.getKey();
-			String targetClassName = targetClassInfo.getClassName();
 			InputStream targetClass = new FileInputStream(new File(
 					Configuration.workingDir + Configuration.outputDir + File.separator
-							+ "coverage/coverage.out" + File.separator 
-							+ targetClassInfo.getPackage()
-							+ File.separator + targetClassName + ".class"));
+							+ "coverage/coverage.out/" + targetClassInfo.pathToClassFile()));
 
 			if (executionData == null) {
 				executionData = new ExecutionDataStore();
@@ -249,10 +246,8 @@ public class JavaRepresentation extends
 		// because we're in JavaRepresentation
 		ScopeInfo scopeInfo = new ScopeInfo();
 		JavaParser myParser = new JavaParser(scopeInfo);
-		String className = pair.getClassName();
-		String packageName = pair.getPackage();
 		// originalSource entire class file written as a string
-		String path = Configuration.workingDir + Configuration.outputDir +  "/original/" + packageName + "/" + className + ".java";
+		String path = Configuration.workingDir + Configuration.outputDir +  "/original/" + pair.pathToJavaFile();
 		String source = FileUtils.readFileToString(new File(path));
 		JavaRepresentation.originalSource.put(pair, source);
 
@@ -284,7 +279,7 @@ public class JavaRepresentation extends
 						|| semanticCheck.equals("javaspecial")) {
 					base.put(s.getStmtId(), s);
 					codeBank.put(s.getStmtId(), s);
-					stmtToFile.put(s.getStmtId(),className);
+					stmtToFile.put(s.getStmtId(),pair);
 				}
 				scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
 				JavaRepresentation.inScopeMap.put(s.getStmtId(),
@@ -463,7 +458,7 @@ public class JavaRepresentation extends
 
 			try {
 				for (JavaEditOperation edit : genome) {
-					if(edit.getFileName().equalsIgnoreCase(filename)){
+					if(edit.getFileInfo().getClassName().equalsIgnoreCase(filename)){
 						edit.edit(rewriter, ast, cu);
 					}
 				}
@@ -561,7 +556,7 @@ public class JavaRepresentation extends
 	public void delete(int location) {
 		super.delete(location);
 		JavaStatement locationStatement = base.get(location);
-		String fileName = stmtToFile.get(location);
+		ClassInfo fileName = stmtToFile.get(location);
 		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
 				Mutation.DELETE);
 		this.genome.add(newEdit);
@@ -570,7 +565,7 @@ public class JavaRepresentation extends
 	private void editHelper(int location, int fixCode, Mutation mutType) {
 		JavaStatement locationStatement = base.get(location);
 		JavaStatement fixCodeStatement = codeBank.get(fixCode);
-		String fileName = stmtToFile.get(location);
+		ClassInfo fileName = stmtToFile.get(location);
 		JavaEditOperation newEdit = new JavaEditOperation(mutType, fileName,
 				locationStatement, fixCodeStatement);
 		this.genome.add(newEdit);
@@ -587,7 +582,7 @@ public class JavaRepresentation extends
 		super.append(swap1, swap2);
 		JavaStatement locationStatement = base.get(swap1);
 		JavaStatement fixCodeStatement = base.get(swap2);
-		String fileName = stmtToFile.get(swap1);
+		ClassInfo fileName = stmtToFile.get(swap1);
 		JavaEditOperation newEdit = new JavaEditOperation(Mutation.SWAP, fileName, 
 				locationStatement, fixCodeStatement);
 		this.genome.add(newEdit);
@@ -603,7 +598,7 @@ public class JavaRepresentation extends
 	public void nullInsert(int location) {
 		super.nullInsert(location);
 		JavaStatement locationStatement = base.get(location);
-		String fileName = stmtToFile.get(location);
+		ClassInfo fileName = stmtToFile.get(location);
 		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
 				Mutation.NULLINSERT);
 		this.genome.add(newEdit);
@@ -645,7 +640,7 @@ public class JavaRepresentation extends
 				for (Pair<ClassInfo, String> ele : sourceBuffers) {
 					ClassInfo ci = ele.getFirst();
 					String program = ele.getSecond();
-					String pathToFile = ci.getPackage() + File.separatorChar + ci.getClassName() + ".java";
+					String pathToFile = ci.pathToJavaFile();
 					// FIXME: can I write this in the folders to match where the
 					// class file is compiled? I think the answer is YES: see
 					// fixme in astutils
