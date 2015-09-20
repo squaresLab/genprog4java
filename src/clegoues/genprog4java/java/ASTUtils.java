@@ -119,8 +119,7 @@ class JavaSourceFromString extends SimpleJavaFileObject {
 	final String code;
 
 	JavaSourceFromString(String name, ClassInfo classInfo, String code) {
-		super(URI.create(classInfo.getPackage() + classInfo.getClassName()
-				+ Kind.SOURCE.extension), Kind.SOURCE);
+		super(URI.create(classInfo.pathToJavaFile()), Kind.SOURCE);
 		this.code = code;
 	}
 
