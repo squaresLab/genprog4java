@@ -121,14 +121,14 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 	} // default does nothing. OCaml version takes the original representation
 		// here. Probably should do same
 
-	public void load(ArrayList<String> bases) throws IOException {
+	public void load(ArrayList<Pair<String,String>> bases) throws IOException {
 
 		// FIXME: do deserializing String cacheName = base + ".cache";
 		// boolean didDeserialize = this.deserialize(cacheName,null, true);
 		// if(!didDeserialize) {
 		// if(!didDeserialize)
 		// this.serialize(cacheName, null, true);
-		for (String base : bases) {
+		for (Pair<String,String> base : bases) {
 
 			this.fromSource(base);
 			logger.info("loaded from source " + base);

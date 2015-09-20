@@ -53,6 +53,7 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
+import clegoues.genprog4java.util.Pair;
 
 public class Configuration {
 	protected static Logger logger = Logger.getLogger(Configuration.class);
@@ -63,7 +64,7 @@ public class Configuration {
 	public static String sourceVersion = "1.6";
 	public static String targetVersion = "1.6";
 	public static String globalExtension = ".java";
-	public static ArrayList<String> targetClassNames = new ArrayList<String>();
+	public static ArrayList<Pair<String,String>> targetClassNames = new ArrayList<Pair<String,String>>();
 	public static String javaRuntime = "";
 	public static String javaVM;
 	public static String jacocoPath = "";
@@ -141,70 +142,61 @@ public class Configuration {
 		JavaRepresentation.configure(prop);
 		FaultLocRepresentation.configure(prop);
 		CachingRepresentation.configure(prop);
-		//Save original target file to an outside folder if it is the first run. Or load it if it is not.
-		saveOrLoadTargetFiles();
-
 	}
 
-	public static void saveOrLoadTargetFiles(){
-
- 		String original = Configuration.workingDir + File.separatorChar + Configuration.outputDir  + File.separatorChar + "original" + File.separatorChar;
-
-		//create safe folder and save the original target class
-		File createFile = new File(Configuration.outputDir);
-		createFile.mkdirs();
-		createFile = new File(original);
-		createFile.mkdirs();
-
-		String sourceDirPath =  Configuration.workingDir + File.separatorChar + Configuration.sourceDir + File.separatorChar;
-		for( String s : Configuration.targetClassNames ){
-			String pathToFile = "";
-			String justClass = "";
-			String packagePath = "";
-			int startOfClass = s.lastIndexOf('.');
-			if(startOfClass >= 0) {
-				justClass = s.substring(startOfClass + 1, s.length());
-				packagePath = s.substring(0,startOfClass).replace('.', '/');
-				File packageFile = new File(original+ File.separatorChar + packagePath);
-				if(!packageFile.exists()) {
-					packageFile.mkdirs();
-				}
-			} else {
-				justClass = s;
-			}
-			justClass += ".java";
-			String topLevel = sourceDirPath + justClass;
-			File classFile = new File(topLevel);
-			if(classFile.exists()) {
-				pathToFile = topLevel;
-			} else {
-				pathToFile = sourceDirPath + s.replace('.', '/');
-			}
-			String cmd = "cp " + pathToFile + " " + original + packagePath + File.separatorChar;
-			Utils.runCommand(cmd);
-		}	
+	public static Pair<String,String> getClassAndPackage(String fullName) {
+		String s = fullName.trim();
+		int startOfClass = s.lastIndexOf('.');
+		String justClass = s.substring(startOfClass + 1, s.length());
+		String packagePath = s.substring(0,startOfClass).replace('.', '/');
+		return new Pair<String,String>(justClass,packagePath );
 	}
-
-
-	public static ArrayList<String> getClasses(String filename)
+	
+	public static ArrayList<Pair<String,String>> getClasses(String filename)
 			throws IOException, FileNotFoundException {
-		ArrayList<String> returnValue = new ArrayList<String>();
+		ArrayList<Pair<String,String>> returnValue = new ArrayList<Pair<String,String>>();
 		String ext = FilenameUtils.getExtension(filename);
 		if (ext.equals("txt")) {
 			FileInputStream fis;
 			fis = new FileInputStream(filename);
 			BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-			String line = br.readLine();
-			while((line != null) && !line.isEmpty()) {
-				returnValue.add(line.trim());
-				logger.info(line.trim());
-				line = br.readLine();
+			String line;
+			while(((line = br.readLine()) != null) && !line.isEmpty()) {
+				returnValue.add(getClassAndPackage(line));
 			}
-
 			br.close();
 		} else {
-			returnValue.add(filename);
+			returnValue.add(getClassAndPackage(filename));
 		}
+
 		return returnValue;
+	}
+	
+	public static void saveTargetFiles() {
+		
+		String original = Configuration.workingDir + File.separatorChar + Configuration.outputDir  + File.separatorChar + "original" + File.separatorChar;
+
+		//copy the target classes to an "original" folder; we will work from there.
+		File createFile = new File(original);
+		createFile.mkdirs();
+
+		String sourceDirPath =  Configuration.workingDir + File.separatorChar + Configuration.sourceDir + File.separatorChar;
+		
+		for( Pair<String,String> fileInfo : Configuration.targetClassNames ){
+			String className = fileInfo.getFirst();
+			String packagePath = fileInfo.getSecond();
+			String pathToFile = "";
+					
+			String topLevel = sourceDirPath + className + ".java";
+			
+			File classFile = new File(topLevel);
+			if(classFile.exists()) {
+				pathToFile = topLevel;
+			} else {
+				pathToFile = sourceDirPath + packagePath;
+			}
+			String cmd = "cp " + pathToFile + " " + original + packagePath + File.separatorChar;
+			Utils.runCommand(cmd);
+		}	
 	}
 }

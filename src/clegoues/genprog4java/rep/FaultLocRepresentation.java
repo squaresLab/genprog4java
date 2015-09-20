@@ -408,7 +408,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 		} else {
 			positivePath = runTestsCoverage(
 					FaultLocRepresentation.posCoverageFile, TestType.POSITIVE,
-					Fitness.positiveTests, true, "coverage/");
+					Fitness.positiveTests, true, Configuration.workingDir + Configuration.outputDir + "/coverage/");
 		}
 		File negativePathFile = new File(FaultLocRepresentation.negCoverageFile);
 
@@ -417,7 +417,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 		} else {
 			negativePath = runTestsCoverage(
 					FaultLocRepresentation.negCoverageFile, TestType.NEGATIVE,
-					Fitness.negativeTests, false, "coverage/");
+					Fitness.negativeTests, false, Configuration.workingDir + Configuration.outputDir + "/coverage/");
 		}
 		HashMap<Integer, Double> fw = new HashMap<Integer, Double>();
 		TreeSet<Integer> negHt = new TreeSet<Integer>();
@@ -461,7 +461,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 	protected abstract void instrumentForFaultLocalization();
 
 	@Override
-	public void load(ArrayList<String> bases) throws IOException {
+	public void load(ArrayList<Pair<String,String>> bases) throws IOException {
 
 		// SHOULD WE DO SOMETHING SO THAT THE FAULT LOCALIZATION ALSO CONSIDERS
 		// MULTIPLE FILES TO LOCATE THE FAULT?

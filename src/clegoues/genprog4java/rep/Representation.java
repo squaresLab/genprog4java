@@ -110,7 +110,7 @@ public abstract class Representation<G extends EditOperation> implements
 
 	public abstract void noteSuccess();
 
-	public abstract void load(ArrayList<String> classNames) throws IOException,
+	public abstract void load(ArrayList<Pair<String,String>> classNames) throws IOException,
 			UnexpectedCoverageResultException;
 
 	public void serialize(String filename, ObjectOutputStream fout,
@@ -193,7 +193,7 @@ public abstract class Representation<G extends EditOperation> implements
 
 	public abstract boolean sanityCheck();
 
-	public abstract void fromSource(String filename) throws IOException;
+	public abstract void fromSource(Pair<String, String> base) throws IOException;
 
 	public abstract void outputSource(String filename);
 
