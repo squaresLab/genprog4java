@@ -105,6 +105,7 @@ import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.java.ScopeInfo;
+import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.main.Utils;
 import clegoues.genprog4java.mut.HistoryEle;
@@ -118,9 +119,9 @@ public class JavaRepresentation extends
 
 	private static HashMap<Integer, JavaStatement> codeBank = new HashMap<Integer, JavaStatement>();
 	private static HashMap<Integer, JavaStatement> base = new HashMap<Integer, JavaStatement>();
-	private static HashMap<String, CompilationUnit> baseCompilationUnits = new HashMap<String, CompilationUnit>();
+	private static HashMap<ClassInfo, CompilationUnit> baseCompilationUnits = new HashMap<ClassInfo, CompilationUnit>();
 	private static HashMap<Integer, ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer, ArrayList<Integer>>();
-	private static HashMap<String, String> originalSource = new HashMap<String, String>();
+	private static HashMap<ClassInfo, String> originalSource = new HashMap<ClassInfo, String>();
 	private static HashMap<Integer, String> stmtToFile = new HashMap<Integer, String>();
 
 	// semantic check cache stuff, so we don't have to walk stuff a million
@@ -153,7 +154,7 @@ public class JavaRepresentation extends
 		super();
 	}
 
-	private static HashMap<String, String> getOriginalSource() {
+	private static HashMap<ClassInfo, String> getOriginalSource() {
 		return originalSource;
 	}
 
@@ -173,12 +174,14 @@ public class JavaRepresentation extends
 	public TreeSet<Integer> getCoverageInfo() throws IOException {
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
 
-		for (Map.Entry<String, String> ele : JavaRepresentation.originalSource
+		for (Map.Entry<ClassInfo, String> ele : JavaRepresentation.originalSource
 				.entrySet()) {
-			String targetClassName = ele.getKey();
+			ClassInfo targetClassInfo = ele.getKey();
+			String targetClassName = targetClassInfo.getClassName();
 			InputStream targetClass = new FileInputStream(new File(
 					Configuration.workingDir + Configuration.outputDir + File.separator
-							+ "coverage/coverage.out" + File.separator
+							+ "coverage/coverage.out" + File.separator 
+							+ targetClassInfo.getPackage()
 							+ File.separator + targetClassName + ".class"));
 
 			if (executionData == null) {
@@ -236,7 +239,7 @@ public class JavaRepresentation extends
 		return atoms;
 	}
 
-	public void fromSource(Pair<String,String> pair) throws IOException {
+	public void fromSource(ClassInfo pair) throws IOException {
 		// load here, get all statements and the compilation unit saved
 		// parser can visit at the same time to collect scope info
 		// apparently names and types and scopes are visited here below in
@@ -246,16 +249,16 @@ public class JavaRepresentation extends
 		// because we're in JavaRepresentation
 		ScopeInfo scopeInfo = new ScopeInfo();
 		JavaParser myParser = new JavaParser(scopeInfo);
-		String className = pair.getFirst();
-		String packageName = pair.getSecond();
+		String className = pair.getClassName();
+		String packageName = pair.getPackage();
 		// originalSource entire class file written as a string
 		String path = Configuration.workingDir + Configuration.outputDir +  "/original/" + packageName + "/" + className + ".java";
 		String source = FileUtils.readFileToString(new File(path));
-		JavaRepresentation.originalSource.put(className, source);
+		JavaRepresentation.originalSource.put(pair, source);
 
 		myParser.parse(path, Configuration.libs.split(File.pathSeparator));
 		List<ASTNode> stmts = myParser.getStatements();
-		baseCompilationUnits.put(className, myParser.getCompilationUnit());
+		baseCompilationUnits.put(pair, myParser.getCompilationUnit());
 
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
@@ -446,20 +449,21 @@ public class JavaRepresentation extends
 	}
 
 	@Override
-	protected ArrayList<Pair<String, String>> internalComputeSourceBuffers() {
-		ArrayList<Pair<String, String>> retVal = new ArrayList<Pair<String, String>>();
-		for (Map.Entry<String, String> pair : JavaRepresentation
+	protected ArrayList<Pair<ClassInfo, String>> internalComputeSourceBuffers() {
+		ArrayList<Pair<ClassInfo, String>> retVal = new ArrayList<Pair<ClassInfo, String>>();
+		for (Map.Entry<ClassInfo, String> pair : JavaRepresentation
 				.getOriginalSource().entrySet()) {
-			String filename = pair.getKey();
+			ClassInfo ci = pair.getKey();
+			String filename = ci.getClassName();
 			String source = pair.getValue();
 			Document original = new Document(source);
-			CompilationUnit cu = baseCompilationUnits.get(filename);
+			CompilationUnit cu = baseCompilationUnits.get(ci);
 			AST ast = cu.getAST();
 			ASTRewrite rewriter = ASTRewrite.create(ast);
 
 			try {
 				for (JavaEditOperation edit : genome) {
-					if(edit.getFileName().equalsIgnoreCase(pair.getKey())){
+					if(edit.getFileName().equalsIgnoreCase(filename)){
 						edit.edit(rewriter, ast, cu);
 					}
 				}
@@ -485,7 +489,7 @@ public class JavaRepresentation extends
 			// computeSourceBuffers failed than
 			// to return null at those catch blocks
 
-			retVal.add(new Pair<String, String>(filename, original.get()));
+			retVal.add(new Pair<ClassInfo, String>(ci, original.get()));
 		}
 		return retVal;
 	}
@@ -610,7 +614,7 @@ public class JavaRepresentation extends
 
 		// FIXME: why does an append that fails in computeSourceBuffers have
 		// a fitness of 204?
-		List<Pair<String, String>> sourceBuffers = this.computeSourceBuffers();
+		List<Pair<ClassInfo, String>> sourceBuffers = this.computeSourceBuffers();
 		if (sourceBuffers == null) {
 			return false;
 		}
@@ -638,24 +642,22 @@ public class JavaRepresentation extends
 				outDir.mkdir();
 			options.add(outDirName);
 			try {
-				for (Pair<String, String> ele : sourceBuffers) {
-					String sourceName = ele.getFirst();
+				for (Pair<ClassInfo, String> ele : sourceBuffers) {
+					ClassInfo ci = ele.getFirst();
 					String program = ele.getSecond();
-
+					String pathToFile = ci.getPackage() + File.separatorChar + ci.getClassName() + ".java";
 					// FIXME: can I write this in the folders to match where the
 					// class file is compiled? I think the answer is YES: see
 					// fixme in astutils
 
 					BufferedWriter bw = new BufferedWriter(new FileWriter(
-							outDirName + File.separatorChar + sourceName.substring(sourceName.lastIndexOf('.')+1)
-							+ Configuration.globalExtension));
+							outDirName + File.separatorChar + pathToFile));
 					bw.write(program);
 					bw.flush();
 					bw.close();
 
 
-					BufferedWriter bw2 = new BufferedWriter(new FileWriter(
-							sourceName.replace('.', '/') + Configuration.globalExtension));
+					BufferedWriter bw2 = new BufferedWriter(new FileWriter(pathToFile)); // possible FIXME: right path, still?
 					bw2.write(program);
 					bw2.flush();
 					bw2.close();					

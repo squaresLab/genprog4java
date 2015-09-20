@@ -53,7 +53,6 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
-import clegoues.genprog4java.util.Pair;
 
 public class Configuration {
 	protected static Logger logger = Logger.getLogger(Configuration.class);
@@ -182,9 +181,9 @@ public class Configuration {
 
 		String sourceDirPath =  Configuration.workingDir + File.separatorChar + Configuration.sourceDir + File.separatorChar;
 		
-		for( Pair<String,String> fileInfo : Configuration.targetClassNames ){
-			String className = fileInfo.getFirst();
-			String packagePath = fileInfo.getSecond();
+		for( ClassInfo fileInfo : Configuration.targetClassNames ){
+			String className = fileInfo.getClassName();
+			String packagePath = fileInfo.getPackage();
 			String pathToFile = "";
 					
 			String topLevel = sourceDirPath + className + ".java";

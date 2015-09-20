@@ -48,6 +48,7 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.fitness.TestCase;
+import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Mutation;
@@ -110,7 +111,7 @@ public abstract class Representation<G extends EditOperation> implements
 
 	public abstract void noteSuccess();
 
-	public abstract void load(ArrayList<Pair<String,String>> classNames) throws IOException,
+	public abstract void load(ArrayList<ClassInfo> classNames) throws IOException,
 			UnexpectedCoverageResultException;
 
 	public void serialize(String filename, ObjectOutputStream fout,
@@ -193,7 +194,7 @@ public abstract class Representation<G extends EditOperation> implements
 
 	public abstract boolean sanityCheck();
 
-	public abstract void fromSource(Pair<String, String> base) throws IOException;
+	public abstract void fromSource(ClassInfo base) throws IOException;
 
 	public abstract void outputSource(String filename);
 
@@ -265,7 +266,7 @@ public abstract class Representation<G extends EditOperation> implements
 		return myFitness.compareTo(new Double(o.getFitness()));
 	}
 
-	protected List<Pair<String, String>> computeSourceBuffers() {
+	protected List<Pair<ClassInfo, String>> computeSourceBuffers() {
 		// TODO Auto-generated method stub
 		return null;
 	}

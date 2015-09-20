@@ -44,6 +44,7 @@ import javax.tools.SimpleJavaFileObject;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.util.Pair;
 
 public class ASTUtils {
@@ -95,10 +96,10 @@ public class ASTUtils {
 	}
 
 	public static Iterable<JavaSourceFromString> getJavaSourceFromString(
-			String progName, List<Pair<String, String>> code) {
+			String progName, List<Pair<ClassInfo, String>> code) {
 
 		ArrayList<JavaSourceFromString> jsfs = new ArrayList<JavaSourceFromString>();
-		for (Pair<String, String> ele : code) {
+		for (Pair<ClassInfo, String> ele : code) {
 
 			JavaSourceFromString oneSource = new JavaSourceFromString(progName,
 					ele.getFirst(), ele.getSecond());
@@ -117,13 +118,8 @@ public class ASTUtils {
 class JavaSourceFromString extends SimpleJavaFileObject {
 	final String code;
 
-	// FIXME: I strongly suspect that we can override the name to put it
-	// somewhere
-	// that's not "code" or that is in a reasonable location wrt where it's
-	// being compiled. Hmm.
-
-	JavaSourceFromString(String name, String className, String code) {
-		super(URI.create(name.replace(".", "/") + "/" + className
+	JavaSourceFromString(String name, ClassInfo classInfo, String code) {
+		super(URI.create(classInfo.getPackage() + classInfo.getClassName()
 				+ Kind.SOURCE.extension), Kind.SOURCE);
 		this.code = code;
 	}
