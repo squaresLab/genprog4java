@@ -64,7 +64,7 @@ public class Configuration {
 	public static String sourceVersion = "1.6";
 	public static String targetVersion = "1.6";
 	public static String globalExtension = ".java";
-	public static ArrayList<Pair<String,String>> targetClassNames = new ArrayList<Pair<String,String>>();
+	public static ArrayList<ClassInfo> targetClassNames = new ArrayList<ClassInfo>();
 	public static String javaRuntime = "";
 	public static String javaVM;
 	public static String jacocoPath = "";
@@ -144,17 +144,17 @@ public class Configuration {
 		CachingRepresentation.configure(prop);
 	}
 
-	public static Pair<String,String> getClassAndPackage(String fullName) {
+	public static ClassInfo getClassAndPackage(String fullName) {
 		String s = fullName.trim();
 		int startOfClass = s.lastIndexOf('.');
 		String justClass = s.substring(startOfClass + 1, s.length());
 		String packagePath = s.substring(0,startOfClass).replace('.', '/');
-		return new Pair<String,String>(justClass,packagePath );
+		return new ClassInfo(justClass,packagePath );
 	}
 	
-	public static ArrayList<Pair<String,String>> getClasses(String filename)
+	public static ArrayList<ClassInfo> getClasses(String filename)
 			throws IOException, FileNotFoundException {
-		ArrayList<Pair<String,String>> returnValue = new ArrayList<Pair<String,String>>();
+		ArrayList<ClassInfo> returnValue = new ArrayList<ClassInfo>();
 		String ext = FilenameUtils.getExtension(filename);
 		if (ext.equals("txt")) {
 			FileInputStream fis;
