@@ -177,9 +177,9 @@ public class JavaRepresentation extends
 				.entrySet()) {
 			String targetClassName = ele.getKey();
 			InputStream targetClass = new FileInputStream(new File(
-					Configuration.outputDir + File.separator
+					Configuration.workingDir + Configuration.outputDir + File.separator
 							+ "coverage/coverage.out" + File.separator
-							+ File.separator + targetClassName.replace(".","/") + ".class"));
+							+ File.separator + targetClassName + ".class"));
 
 			if (executionData == null) {
 				executionData = new ExecutionDataStore();
@@ -236,23 +236,24 @@ public class JavaRepresentation extends
 		return atoms;
 	}
 
-	public void fromSource(String className) throws IOException {
+	public void fromSource(Pair<String,String> pair) throws IOException {
 		// load here, get all statements and the compilation unit saved
 		// parser can visit at the same time to collect scope info
 		// apparently names and types and scopes are visited here below in
 		// the calls to ASTUtils
 
-		String fname= className.replace('.', '/') + ".java";
-
 		// we can assume that that's what Configuration.globalExtension is,
 		// because we're in JavaRepresentation
 		ScopeInfo scopeInfo = new ScopeInfo();
 		JavaParser myParser = new JavaParser(scopeInfo);
+		String className = pair.getFirst();
+		String packageName = pair.getSecond();
 		// originalSource entire class file written as a string
-		String source = FileUtils.readFileToString(new File(fname));
+		String path = Configuration.workingDir + Configuration.outputDir +  "/original/" + packageName + "/" + className + ".java";
+		String source = FileUtils.readFileToString(new File(path));
 		JavaRepresentation.originalSource.put(className, source);
 
-		myParser.parse(fname, Configuration.libs.split(File.pathSeparator));
+		myParser.parse(path, Configuration.libs.split(File.pathSeparator));
 		List<ASTNode> stmts = myParser.getStatements();
 		baseCompilationUnits.put(className, myParser.getCompilationUnit());
 
@@ -401,8 +402,9 @@ public class JavaRepresentation extends
 					// guess, in particular
 					// because it allows us to serialize/deserialize incoming
 					// populations
-					this.fromSource(filename.replace('.', '/')
-							+ Configuration.globalExtension);
+//					this.fromSource(filename.replace('.', '/')
+//							+ Configuration.globalExtension);
+					// FIXME: deserialize needs fixed; fromSource wants a classname and package, now....
 				}
 				this.genome.addAll((ArrayList<JavaEditOperation>) (in
 						.readObject()));
