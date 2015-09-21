@@ -177,9 +177,9 @@ public class JavaRepresentation extends
 		for (Map.Entry<ClassInfo, String> ele : JavaRepresentation.originalSource
 				.entrySet()) {
 			ClassInfo targetClassInfo = ele.getKey();
-			InputStream targetClass = new FileInputStream(new File(
-					Configuration.workingDir + Configuration.outputDir + File.separator
-							+ "coverage/coverage.out/" + targetClassInfo.pathToClassFile()));
+			String pathToCoverageClass =Configuration.workingDir + Configuration.outputDir + File.separator
+					+ "coverage/coverage.out/" + targetClassInfo.pathToClassFile(); 
+			InputStream targetClass = new FileInputStream(new File(pathToCoverageClass));
 
 			if (executionData == null) {
 				executionData = new ExecutionDataStore();
