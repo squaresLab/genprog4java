@@ -344,7 +344,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		executor.setWatchdog(watchdog);
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-
+// FIXME: the problem is it's not finding the jacocagent because it's at ./lib, not at /path/to/lib
 		executor.setExitValue(0);
 
 		executor.setStreamHandler(new PumpStreamHandler(out));

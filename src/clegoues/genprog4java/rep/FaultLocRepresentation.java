@@ -317,10 +317,8 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
 		for (String test : tests) {
-			File coverageRaw = new File("jacoco.exec"); // FIXME:
-														// likely/possibly a
-														// mistake to put this
-														// in this class
+			// FIXME: LEFT OFF HERE: this is not where jacoco.exec should likely end up.  Not finding it, that's why it's dying right now.
+			File coverageRaw = new File("jacoco.exec");
 
 			if (coverageRaw.exists()) {
 				coverageRaw.delete();
