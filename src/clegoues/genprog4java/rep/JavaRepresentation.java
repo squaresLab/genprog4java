@@ -698,11 +698,13 @@ public class JavaRepresentation extends
 			//System.out.println(System.getProperty("user.dir"));
 			//runCommand(Configuration.defects4jFolder +"defects4j compile");
 			
+			
   			if (!runCommand("/bin/sh runCompile.sh")) {
 				logger.error(compilerErrorWriter.toString());
 				compilerErrorWriter.flush();
 				return false;
 			}
+			
 			//FIXME: if this thing fails it should return false
 			
 			/////////////////////
