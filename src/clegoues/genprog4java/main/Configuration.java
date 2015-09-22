@@ -134,7 +134,8 @@ public class Configuration {
 			// FIXME handle exception
 			e.printStackTrace();
 		}
-
+		saveTargetFiles();
+		
 		Search.configure(prop);
 		Population.configure(prop);
 		Fitness.configure(prop);
@@ -192,8 +193,10 @@ public class Configuration {
 			if(classFile.exists()) {
 				pathToFile = topLevel;
 			} else {
-				pathToFile = sourceDirPath + packagePath;
+				pathToFile = sourceDirPath + packagePath + File.separatorChar + className + ".java";
 			}
+			File packagePathFile = new File(original + packagePath);
+			packagePathFile.mkdirs();
 			String cmd = "cp " + pathToFile + " " + original + packagePath + File.separatorChar;
 			Utils.runCommand(cmd);
 		}	

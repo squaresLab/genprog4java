@@ -20,6 +20,10 @@
 # export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/
 # export PATH=$JAVA_HOME/bin/:$PATH
 
+#2. Add Defects4J's executables to your PATH:
+#    - `export PATH=$PATH:"path2defects4j"/framework/bin`
+# export PATH="path2defects4j/major/bin"$PATH
+
 # CLG thinks it's nice practice to rename the vars taken from the user to
 # something more readable that corresponds to how they're used.  Makes the
 # script easier to read.
@@ -183,113 +187,38 @@ fi
 
 
 #Create the new test suite
-echo Creating new test suite...
-"$4"framework/bin/run_evosuite.pl -p $1 -v "$2"f -n 1 -o $BUGWD/"$TESTWD"/outputOfEvoSuite/ -c branch => 100s
+#echo Creating new test suite...
+#"$4"/framework/bin/run_evosuite.pl -p $1 -v "$2"f -n 1 -o $BUGWD/"$TESTWD"/outputOfEvoSuite/ -c branch => 100s
 
 #Untar the generated test into the tests folder
-cd $BUGWD/"$TESTWD"
-tar xvjf outputOfEvoSuite/$1/evosuite-branch/1/"$1"-"$2"f-evosuite-branch.1.tar.bz2
+#cd $BUGWD/"$TESTWD"
+#tar xvjf outputOfEvoSuite/$1/evosuite-branch/1/"$1"-"$2"f-evosuite-branch.1.tar.bz2
 
 EXTRACLASSES=""
 if [ $LOWERCASEPACKAGE = "closure" ]; then
 EXTRACLASSES="$3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInfo.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMap.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMapOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/Instrumentation.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationTemplate.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/debugging/sourcemap/proto/Mapping.java"
 fi
-
-# CLAIRE TO MAU: I thought we didn't have to do this any more, no?
-# Anyway I'm commenting it out b/c it doesn't work on my machine and I don't
-# think we need it, so debugging seems like a waste of time...
-# Mau's response: I think we don't need to do it anymore, but I think this might be the cause for the tests not passing.
-
-#Go to the bug folder
-# cd "$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD/
-# 
-# echo Compiling source files...
-# #create file to run compilation
-# FILENAME=sources.txt
-# exec 3<>$FILENAME
-# # Write to file
-# echo $LIBSMAIN >&3
-# find -name "*.java" >&3
-# echo $EXTRACLASSES >&3
-# exec 3>&-
-# 
-# 
-# #Compile the project
-# #javac @sources.txt
-# 
-# 
-# echo Compilation of main java classes successful
-# 
-# rm sources.txt
-# 
-# 
-# 
-
-
-
-#where the .class files are
- #DIROFCLASSFILES=org/$JAVADIR
- 
  
  #Jar all the .class's
-cd "$DEFECTS4JDIR"ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$SRCFOLDER"/ 
-jar cf "$DEFECTS4JDIR"ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar "$JAVADIR"/* 
+cd "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$SRCFOLDER"/ 
+jar cf "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar "$JAVADIR"/* 
  #$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
  
  echo Jar of source files created successfully.
-# 
-
-# Same here:
-#--------------------------------
-
-# #Compile test classes
-# cd $BUGWD/$TESTWD
-# 
-# echo Compiling test files...
-# 
-# FILENAME=sources.txt
-# exec 3<>$FILENAME
-# # Write to file
-# echo $LIBSTESTS >&3
-# find -name "*.java" >&3
-# echo $EXTRACLASSES >&3
-# exec 3>&-
-# 
-# #javac @sources.txt
-# 
-# echo Compilation of test java classes successful
-# #rm sources.txt
-
-
- #cd ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/src/test/java
  
  #Jar all the test class's
-cd "$DEFECTS4JDIR"ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$TESTFOLDER"/
-jar cf "$DEFECTS4JDIR"ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllTestClasses.jar "$JAVADIR"/* 
+cd "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$TESTFOLDER"/
+jar cf "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllTestClasses.jar "$JAVADIR"/* 
 
  #$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
  
  echo Jar of test files created successfully.
 
 
-#javac *.java */*.java */*/*.java */*/*/*.java */*/*/*/*.java -Xlint:unchecked
-
-#cd ~/Research/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/src/test/java
-
-
-# 
-# #Jar all the test class's
-# jar cf $BUGWD/"$LOWERCASEPACKAGE"AllTestClasses.jar "$JAVADIR"* 
-# 
-#$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
-
-#echo "Jar of tests created successfully."
-
-
 cd $BUGWD/$WD
 
 #Create file to run defects4j compiile
-FILE="$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD/runCompile.sh
+FILE="$4"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD/runCompile.sh
 /bin/cat <<EOM >$FILE
 #!/bin/bash
 cd $4ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
@@ -299,46 +228,33 @@ EOM
 chmod 777 runCompile.sh
 
 
-
-
 cd $BUGWD
 
 PACKAGEDIR=${JAVADIR//"/"/"."}
 
 #Create config file TODO:#FIX THIS FILE
-FILE="$4"ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/configDefects4j
+FILE="$4"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/configDefects4j
 /bin/cat <<EOM >$FILE
 popsize = 5
 seed = 0
 testsDir = $TESTWD/$JAVADIR
 javaVM = /usr/bin/java
-workingDir = $4ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD
-outputDir = $4ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/tmp
+workingDir = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD
+outputDir = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/tmp
 libs = $CONFIGLIBS
 classDir = bin/
 sanity = yes
 regenPaths
-positiveTests = $4ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/pos.tests
-negativeTests = $4ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/neg.tests
-jacocoPath = $3lib/jacocoagent.jar
-defects4jFolder = $4framework/bin/
-defects4jBugFolder = $4ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy
+positiveTests = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/pos.tests
+negativeTests = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/neg.tests
+jacocoPath = $3/lib/jacocoagent.jar
+defects4jFolder = $4/framework/bin/
+defects4jBugFolder = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy
 classTestFolder = $TESTFOLDER
 classSourceFolder = $SRCFOLDER
 EOM
 
 
-
-#PASSSINGTESTS="$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
-
-#if [[ -s $PASSSINGTESTS ]] ; then
-#echo "Passing tests file has data, all good :D"
-#else
-#echo "ERROR!!! $PASSSINGTESTS is empty, means that all unit tests failed, so the file of the positive tests at $PASSSINGTESTS is empty. ERROR!!!"
-#fi ;
-
-
-#I then go to pos.tests, move the failing tests that appear in the "Root cause in triggering tests" in the console, to the neg.tests
 
 # programmatically get passing and failing tests as well as files
 #info about the bug
@@ -471,5 +387,5 @@ else
 fi
 
 echo "This is the working directory: "
-echo $4ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD
+echo $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD
 
