@@ -181,14 +181,14 @@ cp "$3"defects4jStuff/Utilities/EntityArrays.java $BUGWD/src/main/java/org/apach
 fi
 
 
-#UNCOMMENT!!!!!!!!!
+
 #Create the new test suite
-#echo Creating new test suite...
-#"$4"framework/bin/run_evosuite.pl -p $1 -v "$2"f -n 1 -o $BUGWD/"$TESTWD"/outputOfEvoSuite/ -c branch => 100s
+echo Creating new test suite...
+"$4"framework/bin/run_evosuite.pl -p $1 -v "$2"f -n 1 -o $BUGWD/"$TESTWD"/outputOfEvoSuite/ -c branch => 100s
 
 #Untar the generated test into the tests folder
-#cd $BUGWD/"$TESTWD"
-#tar xvjf outputOfEvoSuite/$1/evosuite-branch/1/"$1"-"$2"f-evosuite-branch.1.tar.bz2
+cd $BUGWD/"$TESTWD"
+tar xvjf outputOfEvoSuite/$1/evosuite-branch/1/"$1"-"$2"f-evosuite-branch.1.tar.bz2
 
 EXTRACLASSES=""
 if [ $LOWERCASEPACKAGE = "closure" ]; then
