@@ -10,5 +10,5 @@ sanity = yes
 regenPaths
 positiveTests = ./smallerPos.tests
 negativeTests = ./neg.tests
-jacocoPath = ./lib/jacocoagent.jar
+jacocoPath = ../../lib/jacocoagent.jar
 sanity = yes
