@@ -202,56 +202,52 @@ fi
  #Jar all the .class's
 cd "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$SRCFOLDER"/ 
 jar cf "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar "$JAVADIR"/* 
- #$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
- 
- echo Jar of source files created successfully.
+
+echo "Jar of source files created successfully."
  
  #Jar all the test class's
 cd "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$TESTFOLDER"/
 jar cf "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllTestClasses.jar "$JAVADIR"/* 
 
- #$DIROFCLASSFILES/*/*.class $DIROFCLASSFILES/*/*/*.class $DIROFCLASSFILES/*/*/*/*.class $DIROFCLASSFILES/*/*/*/*/*.class 
- 
- echo Jar of test files created successfully.
+echo "Jar of test files created successfully."
 
 
 cd $BUGWD/$WD
 
 #Create file to run defects4j compiile
-FILE="$4"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD/runCompile.sh
+# FIXME: This won't work on not-Claire's machine, but she's testing for now
+FILE="$4"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 /bin/cat <<EOM >$FILE
 #!/bin/bash
-cd $4ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
-$4framework/bin/defects4j compile
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/
+export PATH=$JAVA_HOME/bin/:$PATH
+cd $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
+$4/framework/bin/defects4j compile
 EOM
 
-chmod 777 runCompile.sh
+chmod 777 "$4"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 
 
 cd $BUGWD
 
 PACKAGEDIR=${JAVADIR//"/"/"."}
 
-#Create config file TODO:#FIX THIS FILE
-FILE="$4"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/configDefects4j
+#Create config file 
+FILE="$4"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/defects4j.config
 /bin/cat <<EOM >$FILE
 popsize = 5
 seed = 0
 testsDir = $TESTWD/$JAVADIR
 javaVM = /usr/bin/java
-workingDir = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD
-outputDir = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/tmp
+workingDir = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
 libs = $CONFIGLIBS
-classDir = bin/
 sanity = yes
 regenPaths
+sourceDir = $WD
 positiveTests = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/pos.tests
 negativeTests = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/neg.tests
 jacocoPath = $3/lib/jacocoagent.jar
-defects4jFolder = $4/framework/bin/
-defects4jBugFolder = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy
-classTestFolder = $TESTFOLDER
-classSourceFolder = $SRCFOLDER
+compileCommand = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 EOM
 
 
@@ -380,10 +376,10 @@ NUM=`wc -l tmp.txt | xargs | cut -d ' ' -f1`
 if [[ $NUM -gt 1 ]]
 then
     mv tmp.txt $BUGWD/bugfiles.txt
-    echo "targetClassName = $BUGWD/bugfiles.txt" >> $BUGWD/configDefects4j
+    echo "targetClassName = $BUGWD/bugfiles.txt" >> $BUGWD/defects4j.config
 else
     rm tmp.txt
-    echo "targetClassName = "$UNIQFILES >> $BUGWD/configDefects4j
+    echo "targetClassName = "$UNIQFILES >> $BUGWD/defects4j.config
 fi
 
 echo "This is the working directory: "

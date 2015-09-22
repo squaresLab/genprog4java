@@ -99,6 +99,9 @@ public class Configuration {
 		if (prop.getProperty("sourceVersion") != null) {
 			sourceVersion = prop.getProperty("sourceVersion").trim();
 		}
+		if(prop.getProperty("compileCommand") != null) {
+			compileCommand = prop.getProperty("compileCommand").trim();
+		}
 		if (prop.getProperty("targetVersion") != null) {
 			targetVersion = prop.getProperty("targetVersion").trim();
 		}
