@@ -58,7 +58,7 @@ public class Configuration {
 	protected static Logger logger = Logger.getLogger(Configuration.class);
 
 	public static String sourceDir = "./";
-	public static String outputDir = "./";
+	public static String outputDir = "./tmp/";
 	public static String libs;
 	public static String sourceVersion = "1.6";
 	public static String targetVersion = "1.6";
@@ -88,9 +88,6 @@ public class Configuration {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		if (prop.getProperty("outputDir") != null) {
-			outputDir = prop.getProperty("outputDir").trim();
 		}
 		javaVM = prop.getProperty("javaVM").trim();
 		if (prop.getProperty("sourceDir") != null) {
