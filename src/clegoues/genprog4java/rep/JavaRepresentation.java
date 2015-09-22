@@ -651,7 +651,7 @@ public class JavaRepresentation extends
 					bw.flush();
 					bw.close();
 
-
+// TODO: this is definitely all broken
 					BufferedWriter bw2 = new BufferedWriter(new FileWriter(pathToFile)); // possible FIXME: right path, still?
 					bw2.write(program);
 					bw2.flush();
