@@ -613,6 +613,30 @@ public class JavaRepresentation extends
 		if (sourceBuffers == null) {
 			return false;
 		}
+		String outDirName = Configuration.outputDir + File.separatorChar
+				+ exeName + File.separatorChar;
+		try {
+			for (Pair<ClassInfo, String> ele : sourceBuffers) {
+				ClassInfo ci = ele.getFirst();
+				String program = ele.getSecond();
+				String pathToFile = ci.pathToJavaFile();
+
+				BufferedWriter bw = new BufferedWriter(new FileWriter(
+						outDirName + File.separatorChar + pathToFile));
+				bw.write(program);
+				bw.flush();
+				bw.close();
+
+//TODO: this is definitely all broken
+				BufferedWriter bw2 = new BufferedWriter(new FileWriter(pathToFile)); // possible FIXME: right path, still?
+				bw2.write(program);
+				bw2.flush();
+				bw2.close();					
+
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+		}
 
 		if(Configuration.compileCommand == "") {
 			Iterable<? extends JavaFileObject> fileObjects = ASTUtils
@@ -630,37 +654,11 @@ public class JavaRepresentation extends
 			options.add(Configuration.targetVersion);
 
 			options.add("-d");
-			String outDirName = Configuration.outputDir + File.separatorChar
-					+ exeName + File.separatorChar;
+		
 			File outDir = new File(outDirName);
 			if (!outDir.exists())
 				outDir.mkdir();
 			options.add(outDirName);
-			try {
-				for (Pair<ClassInfo, String> ele : sourceBuffers) {
-					ClassInfo ci = ele.getFirst();
-					String program = ele.getSecond();
-					String pathToFile = ci.pathToJavaFile();
-					// FIXME: can I write this in the folders to match where the
-					// class file is compiled? I think the answer is YES: see
-					// fixme in astutils
-
-					BufferedWriter bw = new BufferedWriter(new FileWriter(
-							outDirName + File.separatorChar + pathToFile));
-					bw.write(program);
-					bw.flush();
-					bw.close();
-
-// TODO: this is definitely all broken
-					BufferedWriter bw2 = new BufferedWriter(new FileWriter(pathToFile)); // possible FIXME: right path, still?
-					bw2.write(program);
-					bw2.flush();
-					bw2.close();					
-
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-			}
 
 			StringWriter compilerErrorWriter = new StringWriter();
 			JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -675,6 +673,7 @@ public class JavaRepresentation extends
 				return true;
 			}
 		} else {
+			// FIXME: the code isn't getting printed out.  Whoops.
 			return Utils.runCommand(Configuration.compileCommand);
 		}
 	}
