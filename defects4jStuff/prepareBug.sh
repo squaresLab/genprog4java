@@ -240,6 +240,7 @@ seed = 0
 testsDir = $TESTWD/$JAVADIR
 javaVM = /usr/bin/java
 workingDir = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
+outputDir = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/tmp
 libs = $CONFIGLIBS
 sanity = yes
 regenPaths
@@ -247,6 +248,7 @@ sourceDir = $WD
 positiveTests = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/pos.tests
 negativeTests = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/neg.tests
 jacocoPath = $3/lib/jacocoagent.jar
+classSourceFolder = $SRCFOLDER
 compileCommand = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 EOM
 
