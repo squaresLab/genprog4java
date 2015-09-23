@@ -71,6 +71,8 @@ public class Configuration {
 	public static boolean doSanity = true;
 	public static String workingDir = "./";
 	public static Random randomizer = null;
+	public static String classSourceFolder = "";
+	public static String classTestFolder = "";
 	public static String compileCommand = "";
 
 	public Configuration() {
@@ -99,6 +101,9 @@ public class Configuration {
 		if (prop.getProperty("sourceVersion") != null) {
 			sourceVersion = prop.getProperty("sourceVersion").trim();
 		}
+		if (prop.getProperty("outputDir") != null) {
+			outputDir = prop.getProperty("outputDir").trim();
+		}
 		if(prop.getProperty("compileCommand") != null) {
 			compileCommand = prop.getProperty("compileCommand").trim();
 		}
@@ -107,6 +112,12 @@ public class Configuration {
 		}
 		if (prop.getProperty("jacocoPath") != null) {
 			jacocoPath = prop.getProperty("jacocoPath").trim();
+		}
+		if (prop.getProperty("classSourceFolder") != null) {
+			classSourceFolder = prop.getProperty("classSourceFolder").trim();
+		}
+		if (prop.getProperty("classTestFolder") != null) {
+			classTestFolder = prop.getProperty("classTestFolder").trim();
 		}
 		if (prop.getProperty("sanity") != null) {
 			String sanity = prop.getProperty("sanity").trim();

@@ -1,13 +1,13 @@
 #!/bin/bash
 # 1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)
 # 2nd param is the bug number (ex: 1,2,3,4,...)
-# 3rd param is the folder where the genprog project is (ex: ""$GENPROGDIR"" )
-# 4td param is the folder where defects4j is installed (ex: "$DEFECTS4JDIR" )
+# 3rd param is the folder where the genprog project is (ex: /home/mau/Research/genprog4java/ )
+# 4td param is the folder where defects4j is installed (ex: /home/mau/Research/defects4j/ )
 # 5th param is the option of running it (ex: allHuman, oneHuman, oneGenerated)
 #cp runGenProgForBug.bash ./genprog4java/defects4jStuff/
 
 #Mau runs it like this:
-#./runGenProgForBug.sh Math 2 "$GENPROGDIR" $DEFECTS4JDIR allHuman
+#./runGenProgForBug.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ allHuman
 
 PROJECT="$1"
 BUGNUMBER="$2"
