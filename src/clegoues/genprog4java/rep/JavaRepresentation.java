@@ -123,7 +123,8 @@ public class JavaRepresentation extends
 	private static HashMap<Integer, ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer, ArrayList<Integer>>();
 	private static HashMap<ClassInfo, String> originalSource = new HashMap<ClassInfo, String>();
 	private static HashMap<Integer, ClassInfo> stmtToFile = new HashMap<Integer, ClassInfo>();
-
+	private int mutationNumber = 0;
+	
 	// semantic check cache stuff, so we don't have to walk stuff a million
 	// times unnecessarily
 	// should be the same for all of append, replace, and swap, so we only need
@@ -606,7 +607,7 @@ public class JavaRepresentation extends
 
 	@Override
 	protected boolean internalCompile(String progName, String exeName) {
-
+		
 		// FIXME: why does an append that fails in computeSourceBuffers have
 		// a fitness of 204?
 		List<Pair<ClassInfo, String>> sourceBuffers = this.computeSourceBuffers();
@@ -614,25 +615,38 @@ public class JavaRepresentation extends
 			return false;
 		}
 		String outDirName = Configuration.outputDir + File.separatorChar
-				+ exeName + File.separatorChar;
+				+ exeName + File.separatorChar + File.separatorChar ;
+		
+		File sanRepDir = new File(Configuration.outputDir + File.separatorChar+ exeName);
+		if (!sanRepDir.exists()){
+			sanRepDir.mkdir();
+		}
+		
+		File mutDir = new File(outDirName);
+		if (!mutDir.exists()){
+			mutDir.mkdir();
+		}
+		
 		try {
 			for (Pair<ClassInfo, String> ele : sourceBuffers) {
 				ClassInfo ci = ele.getFirst();
 				String program = ele.getSecond();
 				String pathToFile = ci.pathToJavaFile();
+				
+				createPathFiles(outDirName, pathToFile);
 
 				BufferedWriter bw = new BufferedWriter(new FileWriter(
 						outDirName + File.separatorChar + pathToFile));
 				bw.write(program);
 				bw.flush();
 				bw.close();
-
-//TODO: this is definitely all broken
-				BufferedWriter bw2 = new BufferedWriter(new FileWriter(pathToFile)); // possible FIXME: right path, still?
+				
+				BufferedWriter bw2 = new BufferedWriter(new FileWriter(
+						Configuration.workingDir+ File.separatorChar + Configuration.sourceDir+ File.separatorChar + pathToFile)); 
 				bw2.write(program);
 				bw2.flush();
-				bw2.close();					
-
+				bw2.close();
+				
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -678,6 +692,18 @@ public class JavaRepresentation extends
 		}
 	}
 
+	private void createPathFiles(String base, String pathToFile){
+		pathToFile = pathToFile.substring(0,pathToFile.lastIndexOf(File.separatorChar));
+		String[] array = pathToFile.split(String.valueOf(File.separatorChar));
+		
+		for(String s : array){
+			File fileName = new File(base + File.separatorChar + s);
+			if (!fileName.exists()){
+				fileName.mkdir();
+			}
+			base += File.separatorChar + s;
+		}
+	}
 	
 	
 	public JavaRepresentation copy() {
