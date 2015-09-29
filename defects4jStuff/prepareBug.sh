@@ -3,10 +3,11 @@
 # 2nd param is the bug number (ex: 1,2,3,4,...)
 # 3rd param is the folder where the genprog project is (ex: "/home/mau/Research/genprog4java/" )
 # 4td param is the folder where defects4j is installed (ex: "/home/mau/Research/defects4j/" )
-# 5th param is the option of running it (ex: allHuman, oneHuman, oneGenerated)
+# 5th param is the option of running it (ex: humanMade, generated)
+# 6th param is the percentage of test cases being used to guide genprog's search (ex: 1, 100)
 
 #Mau runs it like this:
-#./prepareBug.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ allHuman
+#./prepareBug.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ humanMade 100
 
 # in case it helps, in my machine, I Have:
 # /home/mau/Research/genprog4j where the source code for genprog is
@@ -32,6 +33,7 @@ BUGNUMBER="$2"
 GENPROGDIR="$3"
 DEFECTS4JDIR="$4"
 OPTION="$5"
+TESTSUITEPERCENTAGE="$6"
 
 PARENTDIR=$DEFECTS4JDIR"/ExamplesCheckedOut"
 
@@ -186,14 +188,6 @@ fi
 
 
 
-#Create the new test suite
-#echo Creating new test suite...
-#"$4"/framework/bin/run_evosuite.pl -p $1 -v "$2"f -n 1 -o $BUGWD/"$TESTWD"/outputOfEvoSuite/ -c branch => 100s
-
-#Untar the generated test into the tests folder
-#cd $BUGWD/"$TESTWD"
-#tar xvjf outputOfEvoSuite/$1/evosuite-branch/1/"$1"-"$2"f-evosuite-branch.1.tar.bz2
-
 EXTRACLASSES=""
 if [ $LOWERCASEPACKAGE = "closure" ]; then
 EXTRACLASSES="$3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInfo.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMap.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMapOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/Instrumentation.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationTemplate.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/debugging/sourcemap/proto/Mapping.java"
@@ -287,9 +281,41 @@ do
 done
 
 
-# get positive tests
+
 case "$OPTION" in
-"allHuman" )
+"humanMade" )
+
+
+;;
+
+"onlyRelevant" ) 
+#Mau doesnt know what this is for.
+        echo "not implemented yet."
+        ;;
+
+"generated" )
+  #echo "write in this file: "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the generated test called NAMEOFTHETARGETFILEEvoSuite_Branch.java"
+  #gedit "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
+
+#MAYBE ERASE THE ORIGINAL? AND LEAVE JUST THE GENERATED ONE?
+
+#Create the new test suite
+echo Creating new test suite...
+"$4"/framework/bin/run_evosuite.pl -p $PROJECT -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfEvoSuite/ -c branch => 100s
+
+#Untar the generated test into the tests folder
+cd $BUGWD/"$TESTWD"/
+tar xvjf outputOfEvoSuite/$PROJECT/evosuite-branch/1/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch.1.tar.bz2
+
+
+;;
+
+esac
+
+
+
+
+# get positive tests
     pushd $BUGWD
     if [[ -f "print.xml" ]] 
         then
@@ -328,25 +354,35 @@ case "$OPTION" in
         mv tmp.txt pos.tests
     done
   popd
-;;
 
-"oneHuman" )
-  echo "write in this file: "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the human made test in the bug info"
-  gedit "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
 
-;;
 
-"onlyRelevant" ) 
-        echo "not implemented yet."
-        ;;
+#Remove a percentage of the positive tests in the test suite
+cd "$4"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
 
-"oneGenerated" )
-  echo "write in this file: "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the generated test called NAMEOFTHETARGETFILEEvoSuite_Branch.java"
-  gedit "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
+if [[ $TESTSUITEPERCENTAGE -ne 100 ]]
+then
+TESTCOUNT=$(cat pos.tests | wc -l)
 
-;;
+PERCENTAGETOREMOVE=$(echo "$TESTSUITEPERCENTAGE * 0.01" | bc -l )
 
-esac
+PERCENTAGETOREMOVE=$(echo "1-$PERCENTAGETOREMOVE" | bc -l )
+
+TESTCOUNT=$(echo "$TESTCOUNT * $PERCENTAGETOREMOVE" | bc -l )
+
+TESTCOUNT=$(echo "($TESTCOUNT+0.5)/1" | bc)
+
+DELETELINES="sed -i -e 1,"$TESTCOUNT"d pos.tests"
+
+eval $DELETELINES
+
+fi
+
+TESTCOUNT=$(cat pos.tests | wc -l)
+
+echo The positive tests file has $TESTCOUNT lines. Which is a $TESTSUITEPERCENTAGE% of the original amount of test cases.
+
+
 
 # get the class names to be repaired
 
