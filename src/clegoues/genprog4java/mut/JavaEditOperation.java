@@ -206,6 +206,35 @@ public class JavaEditOperation implements
 			//This is the same as delete, what is it supposed to be?
 			rewriter.remove(locationNode, null);
 			break;
+		case CASTCHECK:
+ 			break;
+		case EXPADD:
+			break;
+		case EXPREM:
+			break;
+		case EXPREP:
+			break;
+		case FUNREP:
+			break;
+		case NULLCHECK:
+			break;
+		case OBJINIT:
+			break;
+		case PARADD:
+			break;
+		case PARREM:
+			break;
+		case PARREP:
+			break;
+		case RANGECHECK:
+			break;
+		case SIZECHECK:
+
+			break;
+		default:
+			break;
+			
+			
 		}
 	}
 

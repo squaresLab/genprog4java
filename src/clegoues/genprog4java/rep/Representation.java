@@ -60,7 +60,7 @@ import clegoues.genprog4java.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class Representation<G extends EditOperation> implements
-		Comparable<Representation<G>> {
+Comparable<Representation<G>> {
 
 	protected Logger logger = Logger.getLogger(Representation.class);
 
@@ -112,7 +112,7 @@ public abstract class Representation<G extends EditOperation> implements
 	public abstract void noteSuccess();
 
 	public abstract void load(ArrayList<ClassInfo> classNames) throws IOException,
-			UnexpectedCoverageResultException;
+	UnexpectedCoverageResultException;
 
 	public void serialize(String filename, ObjectOutputStream fout,
 			boolean globalinfo) { // second parameter is optional
@@ -128,7 +128,7 @@ public abstract class Representation<G extends EditOperation> implements
 			out.writeObject(this.history);
 		} catch (IOException e) {
 			System.err
-					.println("Representation: largely unexpected failure in serialization.");
+			.println("Representation: largely unexpected failure in serialization.");
 			e.printStackTrace();
 		} finally {
 			if (fout == null) {
@@ -139,7 +139,7 @@ public abstract class Representation<G extends EditOperation> implements
 						fileOut.close();
 				} catch (IOException e) {
 					System.err
-							.println("Representation: largely unexpected failure in serialization.");
+					.println("Representation: largely unexpected failure in serialization.");
 					e.printStackTrace();
 				}
 			}
@@ -167,8 +167,8 @@ public abstract class Representation<G extends EditOperation> implements
 			succeeded = false;
 		} catch (ClassNotFoundException e) {
 			System.err
-					.println("Representation: ClassNotFoundException in deserialize "
-							+ filename + " which is probably *not* OK");
+			.println("Representation: ClassNotFoundException in deserialize "
+					+ filename + " which is probably *not* OK");
 			e.printStackTrace();
 			succeeded = false;
 		} finally {
@@ -179,8 +179,8 @@ public abstract class Representation<G extends EditOperation> implements
 				}
 			} catch (IOException e) {
 				System.err
-						.println("Representation: IOException in file close in deserialize "
-								+ filename + " which is weird?");
+				.println("Representation: IOException in file close in deserialize "
+						+ filename + " which is weird?");
 				succeeded = false;
 				e.printStackTrace();
 			}
@@ -252,6 +252,54 @@ public abstract class Representation<G extends EditOperation> implements
 
 	public static void configure(Properties prop) {
 		// FIXME: this is dumb, do it all in configuration
+	}
+
+	public void funRep(int dst, int source){
+		history.add(new HistoryEle(Mutation.FUNREP, dst, source));
+	}
+
+	public void parRep(int dst, int source){
+		history.add(new HistoryEle(Mutation.PARREP, dst, source));
+	}
+
+	public void parAdd(int dst, int source){
+		history.add(new HistoryEle(Mutation.PARADD, dst, source));
+	}
+
+	public void parRem(int atomId){
+		history.add(new HistoryEle(Mutation.PARREM, atomId));
+	}
+
+	public void expRep(int dst, int source){
+		history.add(new HistoryEle(Mutation.EXPREP, dst, source));
+	}
+
+	public void expAdd(int dst, int source){
+		history.add(new HistoryEle(Mutation.EXPADD, dst, source));
+	}
+
+	public void expRem(int atomId){
+		history.add(new HistoryEle(Mutation.EXPREM, atomId));
+	}
+
+	public void nullCheck(int atomId){
+		history.add(new HistoryEle(Mutation.NULLCHECK, atomId));
+	}
+
+	public void objInit(int atomId){
+		history.add(new HistoryEle(Mutation.OBJINIT, atomId));
+	}
+
+	public void rangeCheck(int atomId){
+		history.add(new HistoryEle(Mutation.RANGECHECK, atomId));
+	}
+
+	public void sizeCheck(int atomId){
+		history.add(new HistoryEle(Mutation.SIZECHECK, atomId));
+	}
+
+	public void castCheck(int atomId){
+		history.add(new HistoryEle(Mutation.CASTCHECK, atomId));
 	}
 
 	public void nullInsert(int atomId) {
