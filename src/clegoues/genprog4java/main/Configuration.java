@@ -59,6 +59,7 @@ public class Configuration {
 
 	public static String sourceDir = "./";
 	public static String outputDir = "./tmp/";
+	public static String classesDir = "";
 	public static String libs;
 	public static String sourceVersion = "1.6";
 	public static String targetVersion = "1.6";
