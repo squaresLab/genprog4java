@@ -621,6 +621,7 @@ public class JavaRepresentation extends
 		if (!sanRepDir.exists()){
 			sanRepDir.mkdir();
 		}
+
 		
 		File mutDir = new File(outDirName);
 		if (!mutDir.exists()){
@@ -632,6 +633,7 @@ public class JavaRepresentation extends
 				ClassInfo ci = ele.getFirst();
 				String program = ele.getSecond();
 				String pathToFile = ci.pathToJavaFile();
+
 				
 				createPathFiles(outDirName, pathToFile);
 
@@ -639,14 +641,16 @@ public class JavaRepresentation extends
 						outDirName + File.separatorChar + pathToFile));
 				bw.write(program);
 				bw.flush();
+
 				bw.close();
-				
+				if(Configuration.compileCommand != "") {
+
 				BufferedWriter bw2 = new BufferedWriter(new FileWriter(
 						Configuration.workingDir+ File.separatorChar + Configuration.sourceDir+ File.separatorChar + pathToFile)); 
 				bw2.write(program);
 				bw2.flush();
 				bw2.close();
-				
+				}	
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -669,9 +673,9 @@ public class JavaRepresentation extends
 
 			options.add("-d");
 		
-			File outDir = new File(outDirName);
-			if (!outDir.exists())
-				outDir.mkdir();
+			File outDirFile = new File(outDirName);
+			if (!outDirFile.exists())
+				outDirFile.mkdir();
 			options.add(outDirName);
 
 			StringWriter compilerErrorWriter = new StringWriter();
@@ -688,6 +692,7 @@ public class JavaRepresentation extends
 			}
 		} else {
 			// FIXME: the code isn't getting printed out.  Whoops.
+
 			return Utils.runCommand(Configuration.compileCommand);
 		}
 	}
