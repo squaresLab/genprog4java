@@ -186,7 +186,7 @@ public class Configuration {
 	
 	public static void saveTargetFiles() {
 		
-		String original = Configuration.workingDir + File.separatorChar + Configuration.outputDir  + File.separatorChar + "original" + File.separatorChar;
+		String original = Configuration.outputDir  + File.separatorChar + "original" + File.separatorChar;
 
 		//copy the target classes to an "original" folder; we will work from there.
 		File createFile = new File(original);
