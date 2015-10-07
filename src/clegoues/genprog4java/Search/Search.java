@@ -107,6 +107,7 @@ public class Search<G extends EditOperation> {
 		if (props.getProperty("search") != null) {
 			Search.searchStrategy = props.getProperty("search").trim();
 		}
+		//I'm gessing this is for all the templates
 		if (props.getProperty("PAR") != null){
 			parTemplates = new ArrayList<Pair<Mutation, Double>>();
 			Double d = new Double(1.0);
@@ -121,6 +122,8 @@ public class Search<G extends EditOperation> {
 			parTemplates.add(new Pair<Mutation, Double>(Mutation.RANGECHECK, d));
 			parTemplates.add(new Pair<Mutation, Double>(Mutation.SIZECHECK, d));
 			parTemplates.add(new Pair<Mutation, Double>(Mutation.CASTCHECK, d));
+
+			//And this is for a subset of the templates
 		} else if(props.getProperty("PARtemplates") != null){
 			String[] templates = props.getProperty("PARtemplates").trim().split(" ");
 			parTemplates = new ArrayList<Pair<Mutation, Double>>();

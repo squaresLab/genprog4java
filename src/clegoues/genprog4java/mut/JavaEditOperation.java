@@ -206,27 +206,43 @@ public class JavaEditOperation implements
 			//This is the same as delete, what is it supposed to be?
 			rewriter.remove(locationNode, null);
 			break;
+			
+			//Implement All These
 		case CASTCHECK:
+			
  			break;
 		case EXPADD:
+			
 			break;
 		case EXPREM:
+			
 			break;
 		case EXPREP:
+			
 			break;
 		case FUNREP:
+			
 			break;
 		case NULLCHECK:
+			if(canAddNullCheck(locationNode)){
+				addNullCheck(rewriter,locationNode);
+			}
+			
 			break;
 		case OBJINIT:
+			
 			break;
 		case PARADD:
+			
 			break;
 		case PARREM:
+			
 			break;
 		case PARREP:
+			
 			break;
 		case RANGECHECK:
+			
 			break;
 		case SIZECHECK:
 
@@ -236,6 +252,14 @@ public class JavaEditOperation implements
 			
 			
 		}
+	}
+	
+	private boolean canAddNullCheck(ASTNode nodeToCheck){
+		
+	}
+
+	private void addNullCheck(ASTRewrite rewriter, ASTNode nodeToCheck){
+		
 	}
 
 

@@ -61,7 +61,7 @@ import clegoues.genprog4java.mut.Mutation;
 
 @SuppressWarnings("rawtypes")
 public abstract class CachingRepresentation<G extends EditOperation> extends
-		Representation<G> {
+Representation<G> {
 	protected Logger logger = Logger.getLogger(CachingRepresentation.class);
 
 	public static boolean skipFailedSanity = true;
@@ -121,7 +121,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 
 	public void noteSuccess() {
 	} // default does nothing. OCaml version takes the original representation
-		// here. Probably should do same
+	// here. Probably should do same
 
 	public void load(ArrayList<ClassInfo> bases) throws IOException {
 
@@ -333,19 +333,19 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 				sanityFilename, thisTest);
 		// System.out.println("command: " + command.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);// Mau had to
-																// change this
-																// to be able to
-																// run longer
-																// tests. It was
-																// on 6000
-																// originally
+		// change this
+		// to be able to
+		// run longer
+		// tests. It was
+		// on 6000
+		// originally
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");
 		executor.setWorkingDirectory(new File(workingDirectory));
 		executor.setWatchdog(watchdog);
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-// FIXME: the problem is it's not finding the jacocagent because it's at ./lib, not at /path/to/lib
+		// FIXME: the problem is it's not finding the jacocagent because it's at ./lib, not at /path/to/lib
 		executor.setExitValue(0);
 
 		executor.setStreamHandler(new PumpStreamHandler(out));
@@ -458,77 +458,77 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 		super.replace(one, two);
 		this.updated();
 	}
-	
+
 	public void nullCheck(int atomId){
-				super.nullCheck(atomId);
-				this.updated();
-			}
-			
-			@Override
-			public void funRep(int dst, int source){
-				super.funRep(dst, source);
-				this.updated();
-			}
-			
-			@Override
-			public void parRep(int dst, int source){
-				super.parRep(dst, source);
-				this.updated();
-			}
-			
-			@Override
-			public void parAdd(int dst, int source){
-				super.parAdd(dst, source);
-				this.updated();
-			}
-			
-			@Override
-			public void parRem(int atomId){
-				super.parRem(atomId);
-				this.updated();
-			}
-			
-			@Override
-			public void expRep(int dst, int source){
-				super.expRep(dst, source);
-				this.updated();
-			}
-			
-			@Override
-			public void expAdd(int dst, int source){
-				super.expAdd(dst, source);
-				this.updated();
-			}
-			
-			@Override
-			public void expRem(int atomId){
-				super.expRem(atomId);
-				this.updated();
-			}
-			
-			@Override
-			public void objInit(int atomId){
-				super.expRem(atomId);
-				this.updated();
-			}
-			
-			@Override
-			public void rangeCheck(int atomId){
-				super.rangeCheck(atomId);
-				this.updated();
-			}
-			
-			@Override
-			public void sizeCheck(int atomId){
-				super.sizeCheck(atomId);
-				this.updated();
-			}
-		
-			@Override
-			public void castCheck(int atomId){
-				super.castCheck(atomId);
-				this.updated();
-			}
+		super.nullCheck(atomId);
+		this.updated();
+	}
+
+	@Override
+	public void funRep(int dst, int source){
+		super.funRep(dst, source);
+		this.updated();
+	}
+
+	@Override
+	public void parRep(int dst, int source){
+		super.parRep(dst, source);
+		this.updated();
+	}
+
+	@Override
+	public void parAdd(int dst, int source){
+		super.parAdd(dst, source);
+		this.updated();
+	}
+
+	@Override
+	public void parRem(int atomId){
+		super.parRem(atomId);
+		this.updated();
+	}
+
+	@Override
+	public void expRep(int dst, int source){
+		super.expRep(dst, source);
+		this.updated();
+	}
+
+	@Override
+	public void expAdd(int dst, int source){
+		super.expAdd(dst, source);
+		this.updated();
+	}
+
+	@Override
+	public void expRem(int atomId){
+		super.expRem(atomId);
+		this.updated();
+	}
+
+	@Override
+	public void objInit(int atomId){
+		super.expRem(atomId);
+		this.updated();
+	}
+
+	@Override
+	public void rangeCheck(int atomId){
+		super.rangeCheck(atomId);
+		this.updated();
+	}
+
+	@Override
+	public void sizeCheck(int atomId){
+		super.sizeCheck(atomId);
+		this.updated();
+	}
+
+	@Override
+	public void castCheck(int atomId){
+		super.castCheck(atomId);
+		this.updated();
+	}
 
 	protected abstract CommandLine internalTestCaseCommand(String exeName,
 			String fileName, TestCase test);
