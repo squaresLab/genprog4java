@@ -255,7 +255,8 @@ public class JavaEditOperation implements
 	}
 	
 	private boolean canAddNullCheck(ASTNode nodeToCheck){
-		return true;
+
+		return false;
 	}
 
 	private void addNullCheck(ASTRewrite rewriter, ASTNode nodeToCheck){
