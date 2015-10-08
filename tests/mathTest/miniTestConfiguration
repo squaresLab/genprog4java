@@ -6,7 +6,7 @@ libs = ./lib/junittestrunner.jar:./lib/commons-io-1.4.jar:./lib/junit-4.10.jar:.
 targetClassName = org.apache.commons.math.fraction.BigFraction
 sanity = yes
 regenPaths
-positiveTests = /home/mau/Research/genprog4java/tests/mathTest/pos.tests
-negativeTests = /home/mau/Research/genprog4java/tests/mathTest/neg.tests
-jacocoPath = ../lib/jacocoagent.jar
+positiveTests = ./smallerPos.tests
+negativeTests = ./neg.tests
+jacocoPath = ../../lib/jacocoagent.jar
 sanity = yes
