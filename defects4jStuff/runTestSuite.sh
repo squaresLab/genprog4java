@@ -10,6 +10,9 @@
 #Mau runs it like this:
 #./runTestSuite.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/
 
+#VM:
+#./runTestSuite.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/
+
 PROJECT="$1"
 BUGNUMBER="$2"
 GENPROGDIR="$3"
