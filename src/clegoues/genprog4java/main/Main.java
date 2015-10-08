@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.BasicConfigurator;
 
 import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.RepairFoundException;
@@ -59,6 +60,7 @@ public class Main {
 		Population incomingPopulation = null;
 		assert (args.length > 0);
 		long startTime = System.currentTimeMillis();
+		BasicConfigurator.configure();
 
 		Configuration.setProperties(args[0]);
 		File workDir = new File(Configuration.outputDir);
