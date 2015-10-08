@@ -25,9 +25,17 @@ POSTESTS=$DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/p
 JAVALOCATION=$(which java)
 
 
+TESTCOUNT=$(cat $POSTESTS | wc -l)
+
+echo This test suite has $TESTCOUNT tests
+
+COUNTER=0
+
 while read p; do
 
-  echo Running test: $p
+COUNTER=$(($COUNTER + 1))
+
+  echo Running test $COUNTER out of $TESTCOUNT: $p
 OUTPUT=$($JAVALOCATION -cp .:$DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar:$DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllTestClasses.jar:$DEFECTS4JDIR/framework/projects/lib/junit-4.11.jar org.junit.runner.JUnitCore $p)
 
 echo $OUTPUT
@@ -55,7 +63,10 @@ fi
 
 done <$POSTESTS
 
-
+if [[ $TESTCOUNT == $COUNTER ]]
+then
+   echo "Yey! All tests were executed successfully :D :D :D"
+fi
 
 
 

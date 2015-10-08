@@ -35,7 +35,9 @@ package clegoues.genprog4java.rep;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +59,6 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.util.Pair;
-import clegoues.genprog4java.mut.Mutation;
 
 @SuppressWarnings("rawtypes")
 public abstract class CachingRepresentation<G extends EditOperation> extends
@@ -197,6 +198,9 @@ Representation<G> {
 			return false;
 		}
 
+		//print to a file only the tests in scope
+		printTestsInScope(passingTests);
+
 		testNum = 1;
 		for (String negTest : Fitness.negativeTests) {
 			logger.info("\tn" + testNum + ": ");
@@ -219,6 +223,27 @@ Representation<G> {
 		logger.info("sanity checking completed (time taken = "
 				+ (System.currentTimeMillis() - startTime) + ")");
 		return true;
+	}
+
+	private void printTestsInScope(ArrayList<String> passingTests){
+
+		String path = Fitness.posTestFile;
+		//Set up to write to txt file
+		FileWriter write = null;
+		try {
+			write = new FileWriter(path, false);
+		} catch (IOException e) {
+			logger.error("Error creating the file" + path);
+			return;
+		}
+		PrintWriter printer = new PrintWriter(write);
+
+		//Now write data to the file
+		for(String s : passingTests){
+			printer.println(s);
+		}
+		printer.close();
+
 	}
 
 	public boolean testCase(TestCase test) {
