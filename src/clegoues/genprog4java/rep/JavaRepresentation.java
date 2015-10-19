@@ -179,7 +179,14 @@ public class JavaRepresentation extends
 				.entrySet()) {
 			ClassInfo targetClassInfo = ele.getKey();
 			String pathToCoverageClass = Configuration.workingDir + File.separator
-					+ Configuration.classSourceFolder + File.separator + targetClassInfo.pathToClassFile(); 
+					+ Configuration.classSourceFolder + File.separator + targetClassInfo.pathToClassFile();
+			File compiledClass = new File(pathToCoverageClass);
+			if(!compiledClass.exists()) {
+				pathToCoverageClass = Configuration.outputDir + "coverage/coverage.out" + File.separatorChar
+						+ targetClassInfo.pathToClassFile() ;
+				compiledClass = new File(pathToCoverageClass);
+			}
+			
 			InputStream targetClass = new FileInputStream(new File(pathToCoverageClass));
 
 			if (executionData == null) {
@@ -248,7 +255,7 @@ public class JavaRepresentation extends
 		ScopeInfo scopeInfo = new ScopeInfo();
 		JavaParser myParser = new JavaParser(scopeInfo);
 		// originalSource entire class file written as a string
-		String path = Configuration.workingDir + Configuration.outputDir +  "/original/" + pair.pathToJavaFile();
+		String path = Configuration.outputDir +  "/original/" + pair.pathToJavaFile();
 		String source = FileUtils.readFileToString(new File(path));
 		JavaRepresentation.originalSource.put(pair, source);
 
@@ -615,12 +622,13 @@ public class JavaRepresentation extends
 			return false;
 		}
 		String outDirName = Configuration.outputDir + File.separatorChar
-				+ exeName + File.separatorChar + File.separatorChar ;
+				+ exeName + File.separatorChar ;
 		
 		File sanRepDir = new File(Configuration.outputDir + File.separatorChar+ exeName);
 		if (!sanRepDir.exists()){
 			sanRepDir.mkdir();
 		}
+
 		
 		File mutDir = new File(outDirName);
 		if (!mutDir.exists()){
@@ -632,6 +640,7 @@ public class JavaRepresentation extends
 				ClassInfo ci = ele.getFirst();
 				String program = ele.getSecond();
 				String pathToFile = ci.pathToJavaFile();
+
 				
 				createPathFiles(outDirName, pathToFile);
 
@@ -639,14 +648,17 @@ public class JavaRepresentation extends
 						outDirName + File.separatorChar + pathToFile));
 				bw.write(program);
 				bw.flush();
+
 				bw.close();
-				
-				BufferedWriter bw2 = new BufferedWriter(new FileWriter(
-						Configuration.workingDir+ File.separatorChar + Configuration.sourceDir+ File.separatorChar + pathToFile)); 
+				if(Configuration.compileCommand != "") {
+					String path = 
+							Configuration.workingDir+ File.separatorChar + Configuration.sourceDir+ File.separatorChar + pathToFile; 
+ 
+				BufferedWriter bw2 = new BufferedWriter(new FileWriter(path)); 
 				bw2.write(program);
 				bw2.flush();
 				bw2.close();
-				
+				}	
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -669,9 +681,9 @@ public class JavaRepresentation extends
 
 			options.add("-d");
 		
-			File outDir = new File(outDirName);
-			if (!outDir.exists())
-				outDir.mkdir();
+			File outDirFile = new File(outDirName);
+			if (!outDirFile.exists())
+				outDirFile.mkdir();
 			options.add(outDirName);
 
 			StringWriter compilerErrorWriter = new StringWriter();
@@ -687,7 +699,6 @@ public class JavaRepresentation extends
 				return true;
 			}
 		} else {
-			// FIXME: the code isn't getting printed out.  Whoops.
 			return Utils.runCommand(Configuration.compileCommand);
 		}
 	}

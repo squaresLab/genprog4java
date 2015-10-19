@@ -63,7 +63,7 @@ import clegoues.genprog4java.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class FaultLocRepresentation<G extends EditOperation> extends
-		CachingRepresentation<G> {
+CachingRepresentation<G> {
 	protected Logger logger = Logger.getLogger(FaultLocRepresentation.class);
 
 	private static double positivePathWeight = 0.1;
@@ -136,7 +136,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 			}
 		} catch (IOException e) {
 			System.err
-					.println("faultLocRep: largely unexpected failure in serialization.");
+			.println("faultLocRep: largely unexpected failure in serialization.");
 			e.printStackTrace();
 		} finally {
 			if (fout == null) {
@@ -147,7 +147,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 						fileOut.close();
 				} catch (IOException e) {
 					System.err
-							.println("faultLocRep: largely unexpected failure in serialization.");
+					.println("faultLocRep: largely unexpected failure in serialization.");
 					e.printStackTrace();
 				}
 			}
@@ -181,8 +181,8 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 						|| posWeight != FaultLocRepresentation.positivePathWeight
 						|| FaultLocRepresentation.regenPaths) {
 					this.computeLocalization(); // I remember needing to do this
-												// in OCaml but I don't remember
-												// why?
+					// in OCaml but I don't remember
+					// why?
 				}
 				logger.info("faultLocRepresentation: " + filename + "loaded\n");
 			} else {
@@ -190,18 +190,18 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 			}
 		} catch (IOException e) {
 			System.err
-					.println("faultLocRepresentation: IOException in deserialize "
-							+ filename + " which is probably OK");
+			.println("faultLocRepresentation: IOException in deserialize "
+					+ filename + " which is probably OK");
 			succeeded = false;
 		} catch (ClassNotFoundException e) {
 			System.err
-					.println("faultLocRepresentation: ClassNotFoundException in deserialize "
-							+ filename + " which is probably *not* OK");
+			.println("faultLocRepresentation: ClassNotFoundException in deserialize "
+					+ filename + " which is probably *not* OK");
 			e.printStackTrace();
 			succeeded = false;
 		} catch (UnexpectedCoverageResultException e) {
 			System.err
-					.println("faultLocRepresentation: reran coverage in faultLocRep deserialize and something unexpected happened, so I'm giving up.");
+			.println("faultLocRepresentation: reran coverage in faultLocRep deserialize and something unexpected happened, so I'm giving up.");
 			Runtime.getRuntime().exit(1);
 		} finally {
 			try {
@@ -214,8 +214,8 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 			} catch (IOException e) {
 				succeeded = false;
 				System.err
-						.println("faultLocRepresentation: IOException in file close in deserialize "
-								+ filename + " which is weird?");
+				.println("faultLocRepresentation: IOException in file close in deserialize "
+						+ filename + " which is weird?");
 				e.printStackTrace();
 			}
 		}
@@ -247,6 +247,16 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 			case SWAP:
 				addToSet = this.swapSources(atomId).size() > 0;
 				break;
+
+			case NULLCHECK:
+				addToSet = true;
+				break;
+
+			default:
+				addToSet = this.replaceSources(atomId).size() > 0;
+				break;
+
+
 			}
 			if (addToSet) {
 				retVal.add(mutation);
@@ -312,7 +322,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 
 	private TreeSet<Integer> runTestsCoverage(String pathFile, TestType testT,
 			ArrayList<String> tests, boolean expectedResult, String wd)
-			throws IOException, UnexpectedCoverageResultException {
+					throws IOException, UnexpectedCoverageResultException {
 		int counterCoverageErrors = 0;
 
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
@@ -376,7 +386,7 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 	}
 
 	protected void computeLocalization() throws IOException,
-			UnexpectedCoverageResultException {
+	UnexpectedCoverageResultException {
 		// FIXME: THIS ONLY DOES STANDARD PATH FILE localization
 		/*
 		 * Default "ICSE'09"-style fault and fix localization from path files.
@@ -473,8 +483,8 @@ public abstract class FaultLocRepresentation<G extends EditOperation> extends
 		// filename += Configuration.globalExtension;
 
 		super.load(bases); // calling super so that the code is loaded and the
-							// sanity check happens before localization is
-							// computed
+		// sanity check happens before localization is
+		// computed
 		try {
 			this.computeLocalization();
 		} catch (UnexpectedCoverageResultException e) {

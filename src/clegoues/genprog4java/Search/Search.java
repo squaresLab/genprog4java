@@ -67,6 +67,7 @@ public class Search<G extends EditOperation> {
 	public static String searchStrategy = "ga";
 	private Fitness<G> fitnessEngine = null;
 	private int generationsRun = 0;
+	private static ArrayList<Pair<Mutation, Double>> parTemplates;
 
 	public Search(Fitness<G> engine) {
 		this.fitnessEngine = engine;
@@ -106,6 +107,55 @@ public class Search<G extends EditOperation> {
 		if (props.getProperty("search") != null) {
 			Search.searchStrategy = props.getProperty("search").trim();
 		}
+		//I'm gessing this is for all the templates
+		if (props.getProperty("PAR") != null){
+			parTemplates = new ArrayList<Pair<Mutation, Double>>();
+			Double d = new Double(1.0);
+			parTemplates.add(new Pair<Mutation, Double>(Mutation.FUNREP, d));
+			parTemplates.add(new Pair<Mutation, Double>(Mutation.PARREP, d));
+			parTemplates.add(new Pair<Mutation, Double>(Mutation.PARADD, d));
+			parTemplates.add(new Pair<Mutation, Double>(Mutation.PARREM, d));
+			parTemplates.add(new Pair<Mutation, Double>(Mutation.EXPREP, d));
+			parTemplates.add(new Pair<Mutation, Double>(Mutation.EXPADD, d));
+			parTemplates.add(new Pair<Mutation, Double>(Mutation.EXPREM, d));
+			parTemplates.add(new Pair<Mutation, Double>(Mutation.NULLCHECK, d));
+			parTemplates.add(new Pair<Mutation, Double>(Mutation.RANGECHECK, d));
+			parTemplates.add(new Pair<Mutation, Double>(Mutation.SIZECHECK, d));
+			parTemplates.add(new Pair<Mutation, Double>(Mutation.CASTCHECK, d));
+
+			//And this is for a subset of the templates
+		} else if(props.getProperty("PARtemplates") != null){
+			String[] templates = props.getProperty("PARtemplates").trim().split(" ");
+			parTemplates = new ArrayList<Pair<Mutation, Double>>();
+			for(int i = 0; i < templates.length; i++){
+				String s = templates[i];
+				Double d = new Double(1.0);
+				if(s.equals("funRep")){
+					parTemplates.add(new Pair<Mutation, Double>(Mutation.FUNREP, d));
+				} else if(s.equals("parRep")){
+					parTemplates.add(new Pair<Mutation, Double>(Mutation.PARREP, d));
+				} else if(s.equals("parAdd")){
+					parTemplates.add(new Pair<Mutation, Double>(Mutation.PARADD, d));
+				} else if(s.equals("parRem")){
+					parTemplates.add(new Pair<Mutation, Double>(Mutation.PARREM, d));
+				} else if(s.equals("expRep")){
+					parTemplates.add(new Pair<Mutation, Double>(Mutation.EXPREP, d));
+				} else if(s.equals("expAdd")){
+					parTemplates.add(new Pair<Mutation, Double>(Mutation.EXPADD, d));
+				} else if(s.equals("expRem")){
+					parTemplates.add(new Pair<Mutation, Double>(Mutation.EXPREM, d));
+				} else if(s.equals("nullCheck")){
+					parTemplates.add(new Pair<Mutation, Double>(Mutation.NULLCHECK, d));
+				} else if(s.equals("rangeCheck")){
+					parTemplates.add(new Pair<Mutation, Double>(Mutation.RANGECHECK, d));
+				} else if(s.equals("sizeCheck")){
+					parTemplates.add(new Pair<Mutation, Double>(Mutation.SIZECHECK, d));
+				} else if(s.equals("castCheck")){
+					parTemplates.add(new Pair<Mutation, Double>(Mutation.CASTCHECK, d));
+				} 
+
+			}
+		}
 	}
 
 	/*
@@ -132,15 +182,10 @@ public class Search<G extends EditOperation> {
 		logger.info("\nRepair Found: " + rep.getName() + "\n");
 
 		Calendar endTime = Calendar.getInstance(); // TODO do something with
-													// this
-		
-		//COPY THIS FILE INTO THE SOURCE TREE
-		
-		
-		
-		
-		
-		
+		// this
+
+		// COPY THIS FILE INTO THE SOURCE TREE
+
 		File repairDir = new File("repair/");
 		if (!repairDir.exists())
 			repairDir.mkdir();
@@ -215,6 +260,13 @@ public class Search<G extends EditOperation> {
 				Search.repProb));
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.NULLINSERT,
 				Search.nullProb));
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.NULLCHECK,
+				Search.nullProb));
+		if (parTemplates != null)
+			for (Pair<Mutation, Double> p : parTemplates) {
+				availableMutations.add(p);
+			}
+		;
 		Representation.registerMutations(availableMutations);
 	}
 
@@ -240,6 +292,9 @@ public class Search<G extends EditOperation> {
 			}
 			if (Search.swapProb > 0.0) {
 				count += original.swapSources(faultyLocation).size();
+			}
+			if (Search.nullProb > 0.0) {
+				count++;
 			}
 		}
 		logger.info("search: bruteForce: " + count
@@ -372,7 +427,7 @@ public class Search<G extends EditOperation> {
 	 * 
 	 * @return variant' modified/potentially mutated variant
 	 */
-	void mutate(Representation<G> variant) {
+	public void mutate(Representation<G> variant) {
 		ArrayList faultyAtoms = variant.getFaultyAtoms();
 		ArrayList<WeightedAtom> proMutList = new ArrayList<WeightedAtom>();
 		for (int i = 0; i < Search.promut; i++) {
@@ -406,7 +461,7 @@ public class Search<G extends EditOperation> {
 				break;
 			case REPLACE:
 				TreeSet<WeightedAtom> replaceAllowed = variant
-						.replaceSources(stmtid);
+				.replaceSources(stmtid);
 				WeightedAtom replaceWith = (WeightedAtom) GlobalUtils
 						.chooseOneWeighted(new ArrayList(replaceAllowed));
 				variant.replace(stmtid, replaceWith.getAtom());
@@ -486,7 +541,7 @@ public class Search<G extends EditOperation> {
 	 */
 	private void runGa(int startGen, int numGens,
 			Population<G> incomingPopulation, Representation<G> original)
-			throws RepairFoundException {
+					throws RepairFoundException {
 		/*
 		 * the bulk of run_ga is performed by the recursive inner helper
 		 * function, which Claire modeled off the MatLab code sent to her by the

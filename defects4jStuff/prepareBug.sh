@@ -9,6 +9,9 @@
 #Mau runs it like this:
 #./prepareBug.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ humanMade 100
 
+#VM:
+#./prepareBug.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/ allHuman 100
+
 # in case it helps, in my machine, I Have:
 # /home/mau/Research/genprog4j where the source code for genprog is
 # /home/mau/Research/defects4j where the defects4j source code is

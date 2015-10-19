@@ -10,6 +10,9 @@
 #Mau runs it like this:
 #./runTestSuite.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/
 
+#VM:
+#./runTestSuite.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/
+
 PROJECT="$1"
 BUGNUMBER="$2"
 GENPROGDIR="$3"
@@ -22,9 +25,17 @@ POSTESTS=$DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/p
 JAVALOCATION=$(which java)
 
 
+TESTCOUNT=$(cat $POSTESTS | wc -l)
+
+echo This test suite has $TESTCOUNT tests
+
+COUNTER=0
+
 while read p; do
 
-  echo Running test: $p
+COUNTER=$(($COUNTER + 1))
+
+  echo Running test $COUNTER out of $TESTCOUNT: $p
 OUTPUT=$($JAVALOCATION -cp .:$DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar:$DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllTestClasses.jar:$DEFECTS4JDIR/framework/projects/lib/junit-4.11.jar org.junit.runner.JUnitCore $p)
 
 echo $OUTPUT
@@ -52,7 +63,10 @@ fi
 
 done <$POSTESTS
 
-
+if [[ $TESTCOUNT == $COUNTER ]]
+then
+   echo "Yey! All tests were executed successfully :D :D :D"
+fi
 
 
 
