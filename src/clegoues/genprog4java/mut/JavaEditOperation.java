@@ -401,7 +401,7 @@ public class JavaEditOperation implements
 					InfixExpression expression = null;
 					expression = parent.getAST().newInfixExpression();
 					expression.setLeftOperand(parent.getAST().newSimpleName(arrayindex));
-					expression.setOperator(Operator.GREATER);
+					expression.setOperator(Operator.GREATER_EQUALS);
 					
 					// and then part as "index = arrayname.length - 1"
 					SimpleName qualifier = parent.getAST().newSimpleName(((ArrayAccess)array).getArray().toString());

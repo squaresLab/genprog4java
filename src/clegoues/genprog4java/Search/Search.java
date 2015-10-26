@@ -63,6 +63,10 @@ public class Search<G extends EditOperation> {
 	private static double swapProb = 0.0;
 	private static double repProb = 0.25;
 	private static double nullProb = .25;
+	
+	private static double lbsetProb = 0.25;
+	private static double ubsetProb = 0.25;
+	
 	private static String startingGenome = "";
 	public static String searchStrategy = "ga";
 	private Fitness<G> fitnessEngine = null;
@@ -150,6 +154,10 @@ public class Search<G extends EditOperation> {
 					parTemplates.add(new Pair<Mutation, Double>(Mutation.RANGECHECK, d));
 				} else if(s.equals("sizeCheck")){
 					parTemplates.add(new Pair<Mutation, Double>(Mutation.SIZECHECK, d));
+				} else if(s.equals("lboundSet")){
+					parTemplates.add(new Pair<Mutation, Double>(Mutation.LBOUNDSET, d));
+				} else if(s.equals("uboundSet")){
+					parTemplates.add(new Pair<Mutation, Double>(Mutation.UBOUNDSET, d));
 				} else if(s.equals("castCheck")){
 					parTemplates.add(new Pair<Mutation, Double>(Mutation.CASTCHECK, d));
 				} 
@@ -262,6 +270,10 @@ public class Search<G extends EditOperation> {
 				Search.nullProb));
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.NULLCHECK,
 				Search.nullProb));
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.LBOUNDSET,
+				Search.lbsetProb));
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.UBOUNDSET,
+				Search.ubsetProb));
 		if (parTemplates != null)
 			for (Pair<Mutation, Double> p : parTemplates) {
 				availableMutations.add(p);
@@ -469,6 +481,12 @@ public class Search<G extends EditOperation> {
 			case NULLINSERT:
 				variant.nullInsert(stmtid);
 				break;
+			case LBOUNDSET:
+				variant.setLowerBound(stmtid);
+				break;
+			case UBOUNDSET:
+				variant.setUpperBound(stmtid);
+				break;	
 			}
 		}
 	}

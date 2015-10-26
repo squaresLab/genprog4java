@@ -119,6 +119,12 @@ public class HistoryEle {
 		case SIZECHECK:	 
 			result += "sc(" + this.location + ")";
 			break;
+		case LBOUNDSET:	 
+			result += "lbs(" + this.location + ")";
+			break;
+		case UBOUNDSET:	 
+			result += "ubs(" + this.location + ")";
+			break;	
 		default:
 			break;
 		}
