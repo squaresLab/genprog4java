@@ -267,7 +267,7 @@ public class JavaEditOperation implements
 			final Map<ASTNode, List<ASTNode>> nodestmts = new HashMap<ASTNode, List<ASTNode>>();	// to track the parent nodes of array access nodes
 			final Map<ASTNode, String> lowerbound = new HashMap<ASTNode, String>();			// to set the upper-bound values of array. currently set to arrayname.length
 		
-			cu.accept(new ASTVisitor() {
+			locationNode.accept(new ASTVisitor() {
 				
 				// method to visit all ArrayAccess nodes in locationNode and store their parents
 				public boolean visit(ArrayAccess node) {
