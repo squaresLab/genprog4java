@@ -302,8 +302,6 @@ public class JavaEditOperation implements
 			Set<ASTNode> parentnodes = nodestmts.keySet();
 			// for each parent node which may have multiple array access instances 
 			for(ASTNode parent: parentnodes){
-				System.out.println("##########################START##########################================");
-
 				// create a newnode
 				Block newnode = parent.getAST().newBlock();
 				List<ASTNode> arrays = nodestmts.get(parent);
