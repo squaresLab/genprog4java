@@ -305,7 +305,15 @@ Comparable<Representation<G>> {
 	public void nullInsert(int atomId) {
 		history.add(new HistoryEle(Mutation.NULLINSERT, atomId));
 	}
-
+	
+	public void setLowerBound(int atomId) {
+		history.add(new HistoryEle(Mutation.LBOUNDSET, atomId));
+	}
+	
+	public void setUpperBound(int atomId) {
+		history.add(new HistoryEle(Mutation.UBOUNDSET, atomId));
+	}
+	
 	public abstract void setFitness(double fitness);
 
 	@Override
