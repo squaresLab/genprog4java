@@ -64,6 +64,7 @@ public class Search<G extends EditOperation> {
 	private static double repProb = 0.25;
 	private static double nullProb = .25;
 	
+	private static double rcheckProb = .25;
 	private static double lbsetProb = 0.25;
 	private static double ubsetProb = 0.25;
 	
@@ -126,6 +127,8 @@ public class Search<G extends EditOperation> {
 			parTemplates.add(new Pair<Mutation, Double>(Mutation.RANGECHECK, d));
 			parTemplates.add(new Pair<Mutation, Double>(Mutation.SIZECHECK, d));
 			parTemplates.add(new Pair<Mutation, Double>(Mutation.CASTCHECK, d));
+			parTemplates.add(new Pair<Mutation, Double>(Mutation.LBOUNDSET, d));
+			parTemplates.add(new Pair<Mutation, Double>(Mutation.UBOUNDSET, d));
 
 			//And this is for a subset of the templates
 		} else if(props.getProperty("PARtemplates") != null){
@@ -274,6 +277,8 @@ public class Search<G extends EditOperation> {
 				Search.lbsetProb));
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.UBOUNDSET,
 				Search.ubsetProb));
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.RANGECHECK,
+				Search.rcheckProb));
 		if (parTemplates != null)
 			for (Pair<Mutation, Double> p : parTemplates) {
 				availableMutations.add(p);
@@ -486,6 +491,9 @@ public class Search<G extends EditOperation> {
 				break;
 			case UBOUNDSET:
 				variant.setUpperBound(stmtid);
+				break;	
+			case RANGECHECK:
+				variant.rangeCheck(stmtid);
 				break;	
 			}
 		}
