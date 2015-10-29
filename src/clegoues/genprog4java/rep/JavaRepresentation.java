@@ -611,6 +611,33 @@ public class JavaRepresentation extends
 				Mutation.NULLINSERT);
 		this.genome.add(newEdit);
 	}
+	
+	public void rangeCheck(int location) {
+		super.nullInsert(location);
+		JavaStatement locationStatement = base.get(location);
+		ClassInfo fileName = stmtToFile.get(location);
+		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
+				Mutation.RANGECHECK);
+		this.genome.add(newEdit);
+	}
+	
+	public void setLowerBound(int location) {
+		super.nullInsert(location);
+		JavaStatement locationStatement = base.get(location);
+		ClassInfo fileName = stmtToFile.get(location);
+		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
+				Mutation.LBOUNDSET);
+		this.genome.add(newEdit);
+	}
+	
+	public void setUpperBound(int location) {
+		super.nullInsert(location);
+		JavaStatement locationStatement = base.get(location);
+		ClassInfo fileName = stmtToFile.get(location);
+		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
+				Mutation.UBOUNDSET);
+		this.genome.add(newEdit);
+	}
 
 	@Override
 	protected boolean internalCompile(String progName, String exeName) {

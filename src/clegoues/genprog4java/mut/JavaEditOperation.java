@@ -48,9 +48,14 @@ import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
@@ -147,7 +152,13 @@ public class JavaEditOperation implements
 	@Override
 	public void edit(ASTRewrite rewriter, AST ast, CompilationUnit cu) {
 		ASTNode locationNode = this.getLocation().getASTNode();
-
+		
+		// these are used for array access related checks for implementing PAR templates
+		final Map<ASTNode, List<ASTNode>> nodestmts = new HashMap<ASTNode, List<ASTNode>>();	// to track the parent nodes of array access nodes
+		final Map<ASTNode, String> lowerbound = new HashMap<ASTNode, String>();			// to set the lower-bound values of array. currently set to arrayname.length
+		final Map<ASTNode, String> upperbound = new HashMap<ASTNode, String>();			// to set the upper-bound values of array. currently set to arrayname.length
+		Set<ASTNode> parentnodes = nodestmts.keySet();
+		
 		ASTNode fixCodeNode = null;
 		if (this.fixCode != null) {
 			fixCodeNode = ASTNode.copySubtree(locationNode.getAST(), this
@@ -258,15 +269,208 @@ public class JavaEditOperation implements
 			
 			break;
 		case RANGECHECK:
-			
+			locationNode.accept(new ASTVisitor() {
+
+				// method to visit all ArrayAccess nodes in locationNode and
+				// store their parents
+				public boolean visit(ArrayAccess node) {
+					lowerbound.put(node, "0");
+					ASTNode parent = getParent(node);
+					if (!nodestmts.containsKey(parent)) {
+						List<ASTNode> arraynodes = new ArrayList<ASTNode>();
+						arraynodes.add(node);
+						nodestmts.put(parent, arraynodes);
+					} else {
+						List<ASTNode> arraynodes = (List<ASTNode>) nodestmts
+								.get(parent);
+						if (!arraynodes.contains(node))
+							arraynodes.add(node);
+						nodestmts.put(parent, arraynodes);
+					}
+					return true;
+				}
+
+				// method to get the parent of ArrayAccess node. We traverse the
+				// ast upwards until the parent node is an instance of statement
+				// if statement is(are) added to this parent node
+				private ASTNode getParent(ArrayAccess node) {
+					ASTNode parent = node.getParent();
+					while (!(parent instanceof Statement)) {
+						parent = parent.getParent();
+					}
+					return parent;
+				}
+			});
+
+			parentnodes = nodestmts.keySet();
+			// for each parent node which may have multiple array access
+			// instances
+			for (ASTNode parent : parentnodes) {
+				// create a new node
+				newNode = parent.getAST().newBlock();
+
+				// if the parent is for statement then create a new for
+				// statement. this is special case
+				ForStatement newForStmt = null;
+
+				List<ASTNode> arrays = nodestmts.get(parent); // get all the arrays of the parent
+				boolean returnflag = false; // to check is parent node has a return statement
+				int counter = 0; // to keep track of the #range check conditions
+				boolean isforstmt = false; // to check if parent is of type ForStatement
+				
+				if (parent.toString().contains("return")) {
+					returnflag = true;
+				}
+
+				if (parent instanceof ForStatement) {
+					isforstmt = true;
+					newForStmt = (ForStatement) parent;
+				}
+
+				// new if statement that will contain the range check
+				// expressions concatenated using AND
+				IfStatement rangechkstmt = parent.getAST().newIfStatement();
+
+				InfixExpression finalandexpression = null;
+				finalandexpression = parent.getAST().newInfixExpression();
+				finalandexpression.setOperator(Operator.CONDITIONAL_AND);
+
+				// for each of the array access instances
+				for (ASTNode array : arrays) {
+					// get the array index
+					String arrayindex = ((ArrayAccess) array).getIndex().toString();
+					arrayindex = arrayindex.replace("++", "");
+					arrayindex = arrayindex.replace("--", "");
+
+					// create infix expression to check lowerbound and
+					// upperbound of array index
+					InfixExpression andexpression = null;
+					andexpression = parent.getAST().newInfixExpression();
+					andexpression.setOperator(Operator.CONDITIONAL_AND);
+
+					// create infix expression to check lowerbound
+					InfixExpression checklboundexpression = null;
+					checklboundexpression = parent.getAST()
+							.newInfixExpression();
+					checklboundexpression.setLeftOperand(parent.getAST()
+							.newSimpleName(arrayindex));
+					checklboundexpression.setOperator(Operator.GREATER_EQUALS);
+					checklboundexpression.setRightOperand(parent.getAST()
+							.newNumberLiteral(lowerbound.get(array)));
+
+					// create infix expression to check upper bound
+					InfixExpression checkuboundexpression = null;
+					checkuboundexpression = parent.getAST()
+							.newInfixExpression();
+					checkuboundexpression.setLeftOperand(parent.getAST()
+							.newSimpleName(arrayindex));
+					checkuboundexpression.setOperator(Operator.LESS);
+
+					SimpleName uqualifier = parent.getAST().newSimpleName(
+							((ArrayAccess) array).getArray().toString());
+					SimpleName uname = parent.getAST().newSimpleName("length");
+					checkuboundexpression.setRightOperand(parent.getAST()
+							.newQualifiedName(uqualifier, uname));
+
+					andexpression.setLeftOperand(checklboundexpression);
+					andexpression.setRightOperand(checkuboundexpression);
+
+					if (counter == 0) { // only one array access is there in
+										// parent node
+						finalandexpression = andexpression;
+						counter++;
+					} else { // if more than one array access are there then
+								// keep creating and concatenating expressions
+								// into "finalandexpression"
+						InfixExpression tmpandexpression = null;
+						tmpandexpression = parent.getAST().newInfixExpression();
+						tmpandexpression.setOperator(Operator.CONDITIONAL_AND);
+						tmpandexpression.setLeftOperand(finalandexpression);
+						tmpandexpression.setRightOperand(andexpression);
+						finalandexpression = tmpandexpression;
+						counter++;
+					}
+				}
+
+				if (isforstmt == false) { // if the parent node is NOT
+											// ForStatement
+					if (returnflag == false) { // if parent node DOES NOT
+												// contain return statement
+						rangechkstmt.setExpression(finalandexpression);
+						ASTNode stmt = (Statement) parent;
+						stmt = ASTNode.copySubtree(parent.getAST(), stmt);
+						rangechkstmt.setThenStatement((Statement) stmt);
+						newNode.statements().add(rangechkstmt);
+					} else { // if parent node contains return statement
+
+						// create a prefix expression = NOT(finalandconditions)
+						PrefixExpression notfinalandexpression = null;
+						notfinalandexpression = parent.getAST()
+								.newPrefixExpression();
+
+						ParenthesizedExpression parexp = null;
+						parexp = parent.getAST().newParenthesizedExpression();
+						parexp.setExpression(finalandexpression);
+
+						notfinalandexpression.setOperand(parexp);
+						notfinalandexpression
+								.setOperator(org.eclipse.jdt.core.dom.PrefixExpression.Operator.NOT);
+						// set the ifstatement expression
+						rangechkstmt.setExpression(notfinalandexpression);
+
+						// set the then part as return default. We shall have to
+						// declare RETURN_DEFAULT constant in the target
+						// program.
+						ReturnStatement rstmt = parent.getAST()
+								.newReturnStatement();
+						SimpleName defaultreturnvalue = parent.getAST()
+								.newSimpleName("RETURN_DEFAULT");
+						rstmt.setExpression(defaultreturnvalue);
+						rangechkstmt.setThenStatement(rstmt);
+
+						// add the if statement followed by remaining content of
+						// the parent node to new node
+						newNode.statements().add(rangechkstmt);
+						ASTNode stmt = (Statement) parent;
+						stmt = ASTNode.copySubtree(parent.getAST(), stmt);
+						newNode.statements().add(stmt);
+					}
+				} else { // if the parent node is of type ForStatement.
+
+					// get the expressions of for statement
+					Expression forexp = ((ForStatement) parent).getExpression();
+					forexp = (Expression) ((ForStatement) parent)
+							.getExpression().copySubtree(
+									((ForStatement) parent).getExpression()
+											.getAST(), (ASTNode) forexp);
+
+					// create infix expression to AND the range check
+					// expressions and for statement expressions
+					InfixExpression forexpression = null;
+					forexpression = parent.getAST().newInfixExpression();
+					forexpression.setOperator(Operator.CONDITIONAL_AND);
+					forexpression.setLeftOperand(finalandexpression);
+					forexpression.setRightOperand(forexp);
+
+					// update the for statement expressions
+					newForStmt = (ForStatement) ASTNode.copySubtree(
+							parent.getAST(), newForStmt);
+					newForStmt.setExpression(forexpression);
+				}
+
+				// replace parent node with new node (or new for statement)
+				if (isforstmt == false) {
+					rewriter.replace(parent, newNode, null);
+				} else {
+					rewriter.replace(parent, newForStmt, null);
+				}
+			}
+
 			break;
 		case SIZECHECK:
 
 			break;
 		case LBOUNDSET:
-			final Map<ASTNode, List<ASTNode>> nodestmts = new HashMap<ASTNode, List<ASTNode>>();	// to track the parent nodes of array access nodes
-			final Map<ASTNode, String> lowerbound = new HashMap<ASTNode, String>();			// to set the upper-bound values of array. currently set to arrayname.length
-		
 			locationNode.accept(new ASTVisitor() {
 				
 				// method to visit all ArrayAccess nodes in locationNode and store their parents
@@ -297,7 +501,7 @@ public class JavaEditOperation implements
 				}
 			});
 			
-			Set<ASTNode> parentnodes = nodestmts.keySet();
+			parentnodes = nodestmts.keySet();
 			// for each parent node which may have multiple array access instances
 			for(ASTNode parent: parentnodes){
 				// create a newnode
@@ -337,32 +541,28 @@ public class JavaEditOperation implements
 				}
 				// append the existing content of parent node to newnode
 				ASTNode stmt = (Statement)parent;
-				stm1 = ASTNode.copySubtree(parent.getAST(), stmt);
+				stmt = ASTNode.copySubtree(parent.getAST(), stmt);
 				newnode.statements().add(stmt);
-				System.out.println("new node  :" + newnode.toString()); 
 				rewriter.replace(parent, newnode, null);
 			}	
 				
 			break;
-		case UBOUNDSET:
-			final Map<ASTNode, List<ASTNode>> nodestmts1 = new HashMap<ASTNode, List<ASTNode>>();	// to track the parent nodes of array access nodes
-			final Map<ASTNode, String> upperbound = new HashMap<ASTNode, String>();			// to set the upper-bound values of array. currently set to arrayname.length
-				
+		case UBOUNDSET:				
 			locationNode.accept(new ASTVisitor() {
 				
 				// method to visit all ArrayAccess nodes in locationNode and store their parents
 				public boolean visit(ArrayAccess node) {
 					upperbound.put(node, node.getArray().toString().concat(".length"));
 					ASTNode parent = getParent(node);				
-					if(!nodestmts1.containsKey(parent)){		
+					if(!nodestmts.containsKey(parent)){		
 						List<ASTNode> arraynodes = new ArrayList<ASTNode>();
 						arraynodes.add(node);
-						nodestmts1.put(parent, arraynodes);		
+						nodestmts.put(parent, arraynodes);		
 					}else{
-						List<ASTNode> arraynodes = (List<ASTNode>) nodestmts1.get(parent);
+						List<ASTNode> arraynodes = (List<ASTNode>) nodestmts.get(parent);
 						if(!arraynodes.contains(node))
 							arraynodes.add(node);
-						nodestmts1.put(parent, arraynodes);	
+						nodestmts.put(parent, arraynodes);	
 					}
 					return true;
 				}
@@ -378,17 +578,15 @@ public class JavaEditOperation implements
 				}
 			});
 			
-			Set<ASTNode> parentnodes1 = nodestmts1.keySet();
+			parentnodes = nodestmts.keySet();
 			// for each parent node which may have multiple array access instances 
-			for(ASTNode parent: parentnodes1){
+			for(ASTNode parent: parentnodes){
 				// create a newnode
 				Block newnode = parent.getAST().newBlock();
-				List<ASTNode> arrays = nodestmts1.get(parent);
-				System.out.println("original parent: " + parent.toString());
+				List<ASTNode> arrays = nodestmts.get(parent);
 				
 				// for each of the array access instances
 				for( ASTNode  array : arrays){
-					
 					// get the array index
 					String arrayindex = ((ArrayAccess)array).getIndex().toString();
 					arrayindex = arrayindex.replace("++", "");
