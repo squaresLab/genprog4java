@@ -252,6 +252,22 @@ CachingRepresentation<G> {
 				addToSet = true;
 				break;
 
+			case RANGECHECK:
+				addToSet = true;
+				break;	
+			
+			case LBOUNDSET:
+				addToSet = true;
+				break;	
+			
+			case UBOUNDSET:
+				addToSet = true;
+				break;	
+				
+			case OFFBYONE:
+				addToSet = true;
+				break;
+				
 			default:
 				addToSet = this.replaceSources(atomId).size() > 0;
 				break;

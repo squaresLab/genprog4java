@@ -638,6 +638,15 @@ public class JavaRepresentation extends
 				Mutation.UBOUNDSET);
 		this.genome.add(newEdit);
 	}
+	
+	public void offByOne(int location) {
+		super.nullInsert(location);
+		JavaStatement locationStatement = base.get(location);
+		ClassInfo fileName = stmtToFile.get(location);
+		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
+				Mutation.OFFBYONE);
+		this.genome.add(newEdit);
+	}
 
 	@Override
 	protected boolean internalCompile(String progName, String exeName) {

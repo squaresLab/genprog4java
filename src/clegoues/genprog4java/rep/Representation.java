@@ -314,6 +314,10 @@ Comparable<Representation<G>> {
 		history.add(new HistoryEle(Mutation.UBOUNDSET, atomId));
 	}
 	
+	public void offByOne(int atomId) {
+		history.add(new HistoryEle(Mutation.OFFBYONE, atomId));
+	}
+	
 	public abstract void setFitness(double fitness);
 
 	@Override
