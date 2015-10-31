@@ -125,6 +125,9 @@ public class HistoryEle {
 		case UBOUNDSET:	 
 			result += "ubs(" + this.location + ")";
 			break;	
+		case OFFBYONE:
+			result += "obo(" + this.location + ")";
+			break;
 		default:
 			break;
 		}

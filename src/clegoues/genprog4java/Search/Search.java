@@ -67,6 +67,7 @@ public class Search<G extends EditOperation> {
 	private static double rcheckProb = .25;
 	private static double lbsetProb = 0.25;
 	private static double ubsetProb = 0.25;
+	private static double offbyoneProb = 0.25;
 	
 	private static String startingGenome = "";
 	public static String searchStrategy = "ga";
@@ -129,6 +130,7 @@ public class Search<G extends EditOperation> {
 			parTemplates.add(new Pair<Mutation, Double>(Mutation.CASTCHECK, d));
 			parTemplates.add(new Pair<Mutation, Double>(Mutation.LBOUNDSET, d));
 			parTemplates.add(new Pair<Mutation, Double>(Mutation.UBOUNDSET, d));
+			parTemplates.add(new Pair<Mutation, Double>(Mutation.OFFBYONE, d));
 
 			//And this is for a subset of the templates
 		} else if(props.getProperty("PARtemplates") != null){
@@ -163,8 +165,9 @@ public class Search<G extends EditOperation> {
 					parTemplates.add(new Pair<Mutation, Double>(Mutation.UBOUNDSET, d));
 				} else if(s.equals("castCheck")){
 					parTemplates.add(new Pair<Mutation, Double>(Mutation.CASTCHECK, d));
-				} 
-
+				} else if(s.equals("offByOne")){
+					parTemplates.add(new Pair<Mutation, Double>(Mutation.OFFBYONE, d));
+				}
 			}
 		}
 	}
@@ -279,6 +282,8 @@ public class Search<G extends EditOperation> {
 				Search.ubsetProb));
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.RANGECHECK,
 				Search.rcheckProb));
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.OFFBYONE,
+				Search.offbyoneProb));
 		if (parTemplates != null)
 			for (Pair<Mutation, Double> p : parTemplates) {
 				availableMutations.add(p);
