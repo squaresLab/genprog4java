@@ -1,26 +1,20 @@
 #!/bin/bash
-# 1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)
-# 2nd param is the bug number (ex: 1,2,3,4,...)
-# 3rd param is the folder where the genprog project is (ex: "/home/mau/Research/genprog4java/" )
-# 4td param is the folder where defects4j is installed (ex: "/home/mau/Research/defects4j/" )
-# 5th param is the option of running it (ex: humanMade, generated)
-# 6th param is the percentage of test cases being used to guide genprog's search (ex: 1, 100)
+# 1st param: project name, sentence case (ex: Lang, Chart, Closure, Math, Time)
+# 2nd param: bug number (ex: 1,2,3,4,...)
+# 3rd param: location of genprog4java (ex: "/home/mau/Research/genprog4java/" )
+# 4td param: defects4j installation (ex: "/home/mau/Research/defects4j/" )
+# 5th param: testing option (ex: humanMade, generated)
+# 6th param: test suite sample size (ex: 1, 100)
 
-#Mau runs it like this:
+# Example usage, local for Mau
 #./prepareBug.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ humanMade 100
 
-#VM:
+# Example usage, VM:
 #./prepareBug.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/ allHuman 100
 
-# in case it helps, in my machine, I Have:
-# /home/mau/Research/genprog4j where the source code for genprog is
-# /home/mau/Research/defects4j where the defects4j source code is
-# /home/mau/Research/defects4j/ExamplesCheckedOut where every time that I check out a bug from defects4j, it goes here
-
-# note to self for CLG: 
-# for compilation to work, javac really has to be 1.7 and JAVA_HOME set accordingly,
-# even though defects4j ships with a version of the javac compiler.
-# So, don't forget to do the following on your OS X laptop:
+# OS X note, mostly for CLG: 
+# javac has to be version 1.7, and JAVA_HOME must be set accordingly,
+# So, don't forget to do the following on OS X:
 # export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/
 # export PATH=$JAVA_HOME/bin/:$PATH
 
@@ -28,9 +22,6 @@
 #    - `export PATH=$PATH:"path2defects4j"/framework/bin`
 # export PATH="path2defects4j/major/bin"$PATH
 
-# CLG thinks it's nice practice to rename the vars taken from the user to
-# something more readable that corresponds to how they're used.  Makes the
-# script easier to read.
 PROJECT="$1"
 BUGNUMBER="$2"
 GENPROGDIR="$3"
@@ -43,7 +34,7 @@ PARENTDIR=$DEFECTS4JDIR"/ExamplesCheckedOut"
 #copy these files to the source control
 
 mkdir -p $PARENTDIR
-cp -r $GENPROGDIR"/defects4jStuff/Utilities" $PARENTDIR
+cp -r $GENPROGDIR"/defects4j-scripts/Utilities" $PARENTDIR
 
 #This transforms the first parameter to lower case. Ex: lang, chart, closure, math or time
 # CLG changed the way you did this (which was fine for Bash 4!) so it's a bit more platform-independent
