@@ -262,7 +262,7 @@ Representation<G> {
 			String newName = CachingRepresentation.newVariant();
 			if (!this.compile(newName, newName)) {
 				this.setFitness(0.0);
-				logger.info(this.getName() + " fails to compile\n");
+				logger.info(this.getName() + " at " + newName + " fails to compile\n");
 				return false;
 			}
 		} else if (!this.alreadyCompiled.getFirst()) {
