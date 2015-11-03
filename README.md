@@ -48,20 +48,19 @@ ${workspace_loc:GenProg4Java/tests/mathTest}
 
 ### Hello, World! ###
 
-Your best bet for a Hello, World! example is in genprog4java/tests/mathTest.  It
-has a miniTestConfiguration that should, more or less, have flags close to
-what's necessary to get it to run, though we do change this file with some
-regularity so if it doesn't work out of the gate, double check that it doesn't
-look completely wacky.
+genprog4java/tests/mathTest serves as a reasonable Hello, World! example.  It
+has a miniTestConfiguration that should have flags close to what's necessary to
+get it to run, though we do change this file with some regularity so if it
+doesn't work out of the gate, double check that it doesn't look completely
+wacky.
 
 ### Integration with Defects4j ###
 
-We've setup two scripts for integrating defects4j with genprog.
-The main script is the one that prepares the bug to be run. This script is called prepareBug.sh and it is located in genprog4j/defects4JStuff/prepareBug.sh
+There are two main scripts for integrating defects4J with GenProg.  Both are in Genprog4Java/defects4j-scripts
 
-The overall functionality of the script is to set up everything so that genprog can run on the bug taken from defects4j with the parameters specified by the user.
+prepareBug.sh sets up a defect for a repair attempt, including a complete GenProg4Java config file. 
 
-The scripts takes the following parameters:
+It takes the following parameters:
 
 * 1st param is the package in upper case (ex: Lang, Chart, Closure, Math, Time)
 * 2nd param is the bug number (ex: 1,2,3,4,...)
@@ -72,32 +71,13 @@ The scripts takes the following parameters:
 So a typical run would look like this:
 ./prepareBug.sh Math 2 /home/mau/Research/ /home/mau/Research/defects4j/ allHuman
 
-1st param: Defects4j has five projects: Lang, Chart, Closure, Math, Time, you can choose whichever you like. Lang and Math have worked without any issue so far. The other three projects, we are still working on them.
+The script creates a directory in the defects4j folder called ExamplesCheckedOut, in which it checks out the buggy and fixed versions of the project/bug number you specify.  It compiles them both. 
 
-2nd param: bug number of the selected project.
+If the Lang project is specified, the scropt copies a modified version of EntityArrays.java to the working directory. This is because this file contains a lot of non ascii characters in the comments that were causing issues with compilation.
 
-3rd param: where did you download the bitbucket project.
+If specified, the script calls evosuite to generate test suites.
 
-4th param: where is defects4j folder located.
-
-5th param: there are three ways to run this script: allHuman for running genprog with all the human made tests. oneHuman: to run it with just one of the human made tests. oneGenerated: to run it with just one of the generated tests.
-
-It starts by setting up the different paths per every one of the different projects (Lang, Chart, Closure, Math, Time).
-Then uses defects4j's scripts to checkout the buggy and fixed version of the code of the bug indicated in the parameters.
-Then it compiles the checkedout versions.
-
-It then makes the difference from the last parameter as explained before.
-
-If it is running the Lang project then it copies a modified file called EntityArrays.java to the working directory. This is because this file contains a lot of non ascii characters in the comments that were causing issues with compilation.
-
-Then it creates a new test suite different from the one that comes with the project using evosuite (integrataed with defects4j), this is because we need two different test suites to run the experiment.
-
-It then compiles all the .java files, and then creates a jar file with all the .class files created from compiling the .java files. This is so genprog can run the different variations without having to compile the whole thing, but just changing one java file and then it takes all the rest of the source from this jar.
-
-Every genprog run needs a config file. This is what it does next. It creates a text file with the configuration needed to be ran by genprog.
-
-Finally it prints out the information about the bug taken from defects4j and opens two files that need to be edited with the info displayed from the bug: neg.tests and configDefects4j
-It dispalys some instructions on how to edit these two files with examples.
+It then queries defects4j to determine the positive and negative test files, creates a compile script, and generates a config for GenProg; byproducts (pos.tests,neg.tests, and defects4j.config) appear in the ProjectBugNumBuggy/ folder. 
 
 
 The second script is still under construction.

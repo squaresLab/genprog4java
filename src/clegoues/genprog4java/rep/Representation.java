@@ -97,6 +97,12 @@ Comparable<Representation<G>> {
 		this.history = history;
 	}
 
+
+	protected String variantFolder = "";
+	
+	public String getVariantFolder() {
+		return this.variantFolder;
+	}
 	public abstract Representation<G> copy();
 
 	public abstract boolean getVariableLength();
@@ -327,7 +333,6 @@ Comparable<Representation<G>> {
 	}
 
 	protected List<Pair<ClassInfo, String>> computeSourceBuffers() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

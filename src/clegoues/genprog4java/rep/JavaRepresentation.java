@@ -518,7 +518,7 @@ public class JavaRepresentation extends
 					+ Configuration.outputDir + File.separator + exeName + "/";
 		} else {
 			outputDir = Configuration.outputDir + File.separator
-					+ this.getName() + System.getProperty("path.separator")
+					+ this.getVariantFolder() + File.separator
 					+ Configuration.outputDir + File.separator + exeName + "/";
 		}
 		String classPath = outputDir + System.getProperty("path.separator")
@@ -528,15 +528,6 @@ public class JavaRepresentation extends
 		command.addArgument(classPath);
 
 		if (this.doingCoverage) {
-
-			/*
-			 * ArrayList<String> targetClasses = new ArrayList<String>(); try{
-			 * targetClasses.addAll(getClasses(Configuration.targetClassName));
-			 * } catch (IOException e) { System.err.println("failed to read " +
-			 * targetClasses + " giving up"); Runtime.getRuntime().exit(1); }
-			 * String targetClassString = ""; for(String s : targetClasses){
-			 * targetClassString += s + ","; }
-			 */
 
 			command.addArgument("-Xmx1024m");
 			command.addArgument("-javaagent:" + Configuration.jacocoPath
@@ -861,7 +852,7 @@ public class JavaRepresentation extends
 	}
 
 	public void test() {
-		String newName = CachingRepresentation.newVariant();
+		String newName = CachingRepresentation.newVariantFolder();
 		internalCompile(newName, newName);
 	}
 
