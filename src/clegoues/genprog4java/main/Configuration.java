@@ -163,25 +163,21 @@ public class Configuration {
 	
 	public static void saveOrLoadTargetFiles(){
 		
-		String safeFolder = Configuration.outputDir  + File.separatorChar + "originalTargetFiles/";
-		String originFolder = Configuration.workingDir + File.separatorChar + Configuration.sourceDir + File.separatorChar;
-		String targetClassName = Configuration.targetClassNames.get(0) + Configuration.globalExtension;
-
+		String safeFolder = Configuration.outputDir  + File.separatorChar + "original" + File.separatorChar;
 		
 		//If there is a variant already created in the output folder then it is not the first run
-		File variant0Folder = new File(Configuration.outputDir + "/variant0/");
+		File variant0Folder = new File(Configuration.outputDir  + File.separatorChar + "variant0"  + File.separatorChar );
 		if (variant0Folder.exists()){
-			//overwrite the targetClass with the one saved before
-			Utils.runCommand("cp " + safeFolder + targetClassName + " " + originFolder + targetClassName);
+			
+			for( ClassInfo s : Configuration.targetClassNames ){
+				//overwrite the targetClass with the one saved before
+				Utils.runCommand("cp " + safeFolder + s.pathToJavaFile() + " " + Configuration.workingDir + Configuration.sourceDir + File.separatorChar + s.getPackage());
+			}
 			
 		//else 	it is the first run
 		}else{
 			//create safe folder and save the original target class
-			File createFile = new File(Configuration.outputDir);
-			createFile.mkdir();
-			createFile = new File(safeFolder);
-			createFile.mkdir();
-			Utils.runCommand("cp " + originFolder + targetClassName + " " + safeFolder + targetClassName);
+			saveTargetFiles();
 		}
 		
 	}
@@ -214,7 +210,7 @@ public class Configuration {
 		return returnValue;
 	}
 	
-	/*public static void saveTargetFiles() {
+	public static void saveTargetFiles() {
 		
 		String original = Configuration.outputDir  + File.separatorChar + "original" + File.separatorChar;
 
@@ -242,5 +238,5 @@ public class Configuration {
 			String cmd = "cp " + pathToFile + " " + original + packagePath + File.separatorChar;
 			Utils.runCommand(cmd);
 		}	
-	}*/
+	}
 }
