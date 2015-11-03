@@ -79,6 +79,8 @@ If specified, the script calls evosuite to generate test suites.
 
 It then queries defects4j to determine the positive and negative test files, creates a compile script, and generates a config for GenProg; byproducts (pos.tests,neg.tests, and defects4j.config) appear in the ProjectBugNumBuggy/ folder. 
 
+To run GenProg manually with this config file, the working directory should be the checked-out buggy version
+(e.g., /Users/clegoues/research/defects4j/ExamplesCheckedOut/lang1Buggy/), and specify the config file to the main GenProg4Java executable.  (e.g., /Users/clegoues/research/defects4j/ExamplesCheckedOut/lang1Buggy/defects4j.config).  Pass the log4j config to the VM (-ea -Dlog4j.configuration=file:${workspace_loc:GenProg4Java}/src/log4j.properties).  CLG tends to run from within Eclipse, but you can do what you like.
 
 The second script is still under construction.
 It is called runGenProgForBug.sh and its overall purpose is to be able to run genprog on a certain defects4j bug with certain different seeds until it it able to either find a patch or get a to a certain number of generations or wallclock time.
