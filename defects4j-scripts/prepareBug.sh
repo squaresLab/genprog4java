@@ -1,4 +1,5 @@
 #!/bin/bash
+#
 # 1st param: project name, sentence case (ex: Lang, Chart, Closure, Math, Time)
 # 2nd param: bug number (ex: 1,2,3,4,...)
 # 3rd param: location of genprog4java (ex: "/home/mau/Research/genprog4java/" )
@@ -18,10 +19,6 @@
 # export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/
 # export PATH=$JAVA_HOME/bin/:$PATH
 
-#2. Add Defects4J's executables to your PATH:
-#    - `export PATH=$PATH:"path2defects4j"/framework/bin`
-# export PATH="path2defects4j/major/bin"$PATH
-
 PROJECT="$1"
 BUGNUMBER="$2"
 GENPROGDIR="$3"
@@ -30,6 +27,11 @@ OPTION="$5"
 TESTSUITEPERCENTAGE="$6"
 
 PARENTDIR=$DEFECTS4JDIR"/ExamplesCheckedOut"
+
+
+#Add the path of defects4j so the defects4j's commands run 
+export PATH=$PATH:"$DEFECTS4JDIR"/framework/bin
+export PATH=$PATH:"$DEFECTS4JDIR"/major/bin
 
 #copy these files to the source control
 
@@ -42,15 +44,26 @@ LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 # directory with the checked out buggy project
 BUGWD=$PARENTDIR"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
 
+#Checkout the buggy version of the code
+defects4j checkout -p $1 -v "$BUGNUMBER"b -w $BUGWD
 
-#Specific variables per every project
-#TESTWD is the address from the root to the address where JAVADIR starts, for the TEST files 
-#WD is the address from the root to the address where JAVADIR starts,  for the SOURCE files 
-#JAVADIR is the address from the WD or TESTWD, to the address where all the java files are for both source and test files 
-#It is usually used TESTWD/JAVADIR or WD/JAVADIR
-#CONFIGLIBS are the libraries to be included in the configuration file so that GenProg can run it.
-#LIBSTESTS are the libraries needed to compile the  tests (dependencies of the project)
-#LIBSMAIN are the libraries needed to compile the project (dependencies of the project)
+#Checkout the fixed version of the code, primarily to make the second test suite
+defects4j checkout -p $1 -v "$BUGNUMBER"f -w "$DEFECTS4JDIR/"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Fixed
+
+#Compile the both buggy and fixed code
+for dir in Buggy Fixed
+do
+    pushd $PARENTDIR"/"$LOWERCASEPACKAGE$BUGNUMBER$dir
+    defects4j compile
+    popd
+done
+
+#Specific variables per project
+#TESTWD: location of project test files (relative to root)
+#WD: location of project src files (relative to root)
+#JAVADIR: path from the WD or TESTWD to location of java files for both source and test files 
+#CONFIGLIBS: libraries to be included in the configuration file so that GenProg can run it.
+#LIBSTESTS: libraries needed to compile the  tests (dependencies of the project)
 
 SRCJAR=$BUGWD"/"$LOWERCASEPACKAGE"AllSourceClasses.jar"
 TESTJAR=$BUGWD"/"$LOWERCASEPACKAGE"AllTestClasses.jar"
@@ -62,6 +75,7 @@ GENLIBS=$GENPROGDIR"/lib/junittestrunner.jar:"$GENPROGDIR"/lib/commons-io-1.4.ja
 # all libs for a package need at least the source jar, test jar, and generic genprog libs
 CONFIGLIBS=$SRCJAR":"$TESTJAR
 
+EXTRACLASSES=""
 
 case "$LOWERCASEPACKAGE" in 
 'chart') 
@@ -72,31 +86,29 @@ case "$LOWERCASEPACKAGE" in
 $BUGWD/lib/servlet.jar:\
 $BUGWD/lib/junit.jar"
 
-	SRCFOLDER=build
-	TESTFOLDER=build-tests
-        
+	    SRCFOLDER=build
+	    TESTFOLDER=build-tests
         CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$CHARTLIBS
         LIBSTESTS="-cp \".:$SRCJAR:$GENLIBS:$CHARTLIBS\" "
-        LIBSMAIN="-cp \".:$CHARTLIBS\" "
         ;;
+
 'closure')
         TESTWD=test
         WD=src
         JAVADIR=com/google
-
         CLOSURELIBS="$BUGWD/lib/ant.jar:$BUGWD/lib/ant-launcher.jar:\
 $BUGWD/lib/args4j.jar:$BUGWD/lib/caja-r4314.jar:\
 $BUGWD/lib/guava.jar:$BUGWD/lib/jarjar.jar:\
 $BUGWD/lib/json.jar:$BUGWD/lib/jsr305.jar:\
 $BUGWD/lib/junit.jar:$BUGWD/lib/protobuf-java.jar:\
 $BUGWD/build/lib/rhino.jar:"
-
-	SRCFOLDER=build/classes
-	TESTFOLDER=build/test
+	    SRCFOLDER=build/classes
+	    TESTFOLDER=build/test
         
         CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$CLOSURELIBS
         LIBSTESTS="-cp \".:$SRCJAR:$GENLIBS:$CLOSURELIBS\" "
-        LIBSMAIN="-cp \".:$CLOSURELIBS\" "
+        EXTRACLASSES="$3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInfo.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMap.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMapOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/Instrumentation.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationTemplate.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/debugging/sourcemap/proto/Mapping.java"
+
         ;;
 
 'lang')
@@ -116,10 +128,12 @@ $GENPROGDIR/lib/junittestrunner.jar:$GENPROGDIR/lib/commons-io-1.4.jar:\
 $DEFECTS4JDIR/framework/projects/lib/junit-4.11.jar:\
 $DEFECTS4JDIR/framework/projects/Lang/lib/easymock.jar:\
 $DEFECTS4JDIR/framework/projects/lib/easymock-3.3.1.jar\" "
-        LIBSMAIN=""
 
-	SRCFOLDER=target/classes
-	TESTFOLDER=target/tests
+	    SRCFOLDER=target/classes
+	    TESTFOLDER=target/tests
+        # special handling...
+        cp "$3"defects4j-scripts/Utilities/EntityArrays.java $BUGWD/src/main/java/org/apache/commons/lang3/text/translate/
+
         ;;
 
 'math')
@@ -129,10 +143,8 @@ $DEFECTS4JDIR/framework/projects/lib/easymock-3.3.1.jar\" "
         MATHLIBS=$DEFECTS4JDIR"/framework/projects/Math/lib/commons-discovery-0.5.jar"
         CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$MATHLIBS
         LIBSTESTS="-cp \".:$SRCJAR:$GENLIBS:$MATHLIBS\" "
-        LIBSMAIN=""
-
-	SRCFOLDER=target/classes
-	TESTFOLDER=target/test-classes
+	    SRCFOLDER=target/classes
+	    TESTFOLDER=target/test-classes
         ;;
 
 'time')
@@ -141,46 +153,14 @@ $DEFECTS4JDIR/framework/projects/lib/easymock-3.3.1.jar\" "
         JAVADIR=org/joda/time
         TIMELIBS=$DEFECTS4JDIR"/framework/projects/Time/lib/joda-convert-1.2.jar:"$GENLIBS":"$DEFECTS4JDIR/"framework/projects/lib/easymock-3.3.1.jar"
         CONFIGLIBS=$CONFIGLIBS":"$TIMELIBS
-
-	SRCFOLDER=target/classes
-	TESTFOLDER=target/test-classes
-
+	    SRCFOLDER=target/classes
+	    TESTFOLDER=target/test-classes
         LIBSTESTS="-cp \".:$SRCJAR:$TIMELIBS\" "
-        LIBSMAIN="-cp \".:$DEFECTS4JDIR/framework/projects/Time/lib/joda-convert-1.2.jar\" "
         ;;
 esac
 
-#Add the path of defects4j so the defects4j's commands run 
-export PATH=$PATH:"$DEFECTS4JDIR"/framework/bin
+#Jar all the .class's
 
-#Checkout the buggy version of the code
-defects4j checkout -p $1 -v "$BUGNUMBER"b -w $BUGWD
-
-#Checkout the fixed version of the code to make the seccond test suite
-defects4j checkout -p $1 -v "$BUGNUMBER"f -w "$DEFECTS4JDIR/"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Fixed
-
-
-#Compile the buggy and fixed code
-for dir in Buggy Fixed
-do
-    pushd $PARENTDIR"/"$LOWERCASEPACKAGE$BUGNUMBER$dir
-    defects4j compile
-    popd
-done
-
-#for the lang project copy a fixed file
-if [ $LOWERCASEPACKAGE = "lang" ]; then
-    cp "$3"defects4j-scripts/Utilities/EntityArrays.java $BUGWD/src/main/java/org/apache/commons/lang3/text/translate/
-fi
-
-
-
-EXTRACLASSES=""
-if [ $LOWERCASEPACKAGE = "closure" ]; then
-EXTRACLASSES="$3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInfo.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMap.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMapOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/Instrumentation.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationTemplate.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/debugging/sourcemap/proto/Mapping.java"
-fi
- 
- #Jar all the .class's
 cd "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$SRCFOLDER"/ 
 jar cf "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar "$JAVADIR"/* 
 
@@ -192,11 +172,10 @@ jar cf "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$L
 
 echo "Jar of test files created successfully."
 
-
 cd $BUGWD/$WD
 
 #Create file to run defects4j compiile
-# FIXME: This won't work on not-Claire's machine, but she's testing for now
+
 FILE="$4"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 /bin/cat <<EOM >$FILE
 #!/bin/bash
@@ -233,8 +212,6 @@ classSourceFolder = $SRCFOLDER
 compileCommand = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 EOM
 
-
-
 # programmatically get passing and failing tests as well as files
 #info about the bug
 INFO=`defects4j info -p $PROJECT -v $BUGNUMBER`
@@ -268,35 +245,23 @@ do
 done
 
 
-
 case "$OPTION" in
 "humanMade" )
-
-
+# default
 ;;
 
 "onlyRelevant" ) 
-#Mau doesnt know what this is for.
         echo "not implemented yet."
         ;;
 
 "generated" )
-  #echo "write in this file: "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests, the generated test called NAMEOFTHETARGETFILEEvoSuite_Branch.java"
-  #gedit "$4"ExamplesCheckedOut/"$LOWERCASEPACKAGE""$2"Buggy/pos.tests
-
-#MAYBE ERASE THE ORIGINAL? AND LEAVE JUST THE GENERATED ONE?
-
 #Create the new test suite
-echo Creating new test suite...
-"$4"/framework/bin/run_evosuite.pl -p $PROJECT -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfEvoSuite/ -c branch => 100s
-
-#Untar the generated test into the tests folder
-cd $BUGWD/"$TESTWD"/
-tar xvjf outputOfEvoSuite/$PROJECT/evosuite-branch/1/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch.1.tar.bz2
-
-
+        echo Creating new test suite...
+        "$4"/framework/bin/run_evosuite.pl -p $PROJECT -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfEvoSuite/ -c branch => 100s
+        #Untar the generated test into the tests folder
+        cd $BUGWD/"$TESTWD"/
+        tar xvjf outputOfEvoSuite/$PROJECT/evosuite-branch/1/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch.1.tar.bz2
 ;;
-
 esac
 
 

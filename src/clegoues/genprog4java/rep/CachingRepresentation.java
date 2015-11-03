@@ -102,7 +102,7 @@ Representation<G> {
 		super();
 	}
 
-	public static String newVariant() {
+	public static String newVariantFolder() {
 		String result = String.format("variant%d", sequence);
 		sequence++;
 		return result;
@@ -246,6 +246,7 @@ Representation<G> {
 
 	}
 
+	
 	public boolean testCase(TestCase test) {
 		List<Integer> hash = astHash();
 		HashMap<String, FitnessValue> thisVariantsFitness = null;
@@ -259,7 +260,8 @@ Representation<G> {
 		}
 
 		if (this.alreadyCompiled == null) {
-			String newName = CachingRepresentation.newVariant();
+			String newName = CachingRepresentation.newVariantFolder();
+			this.variantFolder = newName;
 			if (!this.compile(newName, newName)) {
 				this.setFitness(0.0);
 				logger.info(this.getName() + " at " + newName + " fails to compile\n");
@@ -274,8 +276,8 @@ Representation<G> {
 			this.setFitness(0.0);
 			return false;
 		}
-		FitnessValue fitness = this.internalTestCase(this.getName(),
-				this.getName() + Configuration.globalExtension, test);
+		FitnessValue fitness = this.internalTestCase(this.variantFolder,
+				this.variantFolder + Configuration.globalExtension, test);
 		thisVariantsFitness.put(test.toString(), fitness);
 		return fitness.isAllPassed();
 	}
@@ -354,6 +356,8 @@ Representation<G> {
 
 	protected FitnessValue internalTestCase(String sanityExename,
 			String sanityFilename, TestCase thisTest) {
+		// FIXME: the filename is wrong, here; it's looking based on the name of the edits incorporated, not the variant folder name, as it should be
+		
 		CommandLine command = this.internalTestCaseCommand(sanityExename,
 				sanityFilename, thisTest);
 		// System.out.println("command: " + command.toString());

@@ -193,7 +193,7 @@ public class Search<G extends EditOperation> {
 	 */
 	void noteSuccess(Representation<G> rep, Representation<G> original,
 			int generation) {
-		logger.info("\nRepair Found: " + rep.getName() + "\n");
+		logger.info("\nRepair Found: " + rep.getName() + " (in " + rep.getVariantFolder() + ")\n");
 
 		Calendar endTime = Calendar.getInstance(); // TODO do something with
 		// this
@@ -530,7 +530,7 @@ public class Search<G extends EditOperation> {
 				&& incomingPopulation.size() > incomingPopulation.getPopsize()) {
 			initialPopulation = incomingPopulation.firstN(incomingPopulation
 					.getPopsize());
-		} // FIXME: this is too functional I think.
+		} 
 		int stillNeed = initialPopulation.getPopsize()
 				- initialPopulation.size();
 		if (stillNeed > 0) {

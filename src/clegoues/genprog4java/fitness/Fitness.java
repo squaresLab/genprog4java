@@ -40,10 +40,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.Random;
 
 import org.apache.log4j.Logger;
 
+import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.util.GlobalUtils;
@@ -52,6 +52,10 @@ import clegoues.genprog4java.util.Pair;
 public class Fitness<G extends EditOperation> {
 	protected static Logger logger = Logger.getLogger(Fitness.class);
 
+	private static int generation = -1;
+	private static List<Integer> testSample = GlobalUtils.range(1,Fitness.numPositiveTests);
+	private static List<Integer> restSample = null;
+	
 	private static double negativeTestWeight = 2.0;
 	private static double sample = 1.0;
 	private static String sampleStrategy = "variant"; // options: all,
@@ -122,6 +126,22 @@ public class Fitness<G extends EditOperation> {
 		return allLines;
 	}
 
+	private int testPassCount(Representation<G> rep, boolean shortCircuit, TestType type, List<Integer> tests) {
+		int numPassed = 0;
+		for (Integer testNum : tests) {
+			TestCase thisTest = new TestCase(type, testNum);
+			if (!rep.testCase(thisTest)) {
+				rep.cleanup();
+				if(shortCircuit) {
+					return numPassed;
+				}
+			} else {
+				numPassed++;
+			}
+		}
+		return numPassed;
+	}
+	
 	/*
 	 * {b test_to_first_failure} variant returns true if the variant passes all
 	 * test cases and false otherwise; unlike other search strategies and as an
@@ -131,57 +151,43 @@ public class Fitness<G extends EditOperation> {
 	 */
 
 	public boolean testToFirstFailure(Representation<G> rep) {
-		for (int i = 1; i <= Fitness.numNegativeTests; i++) {
-			TestCase thisTest = new TestCase(TestType.NEGATIVE, i);
-			if (!rep.testCase(thisTest)) {
-				rep.cleanup();
-				return false;
-			}
-		}
-		Long L = Math.round(sample * Fitness.numPositiveTests);
-		int sampleSize = Integer.valueOf(L.intValue());
-
-		ArrayList<Integer> allPositiveTests = GlobalUtils.range(1,
-				Fitness.numPositiveTests);
-		List<Integer> positiveSample;
-		if (sampleSize == Fitness.numPositiveTests) {
-			positiveSample = allPositiveTests;
-		} else {
-			long seed = System.nanoTime();
-			Collections.shuffle(allPositiveTests, new Random(seed));
-			positiveSample = allPositiveTests.subList(0, sampleSize);
-		}
-		for (Integer testNum : positiveSample) {
-			TestCase thisTest = new TestCase(TestType.POSITIVE, testNum);
-			if (!rep.testCase(thisTest)) {
-				rep.cleanup();
-				return false;
-			}
-		}
-		if (Fitness.sample < 1.0) {
-			List<Integer> restOfSample = allPositiveTests.subList(
-					sampleSize + 1, allPositiveTests.size());
-			for (Integer testNum : restOfSample) {
-				TestCase thisTest = new TestCase(TestType.POSITIVE, testNum);
-				if (!rep.testCase(thisTest)) {
-					rep.cleanup();
-					return false;
-				}
-			}
+		int numNegativePassed = this.testPassCount(rep, true, TestType.NEGATIVE, GlobalUtils.range(1, Fitness.numNegativeTests));
+		if(numNegativePassed < Fitness.numNegativeTests) {
+			return false;
 		}
 
+		int numPositivePassed = this.testPassCount(rep,  true, TestType.POSITIVE, GlobalUtils.range(1, Fitness.numPositiveTests));
+		if(numPositivePassed < Fitness.numPositiveTests) {
+			return false;
+		}
 		return true;
 	}
 
-	private Pair<Double, Double> testFitnessGeneration(Representation<G> rep,
-			int generation) {
-		throw new UnsupportedOperationException();
+	private static void resample() {
+		ArrayList<Integer> allPositiveTests = GlobalUtils.range(1,
+				Fitness.numPositiveTests);
+		Long L = Math.round(sample * Fitness.numPositiveTests);
+		int sampleSize = Integer.valueOf(L.intValue());
+		Collections.shuffle(allPositiveTests, Configuration.randomizer);
+		Fitness.testSample = allPositiveTests.subList(0,sampleSize); //FIXME: make sure no off-by-one
+		Fitness.restSample = allPositiveTests.subList(sampleSize, allPositiveTests.size());
 	}
-
-	private Pair<Double, Double> testFitnessVariant(Representation<G> rep) {
-		throw new UnsupportedOperationException();
+	
+	private Pair<Double,Double> testFitnessSample(Representation<G> rep, double fac) {
+		int numNegPassed = this.testPassCount(rep,false,TestType.NEGATIVE, GlobalUtils.range(1, Fitness.numNegativeTests));
+		int numPosPassed = this.testPassCount(rep,false,TestType.POSITIVE, testSample);
+		int numRestPassed = 0;
+		if((numNegPassed == Fitness.numNegativeTests) &&
+			(numPosPassed == testSample.size())) {
+			if(Fitness.sample < 1.0) { // restSample won't be null by definition here
+				numRestPassed = this.testPassCount(rep, false, TestType.POSITIVE, restSample);				
+			}
+		} 
+		double sampleFitness = fac * numNegPassed + numPosPassed;
+		double totalFitness = sampleFitness + numRestPassed;
+		return new Pair<Double,Double>(totalFitness,sampleFitness);
 	}
-
+	
 	private Pair<Double, Double> testFitnessFull(Representation<G> rep,
 			double fac) {
 		double fitness = 0.0;
@@ -222,30 +228,18 @@ public class Fitness<G extends EditOperation> {
 				+ ((Fitness.numNegativeTests * fac));
 		double curFit = rep.getFitness();
 		if (curFit > -1.0) {
-			logger.info("\t" + curFit + " " + rep.getName());
+			logger.info("\t" + curFit + " " + rep.getName() + " (stored at: " + rep.getVariantFolder() + ")");
 			return !(curFit < maxFitness);
 		}
 
 		Pair<Double, Double> fitnessPair = new Pair<Double, Double>(-1.0, -1.0);
 		if (Fitness.sample < 1.0) {
-			if (Fitness.sampleStrategy == "generation") {
-				fitnessPair = this.testFitnessGeneration(rep, generation);
-			} else if (Fitness.sampleStrategy == "variant") {
-				fitnessPair = this.testFitnessVariant(rep);
-			} else {
-				throw new UnsupportedOperationException(
-						"Fitness: Claire did not implement the \"all\" strategy, or you asked for something totally bonkers (requested sample strategy: "
-								+ Fitness.sampleStrategy + ")\n"); // not doing
-																	// all right
-																	// now
-																	// because
-																	// don't see
-																	// a need
-																	// for those
-																	// experiments
-																	// any time
-																	// soon
-			}
+			if (((Fitness.sampleStrategy == "generation") && (Fitness.generation != generation)) ||
+				(Fitness.sampleStrategy == "variant")) {
+						generation = Fitness.generation;
+						Fitness.resample();
+				} 	
+			fitnessPair = this.testFitnessSample(rep, fac);
 		} else {
 			fitnessPair = this.testFitnessFull(rep, fac);
 		}
