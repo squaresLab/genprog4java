@@ -64,7 +64,7 @@ public class Search<G extends EditOperation> {
 	private static double repProb = 0.25;
 	private static double nullProb = .25;
 	
-	private static double rcheckProb = .25;
+	private static double rcheckProb = 0.25;
 	private static double lbsetProb = 0.25;
 	private static double ubsetProb = 0.25;
 	private static double offbyoneProb = 0.25;
