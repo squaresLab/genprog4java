@@ -1,0 +1,3 @@
+org.apache.commons.math.util.OpenIntToFieldTest
+org.apache.commons.math.util.ResizableDoubleArrayTest
+org.apache.commons.math.util.TransformerMapTest
