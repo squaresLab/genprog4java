@@ -341,57 +341,66 @@ public class JavaEditOperation implements
 				// for each of the array access instances
 				for (ASTNode array : arrays) {
 					// get the array index
-					String arrayindex = ((ArrayAccess) array).getIndex().toString();
-					arrayindex = arrayindex.replace("++", "");
-					arrayindex = arrayindex.replace("--", "");
+					Expression index = ((ArrayAccess) array).getIndex();
+					String arrayindex;
+					if (!(index instanceof NumberLiteral)) {
+						arrayindex = index.toString();
+						arrayindex = arrayindex.replace("++", "");
+						arrayindex = arrayindex.replace("--", "");
 
-					// create infix expression to check lowerbound and
-					// upperbound of array index
-					InfixExpression andexpression = null;
-					andexpression = parent.getAST().newInfixExpression();
-					andexpression.setOperator(Operator.CONDITIONAL_AND);
+						// create infix expression to check lowerbound and
+						// upperbound of array index
+						InfixExpression andexpression = null;
+						andexpression = parent.getAST().newInfixExpression();
+						andexpression.setOperator(Operator.CONDITIONAL_AND);
 
-					// create infix expression to check lowerbound
-					InfixExpression checklboundexpression = null;
-					checklboundexpression = parent.getAST()
-							.newInfixExpression();
-					checklboundexpression.setLeftOperand(parent.getAST()
-							.newSimpleName(arrayindex));
-					checklboundexpression.setOperator(Operator.GREATER_EQUALS);
-					checklboundexpression.setRightOperand(parent.getAST()
-							.newNumberLiteral(lowerbound.get(array)));
+						// create infix expression to check lowerbound
+						InfixExpression checklboundexpression = null;
+						checklboundexpression = parent.getAST()
+								.newInfixExpression();
+						checklboundexpression.setLeftOperand(parent.getAST()
+								.newSimpleName(arrayindex));
+						checklboundexpression
+								.setOperator(Operator.GREATER_EQUALS);
+						checklboundexpression.setRightOperand(parent.getAST()
+								.newNumberLiteral(lowerbound.get(array)));
 
-					// create infix expression to check upper bound
-					InfixExpression checkuboundexpression = null;
-					checkuboundexpression = parent.getAST()
-							.newInfixExpression();
-					checkuboundexpression.setLeftOperand(parent.getAST()
-							.newSimpleName(arrayindex));
-					checkuboundexpression.setOperator(Operator.LESS);
+						// create infix expression to check upper bound
+						InfixExpression checkuboundexpression = null;
+						checkuboundexpression = parent.getAST()
+								.newInfixExpression();
+						checkuboundexpression.setLeftOperand(parent.getAST()
+								.newSimpleName(arrayindex));
+						checkuboundexpression.setOperator(Operator.LESS);
 
-					SimpleName uqualifier = parent.getAST().newSimpleName(
-							((ArrayAccess) array).getArray().toString());
-					SimpleName uname = parent.getAST().newSimpleName("length");
-					checkuboundexpression.setRightOperand(parent.getAST()
-							.newQualifiedName(uqualifier, uname));
+						SimpleName uqualifier = parent.getAST().newSimpleName(
+								((ArrayAccess) array).getArray().toString());
+						SimpleName uname = parent.getAST().newSimpleName(
+								"length");
+						checkuboundexpression.setRightOperand(parent.getAST()
+								.newQualifiedName(uqualifier, uname));
 
-					andexpression.setLeftOperand(checklboundexpression);
-					andexpression.setRightOperand(checkuboundexpression);
+						andexpression.setLeftOperand(checklboundexpression);
+						andexpression.setRightOperand(checkuboundexpression);
 
-					if (counter == 0) { // only one array access is there in
-										// parent node
-						finalandexpression = andexpression;
-						counter++;
-					} else { // if more than one array access are there then
-								// keep creating and concatenating expressions
-								// into "finalandexpression"
-						InfixExpression tmpandexpression = null;
-						tmpandexpression = parent.getAST().newInfixExpression();
-						tmpandexpression.setOperator(Operator.CONDITIONAL_AND);
-						tmpandexpression.setLeftOperand(finalandexpression);
-						tmpandexpression.setRightOperand(andexpression);
-						finalandexpression = tmpandexpression;
-						counter++;
+						if (counter == 0) { // only one array access is there in
+											// parent node
+							finalandexpression = andexpression;
+							counter++;
+						} else { // if more than one array access are there then
+									// keep creating and concatenating
+									// expressions
+									// into "finalandexpression"
+							InfixExpression tmpandexpression = null;
+							tmpandexpression = parent.getAST()
+									.newInfixExpression();
+							tmpandexpression
+									.setOperator(Operator.CONDITIONAL_AND);
+							tmpandexpression.setLeftOperand(finalandexpression);
+							tmpandexpression.setRightOperand(andexpression);
+							finalandexpression = tmpandexpression;
+							counter++;
+						}
 					}
 				}
 
@@ -513,9 +522,11 @@ public class JavaEditOperation implements
 				
 				// for each of the array access instances
 				for( ASTNode  array : arrays){
-					
+					Expression index = ((ArrayAccess) array).getIndex();
+				    String arrayindex;
+					if (!(index instanceof NumberLiteral)){
 					// get the array index
-					String arrayindex = ((ArrayAccess)array).getIndex().toString();
+					arrayindex = index.toString();
 					arrayindex = arrayindex.replace("++", "");
 					arrayindex = arrayindex.replace("--", "");
 					
@@ -547,6 +558,7 @@ public class JavaEditOperation implements
 				stmt = ASTNode.copySubtree(parent.getAST(), stmt);
 				newnode.statements().add(stmt);
 				rewriter.replace(parent, newnode, null);
+				}
 			}	
 				
 			break;
@@ -590,8 +602,11 @@ public class JavaEditOperation implements
 				
 				// for each of the array access instances
 				for( ASTNode  array : arrays){
+					Expression index = ((ArrayAccess) array).getIndex();
+				    String arrayindex;
+					if (!(index instanceof NumberLiteral)){
 					// get the array index
-					String arrayindex = ((ArrayAccess)array).getIndex().toString();
+					arrayindex = index.toString();
 					arrayindex = arrayindex.replace("++", "");
 					arrayindex = arrayindex.replace("--", "");
 					
@@ -636,6 +651,7 @@ public class JavaEditOperation implements
 				stmt = ASTNode.copySubtree(parent.getAST(), stmt);
 				newnode.statements().add(stmt);
 				rewriter.replace(parent, newnode, null);
+				}
 			}	
 			
 			break;	
@@ -796,8 +812,7 @@ public class JavaEditOperation implements
 			
 		default:
 			break;
-			
-			
+		
 		}
 	}
 	
