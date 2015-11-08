@@ -256,11 +256,12 @@ case "$OPTION" in
 
 "generated" )
 #Create the new test suite
-        echo Creating new test suite...
-        "$4"/framework/bin/run_evosuite.pl -p $PROJECT -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfEvoSuite/ -c branch => 100s
-        #Untar the generated test into the tests folder
-        cd $BUGWD/"$TESTWD"/
-        tar xvjf outputOfEvoSuite/$PROJECT/evosuite-branch/1/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch.1.tar.bz2
+echo Creating new test suite...
+"$4"/framework/bin/run_evosuite.pl -p $PROJECT -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfEvoSuite/ -c branch -b 100 -A
+
+#Untar the generated test into the tests folder
+cd $BUGWD/"$TESTWD"/
+tar xvjf outputOfEvoSuite/$PROJECT/evosuite-branch/1/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch.1.tar.bz2
 ;;
 esac
 
