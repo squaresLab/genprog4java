@@ -214,7 +214,7 @@ EOM
 
 # programmatically get passing and failing tests as well as files
 #info about the bug
-INFO=`defects4j info -p $PROJECT -v $BUGNUMBER`
+INFO=`defects4j info -p $PROJECT -b $BUGNUMBER`
 
 # gets the content starting at the list of tests
 JUSTTEST=`echo $INFO | sed -n -e 's/.*Root cause in triggering tests: - //p'`
