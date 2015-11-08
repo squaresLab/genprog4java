@@ -146,7 +146,9 @@ public class Configuration {
 			// FIXME handle exception
 			e.printStackTrace();
 		}
-		saveTargetFiles();
+		
+		//saveTargetFiles();
+	
 		
 		Search.configure(prop);
 		Population.configure(prop);
@@ -154,6 +156,30 @@ public class Configuration {
 		JavaRepresentation.configure(prop);
 		FaultLocRepresentation.configure(prop);
 		CachingRepresentation.configure(prop);
+		
+		//Save original target file to an outside folder if it is the first run. Or load it if it is not.
+		saveOrLoadTargetFiles();
+	}
+	
+	public static void saveOrLoadTargetFiles(){
+		
+		String safeFolder = Configuration.outputDir  + File.separatorChar + "original" + File.separatorChar;
+		
+		//If there is a variant already created in the output folder then it is not the first run
+		File variant0Folder = new File(Configuration.outputDir  + File.separatorChar + "variant0"  + File.separatorChar );
+		if (variant0Folder.exists()){
+			
+			for( ClassInfo s : Configuration.targetClassNames ){
+				//overwrite the targetClass with the one saved before
+				Utils.runCommand("cp " + safeFolder + s.pathToJavaFile() + " " + Configuration.workingDir + Configuration.sourceDir + File.separatorChar + s.getPackage());
+			}
+			
+		//else 	it is the first run
+		}else{
+			//create safe folder and save the original target class
+			saveTargetFiles();
+		}
+		
 	}
 
 	public static ClassInfo getClassAndPackage(String fullName) {
