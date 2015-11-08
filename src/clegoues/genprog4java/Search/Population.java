@@ -52,9 +52,9 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	private static double crossp = 0.5; 
 
 	private static String incomingPop = "";
-	private int tournamentK = 2;
+	private static int tournamentK = (int) (popsize *0.2); //tournament size, 20% of the population
 	private static String outputFormat = "txt";
-	private double tournamentP = 1.0;
+	private double tournamentP = 1.0; //tournamente probability
 	private static String crossover = "onepoint";
 	private ArrayList<Representation<G>> population = new ArrayList<Representation<G>>(this.popsize);
 
@@ -79,6 +79,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		}
 		if(prop.getProperty("popsize") != null) {
 			popsize = Integer.parseInt(prop.getProperty("popsize").trim());
+			tournamentK = (int) (popsize *0.2);
 		}
 		if(prop.getProperty("crossover") != null) {
 			crossover = prop.getProperty("crossover").trim();
@@ -195,8 +196,8 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 					taken = true;
 				}
 			}
-			if(taken) {
-				return indiv;
+			if(taken && indiv.getFitness()>0) {
+				return indiv;	
 			} else {
 				step += 1.0;
 			}

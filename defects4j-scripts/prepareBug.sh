@@ -195,7 +195,7 @@ PACKAGEDIR=${JAVADIR//"/"/"."}
 #Create config file 
 FILE="$4"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/defects4j.config
 /bin/cat <<EOM >$FILE
-popsize = 5
+popsize = 20
 seed = 0
 testsDir = $TESTWD/$JAVADIR
 javaVM = /usr/bin/java
