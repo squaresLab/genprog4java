@@ -61,7 +61,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	public Population() {
 
 	}
-	
+
 	public Population(ArrayList<Representation<G>> smallerPop) {
 		this.population = smallerPop;
 	}
@@ -196,7 +196,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 					taken = true;
 				}
 			}
-			if(taken && indiv.getFitness()>0) {
+			if(taken) {
 				return indiv;	
 			} else {
 				step += 1.0;
@@ -211,6 +211,21 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		assert(this.tournamentP <= 1.0) ;
 		assert(population.size() >= 0);
 		ArrayList<Representation<G>> result = new ArrayList<Representation<G>>();
+
+		//remove the uncompiling ones from the population
+		for(int i = 0; i< population.size(); ++i) {
+			Representation<G> indiv = population.get(i);
+			boolean successfullyCompiled = indiv.compile(indiv.getName(), indiv.getVariantFolder());
+			if(!successfullyCompiled){
+				//replace that variant with the original
+				population.remove(indiv);
+				//first element of the population should be the original, which should always compile
+				Representation<G> toInsert = population.get(0);
+				population.add(toInsert);
+			}
+
+		}
+
 
 		for(int i = 0 ; i < desired; i++) {
 			result.add(selectOne());
@@ -287,7 +302,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		// the only trick is if one of the two variants is "original"
 		ArrayList<G> g1 = variant1.getGenome();
 		ArrayList<G> g2 = variant2.getGenome();
-		
+
 		ArrayList<G> newg1 = new ArrayList<G>();
 		ArrayList<G> newg2 = new ArrayList<G>();
 		ArrayList<Representation<G>> retval = new ArrayList<Representation<G>>();
@@ -297,11 +312,11 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		ArrayList<G> firstHalfG2 = new ArrayList<G>();
 		ArrayList<G> secondHalfG2 = new ArrayList<G>();
 		int point1 = 0, point2 = 0;
-		
+
 		if(g1.size() > 0) {
-			 point1 = Configuration.randomizer.nextInt(g1.size());
-			 firstHalfG1 = new ArrayList<G>(g1.subList(0,point1));
-			 secondHalfG1 = new ArrayList<G>(g1.subList(point1 + 1, g1.size()));
+			point1 = Configuration.randomizer.nextInt(g1.size());
+			firstHalfG1 = new ArrayList<G>(g1.subList(0,point1));
+			secondHalfG1 = new ArrayList<G>(g1.subList(point1 + 1, g1.size()));
 		} 
 		if(g2.size() > 0) {
 			if(original.getVariableLength() || g1.size() == 0) {
@@ -345,10 +360,10 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		throw new UnsupportedOperationException("Population: unrecognized crossover: " + crossover);
 
 	}
-/* crossover population original_variant performs crossover over the entire
+	/* crossover population original_variant performs crossover over the entire
 			population, returning a new population with both the old and the new
 			variants */
-	
+
 	public void crossover(Representation<G> original) {
 		Collections.shuffle(population,Configuration.randomizer);
 		ArrayList<Representation<G>> output = new ArrayList<Representation<G>>(this.population);
