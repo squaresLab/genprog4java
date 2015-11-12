@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -49,11 +50,14 @@ import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
@@ -65,12 +69,14 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.eclipse.jdt.core.dom.QualifiedName;
 
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
 
 public class JavaEditOperation implements
-		EditOperation<JavaStatement, ASTRewrite, AST> {
+EditOperation<JavaStatement, ASTRewrite, AST> {
 
 	private Mutation mutType;
 	private JavaStatement location = null;
@@ -120,19 +126,19 @@ public class JavaEditOperation implements
 	public ClassInfo getFileInfo() {
 		return this.fileInfo;
 	}
-	
+
 	public void setFileInfo(ClassInfo newFileName){
 		fileInfo = newFileName;
 	}
 
 	/*protected static ListRewrite getListRewriter(ASTNode origin, ASTNode fix, ASTRewrite rewriter) {
 		ASTNode parent = origin;
-		
+
 		//while (!(parent instanceof Block)) {
 		//	parent = parent.getParent();
 		//}
-		
-		
+
+
 		//make a new statement with the append (probably a block), and replace the origin in the parent for this new one
 		Block newNode = origin.getAST().newBlock();
 		ASTNode stm1 = (Statement)origin;
@@ -145,23 +151,23 @@ public class JavaEditOperation implements
 			stm2 = ASTNode.copySubtree(fix.getAST(), stm2);
 			newNode.statements().add(stm2);
 		}
-		
+
 		rewriter.replace(origin, newNode, null);
-		
-		
+
+
 		return rewriter.getListRewrite(parent, Block.STATEMENTS_PROPERTY);
 	}*/
 
 	@Override
 	public void edit(final ASTRewrite rewriter, AST ast, CompilationUnit cu) {
 		ASTNode locationNode = this.getLocation().getASTNode();
-		
+
 		// these are used for array access related checks for implementing PAR templates
 		final Map<ASTNode, List<ASTNode>> nodestmts = new HashMap<ASTNode, List<ASTNode>>();	// to track the parent nodes of array access nodes
 		final Map<ASTNode, String> lowerbound = new HashMap<ASTNode, String>();			// to set the lower-bound values of array. currently set to arrayname.length
 		final Map<ASTNode, String> upperbound = new HashMap<ASTNode, String>();			// to set the upper-bound values of array. currently set to arrayname.length
 		Set<ASTNode> parentnodes = nodestmts.keySet();
-		
+
 		ASTNode fixCodeNode = null;
 		if (this.fixCode != null) {
 			fixCodeNode = ASTNode.copySubtree(locationNode.getAST(), this
@@ -169,40 +175,7 @@ public class JavaEditOperation implements
 		}
 		switch (this.getType()) {
 		case APPEND:
-			
-			//ASTNode newNode = ASTNode.copySubtree(locationNode.getAST(), this.getFixCode().getASTNode());
-			
-			//ListRewrite lrw = getListRewriter(locationNode, fixCodeNode, rewriter);
-			//lrw.insertAfter(fixCodeNode, locationNode, null);
-			
-			
-			//make a new statement with the append (probably a block), and replace the origin in the parent for this new one
-			////ASTNode newStatement;
-			//newStatement = ListRewrite.createCopyTarget(locationNode, fixCodeNode);
-			////ASTNode[] targetNodes = {locationNode, fixCodeNode};
-			////newStatement = rewriter.createGroupNode(targetNodes) ;
-			////rewriter.replace(locationNode, newStatement, null);
-			
-			
-			//ImportDeclaration id = ast.newImportDeclaration();
-			//id.setName(ast.newName(new String[] {"java", "util", "Set"}));
-			//ListRewrite lrw = rewriter.getListRewrite(cu, CompilationUnit.IMPORTS_PROPERTY);
-			//lrw.insertAfter(id, locationNode, null);
-			
-			//ASTNode newNode;
-			//Block newStatement = locationNode.getAST().newBlock();
-			//newStatement.statements().add((Statement)locationNode);
-			//newStatement.statements().add(fixCodeNode);
-			//newNode = ASTNode.copySubtree(locationNode.getAST(), newStatement.getASTNode());
-			//rewriter.replace(locationNode, newStatement, null);
-			//locationNode.getParent().setChild();
-			
-			
-			
-			//ListRewrite lrw = rewriter.getListRewrite(locationNode, Block.STATEMENTS_PROPERTY);
-			//lrw.insertAfter(fixCodeNode, locationNode, null);
-			
-			
+
 			Block newNode = locationNode.getAST().newBlock(); 
 			ASTNode stm1 = (Statement)locationNode;
 			if(locationNode instanceof Statement){
@@ -214,9 +187,9 @@ public class JavaEditOperation implements
 				stm2 = ASTNode.copySubtree(fixCodeNode.getAST(), stm2);
 				newNode.statements().add(stm2);
 			}
-			
+
 			rewriter.replace(locationNode, newNode, null);
-			
+
 
 			break;
 		case REPLACE:
@@ -236,40 +209,96 @@ public class JavaEditOperation implements
 			//This is the same as delete, what is it supposed to be?
 			rewriter.remove(locationNode, null);
 			break;
-			
+
 			//Implement All These
 		case CASTCHECK:
-			
- 			break;
+
+			break;
 		case EXPADD:
-			
+
 			break;
 		case EXPREM:
-			
+
 			break;
 		case EXPREP:
-			
+
 			break;
 		case FUNREP:
-			
+
 			break;
 		case NULLCHECK:
-			if(canAddNullCheck(locationNode)){
-				addNullCheck(rewriter,locationNode);
+			List<String> listToCheckNulls = new ArrayList<String>();
+
+			if(locationNode instanceof MethodInvocation){
+				listToCheckNulls.add(((MethodInvocation) locationNode).getName().toString());
 			}
-			
+
+			if(locationNode instanceof FieldAccess){
+				listToCheckNulls.add(((FieldAccess) locationNode).getExpression().toString());
+			}
+
+			if(locationNode instanceof QualifiedName){
+				listToCheckNulls.add(((FieldAccess) locationNode).getName().toString());
+			}
+
+			if(listToCheckNulls.size() > 0){
+
+				//Create if before the error
+				IfStatement ifstmt = locationNode.getAST().newIfStatement();
+				Block newNode1 = locationNode.getAST().newBlock(); 
+				InfixExpression everythingInTheCondition = locationNode.getAST().newInfixExpression(); 
+				InfixExpression keepForNextRound = locationNode.getAST().newInfixExpression(); 
+
+				if(listToCheckNulls.size()==1){
+					InfixExpression expression = null;
+					expression = locationNode.getAST().newInfixExpression();
+					expression.setLeftOperand(locationNode.getAST().newSimpleName(listToCheckNulls.get(0).toString()));
+					expression.setOperator(Operator.EQUALS);
+					expression.setRightOperand(locationNode.getAST().newSimpleName("null")); //NOT SURE IF THIS IS THE RIGHT WAY TO GET NULL
+					ifstmt.setExpression(expression);
+				}else{
+					for(String sn : listToCheckNulls){
+						// with expression "x==null" 
+						InfixExpression expression = null;
+						expression = locationNode.getAST().newInfixExpression();
+						expression.setLeftOperand(locationNode.getAST().newSimpleName(sn));
+						expression.setOperator(Operator.EQUALS);
+						expression.setRightOperand(locationNode.getAST().newSimpleName("null")); //NOT SURE IF THIS IS THE RIGHT WAY TO GET NULL
+
+						if(!sn.equals(listToCheckNulls.get(0))) {
+							everythingInTheCondition = locationNode.getAST().newInfixExpression();
+							everythingInTheCondition.setLeftOperand(keepForNextRound);
+							everythingInTheCondition.setOperator(Operator.AND);
+							everythingInTheCondition.setRightOperand(expression);
+						}
+						keepForNextRound = expression;
+					}
+					ifstmt.setExpression(everythingInTheCondition);
+				}
+
+				//add then statement
+				//Block thenexpression = null;
+				//thenexpression = locationNode.getAST().newBlock();
+				//ASTNode copyLocationNode = (Statement)locationNode;
+				//copyLocationNode = ASTNode.copySubtree(locationNode.getAST(), copyLocationNode);
+				ifstmt.setThenStatement((Statement) locationNode);
+				newNode1.statements().add(ifstmt);
+
+				rewriter.replace(locationNode, newNode1, null);
+			}
+
 			break;
 		case OBJINIT:
-			
+
 			break;
 		case PARADD:
-			
+
 			break;
 		case PARREM:
-			
+
 			break;
 		case PARREP:
-			
+
 			break;
 		case RANGECHECK:
 			locationNode.accept(new ASTVisitor() {
@@ -320,7 +349,7 @@ public class JavaEditOperation implements
 				boolean returnflag = false; // to check is parent node has a return statement
 				int counter = 0; // to keep track of the #range check conditions
 				boolean isforstmt = false; // to check if parent is of type ForStatement
-				
+
 				if (parent.toString().contains("return")) {
 					returnflag = true;
 				}
@@ -361,7 +390,7 @@ public class JavaEditOperation implements
 						checklboundexpression.setLeftOperand(parent.getAST()
 								.newSimpleName(arrayindex));
 						checklboundexpression
-								.setOperator(Operator.GREATER_EQUALS);
+						.setOperator(Operator.GREATER_EQUALS);
 						checklboundexpression.setRightOperand(parent.getAST()
 								.newNumberLiteral(lowerbound.get(array)));
 
@@ -384,18 +413,18 @@ public class JavaEditOperation implements
 						andexpression.setRightOperand(checkuboundexpression);
 
 						if (counter == 0) { // only one array access is there in
-											// parent node
+							// parent node
 							finalandexpression = andexpression;
 							counter++;
 						} else { // if more than one array access are there then
-									// keep creating and concatenating
-									// expressions
-									// into "finalandexpression"
+							// keep creating and concatenating
+							// expressions
+							// into "finalandexpression"
 							InfixExpression tmpandexpression = null;
 							tmpandexpression = parent.getAST()
 									.newInfixExpression();
 							tmpandexpression
-									.setOperator(Operator.CONDITIONAL_AND);
+							.setOperator(Operator.CONDITIONAL_AND);
 							tmpandexpression.setLeftOperand(finalandexpression);
 							tmpandexpression.setRightOperand(andexpression);
 							finalandexpression = tmpandexpression;
@@ -405,9 +434,9 @@ public class JavaEditOperation implements
 				}
 
 				if (isforstmt == false) { // if the parent node is NOT
-											// ForStatement
+					// ForStatement
 					if (returnflag == false) { // if parent node DOES NOT
-												// contain return statement
+						// contain return statement
 						rangechkstmt.setExpression(finalandexpression);
 						ASTNode stmt = (Statement) parent;
 						stmt = ASTNode.copySubtree(parent.getAST(), stmt);
@@ -426,7 +455,7 @@ public class JavaEditOperation implements
 
 						notfinalandexpression.setOperand(parexp);
 						notfinalandexpression
-								.setOperator(org.eclipse.jdt.core.dom.PrefixExpression.Operator.NOT);
+						.setOperator(org.eclipse.jdt.core.dom.PrefixExpression.Operator.NOT);
 						// set the ifstatement expression
 						rangechkstmt.setExpression(notfinalandexpression);
 
@@ -454,7 +483,7 @@ public class JavaEditOperation implements
 					forexp = (Expression) ((ForStatement) parent)
 							.getExpression().copySubtree(
 									((ForStatement) parent).getExpression()
-											.getAST(), (ASTNode) forexp);
+									.getAST(), (ASTNode) forexp);
 
 					// create infix expression to AND the range check
 					// expressions and for statement expressions
@@ -484,7 +513,7 @@ public class JavaEditOperation implements
 			break;
 		case LBOUNDSET:
 			locationNode.accept(new ASTVisitor() {
-				
+
 				// method to visit all ArrayAccess nodes in locationNode and store their parents
 				public boolean visit(ArrayAccess node) {
 					lowerbound.put(node, "0");
@@ -501,7 +530,7 @@ public class JavaEditOperation implements
 					}
 					return true;
 				}
-				
+
 				// method to get the parent of ArrayAccess node. We traverse the ast upwards until the parent node is an instance of statement
 				// if statement is(are) added to this parent node
 				private ASTNode getParent(ArrayAccess node) {
@@ -512,59 +541,59 @@ public class JavaEditOperation implements
 					return parent;
 				}
 			});
-			
+
 			parentnodes = nodestmts.keySet();
 			// for each parent node which may have multiple array access instances
 			for(ASTNode parent: parentnodes){
 				// create a newnode
 				Block newnode = parent.getAST().newBlock();
 				List<ASTNode> arrays = nodestmts.get(parent);
-				
+
 				// for each of the array access instances
 				for( ASTNode  array : arrays){
 					Expression index = ((ArrayAccess) array).getIndex();
-				    String arrayindex;
+					String arrayindex;
 					if (!(index instanceof NumberLiteral)){
-					// get the array index
-					arrayindex = index.toString();
-					arrayindex = arrayindex.replace("++", "");
-					arrayindex = arrayindex.replace("--", "");
-					
-					// create if statement 
-					IfStatement stmt = parent.getAST().newIfStatement();
-					
-					// with expression "index < 0" 
-					InfixExpression expression = null;
-					expression = parent.getAST().newInfixExpression();
-					expression.setLeftOperand(parent.getAST().newSimpleName(arrayindex));
-					expression.setOperator(Operator.LESS);
-					expression.setRightOperand(parent.getAST().newNumberLiteral(lowerbound.get(array)));
-					stmt.setExpression(expression);
-					
-					// and then part as "index = 0"
-					Assignment thenexpression = null;
-					thenexpression = parent.getAST().newAssignment();
-					thenexpression.setLeftHandSide(parent.getAST().newSimpleName(arrayindex));
-					thenexpression.setOperator(Assignment.Operator.ASSIGN);
-					thenexpression.setRightHandSide(parent.getAST().newNumberLiteral(lowerbound.get(array)));
-					ExpressionStatement thenstmt = parent.getAST().newExpressionStatement(thenexpression);
-					stmt.setThenStatement(thenstmt);
-					
-					// add if statement to newnode
+						// get the array index
+						arrayindex = index.toString();
+						arrayindex = arrayindex.replace("++", "");
+						arrayindex = arrayindex.replace("--", "");
+
+						// create if statement 
+						IfStatement stmt = parent.getAST().newIfStatement();
+
+						// with expression "index < 0" 
+						InfixExpression expression = null;
+						expression = parent.getAST().newInfixExpression();
+						expression.setLeftOperand(parent.getAST().newSimpleName(arrayindex));
+						expression.setOperator(Operator.LESS);
+						expression.setRightOperand(parent.getAST().newNumberLiteral(lowerbound.get(array)));
+						stmt.setExpression(expression);
+
+						// and then part as "index = 0"
+						Assignment thenexpression = null;
+						thenexpression = parent.getAST().newAssignment();
+						thenexpression.setLeftHandSide(parent.getAST().newSimpleName(arrayindex));
+						thenexpression.setOperator(Assignment.Operator.ASSIGN);
+						thenexpression.setRightHandSide(parent.getAST().newNumberLiteral(lowerbound.get(array)));
+						ExpressionStatement thenstmt = parent.getAST().newExpressionStatement(thenexpression);
+						stmt.setThenStatement(thenstmt);
+
+						// add if statement to newnode
+						newnode.statements().add(stmt);
+					}
+					// append the existing content of parent node to newnode
+					ASTNode stmt = (Statement)parent;
+					stmt = ASTNode.copySubtree(parent.getAST(), stmt);
 					newnode.statements().add(stmt);
-				}
-				// append the existing content of parent node to newnode
-				ASTNode stmt = (Statement)parent;
-				stmt = ASTNode.copySubtree(parent.getAST(), stmt);
-				newnode.statements().add(stmt);
-				rewriter.replace(parent, newnode, null);
+					rewriter.replace(parent, newnode, null);
 				}
 			}	
-				
+
 			break;
 		case UBOUNDSET:				
 			locationNode.accept(new ASTVisitor() {
-				
+
 				// method to visit all ArrayAccess nodes in locationNode and store their parents
 				public boolean visit(ArrayAccess node) {
 					upperbound.put(node, node.getArray().toString().concat(".length"));
@@ -581,7 +610,7 @@ public class JavaEditOperation implements
 					}
 					return true;
 				}
-				
+
 				// method to get the parent of ArrayAccess node. We traverse the ast upwards until the parent node is an instance of statement
 				// if statement is(are) added to this parent node
 				private ASTNode getParent(ArrayAccess node) {
@@ -592,89 +621,89 @@ public class JavaEditOperation implements
 					return parent;
 				}
 			});
-			
+
 			parentnodes = nodestmts.keySet();
 			// for each parent node which may have multiple array access instances 
 			for(ASTNode parent: parentnodes){
 				// create a newnode
 				Block newnode = parent.getAST().newBlock();
 				List<ASTNode> arrays = nodestmts.get(parent);
-				
+
 				// for each of the array access instances
 				for( ASTNode  array : arrays){
 					Expression index = ((ArrayAccess) array).getIndex();
-				    String arrayindex;
+					String arrayindex;
 					if (!(index instanceof NumberLiteral)){
-					// get the array index
-					arrayindex = index.toString();
-					arrayindex = arrayindex.replace("++", "");
-					arrayindex = arrayindex.replace("--", "");
-					
-					// create if statement 
-					IfStatement stmt = parent.getAST().newIfStatement();
-					
-					// with expression "index > arrayname.length" 
-					InfixExpression expression = null;
-					expression = parent.getAST().newInfixExpression();
-					expression.setLeftOperand(parent.getAST().newSimpleName(arrayindex));
-					expression.setOperator(Operator.GREATER_EQUALS);
-					
-					// and then part as "index = arrayname.length - 1"
-					SimpleName qualifier = parent.getAST().newSimpleName(((ArrayAccess)array).getArray().toString());
-					SimpleName name = parent.getAST().newSimpleName("length");
-					expression.setRightOperand(parent.getAST().newQualifiedName(qualifier, name));
-					stmt.setExpression(expression);
-						
-					Assignment thenexpression = null;
-					thenexpression = parent.getAST().newAssignment();
-					thenexpression.setLeftHandSide(parent.getAST().newSimpleName(arrayindex));
-					thenexpression.setOperator(Assignment.Operator.ASSIGN);
-					
-					InfixExpression setupperboundexpression = null;
-					setupperboundexpression = parent.getAST().newInfixExpression();
-					SimpleName qualifier1 = parent.getAST().newSimpleName(((ArrayAccess)array).getArray().toString());
-					SimpleName name1 = parent.getAST().newSimpleName("length");
-					setupperboundexpression.setLeftOperand(parent.getAST().newQualifiedName(qualifier1, name1));
-					setupperboundexpression.setOperator(Operator.MINUS);
-					setupperboundexpression.setRightOperand(parent.getAST().newNumberLiteral("1"));
-					
-					thenexpression.setRightHandSide(setupperboundexpression);
-					
-					ExpressionStatement thenstmt = parent.getAST().newExpressionStatement(thenexpression);
-					stmt.setThenStatement(thenstmt);
-					
-					// add if statement to newnode
+						// get the array index
+						arrayindex = index.toString();
+						arrayindex = arrayindex.replace("++", "");
+						arrayindex = arrayindex.replace("--", "");
+
+						// create if statement 
+						IfStatement stmt = parent.getAST().newIfStatement();
+
+						// with expression "index > arrayname.length" 
+						InfixExpression expression = null;
+						expression = parent.getAST().newInfixExpression();
+						expression.setLeftOperand(parent.getAST().newSimpleName(arrayindex));
+						expression.setOperator(Operator.GREATER_EQUALS);
+
+						// and then part as "index = arrayname.length - 1"
+						SimpleName qualifier = parent.getAST().newSimpleName(((ArrayAccess)array).getArray().toString());
+						SimpleName name = parent.getAST().newSimpleName("length");
+						expression.setRightOperand(parent.getAST().newQualifiedName(qualifier, name));
+						stmt.setExpression(expression);
+
+						Assignment thenexpression = null;
+						thenexpression = parent.getAST().newAssignment();
+						thenexpression.setLeftHandSide(parent.getAST().newSimpleName(arrayindex));
+						thenexpression.setOperator(Assignment.Operator.ASSIGN);
+
+						InfixExpression setupperboundexpression = null;
+						setupperboundexpression = parent.getAST().newInfixExpression();
+						SimpleName qualifier1 = parent.getAST().newSimpleName(((ArrayAccess)array).getArray().toString());
+						SimpleName name1 = parent.getAST().newSimpleName("length");
+						setupperboundexpression.setLeftOperand(parent.getAST().newQualifiedName(qualifier1, name1));
+						setupperboundexpression.setOperator(Operator.MINUS);
+						setupperboundexpression.setRightOperand(parent.getAST().newNumberLiteral("1"));
+
+						thenexpression.setRightHandSide(setupperboundexpression);
+
+						ExpressionStatement thenstmt = parent.getAST().newExpressionStatement(thenexpression);
+						stmt.setThenStatement(thenstmt);
+
+						// add if statement to newnode
+						newnode.statements().add(stmt);
+					}
+					// append the existing content of parent node to newnode
+					ASTNode stmt = (Statement)parent;
+					stmt = ASTNode.copySubtree(parent.getAST(), stmt);
 					newnode.statements().add(stmt);
-				}
-				// append the existing content of parent node to newnode
-				ASTNode stmt = (Statement)parent;
-				stmt = ASTNode.copySubtree(parent.getAST(), stmt);
-				newnode.statements().add(stmt);
-				rewriter.replace(parent, newnode, null);
+					rewriter.replace(parent, newnode, null);
 				}
 			}	
-			
+
 			break;	
 		case OFFBYONE:
 			locationNode.accept(new ASTVisitor() {
 				int mutationtype;	// used to randomly put + or - operator while mutating array index
 				// method to visit all ArrayAccess nodes modify array index by 1
 				public boolean visit(ArrayAccess node) {
-					
+
 					// using random numbers (even or odd) to increase or decrease the index by 1
 					Random rand = new Random();
 					int randomNum = rand.nextInt(11);
 					if(randomNum%2==0){
-				    	mutationtype = 0;
-				    }else{
-				    	mutationtype = 1;
-				    }
+						mutationtype = 0;
+					}else{
+						mutationtype = 1;
+					}
 					Expression arrayindex = node.getIndex(); // original index
 					Expression mutatedindex = mutateIndex(arrayindex, 1); // method call to get mutated index
 					rewriter.replace(arrayindex, mutatedindex, null);	// replacing original index with mutated index
 					return true;
 				}
-				
+
 				// recursive method to mutate array index. (increase or decrease the index by 1)
 				private Expression mutateIndex(Expression arrayindex, int mutateflag) { // arrayindex is the index to be mutated, mutateflag is used to check if mutation is to be performed.
 
@@ -726,7 +755,7 @@ public class JavaEditOperation implements
 						} else if (arrayindex.toString().contains("--")) {
 							pexp.setOperator(org.eclipse.jdt.core.dom.PostfixExpression.Operator.DECREMENT);
 						}
-						
+
 						if (mutateflag == 0) { // if no mutation is to be performed then return the index
 							return pexp;
 						}
@@ -734,7 +763,7 @@ public class JavaEditOperation implements
 						InfixExpression mutatedindex = null;
 						mutatedindex = arrayindex.getAST().newInfixExpression();
 						mutatedindex.setLeftOperand(pexp);
-						
+
 						if (mutationtype == 0) {
 							mutatedindex.setOperator(Operator.MINUS);
 							mutationtype = 1;
@@ -742,7 +771,7 @@ public class JavaEditOperation implements
 							mutatedindex.setOperator(Operator.PLUS);
 							mutationtype = 0;
 						}
-						
+
 						mutatedindex.setRightOperand(arrayindex.getAST().newNumberLiteral("1"));
 						// return mutated index
 						return mutatedindex;
@@ -757,7 +786,7 @@ public class JavaEditOperation implements
 						} else if (arrayindex.toString().contains("--")) {
 							pexp.setOperator(org.eclipse.jdt.core.dom.PrefixExpression.Operator.DECREMENT);
 						}
-						
+
 						if (mutateflag == 0) { // if no mutation is to be performed then return the index
 							return pexp;
 						}
@@ -779,7 +808,7 @@ public class JavaEditOperation implements
 						InfixExpression iexp = arrayindex.getAST().newInfixExpression();
 						Expression loperand = ((InfixExpression) arrayindex).getLeftOperand();
 						if (loperand != null) {
-								iexp.setLeftOperand(mutateIndex(((InfixExpression) arrayindex).getLeftOperand(), 0));
+							iexp.setLeftOperand(mutateIndex(((InfixExpression) arrayindex).getLeftOperand(), 0));
 						}
 
 						Operator ioperator = ((InfixExpression) arrayindex).getOperator();
@@ -809,20 +838,11 @@ public class JavaEditOperation implements
 			});
 
 			break;
-			
+
 		default:
 			break;
-		
+
 		}
-	}
-	
-	private boolean canAddNullCheck(ASTNode nodeToCheck){
-
-		return false;
-	}
-
-	private void addNullCheck(ASTRewrite rewriter, ASTNode nodeToCheck){
-		
 	}
 
 
