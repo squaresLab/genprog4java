@@ -500,6 +500,43 @@ public class Search<G extends EditOperation> {
 			case RANGECHECK:
 				variant.rangeCheck(stmtid);
 				break;	
+			case FUNREP:
+				
+				break;
+			case PARREP:
+				
+				break;
+			case PARADD:
+				
+				break;
+			case PARREM:
+				
+				break;
+			case EXPREP:
+				
+				break;
+			case EXPADD:
+				
+				break;
+			case EXPREM:
+				
+				break;
+			case NULLCHECK:
+				
+				break;
+			case OBJINIT:
+				
+				break;
+			case SIZECHECK:
+				
+				break;
+			case CASTCHECK:
+				
+				break;
+			case OFFBYONE:
+				
+				break;
+				
 			}
 		}
 	}
