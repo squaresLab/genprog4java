@@ -247,7 +247,23 @@ CachingRepresentation<G> {
 			case SWAP:
 				addToSet = this.swapSources(atomId).size() > 0;
 				break;
-
+				
+			/*
+			Other cases
+			case :
+				addToSet = true;
+				break;
+			case :
+				addToSet = true;
+				break;
+			case :
+				addToSet = true;
+				break;
+			case :
+				addToSet = true;
+				break;
+			*/
+				
 			case NULLCHECK:
 				addToSet = true;
 				break;
@@ -264,12 +280,12 @@ CachingRepresentation<G> {
 				addToSet = true;
 				break;	
 				
-			case OFFBYONE:
-				addToSet = true;
-				break;
+		//	case OFFBYONE:
+			//	addToSet = true;
+			//	break;
 				
 			default:
-				addToSet = this.replaceSources(atomId).size() > 0;
+				addToSet = false; // this.replaceSources(atomId).size() > 0;
 				break;
 
 
