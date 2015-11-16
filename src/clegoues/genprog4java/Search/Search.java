@@ -56,18 +56,34 @@ public class Search<G extends EditOperation> {
 	protected Logger logger = Logger.getLogger(Search.class);
 
 	private static int generations = 10;
-	private static double promut = 1;
+	//The proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
+	private static double promut = 1; 
 	private static boolean continueSearch = false;
-	private static double appProb = 0.25;
-	private static double delProb = 0.25;
-	private static double swapProb = 0.0;
-	private static double repProb = 0.25;
-	private static double nullProb = .25;
 	
-	private static double rcheckProb = 0.25;
-	private static double lbsetProb = 0.25;
-	private static double ubsetProb = 0.25;
-	private static double offbyoneProb = 0.25;
+	//20 mutations 1/20 = 0.05
+	private static double appProb = 0.05;
+	private static double delProb = 0.05;
+	private static double swapProb = 0.05;
+	private static double repProb = 0.05;
+	private static double nullInsProb = 0.05;
+	
+	private static double funRepProb = 0.00;
+	private static double parRepProb = 0.00;
+	private static double parAddProb = 0.00;
+	private static double parRemProb = 0.00;
+	private static double expRepProb = 0.00;
+	private static double expAddProb = 0.00;
+	private static double expRemProb = 0.00;
+	private static double nullCheckProb = 0.05;
+	private static double objInitProb = 0.00;
+	private static double sizeCheckProb = 0.00;
+	private static double castCheckProb = 0.00;
+	
+	
+	private static double rcheckProb = 0.05;
+	private static double lbsetProb = 0.05;
+	private static double ubsetProb = 0.05;
+	private static double offbyoneProb = 0.05;
 	
 	private static String startingGenome = "";
 	public static String searchStrategy = "ga";
@@ -273,9 +289,32 @@ public class Search<G extends EditOperation> {
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.REPLACE,
 				Search.repProb));
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.NULLINSERT,
-				Search.nullProb));
+				Search.nullInsProb));
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.NULLCHECK,
-				Search.nullProb));
+				Search.nullCheckProb));
+		
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.FUNREP,
+				Search.funRepProb));
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.PARREP,
+				Search.parRepProb));
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.PARADD,
+				Search.parAddProb));
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.PARREM,
+				Search.parRemProb));
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.EXPREP,
+				Search.expRepProb));
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.EXPADD,
+				Search.expAddProb));
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.EXPREM,
+				Search.expRemProb));
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.OBJINIT,
+				Search.objInitProb));
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.SIZECHECK,
+				Search.sizeCheckProb));
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.CASTCHECK,
+				Search.castCheckProb));
+
+		
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.LBOUNDSET,
 				Search.lbsetProb));
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.UBOUNDSET,
@@ -315,7 +354,7 @@ public class Search<G extends EditOperation> {
 			if (Search.swapProb > 0.0) {
 				count += original.swapSources(faultyLocation).size();
 			}
-			if (Search.nullProb > 0.0) {
+			if (Search.nullCheckProb > 0.0) {
 				count++;
 			}
 		}
@@ -453,16 +492,17 @@ public class Search<G extends EditOperation> {
 		ArrayList faultyAtoms = variant.getFaultyAtoms();
 		ArrayList<WeightedAtom> proMutList = new ArrayList<WeightedAtom>();
 		for (int i = 0; i < Search.promut; i++) {
+			//chooses a random mutation
 			proMutList.add((WeightedAtom) GlobalUtils
 					.chooseOneWeighted(faultyAtoms));
 
 		}
 		for (WeightedAtom atom : proMutList) {
 			int stmtid = atom.getAtom();
-			TreeSet<Pair<Mutation, Double>> availableMutations = variant
-					.availableMutations(stmtid);
-			Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils
-					.chooseOneWeighted(new ArrayList(availableMutations));
+			//the available mutations for this stmt
+			TreeSet<Pair<Mutation, Double>> availableMutations = variant.availableMutations(stmtid);
+			//choose one at random
+			Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(new ArrayList(availableMutations));
 			Mutation mut = chosenMutation.getFirst();
 			// FIXME: make sure the mutation list isn't empty before choosing?
 			switch (mut) {
@@ -522,6 +562,7 @@ public class Search<G extends EditOperation> {
 				
 				break;
 			case NULLCHECK:
+				variant.nullCheck(stmtid);
 				
 				break;
 			case OBJINIT:

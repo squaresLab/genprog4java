@@ -63,6 +63,8 @@ public abstract class Representation<G extends EditOperation> implements
 Comparable<Representation<G>> {
 
 	protected Logger logger = Logger.getLogger(Representation.class);
+	
+	protected String variantFolder = "";
 
 	private ArrayList<HistoryEle> history = new ArrayList<HistoryEle>();
 
@@ -96,9 +98,6 @@ Comparable<Representation<G>> {
 	public void setHistory(ArrayList<HistoryEle> history) {
 		this.history = history;
 	}
-
-
-	protected String variantFolder = "";
 	
 	public String getVariantFolder() {
 		return this.variantFolder;
