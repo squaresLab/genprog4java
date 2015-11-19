@@ -49,6 +49,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import clegoues.genprog4java.rep.JavaRepresentation;
+import clegoues.genprog4java.util.Pair;
 
 public class SemanticInfoVisitor extends ASTVisitor {
 
@@ -59,6 +60,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	private TreeSet<String> fieldName;
 	private TreeSet<String> currentMethodScope;
+	private TreeSet<Pair<String,String>> methodReturnType;
 
 	// unlike in the OCaml implementation, this only collects the statements and
 	// the semantic information. It doesn't number.
@@ -81,6 +83,14 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.nodeSet = o;
 	}
 
+	public TreeSet<Pair<String,String>> getMethodReturnType() {
+		return this.methodReturnType;
+	}
+
+	public void setMethodReturnType(TreeSet<Pair<String,String>> methodReturnTypeSet) {
+		this.methodReturnType = methodReturnTypeSet;
+	}
+	
 	public List<ASTNode> getNodeSet() {
 		return this.nodeSet;
 	}
@@ -100,6 +110,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		return super.visit(node);
 	}
 
+
 	@Override
 	public boolean visit(MethodDeclaration node) {
 		this.currentMethodScope = new TreeSet<String>();
@@ -110,7 +121,9 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				this.currentMethodScope.add(v.getName().getIdentifier());
 			}
 		}
-
+		String returnType = node.getReturnType2()==null?"null":node.getReturnType2().toString();
+		this.methodReturnType.add(new Pair<String, String>(node.getName().toString(),returnType));
+		
 		return super.visit(node);
 	}
 

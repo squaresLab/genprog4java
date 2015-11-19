@@ -75,6 +75,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
@@ -134,7 +135,9 @@ public class JavaRepresentation extends
 
 	private static HashMap<Integer, TreeSet<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, TreeSet<WeightedAtom>>();
 	private static HashMap<Integer, Set<String>> inScopeMap = new HashMap<Integer, Set<String>>();
+	private static TreeSet<Pair<String,String>> methodReturnType = new TreeSet<Pair<String,String>>();
 
+	
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
 
 	public static void configure(Properties prop) {
@@ -262,6 +265,7 @@ public class JavaRepresentation extends
 		myParser.parse(path, Configuration.libs.split(File.pathSeparator));
 		List<ASTNode> stmts = myParser.getStatements();
 		baseCompilationUnits.put(pair, myParser.getCompilationUnit());
+		JavaRepresentation.methodReturnType.addAll(myParser.getMethodReturnTypeSet());
 
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
@@ -293,6 +297,9 @@ public class JavaRepresentation extends
 				JavaRepresentation.inScopeMap.put(s.getStmtId(),
 						scopeInfo.getScope(s.getASTNode()));
 			}
+			/*if(node instanceof MethodDeclaration){
+				methodReturnType.addAll(myParser.getMethodReturnTypeSet());
+			}*/
 
 		}
 	}
@@ -773,7 +780,15 @@ public class JavaRepresentation extends
 					ok = false;
 					break;
 				}
+				for(Pair<String,String> pair : methodReturnType){
+					if(pair.getFirst().equalsIgnoreCase(req) && pair.getSecond().equalsIgnoreCase("void")){
+						ok=false;
+						break;
+					}
+				}
+				
 			}
+			
 			if (ok) {
 				retVal.add(atom);
 			}
