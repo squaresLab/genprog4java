@@ -36,12 +36,15 @@ package clegoues.genprog4java.java;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+
+import clegoues.genprog4java.util.Pair;
 
 
 public class JavaParser
@@ -50,16 +53,22 @@ public class JavaParser
 	private SemanticInfoVisitor visitor;
 	private CompilationUnit compilationUnit;
 	private Set<String> fields;
+	private TreeSet<Pair<String,String>> methodReturnType;
 	
 
 	public JavaParser(ScopeInfo scopeList)
 	{
 		this.stmts = new LinkedList<ASTNode>();
+		this.methodReturnType = new TreeSet<Pair<String,String>>();
 		this.visitor = new SemanticInfoVisitor();
 		this.visitor.setNodeSet(this.stmts);		
 		this.visitor.setScopeList(scopeList);
+		this.visitor.setMethodReturnType(methodReturnType);
 	}
 
+	public TreeSet<Pair<String,String>> getMethodReturnTypeSet(){
+		return this.methodReturnType;
+	}
 	
 	public LinkedList<ASTNode> getStatements()
 	{
