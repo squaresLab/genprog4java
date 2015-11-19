@@ -75,7 +75,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
@@ -115,7 +115,7 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
 public class JavaRepresentation extends
-		FaultLocRepresentation<JavaEditOperation> {
+FaultLocRepresentation<JavaEditOperation> {
 	protected Logger logger = Logger.getLogger(JavaRepresentation.class);
 
 	private static HashMap<Integer, JavaStatement> codeBank = new HashMap<Integer, JavaStatement>();
@@ -125,7 +125,7 @@ public class JavaRepresentation extends
 	private static HashMap<ClassInfo, String> originalSource = new HashMap<ClassInfo, String>();
 	private static HashMap<Integer, ClassInfo> stmtToFile = new HashMap<Integer, ClassInfo>();
 	private int mutationNumber = 0;
-	
+
 	// semantic check cache stuff, so we don't have to walk stuff a million
 	// times unnecessarily
 	// should be the same for all of append, replace, and swap, so we only need
@@ -137,7 +137,7 @@ public class JavaRepresentation extends
 	private static HashMap<Integer, Set<String>> inScopeMap = new HashMap<Integer, Set<String>>();
 	private static TreeSet<Pair<String,String>> methodReturnType = new TreeSet<Pair<String,String>>();
 
-	
+
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
 
 	public static void configure(Properties prop) {
@@ -189,7 +189,7 @@ public class JavaRepresentation extends
 						+ targetClassInfo.pathToClassFile() ;
 				compiledClass = new File(pathToCoverageClass);
 			}
-			
+
 			InputStream targetClass = new FileInputStream(new File(pathToCoverageClass));
 
 			if (executionData == null) {
@@ -208,7 +208,7 @@ public class JavaRepresentation extends
 					executionData.put(data);
 				}
 			});
-			
+
 
 			reader.read();
 			in.close();
@@ -305,8 +305,8 @@ public class JavaRepresentation extends
 	}
 
 	public static boolean canRepair(ASTNode node) {
-		
-		
+
+
 		return node instanceof AssertStatement 
 				|| node instanceof Block
 				|| node instanceof BreakStatement
@@ -415,8 +415,8 @@ public class JavaRepresentation extends
 					// guess, in particular
 					// because it allows us to serialize/deserialize incoming
 					// populations
-//					this.fromSource(filename.replace('.', '/')
-//							+ Configuration.globalExtension);
+					//					this.fromSource(filename.replace('.', '/')
+					//							+ Configuration.globalExtension);
 					// FIXME: deserialize needs fixed; fromSource wants a classname and package, now....
 				}
 				this.genome.addAll((ArrayList<JavaEditOperation>) (in
@@ -444,8 +444,8 @@ public class JavaRepresentation extends
 				}
 			} catch (IOException e) {
 				System.err
-						.println("javaRepresentation: IOException in file close in deserialize "
-								+ filename + " which is weird?");
+				.println("javaRepresentation: IOException in file close in deserialize "
+						+ filename + " which is weird?");
 				e.printStackTrace();
 			}
 		}
@@ -609,7 +609,7 @@ public class JavaRepresentation extends
 				Mutation.NULLINSERT);
 		this.genome.add(newEdit);
 	}
-	
+
 	public void rangeCheck(int location) {
 		super.nullInsert(location);
 		JavaStatement locationStatement = base.get(location);
@@ -618,7 +618,7 @@ public class JavaRepresentation extends
 				Mutation.RANGECHECK);
 		this.genome.add(newEdit);
 	}
-	
+
 	public void setLowerBound(int location) {
 		super.nullInsert(location);
 		JavaStatement locationStatement = base.get(location);
@@ -627,7 +627,7 @@ public class JavaRepresentation extends
 				Mutation.LBOUNDSET);
 		this.genome.add(newEdit);
 	}
-	
+
 	public void setUpperBound(int location) {
 		super.nullInsert(location);
 		JavaStatement locationStatement = base.get(location);
@@ -636,7 +636,7 @@ public class JavaRepresentation extends
 				Mutation.UBOUNDSET);
 		this.genome.add(newEdit);
 	}
-	
+
 	public void offByOne(int location) {
 		super.nullInsert(location);
 		JavaStatement locationStatement = base.get(location);
@@ -648,7 +648,7 @@ public class JavaRepresentation extends
 
 	@Override
 	protected boolean internalCompile(String progName, String exeName) {
-		
+
 		// FIXME: why does an append that fails in computeSourceBuffers have
 		// a fitness of 204?
 		List<Pair<ClassInfo, String>> sourceBuffers = this.computeSourceBuffers();
@@ -657,25 +657,25 @@ public class JavaRepresentation extends
 		}
 		String outDirName = Configuration.outputDir + File.separatorChar
 				+ exeName + File.separatorChar ;
-		
+
 		File sanRepDir = new File(Configuration.outputDir + File.separatorChar+ exeName);
 		if (!sanRepDir.exists()){
 			sanRepDir.mkdir();
 		}
 
-		
+
 		File mutDir = new File(outDirName);
 		if (!mutDir.exists()){
 			mutDir.mkdir();
 		}
-		
+
 		try {
 			for (Pair<ClassInfo, String> ele : sourceBuffers) {
 				ClassInfo ci = ele.getFirst();
 				String program = ele.getSecond();
 				String pathToFile = ci.pathToJavaFile();
 
-				
+
 				createPathFiles(outDirName, pathToFile);
 
 				BufferedWriter bw = new BufferedWriter(new FileWriter(
@@ -687,11 +687,11 @@ public class JavaRepresentation extends
 				if(Configuration.compileCommand != "") {
 					String path = 
 							Configuration.workingDir+ File.separatorChar + Configuration.sourceDir+ File.separatorChar + pathToFile; 
- 
-				BufferedWriter bw2 = new BufferedWriter(new FileWriter(path)); 
-				bw2.write(program);
-				bw2.flush();
-				bw2.close();
+
+					BufferedWriter bw2 = new BufferedWriter(new FileWriter(path)); 
+					bw2.write(program);
+					bw2.flush();
+					bw2.close();
 				}	
 			}
 		} catch (IOException e) {
@@ -714,7 +714,7 @@ public class JavaRepresentation extends
 			options.add(Configuration.targetVersion);
 
 			options.add("-d");
-		
+
 			File outDirFile = new File(outDirName);
 			if (!outDirFile.exists())
 				outDirFile.mkdir();
@@ -740,7 +740,7 @@ public class JavaRepresentation extends
 	private void createPathFiles(String base, String pathToFile){
 		pathToFile = pathToFile.substring(0,pathToFile.lastIndexOf(File.separatorChar));
 		String[] array = pathToFile.split(String.valueOf(File.separatorChar));
-		
+
 		for(String s : array){
 			File fileName = new File(base + File.separatorChar + s);
 			if (!fileName.exists()){
@@ -749,8 +749,8 @@ public class JavaRepresentation extends
 			base += File.separatorChar + s;
 		}
 	}
-	
-	
+
+
 	public JavaRepresentation copy() {
 		JavaRepresentation copy = new JavaRepresentation(this.getHistory(),
 				this.getGenome(), this.getFaultyAtoms(),
@@ -780,15 +780,19 @@ public class JavaRepresentation extends
 					ok = false;
 					break;
 				}
-				for(Pair<String,String> pair : methodReturnType){
-					if(pair.getFirst().equalsIgnoreCase(req) && pair.getSecond().equalsIgnoreCase("void")){
+			}
+
+			if(stmt.getASTNode() instanceof MethodRef){
+				MethodRef mr = (MethodRef) stmt.getASTNode();
+				Pair<String,String> methodRefInMrt = mrtContainsMethodName(mr.getName().toString());
+				if(methodRefInMrt != null){
+					if( methodRefInMrt.getSecond().equalsIgnoreCase("void") || methodRefInMrt.getSecond().equalsIgnoreCase("null")){
 						ok=false;
 						break;
 					}
 				}
-				
 			}
-			
+
 			if (ok) {
 				retVal.add(atom);
 			}
@@ -796,6 +800,15 @@ public class JavaRepresentation extends
 		}
 		JavaRepresentation.scopeSafeAtomMap.put(stmtId, retVal);
 		return retVal;
+	}
+
+	private Pair<String,String> mrtContainsMethodName(String matchString){
+		for (Pair<String,String> p : methodReturnType) {
+			if(p.getFirst().equalsIgnoreCase(matchString)){
+				return p;
+			}
+		}
+		return null;
 	}
 
 	@Override
