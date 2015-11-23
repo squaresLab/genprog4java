@@ -42,7 +42,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -50,27 +49,23 @@ import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.eclipse.jdt.core.dom.QualifiedName;
 
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
@@ -227,67 +222,130 @@ EditOperation<JavaStatement, ASTRewrite, AST> {
 
 			break;
 		case NULLCHECK:
-			List<String> listToCheckNulls = new ArrayList<String>();
 
-			if(locationNode instanceof MethodInvocation){
-				listToCheckNulls.add(((MethodInvocation) locationNode).getName().toString());
-			}
+			//final Map<ASTNode, String> expressions = new HashMap<ASTNode, String>();			// to set the lower-bound values of array. currently set to arrayname.length
 
-			if(locationNode instanceof FieldAccess){
-				listToCheckNulls.add(((FieldAccess) locationNode).getExpression().toString());
-			}
+			locationNode.accept(new ASTVisitor() {
 
-			if(locationNode instanceof QualifiedName){
-				listToCheckNulls.add(((FieldAccess) locationNode).getName().toString());
-			}
+				// method to visit all Expressions relevant for this in locationNode and
+				// store their parents
+				public boolean visit(MethodInvocation node) {
+					saveDataOfTheExpression(node);
+					return true;
+				}
 
-			if(listToCheckNulls.size() > 0){
+				public boolean visit(FieldAccess node) {
+					saveDataOfTheExpression(node);
+					return true;
+				}
+
+				public boolean visit(QualifiedName node) {
+					saveDataOfTheExpression(node);
+					return true;
+				}
+
+				public void saveDataOfTheExpression(ASTNode node){
+					//expressions.put(node, "0");
+					ASTNode parent = getParent(node);
+					if (!nodestmts.containsKey(parent)) {
+						List<ASTNode> arraynodes = new ArrayList<ASTNode>();
+						arraynodes.add(node);
+						nodestmts.put(parent, arraynodes);
+					} else {
+						List<ASTNode> arraynodes = (List<ASTNode>) nodestmts
+								.get(parent);
+						if (!arraynodes.contains(node))
+							arraynodes.add(node);
+						nodestmts.put(parent, arraynodes);
+					}
+				}
+
+				// method to get the parent of ArrayAccess node. We traverse the
+				// ast upwards until the parent node is an instance of statement
+				// if statement is(are) added to this parent node
+				private ASTNode getParent(ASTNode node) {
+					ASTNode parent = node.getParent();
+					while (!(parent instanceof Statement)) {
+						parent = parent.getParent();
+					}
+					return parent;
+				}
+			});
+
+			parentnodes = nodestmts.keySet();
+			// for each parent node which may have multiple array access instances
+			for(ASTNode parent: parentnodes){
+				// create a newnode
+				//Block newnode = parent.getAST().newBlock();
+				List<ASTNode> expressionsFromThisParent = nodestmts.get(parent);
 
 				//Create if before the error
 				IfStatement ifstmt = locationNode.getAST().newIfStatement();
-				Block newNode1 = locationNode.getAST().newBlock(); 
+				//Block newNode1 = locationNode.getAST().newBlock(); 
 				InfixExpression everythingInTheCondition = locationNode.getAST().newInfixExpression(); 
 				InfixExpression keepForNextRound = locationNode.getAST().newInfixExpression(); 
 
-				if(listToCheckNulls.size()==1){
+				ASTNode lastExpInTheList = expressionsFromThisParent.get(expressionsFromThisParent.size()-1);
+				// for each of the expressions that can be null
+				for(ASTNode  expressionToCheckIfNull : expressionsFromThisParent){
+
+					String leftOperand=null;
+					
+					
+
 					InfixExpression expression = null;
-					expression = locationNode.getAST().newInfixExpression();
-					expression.setLeftOperand(locationNode.getAST().newSimpleName(listToCheckNulls.get(0).toString()));
-					expression.setOperator(Operator.EQUALS);
-					expression.setRightOperand(locationNode.getAST().newSimpleName("null")); //NOT SURE IF THIS IS THE RIGHT WAY TO GET NULL
-					ifstmt.setExpression(expression);
-				}else{
-					for(String sn : listToCheckNulls){
-						// with expression "x==null" 
-						InfixExpression expression = null;
-						expression = locationNode.getAST().newInfixExpression();
-						expression.setLeftOperand(locationNode.getAST().newSimpleName(sn));
-						expression.setOperator(Operator.EQUALS);
-						expression.setRightOperand(locationNode.getAST().newSimpleName("null")); //NOT SURE IF THIS IS THE RIGHT WAY TO GET NULL
-
-						if(!sn.equals(listToCheckNulls.get(0))) {
-							everythingInTheCondition = locationNode.getAST().newInfixExpression();
-							everythingInTheCondition.setLeftOperand(keepForNextRound);
-							everythingInTheCondition.setOperator(Operator.AND);
-							everythingInTheCondition.setRightOperand(expression);
-						}
-						keepForNextRound = expression;
+					expression = expressionToCheckIfNull.getAST().newInfixExpression();
+					ASTNode toCheckIfNullNode = expressionToCheckIfNull;
+					toCheckIfNullNode = ASTNode.copySubtree(expressionToCheckIfNull.getAST(), toCheckIfNullNode);
+					
+					if(expressionToCheckIfNull instanceof MethodInvocation){
+						
+						MethodInvocation mi = expressionToCheckIfNull.getAST().newMethodInvocation();
+						Expression exp = ((MethodInvocation)expressionToCheckIfNull).getExpression();
+						mi.setExpression(((MethodInvocation)exp).getExpression());
+						mi.setName(((MethodInvocation)exp).getName());
+						
+						expression.setLeftOperand(mi);
+						
+	
+						
+		
 					}
-					ifstmt.setExpression(everythingInTheCondition);
+					if(expressionToCheckIfNull instanceof FieldAccess)
+						expression.setLeftOperand(((FieldAccess) expressionToCheckIfNull).getExpression());
+					if(expressionToCheckIfNull instanceof QualifiedName)
+						expression.setLeftOperand(((QualifiedName) expressionToCheckIfNull).getName());
+					
+					
+					//expression.setLeftOperand((Expression)toCheckIfNullNode);
+					expression.setOperator(Operator.EQUALS);
+					expression.setRightOperand(expressionToCheckIfNull.getAST().newNullLiteral());
+
+					if(expressionsFromThisParent.size() != 1) {
+						everythingInTheCondition = expressionToCheckIfNull.getAST().newInfixExpression();
+						everythingInTheCondition.setLeftOperand(keepForNextRound);
+						everythingInTheCondition.setOperator(Operator.AND);
+						everythingInTheCondition.setRightOperand(expression);
+						keepForNextRound = expression;
+					}else{
+						everythingInTheCondition = expression;
+					}
+					
+
 				}
-
-				//add then statement
-				//Block thenexpression = null;
-				//thenexpression = locationNode.getAST().newBlock();
-				//ASTNode copyLocationNode = (Statement)locationNode;
-				//copyLocationNode = ASTNode.copySubtree(locationNode.getAST(), copyLocationNode);
-				ifstmt.setThenStatement((Statement) locationNode);
-				newNode1.statements().add(ifstmt);
-
-				rewriter.replace(locationNode, newNode1, null);
-			}
+				ifstmt.setExpression(everythingInTheCondition);
+						
+				ASTNode thenStmt = (Statement) parent;
+				thenStmt = ASTNode.copySubtree(parent.getAST(), thenStmt);
+				ifstmt.setThenStatement((Statement) thenStmt);
+				//newNode.statements().add(rangechkstmt);
+						
+				//ifstmt.setThenStatement((Statement)thenStmt);
+				rewriter.replace(parent, ifstmt, null);
+			}	
 
 			break;
+
 		case OBJINIT:
 
 			break;
