@@ -9,8 +9,12 @@
 PATHTOGENPROG="$1"
 PATHTOSIMPLEEXAMPLE=$PATHTOGENPROG"/SimpleExample"
 
-#Crete jar file
+#Compile
 cd $PATHTOSIMPLEEXAMPLE/
+ant -buildfile buildSimpleExample.xml
+
+#Create jar file
+cd $PATHTOSIMPLEEXAMPLE/bin/
 jar cf $PATHTOSIMPLEEXAMPLE/SimpleExample.jar ./* 
 
 
