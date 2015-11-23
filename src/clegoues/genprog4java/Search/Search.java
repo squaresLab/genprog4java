@@ -280,7 +280,7 @@ public class Search<G extends EditOperation> {
 		};
 		TreeSet<Pair<Mutation, Double>> availableMutations = new TreeSet<Pair<Mutation, Double>>(
 				myComp);
-		/*availableMutations.add(new Pair<Mutation, Double>(Mutation.DELETE,
+		availableMutations.add(new Pair<Mutation, Double>(Mutation.DELETE,
 				Search.delProb));
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.APPEND,
 				Search.appProb));
@@ -289,10 +289,10 @@ public class Search<G extends EditOperation> {
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.REPLACE,
 				Search.repProb));
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.NULLINSERT,
-				Search.nullInsProb));*/
+				Search.nullInsProb));
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.NULLCHECK,
 				Search.nullCheckProb));
-		/*
+		
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.FUNREP,
 				Search.funRepProb));
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.PARREP,
@@ -322,7 +322,7 @@ public class Search<G extends EditOperation> {
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.RANGECHECK,
 				Search.rcheckProb));
 		availableMutations.add(new Pair<Mutation, Double>(Mutation.OFFBYONE,
-				Search.offbyoneProb));*/
+				Search.offbyoneProb));
 		if (parTemplates != null)
 			for (Pair<Mutation, Double> p : parTemplates) {
 				availableMutations.add(p);
