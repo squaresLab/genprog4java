@@ -309,6 +309,7 @@ FaultLocRepresentation<JavaEditOperation> {
 
 		return node instanceof AssertStatement 
 				|| node instanceof Block
+				//|| node instanceof MethodInvocation
 				|| node instanceof BreakStatement
 				|| node instanceof ConstructorInvocation
 				|| node instanceof ContinueStatement
@@ -520,13 +521,16 @@ FaultLocRepresentation<JavaEditOperation> {
 
 		if (this.doingCoverage) {
 			outputDir = Configuration.outputDir + File.separator
-					+ "coverage/coverage.out/"
-					+ System.getProperty("path.separator")
+					+ "coverage/coverage.out"
+					+ System.getProperty("path.separator") + ":"
 					+ Configuration.outputDir + File.separator + exeName + "/";
 		} else {
-			outputDir = Configuration.outputDir + File.separator
-					+ this.getVariantFolder() + File.separator
-					+ Configuration.outputDir + File.separator + exeName + "/";
+			String variantName = this.getVariantFolder();
+			if(variantName!=null && !variantName.equalsIgnoreCase("")){
+			outputDir += Configuration.outputDir + File.separator 
+					+ variantName + File.separator + ":";
+			}
+			outputDir += Configuration.outputDir + File.separator + exeName + "/";
 		}
 		String classPath = outputDir + System.getProperty("path.separator")
 				+ Configuration.libs;
@@ -581,6 +585,8 @@ FaultLocRepresentation<JavaEditOperation> {
 	public void append(int whereToAppend, int whatToAppend) {
 		super.append(whereToAppend, whatToAppend);
 		this.editHelper(whereToAppend, whatToAppend, Mutation.APPEND);
+		//FIXME:
+		//Not sure why append and replace don't add the edit operation to the genome
 	}
 
 	@Override
@@ -599,6 +605,8 @@ FaultLocRepresentation<JavaEditOperation> {
 	public void replace(int whatToReplace, int whatToReplaceWith) {
 		super.append(whatToReplace, whatToReplaceWith);
 		this.editHelper(whatToReplace, whatToReplaceWith, Mutation.REPLACE);
+		//FIXME:
+		//Not sure why append and replace don't add the edit operation to the genome
 	}
 
 	public void nullInsert(int location) {
@@ -611,7 +619,7 @@ FaultLocRepresentation<JavaEditOperation> {
 	}
 
 	public void rangeCheck(int location) {
-		super.nullInsert(location);
+		super.rangeCheck(location);
 		JavaStatement locationStatement = base.get(location);
 		ClassInfo fileName = stmtToFile.get(location);
 		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
@@ -620,7 +628,7 @@ FaultLocRepresentation<JavaEditOperation> {
 	}
 
 	public void setLowerBound(int location) {
-		super.nullInsert(location);
+		super.setLowerBound(location);
 		JavaStatement locationStatement = base.get(location);
 		ClassInfo fileName = stmtToFile.get(location);
 		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
@@ -629,7 +637,7 @@ FaultLocRepresentation<JavaEditOperation> {
 	}
 
 	public void setUpperBound(int location) {
-		super.nullInsert(location);
+		super.setUpperBound(location);
 		JavaStatement locationStatement = base.get(location);
 		ClassInfo fileName = stmtToFile.get(location);
 		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
@@ -638,7 +646,7 @@ FaultLocRepresentation<JavaEditOperation> {
 	}
 
 	public void offByOne(int location) {
-		super.nullInsert(location);
+		super.offByOne(location);
 		JavaStatement locationStatement = base.get(location);
 		ClassInfo fileName = stmtToFile.get(location);
 		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
@@ -646,6 +654,23 @@ FaultLocRepresentation<JavaEditOperation> {
 		this.genome.add(newEdit);
 	}
 
+	public void nullCheck(int location){
+		super.nullCheck(location);
+		JavaStatement locationStatement = base.get(location);
+		ClassInfo fileName = stmtToFile.get(location);
+		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
+				Mutation.NULLCHECK);
+		this.genome.add(newEdit);
+	}
+	
+	/*
+	 * 
+	 * Others methodds like that related to the Par templates to come
+	 * 
+	 * 
+	 * 
+	 */
+	
 	@Override
 	protected boolean internalCompile(String progName, String exeName) {
 
