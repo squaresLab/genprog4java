@@ -214,7 +214,7 @@ EOM
 
 # programmatically get passing and failing tests as well as files
 #info about the bug
-INFO=`defects4j info -p $PROJECT -b $BUGNUMBER`
+INFO=`defects4j info -p $PROJECT -v $BUGNUMBER`
 
 # gets the content starting at the list of tests
 JUSTTEST=`echo $INFO | sed -n -e 's/.*Root cause in triggering tests: - //p'`
@@ -331,11 +331,13 @@ fi
 
 TESTCOUNT=$(cat pos.tests | wc -l)
 
-echo The positive tests file has $TESTCOUNT lines. Which is a $TESTSUITEPERCENTAGE% of the original amount of test cases.
+echo "The positive tests file has $TESTCOUNT lines. Which is a $TESTSUITEPERCENTAGE% of the original amount of test cases."
 
 
 
 # get the class names to be repaired
+
+echo "GETTING CLASS NAMES"
 
 JUSTSOURCE=`echo $INFO | sed -n -e 's/.*List of modified sources: - //p'`
 

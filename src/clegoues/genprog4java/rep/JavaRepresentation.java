@@ -185,8 +185,7 @@ FaultLocRepresentation<JavaEditOperation> {
 					+ "coverage/coverage.out" + File.separator + targetClassInfo.pathToClassFile();
 			File compiledClass = new File(pathToCoverageClass);
 			if(!compiledClass.exists()) {
-				pathToCoverageClass = Configuration.outputDir + "coverage/coverage.out" + File.separatorChar
-						+ targetClassInfo.pathToClassFile() ;
+				pathToCoverageClass = Configuration.classSourceFolder + File.separator + targetClassInfo.pathToClassFile();
 				compiledClass = new File(pathToCoverageClass);
 			}
 
@@ -532,7 +531,10 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 		String classPath = outputDir + System.getProperty("path.separator")
 				+ Configuration.libs + System.getProperty("path.separator") 
-				+ Configuration.classTestFolder;
+				+ Configuration.classTestFolder; 
+		if(Configuration.classSourceFolder != "") {
+			classPath += System.getProperty("path.separator") + Configuration.classSourceFolder;
+		}
 		// Positive tests
 		command.addArgument("-classpath");
 		command.addArgument(classPath);
@@ -660,8 +662,6 @@ FaultLocRepresentation<JavaEditOperation> {
 	/*
 	 * 
 	 * Others methodds like that related to the Par templates to come
-	 * 
-	 * 
 	 * 
 	 */
 	
