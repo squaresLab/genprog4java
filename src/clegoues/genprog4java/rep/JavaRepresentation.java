@@ -190,7 +190,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				compiledClass = new File(pathToCoverageClass);
 			}
 
-			InputStream targetClass = new FileInputStream(new File(pathToCoverageClass));
+	InputStream targetClass = new FileInputStream(new File(pathToCoverageClass));
 
 			if (executionData == null) {
 				executionData = new ExecutionDataStore();
@@ -216,7 +216,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			final CoverageBuilder coverageBuilder = new CoverageBuilder();
 			final Analyzer analyzer = new Analyzer(executionData,
 					coverageBuilder);
-			analyzer.analyzeClass(targetClass);
+			analyzer.analyzeAll(new File(pathToCoverageClass));
 
 			TreeSet<Integer> coveredLines = new TreeSet<Integer>();
 			for (final IClassCoverage cc : coverageBuilder.getClasses()) {
@@ -520,10 +520,11 @@ FaultLocRepresentation<JavaEditOperation> {
 		String outputDir = "";
 
 		if (this.doingCoverage) {
-			outputDir = Configuration.outputDir + File.separator
-					+ "coverage/coverage.out"
-					+ System.getProperty("path.separator") + ":"
-					+ Configuration.outputDir + File.separator + exeName + "/";
+			outputDir = "bin/"; 
+					// FIXME: Configuration.outputDir + File.separator
+			// 		+ "coverage/coverage.out"
+			//+ System.getProperty("path.separator") + ":"
+			//		+ Configuration.outputDir + File.separator + exeName + "/";
 		} else {
 			String variantName = this.getVariantFolder();
 			if(variantName!=null && !variantName.equalsIgnoreCase("")){
@@ -533,7 +534,8 @@ FaultLocRepresentation<JavaEditOperation> {
 			outputDir += Configuration.outputDir + File.separator + exeName + "/";
 		}
 		String classPath = outputDir + System.getProperty("path.separator")
-				+ Configuration.libs;
+				+ Configuration.libs + System.getProperty("path.separator") 
+				+ Configuration.classTestFolder;
 		// Positive tests
 		command.addArgument("-classpath");
 		command.addArgument(classPath);
@@ -543,11 +545,6 @@ FaultLocRepresentation<JavaEditOperation> {
 			command.addArgument("-Xmx1024m");
 			command.addArgument("-javaagent:" + Configuration.jacocoPath
 					+ "=excludes=org.junit.*,append=false");
-			// FIXME: I actually think we need this, no?
-			// "-javaagent:"+Configuration.jacocoPath+"=excludes=" +
-			// Configuration.testsDir+".*" + ",includes="+targetClassString
-			// +",append=false");
-
 		} else {
 			command.addArgument("-Xms128m");
 			command.addArgument("-Xmx256m");
