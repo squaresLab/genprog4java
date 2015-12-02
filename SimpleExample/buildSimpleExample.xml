@@ -11,8 +11,8 @@
     <property name="target" value="1.7"/>
     <property name="source" value="1.7"/>
     <path id="JUnit 4.libraryclasspath">
-        <pathelement location="../../../../../usr/share/eclipse/dropins/jdt/plugins/org.junit_4.8.2.dist/junit.jar"/>
-        <pathelement location="../../../../../usr/share/eclipse/dropins/jdt/plugins/org.hamcrest.core_1.3.0.jar"/>
+        <pathelement location="/Applications/eclipse/external-jars/junit-4.12.jar"/>
+        <pathelement location="/Applications/eclipse/external-jars/hamcrest-core-1.3.jar"/>
     </path>
     <path id="SimpleExample.classpath">
         <pathelement location="bin"/>
