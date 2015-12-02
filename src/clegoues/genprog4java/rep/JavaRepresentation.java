@@ -181,16 +181,14 @@ FaultLocRepresentation<JavaEditOperation> {
 		for (Map.Entry<ClassInfo, String> ele : JavaRepresentation.originalSource
 				.entrySet()) {
 			ClassInfo targetClassInfo = ele.getKey();
-			String pathToCoverageClass = Configuration.workingDir + File.separator
-					+ Configuration.classSourceFolder + File.separator + targetClassInfo.pathToClassFile();
+			String pathToCoverageClass = Configuration.outputDir + File.separator
+					+ "coverage/coverage.out" + File.separator + targetClassInfo.pathToClassFile();
 			File compiledClass = new File(pathToCoverageClass);
 			if(!compiledClass.exists()) {
 				pathToCoverageClass = Configuration.outputDir + "coverage/coverage.out" + File.separatorChar
 						+ targetClassInfo.pathToClassFile() ;
 				compiledClass = new File(pathToCoverageClass);
 			}
-
-	InputStream targetClass = new FileInputStream(new File(pathToCoverageClass));
 
 			if (executionData == null) {
 				executionData = new ExecutionDataStore();
@@ -520,9 +518,8 @@ FaultLocRepresentation<JavaEditOperation> {
 		String outputDir = "";
 
 		if (this.doingCoverage) {
-			outputDir = "bin/"; 
-					// FIXME: Configuration.outputDir + File.separator
-			// 		+ "coverage/coverage.out"
+			outputDir =  Configuration.outputDir + File.separator
+					+ "coverage/coverage.out/";
 			//+ System.getProperty("path.separator") + ":"
 			//		+ Configuration.outputDir + File.separator + exeName + "/";
 		} else {
@@ -671,8 +668,6 @@ FaultLocRepresentation<JavaEditOperation> {
 	@Override
 	protected boolean internalCompile(String progName, String exeName) {
 
-		// FIXME: why does an append that fails in computeSourceBuffers have
-		// a fitness of 204?
 		List<Pair<ClassInfo, String>> sourceBuffers = this.computeSourceBuffers();
 		if (sourceBuffers == null) {
 			return false;
