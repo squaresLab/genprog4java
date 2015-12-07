@@ -36,8 +36,6 @@ export PATH=$PATH:"$DEFECTS4JDIR"/major/bin
 #copy these files to the source control
 
 mkdir -p $PARENTDIR
-# CLG asks: why do we need this?
-#cp -r $GENPROGDIR"/defects4j-scripts/Utilities" $PARENTDIR
 
 LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 
@@ -65,15 +63,12 @@ done
 #CONFIGLIBS: libraries to be included in the configuration file so that GenProg can run it.
 #LIBSTESTS: libraries needed to compile the  tests (dependencies of the project)
 
-SRCJAR=$BUGWD"/"$LOWERCASEPACKAGE"AllSourceClasses.jar"
-TESTJAR=$BUGWD"/"$LOWERCASEPACKAGE"AllTestClasses.jar"
-
 # Common genprog libs: junit test runner and the like
 
 GENLIBS=$GENPROGDIR"/lib/junittestrunner.jar:"$GENPROGDIR"/lib/commons-io-1.4.jar:"$GENPROGDIR"/lib/junit-4.10.jar"
 
 # all libs for a package need at least the source jar, test jar, and generic genprog libs
-CONFIGLIBS=$SRCJAR":"$TESTJAR
+CONFIGLIBS=""
 
 EXTRACLASSES=""
 
@@ -89,7 +84,7 @@ $BUGWD/lib/junit.jar"
 	    SRCFOLDER=build
 	    TESTFOLDER=build-tests
         CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$CHARTLIBS
-        LIBSTESTS="-cp \".:$SRCJAR:$GENLIBS:$CHARTLIBS\" "
+        LIBSTESTS="-cp \".:$GENLIBS:$CHARTLIBS\" "
         ;;
 
 'closure')
@@ -106,7 +101,7 @@ $BUGWD/build/lib/rhino.jar:"
 	    TESTFOLDER=build/test
         
         CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$CLOSURELIBS
-        LIBSTESTS="-cp \".:$SRCJAR:$GENLIBS:$CLOSURELIBS\" "
+        LIBSTESTS="-cp \".:$GENLIBS:$CLOSURELIBS\" "
         EXTRACLASSES="$3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInfo.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMap.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMapOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/Instrumentation.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationTemplate.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/debugging/sourcemap/proto/Mapping.java"
 
         ;;
@@ -123,7 +118,7 @@ $DEFECTS4JDIR/framework/projects/Lang/lib/asm.jar:\
 $DEFECTS4JDIR/framework/projects/Lang/lib/cglib.jar:\
 $DEFECTS4JDIR/framework/projects/lib/easymock-3.3.1.jar"
         CONFIGLIBS=$CONFIGLIBS:$LANGLIBS
-        LIBSTESTS="-cp \".:$SRCJAR:\
+        LIBSTESTS="-cp \".:\
 $GENPROGDIR/lib/junittestrunner.jar:$GENPROGDIR/lib/commons-io-1.4.jar:\
 $DEFECTS4JDIR/framework/projects/lib/junit-4.11.jar:\
 $DEFECTS4JDIR/framework/projects/Lang/lib/easymock.jar:\
@@ -142,7 +137,7 @@ $DEFECTS4JDIR/framework/projects/lib/easymock-3.3.1.jar\" "
         JAVADIR=org/apache/commons/math3
         MATHLIBS=$DEFECTS4JDIR"/framework/projects/Math/lib/commons-discovery-0.5.jar"
         CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$MATHLIBS
-        LIBSTESTS="-cp \".:$SRCJAR:$GENLIBS:$MATHLIBS\" "
+        LIBSTESTS="-cp \".:$GENLIBS:$MATHLIBS\" "
 	    SRCFOLDER=target/classes
 	    TESTFOLDER=target/test-classes
         ;;
@@ -155,22 +150,9 @@ $DEFECTS4JDIR/framework/projects/lib/easymock-3.3.1.jar\" "
         CONFIGLIBS=$CONFIGLIBS":"$TIMELIBS
 	    SRCFOLDER=target/classes
 	    TESTFOLDER=target/test-classes
-        LIBSTESTS="-cp \".:$SRCJAR:$TIMELIBS\" "
+        LIBSTESTS="-cp \".:$TIMELIBS\" "
         ;;
 esac
-
-#Jar all the .class's
-
-cd "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$SRCFOLDER"/ 
-jar cf "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar "$JAVADIR"/* 
-
-echo "Jar of source files created successfully."
- 
- #Jar all the test class's
-cd "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$TESTFOLDER"/
-jar cf "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllTestClasses.jar "$JAVADIR"/* 
-
-echo "Jar of test files created successfully."
 
 cd $BUGWD/$WD
 
@@ -197,7 +179,6 @@ FILE="$4"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/defects4j.config
 /bin/cat <<EOM >$FILE
 popsize = 20
 seed = 0
-testsDir = $TESTWD/$JAVADIR
 javaVM = /usr/bin/java
 workingDir = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
 outputDir = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/tmp
@@ -209,6 +190,7 @@ positiveTests = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/pos.tests
 negativeTests = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/neg.tests
 jacocoPath = $3/lib/jacocoagent.jar
 classSourceFolder = $SRCFOLDER
+classTestFolder = $TESTFOLDER
 compileCommand = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 EOM
 
