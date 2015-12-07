@@ -23,14 +23,17 @@ what flags are available (and their defaults, when applicable) in
 clegoues.genprog4java.main.Configuration
 
 You must, at minimum, provide:
+
 * javaVM - path to java
+
 * libs - classpath to compile the project
+
 * targetClassName - fully-qualified class name (with package), no .java at the
 end, OR a .txt file with a list of such class names (when multiple files are to
 be considered for repair), one per line
 
 Although the other options are, well, optional, you probably want to set a large
-number of them, like sourceDir and seed.
+number of them, like seed.
 
 Individual classes also have individual configure methods; you can search for
 them to find more options.  It is on The List to make this less ridiculous.
