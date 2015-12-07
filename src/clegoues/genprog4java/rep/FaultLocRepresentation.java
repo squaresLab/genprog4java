@@ -51,6 +51,7 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
+import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.fitness.TestType;
@@ -232,98 +233,38 @@ CachingRepresentation<G> {
 
 	public TreeSet<Pair<Mutation, Double>> availableMutations(int atomId) {
 		TreeSet<Pair<Mutation, Double>> retVal = new TreeSet<Pair<Mutation, Double>>();
-		for (Pair<Mutation, Double> mutation : Representation.mutations) {
-			boolean addToSet = false;
-			switch (mutation.getFirst()) {
-			case DELETE:
-				addToSet = true;
-				break;
-			case APPEND:
-				addToSet = this.appendSources(atomId).size() > 0;
-				break;
-			case REPLACE:
-				addToSet = this.replaceSources(atomId).size() > 0;
-				break;
-			case SWAP:
-				addToSet = this.swapSources(atomId).size() > 0;
-				break;
-				
-			/*
-			Other cases
-			case :
-				addToSet = true;
-				break;
-			case :
-				addToSet = true;
-				break;
-			case :
-				addToSet = true;
-				break;
-			case :
-				addToSet = true;
-				break;
-			*/
-				
-			case NULLCHECK:
-				addToSet = true;
-				break;
-
-			case RANGECHECK:
-				addToSet = true;
-				break;	
-			
-			case LBOUNDSET:
-				addToSet = true;
-				break;	
-			
-			case UBOUNDSET:
-				addToSet = true;
-				break;	
-				
-		//	case OFFBYONE:
-			//	addToSet = true;
-			//	break;
-				
-			default:
-				addToSet = false; // this.replaceSources(atomId).size() > 0;
-				break;
-
-
-			}
-			if (addToSet) {
-				retVal.add(mutation);
+		for (Map.Entry mutation : Search.availableMutations.entrySet()) {
+			if(this.editSources(atomId, (Mutation) mutation.getKey()).size() > 0) {
+				retVal.add(new Pair<Mutation,Double>((Mutation) mutation.getKey(), (Double) mutation.getValue()));
 			}
 		}
 		return retVal;
 	}
-
+	
 	@Override
-	// you probably want to override these for semantic legality check
-	public TreeSet<WeightedAtom> appendSources(int stmtId) {
+	public void performEdit(Mutation edit, int dst, int source) {
+	}
+	
+	@Override
+	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for (WeightedAtom item : this.fixLocalization) {
-			retVal.add(item);
+		switch(editType) {
+		case APPEND:
+		case SWAP:
+		case REPLACE:
+			for (WeightedAtom item : this.fixLocalization) {
+				retVal.add(item);
+			}
+			break;
+		case DELETE:
+			retVal.add(new WeightedAtom(stmtId, 1.0));
+			break;
+			default: break;
 		}
 		return retVal;
 	}
 
-	@Override
-	public TreeSet<WeightedAtom> swapSources(int stmtId) {
-		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for (WeightedAtom item : this.fixLocalization) {
-			retVal.add(item);
-		}
-		return retVal;
-	}
 
-	@Override
-	public TreeSet<WeightedAtom> replaceSources(int stmtId) {
-		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for (WeightedAtom item : this.fixLocalization) {
-			retVal.add(item);
-		}
-		return retVal;
-	}
 
 	/*
 	 * 

@@ -524,14 +524,14 @@ FaultLocRepresentation<JavaEditOperation> {
 		} else {
 			String variantName = this.getVariantFolder();
 			if(variantName!=null && !variantName.equalsIgnoreCase("")){
-			outputDir += Configuration.outputDir + File.separator 
-					+ variantName + File.separator + ":";
+				outputDir += Configuration.outputDir + File.separator 
+						+ variantName + File.separator + ":";
 			}
 			outputDir += Configuration.outputDir + File.separator + exeName + "/";
 		}
 		String classPath = outputDir + System.getProperty("path.separator")
-				+ Configuration.libs + System.getProperty("path.separator") 
-				+ Configuration.classTestFolder; 
+		+ Configuration.libs + System.getProperty("path.separator") 
+		+ Configuration.classTestFolder; 
 		if(Configuration.classSourceFolder != "") {
 			classPath += System.getProperty("path.separator") + Configuration.classSourceFolder;
 		}
@@ -557,17 +557,6 @@ FaultLocRepresentation<JavaEditOperation> {
 		return command;
 
 	}
-
-	@Override
-	public void delete(int location) {
-		super.delete(location);
-		JavaStatement locationStatement = base.get(location);
-		ClassInfo fileName = stmtToFile.get(location);
-		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
-				Mutation.DELETE);
-		this.genome.add(newEdit);
-	}
-
 	private void editHelper(int location, int fixCode, Mutation mutType) {
 		JavaStatement locationStatement = base.get(location);
 		JavaStatement fixCodeStatement = codeBank.get(fixCode);
@@ -577,94 +566,38 @@ FaultLocRepresentation<JavaEditOperation> {
 		this.genome.add(newEdit);
 	}
 
-	@Override
-	public void append(int whereToAppend, int whatToAppend) {
-		super.append(whereToAppend, whatToAppend);
-		this.editHelper(whereToAppend, whatToAppend, Mutation.APPEND);
-		//FIXME:
-		//Not sure why append and replace don't add the edit operation to the genome
+	public void performEdit(Mutation edit, int dst, int source) {
+		super.performEdit(edit, dst, source);
+		switch(edit) {
+		case DELETE: 
+		case NULLINSERT:
+		case RANGECHECK:
+		case LBOUNDSET:
+		case UBOUNDSET:
+		case OFFBYONE:
+		case NULLCHECK:
+			JavaStatement locationStatement = base.get(dst);
+			ClassInfo fileName = stmtToFile.get(dst);
+			JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
+					Mutation.DELETE);
+			this.genome.add(newEdit);
+			break;
+		case APPEND:
+		case REPLACE: this.editHelper(dst, source, edit);
+		break;
+		case SWAP:
+			JavaStatement loc = base.get(dst);
+			JavaStatement fixCodeStatement = base.get(source);
+			ClassInfo swapFileName = stmtToFile.get(dst);
+			JavaEditOperation swapEdit = new JavaEditOperation(Mutation.SWAP, swapFileName, 
+					loc, fixCodeStatement);
+			this.genome.add(swapEdit);
+			break;
+			default: logger.fatal("unhandled edit template type in performEdit; this should be impossible (famous last words...)");
+		}
 	}
 
-	@Override
-	public void swap(int swap1, int swap2) {
-		super.append(swap1, swap2);
-		JavaStatement locationStatement = base.get(swap1);
-		JavaStatement fixCodeStatement = base.get(swap2);
-		ClassInfo fileName = stmtToFile.get(swap1);
-		JavaEditOperation newEdit = new JavaEditOperation(Mutation.SWAP, fileName, 
-				locationStatement, fixCodeStatement);
-		this.genome.add(newEdit);
 
-	}
-
-	@Override
-	public void replace(int whatToReplace, int whatToReplaceWith) {
-		super.append(whatToReplace, whatToReplaceWith);
-		this.editHelper(whatToReplace, whatToReplaceWith, Mutation.REPLACE);
-		//FIXME:
-		//Not sure why append and replace don't add the edit operation to the genome
-	}
-
-	public void nullInsert(int location) {
-		super.nullInsert(location);
-		JavaStatement locationStatement = base.get(location);
-		ClassInfo fileName = stmtToFile.get(location);
-		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
-				Mutation.NULLINSERT);
-		this.genome.add(newEdit);
-	}
-
-	public void rangeCheck(int location) {
-		super.rangeCheck(location);
-		JavaStatement locationStatement = base.get(location);
-		ClassInfo fileName = stmtToFile.get(location);
-		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
-				Mutation.RANGECHECK);
-		this.genome.add(newEdit);
-	}
-
-	public void setLowerBound(int location) {
-		super.setLowerBound(location);
-		JavaStatement locationStatement = base.get(location);
-		ClassInfo fileName = stmtToFile.get(location);
-		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
-				Mutation.LBOUNDSET);
-		this.genome.add(newEdit);
-	}
-
-	public void setUpperBound(int location) {
-		super.setUpperBound(location);
-		JavaStatement locationStatement = base.get(location);
-		ClassInfo fileName = stmtToFile.get(location);
-		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
-				Mutation.UBOUNDSET);
-		this.genome.add(newEdit);
-	}
-
-	public void offByOne(int location) {
-		super.offByOne(location);
-		JavaStatement locationStatement = base.get(location);
-		ClassInfo fileName = stmtToFile.get(location);
-		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
-				Mutation.OFFBYONE);
-		this.genome.add(newEdit);
-	}
-
-	public void nullCheck(int location){
-		super.nullCheck(location);
-		JavaStatement locationStatement = base.get(location);
-		ClassInfo fileName = stmtToFile.get(location);
-		JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
-				Mutation.NULLCHECK);
-		this.genome.add(newEdit);
-	}
-	
-	/*
-	 * 
-	 * Others methodds like that related to the Par templates to come
-	 * 
-	 */
-	
 	@Override
 	protected boolean internalCompile(String progName, String exeName) {
 
@@ -829,44 +762,62 @@ FaultLocRepresentation<JavaEditOperation> {
 	}
 
 	@Override
-	// you probably want to override these for semantic legality check
-	public TreeSet<WeightedAtom> appendSources(int stmtId) {
-		if (JavaRepresentation.semanticCheck.equals("scope")) {
+	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
+		switch(editType) {
+		case APPEND: 	
+		case REPLACE:
+			if (JavaRepresentation.semanticCheck.equals("scope")) {
 			return this.scopeHelper(stmtId);
-		} else {
-			return super.appendSources(stmtId);
-		}
-	}
-
-	@Override
-	public TreeSet<WeightedAtom> swapSources(int stmtId) {
-		if (JavaRepresentation.semanticCheck.equals("scope")) {
-			TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-			for (WeightedAtom item : this.scopeHelper(stmtId)) {
-				int atom = item.getAtom();
-				TreeSet<WeightedAtom> inScopeThere = this.scopeHelper(atom);
-				boolean containsThisAtom = false;
-				for (WeightedAtom there : inScopeThere) {
-					if (there.getAtom() == stmtId) {
-						containsThisAtom = true;
-						break;
-					}
-				}
-				if (containsThisAtom)
-					retVal.add(item);
+			} else {
+				return super.editSources(stmtId, editType);
 			}
-			return retVal;
-		} else {
-			return super.swapSources(stmtId);
-		}
-	}
-
-	@Override
-	public TreeSet<WeightedAtom> replaceSources(int stmtId) {
-		if (JavaRepresentation.semanticCheck.equals("scope")) {
-			return this.scopeHelper(stmtId);
-		} else {
-			return super.replaceSources(stmtId);
+		case DELETE: 
+			TreeSet<WeightedAtom> retval = new TreeSet<WeightedAtom>();
+			retval.add(new WeightedAtom(stmtId, 1.0));
+			return retval;
+		case SWAP:
+			if (JavaRepresentation.semanticCheck.equals("scope")) {
+				TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+				for (WeightedAtom item : this.scopeHelper(stmtId)) {
+					int atom = item.getAtom();
+					TreeSet<WeightedAtom> inScopeThere = this.scopeHelper(atom);
+					boolean containsThisAtom = false;
+					for (WeightedAtom there : inScopeThere) {
+						if (there.getAtom() == stmtId) {
+							containsThisAtom = true;
+							break;
+						}
+					}
+					if (containsThisAtom)
+						retVal.add(item);
+				}
+				return retVal;
+			} else {
+				return super.editSources(stmtId, editType);
+			}
+		case NULLINSERT:
+		case FUNREP:
+		case PARREP:
+		case PARADD:
+		case PARREM:
+		case EXPREP:
+		case EXPADD:
+		case EXPREM:
+		case NULLCHECK:
+		case OBJINIT:
+		case RANGECHECK:
+		case SIZECHECK:
+		case CASTCHECK:
+		case LBOUNDSET:
+		case UBOUNDSET:
+		case OFFBYONE:
+		default:
+			// IMPORTANT FIXME FOR MANISH AND MAU: you must add handling here to check legality for templates as you add them.
+			// if a template always applies, then you can move the template type to the DELETE case, above.
+			// however, I don't think most templates always apply; it doesn't make sense to null check a statement in which nothing
+			// could conceivably be null, for example.
+			logger.fatal("Unhandled template type in editSources!  Fix code in JavaRepresentation to do this properly.");
+			return new TreeSet<WeightedAtom>();
 		}
 	}
 
@@ -879,7 +830,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			ASTNode actualStmt = stmt.getASTNode();
 			String stmtStr = actualStmt.toString();
 			logger.debug("statement " + atomid + " at line " + stmt.getLineno()
-					+ ": " + stmtStr);
+			+ ": " + stmtStr);
 			logger.debug("\t Names:");
 			for (String name : stmt.getNames()) {
 				logger.debug("\t\t" + name);
