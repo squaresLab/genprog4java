@@ -760,6 +760,38 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 		return null;
 	}
+	
+	@Override
+	public Boolean doesEditApply(int location, Mutation editType) {
+		switch(editType) {
+		case APPEND: 
+		case REPLACE:
+		case SWAP:
+			return this.editSources(location,  editType).size() > 0;
+		case DELETE: return true; // possible FIXME: not always true in Java?
+		case NULLCHECK: 
+			break; 
+		case NULLINSERT:
+		case FUNREP:
+		case PARREP:
+		case PARADD:
+		case PARREM:
+		case EXPREP:
+		case EXPADD:
+		case EXPREM:
+		case OBJINIT:
+		case RANGECHECK:
+		case SIZECHECK:
+		case CASTCHECK:
+		case LBOUNDSET:
+		case UBOUNDSET:
+		case OFFBYONE:
+			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
+			break;
+		}
+		return false;
+	}
+
 
 	@Override
 	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
