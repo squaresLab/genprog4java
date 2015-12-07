@@ -37,6 +37,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
 
@@ -59,42 +62,54 @@ public class Search<G extends EditOperation> {
 	//The proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
 	private static double promut = 1; 
 	private static boolean continueSearch = false;
-	
+
 	//20 mutations 1/20 = 0.05
-	private static double appProb = 0.05;
-	private static double delProb = 0.05;
-	private static double swapProb = 0.05;
-	private static double repProb = 0.05;
-	private static double nullInsProb = 0.05;
-	
-	private static double funRepProb = 0.00;
-	private static double parRepProb = 0.00;
-	private static double parAddProb = 0.00;
-	private static double parRemProb = 0.00;
-	private static double expRepProb = 0.00;
-	private static double expAddProb = 0.00;
-	private static double expRemProb = 0.00;
-	private static double nullCheckProb = 0.05;
-	private static double objInitProb = 0.00;
-	private static double sizeCheckProb = 0.00;
-	private static double castCheckProb = 0.00;
-	
-	
-	private static double rcheckProb = 0.05;
-	private static double lbsetProb = 0.05;
-	private static double ubsetProb = 0.05;
-	private static double offbyoneProb = 0.05;
-	
+	public static HashMap<Mutation,Double> availableMutations = new HashMap<Mutation,Double>();
+
 	private static String startingGenome = "";
 	public static String searchStrategy = "ga";
 	private Fitness<G> fitnessEngine = null;
 	private int generationsRun = 0;
-	private static ArrayList<Pair<Mutation, Double>> parTemplates;
 
 	public Search(Fitness<G> engine) {
 		this.fitnessEngine = engine;
 	}
 
+	public static void parseEdits(String[] editList, Boolean withWeight) {
+		for(String oneItem : editList) {
+			String edit = "";
+			Double weight = 1.0;
+			if(withWeight) {
+				String[] editAndWeight = oneItem.split(",");
+				edit = editAndWeight[0];
+				weight = Double.parseDouble(editAndWeight[1]);
+			} else {
+				edit = oneItem;
+			}
+			switch(edit.toLowerCase()) {
+			case "append": availableMutations.put(Mutation.APPEND, weight); break;
+			case "swap":  availableMutations.put(Mutation.SWAP, weight); break;
+			case "delete":  availableMutations.put(Mutation.DELETE, weight); break;
+			case "replace":  availableMutations.put(Mutation.REPLACE, weight); break;
+			case "nullinsert":  availableMutations.put(Mutation.NULLINSERT, weight); break;
+			case "funrep":  availableMutations.put(Mutation.FUNREP, weight); break;
+			case "parrep":  availableMutations.put(Mutation.PARREP, weight); break;
+			case "paradd":  availableMutations.put(Mutation.PARADD, weight); break;
+			case "parrem":  availableMutations.put(Mutation.PARREM, weight); break;
+			case "exprep":  availableMutations.put(Mutation.EXPREP, weight); break;
+			case "expadd":  availableMutations.put(Mutation.EXPADD, weight); break;
+			case "exprem":  availableMutations.put(Mutation.EXPREM, weight); break;
+			case "nullcheck":  availableMutations.put(Mutation.NULLCHECK, weight); break;
+			case "objinit":  availableMutations.put(Mutation.OBJINIT, weight); break;
+			case "rangecheck":  availableMutations.put(Mutation.RANGECHECK, weight); break;
+			case "sizecheck":  availableMutations.put(Mutation.SIZECHECK, weight); break;
+			case "castcheck":  availableMutations.put(Mutation.CASTCHECK, weight); break;
+			case "lbset":  availableMutations.put(Mutation.LBOUNDSET, weight); break;
+			case "ubset":  availableMutations.put(Mutation.UBOUNDSET, weight); break;
+			case "offbyone":  availableMutations.put(Mutation.OFFBYONE, weight); break;
+			}
+		}
+	}
 	public static void configure(Properties props) {
 		if (props.getProperty("generations") != null) {
 			Search.generations = Integer.parseInt(props.getProperty(
@@ -110,82 +125,25 @@ public class Search<G extends EditOperation> {
 		if (props.getProperty("continue") != null) {
 			Search.continueSearch = true;
 		}
-		if (props.getProperty("appp") != null) {
-			Search.appProb = Double.parseDouble(props.getProperty("appp")
-					.trim());
+		if(props.getProperty("edits") != null) {
+			String edits = props.getProperty("edits");
+			String[] editList = edits.split(";");
+			parseEdits(editList, false);
+
+		} else if (props.getProperty("editsWithWeights") != null) { 
+			String edits = props.getProperty("editsWithWeights");
+			String[] editList = edits.split(",");
+			parseEdits(editList, true);
+		} else { // edits set to defaults
+			availableMutations.put(Mutation.APPEND, 1.0);
+			availableMutations.put(Mutation.REPLACE, 1.0);
+			availableMutations.put(Mutation.DELETE, 1.0); 
 		}
-		if (props.getProperty("repp") != null) {
-			Search.repProb = Double.parseDouble(props.getProperty("repp")
-					.trim());
-		}
-		if (props.getProperty("delp") != null) {
-			Search.delProb = Double.parseDouble(props.getProperty("delp")
-					.trim());
-		}
-		if (props.getProperty("swapp") != null) {
-			Search.swapProb = Double.parseDouble(props.getProperty("swapp")
-					.trim());
-		}
+
 		if (props.getProperty("search") != null) {
 			Search.searchStrategy = props.getProperty("search").trim();
 		}
-		//I'm gessing this is for all the templates
-		if (props.getProperty("PAR") != null){
-			parTemplates = new ArrayList<Pair<Mutation, Double>>();
-			Double d = new Double(1.0);
-			parTemplates.add(new Pair<Mutation, Double>(Mutation.FUNREP, d));
-			parTemplates.add(new Pair<Mutation, Double>(Mutation.PARREP, d));
-			parTemplates.add(new Pair<Mutation, Double>(Mutation.PARADD, d));
-			parTemplates.add(new Pair<Mutation, Double>(Mutation.PARREM, d));
-			parTemplates.add(new Pair<Mutation, Double>(Mutation.EXPREP, d));
-			parTemplates.add(new Pair<Mutation, Double>(Mutation.EXPADD, d));
-			parTemplates.add(new Pair<Mutation, Double>(Mutation.EXPREM, d));
-			parTemplates.add(new Pair<Mutation, Double>(Mutation.NULLCHECK, d));
-			parTemplates.add(new Pair<Mutation, Double>(Mutation.RANGECHECK, d));
-			parTemplates.add(new Pair<Mutation, Double>(Mutation.SIZECHECK, d));
-			parTemplates.add(new Pair<Mutation, Double>(Mutation.CASTCHECK, d));
-			parTemplates.add(new Pair<Mutation, Double>(Mutation.LBOUNDSET, d));
-			parTemplates.add(new Pair<Mutation, Double>(Mutation.UBOUNDSET, d));
-			parTemplates.add(new Pair<Mutation, Double>(Mutation.OFFBYONE, d));
 
-			//And this is for a subset of the templates
-		} else if(props.getProperty("PARtemplates") != null){
-			String[] templates = props.getProperty("PARtemplates").trim().split(" ");
-			parTemplates = new ArrayList<Pair<Mutation, Double>>();
-			for(int i = 0; i < templates.length; i++){
-				String s = templates[i];
-				Double d = new Double(1.0);
-				if(s.equals("funRep")){
-					parTemplates.add(new Pair<Mutation, Double>(Mutation.FUNREP, d));
-				} else if(s.equals("parRep")){
-					parTemplates.add(new Pair<Mutation, Double>(Mutation.PARREP, d));
-				} else if(s.equals("parAdd")){
-					parTemplates.add(new Pair<Mutation, Double>(Mutation.PARADD, d));
-				} else if(s.equals("parRem")){
-					parTemplates.add(new Pair<Mutation, Double>(Mutation.PARREM, d));
-				} else if(s.equals("expRep")){
-					parTemplates.add(new Pair<Mutation, Double>(Mutation.EXPREP, d));
-				} else if(s.equals("expAdd")){
-					parTemplates.add(new Pair<Mutation, Double>(Mutation.EXPADD, d));
-				} else if(s.equals("expRem")){
-					parTemplates.add(new Pair<Mutation, Double>(Mutation.EXPREM, d));
-				} else if(s.equals("nullCheck")){
-					parTemplates.add(new Pair<Mutation, Double>(Mutation.NULLCHECK, d));
-				} else if(s.equals("rangeCheck")){
-					parTemplates.add(new Pair<Mutation, Double>(Mutation.RANGECHECK, d));
-				} else if(s.equals("sizeCheck")){
-					parTemplates.add(new Pair<Mutation, Double>(Mutation.SIZECHECK, d));
-				} else if(s.equals("lboundSet")){
-					parTemplates.add(new Pair<Mutation, Double>(Mutation.LBOUNDSET, d));
-				} else if(s.equals("uboundSet")){
-					parTemplates.add(new Pair<Mutation, Double>(Mutation.UBOUNDSET, d));
-				} else if(s.equals("castCheck")){
-					parTemplates.add(new Pair<Mutation, Double>(Mutation.CASTCHECK, d));
-				} else if(s.equals("offByOne")){
-					parTemplates.add(new Pair<Mutation, Double>(Mutation.OFFBYONE, d));
-				}
-			}
-		}
 	}
 
 	/*
@@ -243,21 +201,7 @@ public class Search<G extends EditOperation> {
 
 	private boolean doWork(Representation<G> rep, Representation<G> original,
 			Mutation mut, int first, int second) {
-		switch (mut) {
-		case DELETE:
-			rep.delete(first);
-			break;
-		case APPEND:
-			rep.append(first, second);
-			break;
-		case REPLACE:
-			rep.replace(first, second);
-			break;
-		case SWAP:
-			rep.swap(first, second);
-			break;
-		}
-
+		rep.performEdit(mut, first, second);
 		if (fitnessEngine.testToFirstFailure(rep)) {
 			this.noteSuccess(rep, original, 1);
 			if (!Search.continueSearch) {
@@ -267,74 +211,9 @@ public class Search<G extends EditOperation> {
 		return false;
 	}
 
-	private void registerMutations(Representation<G> variant) {
-		Comparator<Pair<Mutation, Double>> myComp = new Comparator<Pair<Mutation, Double>>() {
-			@Override
-			public int compare(Pair<Mutation, Double> one,
-					Pair<Mutation, Double> two) {
-				if (one.getFirst().compareTo(two.getFirst()) == 0) {
-					return one.getSecond().compareTo(two.getSecond());
-				}
-				return one.getFirst().compareTo(two.getFirst());
-			}
-		};
-		TreeSet<Pair<Mutation, Double>> availableMutations = new TreeSet<Pair<Mutation, Double>>(
-				myComp);
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.DELETE,
-				Search.delProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.APPEND,
-				Search.appProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.SWAP,
-				Search.swapProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.REPLACE,
-				Search.repProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.NULLINSERT,
-				Search.nullInsProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.NULLCHECK,
-				Search.nullCheckProb));
-		
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.FUNREP,
-				Search.funRepProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.PARREP,
-				Search.parRepProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.PARADD,
-				Search.parAddProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.PARREM,
-				Search.parRemProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.EXPREP,
-				Search.expRepProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.EXPADD,
-				Search.expAddProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.EXPREM,
-				Search.expRemProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.OBJINIT,
-				Search.objInitProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.SIZECHECK,
-				Search.sizeCheckProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.CASTCHECK,
-				Search.castCheckProb));
-
-		
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.LBOUNDSET,
-				Search.lbsetProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.UBOUNDSET,
-				Search.ubsetProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.RANGECHECK,
-				Search.rcheckProb));
-		availableMutations.add(new Pair<Mutation, Double>(Mutation.OFFBYONE,
-				Search.offbyoneProb));
-		if (parTemplates != null)
-			for (Pair<Mutation, Double> p : parTemplates) {
-				availableMutations.add(p);
-			}
-		;
-		Representation.registerMutations(availableMutations);
-	}
-
 	public boolean bruteForceOne(Representation<G> original) {
 
 		original.reduceFixSpace();
-		registerMutations(original);
 
 		int count = 0;
 		TreeSet<WeightedAtom> allFaultyAtoms = new TreeSet<WeightedAtom>(
@@ -342,21 +221,15 @@ public class Search<G extends EditOperation> {
 
 		for (WeightedAtom faultyAtom : allFaultyAtoms) {
 			int faultyLocation = faultyAtom.getAtom();
-			if (Search.delProb > 0.0) {
-				count++;
+
+			for(Map.Entry mutation : availableMutations.entrySet()) {
+				Mutation key = (Mutation) mutation.getKey();
+				Double prob = (Double) mutation.getValue();
+				if(prob > 0.0) {
+					count += original.editSources(faultyLocation, key).size(); 
+				}
 			}
-			if (Search.appProb > 0.0) {
-				count += original.appendSources(faultyLocation).size();
-			}
-			if (Search.repProb > 0.0) {
-				count += original.replaceSources(faultyLocation).size();
-			}
-			if (Search.swapProb > 0.0) {
-				count += original.swapSources(faultyLocation).size();
-			}
-			if (Search.nullCheckProb > 0.0) {
-				count++;
-			}
+
 		}
 		logger.info("search: bruteForce: " + count
 				+ " mutants in search space\n");
@@ -408,18 +281,22 @@ public class Search<G extends EditOperation> {
 				Mutation mut = mutation.getFirst();
 				double prob = mutation.getSecond();
 				logger.info(weight + " " + prob);
-				if (mut == Mutation.DELETE) {
-					Representation<G> rep = original.copy();
-					if (this.doWork(rep, original, mut, stmt, stmt)) {
+				switch(mut) {
+				case DELETE:
+					Representation<G> delRep = original.copy();
+					if (this.doWork(delRep, original, mut, stmt, stmt)) {
 						wins++;
 						repairFound = true;
 					}
-				} else if (mut == Mutation.APPEND) {
-					TreeSet<WeightedAtom> appendSources = new TreeSet<WeightedAtom>(
+					break;
+				case APPEND:
+				case REPLACE:
+				case SWAP:
+					TreeSet<WeightedAtom> sources = new TreeSet<WeightedAtom>(
 							descendingAtom);
-					appendSources.addAll(this.rescaleAtomPairs(original
-							.appendSources(stmt)));
-					for (WeightedAtom append : appendSources) {
+					sources.addAll(this.rescaleAtomPairs(original
+							.editSources(stmt, mut)));
+					for (WeightedAtom append : sources) {
 						Representation<G> rep = original.copy();
 						if (this.doWork(rep, original, mut, stmt,
 								append.getAtom())) {
@@ -427,41 +304,20 @@ public class Search<G extends EditOperation> {
 							repairFound = true;
 						}
 					}
-				} else if (mut == Mutation.REPLACE) {
-					TreeSet<WeightedAtom> replaceSources = new TreeSet<WeightedAtom>(
-							descendingAtom);
-					replaceSources.addAll(this.rescaleAtomPairs(original
-							.replaceSources(stmt)));
-					for (WeightedAtom replace : replaceSources) {
-						Representation<G> rep = original.copy();
-						if (this.doWork(rep, original, mut, stmt,
-								replace.getAtom())) {
-							wins++;
-							repairFound = true;
-						}
-					}
+					break;
+				default:
+					logger.fatal("FATAL: unhandled template type in bruteForceOne.  Add handling (probably by adding a case either to the DELETE case or the other one); and try again");
+					break;
+				}
 
-				} else if (mut == Mutation.SWAP) {
-					TreeSet<WeightedAtom> swapSources = new TreeSet<WeightedAtom>(
-							descendingAtom);
-					swapSources.addAll(this.rescaleAtomPairs(original
-							.swapSources(stmt)));
-					for (WeightedAtom swap : swapSources) {
-						Representation<G> rep = original.copy();
-						if (this.doWork(rep, original, mut, stmt,
-								swap.getAtom())) {
-							wins++;
-							repairFound = true;
-						}
-					}
-				}
-				// FIXME: debug output System.out.printf("\t variant " + wins +
-				// "/" + sofar + "/" + count + "(w: " + probs +")" +
-				// rep.getName());
-				sofar++;
-				if (repairFound && !Search.continueSearch) {
-					return true;
-				}
+
+			}
+			// FIXME: debug output System.out.printf("\t variant " + wins +
+			// "/" + sofar + "/" + count + "(w: " + probs +")" +
+			// rep.getName());
+			sofar++;
+			if (repairFound && !Search.continueSearch) {
+				return true;
 			}
 		}
 		logger.info("search: brute_force_1 ends\n");
@@ -507,77 +363,21 @@ public class Search<G extends EditOperation> {
 			// FIXME: make sure the mutation list isn't empty before choosing?
 			switch (mut) {
 			case DELETE:
-				variant.delete(stmtid);
+				// FIXME: this -1 hack is pretty gross; note to self, CLG should fix it
+				variant.performEdit(mut, stmtid, (-1));
 				break;
 			case APPEND:
-				TreeSet<WeightedAtom> allowed = variant.appendSources(stmtid);
+			case SWAP:
+			case REPLACE: 
+				TreeSet<WeightedAtom> allowed = variant.editSources(stmtid,mut);
 				WeightedAtom after = (WeightedAtom) GlobalUtils
 						.chooseOneWeighted(new ArrayList(allowed));
-				variant.append(stmtid, after.getAtom());
+				variant.performEdit(mut, stmtid,  after.getAtom()); 
 				break;
-			case SWAP:
-				TreeSet<WeightedAtom> swapAllowed = variant.swapSources(stmtid);
-				WeightedAtom swapWith = (WeightedAtom) GlobalUtils
-						.chooseOneWeighted(new ArrayList(swapAllowed));
-				variant.swap(stmtid, swapWith.getAtom());
+			default: 
+				logger.fatal("Unhandled template type in search.mutate; add handling and try again!");
 				break;
-			case REPLACE:
-				TreeSet<WeightedAtom> replaceAllowed = variant
-				.replaceSources(stmtid);
-				WeightedAtom replaceWith = (WeightedAtom) GlobalUtils
-						.chooseOneWeighted(new ArrayList(replaceAllowed));
-				variant.replace(stmtid, replaceWith.getAtom());
-				break;
-			case NULLINSERT:
-				variant.nullInsert(stmtid);
-				break;
-			case LBOUNDSET:
-				variant.setLowerBound(stmtid);
-				break;
-			case UBOUNDSET:
-				variant.setUpperBound(stmtid);
-				break;	
-			case RANGECHECK:
-				variant.rangeCheck(stmtid);
-				break;	
-			case FUNREP:
-				
-				break;
-			case PARREP:
-				
-				break;
-			case PARADD:
-				
-				break;
-			case PARREM:
-				
-				break;
-			case EXPREP:
-				
-				break;
-			case EXPADD:
-				
-				break;
-			case EXPREM:
-				
-				break;
-			case NULLCHECK:
-				variant.nullCheck(stmtid);
-				
-				break;
-			case OBJINIT:
-				
-				break;
-			case SIZECHECK:
-				
-				break;
-			case CASTCHECK:
-				
-				break;
-			case OFFBYONE:
-				
-				break;
-				
+
 			}
 		}
 	}
@@ -600,7 +400,6 @@ public class Search<G extends EditOperation> {
 	private Population<G> initializeGa(Representation<G> original,
 			Population<G> incomingPopulation) throws RepairFoundException {
 		original.reduceSearchSpace();
-		this.registerMutations(original);
 
 		Population<G> initialPopulation = incomingPopulation;
 
@@ -697,7 +496,7 @@ public class Search<G extends EditOperation> {
 	 */
 	public void geneticAlgorithm(Representation<G> original,
 			Population<G> incomingPopulation) throws RepairFoundException,
-			CloneNotSupportedException {
+	CloneNotSupportedException {
 		logger.info("search: genetic algorithm begins\n");
 		assert (Search.generations >= 0);
 

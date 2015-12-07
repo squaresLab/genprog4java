@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
@@ -218,111 +219,15 @@ Comparable<Representation<G>> {
 	public abstract TreeSet<Pair<Mutation, Double>> availableMutations(
 			int atomId);
 
-	protected static TreeSet<Pair<Mutation, Double>> mutations = null;
-
-	// FIXME: this static mutation thing is so lazy of me, I can't even. But I'm
-	// tired of this clone/copy debacle and just want it to Go Away.
-	public static void registerMutations(
-			TreeSet<Pair<Mutation, Double>> availableMutations) {
-		Representation.mutations = new TreeSet<Pair<Mutation, Double>>();
-		for (Pair<Mutation, Double> candidateMut : availableMutations) {
-			if (candidateMut.getSecond() > 0.0) {
-				Representation.mutations.add(candidateMut);
-			}
-		}
-	}
-
-	public void delete(int atomId) {
-		history.add(new HistoryEle(Mutation.DELETE, atomId));
-	}
-
-	public void append(int whereToAppend, int whatToAppend) {
-		history.add(new HistoryEle(Mutation.APPEND, whereToAppend, whatToAppend));
-	}
-
-	public abstract TreeSet<WeightedAtom> appendSources(int atomId);
-
-	public void swap(int swap1, int swap2) {
-		history.add(new HistoryEle(Mutation.SWAP, swap1, swap2));
-	}
-
-	public abstract TreeSet<WeightedAtom> swapSources(int atomId);
-
-	public void replace(int whatToReplace, int whatToReplaceWith) {
-		history.add(new HistoryEle(Mutation.REPLACE, whatToReplace,
-				whatToReplaceWith));
-	}
-
-	public abstract TreeSet<WeightedAtom> replaceSources(int atomId);
 
 	public static void configure(Properties prop) {
 		// FIXME: this is dumb, do it all in configuration
 	}
-
-	public void funRep(int dst, int source){
-		history.add(new HistoryEle(Mutation.FUNREP, dst, source));
-	}
-
-	public void parRep(int dst, int source){
-		history.add(new HistoryEle(Mutation.PARREP, dst, source));
-	}
-
-	public void parAdd(int dst, int source){
-		history.add(new HistoryEle(Mutation.PARADD, dst, source));
-	}
-
-	public void parRem(int atomId){
-		history.add(new HistoryEle(Mutation.PARREM, atomId));
-	}
-
-	public void expRep(int dst, int source){
-		history.add(new HistoryEle(Mutation.EXPREP, dst, source));
-	}
-
-	public void expAdd(int dst, int source){
-		history.add(new HistoryEle(Mutation.EXPADD, dst, source));
-	}
-
-	public void expRem(int atomId){
-		history.add(new HistoryEle(Mutation.EXPREM, atomId));
-	}
-
-	public void nullCheck(int atomId){
-		history.add(new HistoryEle(Mutation.NULLCHECK, atomId));
-	}
-
-	public void objInit(int atomId){
-		history.add(new HistoryEle(Mutation.OBJINIT, atomId));
-	}
-
-	public void rangeCheck(int atomId){
-		history.add(new HistoryEle(Mutation.RANGECHECK, atomId));
-	}
-
-	public void sizeCheck(int atomId){
-		history.add(new HistoryEle(Mutation.SIZECHECK, atomId));
-	}
-
-	public void castCheck(int atomId){
-		history.add(new HistoryEle(Mutation.CASTCHECK, atomId));
-	}
-
-	public void nullInsert(int atomId) {
-		history.add(new HistoryEle(Mutation.NULLINSERT, atomId));
-	}
 	
-	public void setLowerBound(int atomId) {
-		history.add(new HistoryEle(Mutation.LBOUNDSET, atomId));
+	public void performEdit(Mutation edit, int dst, int source) {
+		history.add(new HistoryEle(edit, dst, source));
 	}
-	
-	public void setUpperBound(int atomId) {
-		history.add(new HistoryEle(Mutation.UBOUNDSET, atomId));
-	}
-	
-	public void offByOne(int atomId) {
-		history.add(new HistoryEle(Mutation.OFFBYONE, atomId));
-	}
-	
+
 	public abstract void setFitness(double fitness);
 
 	@Override
@@ -347,5 +252,12 @@ Comparable<Representation<G>> {
 		br.close();
 		return allLines;
 	}
+
+	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 
 }
