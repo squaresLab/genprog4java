@@ -234,14 +234,12 @@ CachingRepresentation<G> {
 	public TreeSet<Pair<Mutation, Double>> availableMutations(int atomId) {
 		TreeSet<Pair<Mutation, Double>> retVal = new TreeSet<Pair<Mutation, Double>>();
 		for (Map.Entry mutation : Search.availableMutations.entrySet()) {
-			if(this.editSources(atomId, (Mutation) mutation.getKey()).size() > 0) {
+			if(this.doesEditApply(atomId, (Mutation) mutation.getKey())) {
 				retVal.add(new Pair<Mutation,Double>((Mutation) mutation.getKey(), (Double) mutation.getValue()));
 			}
 		}
 		return retVal;
 	}
-	
-
 	
 	@Override
 	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
@@ -257,7 +255,7 @@ CachingRepresentation<G> {
 		case DELETE:
 			retVal.add(new WeightedAtom(stmtId, 1.0));
 			break;
-			default: break;
+		default: break;
 		}
 		return retVal;
 	}

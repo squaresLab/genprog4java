@@ -253,11 +253,9 @@ Comparable<Representation<G>> {
 		return allLines;
 	}
 
-	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public abstract TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType);
 
+	public abstract Boolean doesEditApply(int location, Mutation editType);
 
 
 }
