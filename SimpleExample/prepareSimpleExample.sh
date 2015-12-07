@@ -14,9 +14,6 @@ cd $PATHTOSIMPLEEXAMPLE/
 ant -buildfile buildSimpleExample.xml
 
 #Create jar file
-cd $PATHTOSIMPLEEXAMPLE/bin/
-jar cf $PATHTOSIMPLEEXAMPLE/SimpleExample.jar ./* 
-
 
 #Create config file
 cd $PATHTOSIMPLEEXAMPLE
@@ -32,7 +29,7 @@ testsDir = tests/
 javaVM = /usr/bin/java
 workingDir = $PATHTOSIMPLEEXAMPLE/
 outputDir = $PATHTOSIMPLEEXAMPLE/tmp/
-libs = $PATHTOSIMPLEEXAMPLE/SimpleExample.jar:$PATHTOGENPROG/lib/junit-4.10.jar:$PATHTOGENPROG/lib/junittestrunner.jar
+libs = $PATHTOGENPROG/lib/junit-4.10.jar:$PATHTOGENPROG/lib/junittestrunner.jar
 sanity = yes
 regenPaths
 sourceDir = src/
