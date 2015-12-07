@@ -241,9 +241,7 @@ CachingRepresentation<G> {
 		return retVal;
 	}
 	
-	@Override
-	public void performEdit(Mutation edit, int dst, int source) {
-	}
+
 	
 	@Override
 	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
