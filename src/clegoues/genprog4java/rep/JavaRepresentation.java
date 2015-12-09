@@ -63,6 +63,7 @@ import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AssertStatement;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -77,6 +78,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
@@ -84,6 +86,8 @@ import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.BadLocationException;
@@ -136,6 +140,7 @@ FaultLocRepresentation<JavaEditOperation> {
 	private static HashMap<Integer, TreeSet<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, TreeSet<WeightedAtom>>();
 	private static HashMap<Integer, Set<String>> inScopeMap = new HashMap<Integer, Set<String>>();
 	private static TreeSet<Pair<String,String>> methodReturnType = new TreeSet<Pair<String,String>>();
+	private static TreeSet<String> finalVariables = new TreeSet<String>();
 
 
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
@@ -263,6 +268,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		List<ASTNode> stmts = myParser.getStatements();
 		baseCompilationUnits.put(pair, myParser.getCompilationUnit());
 		JavaRepresentation.methodReturnType.addAll(myParser.getMethodReturnTypeSet());
+		JavaRepresentation.finalVariables.addAll(myParser.getFinalVariableSet());
 
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
@@ -742,6 +748,28 @@ FaultLocRepresentation<JavaEditOperation> {
 					}
 				}
 			}
+			
+			//No need to assign a value to a final variable
+			if(stmt.getASTNode() instanceof Assignment){
+				if(((Assignment) stmt.getASTNode()).getLeftHandSide() instanceof SimpleName){
+					SimpleName leftHand = (SimpleName) ((Assignment) stmt.getASTNode()).getLeftHandSide();
+					if(finalVariables.contains(leftHand)){
+						ok=false;
+						break;
+					}
+				}
+			}
+			
+			//No need to insert a declaration of a final variable
+			if(stmt.getASTNode() instanceof VariableDeclarationStatement){
+				VariableDeclarationStatement ds = (VariableDeclarationStatement) stmt.getASTNode();
+				VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
+				
+				if(finalVariables.contains(df.getName().getIdentifier())){
+					ok=false;
+					break;
+				}
+			}
 
 			if (ok) {
 				retVal.add(atom);
@@ -794,15 +822,26 @@ FaultLocRepresentation<JavaEditOperation> {
 
 
 	@Override
+
 	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
 		switch(editType) {
 		case APPEND: 	
 		case REPLACE:
 			if (JavaRepresentation.semanticCheck.equals("scope")) {
-			return this.scopeHelper(stmtId);
+				JavaStatement locationStmt = codeBank.get(stmtId);
+				//If it is a return statement, nothing should be appended after it, since it would be dead code
+				if(!(locationStmt.getASTNode() instanceof ReturnStatement)){
+					return this.scopeHelper(stmtId);
+				}else{
+					TreeSet<WeightedAtom> emptyRetVal = new TreeSet<WeightedAtom>();
+					return emptyRetVal;
+
+				}
 			} else {
 				return super.editSources(stmtId, editType);
 			}
+		
+
 		case DELETE: 
 			TreeSet<WeightedAtom> retval = new TreeSet<WeightedAtom>();
 			retval.add(new WeightedAtom(stmtId, 1.0));
@@ -819,6 +858,7 @@ FaultLocRepresentation<JavaEditOperation> {
 							containsThisAtom = true;
 							break;
 						}
+
 					}
 					if (containsThisAtom)
 						retVal.add(item);

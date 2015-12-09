@@ -231,16 +231,19 @@ EditOperation<JavaStatement, ASTRewrite, AST> {
 				// store their parents
 				public boolean visit(MethodInvocation node) {
 					saveDataOfTheExpression(node);
+					saveDataOfTheExpression(((MethodInvocation)node).getExpression());
 					return true;
 				}
 
 				public boolean visit(FieldAccess node) {
 					saveDataOfTheExpression(node);
+					saveDataOfTheExpression(((FieldAccess)node).getExpression());
 					return true;
 				}
 
 				public boolean visit(QualifiedName node) {
 					saveDataOfTheExpression(node);
+					saveDataOfTheExpression(((QualifiedName)node).getName());
 					return true;
 				}
 
@@ -273,7 +276,7 @@ EditOperation<JavaStatement, ASTRewrite, AST> {
 			});
 
 			parentnodes = nodestmts.keySet();
-			// for each parent node which may have multiple array access instances
+			// for each parent node which may have multiple'   
 			for(ASTNode parent: parentnodes){
 				// create a newnode
 				//Block newnode = parent.getAST().newBlock();
@@ -289,27 +292,19 @@ EditOperation<JavaStatement, ASTRewrite, AST> {
 				// for each of the expressions that can be null
 				for(ASTNode  expressionToCheckIfNull : expressionsFromThisParent){
 
-					String leftOperand=null;
+					//String leftOperand=null;
 					
 					
 
 					InfixExpression expression = null;
 					expression = expressionToCheckIfNull.getAST().newInfixExpression();
-					ASTNode toCheckIfNullNode = expressionToCheckIfNull;
-					toCheckIfNullNode = ASTNode.copySubtree(expressionToCheckIfNull.getAST(), toCheckIfNullNode);
+					//ASTNode toCheckIfNullNode = ASTNode.copySubtree(expressionToCheckIfNull.getAST(), expressionToCheckIfNull);
 					
 					if(expressionToCheckIfNull instanceof MethodInvocation){
 						
-						MethodInvocation mi = expressionToCheckIfNull.getAST().newMethodInvocation();
-						Expression exp = ((MethodInvocation)expressionToCheckIfNull).getExpression();
-						mi.setExpression(((MethodInvocation)exp).getExpression());
-						mi.setName(((MethodInvocation)exp).getName());
-						
-						expression.setLeftOperand(mi);
-						
-	
-						
-		
+						expression.setLeftOperand(createExpression(expressionToCheckIfNull));
+						//expression.setLeftOperand((Expression)expressionToCheckIfNull);
+					
 					}
 					if(expressionToCheckIfNull instanceof FieldAccess)
 						expression.setLeftOperand(((FieldAccess) expressionToCheckIfNull).getExpression());
@@ -321,21 +316,22 @@ EditOperation<JavaStatement, ASTRewrite, AST> {
 					expression.setOperator(Operator.EQUALS);
 					expression.setRightOperand(expressionToCheckIfNull.getAST().newNullLiteral());
 
-					if(expressionsFromThisParent.size() != 1) {
+				/*	if(expressionsFromThisParent.size() != 1) {
 						everythingInTheCondition = expressionToCheckIfNull.getAST().newInfixExpression();
 						everythingInTheCondition.setLeftOperand(keepForNextRound);
 						everythingInTheCondition.setOperator(Operator.AND);
 						everythingInTheCondition.setRightOperand(expression);
 						keepForNextRound = expression;
-					}else{
+					}else{*/
 						everythingInTheCondition = expression;
-					}
+		//			}
 					
 
 				}
 				ifstmt.setExpression(everythingInTheCondition);
 						
 				ASTNode thenStmt = (Statement) parent;
+				//thenStmt = locationNode.getAST().newBlock();
 				thenStmt = ASTNode.copySubtree(parent.getAST(), thenStmt);
 				ifstmt.setThenStatement((Statement) thenStmt);
 				//newNode.statements().add(rangechkstmt);
@@ -761,6 +757,8 @@ EditOperation<JavaStatement, ASTRewrite, AST> {
 					rewriter.replace(arrayindex, mutatedindex, null);	// replacing original index with mutated index
 					return true;
 				}
+				
+				
 
 				// recursive method to mutate array index. (increase or decrease the index by 1)
 				private Expression mutateIndex(Expression arrayindex, int mutateflag) { // arrayindex is the index to be mutated, mutateflag is used to check if mutation is to be performed.
@@ -901,6 +899,47 @@ EditOperation<JavaStatement, ASTRewrite, AST> {
 			break;
 
 		}
+	}
+
+	private Expression createExpression(ASTNode expressionToCheckIfNull) {
+
+			MethodInvocation mi = expressionToCheckIfNull.getAST().newMethodInvocation();
+			
+			
+			Expression beforeTheDot = ((MethodInvocation) expressionToCheckIfNull).getExpression();
+			while(beforeTheDot instanceof MethodInvocation){
+			/*	MethodInvocation tempMI = expressionToCheckIfNull.getAST().newMethodInvocation();
+				Expression expIdentifier = ((MethodInvocation)expressionToCheckIfNull).getExpression();
+				MethodInvocation exp = expressionToCheckIfNull.getAST().newMethodInvocation();
+				exp.setExpression(expIdentifier);
+				
+				tempMI.setExpression(expIdentifier);
+				
+				String snIdentifier = ((MethodInvocation)expressionToCheckIfNull).getName().toString();
+				SimpleName sn = expressionToCheckIfNull.getAST().newSimpleName(snIdentifier);
+				tempMI.setName(sn);
+				
+		*/		
+				beforeTheDot = ((MethodInvocation) beforeTheDot).getExpression();
+			}
+			
+			String expIdentifier = ((SimpleName)beforeTheDot).getIdentifier();
+			//MethodInvocation exp = expressionToCheckIfNull.getAST().newMethodInvocation();
+			//exp.setExpression(expIdentifier);
+			return expressionToCheckIfNull.getAST().newSimpleName(expIdentifier);
+			
+			/*mi.setExpression(expressionToCheckIfNull.getAST().newSimpleName(expIdentifier));
+		
+			
+			
+			String snIdentifier = ((MethodInvocation)beforeTheDot).getName().toString();
+			SimpleName sn = expressionToCheckIfNull.getAST().newSimpleName(snIdentifier);
+			mi.setName(sn);
+			
+			return mi;
+			*/
+
+		
 	}
 
 
