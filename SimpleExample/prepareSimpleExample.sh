@@ -9,6 +9,8 @@
 PATHTOGENPROG="$1"
 PATHTOSIMPLEEXAMPLE=$PATHTOGENPROG"/SimpleExample"
 
+export PATH=$PATH:$PATHTOGENPROG/lib
+
 #Compile
 cd $PATHTOSIMPLEEXAMPLE/
 ant -buildfile buildSimpleExample.xml

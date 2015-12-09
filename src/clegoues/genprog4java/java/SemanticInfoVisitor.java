@@ -39,6 +39,7 @@ import java.util.TreeSet;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
@@ -61,6 +62,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private TreeSet<String> fieldName;
 	private TreeSet<String> currentMethodScope;
 	private TreeSet<Pair<String,String>> methodReturnType;
+	private TreeSet<String> finalVariables;
 
 	// unlike in the OCaml implementation, this only collects the statements and
 	// the semantic information. It doesn't number.
@@ -91,6 +93,14 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.methodReturnType = methodReturnTypeSet;
 	}
 	
+	public TreeSet<String> getFinalVariables() {
+		return this.finalVariables;
+	}
+	
+	public void setFinalVariables(TreeSet<String> finalVariables) {
+		this.finalVariables = finalVariables;
+	}
+	
 	public List<ASTNode> getNodeSet() {
 		return this.nodeSet;
 	}
@@ -109,7 +119,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		}
 		return super.visit(node);
 	}
-
 
 	@Override
 	public boolean visit(MethodDeclaration node) {
@@ -142,6 +151,17 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		return super.visit(node);
 	}
 
+	
+	public boolean visit(SingleVariableDeclaration node){
+		
+		return super.visit(node);
+	}
+	
+	public boolean visit(Assignment node){
+		
+		return super.visit(node);
+	}
+
 	@Override
 	public void endVisit(Initializer node) {
 		super.endVisit(node);
@@ -158,6 +178,15 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			if (o instanceof VariableDeclarationFragment) {
 				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
 				this.currentMethodScope.add(v.getName().getIdentifier());
+			}
+		}
+		
+		//if it is a final variable 
+		List<Modifier> modifiersOfTheVariableBeingDeclared = node.modifiers();
+		for(Modifier m : modifiersOfTheVariableBeingDeclared){
+			if(m.getKeyword().toString().equals("final")){
+				VariableDeclarationFragment df = (VariableDeclarationFragment) node.fragments().get(0);
+				finalVariables.add(df.getName().getIdentifier());
 			}
 		}
 		return super.visit(node);

@@ -54,20 +54,27 @@ public class JavaParser
 	private CompilationUnit compilationUnit;
 	private Set<String> fields;
 	private TreeSet<Pair<String,String>> methodReturnType;
+	private TreeSet<String> finalVariables;
 	
 
 	public JavaParser(ScopeInfo scopeList)
 	{
 		this.stmts = new LinkedList<ASTNode>();
 		this.methodReturnType = new TreeSet<Pair<String,String>>();
+		this.finalVariables =  new TreeSet<String>();
 		this.visitor = new SemanticInfoVisitor();
 		this.visitor.setNodeSet(this.stmts);		
 		this.visitor.setScopeList(scopeList);
 		this.visitor.setMethodReturnType(methodReturnType);
+		this.visitor.setFinalVariables(finalVariables);
 	}
 
 	public TreeSet<Pair<String,String>> getMethodReturnTypeSet(){
 		return this.methodReturnType;
+	}
+	
+	public TreeSet<String> getFinalVariableSet(){
+		return this.finalVariables;
 	}
 	
 	public LinkedList<ASTNode> getStatements()
