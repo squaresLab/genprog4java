@@ -31,7 +31,7 @@ testsDir = tests/
 javaVM = /usr/bin/java
 workingDir = $PATHTOSIMPLEEXAMPLE/
 outputDir = $PATHTOSIMPLEEXAMPLE/tmp/
-libs = $PATHTOGENPROG/lib/junit-4.10.jar:$PATHTOGENPROG/lib/junittestrunner.jar
+libs = $PATHTOGENPROG/lib/junit-4.10.jar:$PATHTOGENPROG/lib/junittestrunner.jar:$PATHTOSIMPLEEXAMPLE/bin/
 sanity = yes
 regenPaths
 sourceDir = src/
