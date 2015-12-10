@@ -30,5 +30,6 @@
 	<classpathentry kind="lib" path="lib/org.jacoco.agent-0.7.6.201511241051.jar"/>
 	<classpathentry kind="lib" path="lib/org.jacoco.core-0.7.6.201511241051.jar"/>
 	<classpathentry kind="lib" path="lib/jacocoagent.jar"/>
+	<classpathentry kind="lib" path="lib/asm-all-5.0.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
