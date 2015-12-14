@@ -276,6 +276,8 @@ FaultLocRepresentation<JavaEditOperation> {
 			if (JavaRepresentation.canRepair(node)) {
 				JavaStatement s = new JavaStatement();
 				s.setStmtId(stmtCounter);
+				System.out.println("Stmt: " + stmtCounter);
+				System.out.println(node);
 				stmtCounter++;
 				int lineNo = ASTUtils.getLineNumber(node);
 				s.setLineno(lineNo);
@@ -302,11 +304,8 @@ FaultLocRepresentation<JavaEditOperation> {
 				JavaRepresentation.inScopeMap.put(s.getStmtId(),
 						scopeInfo.getScope(s.getASTNode()));
 			}
-			/*if(node instanceof MethodDeclaration){
-				methodReturnType.addAll(myParser.getMethodReturnTypeSet());
-			}*/
-
 		}
+		
 	}
 
 	public static boolean canRepair(ASTNode node) {
@@ -798,6 +797,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		case REPLACE:
 		case SWAP:
 			return this.editSources(location,  editType).size() > 0;
+		case NULLINSERT:
 		case DELETE: return true; // possible FIXME: not always true in Java?
 		case NULLCHECK: 
 			JavaStatement locationStmt = codeBank.get(location);
@@ -805,7 +805,6 @@ FaultLocRepresentation<JavaEditOperation> {
 				return true;
 			}
 			break; 
-		case NULLINSERT:
 		case FUNREP:
 		case PARREP:
 		case PARADD:

@@ -38,8 +38,6 @@ import java.util.Set;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.SimpleName;
 
-// FIXME: direct steal from PAR
-
 public class NameCollector extends ASTVisitor
 {
 	private Set<String> nameSet;

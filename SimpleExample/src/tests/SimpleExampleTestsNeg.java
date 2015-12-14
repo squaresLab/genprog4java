@@ -1,6 +1,7 @@
-package packageSimpleExample;
+package tests;
 
 import static org.junit.Assert.assertEquals;
+import packageSimpleExample.SimpleExample;
 
 import org.junit.Test;
 

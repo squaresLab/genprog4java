@@ -385,7 +385,7 @@ CachingRepresentation<G> {
 		} else {
 			positivePath = runTestsCoverage(
 					FaultLocRepresentation.posCoverageFile, TestType.POSITIVE,
-					Fitness.positiveTests, true, Configuration.workingDir + Configuration.outputDir + "/coverage/");
+					Fitness.positiveTests, true, Configuration.outputDir + "/coverage/");
 		}
 		File negativePathFile = new File(FaultLocRepresentation.negCoverageFile);
 
@@ -394,7 +394,7 @@ CachingRepresentation<G> {
 		} else {
 			negativePath = runTestsCoverage(
 					FaultLocRepresentation.negCoverageFile, TestType.NEGATIVE,
-					Fitness.negativeTests, false, Configuration.workingDir + Configuration.outputDir + "/coverage/");
+					Fitness.negativeTests, false, Configuration.outputDir + "/coverage/");
 		}
 		HashMap<Integer, Double> fw = new HashMap<Integer, Double>();
 		TreeSet<Integer> negHt = new TreeSet<Integer>();
@@ -429,8 +429,6 @@ CachingRepresentation<G> {
 		assert (fixLocalization.size() > 0);
 		this.doingCoverage = false;
 		logger.info("Finish Fault Localization");
-		// this.printDebugInfo();
-		// System.exit(0);
 	}
 
 	protected abstract void printDebugInfo();
