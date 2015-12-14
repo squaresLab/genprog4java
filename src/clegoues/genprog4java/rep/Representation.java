@@ -115,8 +115,6 @@ Comparable<Representation<G>> {
 
 	public abstract int genomeLength();
 
-	public abstract void noteSuccess();
-
 	public abstract void load(ArrayList<ClassInfo> classNames) throws IOException,
 	UnexpectedCoverageResultException;
 
