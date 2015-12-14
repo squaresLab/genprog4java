@@ -25,9 +25,9 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
 
-public class JavaLowerBoundSet extends JavaEditOperation {
+public class JavaLowerBoundSetOperation extends JavaEditOperation {
 
-	public JavaLowerBoundSet(ClassInfo fileName, JavaStatement location) {
+	public JavaLowerBoundSetOperation(ClassInfo fileName, JavaStatement location) {
 		super(Mutation.LBOUNDSET, fileName, location);
 	}
 	@Override

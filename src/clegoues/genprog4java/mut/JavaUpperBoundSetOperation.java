@@ -35,7 +35,6 @@ public class JavaUpperBoundSetOperation extends JavaEditOperation {
 	@Override
 	public void edit(final ASTRewrite rewriter, AST ast, CompilationUnit cu) {
 		ASTNode locationNode = this.getLocation().getASTNode();
-		final Map<ASTNode, String> lowerbound = new HashMap<ASTNode, String>();			// to set the lower-bound values of array. currently set to arrayname.length
 		final Map<ASTNode, String> upperbound = new HashMap<ASTNode, String>();			// to set the upper-bound values of array. currently set to arrayname.length
 		final Map<ASTNode, List<ASTNode>> nodestmts = new HashMap<ASTNode, List<ASTNode>>();	// to track the parent nodes of array access nodes
 		Set<ASTNode> parentnodes = null;
