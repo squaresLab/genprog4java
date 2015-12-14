@@ -605,12 +605,6 @@ FaultLocRepresentation<JavaEditOperation> {
 					loc, fixCodeStatement);
 			this.genome.add(swapEdit);
 			break;
-		case NULLINSERT:
-		case RANGECHECK:
-		case LBOUNDSET:
-		case UBOUNDSET:
-		case OFFBYONE:
-		case NULLCHECK:
 		default: logger.fatal("unhandled edit template type in performEdit; this should be impossible (famous last words...)");
 		}
 	}
@@ -642,7 +636,6 @@ FaultLocRepresentation<JavaEditOperation> {
 				ClassInfo ci = ele.getFirst();
 				String program = ele.getSecond();
 				String pathToFile = ci.pathToJavaFile();
-
 
 				createPathFiles(outDirName, pathToFile);
 
@@ -816,20 +809,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				return true;
 			}
 			break; 
-		case FUNREP:
-		case PARREP:
-		case PARADD:
-		case PARREM:
-		case EXPREP:
-		case EXPADD:
-		case EXPREM:
-		case OBJINIT:
-		case RANGECHECK:
-		case SIZECHECK:
-		case CASTCHECK:
-		case LBOUNDSET:
-		case UBOUNDSET:
-		case OFFBYONE:
+		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;
 		}
