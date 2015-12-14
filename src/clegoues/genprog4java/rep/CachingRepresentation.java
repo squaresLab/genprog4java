@@ -120,10 +120,6 @@ Representation<G> {
 		return true;
 	}
 
-	public void noteSuccess() {
-	} // default does nothing. OCaml version takes the original representation
-	// here. Probably should do same
-
 	public void load(ArrayList<ClassInfo> bases) throws IOException {
 
 		// FIXME: do deserializing String cacheName = base + ".cache";

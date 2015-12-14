@@ -169,12 +169,8 @@ public class Search<G extends EditOperation> {
 	 */
 	void noteSuccess(Representation<G> rep, Representation<G> original,
 			int generation) {
+
 		logger.info("\nRepair Found: " + rep.getName() + " (in " + rep.getVariantFolder() + ")\n");
-
-		Calendar endTime = Calendar.getInstance(); // TODO do something with
-		// this
-
-		// COPY THIS FILE INTO THE SOURCE TREE
 
 		File repairDir = new File("repair/");
 		if (!repairDir.exists())
@@ -182,8 +178,6 @@ public class Search<G extends EditOperation> {
 		String repairFilename = "repair/repair."
 				+ Configuration.globalExtension;
 		rep.outputSource(repairFilename);
-		rep.noteSuccess();
-
 	}
 
 	private TreeSet<WeightedAtom> rescaleAtomPairs(TreeSet<WeightedAtom> items) {
@@ -474,6 +468,8 @@ public class Search<G extends EditOperation> {
 			for (Representation<G> item : incomingPopulation) {
 				if (fitnessEngine.testFitness(gen, item)) {
 					this.noteSuccess(item, original, gen);
+					if(!continueSearch) 
+						return;
 				}
 			}
 			gen++;
