@@ -61,7 +61,6 @@ public class ScopeInfo
 		}
 	}
 	
-	//if stmtScope[buggy] has any string contained in necessary, return false, else return true.
 	public boolean isScopeSafe(ASTNode buggy, Set<String> necessary)
 	{
 		boolean isSafe = true;
