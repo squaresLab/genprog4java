@@ -90,10 +90,7 @@ public class Main {
 		// 2)
 		baseRep.load(Configuration.targetClassNames);
 
-		/*
-		 * for(String className: Configuration.targetClassNames){
-		 * baseRep.load(className); }
-		 */
+
 
 		try {
 			switch (Search.searchStrategy) {
@@ -110,8 +107,6 @@ public class Main {
 				searchEngine.ioSearch(baseRep);
 				break;
 			}
-		} catch (RepairFoundException e) {
-			// FIXME: this is stupid
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
 		}
