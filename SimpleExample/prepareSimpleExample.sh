@@ -25,6 +25,7 @@ PACKAGEDIR=${JAVADIR//"/"/"."}
 #Create config file 
 FILE=./simpleExample.config
 /bin/cat <<EOM >$FILE
+javaVM = /usr/bin/java
 popsize = 20
 seed = 0
 classTestFolder = bin/
