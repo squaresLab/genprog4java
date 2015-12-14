@@ -577,12 +577,6 @@ FaultLocRepresentation<JavaEditOperation> {
 		super.performEdit(edit, dst, source);
 		switch(edit) {
 		case DELETE: 
-		case NULLINSERT:
-		case RANGECHECK:
-		case LBOUNDSET:
-		case UBOUNDSET:
-		case OFFBYONE:
-		case NULLCHECK:
 			JavaStatement locationStatement = base.get(dst);
 			ClassInfo fileName = stmtToFile.get(dst);
 			JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
@@ -600,6 +594,12 @@ FaultLocRepresentation<JavaEditOperation> {
 					loc, fixCodeStatement);
 			this.genome.add(swapEdit);
 			break;
+		case NULLINSERT:
+		case RANGECHECK:
+		case LBOUNDSET:
+		case UBOUNDSET:
+		case OFFBYONE:
+		case NULLCHECK:
 			default: logger.fatal("unhandled edit template type in performEdit; this should be impossible (famous last words...)");
 		}
 	}
