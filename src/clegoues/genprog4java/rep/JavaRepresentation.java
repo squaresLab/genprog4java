@@ -116,7 +116,11 @@ import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.main.Utils;
 import clegoues.genprog4java.mut.HistoryEle;
+import clegoues.genprog4java.mut.JavaAppendOperation;
+import clegoues.genprog4java.mut.JavaDeleteOperation;
 import clegoues.genprog4java.mut.JavaEditOperation;
+import clegoues.genprog4java.mut.JavaReplaceOperation;
+import clegoues.genprog4java.mut.JavaSwapOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
@@ -568,8 +572,16 @@ FaultLocRepresentation<JavaEditOperation> {
 		JavaStatement locationStatement = base.get(location);
 		JavaStatement fixCodeStatement = codeBank.get(fixCode);
 		ClassInfo fileName = stmtToFile.get(location);
-		JavaEditOperation newEdit = new JavaEditOperation(mutType, fileName,
+		JavaEditOperation newEdit = null;
+		switch(mutType) {
+		case REPLACE: newEdit = new JavaReplaceOperation(fileName,
 				locationStatement, fixCodeStatement);
+		break; 
+		case APPEND: newEdit = new JavaAppendOperation(fileName,
+				locationStatement, fixCodeStatement);
+		break;
+		default: break;
+		}
 		this.genome.add(newEdit);
 	}
 
@@ -579,8 +591,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		case DELETE: 
 			JavaStatement locationStatement = base.get(dst);
 			ClassInfo fileName = stmtToFile.get(dst);
-			JavaEditOperation newEdit = new JavaEditOperation(fileName, locationStatement,
-					Mutation.DELETE);
+			JavaEditOperation newEdit = new JavaDeleteOperation(fileName, locationStatement);
 			this.genome.add(newEdit);
 			break;
 		case APPEND:
@@ -590,7 +601,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			JavaStatement loc = base.get(dst);
 			JavaStatement fixCodeStatement = base.get(source);
 			ClassInfo swapFileName = stmtToFile.get(dst);
-			JavaEditOperation swapEdit = new JavaEditOperation(Mutation.SWAP, swapFileName, 
+			JavaEditOperation swapEdit = new JavaSwapOperation(swapFileName, 
 					loc, fixCodeStatement);
 			this.genome.add(swapEdit);
 			break;
@@ -600,7 +611,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		case UBOUNDSET:
 		case OFFBYONE:
 		case NULLCHECK:
-			default: logger.fatal("unhandled edit template type in performEdit; this should be impossible (famous last words...)");
+		default: logger.fatal("unhandled edit template type in performEdit; this should be impossible (famous last words...)");
 		}
 	}
 

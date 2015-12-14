@@ -90,8 +90,6 @@ public class Main {
 		// 2)
 		baseRep.load(Configuration.targetClassNames);
 
-
-
 		try {
 			switch (Search.searchStrategy) {
 			case "ga":
