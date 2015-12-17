@@ -58,7 +58,7 @@ import clegoues.genprog4java.util.Pair;
 public class Search<G extends EditOperation> {
 	protected Logger logger = Logger.getLogger(Search.class);
 
-	private static int generations = 50;
+	private static int generations = 10;
 	//The proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
 	private static double promut = 1; 
 	private static boolean continueSearch = false;
