@@ -127,13 +127,13 @@ public class Search<G extends EditOperation> {
 		}
 		if(props.getProperty("edits") != null) {
 			String edits = props.getProperty("edits");
-			edits = edits.toLowerCase();
+			edits = edits.toLowerCase().trim();
 			String[] editList = edits.split(";");
 			parseEdits(editList, false);
 
 		} else if (props.getProperty("editsWithWeights") != null) { 
 			String edits = props.getProperty("editsWithWeights");
-			edits = edits.toLowerCase();
+			edits = edits.toLowerCase().trim();
 			String[] editList = edits.split(",");
 			parseEdits(editList, true);
 		} else { // edits set to defaults
