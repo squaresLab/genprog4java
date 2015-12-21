@@ -17,7 +17,7 @@ if [[ ! -d bin/ ]] ; then
 fi
 
 javac -d bin/ src/packageOffByOne/OffByOne.java 
-javac -classpath $JUNITJARS/org.junit_4.8.2.dist/junit.jar:$JUNITJARS/org.hamcrest.core_1.3.0.jar:bin/ -sourcepath src/tests/*java -d bin/ src/tests/*java
+javac -classpath $JUNITJARS/junit.jar:$JUNITJARS/hamcrest-core-1.3.jar:bin/ -sourcepath src/tests/*java -d bin/ src/tests/*java
 rm -rf bin/packageOffByOne/
 
 PACKAGEDIR=${JAVADIR//"/"/"."}
