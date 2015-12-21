@@ -594,6 +594,14 @@ FaultLocRepresentation<JavaEditOperation> {
 			JavaEditOperation newEdit = new JavaDeleteOperation(fileName, locationStatement);
 			this.genome.add(newEdit);
 			break;
+		case OFFBYONE:
+			JavaStatement location = base.get(dst);
+			JavaStatement fixCodeStmt = base.get(source);
+			ClassInfo offbyoneFileName = stmtToFile.get(dst);
+			JavaEditOperation offbyoneEdit = new JavaSwapOperation(offbyoneFileName, 
+					location, fixCodeStmt);
+			this.genome.add(offbyoneEdit);
+			break;
 		case APPEND:
 		case REPLACE: this.editHelper(dst, source, edit);
 		break;
@@ -803,6 +811,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			return this.editSources(location,  editType).size() > 0;
 		case NULLINSERT:
 		case DELETE: return true; // possible FIXME: not always true in Java?
+		case OFFBYONE: return true;
 		case NULLCHECK: 
 			JavaStatement locationStmt = codeBank.get(location);
 			if(locationStmt.getASTNode() instanceof MethodInvocation || locationStmt.getASTNode() instanceof FieldAccess || locationStmt.getASTNode() instanceof QualifiedName){
@@ -879,6 +888,9 @@ FaultLocRepresentation<JavaEditOperation> {
 		case LBOUNDSET:
 		case UBOUNDSET:
 		case OFFBYONE:
+			retval = new TreeSet<WeightedAtom>();
+			retval.add(new WeightedAtom(stmtId, 1.0));
+			return retval;
 		default:
 			// IMPORTANT FIXME FOR MANISH AND MAU: you must add handling here to check legality for templates as you add them.
 			// if a template always applies, then you can move the template type to the DELETE case, above.
