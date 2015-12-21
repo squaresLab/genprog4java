@@ -252,6 +252,11 @@ CachingRepresentation<G> {
 				retVal.add(item);
 			}
 			break;
+		case OFFBYONE:
+			for (WeightedAtom item : this.fixLocalization) {
+				retVal.add(item);
+			}
+			break;
 		case DELETE:
 			retVal.add(new WeightedAtom(stmtId, 1.0));
 			break;

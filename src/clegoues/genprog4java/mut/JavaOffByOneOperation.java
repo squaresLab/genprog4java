@@ -43,7 +43,7 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 				Expression arrayindex = node.getIndex(); // original index
 				Expression mutatedindex = mutateIndex(arrayindex, 1); // method call to get mutated index
 				rewriter.replace(arrayindex, mutatedindex, null);	// replacing original index with mutated index
-				return true;
+				return false;
 			}
 			
 			

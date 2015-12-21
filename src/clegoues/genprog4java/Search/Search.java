@@ -287,6 +287,20 @@ public class Search<G extends EditOperation> {
 					break;
 				case APPEND:
 				case REPLACE:
+				case OFFBYONE:
+					TreeSet<WeightedAtom> sources1 = new TreeSet<WeightedAtom>(
+							descendingAtom);
+					sources1.addAll(this.rescaleAtomPairs(original
+							.editSources(stmt, mut)));
+					for (WeightedAtom append : sources1) {
+						Representation<G> rep = original.copy();
+						if (this.doWork(rep, original, mut, stmt,
+								append.getAtom())) {
+							wins++;
+							repairFound = true;
+						}
+					}
+					break;
 				case SWAP:
 					TreeSet<WeightedAtom> sources = new TreeSet<WeightedAtom>(
 							descendingAtom);
@@ -370,6 +384,13 @@ public class Search<G extends EditOperation> {
 						.chooseOneWeighted(new ArrayList(allowed));
 				variant.performEdit(mut, stmtid,  after.getAtom()); 
 				break;
+			case OFFBYONE:
+				TreeSet<WeightedAtom> allow = variant.editSources(stmtid,mut);
+				WeightedAtom aftr = (WeightedAtom) GlobalUtils
+						.chooseOneWeighted(new ArrayList(allow));
+				variant.performEdit(mut, stmtid,  aftr.getAtom()); 
+				break;
+				
 			default: 
 				logger.fatal("Unhandled template type in search.mutate; add handling and try again!");
 				break;
