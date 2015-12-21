@@ -31,8 +31,6 @@ public class OffByOneTestsNeg {
 	    resultArray = tester.createFibonnaciArray(8);
 	    int[] expectedArray8 = {0, 1, 1, 2, 3, 5, 8, 13};
 	    assertArrayEquals(expectedArray8, resultArray);
-	  
-	//  assertArrayEquals(new int[]{1,2,3},new int[]{1,2,3,4});
     
   }
 
