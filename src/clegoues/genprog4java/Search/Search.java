@@ -111,39 +111,43 @@ public class Search<G extends EditOperation> {
 		}
 	}
 	public static void configure(Properties props) {
-		if (props.getProperty("generations") != null) {
-			Search.generations = Integer.parseInt(props.getProperty(
-					"generations").trim());
-		}
-		if (props.getProperty("oracleGenome") != null) {
-			Search.startingGenome = props.getProperty("startingGenome").trim();
-		}
-		if (props.getProperty("promut") != null) {
-			Search.promut = Double.parseDouble(props.getProperty("pMutation")
-					.trim());
-		}
-		if (props.getProperty("continue") != null) {
-			Search.continueSearch = true;
-		}
-		if(props.getProperty("edits") != null) {
-			String edits = props.getProperty("edits");
-			edits = edits.toLowerCase().trim();
-			String[] editList = edits.split(";");
-			parseEdits(editList, false);
+		try {
+			if (props.getProperty("generations") != null) {
+				Search.generations = Integer.parseInt(props.getProperty(
+						"generations").trim());
+			}
+			if (props.getProperty("oracleGenome") != null) {
+				Search.startingGenome = props.getProperty("startingGenome").trim();
+			}
+			if (props.getProperty("promut") != null) {
+				Search.promut = Double.parseDouble(props.getProperty("pMutation")
+						.trim());
+			}
+			if (props.getProperty("continue") != null) {
+				Search.continueSearch = true;
+			}
+			if(props.getProperty("edits") != null) {
+				String edits = props.getProperty("edits");
+				edits = edits.toLowerCase().trim();
+				String[] editList = edits.split(";");
+				parseEdits(editList, false);
+			} else if (props.getProperty("editsWithWeights") != null) { 
+				String edits = props.getProperty("editsWithWeights");
+				edits = edits.toLowerCase().trim();
+				String[] editList = edits.split(",");
+				parseEdits(editList, true);
+			} else { // edits set to defaults
+				availableMutations.put(Mutation.APPEND, 1.0);
+				availableMutations.put(Mutation.REPLACE, 1.0);
+				availableMutations.put(Mutation.DELETE, 1.0); 
+			}
 
-		} else if (props.getProperty("editsWithWeights") != null) { 
-			String edits = props.getProperty("editsWithWeights");
-			edits = edits.toLowerCase().trim();
-			String[] editList = edits.split(",");
-			parseEdits(editList, true);
-		} else { // edits set to defaults
-			availableMutations.put(Mutation.APPEND, 1.0);
-			availableMutations.put(Mutation.REPLACE, 1.0);
-			availableMutations.put(Mutation.DELETE, 1.0); 
-		}
-
-		if (props.getProperty("search") != null) {
-			Search.searchStrategy = props.getProperty("search").trim();
+			if (props.getProperty("search") != null) {
+				Search.searchStrategy = props.getProperty("search").trim();
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 	}
@@ -357,44 +361,56 @@ public class Search<G extends EditOperation> {
 	public void mutate(Representation<G> variant) {
 		ArrayList faultyAtoms = variant.getFaultyAtoms();
 		ArrayList<WeightedAtom> proMutList = new ArrayList<WeightedAtom>();
-		for (int i = 0; i < Search.promut; i++) {
-			//chooses a random mutation
-			proMutList.add((WeightedAtom) GlobalUtils
-					.chooseOneWeighted(faultyAtoms));
+		boolean foundMutationThatCanApplyToAtom = false;
+		while(!foundMutationThatCanApplyToAtom){
+			for (int i = 0; i < Search.promut; i++) {
+				//chooses a random atom
+				WeightedAtom wa = null;
+				boolean alreadyOnList = false;
+				do{
+					wa = (WeightedAtom) GlobalUtils.chooseOneWeighted(faultyAtoms);
+					alreadyOnList = proMutList.contains(wa);
+				}while(alreadyOnList);
+				proMutList.add(wa);
+			}
+			for (WeightedAtom atom : proMutList) {
+				int stmtid = atom.getAtom();
+				//the available mutations for this stmt
+				TreeSet<Pair<Mutation, Double>> availableMutations = variant.availableMutations(stmtid);
+				if(availableMutations.isEmpty()){
+					continue; 
+				}else{
+					foundMutationThatCanApplyToAtom = true;
+				}
+				//choose one at random
+				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(new ArrayList(availableMutations));
+				Mutation mut = chosenMutation.getFirst();
+				// FIXME: make sure the mutation list isn't empty before choosing?
+				switch (mut) {
+				case DELETE:
+					// FIXME: this -1 hack is pretty gross; note to self, CLG should fix it
+					variant.performEdit(mut, stmtid, (-1));
+					break;
+				case APPEND:
+				case SWAP:
+				case REPLACE: 
+					TreeSet<WeightedAtom> allowed = variant.editSources(stmtid,mut);
+					WeightedAtom after = (WeightedAtom) GlobalUtils
+							.chooseOneWeighted(new ArrayList(allowed));
+					variant.performEdit(mut, stmtid,  after.getAtom()); 
+					break;
+				case OFFBYONE:
+					TreeSet<WeightedAtom> allow = variant.editSources(stmtid,mut);
+					WeightedAtom aftr = (WeightedAtom) GlobalUtils
+							.chooseOneWeighted(new ArrayList(allow));
+					variant.performEdit(mut, stmtid,  aftr.getAtom()); 
+					break;
 
-		}
-		for (WeightedAtom atom : proMutList) {
-			int stmtid = atom.getAtom();
-			//the available mutations for this stmt
-			TreeSet<Pair<Mutation, Double>> availableMutations = variant.availableMutations(stmtid);
-			//choose one at random
-			Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(new ArrayList(availableMutations));
-			Mutation mut = chosenMutation.getFirst();
-			// FIXME: make sure the mutation list isn't empty before choosing?
-			switch (mut) {
-			case DELETE:
-				// FIXME: this -1 hack is pretty gross; note to self, CLG should fix it
-				variant.performEdit(mut, stmtid, (-1));
-				break;
-			case APPEND:
-			case SWAP:
-			case REPLACE: 
-				TreeSet<WeightedAtom> allowed = variant.editSources(stmtid,mut);
-				WeightedAtom after = (WeightedAtom) GlobalUtils
-						.chooseOneWeighted(new ArrayList(allowed));
-				variant.performEdit(mut, stmtid,  after.getAtom()); 
-				break;
-			case OFFBYONE:
-				TreeSet<WeightedAtom> allow = variant.editSources(stmtid,mut);
-				WeightedAtom aftr = (WeightedAtom) GlobalUtils
-						.chooseOneWeighted(new ArrayList(allow));
-				variant.performEdit(mut, stmtid,  aftr.getAtom()); 
-				break;
-				
-			default: 
-				logger.fatal("Unhandled template type in search.mutate; add handling and try again!");
-				break;
+				default: 
+					logger.fatal("Unhandled template type in search.mutate; add handling and try again!");
+					break;
 
+				}
 			}
 		}
 	}
@@ -516,15 +532,15 @@ public class Search<G extends EditOperation> {
 	 */
 	public void geneticAlgorithm(Representation<G> original,
 			Population<G> incomingPopulation) throws
-	CloneNotSupportedException {
+			CloneNotSupportedException {
 		logger.info("search: genetic algorithm begins\n");
 		assert (Search.generations >= 0);
 
 		try {
-		Population<G> initialPopulation = this.initializeGa(original,
-				incomingPopulation);
-		generationsRun++;
-		this.runGa(1, Search.generations, initialPopulation, original);
+			Population<G> initialPopulation = this.initializeGa(original,
+					incomingPopulation);
+			generationsRun++;
+			this.runGa(1, Search.generations, initialPopulation, original);
 		} catch(RepairFoundException e) {
 			return;
 		}
