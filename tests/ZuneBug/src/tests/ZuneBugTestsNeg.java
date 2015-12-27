@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class ZuneBugTestsNeg {
 
-  @Test
+  @Test(timeout=100)
   public void severalTestCasesToTestCurrentYear() {
 
 	  ZuneBug tester = new ZuneBug();

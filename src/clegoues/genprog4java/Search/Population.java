@@ -48,13 +48,11 @@ import clegoues.genprog4java.util.GlobalUtils;
 
 public class Population<G extends EditOperation> implements Iterable<Representation<G>>{
 
-	private static int popsize = 40;
+	private static int popsize = 20;
 	private static double crossp = 0.5; 
 
-	private static String incomingPop = "";
 	private static int tournamentK = (int) (popsize *0.2); //tournament size, 20% of the population
-	private static String outputFormat = "txt";
-	private double tournamentP = 1.0; //tournamente probability
+	private double tournamentP = 1.0; //tournament probability
 	private static String crossover = "onepoint";
 	private ArrayList<Representation<G>> population = new ArrayList<Representation<G>>(this.popsize);
 
@@ -393,7 +391,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	}
 
 	public void selection(int popsize) {
-		this.tournamentSelection(popsize);
+		this.population = this.tournamentSelection(popsize);
 
 	}
 

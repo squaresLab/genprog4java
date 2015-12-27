@@ -564,7 +564,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		command.addArgument("clegoues.genprog4java.fitness.JUnitTestRunner");
 
 		command.addArgument(test.toString());
-		logger.info("Command: " + command.toString());
+		//logger.info("Command: " + command.toString());
 		return command;
 
 	}
@@ -835,12 +835,11 @@ FaultLocRepresentation<JavaEditOperation> {
 			if (JavaRepresentation.semanticCheck.equals("scope")) {
 				JavaStatement locationStmt = codeBank.get(stmtId);
 				//If it is a return statement, nothing should be appended after it, since it would be dead code
+				// FIXME: what about REPLACE?
 				if(!(locationStmt.getASTNode() instanceof ReturnStatement)){
 					return this.scopeHelper(stmtId);
 				}else{
-					TreeSet<WeightedAtom> emptyRetVal = new TreeSet<WeightedAtom>();
-					return emptyRetVal;
-
+					return new TreeSet<WeightedAtom>();
 				}
 			} else {
 				return super.editSources(stmtId, editType);
