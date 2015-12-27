@@ -228,7 +228,7 @@ public class Fitness<G extends EditOperation> {
 				+ ((Fitness.numNegativeTests * fac));
 		double curFit = rep.getFitness();
 		if (curFit > -1.0) {
-			logger.info("\t" + curFit + " " + rep.getName() + " (stored at: " + rep.getVariantFolder() + ")");
+			logger.info("\t gen: " + generation + " " + curFit + " " + rep.getName() + " (stored at: " + rep.getVariantFolder() + ")");
 			return !(curFit < maxFitness);
 		}
 
@@ -243,7 +243,7 @@ public class Fitness<G extends EditOperation> {
 		} else {
 			fitnessPair = this.testFitnessFull(rep, fac);
 		}
-		logger.info("\t" + fitnessPair.getFirst() + " " + rep.getName());
+		logger.info("\t gen: " + generation + " " + fitnessPair.getFirst() + " " + rep.getName());
 		rep.setFitness(fitnessPair.getSecond());
 		rep.cleanup();
 		return !(fitnessPair.getSecond() < maxFitness);

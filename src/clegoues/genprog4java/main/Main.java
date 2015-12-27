@@ -76,12 +76,7 @@ public class Main {
 			}
 			fitnessEngine = new Fitness<JavaEditOperation>();
 			searchEngine = new Search<JavaEditOperation>(fitnessEngine);
-			incomingPopulation = new Population<JavaEditOperation>(); // FIXME:
-																		// read
-																		// from
-																		// incoming
-																		// if
-																		// applicable?
+			incomingPopulation = new Population<JavaEditOperation>(); 
 		}
 		// loads the class file into the representation.
 		// Does the Following:

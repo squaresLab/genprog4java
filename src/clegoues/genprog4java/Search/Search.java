@@ -153,12 +153,6 @@ public class Search<G extends EditOperation> {
 	}
 
 	/*
-	 * CLG is not convinced that the responsibility for writing out the
-	 * successful repair should lie in search, but she does think it's better to
-	 * have it here than in fitness, where it was before
-	 */
-
-	/*
 	 * Different strategies and representation types can do different things
 	 * when a repair is found. This at least stores information about the
 	 * successful variant and may write it to disk or otherwise dispatch to the
@@ -495,21 +489,30 @@ public class Search<G extends EditOperation> {
 			generationsRun++;
 			assert (incomingPopulation.getPopsize() > 0);
 			// Step 1: selection
+			logger.info("before selection, generation: " + gen + " incoming popsize: " + incomingPopulation.size());
 			incomingPopulation.selection(incomingPopulation.getPopsize());
+			logger.info("after selection, generation: " + gen + " incoming popsize: " + incomingPopulation.size());
 			// step 2: crossover
 			incomingPopulation.crossover(original);
+			logger.info("after crossover, generation: " + gen + " incoming popsize: " + incomingPopulation.size());
+
 			// step 3: mutation
 			for (Representation<G> item : incomingPopulation) {
 				this.mutate(item);
 			}
+			logger.info("after mutation, generation: " + gen + " incoming popsize: " + incomingPopulation.size());
+
 			// step 4: fitness
+			int count = 0;
 			for (Representation<G> item : incomingPopulation) {
+				count++;
 				if (fitnessEngine.testFitness(gen, item)) {
 					this.noteSuccess(item, original, gen);
 					if(!continueSearch) 
 						return;
 				}
 			}
+			logger.info("Generation: " + gen + " I think I tested " + count + " variants.");
 			gen++;
 		}
 	}

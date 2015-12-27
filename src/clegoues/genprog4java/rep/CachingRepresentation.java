@@ -125,13 +125,10 @@ Representation<G> {
 		// FIXME: do deserializing String cacheName = base + ".cache";
 		// boolean didDeserialize = this.deserialize(cacheName,null, true);
 		// if(!didDeserialize) {
-		// if(!didDeserialize)
 		// this.serialize(cacheName, null, true);
 		for (ClassInfo base : bases) {
-
 			this.fromSource(base);
 			logger.info("loaded from source " + base);
-
 		}
 		if (Configuration.doSanity) {
 			if (!this.sanityCheck()) {
