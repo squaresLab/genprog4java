@@ -33,6 +33,7 @@
 
 package clegoues.genprog4java.mut;
 
+import java.util.HashMap;
 import java.util.List;
 
 public interface EditOperation<R> {
@@ -50,5 +51,7 @@ public interface EditOperation<R> {
 	public void setHoleCode(String holeName, EditHole target);
 
 	public void edit(R rewriter);
+	
+	public void setAllHoles(HashMap<String,EditHole> holes);
 
 }

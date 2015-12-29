@@ -33,18 +33,19 @@
 
 package clegoues.genprog4java.mut;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class HistoryEle {
 	private Mutation mtype = null;
 	private Location location;
-	private List<EditHole> fixCode;
+	private HashMap<String,EditHole> fixCode;
 	public HistoryEle() { }
 	public HistoryEle(Mutation m, Location location) {
 		this.mtype = m;
 		this.location = location;
 	}
-	public HistoryEle(Mutation m, Location loc, List<EditHole> fixes) {
+	public HistoryEle(Mutation m, Location loc, HashMap<String,EditHole> fixes) {
 		this.mtype = m;
 		this.location = loc;
 		this.fixCode = fixes;
@@ -61,13 +62,13 @@ public class HistoryEle {
 	public void setLocation(Location location) {
 		this.location = location;
 	}
-	public List<EditHole> getFixCode() {
+	public HashMap<String,EditHole> getFixCode() {
 		return fixCode;
 	}
-	public void setFixCode(List<EditHole> fixCode) {
+	public void setFixCode(HashMap<String,EditHole> fixCode) {
 		this.fixCode = fixCode;
 	}
-	public String toString() { // FIXME: this won't work for lists of edit code!
+	public String toString() { // FIXME: this won't work for hashmaps of edit code!
 		String result = "";
 		switch(this.mtype) {
 		case APPEND:

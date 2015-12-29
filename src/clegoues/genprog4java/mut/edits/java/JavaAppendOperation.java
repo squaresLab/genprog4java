@@ -1,7 +1,6 @@
 package clegoues.genprog4java.mut.edits.java;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -16,10 +15,9 @@ import clegoues.genprog4java.mut.EditHole;
 
 public class JavaAppendOperation extends JavaEditOperation {
 	
-	public JavaAppendOperation(JavaLocation location, List<EditHole> fixCode) {
+	public JavaAppendOperation(JavaLocation location, HashMap<String,EditHole> fixCode) {
 		super(Mutation.APPEND, location, fixCode);
 	}
-	
 
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = this.getLocationNode(); 

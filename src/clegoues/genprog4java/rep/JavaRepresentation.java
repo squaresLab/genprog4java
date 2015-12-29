@@ -575,18 +575,9 @@ FaultLocRepresentation<JavaEditOperation> {
 		return command;
 
 	}
-	private void editHelper(Location locationStatement, int fixCode, Mutation mutType) {
-		JavaStatement fixCodeStatement = codeBank.get(fixCode);
-		ClassInfo fileName = ((JavaLocation) locationStatement).getClassInfo(); 
-		JavaHole fixCodeHole = new JavaHole("singleHole", fixCodeStatement.getASTNode());
-		List<EditHole> holes = new ArrayList<EditHole>();
-		holes.add(fixCodeHole);
-		JavaEditOperation newEdit = editFactory.makeEdit(mutType, locationStatement, holes);
-		this.genome.add(newEdit);
-	}
 
 	@Override
-	public void performEdit(Mutation edit, Location dst, List<EditHole> sources) {
+	public void performEdit(Mutation edit, Location dst, HashMap<String,EditHole> sources)
 		super.performEdit(edit, dst, sources);
 		JavaEditOperation thisEdit = this.editFactory.makeEdit(edit, dst, sources);
 		this.genome.add(thisEdit);

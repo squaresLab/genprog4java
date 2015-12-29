@@ -57,7 +57,7 @@ EditOperation<ASTRewrite> {
 	// sense to me to keep it (because edits apply to a location; it's important).
 	// Alternatively, make it a hole? 
 	private Location<JavaStatement> location = null;
-	private ArrayList<String> holeNames = null;
+	private ArrayList<String> holeNames = null; // FIXME: responsibility of subclasses to define? 
 	private HashMap<String,EditHole> holeCode = new HashMap<String,EditHole>();
 
 	public JavaEditOperation(Mutation mutType, JavaLocation location) {
@@ -69,13 +69,10 @@ EditOperation<ASTRewrite> {
 		return this.location;
 	}
 
-	protected JavaEditOperation(Mutation mutType, JavaLocation location, List<EditHole> sources) {
+	protected JavaEditOperation(Mutation mutType, JavaLocation location, HashMap<String,EditHole> sources) {
 		this.mutType = mutType;
 		this.location = location;
-		for(EditHole source : sources) {
-			this.holeCode.put(source.getName(), source);
-			this.holeNames.add(source.getName()) ;
-		}
+		this.holeCode = new HashMap<String,EditHole>(sources);
 	}
 
 	@Override
@@ -104,6 +101,9 @@ EditOperation<ASTRewrite> {
 
 	public EditHole getHoleCode(String name) {
 		return this.holeCode.get(name);
+	}
+	public void setAllHoles(HashMap<String,EditHole> holes) {
+		holeCode = new HashMap<String,EditHole>(holes);
 	}
 
 }

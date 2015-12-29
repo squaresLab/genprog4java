@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
@@ -223,7 +224,7 @@ Comparable<Representation<G>> {
 	public static void configure(Properties prop) {
 	}
 	
-	public void performEdit(Mutation edit, Location dst, List<EditHole> sources) {
+	public void performEdit(Mutation edit, Location dst, HashMap<String,EditHole> sources) {
 		history.add(new HistoryEle(edit, dst, sources));
 	}
 
@@ -252,9 +253,13 @@ Comparable<Representation<G>> {
 		return allLines;
 	}
 
-	public abstract TreeSet<WeightedAtom> editSources(Location stmtId, Mutation editType);
+	public abstract TreeSet<WeightedAtom> editSources(Location stmtId, Mutation editType, String hole);
 
 	public abstract Boolean doesEditApply(Location location, Mutation editType);
+
+	public abstract List<String> holesForMutation(Mutation mut);
+
+	public abstract EditHole instantiateHole(String holeName, WeightedAtom selected);
 
 
 }

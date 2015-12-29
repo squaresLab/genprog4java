@@ -1,6 +1,6 @@
 package clegoues.genprog4java.mut.edits.java;
 
-import java.util.List;
+import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
@@ -15,7 +15,7 @@ public class JavaEditFactory {
 
 	protected Logger logger = Logger.getLogger(JavaEditOperation.class);
 
-	public JavaEditOperation makeEdit(Mutation edit, Location dst, List<EditHole> sources) {
+	public JavaEditOperation makeEdit(Mutation edit, Location dst, HashMap<String,EditHole> sources) {
 		switch(edit) {
 		case DELETE: 
 			return new JavaDeleteOperation((JavaLocation) dst);
