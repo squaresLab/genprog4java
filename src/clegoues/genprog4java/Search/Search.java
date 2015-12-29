@@ -198,8 +198,8 @@ public class Search<G extends EditOperation> {
 	}
 
 	private boolean doWork(Representation<G> rep, Representation<G> original,
-			Mutation mut, Location first, List<EditHole> second) {
-		rep.performEdit(mut, first, second);
+			Mutation mut, Location first, HashMap<String,EditHole> fixCode) {
+		rep.performEdit(mut, first, fixCode);
 		if (fitnessEngine.testToFirstFailure(rep)) {
 			this.noteSuccess(rep, original, 1);
 			if (!Search.continueSearch) {
@@ -222,8 +222,11 @@ public class Search<G extends EditOperation> {
 			for(Map.Entry mutation : availableMutations.entrySet()) {
 				Mutation key = (Mutation) mutation.getKey();
 				Double prob = (Double) mutation.getValue();
+				List<String> holes = original.holesForMutation(key);
 				if(prob > 0.0) {
-					count += original.editSources(faultyLocation, key).size(); 
+					for(String hole : holes) { // FIXME: this math is wrong for multi-holed edits
+					count += original.editSources(faultyLocation, key, hole).size();
+					}
 				}
 			}
 
@@ -279,7 +282,7 @@ public class Search<G extends EditOperation> {
 				switch(mut) {
 				case DELETE:
 					Representation<G> delRep = original.copy();
-					if (this.doWork(delRep, original, mut, stmt, stmt)) {
+					if (this.doWork(delRep, original, mut, faultyLocation, null)) {
 						wins++;
 						repairFound = true;
 					}
@@ -290,10 +293,10 @@ public class Search<G extends EditOperation> {
 					TreeSet<WeightedAtom> sources1 = new TreeSet<WeightedAtom>(
 							descendingAtom);
 					sources1.addAll(this.rescaleAtomPairs(original
-							.editSources(stmt, mut)));
+							.editSources(faultyLocation, mut)));
 					for (WeightedAtom append : sources1) {
 						Representation<G> rep = original.copy();
-						if (this.doWork(rep, original, mut, stmt,
+						if (this.doWork(rep, original, mut, faultyLocation,
 								append.getAtom())) {
 							wins++;
 							repairFound = true;
