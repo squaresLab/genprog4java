@@ -39,34 +39,40 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaHole;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public abstract class JavaEditOperation implements
-EditOperation<JavaStatement, ASTRewrite> {
+EditOperation<ASTRewrite> {
 
 	private Mutation mutType;
-	private JavaStatement location = null;
+	// I don't think the location abstraction is strictly necessary functionally, but conceptually it makes
+	// sense to me to keep it (because edits apply to a location; it's important).
+	// Alternatively, make it a hole? 
+	private Location<JavaStatement> location = null;
 	private ArrayList<String> holeNames = null;
 	private HashMap<String,EditHole> holeCode = new HashMap<String,EditHole>();
 	private ClassInfo fileInfo = null;
 
 	protected JavaEditOperation(Mutation mutType, ClassInfo fileName, JavaStatement location) {
 		this.mutType = mutType;
-		this.location = location;
+		this.location = new JavaLocation(location);
 		this.fileInfo = fileName;
 	}
 
 	protected JavaEditOperation(Mutation mutType, ClassInfo fileName, JavaStatement location,
 			JavaStatement singleHoleCode) {
 		this.mutType = mutType;
-		this.location = location;
+		this.location = new JavaLocation(location);
 		this.holeCode.put("singleHole", new JavaHole("singleHole", singleHoleCode.getASTNode()));
 		this.fileInfo = fileName;
 		this.holeNames.add("singleHole");
@@ -87,12 +93,9 @@ EditOperation<JavaStatement, ASTRewrite> {
 		this.mutType = type;
 	}
 
-	public JavaStatement getLocation() {
-		return this.location;
-	}
-
-	public void setLocation(JavaStatement location) {
-		this.location = location;
+	protected ASTNode getLocationNode() {
+		JavaStatement actualLocation = this.location.getLocation();
+		return actualLocation.getASTNode();
 	}
 
 	public void setHoleCode(String name, EditHole fixCode) {

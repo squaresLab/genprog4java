@@ -24,7 +24,7 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 	}
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = this.getLocation().getASTNode();
+				ASTNode locationNode = this.getLocationNode(); 
 		locationNode.accept(new ASTVisitor() {
 			int mutationtype;	// used to randomly put + or - operator while mutating array index
 			// method to visit all ArrayAccess nodes modify array index by 1

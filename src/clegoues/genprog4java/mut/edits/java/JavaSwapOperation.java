@@ -5,6 +5,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaHole;
 
@@ -17,13 +18,12 @@ public class JavaSwapOperation extends JavaEditOperation {
 	
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = this.getLocation().getASTNode();
+		ASTNode locationNode = this.getLocationNode();
 		JavaHole fixCode = (JavaHole) this.getHoleCode("singleHole"); 
 		ASTNode fixCodeNode =
 			 ASTNode.copySubtree(locationNode.getAST(), fixCode.getCode()); 
 		rewriter.replace(locationNode, fixCodeNode, null);
 		rewriter.replace(fixCode.getCode(), ASTNode
-				.copySubtree(locationNode.getAST(), this.getLocation()
-						.getASTNode()), null);
+				.copySubtree(locationNode.getAST(), this.getLocationNode()), null); 
 	}
 }
