@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. --><project basedir="." default="build" name="GenProg4Java">
+    <property environment="env"/>
+    <property name="ECLIPSE_HOME" value="../../../../usr/lib/eclipse"/>
+    <property name="workspace_loc:GenProg4Java" value="."/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.7"/>
+    <property name="source" value="1.7"/>
+    <path id="JUnit 4.libraryclasspath">
+        <pathelement location="../../../../usr/share/eclipse/dropins/jdt/plugins/org.junit_4.8.2.dist/junit.jar"/>
+        <pathelement location="../../../../usr/share/eclipse/dropins/jdt/plugins/org.hamcrest.core_1.3.0.jar"/>
+    </path>
+    <path id="GenProg4Java.classpath">
+        <pathelement location="bin"/>
+        <path refid="JUnit 4.libraryclasspath"/>
+        <pathelement location="lib/asm-all-3.3.1.jar"/>
+        <pathelement location="lib/commons-cli-1.1.jar"/>
+        <pathelement location="lib/commons-collections-3.2.1.jar"/>
+        <pathelement location="lib/commons-exec-1.0.0-SNAPSHOT.jar"/>
+        <pathelement location="lib/commons-io-1.4.jar"/>
+        <pathelement location="lib/jstests.jar"/>
+        <pathelement location="lib/junit-4.10.jar"/>
+        <pathelement location="lib/org.eclipse.core.commands_3.6.0.I20100512-1500.jar"/>
+        <pathelement location="lib/org.eclipse.core.contenttype_3.4.100.v20100505-1235.jar"/>
+        <pathelement location="lib/org.eclipse.core.jobs_3.5.1.R36x_v20100824.jar"/>
+        <pathelement location="lib/org.eclipse.core.resources_3.6.0.R36x_v20100825-0600.jar"/>
+        <pathelement location="lib/org.eclipse.core.runtime_3.6.0.v20100505.jar"/>
+        <pathelement location="lib/org.eclipse.core.runtime.compatibility_3.2.100.v20100505.jar"/>
+        <pathelement location="lib/org.eclipse.equinox.common_3.6.0.v20100503.jar"/>
+        <pathelement location="lib/org.eclipse.equinox.preferences_3.3.0.v20100503.jar"/>
+        <pathelement location="lib/org.eclipse.jdt_3.6.1.v201009090800.jar"/>
+        <pathelement location="lib/org.eclipse.jdt.ui_3.6.1.r361_v20100825-0800.jar"/>
+        <pathelement location="lib/org.eclipse.jface_3.6.1.M20100825-0800.jar"/>
+        <pathelement location="lib/org.eclipse.jface.text_3.6.1.r361_v20100825-0800.jar"/>
+        <pathelement location="lib/org.eclipse.osgi_3.6.1.R36x_v20100806.jar"/>
+        <pathelement location="lib/org.eclipse.osgi.services_3.2.100.v20100503.jar"/>
+        <pathelement location="lib/org.eclipse.osgi.util_3.2.100.v20100503.jar"/>
+        <pathelement location="lib/org.eclipse.text_3.5.0.v20100601-1300.jar"/>
+        <pathelement location="lib/org.jacoco.core-0.5.8.201205221855.jar"/>
+        <pathelement location="lib/org.eclipse.jdt.core_3.6.1.v_A68_R36x.jar"/>
+        <pathelement location="lib/log4j-1.2.17.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="GenProg4Java.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+        <copy todir="${ant.library.dir}">
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </copy>
+        <unzip dest="${ant.library.dir}">
+            <patternset includes="jdtCompilerAdapter.jar"/>
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </unzip>
+    </target>
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
+    <target name="Main">
+        <java classname="clegoues.genprog4java.main.Main" dir="../defects4j/ExamplesCheckedOut/math2Buggy/src/main/java" failonerror="true" fork="yes">
+            <jvmarg line="-ea -Dlog4j.configuration=file:${workspace_loc:GenProg4Java}/src/log4j.properties"/>
+            <arg line="/home/mau/Research/defects4j/ExamplesCheckedOut/math2Buggy/defects4j.config"/>
+            <classpath refid="GenProg4Java.classpath"/>
+        </java>
+    </target>
+</project>
