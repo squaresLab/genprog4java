@@ -1,17 +1,20 @@
 package clegoues.genprog4java.mut.edits.java;
 
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaHole;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
+import clegoues.genprog4java.mut.EditHole;
 
 public class JavaReplaceOperation extends JavaEditOperation {
-	public JavaReplaceOperation(ClassInfo fileName, JavaStatement location,
-			JavaStatement fixCode) {
-		super(Mutation.REPLACE, fileName, location, fixCode);
+	
+	public JavaReplaceOperation(JavaLocation location,
+			List<EditHole> fixCode) {
+		super(Mutation.REPLACE, location, fixCode);
 	}
 	@Override
 	public void edit(final ASTRewrite rewriter) {

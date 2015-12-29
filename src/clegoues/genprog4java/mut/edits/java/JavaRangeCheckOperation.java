@@ -23,15 +23,13 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.main.ClassInfo;
-import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class JavaRangeCheckOperation extends JavaEditOperation {
 
-	public JavaRangeCheckOperation(ClassInfo fileName, JavaStatement location) {
-		super(Mutation.RANGECHECK, fileName, location);
+	public JavaRangeCheckOperation(JavaLocation location) {
+		super(Mutation.RANGECHECK, location);
 	}
 
 	@Override

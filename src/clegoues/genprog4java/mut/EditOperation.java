@@ -44,6 +44,8 @@ public interface EditOperation<R> {
 	public List<String> getHoles();
 
 	public EditHole getHoleCode(String holeName);
+	
+	public Location getLocation();
 
 	public void setHoleCode(String holeName, EditHole target);
 

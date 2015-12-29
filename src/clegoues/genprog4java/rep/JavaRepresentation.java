@@ -115,27 +115,33 @@ import clegoues.genprog4java.java.ScopeInfo;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.main.Utils;
+import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.HistoryEle;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.edits.java.JavaAppendOperation;
 import clegoues.genprog4java.mut.edits.java.JavaDeleteOperation;
+import clegoues.genprog4java.mut.edits.java.JavaEditFactory;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.mut.edits.java.JavaReplaceOperation;
 import clegoues.genprog4java.mut.edits.java.JavaSwapOperation;
+import clegoues.genprog4java.mut.holes.java.JavaHole;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.util.Pair;
 
 public class JavaRepresentation extends
 FaultLocRepresentation<JavaEditOperation> {
 	protected Logger logger = Logger.getLogger(JavaRepresentation.class);
+	
+	private JavaEditFactory editFactory = new JavaEditFactory();
 
 	private static HashMap<Integer, JavaStatement> codeBank = new HashMap<Integer, JavaStatement>();
 	private static HashMap<Integer, JavaStatement> base = new HashMap<Integer, JavaStatement>();
 	private static HashMap<ClassInfo, CompilationUnit> baseCompilationUnits = new HashMap<ClassInfo, CompilationUnit>();
 	private static HashMap<Integer, ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer, ArrayList<Integer>>();
 	private static HashMap<ClassInfo, String> originalSource = new HashMap<ClassInfo, String>();
-	private static HashMap<Integer, ClassInfo> stmtToFile = new HashMap<Integer, ClassInfo>();
-	private int mutationNumber = 0;
-
+	private static HashMap<Integer,JavaLocation> locationInformation = new HashMap<Integer,JavaLocation>();
+	
 	// semantic check cache stuff, so we don't have to walk stuff a million
 	// times unnecessarily
 	// should be the same for all of append, replace, and swap, so we only need
@@ -160,7 +166,7 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	public JavaRepresentation(ArrayList<HistoryEle> history,
 			ArrayList<JavaEditOperation> genome2,
-			ArrayList<WeightedAtom> arrayList,
+			ArrayList<Location> arrayList,
 			ArrayList<WeightedAtom> arrayList2) {
 		super(history, genome2, arrayList, arrayList2);
 	}
@@ -280,8 +286,12 @@ FaultLocRepresentation<JavaEditOperation> {
 			if (JavaRepresentation.canRepair(node)) {
 				JavaStatement s = new JavaStatement();
 				s.setStmtId(stmtCounter);
+				s.setClassInfo(pair);
+				
 				System.out.println("Stmt: " + stmtCounter);
 				System.out.println(node);
+				
+				
 				stmtCounter++;
 				int lineNo = ASTUtils.getLineNumber(node);
 				s.setLineno(lineNo);
@@ -297,16 +307,12 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 				lineNoList.add(s.getStmtId());
 				lineNoToAtomIDMap.put(lineNo, lineNoList);
-				if (semanticCheck.equals("scope")
-						|| semanticCheck.equals("none")
-						|| semanticCheck.equals("javaspecial")) {
-					base.put(s.getStmtId(), s);
-					codeBank.put(s.getStmtId(), s);
-					stmtToFile.put(s.getStmtId(),pair);
-				}
+				base.put(s.getStmtId(), s);
+				
+				codeBank.put(s.getStmtId(), s);
 				scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
 				JavaRepresentation.inScopeMap.put(s.getStmtId(),
-						scopeInfo.getScope(s.getASTNode()));
+							scopeInfo.getScope(s.getASTNode()));
 			}
 		}
 		
@@ -482,7 +488,8 @@ FaultLocRepresentation<JavaEditOperation> {
 
 			try {
 				for (JavaEditOperation edit : genome) {
-					if(edit.getFileInfo().getClassName().equalsIgnoreCase(filename)){
+					JavaLocation locationStatement = (JavaLocation) edit.getLocation();
+					if(locationStatement.getClassInfo().getClassName().equalsIgnoreCase(filename)){
 						edit.edit(rewriter);
 					}
 				}
@@ -568,53 +575,21 @@ FaultLocRepresentation<JavaEditOperation> {
 		return command;
 
 	}
-	private void editHelper(int location, int fixCode, Mutation mutType) {
-		JavaStatement locationStatement = base.get(location);
+	private void editHelper(Location locationStatement, int fixCode, Mutation mutType) {
 		JavaStatement fixCodeStatement = codeBank.get(fixCode);
-		ClassInfo fileName = stmtToFile.get(location);
-		JavaEditOperation newEdit = null;
-		switch(mutType) {
-		case REPLACE: newEdit = new JavaReplaceOperation(fileName,
-				locationStatement, fixCodeStatement);
-		break; 
-		case APPEND: newEdit = new JavaAppendOperation(fileName,
-				locationStatement, fixCodeStatement);
-		break;
-		default: break;
-		}
+		ClassInfo fileName = ((JavaLocation) locationStatement).getClassInfo(); 
+		JavaHole fixCodeHole = new JavaHole("singleHole", fixCodeStatement.getASTNode());
+		List<EditHole> holes = new ArrayList<EditHole>();
+		holes.add(fixCodeHole);
+		JavaEditOperation newEdit = editFactory.makeEdit(mutType, locationStatement, holes);
 		this.genome.add(newEdit);
 	}
 
-	public void performEdit(Mutation edit, int dst, int source) {
-		super.performEdit(edit, dst, source);
-		switch(edit) {
-		case DELETE: 
-			JavaStatement locationStatement = base.get(dst);
-			ClassInfo fileName = stmtToFile.get(dst);
-			JavaEditOperation newEdit = new JavaDeleteOperation(fileName, locationStatement);
-			this.genome.add(newEdit);
-			break;
-		case OFFBYONE:
-			JavaStatement location = base.get(dst);
-			JavaStatement fixCodeStmt = base.get(source);
-			ClassInfo offbyoneFileName = stmtToFile.get(dst);
-			JavaEditOperation offbyoneEdit = new JavaSwapOperation(offbyoneFileName, 
-					location, fixCodeStmt);
-			this.genome.add(offbyoneEdit);
-			break;
-		case APPEND:
-		case REPLACE: this.editHelper(dst, source, edit);
-		break;
-		case SWAP:
-			JavaStatement loc = base.get(dst);
-			JavaStatement fixCodeStatement = base.get(source);
-			ClassInfo swapFileName = stmtToFile.get(dst);
-			JavaEditOperation swapEdit = new JavaSwapOperation(swapFileName, 
-					loc, fixCodeStatement);
-			this.genome.add(swapEdit);
-			break;
-		default: logger.fatal("unhandled edit template type in performEdit; this should be impossible (famous last words...)");
-		}
+	@Override
+	public void performEdit(Mutation edit, Location dst, List<EditHole> sources) {
+		super.performEdit(edit, dst, sources);
+		JavaEditOperation thisEdit = this.editFactory.makeEdit(edit, dst, sources);
+		this.genome.add(thisEdit);
 	}
 
 
@@ -722,7 +697,7 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	public JavaRepresentation copy() {
 		JavaRepresentation copy = new JavaRepresentation(this.getHistory(),
-				this.getGenome(), this.getFaultyAtoms(),
+				this.getGenome(), this.getFaultyLocations(),
 				this.getFixSourceAtoms());
 		return copy;
 	}
@@ -803,7 +778,7 @@ FaultLocRepresentation<JavaEditOperation> {
 	}
 	
 	@Override
-	public Boolean doesEditApply(int location, Mutation editType) {
+	public Boolean doesEditApply(Location location, Mutation editType) { // FIXME: Kill this whole thing?
 		switch(editType) {
 		case APPEND: 
 		case REPLACE:
@@ -827,28 +802,27 @@ FaultLocRepresentation<JavaEditOperation> {
 
 
 	@Override
-
-	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
+	public TreeSet<WeightedAtom> editSources(Location location, Mutation editType) {
 		switch(editType) {
 		case APPEND: 	
 		case REPLACE:
 			if (JavaRepresentation.semanticCheck.equals("scope")) {
-				JavaStatement locationStmt = codeBank.get(stmtId);
+				// CLG possible FIXME: not super confident that the double get is necessary...but never trusts Java objects...
+				JavaStatement locationStmt = codeBank.get(((JavaStatement) location.getLocation()).getStmtId());;
 				//If it is a return statement, nothing should be appended after it, since it would be dead code
 				// FIXME: what about REPLACE?
 				if(!(locationStmt.getASTNode() instanceof ReturnStatement)){
-					return this.scopeHelper(stmtId);
+					return this.scopeHelper(location);
 				}else{
 					return new TreeSet<WeightedAtom>();
 				}
 			} else {
-				return super.editSources(stmtId, editType);
+				return super.editSources(location, editType);
 			}
 		
-
+// FIXME: kill this whole thing
 		case DELETE: 
 			TreeSet<WeightedAtom> retval = new TreeSet<WeightedAtom>();
-			retval.add(new WeightedAtom(stmtId, 1.0));
 			return retval;
 		case SWAP:
 			if (JavaRepresentation.semanticCheck.equals("scope")) {
@@ -902,9 +876,9 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	@Override
 	protected void printDebugInfo() {
-		ArrayList<WeightedAtom> buggyStatements = this.getFaultyAtoms();
-		for (WeightedAtom atom : buggyStatements) {
-			int atomid = atom.getAtom();
+		ArrayList<Location> buggyLocations = this.getFaultyLocations();
+		for (Location location : buggyLocations) {
+			int atomid = ((JavaStatement) location.getLocation()).getStmtId(); 
 			JavaStatement stmt = JavaRepresentation.base.get(atomid);
 			ASTNode actualStmt = stmt.getASTNode();
 			String stmtStr = actualStmt.toString();
@@ -929,6 +903,18 @@ FaultLocRepresentation<JavaEditOperation> {
 	public void test() {
 		String newName = CachingRepresentation.newVariantFolder();
 		internalCompile(newName, newName);
+	}
+
+	@Override
+	protected Location instantiateLocation(Integer i, double negWeight) {
+		if(locationInformation.containsKey(i)) {
+			return locationInformation.get(i);
+		}
+		JavaStatement stmt = base.get(i);
+		JavaLocation location = new JavaLocation(stmt, negWeight);
+		location.setClassInfo(stmt.getClassInfo());
+		locationInformation.put(i, location);
+		return location;
 	}
 
 }

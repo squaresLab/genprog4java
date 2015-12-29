@@ -1,19 +1,20 @@
 package clegoues.genprog4java.mut.edits.java;
 
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.main.ClassInfo;
-import clegoues.genprog4java.mut.Location;
+
+import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaHole;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class JavaSwapOperation extends JavaEditOperation {
 
-	public JavaSwapOperation(ClassInfo fileName, JavaStatement location,
-			JavaStatement fixCode) {
-		super(Mutation.SWAP, fileName, location, fixCode);
+	public JavaSwapOperation(JavaLocation location, List<EditHole> fixCode) {
+		super(Mutation.SWAP, location, fixCode);
 	}
 	
 	@Override

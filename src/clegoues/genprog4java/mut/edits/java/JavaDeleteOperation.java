@@ -3,17 +3,13 @@ package clegoues.genprog4java.mut.edits.java;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.main.ClassInfo;
-import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class JavaDeleteOperation extends JavaEditOperation {
-
-	public JavaDeleteOperation(ClassInfo fileName, JavaStatement location) {
-		super(Mutation.DELETE, fileName,  location);
+	public JavaDeleteOperation(JavaLocation location) {
+		super(Mutation.DELETE, location);
 	}
-	
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = this.getLocationNode(); 
