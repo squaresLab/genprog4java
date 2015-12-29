@@ -62,7 +62,6 @@ import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AssertStatement;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -72,15 +71,10 @@ import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.MethodRef;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
@@ -88,8 +82,6 @@ import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.BadLocationException;
@@ -119,12 +111,8 @@ import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.mut.edits.java.JavaAppendOperation;
-import clegoues.genprog4java.mut.edits.java.JavaDeleteOperation;
 import clegoues.genprog4java.mut.edits.java.JavaEditFactory;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
-import clegoues.genprog4java.mut.edits.java.JavaReplaceOperation;
-import clegoues.genprog4java.mut.edits.java.JavaSwapOperation;
 import clegoues.genprog4java.mut.holes.java.JavaHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.util.Pair;
@@ -149,11 +137,14 @@ FaultLocRepresentation<JavaEditOperation> {
 	private static String semanticCheck = "scope";
 	private static int stmtCounter = 0;
 
-	private static HashMap<Integer, TreeSet<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, TreeSet<WeightedAtom>>();
-	private static HashMap<Integer, Set<String>> inScopeMap = new HashMap<Integer, Set<String>>();
+	public static HashMap<Integer, Set<String>> inScopeMap = new HashMap<Integer, Set<String>>();
 	private static TreeSet<Pair<String,String>> methodReturnType = new TreeSet<Pair<String,String>>();
-	private static TreeSet<String> finalVariables = new TreeSet<String>();
+	// Mau, please FIXME: the final variables check doesn't make sense for the append, swap, etc edits.  Please fix it so it does.
+	public static TreeSet<String> finalVariables = new TreeSet<String>();
 
+	public static TreeSet<Pair<String,String>> getMethodReturns() {
+		return methodReturnType;
+	}
 
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
 
@@ -576,8 +567,9 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
-	public void performEdit(Mutation edit, Location dst, HashMap<String,EditHole> sources)
+	public void performEdit(Mutation edit, Location dst, HashMap<String,EditHole> sources) {
 		super.performEdit(edit, dst, sources);
 		JavaEditOperation thisEdit = this.editFactory.makeEdit(edit, dst, sources);
 		this.genome.add(thisEdit);
@@ -693,178 +685,24 @@ FaultLocRepresentation<JavaEditOperation> {
 		return copy;
 	}
 
-	private TreeSet<WeightedAtom> scopeHelper(int stmtId) {
-		if (JavaRepresentation.scopeSafeAtomMap.containsKey(stmtId)) {
-			return JavaRepresentation.scopeSafeAtomMap.get(stmtId);
-		}
-		JavaStatement locationStmt = codeBank.get(stmtId);
-		// I *believe* this is just variable names and doesn't check required
-		// types, which are also collected
-		// at parse time and thus could be considered here.
-		Set<String> inScopeAt = JavaRepresentation.inScopeMap.get(locationStmt
-				.getStmtId());
-		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for (WeightedAtom atom : this.getFixSourceAtoms()) {
-			int index = atom.getAtom();
-			JavaStatement stmt = codeBank.get(index);
-			Set<String> requiredScopes = stmt.getRequiredNames();
-
-			boolean ok = true;
-			for (String req : requiredScopes) {
-				if (!inScopeAt.contains(req)) {
-					ok = false;
-					break;
-				}
-			}
-
-			if(stmt.getASTNode() instanceof MethodRef){
-				MethodRef mr = (MethodRef) stmt.getASTNode();
-				Pair<String,String> methodRefInMrt = mrtContainsMethodName(mr.getName().toString());
-				if(methodRefInMrt != null){
-					if( methodRefInMrt.getSecond().equalsIgnoreCase("void") || methodRefInMrt.getSecond().equalsIgnoreCase("null")){
-						ok=false;
-						break;
-					}
-				}
-			}
-			
-			//No need to assign a value to a final variable
-			if(stmt.getASTNode() instanceof Assignment){
-				if(((Assignment) stmt.getASTNode()).getLeftHandSide() instanceof SimpleName){
-					SimpleName leftHand = (SimpleName) ((Assignment) stmt.getASTNode()).getLeftHandSide();
-					if(finalVariables.contains(leftHand)){
-						ok=false;
-						break;
-					}
-				}
-			}
-			
-			//No need to insert a declaration of a final variable
-			if(stmt.getASTNode() instanceof VariableDeclarationStatement){
-				VariableDeclarationStatement ds = (VariableDeclarationStatement) stmt.getASTNode();
-				VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
-				
-				if(finalVariables.contains(df.getName().getIdentifier())){
-					ok=false;
-					break;
-				}
-			}
-
-			if (ok) {
-				retVal.add(atom);
-			}
-
-		}
-		JavaRepresentation.scopeSafeAtomMap.put(stmtId, retVal);
-		return retVal;
-	}
-
-	private Pair<String,String> mrtContainsMethodName(String matchString){
-		for (Pair<String,String> p : methodReturnType) {
-			if(p.getFirst().equalsIgnoreCase(matchString)){
-				return p;
-			}
-		}
-		return null;
-	}
-	
+	@SuppressWarnings("rawtypes")
 	@Override
-	public Boolean doesEditApply(Location location, Mutation editType) { // FIXME: Kill this whole thing?
-		switch(editType) {
-		case APPEND: 
-		case REPLACE:
-		case SWAP:
-			return this.editSources(location,  editType).size() > 0;
-		case NULLINSERT:
-		case DELETE: return true; // possible FIXME: not always true in Java?
-		case OFFBYONE: return true;
-		case NULLCHECK: 
-			JavaStatement locationStmt = codeBank.get(location);
-			if(locationStmt.getASTNode() instanceof MethodInvocation || locationStmt.getASTNode() instanceof FieldAccess || locationStmt.getASTNode() instanceof QualifiedName){
-				return true;
-			}
-			break; 
-		default:
-			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
-			break;
-		}
-		return false;
+	public Boolean doesEditApply(Location location, Mutation editType) {
+		return editFactory.doesEditApply(this,location,editType); 
 	}
 
 
+	@SuppressWarnings("rawtypes")
 	@Override
-	public TreeSet<WeightedAtom> editSources(Location location, Mutation editType) {
-		switch(editType) {
-		case APPEND: 	
-		case REPLACE:
-			if (JavaRepresentation.semanticCheck.equals("scope")) {
-				// CLG possible FIXME: not super confident that the double get is necessary...but never trusts Java objects...
-				JavaStatement locationStmt = codeBank.get(((JavaStatement) location.getLocation()).getStmtId());;
-				//If it is a return statement, nothing should be appended after it, since it would be dead code
-				// FIXME: what about REPLACE?
-				if(!(locationStmt.getASTNode() instanceof ReturnStatement)){
-					return this.scopeHelper(location);
-				}else{
-					return new TreeSet<WeightedAtom>();
-				}
-			} else {
-				return super.editSources(location, editType);
-			}
-		
-// FIXME: kill this whole thing
-		case DELETE: 
-			TreeSet<WeightedAtom> retval = new TreeSet<WeightedAtom>();
-			return retval;
-		case SWAP:
-			if (JavaRepresentation.semanticCheck.equals("scope")) {
-				TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-				for (WeightedAtom item : this.scopeHelper(stmtId)) {
-					int atom = item.getAtom();
-					TreeSet<WeightedAtom> inScopeThere = this.scopeHelper(atom);
-					boolean containsThisAtom = false;
-					for (WeightedAtom there : inScopeThere) {
-						if (there.getAtom() == stmtId) {
-							containsThisAtom = true;
-							break;
-						}
-
-					}
-					if (containsThisAtom)
-						retVal.add(item);
-				}
-				return retVal;
-			} else {
-				return super.editSources(stmtId, editType);
-			}
-		case NULLINSERT:
-		case FUNREP:
-		case PARREP:
-		case PARADD:
-		case PARREM:
-		case EXPREP:
-		case EXPADD:
-		case EXPREM:
-		case NULLCHECK:
-		case OBJINIT:
-		case RANGECHECK:
-		case SIZECHECK:
-		case CASTCHECK:
-		case LBOUNDSET:
-		case UBOUNDSET:
-		case OFFBYONE:
-			retval = new TreeSet<WeightedAtom>();
-			retval.add(new WeightedAtom(stmtId, 1.0));
-			return retval;
-		default:
-			// IMPORTANT FIXME FOR MANISH AND MAU: you must add handling here to check legality for templates as you add them.
-			// if a template always applies, then you can move the template type to the DELETE case, above.
-			// however, I don't think most templates always apply; it doesn't make sense to null check a statement in which nothing
-			// could conceivably be null, for example.
-			logger.fatal("Unhandled template type in editSources!  Fix code in JavaRepresentation to do this properly.");
-			return new TreeSet<WeightedAtom>();
+	public TreeSet<WeightedAtom> editSources(Location location, Mutation editType, String holeName) {
+		if (semanticCheck.equals("scope")) {
+		return editFactory.editSources(this,location,editType,holeName);
+		} else {
+			return super.editSources(location, editType, holeName);
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	protected void printDebugInfo() {
 		ArrayList<Location> buggyLocations = this.getFaultyLocations();
@@ -891,13 +729,9 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	}
 
-	public void test() {
-		String newName = CachingRepresentation.newVariantFolder();
-		internalCompile(newName, newName);
-	}
-
+	@SuppressWarnings("rawtypes")
 	@Override
-	protected Location instantiateLocation(Integer i, double negWeight) {
+	public Location instantiateLocation(Integer i, double negWeight) {
 		if(locationInformation.containsKey(i)) {
 			return locationInformation.get(i);
 		}
@@ -906,6 +740,26 @@ FaultLocRepresentation<JavaEditOperation> {
 		location.setClassInfo(stmt.getClassInfo());
 		locationInformation.put(i, location);
 		return location;
+	}
+
+	public JavaStatement getFromCodeBank(int index) {
+		return codeBank.get(index);
+	}
+
+	@Override
+	public List<String> holesForMutation(Mutation mut) {
+		return editFactory.holesForMutation(mut);
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public EditHole instantiateHole(String holeName, WeightedAtom selected) {
+		int stmtId = selected.getAtom();
+		// FIXME: STRONGLY ASSUMES it's a statement; this is not always true!  Null checking, for example
+		// need to think about how to handle this...
+		// give types to atoms?
+		JavaStatement stmt = this.getFromCodeBank(stmtId);
+		return new JavaHole(holeName, stmt.getASTNode());
 	}
 
 }

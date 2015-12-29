@@ -243,7 +243,7 @@ CachingRepresentation<G> {
 	}
 	
 	@Override
-	public TreeSet<WeightedAtom> editSources(Location stmtId, Mutation editType) {
+	public TreeSet<WeightedAtom> editSources(Location stmtId, Mutation editType, String holeName) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
 		switch(editType) {
 		case APPEND:
@@ -259,7 +259,6 @@ CachingRepresentation<G> {
 			}
 			break;
 		case DELETE:
-	// FIME:		retVal.add(new WeightedAtom(stmtId, 1.0));
 			break;
 		default: break;
 		}
