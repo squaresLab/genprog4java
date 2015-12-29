@@ -82,9 +82,9 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		if(prop.getProperty("crossover") != null) {
 			crossover = prop.getProperty("crossover").trim();
 		}
+		tournamentK = (int) (popsize *0.2); //tournament size, 20% of the population
 	}
 
-	/* I think that generate makes no sense in java */
 
 	/* {b serialize} serializes a population to disk.  The first variant is
 	      optionally instructed to print out the global information necessary for a

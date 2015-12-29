@@ -1,7 +1,5 @@
 package clegoues.genprog4java.mut;
 
-import java.util.Random;
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -18,6 +16,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
+import clegoues.genprog4java.main.Configuration;
 
 public class JavaOffByOneOperation extends JavaEditOperation {
 
@@ -33,8 +32,7 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 			public boolean visit(ArrayAccess node) {
 
 				// using random numbers (even or odd) to increase or decrease the index by 1
-				Random rand = new Random();
-				int randomNum = rand.nextInt(11);
+				int randomNum = Configuration.randomizer.nextInt(11);
 				if(randomNum%2==0){
 					mutationtype = 0;
 				}else{
