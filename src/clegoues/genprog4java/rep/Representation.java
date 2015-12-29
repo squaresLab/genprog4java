@@ -50,8 +50,10 @@ import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.main.ClassInfo;
+import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
@@ -192,7 +194,7 @@ Comparable<Representation<G>> {
 		return succeeded;
 	}
 
-	public abstract ArrayList<WeightedAtom> getFaultyAtoms();
+	public abstract ArrayList<Location> getFaultyLocations();
 
 	public abstract ArrayList<WeightedAtom> getFixSourceAtoms();
 
@@ -215,15 +217,14 @@ Comparable<Representation<G>> {
 	public abstract void reduceFixSpace();
 
 	public abstract TreeSet<Pair<Mutation, Double>> availableMutations(
-			int atomId);
+			Location faultyLocation);
 
 
 	public static void configure(Properties prop) {
-		// FIXME: this is dumb, do it all in configuration
 	}
 	
-	public void performEdit(Mutation edit, int dst, int source) {
-		history.add(new HistoryEle(edit, dst, source));
+	public void performEdit(Mutation edit, Location dst, List<EditHole> sources) {
+		history.add(new HistoryEle(edit, dst, sources));
 	}
 
 	public abstract void setFitness(double fitness);
@@ -251,9 +252,9 @@ Comparable<Representation<G>> {
 		return allLines;
 	}
 
-	public abstract TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType);
+	public abstract TreeSet<WeightedAtom> editSources(Location stmtId, Mutation editType);
 
-	public abstract Boolean doesEditApply(int location, Mutation editType);
+	public abstract Boolean doesEditApply(Location location, Mutation editType);
 
 
 }

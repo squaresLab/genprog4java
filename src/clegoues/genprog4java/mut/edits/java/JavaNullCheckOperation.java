@@ -21,19 +21,17 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.main.ClassInfo;
-import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class JavaNullCheckOperation extends JavaEditOperation {
 
-	public JavaNullCheckOperation(ClassInfo fileName, JavaStatement location) {
-		super(Mutation.NULLCHECK, fileName, location);
+	public JavaNullCheckOperation(JavaLocation location) {
+		super(Mutation.NULLCHECK, location);
 	}
 
 	private Expression createExpression(ASTNode expressionToCheckIfNull) {
-		MethodInvocation mi = expressionToCheckIfNull.getAST().newMethodInvocation();		
+		MethodInvocation mi = expressionToCheckIfNull.getAST().newMethodInvocation(); // FIXME: Why isn't this used?
 		Expression beforeTheDot = ((MethodInvocation) expressionToCheckIfNull).getExpression();
 		while(beforeTheDot instanceof MethodInvocation){	
 			beforeTheDot = ((MethodInvocation) beforeTheDot).getExpression();

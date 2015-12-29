@@ -59,6 +59,7 @@ import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
@@ -75,14 +76,14 @@ CachingRepresentation<G> {
 	protected static boolean regenPaths = false;
 
 	protected boolean doingCoverage = false;
-	private ArrayList<WeightedAtom> faultLocalization = new ArrayList<WeightedAtom>();
+	private ArrayList<Location> faultLocalization = new ArrayList<Location>();
 	private ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
 	public FaultLocRepresentation(ArrayList<HistoryEle> history,
-			ArrayList<G> genome2, ArrayList<WeightedAtom> arrayList,
+			ArrayList<G> genome2, ArrayList<Location> arrayList,
 			ArrayList<WeightedAtom> arrayList2) {
 		super(history, genome2);
-		this.faultLocalization = new ArrayList<WeightedAtom>(arrayList);
+		this.faultLocalization = new ArrayList<Location>(arrayList);
 		this.fixLocalization = new ArrayList<WeightedAtom>(arrayList2);
 	}
 
@@ -170,7 +171,7 @@ CachingRepresentation<G> {
 				in = fin;
 			}
 			if (super.deserialize(filename, in, globalinfo)) {
-				this.faultLocalization = (ArrayList<WeightedAtom>) in
+				this.faultLocalization = (ArrayList<Location>) in
 						.readObject();
 				this.fixLocalization = (ArrayList<WeightedAtom>) in
 						.readObject();
@@ -223,7 +224,7 @@ CachingRepresentation<G> {
 		return succeeded;
 	}
 
-	public ArrayList<WeightedAtom> getFaultyAtoms() {
+	public ArrayList<Location> getFaultyLocations() {
 		return this.faultLocalization;
 	}
 
@@ -231,7 +232,7 @@ CachingRepresentation<G> {
 		return this.fixLocalization;
 	}
 
-	public TreeSet<Pair<Mutation, Double>> availableMutations(int atomId) {
+	public TreeSet<Pair<Mutation, Double>> availableMutations(Location atomId) {
 		TreeSet<Pair<Mutation, Double>> retVal = new TreeSet<Pair<Mutation, Double>>();
 		for (Map.Entry mutation : Search.availableMutations.entrySet()) {
 			if(this.doesEditApply(atomId, (Mutation) mutation.getKey())) {
@@ -242,7 +243,7 @@ CachingRepresentation<G> {
 	}
 	
 	@Override
-	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
+	public TreeSet<WeightedAtom> editSources(Location stmtId, Mutation editType) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
 		switch(editType) {
 		case APPEND:
@@ -258,7 +259,7 @@ CachingRepresentation<G> {
 			}
 			break;
 		case DELETE:
-			retVal.add(new WeightedAtom(stmtId, 1.0));
+	// FIME:		retVal.add(new WeightedAtom(stmtId, 1.0));
 			break;
 		default: break;
 		}
@@ -422,7 +423,7 @@ CachingRepresentation<G> {
 				}
 				negHt.add(i);
 				fw.put(i, 0.5);
-				faultLocalization.add(new WeightedAtom(i, negWeight));
+				faultLocalization.add(this.instantiateLocation(i, negWeight)); 
 			}
 		}
 		for (Map.Entry<Integer, Double> entry : fw.entrySet()) {
@@ -435,6 +436,8 @@ CachingRepresentation<G> {
 		this.doingCoverage = false;
 		logger.info("Finish Fault Localization");
 	}
+
+	protected abstract Location instantiateLocation(Integer i, double negWeight);
 
 	protected abstract void printDebugInfo();
 

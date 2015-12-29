@@ -1,20 +1,23 @@
 package clegoues.genprog4java.mut.edits.java;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaHole;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
+import clegoues.genprog4java.mut.EditHole;
+
 
 public class JavaAppendOperation extends JavaEditOperation {
 	
-	public JavaAppendOperation(ClassInfo fileName, JavaStatement location,
-			JavaStatement fixCode) {
-		super(Mutation.APPEND, fileName, location, fixCode);
+	public JavaAppendOperation(JavaLocation location, List<EditHole> fixCode) {
+		super(Mutation.APPEND, location, fixCode);
 	}
 	
 

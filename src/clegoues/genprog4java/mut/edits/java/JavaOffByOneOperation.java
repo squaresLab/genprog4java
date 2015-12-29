@@ -1,5 +1,7 @@
 package clegoues.genprog4java.mut.edits.java;
 
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
@@ -12,15 +14,15 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class JavaOffByOneOperation extends JavaEditOperation {
 
-	public JavaOffByOneOperation(ClassInfo fileName, JavaStatement location) {
-		super(Mutation.OFFBYONE, fileName, location);
+	public JavaOffByOneOperation(JavaLocation location, List<EditHole> sources) {
+		super(Mutation.OFFBYONE, location, sources);
 	}
 	@Override
 	public void edit(final ASTRewrite rewriter) {

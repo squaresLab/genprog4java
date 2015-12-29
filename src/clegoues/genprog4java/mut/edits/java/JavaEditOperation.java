@@ -43,12 +43,10 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.mut.holes.java.JavaHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public abstract class JavaEditOperation implements
@@ -61,21 +59,23 @@ EditOperation<ASTRewrite> {
 	private Location<JavaStatement> location = null;
 	private ArrayList<String> holeNames = null;
 	private HashMap<String,EditHole> holeCode = new HashMap<String,EditHole>();
-	private ClassInfo fileInfo = null;
 
-	protected JavaEditOperation(Mutation mutType, ClassInfo fileName, JavaStatement location) {
+	public JavaEditOperation(Mutation mutType, JavaLocation location) {
 		this.mutType = mutType;
-		this.location = new JavaLocation(location);
-		this.fileInfo = fileName;
+		this.location = location;
+	}
+	
+	public Location getLocation() {
+		return this.location;
 	}
 
-	protected JavaEditOperation(Mutation mutType, ClassInfo fileName, JavaStatement location,
-			JavaStatement singleHoleCode) {
+	protected JavaEditOperation(Mutation mutType, JavaLocation location, List<EditHole> sources) {
 		this.mutType = mutType;
-		this.location = new JavaLocation(location);
-		this.holeCode.put("singleHole", new JavaHole("singleHole", singleHoleCode.getASTNode()));
-		this.fileInfo = fileName;
-		this.holeNames.add("singleHole");
+		this.location = location;
+		for(EditHole source : sources) {
+			this.holeCode.put(source.getName(), source);
+			this.holeNames.add(source.getName()) ;
+		}
 	}
 
 	@Override
@@ -105,15 +105,5 @@ EditOperation<ASTRewrite> {
 	public EditHole getHoleCode(String name) {
 		return this.holeCode.get(name);
 	}
-
-	public ClassInfo getFileInfo() {
-		return this.fileInfo;
-	}
-
-	public void setFileInfo(ClassInfo newFileName){
-		fileInfo = newFileName;
-	}
-	
-
 
 }

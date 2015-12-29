@@ -37,16 +37,27 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import clegoues.genprog4java.main.ClassInfo;
+
 public class JavaStatement {
 
 	private ASTNode astNode;
+	private ClassInfo classInfo;
+	
 	private int lineno;
 	private int stmtId; // unique
 	private Set<String> names;
 	private Set<String> types;
-
 	private Set<String> mustBeInScope;
 
+	public void setClassInfo(ClassInfo ci) {
+		this.classInfo = ci;
+	}
+	
+	public ClassInfo getClassInfo() {
+		return this.classInfo;
+	}
+	
 	public void setStmtId(int id) {
 		this.stmtId = id;
 	}

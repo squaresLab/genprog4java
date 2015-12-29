@@ -39,6 +39,7 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
@@ -47,7 +48,9 @@ import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.WeightedAtom;
@@ -178,23 +181,24 @@ public class Search<G extends EditOperation> {
 		rep.outputSource(repairFilename);
 	}
 
-	private TreeSet<WeightedAtom> rescaleAtomPairs(TreeSet<WeightedAtom> items) {
+	private TreeSet<Location> rescaleLocations(TreeSet<Location> items) {
 		double fullSum = 0.0;
-		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for (Pair<?, Double> item : items) {
-			fullSum += item.getSecond();
+		TreeSet<Location> retVal = new TreeSet<Location>();
+		for (Location item : items) {
+			fullSum += item.getWeight();
 		}
 		double scale = 1.0 / fullSum;
-		for (WeightedAtom item : items) {
-			WeightedAtom newItem = new WeightedAtom(item.getAtom(),
-					item.getWeight() * scale);
+		for (Location item : items) { 
+			Location newItem = item.clone();
+			newItem.setLocation(item.getLocation());
+			newItem.setWeight(item.getWeight() * scale);
 			retVal.add(newItem);
 		}
 		return retVal;
 	}
 
 	private boolean doWork(Representation<G> rep, Representation<G> original,
-			Mutation mut, int first, int second) {
+			Mutation mut, Location first, List<EditHole> second) {
 		rep.performEdit(mut, first, second);
 		if (fitnessEngine.testToFirstFailure(rep)) {
 			this.noteSuccess(rep, original, 1);
@@ -210,11 +214,10 @@ public class Search<G extends EditOperation> {
 		original.reduceFixSpace();
 
 		int count = 0;
-		TreeSet<WeightedAtom> allFaultyAtoms = new TreeSet<WeightedAtom>(
-				original.getFaultyAtoms());
+		TreeSet<Location> allFaultyLocations = new TreeSet<Location>(
+				original.getFaultyLocations());
 
-		for (WeightedAtom faultyAtom : allFaultyAtoms) {
-			int faultyLocation = faultyAtom.getAtom();
+		for (Location faultyLocation : allFaultyLocations) {
 
 			for(Map.Entry mutation : availableMutations.entrySet()) {
 				Mutation key = (Mutation) mutation.getKey();
@@ -232,11 +235,9 @@ public class Search<G extends EditOperation> {
 		int sofar = 1;
 		boolean repairFound = false;
 
-		TreeSet<WeightedAtom> rescaledAtoms = rescaleAtomPairs(allFaultyAtoms);
+		TreeSet<Location> rescaledAtoms = rescaleLocations(allFaultyLocations);
 
-		for (WeightedAtom faultyAtom : rescaledAtoms) {
-			int stmt = faultyAtom.getAtom();
-			double weight = faultyAtom.getWeight();
+		for (Location faultyLocation : rescaledAtoms) {
 			Comparator<Pair<Mutation, Double>> descendingMutations = new Comparator<Pair<Mutation, Double>>() {
 				@Override
 				public int compare(Pair<Mutation, Double> one,
@@ -248,7 +249,7 @@ public class Search<G extends EditOperation> {
 			// wouldn't real polymorphism be the actual legitimate best right
 			// here?
 			TreeSet<Pair<Mutation, Double>> availableMutations = original
-					.availableMutations(stmt);
+					.availableMutations(faultyLocation);
 			TreeSet<Pair<Mutation, Double>> rescaledMutations = new TreeSet<Pair<Mutation, Double>>(
 					descendingMutations);
 			double sumMutScale = 0.0;
@@ -274,7 +275,7 @@ public class Search<G extends EditOperation> {
 			for (Pair<Mutation, Double> mutation : rescaledMutations) {
 				Mutation mut = mutation.getFirst();
 				double prob = mutation.getSecond();
-				logger.info(weight + " " + prob);
+				logger.info(faultyLocation.getWeight() + " " + prob);
 				switch(mut) {
 				case DELETE:
 					Representation<G> delRep = original.copy();
@@ -353,24 +354,23 @@ public class Search<G extends EditOperation> {
 	 * @return variant' modified/potentially mutated variant
 	 */
 	public void mutate(Representation<G> variant) {
-		ArrayList faultyAtoms = variant.getFaultyAtoms();
-		ArrayList<WeightedAtom> proMutList = new ArrayList<WeightedAtom>();
+		ArrayList<Location> faultyAtoms = variant.getFaultyLocations();
+		ArrayList<Location> proMutList = new ArrayList<Location>();
 		boolean foundMutationThatCanApplyToAtom = false;
 		while(!foundMutationThatCanApplyToAtom){
 			for (int i = 0; i < Search.promut; i++) {
-				//chooses a random atom
-				WeightedAtom wa = null;
+				//chooses a random location
+				Location wa = null;
 				boolean alreadyOnList = false;
 				do{
-					wa = (WeightedAtom) GlobalUtils.chooseOneWeighted(faultyAtoms);
+					wa = (Location) GlobalUtils.chooseOneWeighted(faultyAtoms);
 					alreadyOnList = proMutList.contains(wa);
 				}while(alreadyOnList);
 				proMutList.add(wa);
 			}
-			for (WeightedAtom atom : proMutList) {
-				int stmtid = atom.getAtom();
+			for (Location location : proMutList) {
 				//the available mutations for this stmt
-				TreeSet<Pair<Mutation, Double>> availableMutations = variant.availableMutations(stmtid);
+				TreeSet<Pair<Mutation, Double>> availableMutations = variant.availableMutations(location);
 				if(availableMutations.isEmpty()){
 					continue; 
 				}else{
@@ -379,25 +379,23 @@ public class Search<G extends EditOperation> {
 				//choose one at random
 				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(new ArrayList(availableMutations));
 				Mutation mut = chosenMutation.getFirst();
-				// FIXME: make sure the mutation list isn't empty before choosing?
 				switch (mut) {
 				case DELETE:
-					// FIXME: this -1 hack is pretty gross; note to self, CLG should fix it
-					variant.performEdit(mut, stmtid, (-1));
+					variant.performEdit(mut, location, new ArrayList<EditHole>());
 					break;
 				case APPEND:
 				case SWAP:
 				case REPLACE: 
-					TreeSet<WeightedAtom> allowed = variant.editSources(stmtid,mut);
+					TreeSet<WeightedAtom> allowed = variant.editSources(location,mut);
 					WeightedAtom after = (WeightedAtom) GlobalUtils
 							.chooseOneWeighted(new ArrayList(allowed));
-					variant.performEdit(mut, stmtid,  after.getAtom()); 
+					variant.performEdit(mut, location,  after.getAtom()); 
 					break;
 				case OFFBYONE:
-					TreeSet<WeightedAtom> allow = variant.editSources(stmtid,mut);
+					TreeSet<WeightedAtom> allow = variant.editSources(location,mut);
 					WeightedAtom aftr = (WeightedAtom) GlobalUtils
 							.chooseOneWeighted(new ArrayList(allow));
-					variant.performEdit(mut, stmtid,  aftr.getAtom()); 
+					variant.performEdit(mut, location,  aftr.getAtom()); 
 					break;
 
 				default: 

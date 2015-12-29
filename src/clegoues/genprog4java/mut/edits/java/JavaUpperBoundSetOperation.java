@@ -21,14 +21,13 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class JavaUpperBoundSetOperation extends JavaEditOperation {
 
-	public JavaUpperBoundSetOperation(ClassInfo fileName, JavaStatement location) {
-		super(Mutation.UBOUNDSET, fileName, location);
+	public JavaUpperBoundSetOperation(JavaLocation location) {
+		super(Mutation.UBOUNDSET, location);
 	}
 
 	@Override
