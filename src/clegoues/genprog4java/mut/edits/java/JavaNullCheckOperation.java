@@ -1,4 +1,4 @@
-package clegoues.genprog4java.mut;
+package clegoues.genprog4java.mut.edits.java;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
+import clegoues.genprog4java.mut.Mutation;
 
 public class JavaNullCheckOperation extends JavaEditOperation {
 
@@ -42,7 +43,7 @@ public class JavaNullCheckOperation extends JavaEditOperation {
 
 
 	@Override
-	public void edit(final ASTRewrite rewriter, AST ast, CompilationUnit cu) {
+	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = this.getLocation().getASTNode();
 		final Map<ASTNode, List<ASTNode>> nodestmts = new HashMap<ASTNode, List<ASTNode>>();	// to track the parent nodes of array access nodes
 		Set<ASTNode> parentnodes = null; 

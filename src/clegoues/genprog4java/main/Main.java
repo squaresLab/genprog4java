@@ -43,7 +43,7 @@ import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.RepairFoundException;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
-import clegoues.genprog4java.mut.JavaEditOperation;
+import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.LocalizationRepresentation;
 import clegoues.genprog4java.rep.Representation;

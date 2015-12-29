@@ -33,26 +33,24 @@
 
 package clegoues.genprog4java.mut;
 
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import java.util.List;
 
-public interface EditOperation<G, R, S> {
+public interface EditOperation<G, R> {
 
 	public Mutation getType();
 
 	public void setType(Mutation type);
+	
+	public List<String> getHoles();
 
-	public G getFixCode();
+	public EditHole getHoleCode(String holeName);
 
-	public void setFixCode(G target);
+	public void setHoleCode(String holeName, EditHole target);
 
 	public G getLocation();
 
 	public void setLocation(G location);
 
-	//public void edit(R rewriter, S ast);
-
-	public void edit(ASTRewrite rewriter, AST ast, CompilationUnit cu);
+	public void edit(R rewriter);
 
 }

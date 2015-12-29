@@ -1,4 +1,4 @@
-package clegoues.genprog4java.mut;
+package clegoues.genprog4java.mut.edits.java;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,12 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -27,6 +25,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
+import clegoues.genprog4java.mut.Mutation;
 
 public class JavaRangeCheckOperation extends JavaEditOperation {
 
@@ -35,7 +34,7 @@ public class JavaRangeCheckOperation extends JavaEditOperation {
 	}
 
 	@Override
-	public void edit(final ASTRewrite rewriter, AST ast, CompilationUnit cu) {
+	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = this.getLocation().getASTNode();
 		final Map<ASTNode, List<ASTNode>> nodestmts = new HashMap<ASTNode, List<ASTNode>>();	// to track the parent nodes of array access nodes
 		Set<ASTNode> parentnodes = null;

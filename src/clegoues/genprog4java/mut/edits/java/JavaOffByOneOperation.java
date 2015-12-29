@@ -1,10 +1,8 @@
-package clegoues.genprog4java.mut;
+package clegoues.genprog4java.mut.edits.java;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.NumberLiteral;
@@ -17,6 +15,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.mut.Mutation;
 
 public class JavaOffByOneOperation extends JavaEditOperation {
 
@@ -24,7 +23,7 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 		super(Mutation.OFFBYONE, fileName, location);
 	}
 	@Override
-	public void edit(final ASTRewrite rewriter, AST ast, CompilationUnit cu) {
+	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = this.getLocation().getASTNode();
 		locationNode.accept(new ASTVisitor() {
 			int mutationtype;	// used to randomly put + or - operator while mutating array index

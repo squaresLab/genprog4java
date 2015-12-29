@@ -31,22 +31,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package clegoues.genprog4java.mut;
+package clegoues.genprog4java.mut.edits.java;
 
 
 
-import org.eclipse.jdt.core.dom.AST;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
+import clegoues.genprog4java.mut.EditHole;
+import clegoues.genprog4java.mut.EditOperation;
+import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.JavaHole;
 
 public abstract class JavaEditOperation implements
-EditOperation<JavaStatement, ASTRewrite, AST> {
+EditOperation<JavaStatement, ASTRewrite> {
 
 	private Mutation mutType;
 	private JavaStatement location = null;
-	private JavaStatement fixCode = null;
+	private ArrayList<String> holeNames = null;
+	private HashMap<String,EditHole> holeCode = new HashMap<String,EditHole>();
 	private ClassInfo fileInfo = null;
 
 	protected JavaEditOperation(Mutation mutType, ClassInfo fileName, JavaStatement location) {
@@ -55,16 +63,20 @@ EditOperation<JavaStatement, ASTRewrite, AST> {
 		this.fileInfo = fileName;
 	}
 
-
 	protected JavaEditOperation(Mutation mutType, ClassInfo fileName, JavaStatement location,
-			JavaStatement fixCode) {
+			JavaStatement singleHoleCode) {
 		this.mutType = mutType;
 		this.location = location;
-		this.fixCode = fixCode;
+		this.holeCode.put("singleHole", new JavaHole("singleHole", singleHoleCode.getASTNode()));
 		this.fileInfo = fileName;
+		this.holeNames.add("singleHole");
 	}
 
-
+	@Override
+	public List<String> getHoles() {
+		return this.holeNames;
+	}
+	
 	@Override
 	public Mutation getType() {
 		return this.mutType;
@@ -83,12 +95,12 @@ EditOperation<JavaStatement, ASTRewrite, AST> {
 		this.location = location;
 	}
 
-	public void setFixCode(JavaStatement fixCode) {
-		this.fixCode = fixCode;
+	public void setHoleCode(String name, EditHole fixCode) {
+		this.holeCode.put(name, fixCode);
 	}
 
-	public JavaStatement getFixCode() {
-		return this.fixCode;
+	public EditHole getHoleCode(String name) {
+		return this.holeCode.get(name);
 	}
 
 	public ClassInfo getFileInfo() {
