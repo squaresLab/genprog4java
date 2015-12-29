@@ -116,12 +116,12 @@ import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.main.Utils;
 import clegoues.genprog4java.mut.HistoryEle;
-import clegoues.genprog4java.mut.JavaAppendOperation;
-import clegoues.genprog4java.mut.JavaDeleteOperation;
-import clegoues.genprog4java.mut.JavaEditOperation;
-import clegoues.genprog4java.mut.JavaReplaceOperation;
-import clegoues.genprog4java.mut.JavaSwapOperation;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.edits.java.JavaAppendOperation;
+import clegoues.genprog4java.mut.edits.java.JavaDeleteOperation;
+import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
+import clegoues.genprog4java.mut.edits.java.JavaReplaceOperation;
+import clegoues.genprog4java.mut.edits.java.JavaSwapOperation;
 import clegoues.genprog4java.util.Pair;
 
 public class JavaRepresentation extends
@@ -483,7 +483,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			try {
 				for (JavaEditOperation edit : genome) {
 					if(edit.getFileInfo().getClassName().equalsIgnoreCase(filename)){
-						edit.edit(rewriter, ast, cu);
+						edit.edit(rewriter);
 					}
 				}
 
