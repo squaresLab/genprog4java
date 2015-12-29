@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 
 public class JavaLowerBoundSetOperation extends JavaEditOperation {
@@ -31,7 +32,7 @@ public class JavaLowerBoundSetOperation extends JavaEditOperation {
 	}
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = this.getLocation().getASTNode();
+		ASTNode locationNode = this.getLocationNode(); 
 		final Map<ASTNode, List<ASTNode>> nodestmts = new HashMap<ASTNode, List<ASTNode>>();	// to track the parent nodes of array access nodes
 		Set<ASTNode> parentnodes = null; 
 		final Map<ASTNode, String> lowerbound = new HashMap<ASTNode, String>();			// to set the lower-bound values of array. currently set to arrayname.length

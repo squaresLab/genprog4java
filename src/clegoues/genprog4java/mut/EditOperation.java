@@ -35,7 +35,7 @@ package clegoues.genprog4java.mut;
 
 import java.util.List;
 
-public interface EditOperation<G, R> {
+public interface EditOperation<R> {
 
 	public Mutation getType();
 
@@ -46,10 +46,6 @@ public interface EditOperation<G, R> {
 	public EditHole getHoleCode(String holeName);
 
 	public void setHoleCode(String holeName, EditHole target);
-
-	public G getLocation();
-
-	public void setLocation(G location);
 
 	public void edit(R rewriter);
 

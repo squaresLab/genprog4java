@@ -5,6 +5,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 
 public class JavaDeleteOperation extends JavaEditOperation {
@@ -15,7 +16,7 @@ public class JavaDeleteOperation extends JavaEditOperation {
 	
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = this.getLocation().getASTNode();
+		ASTNode locationNode = this.getLocationNode(); 
 		rewriter.remove(locationNode, null);
 	}
 }

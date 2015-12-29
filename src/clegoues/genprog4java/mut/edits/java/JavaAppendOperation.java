@@ -19,7 +19,7 @@ public class JavaAppendOperation extends JavaEditOperation {
 	
 
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = this.getLocation().getASTNode();
+		ASTNode locationNode = this.getLocationNode(); 
 		JavaHole fixHole = (JavaHole) this.getHoleCode("singleHole");
 		ASTNode fixCodeNode =
 			 ASTNode.copySubtree(locationNode.getAST(), fixHole.getCode()); 
