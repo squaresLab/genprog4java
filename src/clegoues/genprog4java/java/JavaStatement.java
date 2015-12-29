@@ -39,7 +39,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 
 import clegoues.genprog4java.main.ClassInfo;
 
-public class JavaStatement {
+public class JavaStatement implements Comparable<JavaStatement>{
 
 	private ASTNode astNode;
 	private ClassInfo classInfo;
@@ -111,5 +111,10 @@ public class JavaStatement {
 			return this.astNode.toString();
 		else
 			return "null";
+	}
+
+	@Override
+	public int compareTo(JavaStatement other) {
+		return this.stmtId - other.getStmtId();
 	}
 }

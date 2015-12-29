@@ -189,14 +189,27 @@ public class Search<G extends EditOperation> {
 		}
 		double scale = 1.0 / fullSum;
 		for (Location item : items) { 
-			Location newItem = item.clone();
+			Location newItem = item;
 			newItem.setLocation(item.getLocation());
 			newItem.setWeight(item.getWeight() * scale);
 			retVal.add(newItem);
 		}
 		return retVal;
 	}
-
+	private TreeSet<WeightedAtom> rescaleAtomPairs(TreeSet<WeightedAtom> items) {
+		double fullSum = 0.0;
+		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+		for (WeightedAtom item : items) {
+			fullSum += item.getWeight();
+		}
+		double scale = 1.0 / fullSum;
+		for (WeightedAtom item : items) { 
+			WeightedAtom newItem = item;
+			newItem.setSecond(item.getWeight() * scale);
+			retVal.add(newItem);
+		}
+		return retVal;
+	}
 	private boolean doWork(Representation<G> rep, Representation<G> original,
 			Mutation mut, Location first, HashMap<String,EditHole> fixCode) {
 		rep.performEdit(mut, first, fixCode);
@@ -279,6 +292,8 @@ public class Search<G extends EditOperation> {
 				Mutation mut = mutation.getFirst();
 				double prob = mutation.getSecond();
 				logger.info(faultyLocation.getWeight() + " " + prob);
+				
+				List<String> holes = original.holesForMutation(mut);
 				switch(mut) {
 				case DELETE:
 					Representation<G> delRep = original.copy();
@@ -289,34 +304,39 @@ public class Search<G extends EditOperation> {
 					break;
 				case APPEND:
 				case REPLACE:
-				case OFFBYONE:
 					TreeSet<WeightedAtom> sources1 = new TreeSet<WeightedAtom>(
 							descendingAtom);
-					sources1.addAll(this.rescaleAtomPairs(original
-							.editSources(faultyLocation, mut)));
+					// FIXME: HACK: fix this hard-coding of the hole name, and below, too
+					TreeSet<WeightedAtom> editSources = original.editSources(faultyLocation, mut, "singleHole");
+					sources1.addAll(this.rescaleAtomPairs(editSources));
 					for (WeightedAtom append : sources1) {
 						Representation<G> rep = original.copy();
+						HashMap<String,EditHole> sources = new HashMap<String,EditHole>();
+						sources.put("singleHole", rep.instantiateHole("singleHole", append));
 						if (this.doWork(rep, original, mut, faultyLocation,
-								append.getAtom())) {
+								sources)) {
 							wins++;
 							repairFound = true;
 						}
 					}
 					break;
 				case SWAP:
-					TreeSet<WeightedAtom> sources = new TreeSet<WeightedAtom>(
-							descendingAtom);
+					TreeSet<WeightedAtom> sources = new TreeSet<WeightedAtom>(descendingAtom);
 					sources.addAll(this.rescaleAtomPairs(original
-							.editSources(stmt, mut)));
+							.editSources(faultyLocation, mut, "singleHole")));
 					for (WeightedAtom append : sources) {
 						Representation<G> rep = original.copy();
-						if (this.doWork(rep, original, mut, stmt,
-								append.getAtom())) {
+						HashMap<String,EditHole> swapSources = new HashMap<String,EditHole>();
+						swapSources.put("singleHole", rep.instantiateHole("singleHole", append));
+						if (this.doWork(rep, original, mut, faultyLocation, swapSources)) {
 							wins++;
 							repairFound = true;
 						}
 					}
 					break;
+				case OFFBYONE: // Manish, FIXME: this can't go up with Append/replace; that code tries to append
+					// or replace the current location with every available fix statement, a concept that doesn't make sense
+					// with OffByOne
 				default:
 					logger.fatal("FATAL: unhandled template type in bruteForceOne.  Add handling (probably by adding a case either to the DELETE case or the other one); and try again");
 					break;
@@ -366,7 +386,11 @@ public class Search<G extends EditOperation> {
 				Location wa = null;
 				boolean alreadyOnList = false;
 				do{
-					wa = (Location) GlobalUtils.chooseOneWeighted(faultyAtoms);
+					ArrayList<Pair<?,Double>> pairList = new ArrayList<Pair<?,Double>>();
+					for(Location atom : faultyAtoms) {
+						pairList.add(atom.asPair());
+					}
+					wa = (Location) GlobalUtils.chooseOneWeighted(pairList);
 					alreadyOnList = proMutList.contains(wa);
 				}while(alreadyOnList);
 				proMutList.add(wa);

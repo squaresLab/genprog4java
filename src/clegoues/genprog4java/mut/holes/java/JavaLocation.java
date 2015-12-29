@@ -48,8 +48,8 @@ public class JavaLocation implements Location<JavaStatement> {
 	}
 
 	@Override
-	public Pair<Integer, Double> asPair() {
-		return new Pair<Integer,Double>(this.location.getStmtId(), this.weight);
+	public Pair<JavaStatement, Double> asPair() {
+		return new Pair<JavaStatement,Double>(this.location, this.weight);
 	}
 	
 	@Override
