@@ -1,6 +1,6 @@
 package clegoues.genprog4java.mut.edits.java;
 
-import java.util.List;
+import java.util.HashMap;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -13,7 +13,7 @@ import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class JavaSwapOperation extends JavaEditOperation {
 
-	public JavaSwapOperation(JavaLocation location, List<EditHole> fixCode) {
+	public JavaSwapOperation(JavaLocation location, HashMap<String,EditHole> fixCode) {
 		super(Mutation.SWAP, location, fixCode);
 	}
 	

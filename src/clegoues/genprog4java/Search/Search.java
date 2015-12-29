@@ -379,30 +379,16 @@ public class Search<G extends EditOperation> {
 				//choose one at random
 				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(new ArrayList(availableMutations));
 				Mutation mut = chosenMutation.getFirst();
-				switch (mut) {
-				case DELETE:
-					variant.performEdit(mut, location, new ArrayList<EditHole>());
-					break;
-				case APPEND:
-				case SWAP:
-				case REPLACE: 
-					TreeSet<WeightedAtom> allowed = variant.editSources(location,mut);
-					WeightedAtom after = (WeightedAtom) GlobalUtils
+				HashMap<String,EditHole> filledHoles = new HashMap<String,EditHole>();
+				List<String> holes = variant.holesForMutation(mut);
+				for(String hole : holes) {
+					TreeSet<WeightedAtom> allowed = variant.editSources(location, mut, hole);
+					WeightedAtom selected = (WeightedAtom) GlobalUtils
 							.chooseOneWeighted(new ArrayList(allowed));
-					variant.performEdit(mut, location,  after.getAtom()); 
-					break;
-				case OFFBYONE:
-					TreeSet<WeightedAtom> allow = variant.editSources(location,mut);
-					WeightedAtom aftr = (WeightedAtom) GlobalUtils
-							.chooseOneWeighted(new ArrayList(allow));
-					variant.performEdit(mut, location,  aftr.getAtom()); 
-					break;
-
-				default: 
-					logger.fatal("Unhandled template type in search.mutate; add handling and try again!");
-					break;
-
+					EditHole instantiatedHole = variant.instantiateHole(hole, selected);
+					filledHoles.put(hole, instantiatedHole);
 				}
+				variant.performEdit(mut, location, filledHoles);
 			}
 		}
 	}
