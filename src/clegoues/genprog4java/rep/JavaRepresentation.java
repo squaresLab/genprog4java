@@ -61,6 +61,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -813,7 +814,20 @@ FaultLocRepresentation<JavaEditOperation> {
 			return this.editSources(location,  editType).size() > 0;
 		case NULLINSERT:
 		case DELETE: return true; // possible FIXME: not always true in Java?
-		case OFFBYONE: return true;
+		case OFFBYONE: 
+			JavaStatement lstmt = codeBank.get(location);
+			ASTNode lNode = lstmt.getASTNode();
+			final List<MethodInvocation> methodInocationNodes = new ArrayList<MethodInvocation>();
+			lNode.accept(new ASTVisitor() {
+				public boolean visit(final MethodInvocation node) {
+					methodInocationNodes.add(node);
+					return false;
+				}
+			});
+			if(methodInocationNodes!=null){
+				return true;
+			}
+		
 		case NULLCHECK: 
 			JavaStatement locationStmt = codeBank.get(location);
 			if(locationStmt.getASTNode() instanceof MethodInvocation || locationStmt.getASTNode() instanceof FieldAccess || locationStmt.getASTNode() instanceof QualifiedName){
