@@ -62,6 +62,7 @@ import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -817,14 +818,14 @@ FaultLocRepresentation<JavaEditOperation> {
 		case OFFBYONE: 
 			JavaStatement lstmt = codeBank.get(location);
 			ASTNode lNode = lstmt.getASTNode();
-			final List<MethodInvocation> methodInocationNodes = new ArrayList<MethodInvocation>();
+			final List<ArrayAccess> arrayAccessNodes = new ArrayList<ArrayAccess>();
 			lNode.accept(new ASTVisitor() {
-				public boolean visit(final MethodInvocation node) {
-					methodInocationNodes.add(node);
+				public boolean visit(final ArrayAccess node) {
+					arrayAccessNodes.add(node);
 					return false;
 				}
 			});
-			if(methodInocationNodes!=null){
+			if(arrayAccessNodes!=null){
 				return true;
 			}
 		
