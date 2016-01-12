@@ -23,20 +23,25 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 	public JavaOffByOneOperation(ClassInfo fileName, JavaStatement location) {
 		super(Mutation.OFFBYONE, fileName, location);
 	}
+	public enum mutationType {
+	    ADD, SUBTRACT};
 	@Override
 	public void edit(final ASTRewrite rewriter, AST ast, CompilationUnit cu) {
 		ASTNode locationNode = this.getLocation().getASTNode();
 		locationNode.accept(new ASTVisitor() {
-			int mutationtype;	// used to randomly put + or - operator while mutating array index
+			
+			    
+			mutationType mutationtype;	// used to randomly add or subtract 1 while mutating array index
 			// method to visit all ArrayAccess nodes modify array index by 1
 			public boolean visit(ArrayAccess node) {
 
 				// using random numbers (even or odd) to increase or decrease the index by 1
 				int randomNum = Configuration.randomizer.nextInt(11);
+
 				if(randomNum%2==0){
-					mutationtype = 0;
+					mutationtype = mutationType.SUBTRACT;
 				}else{
-					mutationtype = 1;
+					mutationtype = mutationType.ADD;
 				}
 				Expression arrayindex = node.getIndex(); // original index
 				Expression mutatedindex = mutateIndex(arrayindex, 1); // method call to get mutated index
@@ -57,12 +62,12 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 					InfixExpression mutatedindex = null;
 					mutatedindex = arrayindex.getAST().newInfixExpression();
 					mutatedindex.setLeftOperand(name);
-					if (mutationtype == 0) {
+					if (mutationtype == mutationType.SUBTRACT) {
 						mutatedindex.setOperator(Operator.MINUS);
-						mutationtype = 1;
+						mutationtype = mutationType.ADD;
 					} else {
 						mutatedindex.setOperator(Operator.PLUS);
-						mutationtype = 0;
+						mutationtype = mutationType.SUBTRACT;
 					}
 					mutatedindex.setRightOperand(arrayindex.getAST().newNumberLiteral("1"));
 					// return mutated index
@@ -76,12 +81,12 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 					InfixExpression mutatedindex = null;
 					mutatedindex = arrayindex.getAST().newInfixExpression();
 					mutatedindex.setLeftOperand(number);
-					if (mutationtype == 0) {
+					if (mutationtype == mutationType.SUBTRACT) {
 						mutatedindex.setOperator(Operator.MINUS);
-						mutationtype = 1;
+						mutationtype = mutationType.ADD;
 					} else {
 						mutatedindex.setOperator(Operator.PLUS);
-						mutationtype = 0;
+						mutationtype = mutationType.SUBTRACT;
 					}
 					mutatedindex.setRightOperand(arrayindex.getAST().newNumberLiteral("1"));
 					// return mutated index
@@ -105,12 +110,12 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 					mutatedindex = arrayindex.getAST().newInfixExpression();
 					mutatedindex.setLeftOperand(pexp);
 
-					if (mutationtype == 0) {
+					if (mutationtype == mutationType.SUBTRACT) {
 						mutatedindex.setOperator(Operator.MINUS);
-						mutationtype = 1;
+						mutationtype = mutationType.ADD;
 					} else {
 						mutatedindex.setOperator(Operator.PLUS);
-						mutationtype = 0;
+						mutationtype = mutationType.SUBTRACT;
 					}
 
 					mutatedindex.setRightOperand(arrayindex.getAST().newNumberLiteral("1"));
@@ -135,12 +140,12 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 					InfixExpression mutatedindex = null;
 					mutatedindex = arrayindex.getAST().newInfixExpression();
 					mutatedindex.setLeftOperand(pexp);
-					if (mutationtype == 0) {
+					if (mutationtype == mutationType.SUBTRACT) {
 						mutatedindex.setOperator(Operator.MINUS);
-						mutationtype = 1;
+						mutationtype = mutationType.ADD;
 					} else {
 						mutatedindex.setOperator(Operator.PLUS);
-						mutationtype = 0;
+						mutationtype = mutationType.SUBTRACT;
 					}
 					mutatedindex.setRightOperand(arrayindex.getAST().newNumberLiteral("1"));
 					// return mutated index
@@ -163,12 +168,12 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 					InfixExpression mutatedindex = null;
 					mutatedindex = arrayindex.getAST().newInfixExpression();
 					mutatedindex.setLeftOperand(iexp);
-					if (mutationtype == 0) {
+					if (mutationtype == mutationType.SUBTRACT) {
 						mutatedindex.setOperator(Operator.MINUS);
-						mutationtype = 1;
+						mutationtype = mutationType.ADD;
 					} else {
 						mutatedindex.setOperator(Operator.PLUS);
-						mutationtype = 0;
+						mutationtype = mutationType.SUBTRACT;
 					}
 					mutatedindex.setRightOperand(arrayindex.getAST().newNumberLiteral("1"));
 					// return mutated index

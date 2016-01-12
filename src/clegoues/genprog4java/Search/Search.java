@@ -357,11 +357,13 @@ public class Search<G extends EditOperation> {
 		ArrayList<WeightedAtom> proMutList = new ArrayList<WeightedAtom>();
 		boolean foundMutationThatCanApplyToAtom = false;
 		while(!foundMutationThatCanApplyToAtom){
+			//promut default is 1
 			for (int i = 0; i < Search.promut; i++) {
-				//chooses a random atom
 				WeightedAtom wa = null;
 				boolean alreadyOnList = false;
+				//only adds the random atom if it is different from the others already added
 				do{
+					//chooses a random atom
 					wa = (WeightedAtom) GlobalUtils.chooseOneWeighted(faultyAtoms);
 					alreadyOnList = proMutList.contains(wa);
 				}while(alreadyOnList);
