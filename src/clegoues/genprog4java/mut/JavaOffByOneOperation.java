@@ -29,7 +29,6 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 	public void edit(final ASTRewrite rewriter, AST ast, CompilationUnit cu) {
 		ASTNode locationNode = this.getLocation().getASTNode();
 		locationNode.accept(new ASTVisitor() {
-			
 			    
 			mutationType mutationtype;	// used to randomly add or subtract 1 while mutating array index
 			// method to visit all ArrayAccess nodes modify array index by 1
@@ -44,18 +43,18 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 					mutationtype = mutationType.ADD;
 				}
 				Expression arrayindex = node.getIndex(); // original index
-				Expression mutatedindex = mutateIndex(arrayindex, 1); // method call to get mutated index
+				Expression mutatedindex = mutateIndex(arrayindex, true); // method call to get mutated index
 				rewriter.replace(arrayindex, mutatedindex, null);	// replacing original index with mutated index
 				return false;
 			}
 			
 			
-			// recursive method to mutate array index. (increase or decrease the index by 1)
-			private Expression mutateIndex(Expression arrayindex, int mutateflag) { // arrayindex is the index to be mutated, mutateflag is used to check if mutation is to be performed.
+			// recursive method to mutate array index. (increase or decrease the index by one)
+			private Expression mutateIndex(Expression arrayindex, Boolean mutateflag) { // arrayindex is the index to be mutated, mutateflag is used to check if mutation is to be performed.
 
 				if (arrayindex instanceof SimpleName) {  // if index is simple variable name
 					SimpleName name = arrayindex.getAST().newSimpleName(arrayindex.toString());	// fetch the name
-					if (mutateflag == 0) {	// if no mutation is to be performed then return the index
+					if (mutateflag == false) {	// if no mutation is to be performed then return the index
 						return name;
 					}
 					// create infix expression with index +/- 1
@@ -74,7 +73,7 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 					return mutatedindex;
 				} else if (arrayindex instanceof NumberLiteral) { // if index is number
 					NumberLiteral number = arrayindex.getAST().newNumberLiteral(arrayindex.toString());
-					if (mutateflag == 0) { // if no mutation is to be performed then return the index
+					if (mutateflag == false) { // if no mutation is to be performed then return the index
 						return number;
 					}
 					// create infix expression with index +/- 1
@@ -102,7 +101,7 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 						pexp.setOperator(org.eclipse.jdt.core.dom.PostfixExpression.Operator.DECREMENT);
 					}
 
-					if (mutateflag == 0) { // if no mutation is to be performed then return the index
+					if (mutateflag == false) { // if no mutation is to be performed then return the index
 						return pexp;
 					}
 					// create infix expression with index +/- 1
@@ -133,7 +132,7 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 						pexp.setOperator(org.eclipse.jdt.core.dom.PrefixExpression.Operator.DECREMENT);
 					}
 
-					if (mutateflag == 0) { // if no mutation is to be performed then return the index
+					if (mutateflag == false) { // if no mutation is to be performed then return the index
 						return pexp;
 					}
 					// create infix expression with index +/- 1
@@ -154,7 +153,7 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 					InfixExpression iexp = arrayindex.getAST().newInfixExpression();
 					Expression loperand = ((InfixExpression) arrayindex).getLeftOperand();
 					if (loperand != null) {
-						iexp.setLeftOperand(mutateIndex(((InfixExpression) arrayindex).getLeftOperand(), 0));
+						iexp.setLeftOperand(mutateIndex(((InfixExpression) arrayindex).getLeftOperand(), false));
 					}
 
 					Operator ioperator = ((InfixExpression) arrayindex).getOperator();
@@ -162,7 +161,7 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 
 					Expression roperand = ((InfixExpression) arrayindex).getRightOperand();
 					if (roperand != null) {
-						iexp.setRightOperand(mutateIndex(((InfixExpression) arrayindex).getRightOperand(), 0));
+						iexp.setRightOperand(mutateIndex(((InfixExpression) arrayindex).getRightOperand(), false));
 					}
 					// create infix expression with index +/- 1
 					InfixExpression mutatedindex = null;
@@ -183,5 +182,4 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 			}
 		});
 	}
-
 }

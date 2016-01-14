@@ -121,6 +121,7 @@ import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.JavaAppendOperation;
 import clegoues.genprog4java.mut.JavaDeleteOperation;
 import clegoues.genprog4java.mut.JavaEditOperation;
+import clegoues.genprog4java.mut.JavaOffByOneOperation;
 import clegoues.genprog4java.mut.JavaReplaceOperation;
 import clegoues.genprog4java.mut.JavaSwapOperation;
 import clegoues.genprog4java.mut.Mutation;
@@ -602,8 +603,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			JavaStatement location = base.get(dst);
 			JavaStatement fixCodeStmt = base.get(source);
 			ClassInfo offbyoneFileName = stmtToFile.get(dst);
-			JavaEditOperation offbyoneEdit = new JavaSwapOperation(offbyoneFileName, 
-					location, fixCodeStmt);
+			JavaEditOperation offbyoneEdit = new JavaOffByOneOperation(offbyoneFileName, location);
 			this.genome.add(offbyoneEdit);
 			break;
 		case APPEND:
