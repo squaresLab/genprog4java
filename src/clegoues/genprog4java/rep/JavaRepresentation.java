@@ -78,6 +78,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -87,6 +88,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
@@ -314,7 +316,7 @@ FaultLocRepresentation<JavaEditOperation> {
 						scopeInfo.getScope(s.getASTNode()));
 			}
 		}
-		
+
 	}
 
 	public static boolean canRepair(ASTNode node) {
@@ -546,8 +548,8 @@ FaultLocRepresentation<JavaEditOperation> {
 			outputDir += Configuration.outputDir + File.separator + exeName + "/";
 		}
 		String classPath = outputDir + System.getProperty("path.separator")
-		+ Configuration.libs + System.getProperty("path.separator") 
-		+ Configuration.classTestFolder; 
+				+ Configuration.libs + System.getProperty("path.separator") 
+				+ Configuration.classTestFolder; 
 		if(Configuration.classSourceFolder != "") {
 			classPath += System.getProperty("path.separator") + Configuration.classSourceFolder;
 		}
@@ -735,17 +737,22 @@ FaultLocRepresentation<JavaEditOperation> {
 		if (JavaRepresentation.scopeSafeAtomMap.containsKey(stmtId)) {
 			return JavaRepresentation.scopeSafeAtomMap.get(stmtId);
 		}
-		JavaStatement locationStmt = codeBank.get(stmtId);
+
+		//potentiallyBuggyStmt is a potentially buggy statement
+		JavaStatement potentiallyBuggyStmt = codeBank.get(stmtId);
+
 		// I *believe* this is just variable names and doesn't check required
 		// types, which are also collected
 		// at parse time and thus could be considered here.
-		Set<String> inScopeAt = JavaRepresentation.inScopeMap.get(locationStmt
+		Set<String> inScopeAt = JavaRepresentation.inScopeMap.get(potentiallyBuggyStmt
 				.getStmtId());
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for (WeightedAtom atom : this.getFixSourceAtoms()) {
-			int index = atom.getAtom();
-			JavaStatement stmt = codeBank.get(index);
-			Set<String> requiredScopes = stmt.getRequiredNames();
+
+		//potentialFix is a potential fix statement
+		for (WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {
+			int index = potentialFixAtom.getAtom();
+			JavaStatement potentialFixStmt = codeBank.get(index);
+			Set<String> requiredScopes = potentialFixStmt.getRequiredNames();
 
 			boolean ok = true;
 			for (String req : requiredScopes) {
@@ -755,41 +762,83 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			}
 
-			if(stmt.getASTNode() instanceof MethodRef){
-				MethodRef mr = (MethodRef) stmt.getASTNode();
-				Pair<String,String> methodRefInMrt = mrtContainsMethodName(mr.getName().toString());
-				if(methodRefInMrt != null){
-					if( methodRefInMrt.getSecond().equalsIgnoreCase("void") || methodRefInMrt.getSecond().equalsIgnoreCase("null")){
+			if(potentialFixStmt.getASTNode() instanceof MethodRef){
+				MethodRef mr = (MethodRef) potentialFixStmt.getASTNode();
+				// mrt = method return type
+				String returnType = returnTypeOfThisMethod(mr.getName().toString());
+				if(returnType != null){
+					if( returnType.equalsIgnoreCase("void") || returnType.equalsIgnoreCase("null")){
 						ok=false;
-						break;
 					}
-				}
-			}
-			
-			//No need to assign a value to a final variable
-			if(stmt.getASTNode() instanceof Assignment){
-				if(((Assignment) stmt.getASTNode()).getLeftHandSide() instanceof SimpleName){
-					SimpleName leftHand = (SimpleName) ((Assignment) stmt.getASTNode()).getLeftHandSide();
-					if(finalVariables.contains(leftHand)){
-						ok=false;
-						break;
-					}
-				}
-			}
-			
-			//No need to insert a declaration of a final variable
-			if(stmt.getASTNode() instanceof VariableDeclarationStatement){
-				VariableDeclarationStatement ds = (VariableDeclarationStatement) stmt.getASTNode();
-				VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
-				
-				if(finalVariables.contains(df.getName().getIdentifier())){
-					ok=false;
-					break;
 				}
 			}
 
+			//No need to assign a value to a final variable
+			if(potentialFixStmt.getASTNode() instanceof Assignment){
+				if(((Assignment) potentialFixStmt.getASTNode()).getLeftHandSide() instanceof SimpleName){
+					SimpleName leftHand = (SimpleName) ((Assignment) potentialFixStmt.getASTNode()).getLeftHandSide();
+					if(finalVariables.contains(leftHand)){
+						ok=false;
+					}
+				}
+			}
+
+			//No need to insert a declaration of a final variable
+			if(potentialFixStmt.getASTNode() instanceof VariableDeclarationStatement){
+				VariableDeclarationStatement ds = (VariableDeclarationStatement) potentialFixStmt.getASTNode();
+				VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
+
+				if(finalVariables.contains(df.getName().getIdentifier())){
+					ok=false;
+				}
+			}
+
+			//Do not insert a return statement on a func whose return type is void
+			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
+				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
+				while(!(parent instanceof MethodDeclaration) && parent != null){
+					parent = parent.getParent();
+				}
+
+				if (parent instanceof MethodDeclaration) {
+					String returnType = returnTypeOfThisMethod(((MethodDeclaration)parent).getName().toString());
+					if(returnType != null){
+						if( returnType.equalsIgnoreCase("void") || returnType.equalsIgnoreCase("null")){
+							ok=false;
+						}
+					}
+				}
+			}
+
+			//Do not insert a return statement on a constructor
+			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
+				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
+				while(!(parent instanceof MethodDeclaration) && parent != null){
+					parent = parent.getParent();
+				}
+
+				if (parent != null && parent instanceof MethodDeclaration && ((MethodDeclaration) parent).isConstructor()) {
+					ok=false;
+				}
+			}
+			
+			//Inserting methods like this() or super() somewhere that is not the constructor, is probably wrong
+			if(potentialFixStmt.getASTNode() instanceof ConstructorInvocation || potentialFixStmt.getASTNode() instanceof SuperConstructorInvocation){
+				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
+				while(!(parent instanceof MethodDeclaration) && parent != null){
+					parent = parent.getParent();
+				}
+
+				if (parent != null && parent instanceof MethodDeclaration && !((MethodDeclaration) parent).isConstructor()) {
+					ok=false;
+				}
+
+			}
+			
+			
+			
 			if (ok) {
-				retVal.add(atom);
+				retVal.add(potentialFixAtom);
 			}
 
 		}
@@ -797,15 +846,15 @@ FaultLocRepresentation<JavaEditOperation> {
 		return retVal;
 	}
 
-	private Pair<String,String> mrtContainsMethodName(String matchString){
+	private String returnTypeOfThisMethod(String matchString){
 		for (Pair<String,String> p : methodReturnType) {
 			if(p.getFirst().equalsIgnoreCase(matchString)){
-				return p;
+				return p.getSecond();
 			}
 		}
 		return null;
 	}
-	
+
 	@Override
 	public Boolean doesEditApply(int location, Mutation editType) {
 		switch(editType) {
@@ -861,7 +910,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			} else {
 				return super.editSources(stmtId, editType);
 			}
-		
+
 
 		case DELETE: 
 			TreeSet<WeightedAtom> retval = new TreeSet<WeightedAtom>();
@@ -926,7 +975,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			ASTNode actualStmt = stmt.getASTNode();
 			String stmtStr = actualStmt.toString();
 			logger.debug("statement " + atomid + " at line " + stmt.getLineno()
-			+ ": " + stmtStr);
+					+ ": " + stmtStr);
 			logger.debug("\t Names:");
 			for (String name : stmt.getNames()) {
 				logger.debug("\t\t" + name);
