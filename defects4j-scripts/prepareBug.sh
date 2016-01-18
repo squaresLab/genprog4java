@@ -158,16 +158,16 @@ cd $BUGWD/$WD
 
 #Create file to run defects4j compiile
 
-FILE="$4"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
+FILE="$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 /bin/cat <<EOM >$FILE
 #!/bin/bash
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/
 export PATH=$JAVA_HOME/bin/:$PATH
-cd $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
-$4/framework/bin/defects4j compile
+cd $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
+$DEFECTS4JDIR/framework/bin/defects4j compile
 EOM
 
-chmod 777 "$4"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
+chmod 777 "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 
 
 cd $BUGWD
@@ -175,23 +175,23 @@ cd $BUGWD
 PACKAGEDIR=${JAVADIR//"/"/"."}
 
 #Create config file 
-FILE="$4"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/defects4j.config
+FILE="$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/defects4j.config
 /bin/cat <<EOM >$FILE
 popsize = 20
 seed = 0
 javaVM = /usr/bin/java
-workingDir = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
-outputDir = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/tmp
+workingDir = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
+outputDir = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/tmp
 libs = $CONFIGLIBS
 sanity = yes
 regenPaths
 sourceDir = $WD
-positiveTests = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/pos.tests
-negativeTests = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/neg.tests
+positiveTests = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/pos.tests
+negativeTests = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/neg.tests
 jacocoPath = $3/lib/jacocoagent.jar
-classSourceFolder = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$SRCFOLDER
-classTestFolder = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$TESTFOLDER
-compileCommand = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
+classSourceFolder = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$SRCFOLDER
+classTestFolder = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$TESTFOLDER
+compileCommand = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 EOM
 
 # programmatically get passing and failing tests as well as files
@@ -239,7 +239,7 @@ case "$OPTION" in
 "generated" )
 #Create the new test suite
 echo Creating new test suite...
-"$4"/framework/bin/run_evosuite.pl -p $PROJECT -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfEvoSuite/ -c branch -b 100 -A
+"$DEFECTS4JDIR"/framework/bin/run_evosuite.pl -p $PROJECT -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfEvoSuite/ -c branch -b 100 -A
 
 #Untar the generated test into the tests folder
 cd $BUGWD/"$TESTWD"/
@@ -291,7 +291,7 @@ esac
 
 
 #Remove a percentage of the positive tests in the test suite
-cd "$4"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
+cd "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
 
 if [[ $TESTSUITEPERCENTAGE -ne 100 ]]
 then
@@ -356,5 +356,5 @@ else
 fi
 
 echo "This is the working directory: "
-echo $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD
+echo $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD
 
