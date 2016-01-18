@@ -55,7 +55,6 @@ public class JavaParser
 	private Set<String> fields;
 	private TreeSet<Pair<String,String>> methodReturnType;
 	private TreeSet<String> finalVariables;
-	
 
 	public JavaParser(ScopeInfo scopeList)
 	{
