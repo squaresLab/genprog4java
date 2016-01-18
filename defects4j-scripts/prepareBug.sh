@@ -189,8 +189,8 @@ sourceDir = $WD
 positiveTests = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/pos.tests
 negativeTests = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/neg.tests
 jacocoPath = $3/lib/jacocoagent.jar
-classSourceFolder = $SRCFOLDER
-classTestFolder = $TESTFOLDER
+classSourceFolder = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$SRCFOLDER
+classTestFolder = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$TESTFOLDER
 compileCommand = $4/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 EOM
 
