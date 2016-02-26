@@ -388,18 +388,28 @@ public class Search<G extends EditOperation> {
 					variant.performEdit(mut, stmtid, (-1));
 					break;
 				case APPEND:
+					TreeSet<WeightedAtom> allowedA = variant.editSources(stmtid,mut);
+					WeightedAtom afterA = (WeightedAtom) GlobalUtils
+							.chooseOneWeighted(new ArrayList(allowedA));
+					variant.performEdit(mut, stmtid,  afterA.getAtom()); 
+					break;
 				case SWAP:
+					TreeSet<WeightedAtom> allowedS = variant.editSources(stmtid,mut);
+					WeightedAtom afterS = (WeightedAtom) GlobalUtils
+							.chooseOneWeighted(new ArrayList(allowedS));
+					variant.performEdit(mut, stmtid,  afterS.getAtom()); 
+					break;
 				case REPLACE: 
-					TreeSet<WeightedAtom> allowed = variant.editSources(stmtid,mut);
-					WeightedAtom after = (WeightedAtom) GlobalUtils
-							.chooseOneWeighted(new ArrayList(allowed));
-					variant.performEdit(mut, stmtid,  after.getAtom()); 
+					TreeSet<WeightedAtom> allowedR = variant.editSources(stmtid,mut);
+					WeightedAtom afterR = (WeightedAtom) GlobalUtils
+							.chooseOneWeighted(new ArrayList(allowedR));
+					variant.performEdit(mut, stmtid,  afterR.getAtom()); 
 					break;
 				case OFFBYONE:
-					TreeSet<WeightedAtom> allow = variant.editSources(stmtid,mut);
-					WeightedAtom aftr = (WeightedAtom) GlobalUtils
-							.chooseOneWeighted(new ArrayList(allow));
-					variant.performEdit(mut, stmtid,  aftr.getAtom()); 
+					TreeSet<WeightedAtom> allowedO = variant.editSources(stmtid,mut);
+					WeightedAtom afterO = (WeightedAtom) GlobalUtils
+							.chooseOneWeighted(new ArrayList(allowedO));
+					variant.performEdit(mut, stmtid,  afterO.getAtom()); 
 					break;
 
 				default: 
@@ -549,7 +559,6 @@ public class Search<G extends EditOperation> {
 		} catch(RepairFoundException e) {
 			return;
 		}
-
 	}
 
 	/*
