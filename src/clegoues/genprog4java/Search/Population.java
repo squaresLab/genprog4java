@@ -41,6 +41,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+
+import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
@@ -48,6 +51,8 @@ import clegoues.genprog4java.util.GlobalUtils;
 
 public class Population<G extends EditOperation> implements Iterable<Representation<G>>{
 
+	protected static Logger logger = Logger.getLogger(Fitness.class);
+	
 	private static int popsize = 20;
 	private static double crossp = 0.5; 
 
@@ -195,12 +200,12 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 				}
 			}
 			if(taken) {
-				return indiv;	
+				return indiv.copy();	
 			} else {
 				step += 1.0;
 			}
 		}
-		return population.get(0); // FIXME: this should never happen, right?
+		return population.get(0).copy(); // FIXME: this should never happen, right?
 	}
 	private ArrayList<Representation<G>> tournamentSelection(int desired) {
 		assert(desired >= 0);
@@ -218,12 +223,10 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 				//replace that variant with the original
 				population.remove(indiv);
 				//first element of the population should be the original, which should always compile
-				Representation<G> toInsert = population.get(0);
+				Representation<G> toInsert = population.get(0).copy();
 				population.add(toInsert);
 			}
-
 		}
-
 
 		for(int i = 0 ; i < desired; i++) {
 			result.add(selectOne());
@@ -367,8 +370,8 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		ArrayList<Representation<G>> output = new ArrayList<Representation<G>>(this.population);
 		int half = population.size() / 2;
 		for(int it = 0 ; it < half-1; it++) {
-			Representation<G> parent1 = population.get(it);
-			Representation<G> parent2 = population.get(it + half);
+			Representation<G> parent1 = population.get(it); //copy?
+			Representation<G> parent2 = population.get(it + half); //copy?
 			if(GlobalUtils.probability(crossp)) {
 				ArrayList<Representation<G>> children = this.doCross(original, parent1, parent2);
 				output.addAll(children); // I *think* this is OK, because we include all the parents in output above, so we don't need to add them here

@@ -84,6 +84,7 @@ import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
@@ -96,6 +97,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.internal.compiler.ast.ForeachStatement;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.MalformedTreeException;
@@ -821,22 +823,63 @@ FaultLocRepresentation<JavaEditOperation> {
 					ok=false;
 				}
 			}
-			
-			//Inserting methods like this() or super() somewhere that is not the constructor, is probably wrong
+
+			//Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is probably wrong
 			if(potentialFixStmt.getASTNode() instanceof ConstructorInvocation || potentialFixStmt.getASTNode() instanceof SuperConstructorInvocation){
 				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
 				while(!(parent instanceof MethodDeclaration) && parent != null){
 					parent = parent.getParent();
 				}
 
-				if (parent != null && parent instanceof MethodDeclaration && !((MethodDeclaration) parent).isConstructor()) {
+				if (parent != null && parent instanceof MethodDeclaration && ((MethodDeclaration) parent).isConstructor()) {
+					StructuralPropertyDescriptor locationPotBuggy = potentiallyBuggyStmt.getASTNode().getLocationInParent();
+					List<ASTNode> statementsInBlock = ((MethodDeclaration) parent).getBody().statements();
+					ASTNode firstStmtInTheBlock = statementsInBlock.get(0);
+					StructuralPropertyDescriptor locationFirstInBlock = firstStmtInTheBlock.getLocationInParent();
+
+					//This will catch replacements and swaps, but it will append after the first stmt, so append will still create a non compiling variant
+					if(!locationFirstInBlock.equals(locationPotBuggy)){
+						ok=false;
+					}
+				}else{
 					ok=false;
 				}
-
 			}
-			
-			
-			
+
+			//Swapping, Appending or Replacing a return stmt to the middle of a block will make the code after it unreachable
+			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
+				StructuralPropertyDescriptor locationPotBuggy = potentiallyBuggyStmt.getASTNode().getLocationInParent();
+
+				ASTNode parentBlock = blockThatContainsThisStatement(potentiallyBuggyStmt.getASTNode());
+				if(parentBlock instanceof Block){
+
+					List<ASTNode> statementsInBlock = ((Block)parentBlock).statements();
+					ASTNode lastStmtInTheBlock = statementsInBlock.get(statementsInBlock.size()-1);
+
+					StructuralPropertyDescriptor locationLastInBlock = lastStmtInTheBlock.getLocationInParent();
+
+					if(!locationLastInBlock.equals(locationPotBuggy)){
+						ok=false;
+					}
+				}else{
+					ok=false;
+				}
+			}
+
+			//Don't allow to move breaks outside of switch stmts
+			if(potentialFixStmt.getASTNode() instanceof BreakStatement){
+				ASTNode buggyNode = potentiallyBuggyStmt.getASTNode();
+				boolean isWithinASwitch = buggyNode instanceof SwitchStatement;
+				while(!isWithinASwitch && buggyNode.getParent() != null){
+					buggyNode = buggyNode.getParent();
+					isWithinASwitch = buggyNode instanceof SwitchStatement;
+				}
+				if(!isWithinASwitch){
+					ok=false;
+				}
+			}
+
+
 			if (ok) {
 				retVal.add(potentialFixAtom);
 			}
@@ -844,6 +887,23 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 		JavaRepresentation.scopeSafeAtomMap.put(stmtId, retVal);
 		return retVal;
+	}
+
+	private int getIndexOfStmt(HashMap<Integer, JavaStatement> codeBank, ASTNode stmt){
+		for(int i =0; i < codeBank.size(); ++i){
+			if(stmt.equals(codeBank.get(i).getASTNode())){ 
+				return i; 
+			}
+		}
+		return -1;
+	}
+
+	private ASTNode blockThatContainsThisStatement(ASTNode stmt){
+		ASTNode parent = stmt.getParent();
+		while(parent != null && !(parent instanceof Block)){
+			parent = parent.getParent();
+		}
+		return parent;
 	}
 
 	private String returnTypeOfThisMethod(String matchString){
@@ -859,11 +919,42 @@ FaultLocRepresentation<JavaEditOperation> {
 	public Boolean doesEditApply(int location, Mutation editType) {
 		switch(editType) {
 		case APPEND: 
+			JavaStatement faultyA = codeBank.get(location);
+			ASTNode faultyNodeA = faultyA.getASTNode();
+
+			return this.editSources(location,  editType).size() > 0;
 		case REPLACE:
 		case SWAP:
 			return this.editSources(location,  editType).size() > 0;
 		case NULLINSERT:
-		case DELETE: return true; // possible FIXME: not always true in Java?
+		case DELETE: 
+			boolean itApplies = true;
+
+			//If it is the body of an if, while, or for, it should not be removed
+			JavaStatement faulty = codeBank.get(location);
+			ASTNode faultyNode = faulty.getASTNode();
+			boolean ifCase = false, elseCase = false, whileCase = false, forCase = false;
+
+			if(faultyNode instanceof Block){
+				ifCase = faultyNode.getParent() instanceof IfStatement
+						&& ((IfStatement)faultyNode.getParent()).getThenStatement().equals(faultyNode);
+				whileCase = faultyNode.getParent() instanceof WhileStatement
+						&& ((WhileStatement)faultyNode.getParent()).getBody().equals(faultyNode);
+				forCase = faultyNode.getParent() instanceof ForStatement
+						&& ((ForStatement)faultyNode.getParent()).getBody().equals(faultyNode);
+				if(faultyNode.getParent() instanceof IfStatement && ((IfStatement)faultyNode.getParent()).getElseStatement() != null){
+					elseCase = faultyNode.getParent() instanceof IfStatement
+							&& ((IfStatement)faultyNode.getParent()).getElseStatement().equals(faultyNode);
+				}
+
+			}
+
+			if(ifCase || whileCase || forCase || elseCase){
+				itApplies = false;
+			}else{
+				itApplies = true;
+			}
+			return itApplies;
 		case OFFBYONE: 
 			JavaStatement lstmt = codeBank.get(location);
 			ASTNode lNode = lstmt.getASTNode();
@@ -877,7 +968,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			if(arrayAccessNodes!=null){
 				return true;
 			}
-		
+
 		case NULLCHECK: 
 			JavaStatement locationStmt = codeBank.get(location);
 			if(locationStmt.getASTNode() instanceof MethodInvocation || locationStmt.getASTNode() instanceof FieldAccess || locationStmt.getASTNode() instanceof QualifiedName){
@@ -910,8 +1001,6 @@ FaultLocRepresentation<JavaEditOperation> {
 			} else {
 				return super.editSources(stmtId, editType);
 			}
-
-
 		case DELETE: 
 			TreeSet<WeightedAtom> retval = new TreeSet<WeightedAtom>();
 			retval.add(new WeightedAtom(stmtId, 1.0));

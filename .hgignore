@@ -4,4 +4,4 @@ bin/*
 tmp/
 .*~$
 .*\.orig$
-
+.hgOriginal/*

@@ -255,6 +255,7 @@ Representation<G> {
 		if (this.alreadyCompiled == null) {
 			String newName = CachingRepresentation.newVariantFolder();
 			this.variantFolder = newName;
+			logger.info("History of variant " + getVariantFolder() + " is: " + getHistory());
 			if (!this.compile(newName, newName)) {
 				this.setFitness(0.0);
 				logger.info(this.getName() + " at " + newName + " fails to compile\n");
