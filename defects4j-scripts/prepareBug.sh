@@ -19,6 +19,11 @@
 # export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/
 # export PATH=$JAVA_HOME/bin/:$PATH
 
+if [ "$#" -ne 6 ]; then
+    echo "This script should be run with 6 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size"
+
+else
+
 PROJECT="$1"
 BUGNUMBER="$2"
 GENPROGDIR="$3"
@@ -357,4 +362,6 @@ fi
 
 echo "This is the working directory: "
 echo $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD
+
+fi #correct amount of params if
 

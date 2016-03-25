@@ -14,6 +14,11 @@
 #VM:
 #./runGenProgForBug.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/ allHuman 100
 
+if [ "$#" -ne 6 ]; then
+    echo "This script should be run with 6 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size"
+
+else
+
 PROJECT="$1"
 BUGNUMBER="$2"
 GENPROGDIR="$3"
@@ -123,4 +128,6 @@ for seed in {0..20..2} #0 to 20, increments of 2
 	tar -cvf "$DEFECTS4JDIR"/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/variants"$PROJECT""$BUGNUMBER"Seed$seed.tar "$DEFECTS4JDIR"/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/tmp/
 
  done
+
+fi #correct number of params
 
