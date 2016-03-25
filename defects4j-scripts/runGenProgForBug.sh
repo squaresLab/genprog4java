@@ -30,7 +30,7 @@ TESTSUITEPERCENTAGE="$6"
 LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 
 #Add the path of defects4j so the defects4j's commands run 
-export PATH=$PATH:~/Research/defects4j/framework/bin
+export PATH=$PATH:$DEFECTS4JDIR/framework/bin
 
 PARENTDIR=$DEFECTS4JDIR"/ExamplesCheckedOut"
 
