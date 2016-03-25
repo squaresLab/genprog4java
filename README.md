@@ -70,13 +70,12 @@ It takes the following parameters:
 * 3rd param is the folder where the project is (ex: "/home/mau/Research/" )
 * 4td param is the folder where defects4j is installed (ex: "/home/mau/Research/defects4j/" )
 * 5th param is the option of running it (ex: allHuman, oneHuman, oneGenerated)
+* 6th param is the percentage of test cases being used to guide genprog's search (ex: 1, 100)
 
 So a typical run would look like this:
-./prepareBug.sh Math 2 /home/mau/Research/ /home/mau/Research/defects4j/ allHuman
+./prepareBug.sh Math 2 /home/mau/Research/ /home/mau/Research/defects4j/ allHuman 100
 
 The script creates a directory in the defects4j folder called ExamplesCheckedOut, in which it checks out the buggy and fixed versions of the project/bug number you specify.  It compiles them both. 
-
-If the Lang project is specified, the scropt copies a modified version of EntityArrays.java to the working directory. This is because this file contains a lot of non ascii characters in the comments that were causing issues with compilation.
 
 If specified, the script calls evosuite to generate test suites.
 
@@ -88,10 +87,14 @@ To run GenProg manually with this config file, the working directory should be t
 The second script is still under construction.
 It is called runGenProgForBug.sh and its overall purpose is to be able to run genprog on a certain defects4j bug with certain different seeds until it it able to either find a patch or get a to a certain number of generations or wallclock time.
 
-It takes in two parameters:
+It takes the following parameters:
 
-*  1st param is the package in upper case (ex: Lang, Chart, Closure, Math, Time)
-*  2nd param is the bug number (ex: 1,2,3,4,...)
+* 1st param is the package in upper case (ex: Lang, Chart, Closure, Math, Time)
+* 2nd param is the bug number (ex: 1,2,3,4,...)
+* 3rd param is the folder where the project is (ex: "/home/mau/Research/" )
+* 4td param is the folder where defects4j is installed (ex: "/home/mau/Research/defects4j/" )
+* 5th param is the option of running it (ex: allHuman, oneHuman, oneGenerated)
+* 6th param is the percentage of test cases being used to guide genprog's search (ex: 1, 100)
 
 Same as the one before, first parameter is to specify the project from defects4j and the second one is to specify the bug from that particular project.
 
