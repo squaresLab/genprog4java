@@ -2,6 +2,8 @@ syntax:glob
 *.class
 bin/*
 tmp/
-.*~$
+*~
 .*\.orig$
-.hgOriginal/*
+tests/TemplatePlaygroundTest/*
+tests/SimpleExample/*
+*.log

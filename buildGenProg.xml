@@ -40,7 +40,7 @@
         <pathelement location="lib/org.eclipse.osgi.services_3.2.100.v20100503.jar"/>
         <pathelement location="lib/org.eclipse.osgi.util_3.2.100.v20100503.jar"/>
         <pathelement location="lib/org.eclipse.text_3.5.0.v20100601-1300.jar"/>
-        <pathelement location="lib/org.jacoco.core-0.5.8.201205221855.jar"/>
+        <pathelement location="lib/org.jacoco.core--0.7.6.201511241051.jar"/>
         <pathelement location="lib/org.eclipse.jdt.core_3.6.1.v_A68_R36x.jar"/>
         <pathelement location="lib/log4j-1.2.17.jar"/>
     </path>
