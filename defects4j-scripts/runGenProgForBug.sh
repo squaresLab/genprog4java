@@ -38,7 +38,6 @@ PARENTDIR=$DEFECTS4JDIR"/ExamplesCheckedOut"
 BUGWD=$PARENTDIR"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
 
 
-
 #Compile Genprog and put the class files in /bin
 #Go to the GenProg folder
 cd "$GENPROGDIR"
