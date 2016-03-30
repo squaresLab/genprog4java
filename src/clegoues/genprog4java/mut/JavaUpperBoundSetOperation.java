@@ -34,42 +34,8 @@ public class JavaUpperBoundSetOperation extends JavaEditOperation {
 
 	@Override
 	public void edit(final ASTRewrite rewriter, AST ast, CompilationUnit cu) {
-		ASTNode locationNode = this.getLocation().getASTNode();
-		final Map<ASTNode, String> upperbound = new HashMap<ASTNode, String>();			// to set the upper-bound values of array. currently set to arrayname.length
-		final Map<ASTNode, List<ASTNode>> nodestmts = new HashMap<ASTNode, List<ASTNode>>();	// to track the parent nodes of array access nodes
-		Set<ASTNode> parentnodes = null;
-
-		locationNode.accept(new ASTVisitor() {
-
-			// method to visit all ArrayAccess nodes in locationNode and store their parents
-			public boolean visit(ArrayAccess node) {
-				upperbound.put(node, node.getArray().toString().concat(".length"));
-				ASTNode parent = getParent(node);				
-				if(!nodestmts.containsKey(parent)){		
-					List<ASTNode> arraynodes = new ArrayList<ASTNode>();
-					arraynodes.add(node);
-					nodestmts.put(parent, arraynodes);		
-				}else{
-					List<ASTNode> arraynodes = (List<ASTNode>) nodestmts.get(parent);
-					if(!arraynodes.contains(node))
-						arraynodes.add(node);
-					nodestmts.put(parent, arraynodes);	
-				}
-				return true;
-			}
-
-			// method to get the parent of ArrayAccess node. We traverse the ast upwards until the parent node is an instance of statement
-			// if statement is(are) added to this parent node
-			private ASTNode getParent(ArrayAccess node) {
-				ASTNode parent = node.getParent();
-				while(!(parent instanceof Statement)){
-					parent = parent.getParent();
-				}
-				return parent;
-			}
-		});
-
-		parentnodes = nodestmts.keySet();
+		final Map<ASTNode, List<ASTNode>> nodestmts = this.getLocation().getArrayAccesses(); 
+		Set<ASTNode> parentnodes = nodestmts.keySet();
 		// for each parent node which may have multiple array access instances 
 		for(ASTNode parent: parentnodes){
 			// create a newnode
