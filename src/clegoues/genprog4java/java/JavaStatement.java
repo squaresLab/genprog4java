@@ -33,12 +33,16 @@
 
 package clegoues.genprog4java.java;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.Statement;
 
 public class JavaStatement {
 
@@ -104,18 +108,37 @@ public class JavaStatement {
 		else
 			return "null";
 	}
-	
+	// method to get the parent of an ASTnode. We traverse the ast upwards until the parent node is an instance of statement
+		// if statement is(are) added to this parent node
+		private ASTNode getParent(ASTNode node) {
+			ASTNode parent = node.getParent();
+			while(!(parent instanceof Statement)){
+				parent = parent.getParent();
+			}
+			return parent;
+		}
 	
 	/******* Cached information for applicability of various mutations/templates ******/
-	private HashSet<ASTNode> arrayAccesses = null;
+	private Map<ASTNode, List<ASTNode>> arrayAccesses = null; // to track the parent nodes of array access nodes
 
 	public boolean containsArrayAccesses() {
 		if(arrayAccesses == null) {
-			arrayAccesses = new HashSet<ASTNode>();
+			arrayAccesses =  new HashMap<ASTNode, List<ASTNode>>();
 			this.getASTNode().accept(new ASTVisitor() {
 				// method to visit all ArrayAccess nodes in locationNode and store their parents
 				public boolean visit(ArrayAccess node) {
-					arrayAccesses.add(node);
+					ASTNode parent = getParent(node);
+					if(!arrayAccesses.containsKey(parent)){
+						List<ASTNode> arraynodes = new ArrayList<ASTNode>();
+						arraynodes.add(node);
+						arrayAccesses.put(parent, arraynodes);		
+					}else{
+						List<ASTNode> arraynodes = (List<ASTNode>) arrayAccesses.get(parent);
+						if(!arraynodes.contains(node))
+							arraynodes.add(node);
+						arrayAccesses.put(parent, arraynodes);	
+					}
+
 					return true;
 				}
 			});
@@ -123,8 +146,9 @@ public class JavaStatement {
 		}
 		return this.arrayAccesses.size() > 0;
 	}
+	
 	// DOES NOT CHECK that it isn't null; precondition is that the previous function was called!
-	public HashSet<ASTNode> getArrayAccesses() {
+	public Map<ASTNode, List<ASTNode>> getArrayAccesses() {
 		return this.arrayAccesses;
 	}
 }

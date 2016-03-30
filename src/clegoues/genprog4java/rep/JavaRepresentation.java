@@ -965,9 +965,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			return loc.containsArrayAccesses();
 		case NULLCHECK: 
 			JavaStatement locationStmt = codeBank.get(location);
-			if(locationStmt.getASTNode() instanceof MethodInvocation || locationStmt.getASTNode() instanceof FieldAccess || locationStmt.getASTNode() instanceof QualifiedName){
-				return true;
-			}
+		
 			break; 
 			
 		default:
