@@ -384,6 +384,7 @@ public class Search<G extends EditOperation> {
 				// FIXME: make sure the mutation list isn't empty before choosing?
 				switch (mut) {
 				case LBOUNDSET:
+				case NULLCHECK:
 				case DELETE:
 					// FIXME: this -1 hack is pretty gross; note to self, CLG should fix it
 					variant.performEdit(mut, stmtid, (-1));
