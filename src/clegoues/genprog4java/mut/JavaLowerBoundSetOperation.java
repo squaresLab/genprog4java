@@ -31,39 +31,12 @@ public class JavaLowerBoundSetOperation extends JavaEditOperation {
 	public JavaLowerBoundSetOperation(ClassInfo fileName, JavaStatement location) {
 		super(Mutation.LBOUNDSET, fileName, location);
 	}
-	// method to get the parent of ArrayAccess node. We traverse the ast upwards until the parent node is an instance of statement
-	// if statement is(are) added to this parent node
-	private ASTNode getParent(ASTNode node) {
-		ASTNode parent = node.getParent();
-		while(!(parent instanceof Statement)){
-			parent = parent.getParent();
-		}
-		return parent;
-	}
+	
 	@Override
 	public void edit(final ASTRewrite rewriter, AST ast, CompilationUnit cu) {
-		ASTNode locationNode = this.getLocation().getASTNode();
-		final Map<ASTNode, List<ASTNode>> nodestmts = new HashMap<ASTNode, List<ASTNode>>();	// to track the parent nodes of array access nodes
-		Set<ASTNode> parentnodes = null; 
-		final Map<ASTNode, String> lowerbound = new HashMap<ASTNode, String>();			// to set the lower-bound values of array. currently set to arrayname.length
+		final Map<ASTNode, List<ASTNode>> nodestmts = this.getLocation().getArrayAccesses(); 
 
-		HashSet<ASTNode> arrayAccesses = this.getLocation().getArrayAccesses();
-		for(ASTNode node : arrayAccesses) {
-			lowerbound.put(node, "0");
-			ASTNode parent = getParent(node);
-			if(!nodestmts.containsKey(parent)){
-				List<ASTNode> arraynodes = new ArrayList<ASTNode>();
-				arraynodes.add(node);
-				nodestmts.put(parent, arraynodes);		
-			}else{
-				List<ASTNode> arraynodes = (List<ASTNode>) nodestmts.get(parent);
-				if(!arraynodes.contains(node))
-					arraynodes.add(node);
-				nodestmts.put(parent, arraynodes);	
-			}
-		}
-
-		parentnodes = nodestmts.keySet();
+		Set<ASTNode> parentnodes = nodestmts.keySet();
 		// for each parent node which may have multiple array access instances
 		for(ASTNode parent: parentnodes){
 			// create a newnode
@@ -88,7 +61,7 @@ public class JavaLowerBoundSetOperation extends JavaEditOperation {
 					expression = parent.getAST().newInfixExpression();
 					expression.setLeftOperand(parent.getAST().newSimpleName(arrayindex));
 					expression.setOperator(Operator.LESS);
-					expression.setRightOperand(parent.getAST().newNumberLiteral(lowerbound.get(array)));
+					expression.setRightOperand(parent.getAST().newNumberLiteral("0"));
 					stmt.setExpression(expression);
 
 					// and then part as "index = 0"
@@ -96,7 +69,7 @@ public class JavaLowerBoundSetOperation extends JavaEditOperation {
 					thenexpression = parent.getAST().newAssignment();
 					thenexpression.setLeftHandSide(parent.getAST().newSimpleName(arrayindex));
 					thenexpression.setOperator(Assignment.Operator.ASSIGN);
-					thenexpression.setRightHandSide(parent.getAST().newNumberLiteral(lowerbound.get(array)));
+					thenexpression.setRightHandSide(parent.getAST().newNumberLiteral("0"));
 					ExpressionStatement thenstmt = parent.getAST().newExpressionStatement(thenexpression);
 					stmt.setThenStatement(thenstmt);
 
