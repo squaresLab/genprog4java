@@ -173,18 +173,17 @@ public class JavaStatement {
 					// store their parents
 					public boolean visit(MethodInvocation node) {
 						saveDataOfTheExpression(node);
-			//			saveDataOfTheExpression(((MethodInvocation)node).getExpression());
 						return true;
 					}
 					public boolean visit(FieldAccess node) {
 						saveDataOfTheExpression(node);
-						saveDataOfTheExpression(((FieldAccess)node).getExpression());
+					//	saveDataOfTheExpression(((FieldAccess)node).getExpression());
 						return true;
 					}
 
 					public boolean visit(QualifiedName node) {
 						saveDataOfTheExpression(node);
-						saveDataOfTheExpression(((QualifiedName)node).getName());
+				//		saveDataOfTheExpression(((QualifiedName)node).getName());
 						return true;
 					}
 
