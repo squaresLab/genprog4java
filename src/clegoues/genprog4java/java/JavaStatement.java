@@ -33,9 +33,12 @@
 
 package clegoues.genprog4java.java;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 
 public class JavaStatement {
 
@@ -100,5 +103,24 @@ public class JavaStatement {
 			return this.astNode.toString();
 		else
 			return "null";
+	}
+	
+	
+	/******* Cached information for applicability of various mutations/templates ******/
+	private HashSet<ASTNode> arrayAccesses = null;
+
+	public boolean containsArrayAccesses() {
+		if(arrayAccesses == null) {
+			arrayAccesses = new HashSet<ASTNode>();
+			this.getASTNode().accept(new ASTVisitor() {
+				// method to visit all ArrayAccess nodes in locationNode and store their parents
+				public boolean visit(ArrayAccess node) {
+					arrayAccesses.add(node);
+					return true;
+				}
+			});
+			
+		}
+		return this.arrayAccesses.size() > 0;
 	}
 }

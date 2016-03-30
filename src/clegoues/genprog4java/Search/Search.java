@@ -383,6 +383,7 @@ public class Search<G extends EditOperation> {
 				Mutation mut = chosenMutation.getFirst();
 				// FIXME: make sure the mutation list isn't empty before choosing?
 				switch (mut) {
+				case LBOUNDSET:
 				case DELETE:
 					// FIXME: this -1 hack is pretty gross; note to self, CLG should fix it
 					variant.performEdit(mut, stmtid, (-1));
@@ -411,7 +412,6 @@ public class Search<G extends EditOperation> {
 							.chooseOneWeighted(new ArrayList(allowedO));
 					variant.performEdit(mut, stmtid,  afterO.getAtom()); 
 					break;
-
 				default: 
 					logger.fatal("Unhandled template type in search.mutate; add handling and try again!");
 					break;
@@ -450,8 +450,8 @@ public class Search<G extends EditOperation> {
 				- initialPopulation.size();
 		if (stillNeed > 0) {
 			initialPopulation.add(original.copy());
+			stillNeed--;
 		}
-		stillNeed--;
 		for (int i = 0; i < stillNeed; i++) {
 			Representation<G> newItem = original.copy();
 			this.mutate(newItem);
