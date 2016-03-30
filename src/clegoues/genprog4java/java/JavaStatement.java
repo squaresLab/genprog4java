@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
 
 public class JavaStatement {
@@ -163,27 +164,24 @@ public class JavaStatement {
 		if(nullCheckable == null) {
 			nullCheckable = new HashMap<ASTNode, List<ASTNode>>();
 			if(this.getASTNode() instanceof MethodInvocation 
-					|| this.getASTNode() instanceof ExpressionStatement
-					|| this.getASTNode() instanceof FieldAccess 
-					|| this.getASTNode() instanceof QualifiedName
-					|| this.getASTNode() instanceof ExpressionStatement ){
+					|| this.getASTNode() instanceof ExpressionStatement 
+					|| this.getASTNode() instanceof ReturnStatement ){
 
 				this.getASTNode().accept(new ASTVisitor() {
 					// method to visit all Expressions relevant for this in locationNode and
 					// store their parents
 					public boolean visit(MethodInvocation node) {
 						saveDataOfTheExpression(node);
+
 						return true;
 					}
 					public boolean visit(FieldAccess node) {
 						saveDataOfTheExpression(node);
-					//	saveDataOfTheExpression(((FieldAccess)node).getExpression());
 						return true;
 					}
 
 					public boolean visit(QualifiedName node) {
 						saveDataOfTheExpression(node);
-				//		saveDataOfTheExpression(((QualifiedName)node).getName());
 						return true;
 					}
 

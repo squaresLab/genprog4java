@@ -1,6 +1,7 @@
 package clegoues.genprog4java.mut;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,15 +32,6 @@ public class JavaNullCheckOperation extends JavaEditOperation {
 		super(Mutation.NULLCHECK, fileName, location);
 	}
 
-	private Expression createExpression(ASTNode expressionToCheckIfNull) {
-		MethodInvocation mi = expressionToCheckIfNull.getAST().newMethodInvocation();		
-		Expression beforeTheDot = ((MethodInvocation) expressionToCheckIfNull).getExpression();
-		while(beforeTheDot instanceof MethodInvocation){	
-			beforeTheDot = ((MethodInvocation) beforeTheDot).getExpression();
-		}
-		String expIdentifier = ((SimpleName)beforeTheDot).getIdentifier();
-		return expressionToCheckIfNull.getAST().newSimpleName(expIdentifier);
-	}
 
 
 	@Override
@@ -51,23 +43,42 @@ public class JavaNullCheckOperation extends JavaEditOperation {
 	for(ASTNode parent: parentnodes){
 		// create a newnode
 		List<ASTNode> expressionsFromThisParent = nodestmts.get(parent);
+		Collections.reverse(expressionsFromThisParent);
 		//Create if before the error
 		IfStatement ifstmt = locationNode.getAST().newIfStatement();
-		InfixExpression everythingInTheCondition = locationNode.getAST().newInfixExpression(); 
+		InfixExpression everythingInTheCondition = null; 
 
 		// for each of the expressions that can be null
-		for(ASTNode  expressionToCheckIfNull : expressionsFromThisParent){
-			InfixExpression expression = expressionToCheckIfNull.getAST().newInfixExpression();
-			if(expressionToCheckIfNull instanceof MethodInvocation)
-				expression.setLeftOperand(createExpression(expressionToCheckIfNull));			
-			if(expressionToCheckIfNull instanceof FieldAccess)
-				expression.setLeftOperand(((FieldAccess) expressionToCheckIfNull).getExpression());
+		for(ASTNode expressionToCheckIfNull : expressionsFromThisParent){
+			InfixExpression expression = ifstmt.getAST().newInfixExpression();
+			if(expressionToCheckIfNull instanceof MethodInvocation) {
+				Expression newExpression = (Expression) rewriter.createCopyTarget(((MethodInvocation) expressionToCheckIfNull).getExpression());
+				expression.setLeftOperand(newExpression);
+			}
+			if(expressionToCheckIfNull instanceof SimpleName) {
+				String name = ((SimpleName) expressionToCheckIfNull).getIdentifier();
+				Expression newSimpleName = ifstmt.getAST().newSimpleName(name);
+				expression.setLeftOperand(newSimpleName);
+			}
+			if(expressionToCheckIfNull instanceof FieldAccess) {
+				Expression newExpression = (Expression) rewriter.createCopyTarget(((FieldAccess) expressionToCheckIfNull).getExpression());
+
+				expression.setLeftOperand(newExpression);
+			}
 			if(expressionToCheckIfNull instanceof QualifiedName)
 				expression.setLeftOperand(((QualifiedName) expressionToCheckIfNull).getName());
 
 			expression.setOperator(Operator.NOT_EQUALS);
 			expression.setRightOperand(expressionToCheckIfNull.getAST().newNullLiteral());
+			if(everythingInTheCondition == null)
 				everythingInTheCondition = expression;
+			else {
+				InfixExpression newInfix = ifstmt.getAST().newInfixExpression();
+				newInfix.setOperator(Operator.CONDITIONAL_AND);
+				newInfix.setLeftOperand(everythingInTheCondition);
+				newInfix.setRightOperand(expression);
+				everythingInTheCondition = newInfix;
+			}
 		}
 		ifstmt.setExpression(everythingInTheCondition);
 				
