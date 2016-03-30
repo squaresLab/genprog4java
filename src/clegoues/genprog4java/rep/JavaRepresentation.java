@@ -45,6 +45,7 @@ import java.io.ObjectOutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +85,7 @@ import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
@@ -125,6 +127,7 @@ import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.JavaAppendOperation;
 import clegoues.genprog4java.mut.JavaDeleteOperation;
 import clegoues.genprog4java.mut.JavaEditOperation;
+import clegoues.genprog4java.mut.JavaLowerBoundSetOperation;
 import clegoues.genprog4java.mut.JavaOffByOneOperation;
 import clegoues.genprog4java.mut.JavaReplaceOperation;
 import clegoues.genprog4java.mut.JavaSwapOperation;
@@ -573,7 +576,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		command.addArgument("clegoues.genprog4java.fitness.JUnitTestRunner");
 
 		command.addArgument(test.toString());
-		//logger.info("Command: " + command.toString());
+		logger.info("Command: " + command.toString());
 		return command;
 
 	}
@@ -596,29 +599,29 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	public void performEdit(Mutation edit, int dst, int source) {
 		super.performEdit(edit, dst, source);
+		JavaStatement locationStatement = base.get(dst);
+		ClassInfo fileName = stmtToFile.get(dst);
+
 		switch(edit) {
 		case DELETE: 
-			JavaStatement locationStatement = base.get(dst);
-			ClassInfo fileName = stmtToFile.get(dst);
 			JavaEditOperation newEdit = new JavaDeleteOperation(fileName, locationStatement);
 			this.genome.add(newEdit);
 			break;
+		case LBOUNDSET:
+			JavaEditOperation lboundEdit = new JavaLowerBoundSetOperation(fileName, locationStatement);
+			this.genome.add(lboundEdit);
+			break;
 		case OFFBYONE:
-			JavaStatement location = base.get(dst);
-			JavaStatement fixCodeStmt = base.get(source);
-			ClassInfo offbyoneFileName = stmtToFile.get(dst);
-			JavaEditOperation offbyoneEdit = new JavaOffByOneOperation(offbyoneFileName, location);
+			JavaEditOperation offbyoneEdit = new JavaOffByOneOperation(fileName, locationStatement);
 			this.genome.add(offbyoneEdit);
 			break;
 		case APPEND:
 		case REPLACE: this.editHelper(dst, source, edit);
 		break;
 		case SWAP:
-			JavaStatement loc = base.get(dst);
 			JavaStatement fixCodeStatement = base.get(source);
-			ClassInfo swapFileName = stmtToFile.get(dst);
-			JavaEditOperation swapEdit = new JavaSwapOperation(swapFileName, 
-					loc, fixCodeStatement);
+			JavaEditOperation swapEdit = new JavaSwapOperation(fileName, 
+					locationStatement, fixCodeStatement);
 			this.genome.add(swapEdit);
 			break;
 		default: logger.fatal("unhandled edit template type in performEdit; this should be impossible (famous last words...)");
@@ -956,25 +959,17 @@ FaultLocRepresentation<JavaEditOperation> {
 			}
 			return itApplies;
 		case OFFBYONE: 
-			JavaStatement lstmt = codeBank.get(location);
-			ASTNode lNode = lstmt.getASTNode();
-			final List<ArrayAccess> arrayAccessNodes = new ArrayList<ArrayAccess>();
-			lNode.accept(new ASTVisitor() {
-				public boolean visit(final ArrayAccess node) {
-					arrayAccessNodes.add(node);
-					return false;
-				}
-			});
-			if(arrayAccessNodes!=null){
-				return true;
-			}
-
+		case UBOUNDSET:
+		case LBOUNDSET:
+			JavaStatement loc = codeBank.get(location);
+			return loc.containsArrayAccesses();
 		case NULLCHECK: 
 			JavaStatement locationStmt = codeBank.get(location);
 			if(locationStmt.getASTNode() instanceof MethodInvocation || locationStmt.getASTNode() instanceof FieldAccess || locationStmt.getASTNode() instanceof QualifiedName){
 				return true;
 			}
 			break; 
+			
 		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;

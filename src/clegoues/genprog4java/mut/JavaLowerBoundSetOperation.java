@@ -38,7 +38,6 @@ public class JavaLowerBoundSetOperation extends JavaEditOperation {
 		final Map<ASTNode, String> lowerbound = new HashMap<ASTNode, String>();			// to set the lower-bound values of array. currently set to arrayname.length
 
 		locationNode.accept(new ASTVisitor() {
-
 			// method to visit all ArrayAccess nodes in locationNode and store their parents
 			public boolean visit(ArrayAccess node) {
 				lowerbound.put(node, "0");
