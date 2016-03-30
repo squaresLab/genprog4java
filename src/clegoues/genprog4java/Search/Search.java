@@ -381,11 +381,13 @@ public class Search<G extends EditOperation> {
 				//choose one at random
 				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(new ArrayList(availableMutations));
 				Mutation mut = chosenMutation.getFirst();
-				// FIXME: make sure the mutation list isn't empty before choosing?
 				switch (mut) {
 				case LBOUNDSET:
 				case NULLCHECK:
 				case DELETE:
+				case UBOUNDSET:
+				case RANGECHECK:
+				case NULLINSERT:
 					// FIXME: this -1 hack is pretty gross; note to self, CLG should fix it
 					variant.performEdit(mut, stmtid, (-1));
 					break;

@@ -33,8 +33,6 @@
 
 package clegoues.genprog4java.mut;
 
-
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 

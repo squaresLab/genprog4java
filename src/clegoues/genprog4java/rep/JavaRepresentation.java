@@ -130,8 +130,10 @@ import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.mut.JavaLowerBoundSetOperation;
 import clegoues.genprog4java.mut.JavaNullCheckOperation;
 import clegoues.genprog4java.mut.JavaOffByOneOperation;
+import clegoues.genprog4java.mut.JavaRangeCheckOperation;
 import clegoues.genprog4java.mut.JavaReplaceOperation;
 import clegoues.genprog4java.mut.JavaSwapOperation;
+import clegoues.genprog4java.mut.JavaUpperBoundSetOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
@@ -612,6 +614,14 @@ FaultLocRepresentation<JavaEditOperation> {
 			JavaEditOperation lboundEdit = new JavaLowerBoundSetOperation(fileName, locationStatement);
 			this.genome.add(lboundEdit);
 			break;
+		case UBOUNDSET:
+			JavaEditOperation uboundEdit = new JavaUpperBoundSetOperation(fileName, locationStatement);
+			this.genome.add(uboundEdit);
+			break;
+		case RANGECHECK:
+			JavaEditOperation rcheckedit = new JavaRangeCheckOperation(fileName, locationStatement);
+			this.genome.add(rcheckedit);
+			break;
 		case OFFBYONE:
 			JavaEditOperation offbyoneEdit = new JavaOffByOneOperation(fileName, locationStatement);
 			this.genome.add(offbyoneEdit);
@@ -966,6 +976,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		case OFFBYONE:  // FIXME: CLG suspects this should only apply to particular statements, not every statement in the program.  Maybe?
 		case UBOUNDSET:
 		case LBOUNDSET:
+		case RANGECHECK:
 			JavaStatement loc = codeBank.get(location);
 			return loc.containsArrayAccesses();
 		case NULLCHECK: 
