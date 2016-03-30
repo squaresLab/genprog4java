@@ -128,6 +128,7 @@ import clegoues.genprog4java.mut.JavaAppendOperation;
 import clegoues.genprog4java.mut.JavaDeleteOperation;
 import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.mut.JavaLowerBoundSetOperation;
+import clegoues.genprog4java.mut.JavaNullCheckOperation;
 import clegoues.genprog4java.mut.JavaOffByOneOperation;
 import clegoues.genprog4java.mut.JavaReplaceOperation;
 import clegoues.genprog4java.mut.JavaSwapOperation;
@@ -615,6 +616,10 @@ FaultLocRepresentation<JavaEditOperation> {
 			JavaEditOperation offbyoneEdit = new JavaOffByOneOperation(fileName, locationStatement);
 			this.genome.add(offbyoneEdit);
 			break;
+		case NULLCHECK:
+			JavaEditOperation nullcheckEdit = new JavaNullCheckOperation(fileName,locationStatement);
+			this.genome.add(nullcheckEdit);
+			break;
 		case APPEND:
 		case REPLACE: this.editHelper(dst, source, edit);
 		break;
@@ -964,9 +969,8 @@ FaultLocRepresentation<JavaEditOperation> {
 			JavaStatement loc = codeBank.get(location);
 			return loc.containsArrayAccesses();
 		case NULLCHECK: 
-			JavaStatement locationStmt = codeBank.get(location);
-		
-			break; 
+			JavaStatement locStmt = codeBank.get(location);
+			return locStmt.nullCheckApplies();
 			
 		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
