@@ -123,4 +123,8 @@ public class JavaStatement {
 		}
 		return this.arrayAccesses.size() > 0;
 	}
+	// DOES NOT CHECK that it isn't null; precondition is that the previous function was called!
+	public HashSet<ASTNode> getArrayAccesses() {
+		return this.arrayAccesses;
+	}
 }

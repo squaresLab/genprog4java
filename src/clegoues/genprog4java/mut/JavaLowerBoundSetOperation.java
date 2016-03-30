@@ -2,6 +2,7 @@ package clegoues.genprog4java.mut;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +31,15 @@ public class JavaLowerBoundSetOperation extends JavaEditOperation {
 	public JavaLowerBoundSetOperation(ClassInfo fileName, JavaStatement location) {
 		super(Mutation.LBOUNDSET, fileName, location);
 	}
+	// method to get the parent of ArrayAccess node. We traverse the ast upwards until the parent node is an instance of statement
+	// if statement is(are) added to this parent node
+	private ASTNode getParent(ASTNode node) {
+		ASTNode parent = node.getParent();
+		while(!(parent instanceof Statement)){
+			parent = parent.getParent();
+		}
+		return parent;
+	}
 	@Override
 	public void edit(final ASTRewrite rewriter, AST ast, CompilationUnit cu) {
 		ASTNode locationNode = this.getLocation().getASTNode();
@@ -37,34 +47,21 @@ public class JavaLowerBoundSetOperation extends JavaEditOperation {
 		Set<ASTNode> parentnodes = null; 
 		final Map<ASTNode, String> lowerbound = new HashMap<ASTNode, String>();			// to set the lower-bound values of array. currently set to arrayname.length
 
-		locationNode.accept(new ASTVisitor() {
-			// method to visit all ArrayAccess nodes in locationNode and store their parents
-			public boolean visit(ArrayAccess node) {
-				lowerbound.put(node, "0");
-				ASTNode parent = getParent(node);
-				if(!nodestmts.containsKey(parent)){
-					List<ASTNode> arraynodes = new ArrayList<ASTNode>();
+		HashSet<ASTNode> arrayAccesses = this.getLocation().getArrayAccesses();
+		for(ASTNode node : arrayAccesses) {
+			lowerbound.put(node, "0");
+			ASTNode parent = getParent(node);
+			if(!nodestmts.containsKey(parent)){
+				List<ASTNode> arraynodes = new ArrayList<ASTNode>();
+				arraynodes.add(node);
+				nodestmts.put(parent, arraynodes);		
+			}else{
+				List<ASTNode> arraynodes = (List<ASTNode>) nodestmts.get(parent);
+				if(!arraynodes.contains(node))
 					arraynodes.add(node);
-					nodestmts.put(parent, arraynodes);		
-				}else{
-					List<ASTNode> arraynodes = (List<ASTNode>) nodestmts.get(parent);
-					if(!arraynodes.contains(node))
-						arraynodes.add(node);
-					nodestmts.put(parent, arraynodes);	
-				}
-				return true;
+				nodestmts.put(parent, arraynodes);	
 			}
-
-			// method to get the parent of ArrayAccess node. We traverse the ast upwards until the parent node is an instance of statement
-			// if statement is(are) added to this parent node
-			private ASTNode getParent(ArrayAccess node) {
-				ASTNode parent = node.getParent();
-				while(!(parent instanceof Statement)){
-					parent = parent.getParent();
-				}
-				return parent;
-			}
-		});
+		}
 
 		parentnodes = nodestmts.keySet();
 		// for each parent node which may have multiple array access instances
