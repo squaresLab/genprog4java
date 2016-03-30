@@ -23,8 +23,7 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 	public JavaOffByOneOperation(ClassInfo fileName, JavaStatement location) {
 		super(Mutation.OFFBYONE, fileName, location);
 	}
-	public enum mutationType {
-	    ADD, SUBTRACT};
+	public enum mutationType { ADD, SUBTRACT};
 	@Override
 	public void edit(final ASTRewrite rewriter, AST ast, CompilationUnit cu) {
 		ASTNode locationNode = this.getLocation().getASTNode();
@@ -51,7 +50,6 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 			
 			// recursive method to mutate array index. (increase or decrease the index by one)
 			private Expression mutateIndex(Expression arrayindex, Boolean mutateflag) { // arrayindex is the index to be mutated, mutateflag is used to check if mutation is to be performed.
-
 				if (arrayindex instanceof SimpleName) {  // if index is simple variable name
 					SimpleName name = arrayindex.getAST().newSimpleName(arrayindex.toString());	// fetch the name
 					if (mutateflag == false) {	// if no mutation is to be performed then return the index

@@ -963,7 +963,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				itApplies = true;
 			}
 			return itApplies;
-		case OFFBYONE: 
+		case OFFBYONE:  // FIXME: CLG suspects this should only apply to particular statements, not every statement in the program.  Maybe?
 		case UBOUNDSET:
 		case LBOUNDSET:
 			JavaStatement loc = codeBank.get(location);
