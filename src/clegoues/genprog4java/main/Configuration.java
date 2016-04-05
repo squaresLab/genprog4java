@@ -66,6 +66,8 @@ public class Configuration {
 	public static ArrayList<ClassInfo> targetClassNames = new ArrayList<ClassInfo>();
 	public static String javaRuntime = "";
 	public static String javaVM;
+	public static String testClassPath = "";
+	public static String srcClassPath = "";
 	public static String jacocoPath = "";
 	public static long seed;
 	public static boolean doSanity = true;
@@ -115,6 +117,12 @@ public class Configuration {
 		}
 		if (prop.getProperty("classSourceFolder") != null) {
 			classSourceFolder = prop.getProperty("classSourceFolder").trim();
+		}
+		if(prop.getProperty("testClassPath") != null) {
+			testClassPath = prop.getProperty("testClassPath").trim();
+		}
+		if(prop.getProperty("srcClassPath") != null) {
+			srcClassPath = prop.getProperty("srcClassPath").trim();
 		}
 		if (prop.getProperty("classTestFolder") != null) {
 			classTestFolder = prop.getProperty("classTestFolder").trim();
