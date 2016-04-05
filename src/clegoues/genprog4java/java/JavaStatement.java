@@ -34,20 +34,28 @@
 package clegoues.genprog4java.java;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+
+import clegoues.genprog4java.util.Pair;
 
 public class JavaStatement {
 
@@ -208,6 +216,78 @@ public class JavaStatement {
 	// DOES NOT CHECK that it isn't null; precondition is that the previous function was called!
 	public Map<ASTNode, List<ASTNode>> getNullCheckables() {
 		return this.nullCheckable;
+	}
+
+	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
+	private Map<ASTNode, List<MethodInfo>> candidateReplacements = null;
+	public Map<ASTNode, List<ASTNode>> getMethodReplacements() { return methodReplacements; }
+	public Map<ASTNode, List<MethodInfo>> getCandidateReplacements() { return candidateReplacements; }
+	
+	private ArrayList<ITypeBinding> paramsToTypes(List<SingleVariableDeclaration> params) {
+		int i = 0; 
+		ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>();
+		for(SingleVariableDeclaration param : params) {
+			ITypeBinding paramType = param.getType().resolveBinding();
+			paramTypes.add(i,paramType);
+			i++;
+		}
+		return paramTypes;
+	}
+	public boolean methodReplacerApplies(List<MethodInfo> methodDecls) {
+		if(methodReplacements == null) {
+			methodReplacements = new HashMap<ASTNode, List<ASTNode>>();
+			candidateReplacements = new HashMap<ASTNode, List<MethodInfo>>();
+
+			this.getASTNode().accept(new ASTVisitor() {
+				// method to visit all Expressions relevant for this in locationNode and
+				// store their parents
+				public boolean visit(MethodInvocation node) {
+					// if there exists another invocation that this works for...
+					ArrayList<MethodInfo> possibleReps = new ArrayList<MethodInfo> ();
+					ASTNode parent = getParent(node);
+					IMethodBinding invokedMethod = node.resolveMethodBinding().getMethodDeclaration();
+					ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>(Arrays.asList(invokedMethod.getParameterTypes()));
+					ITypeBinding thisReturnType = invokedMethod.getReturnType();
+
+					for(MethodInfo mi : methodDecls) {
+						if((mi.getNumArgs() == paramTypes.size())) {
+							ITypeBinding candReturnType = mi.getReturnType().resolveBinding();
+							if(candReturnType.isAssignmentCompatible(thisReturnType)) {
+								ArrayList<ITypeBinding> candParamTypes = paramsToTypes(mi.getParameters());
+								boolean isCompatible = true;
+								for(int i = 0; i < mi.getNumArgs(); i++) {
+									ITypeBinding candParam = candParamTypes.get(i);
+									ITypeBinding myParam = paramTypes.get(i);
+									if(!myParam.isAssignmentCompatible(candParam)) {
+										isCompatible = false;
+										break;
+									}
+								}
+								if(isCompatible) {
+									possibleReps.add(mi);
+								}
+							}
+
+						}
+					}
+
+					if(!methodReplacements.containsKey(parent)){
+						List<ASTNode> methodNodes = new ArrayList<ASTNode>();
+						methodNodes.add(node);
+						methodReplacements.put(parent, methodNodes);		
+					}else{
+						List<ASTNode> methodNodes = (List<ASTNode>) arrayAccesses.get(parent);
+						if(!methodNodes.contains(node))
+							methodNodes.add(node);
+						methodReplacements.put(parent, methodNodes);	
+					}
+					candidateReplacements.put(node, possibleReps);
+					return true;
+				}
+
+			});
+		}
+		return methodReplacements.size() > 0;
 	}
 
 

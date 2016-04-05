@@ -1,0 +1,52 @@
+package clegoues.genprog4java.java;
+
+import java.util.List;
+
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
+
+public class MethodInfo {
+private String name;
+private int numArgs;
+private Type returnType;
+private List<SingleVariableDeclaration> parameters;
+
+MethodInfo(String name, int numArgs, Type returnType, List<SingleVariableDeclaration> parameters) {
+	this.setName(name);
+	this.setNumArgs(numArgs);
+	this.setReturnType(returnType);
+	this.setParameters(parameters);
+}
+
+public String getName() {
+	return name;
+}
+
+public void setName(String name) {
+	this.name = name;
+}
+
+public int getNumArgs() {
+	return numArgs;
+}
+
+public void setNumArgs(int numArgs) {
+	this.numArgs = numArgs;
+}
+
+public Type getReturnType() {
+	return returnType;
+}
+
+public void setReturnType(Type returnType) {
+	this.returnType = returnType;
+}
+
+public List<SingleVariableDeclaration> getParameters() {
+	return parameters;
+}
+
+public void setParameters(List<SingleVariableDeclaration> parameters) {
+	this.parameters = parameters;
+}
+}
