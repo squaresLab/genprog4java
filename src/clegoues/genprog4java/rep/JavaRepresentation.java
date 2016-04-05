@@ -119,6 +119,7 @@ import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.java.ScopeInfo;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
@@ -128,6 +129,7 @@ import clegoues.genprog4java.mut.JavaAppendOperation;
 import clegoues.genprog4java.mut.JavaDeleteOperation;
 import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.mut.JavaLowerBoundSetOperation;
+import clegoues.genprog4java.mut.JavaMethodReplacer;
 import clegoues.genprog4java.mut.JavaNullCheckOperation;
 import clegoues.genprog4java.mut.JavaOffByOneOperation;
 import clegoues.genprog4java.mut.JavaRangeCheckOperation;
@@ -160,6 +162,7 @@ FaultLocRepresentation<JavaEditOperation> {
 	private static HashMap<Integer, Set<String>> inScopeMap = new HashMap<Integer, Set<String>>();
 	private static TreeSet<Pair<String,String>> methodReturnType = new TreeSet<Pair<String,String>>();
 	private static TreeSet<String> finalVariables = new TreeSet<String>();
+	private static List<MethodInfo> methodDecls = new ArrayList<MethodInfo>();
 
 
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
@@ -290,7 +293,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		baseCompilationUnits.put(pair, myParser.getCompilationUnit());
 		JavaRepresentation.methodReturnType.addAll(myParser.getMethodReturnTypeSet());
 		JavaRepresentation.finalVariables.addAll(myParser.getFinalVariableSet());
-
+		JavaRepresentation.methodDecls.addAll(myParser.getMethodDeclarations());
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
 				JavaStatement s = new JavaStatement();
@@ -607,8 +610,13 @@ FaultLocRepresentation<JavaEditOperation> {
 
 		switch(edit) {
 		case DELETE: 
+		case NULLINSERT:
 			JavaEditOperation newEdit = new JavaDeleteOperation(fileName, locationStatement);
 			this.genome.add(newEdit);
+			break;
+		case FUNREP:
+			JavaEditOperation funEdit = new JavaMethodReplacer(fileName, locationStatement);
+			this.genome.add(funEdit);
 			break;
 		case LBOUNDSET:
 			JavaEditOperation lboundEdit = new JavaLowerBoundSetOperation(fileName, locationStatement);
@@ -935,22 +943,17 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	@Override
 	public Boolean doesEditApply(int location, Mutation editType) {
+		JavaStatement locationStmt = codeBank.get(location);
 		switch(editType) {
 		case APPEND: 
-			JavaStatement faultyA = codeBank.get(location);
-			ASTNode faultyNodeA = faultyA.getASTNode();
-
-			return this.editSources(location,  editType).size() > 0;
 		case REPLACE:
 		case SWAP:
 			return this.editSources(location,  editType).size() > 0;
 		case NULLINSERT:
 		case DELETE: 
 			boolean itApplies = true;
-
 			//If it is the body of an if, while, or for, it should not be removed
-			JavaStatement faulty = codeBank.get(location);
-			ASTNode faultyNode = faulty.getASTNode();
+			ASTNode faultyNode = locationStmt.getASTNode();
 			boolean ifCase = false, elseCase = false, whileCase = false, forCase = false;
 
 			if(faultyNode instanceof Block){
@@ -977,11 +980,11 @@ FaultLocRepresentation<JavaEditOperation> {
 		case UBOUNDSET:
 		case LBOUNDSET:
 		case RANGECHECK:
-			JavaStatement loc = codeBank.get(location);
-			return loc.containsArrayAccesses();
+			return locationStmt.containsArrayAccesses();
+		case FUNREP:
+			return locationStmt.methodReplacerApplies(methodDecls);
 		case NULLCHECK: 
-			JavaStatement locStmt = codeBank.get(location);
-			return locStmt.nullCheckApplies();
+			return locationStmt.nullCheckApplies();
 			
 		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");

@@ -34,6 +34,7 @@
 package clegoues.genprog4java.java;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -46,6 +47,7 @@ import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -58,6 +60,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	private List<ASTNode> nodeSet;
 	private ScopeInfo scopes;
+	private List<MethodInfo> methodDecls;
 
 	private TreeSet<String> fieldName;
 	private TreeSet<String> currentMethodScope;
@@ -77,10 +80,12 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.fieldName.add("this");
 	}
 
+	public List<MethodInfo> getMethodDecls() { 
+		return this.methodDecls;
+	}
 	public Set<String> getFieldSet() {
 		return this.fieldName;
 	}
-
 	public void setNodeSet(List<ASTNode> o) {
 		this.nodeSet = o;
 	}
@@ -100,6 +105,10 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	public void setFinalVariables(TreeSet<String> finalVariables) {
 		this.finalVariables = finalVariables;
 	}
+	public void setMethodDecls(List<MethodInfo> methodDecls2) {
+		this.methodDecls = methodDecls2;
+	}
+
 	
 	public List<ASTNode> getNodeSet() {
 		return this.nodeSet;
@@ -123,6 +132,11 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(MethodDeclaration node) {
 		this.currentMethodScope = new TreeSet<String>();
+
+		if(node.isConstructor() || node.isVarargs()) return true; // ain't nobody got time for that
+		else {
+		this.methodDecls.add(new MethodInfo(node.getName().getIdentifier(),node.parameters().size(),node.getReturnType2(), node.parameters()));
+		}
 
 		for (Object o : node.parameters()) {
 			if (o instanceof SingleVariableDeclaration) {
