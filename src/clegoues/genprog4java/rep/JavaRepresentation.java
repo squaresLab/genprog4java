@@ -560,10 +560,12 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 		String classPath = outputDir + System.getProperty("path.separator")
 				+ Configuration.libs + System.getProperty("path.separator") 
-				+ Configuration.classTestFolder; 
-		if(Configuration.classSourceFolder != "") {
-			classPath += System.getProperty("path.separator") + Configuration.classSourceFolder;
-		}
+				+ Configuration.testClassPath + System.getProperty("path.separator") 
+				+ Configuration.srcClassPath;
+//; 
+//		if(Configuration.classSourceFolder != "") {
+//			classPath += System.getProperty("path.separator") + Configuration.classSourceFolder;
+//		}
 		// Positive tests
 		command.addArgument("-classpath");
 		command.addArgument(classPath);

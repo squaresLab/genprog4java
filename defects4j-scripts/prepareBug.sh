@@ -21,8 +21,8 @@
 
 if [ "$#" -ne 6 ]; then
     echo "This script should be run with 6 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size"
-
-else
+    exit 0
+fi
 
 PROJECT="$1"
 BUGNUMBER="$2"
@@ -64,104 +64,26 @@ done
 #Specific variables per project
 #TESTWD: location of project test files (relative to root)
 #WD: location of project src files (relative to root)
-#JAVADIR: path from the WD or TESTWD to location of java files for both source and test files 
 #CONFIGLIBS: libraries to be included in the configuration file so that GenProg can run it.
-#LIBSTESTS: libraries needed to compile the  tests (dependencies of the project)
 
 # Common genprog libs: junit test runner and the like
 
-GENLIBS=$GENPROGDIR"/lib/junittestrunner.jar:"$GENPROGDIR"/lib/commons-io-1.4.jar:"$GENPROGDIR"/lib/junit-4.10.jar"
+CONFIGLIBS=$GENPROGDIR"/lib/junittestrunner.jar:"$GENPROGDIR"/lib/commons-io-1.4.jar:"$GENPROGDIR"/lib/junit-4.10.jar"
 
-# all libs for a package need at least the source jar, test jar, and generic genprog libs
-CONFIGLIBS=""
+if [ "$LOWERCASEPACKAGE" = "lang" ] ; then
+    # special handling...do we still need this?
+    cp "$3"defects4j-scripts/Utilities/EntityArrays.java $BUGWD/src/main/java/org/apache/commons/lang3/text/translate/
+fi
 
-EXTRACLASSES=""
-
-case "$LOWERCASEPACKAGE" in 
-'chart') 
-        TESTWD=tests
-        WD=source
-        JAVADIR=org/jfree
-        CHARTLIBS="$BUGWD/lib/itext-2.0.6.jar:\
-$BUGWD/lib/servlet.jar:\
-$BUGWD/lib/junit.jar"
-
-	    SRCFOLDER=build
-	    TESTFOLDER=build-tests
-        CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$CHARTLIBS
-        LIBSTESTS="-cp \".:$GENLIBS:$CHARTLIBS\" "
-        ;;
-
-'closure')
-        TESTWD=test
-        WD=src
-        JAVADIR=com/google
-        CLOSURELIBS="$BUGWD/lib/ant.jar:$BUGWD/lib/ant-launcher.jar:\
-$BUGWD/lib/args4j.jar:$BUGWD/lib/caja-r4314.jar:\
-$BUGWD/lib/guava.jar:$BUGWD/lib/jarjar.jar:\
-$BUGWD/lib/json.jar:$BUGWD/lib/jsr305.jar:\
-$BUGWD/lib/junit.jar:$BUGWD/lib/protobuf-java.jar:\
-$BUGWD/build/lib/rhino.jar:"
-	    SRCFOLDER=build/classes
-	    TESTFOLDER=build/test
-        
-        CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$CLOSURELIBS
-        LIBSTESTS="-cp \".:$GENLIBS:$CLOSURELIBS\" "
-        EXTRACLASSES="$3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInfo.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMap.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/FunctionInformationMapOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/Instrumentation.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationOrBuilder.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/javascript/jscomp/InstrumentationTemplate.java $3/defects4j/ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Buggy/gen/com/google/debugging/sourcemap/proto/Mapping.java"
-
-        ;;
-
-'lang')
-        TESTWD=src/test/java
-        WD=src/main/java
-        JAVADIR=org/apache/commons/lang3 
-
-        LANGLIBS="$GENPROGDIR/lib/junittestrunner.jar:$GENPROGDIR/lib/commons-io-1.4.jar:\
-$DEFECTS4JDIR/framework/projects/lib/junit-4.11.jar:\
-$DEFECTS4JDIR/framework/projects/Lang/lib/easymock.jar:\
-$DEFECTS4JDIR/framework/projects/Lang/lib/asm.jar:\
-$DEFECTS4JDIR/framework/projects/Lang/lib/cglib.jar:\
-$DEFECTS4JDIR/framework/projects/lib/easymock-3.3.1.jar"
-        CONFIGLIBS=$CONFIGLIBS:$LANGLIBS
-        LIBSTESTS="-cp \".:\
-$GENPROGDIR/lib/junittestrunner.jar:$GENPROGDIR/lib/commons-io-1.4.jar:\
-$DEFECTS4JDIR/framework/projects/lib/junit-4.11.jar:\
-$DEFECTS4JDIR/framework/projects/Lang/lib/easymock.jar:\
-$DEFECTS4JDIR/framework/projects/lib/easymock-3.3.1.jar\" "
-
-	    SRCFOLDER=target/classes
-	    TESTFOLDER=target/tests
-        # special handling...
-        cp "$3"defects4j-scripts/Utilities/EntityArrays.java $BUGWD/src/main/java/org/apache/commons/lang3/text/translate/
-
-        ;;
-
-'math')
-        TESTWD=src/test/java
-        WD=src/main/java
-        JAVADIR=org/apache/commons/math3
-        MATHLIBS=$DEFECTS4JDIR"/framework/projects/Math/lib/commons-discovery-0.5.jar"
-        CONFIGLIBS=$CONFIGLIBS":"$GENLIBS":"$MATHLIBS
-        LIBSTESTS="-cp \".:$GENLIBS:$MATHLIBS\" "
-	    SRCFOLDER=target/classes
-	    TESTFOLDER=target/test-classes
-        ;;
-
-'time')
-        TESTWD=src/test/java
-        WD=src/main/java
-        JAVADIR=org/joda/time
-        TIMELIBS=$DEFECTS4JDIR"/framework/projects/Time/lib/joda-convert-1.2.jar:"$GENLIBS":"$DEFECTS4JDIR/"framework/projects/lib/easymock-3.3.1.jar"
-        CONFIGLIBS=$CONFIGLIBS":"$TIMELIBS
-	    SRCFOLDER=target/classes
-	    TESTFOLDER=target/test-classes
-        LIBSTESTS="-cp \".:$TIMELIBS\" "
-        ;;
-esac
-
+cd $DEFECTS4J/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
+TESTWD=`defects4j export -p dir.src.tests`
+SRCFOLDER=`defects4j export -p dir.bin.classes`
+COMPILECP=`defects4j export -p cp.compile`
+TESTCP=`defects4j export -p cp.test`
+WD=`defects4j export -p dir.src.classes`
 cd $BUGWD/$WD
 
-#Create file to run defects4j compiile
+#Create file to run defects4j compile
 
 FILE="$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 /bin/cat <<EOM >$FILE
@@ -176,8 +98,6 @@ chmod 777 "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile
 
 
 cd $BUGWD
-
-PACKAGEDIR=${JAVADIR//"/"/"."}
 
 #Create config file 
 FILE="$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/defects4j.config
@@ -194,51 +114,28 @@ sourceDir = $WD
 positiveTests = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/pos.tests
 negativeTests = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/neg.tests
 jacocoPath = $3/lib/jacocoagent.jar
-classSourceFolder = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$SRCFOLDER
-classTestFolder = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$TESTFOLDER
+testClassPath=$TESTCP
+srcClassPath=$COMPILECP
 compileCommand = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
+targetClassName = $BUGWD/bugfiles.txt
 EOM
 
-# programmatically get passing and failing tests as well as files
+#  get passing and failing tests as well as files
 #info about the bug
-INFO=`defects4j info -p $PROJECT -b $BUGNUMBER`
 
-# gets the content starting at the list of tests
-JUSTTEST=`echo $INFO | sed -n -e 's/.*Root cause in triggering tests: - //p'`
-#gets rid of the information about which assertions are failing, between test class names
-JUSTTEST=`echo $JUSTTEST | sed -e "s/\([a-zA-Z0-9_\.]*\)\(::\)\([a-zA-Z0-9_\.]* --> \)\([a-zA-Z0-9<>: _\.]* - \)/\1 /g"`
-# gets rid of the training bit of info at the end of the test list
-JUSTTEST=`echo $JUSTTEST | sed -n -e 's/\([a-zA-Z0-9_\.]*\)\(::\)\(.*\)/\1/p'`
-
-# I really wish I could come up with a better way to do this, but have not. 
-if [[ -f tmp.txt ]]
-then
-    rm tmp.txt
-fi
-touch tmp.txt
-
-# tests in this var are separated by a space, so this will enumerate over each
-for foo in `echo $JUSTTEST`
-do
-    echo $foo >> tmp.txt
-done
-
-# gets the unique test classes in the list
-UNIQTESTS=`cat tmp.txt | sort -n | uniq`
-
-for FOO in `echo $UNIQTESTS`
-do
-    echo $FOO >> $BUGWD/neg.tests
-done
-
+defects4j export -p tests.trigger > $BUGWD/neg.tests
 
 case "$OPTION" in
-"humanMade" )
-# default
+"humanMade" ) 
+        defects4j export -p tests.all > $BUGWD/pos.tests
+
+;;
+"allHuman" ) 
+        defects4j export -p tests.all > $BUGWD/pos.tests
 ;;
 
 "onlyRelevant" ) 
-        echo "not implemented yet."
+        defects4j export -p tests.relevant > $BUGWD/pos.tests
         ;;
 
 "generated" )
@@ -252,48 +149,7 @@ tar xvjf outputOfEvoSuite/$PROJECT/evosuite-branch/1/"$PROJECT"-"$BUGNUMBER"f-ev
 ;;
 esac
 
-
-# get positive tests
-    pushd $BUGWD
-    if [[ -f "print.xml" ]] 
-        then
-        rm "print.xml"
-    fi
-    echo "<project name=\"Ant test\">" >> print.xml
-    echo "<import file=\"$DEFECTS4JDIR/framework/projects/defects4j.build.xml\"/>" >> print.xml
-    echo "<import file=\"$DEFECTS4JDIR/framework/projects/"$PROJECT"/"$PROJECT".build.xml\"/>" >> print.xml
-    echo "<echo message=\"Fileset is: \${toString:all.manual.tests}\"/>" >> print.xml
-    echo "</project>" >> print.xml
-    ANTOUTPUT=`ant -buildfile print.xml -Dd4j.home=$DEFECTS4JDIR`
-    rm print.xml
-
-    postests=`echo $ANTOUTPUT | sed -n -e 's/.*Fileset is: //p'`
-    postests=`echo $postests | sed -n -e 's/\(.*\)\( BUILD SUCCESSFUL.*\)/\1/p'`
-    postests=`echo $postests | sed -e 's/;/ /g'`
-
-    suffix1=".java"
-    suffix2=".class"
-
-    if [[ -f pos.tests ]]
-    then
-        rm pos.tests
-    fi
-    for i in $postests
-    do
-        i=`echo "$i" | tr '/' '.'`
-        i=`echo $i | sed "s/$suffix1$//" | sed "s/$suffix2$//"` 
-	echo "$i" >> pos.tests
-    done
-
-    for i in $UNIQTESTS
-    do
-        echo $i
-        grep -v "$i" pos.tests > tmp.txt
-        mv tmp.txt pos.tests
-    done
-  popd
-
-
+# FIXME: make this nicer
 
 #Remove a percentage of the positive tests in the test suite
 cd "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
@@ -324,44 +180,10 @@ echo "The positive tests file has $TESTCOUNT lines. Which is a $TESTSUITEPERCENT
 
 # get the class names to be repaired
 
+
 echo "GETTING CLASS NAMES"
 
-JUSTSOURCE=`echo $INFO | sed -n -e 's/.*List of modified sources: - //p'`
-
-JUSTSOURCE=`echo $JUSTSOURCE | sed -e 's/ - / /g'`
-JUSTSOURCE=`echo $JUSTSOURCE | cut -d '-' -f1`
-
-if [[ -f tmp.txt ]]
-then
-    rm tmp.txt
-fi
-
-for foo in `echo $JUSTSOURCE`
-do
-    echo $foo >> tmp.txt
-done
-
-UNIQFILES=`cat tmp.txt | sort -n | uniq`
-rm tmp.txt
-
-for FOO in `echo $UNIQFILES`
-do
-    echo $FOO >> tmp.txt
-done
-
-NUM=`wc -l tmp.txt | xargs | cut -d ' ' -f1`
-
-if [[ $NUM -gt 1 ]]
-then
-    mv tmp.txt $BUGWD/bugfiles.txt
-    echo "targetClassName = $BUGWD/bugfiles.txt" >> $BUGWD/defects4j.config
-else
-    rm tmp.txt
-    echo "targetClassName = "$UNIQFILES >> $BUGWD/defects4j.config
-fi
+defects4j export -p classes.modified > $BUGWD/bugfiles.txt
 
 echo "This is the working directory: "
 echo $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD
-
-fi #correct amount of params if
-
