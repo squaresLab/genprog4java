@@ -75,7 +75,7 @@ if [ "$LOWERCASEPACKAGE" = "lang" ] ; then
     cp "$3"defects4j-scripts/Utilities/EntityArrays.java $BUGWD/src/main/java/org/apache/commons/lang3/text/translate/
 fi
 
-cd $DEFECTS4J/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
+cd $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
 TESTWD=`defects4j export -p dir.src.tests`
 SRCFOLDER=`defects4j export -p dir.bin.classes`
 COMPILECP=`defects4j export -p cp.compile`
