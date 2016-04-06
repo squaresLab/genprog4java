@@ -5,6 +5,9 @@
 # 4td param is the folder where defects4j is installed (ex: /home/mau/Research/defects4j/ )
 # 5th param is the option of running it (ex: allHuman, oneHuman, oneGenerated)
 # 6th param is the percentage of test cases being used to guide genprog's search (ex: 1, 100)
+# 7th param is the folder where the bug files will be cloned to
+# 8th param is the initial seed. It will then increase the seeds by adding 1 until it gets to the number in the 9th param.
+# 9th param is the last seed.
 
 #cp runGenProgForBug.bash ./genprog4java/defects4jStuff/
 
@@ -25,6 +28,9 @@ GENPROGDIR="$3"
 DEFECTS4JDIR="$4"
 OPTION="$5"
 TESTSUITEPERCENTAGE="$6"
+
+STARTSEED="$8"
+UNTILSEED="$9"
 
 #This transforms the first parameter to lower case. Ex: lang, chart, closure, math or time
 LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
@@ -112,6 +118,7 @@ cd $BUGWD/$WD
 #cd $BUGWD/$WD
 
 
+#for (( seed=$STARTSEED; seed<=$UNTILSEED; seed++ ))
 for seed in {0..20..2} #0 to 20, increments of 2
   do	
 	echo "RUNNING THE BUG: $PROJECT $BUGNUMBER, WITH THE SEED: $seed"
