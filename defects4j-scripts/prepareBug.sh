@@ -20,8 +20,8 @@
 # export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/
 # export PATH=$JAVA_HOME/bin/:$PATH
 
-if [ "$#" -ne 6 ]; then
-    echo "This script should be run with 6 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size"
+if [ "$#" -ne 7 ]; then
+    echo "This script should be run with 7 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size, bugs folder"
     exit 0
 fi
 
