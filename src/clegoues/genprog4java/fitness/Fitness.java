@@ -98,20 +98,10 @@ public class Fitness<G extends EditOperation> {
 		}
 
 
-		if (prop.getProperty("pos-tests") != null) { // FIXME: what is this supposed to do?
-			Fitness.numPositiveTests = Integer.parseInt(prop
-					.getProperty("pos-tests"));
-		} else {
-			Fitness.numPositiveTests = Fitness.positiveTests.size();
-		}
-		if (prop.getProperty("neg-tests") != null) {
-			Fitness.numNegativeTests = Integer.parseInt(prop
-					.getProperty("neg-tests"));
-		} else {
-			Fitness.numNegativeTests = Fitness.negativeTests.size();
-		}
-
 		Fitness.configureTests();
+		Fitness.numPositiveTests = Fitness.positiveTests.size();
+		Fitness.numNegativeTests = Fitness.negativeTests.size();
+
 		testSample = GlobalUtils.range(1,Fitness.numPositiveTests);
 	}
 
@@ -131,7 +121,7 @@ public class Fitness<G extends EditOperation> {
 	public static void filterTests(ArrayList<String> toFilter, ArrayList<String> filterBy) {
 		HashSet<String> clazzesInFilterSet = new HashSet<String>();
 		HashSet<String> removeFromFilterSet = new HashSet<String>();
-		
+
 		// stuff in negative tests, must remove class from positive test list and add non-negative tests to list
 		for(String specifiedMethod : filterBy) {
 			if(specifiedMethod.contains("::")) { 
@@ -146,7 +136,7 @@ public class Fitness<G extends EditOperation> {
 			filterBy.remove(removeFromFilterBy);
 		}
 		filterBy.addAll(clazzesInFilterSet);
-		
+
 		HashSet<String> removeFromFilteredSet = new HashSet<String>();
 		for(String testNameInToFilter : toFilter ) {
 			String clazzName = "";
