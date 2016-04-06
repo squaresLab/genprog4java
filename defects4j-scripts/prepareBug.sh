@@ -33,21 +33,18 @@ OPTION="$5"
 TESTSUITEPERCENTAGE="$6"
 BUGSFOLDER="$7"
 
-PARENTDIR=$BUGSFOLDER
-
-
 #Add the path of defects4j so the defects4j's commands run 
 export PATH=$PATH:"$DEFECTS4JDIR"/framework/bin
 export PATH=$PATH:"$DEFECTS4JDIR"/major/bin
 
 #copy these files to the source control
 
-mkdir -p $PARENTDIR
+mkdir -p $BUGSFOLDER
 
 LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 
 # directory with the checked out buggy project
-BUGWD=$PARENTDIR"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
+BUGWD=$BUGSFOLDER"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
 
 #Checkout the buggy and fixed versions of the code (latter to make second testsuite
 defects4j checkout -p $1 -v "$BUGNUMBER"b -w $BUGWD
@@ -56,7 +53,7 @@ defects4j checkout -p $1 -v "$BUGNUMBER"f -w $BUGSFOLDER/$LOWERCASEPACKAGE"$2"Fi
 #Compile the both buggy and fixed code
 for dir in Buggy Fixed
 do
-    pushd $PARENTDIR"/"$LOWERCASEPACKAGE$BUGNUMBER$dir
+    pushd $BUGSFOLDER"/"$LOWERCASEPACKAGE$BUGNUMBER$dir
     defects4j compile
     popd
 done
