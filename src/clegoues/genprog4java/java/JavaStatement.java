@@ -233,7 +233,7 @@ public class JavaStatement {
 		}
 		return paramTypes;
 	}
-	public boolean methodReplacerApplies(List<MethodInfo> methodDecls) {
+	public boolean methodReplacerApplies(final List<MethodInfo> methodDecls) {
 		if(methodReplacements == null) {
 			methodReplacements = new HashMap<ASTNode, List<ASTNode>>();
 			candidateReplacements = new HashMap<ASTNode, List<MethodInfo>>();
