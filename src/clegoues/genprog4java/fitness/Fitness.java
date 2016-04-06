@@ -63,7 +63,7 @@ public class Fitness<G extends EditOperation> {
 	private static int generation = -1;
 	// FIXME: we're already doing sampling, so note to self to kill it in the genprog setup scripts and just pass
 	// the desired sample size to genprog via the config.
-	private static List<Integer> testSample = GlobalUtils.range(1,Fitness.numPositiveTests); // FIXME: THIS IS WRONG
+	private static List<Integer> testSample = null; // FIXME: THIS IS WRONG
 	private static List<Integer> restSample = null;
 
 	private static double negativeTestWeight = 2.0;
@@ -112,6 +112,7 @@ public class Fitness<G extends EditOperation> {
 		}
 
 		Fitness.configureTests();
+		testSample = GlobalUtils.range(1,Fitness.numPositiveTests);
 	}
 
 
