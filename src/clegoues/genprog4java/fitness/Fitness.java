@@ -172,21 +172,6 @@ public class Fitness<G extends EditOperation> {
 		return allLines;
 	}
 
-	private int testPassCount(Representation<G> rep, boolean shortCircuit, TestType type, List<Integer> tests) {
-		int numPassed = 0;
-		for (Integer testNum : tests) {
-			TestCase thisTest = new TestCase(type, testNum);
-			if (!rep.testCase(thisTest)) {
-				rep.cleanup();
-				if(shortCircuit) {
-					return numPassed;
-				}
-			} else {
-				numPassed++;
-			}
-		}
-		return numPassed;
-	}
 
 	/*
 	 * {b test_to_first_failure} variant returns true if the variant passes all
@@ -197,12 +182,12 @@ public class Fitness<G extends EditOperation> {
 	 */
 
 	public boolean testToFirstFailure(Representation<G> rep) {
-		int numNegativePassed = this.testPassCount(rep, true, TestType.NEGATIVE, GlobalUtils.range(1, Fitness.numNegativeTests));
+		int numNegativePassed = this.testPassCount(rep, true, TestType.NEGATIVE, GlobalUtils.range(1, Fitness.numNegativeTests), Fitness.negativeTests);
 		if(numNegativePassed < Fitness.numNegativeTests) {
 			return false;
 		}
 
-		int numPositivePassed = this.testPassCount(rep,  true, TestType.POSITIVE, GlobalUtils.range(1, Fitness.numPositiveTests));
+		int numPositivePassed = this.testPassCount(rep,  true, TestType.POSITIVE, GlobalUtils.range(1, Fitness.numPositiveTests), Fitness.positiveTests);
 		if(numPositivePassed < Fitness.numPositiveTests) {
 			return false;
 		}
@@ -220,18 +205,34 @@ public class Fitness<G extends EditOperation> {
 	}
 
 	private Pair<Double,Double> testFitnessSample(Representation<G> rep, double fac) {
-		int numNegPassed = this.testPassCount(rep,false,TestType.NEGATIVE, GlobalUtils.range(1, Fitness.numNegativeTests));
-		int numPosPassed = this.testPassCount(rep,false,TestType.POSITIVE, testSample);
+		int numNegPassed = this.testPassCount(rep,false,TestType.NEGATIVE, GlobalUtils.range(1, Fitness.numNegativeTests), Fitness.negativeTests);
+		int numPosPassed = this.testPassCount(rep,false,TestType.POSITIVE, testSample, Fitness.positiveTests);
 		int numRestPassed = 0;
 		if((numNegPassed == Fitness.numNegativeTests) &&
 				(numPosPassed == testSample.size())) {
 			if(Fitness.sample < 1.0) { // restSample won't be null by definition here
-				numRestPassed = this.testPassCount(rep, false, TestType.POSITIVE, restSample);				
+				numRestPassed = this.testPassCount(rep, false, TestType.POSITIVE, restSample, Fitness.positiveTests);				
 			}
 		} 
 		double sampleFitness = fac * numNegPassed + numPosPassed;
 		double totalFitness = sampleFitness + numRestPassed;
 		return new Pair<Double,Double>(totalFitness,sampleFitness);
+	}
+
+	private int testPassCount(Representation<G> rep, boolean shortCircuit, TestType type, List<Integer> tests, ArrayList<String> actualTests) {
+		int numPassed = 0;
+		for (Integer testNum : tests) {
+			TestCase thisTest = new TestCase(type, actualTests.get(testNum));
+			if (!rep.testCase(thisTest)) {
+				rep.cleanup();
+				if(shortCircuit) {
+					return numPassed;
+				}
+			} else {
+				numPassed++;
+			}
+		}
+		return numPassed;
 	}
 
 	private Pair<Double, Double> testFitnessFull(Representation<G> rep,

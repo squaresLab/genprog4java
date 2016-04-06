@@ -239,7 +239,6 @@ Representation<G> {
 
 	}
 
-	
 	public boolean testCase(TestCase test) {
 		List<Integer> hash = astHash();
 		HashMap<String, FitnessValue> thisVariantsFitness = null;
@@ -355,13 +354,7 @@ Representation<G> {
 		CommandLine command = this.internalTestCaseCommand(sanityExename,
 				sanityFilename, thisTest);
 		// System.out.println("command: " + command.toString());
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);// Mau had to
-		// change this
-		// to be able to
-		// run longer
-		// tests. It was
-		// on 6000
-		// originally
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");
 		executor.setWorkingDirectory(new File(workingDirectory));
