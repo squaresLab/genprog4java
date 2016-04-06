@@ -7,7 +7,7 @@
 # 6th param is the percentage of test cases being used to guide genprog's search (ex: 1, 100)
 # 7th param is the folder where the bug files will be cloned to
 # 8th param is the initial seed. It will then increase the seeds by adding 1 until it gets to the number in the 9th param.
-# 9th param is the last seed.
+# 9th param is the final seed.
 
 #cp runGenProgForBug.bash ./genprog4java/defects4jStuff/
 
@@ -17,8 +17,8 @@
 #VM:
 #./runGenProgForBug.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/ allHuman 100 /home/ubuntu/defects4j/ExamplesCheckedOut/ 1 5
 
-if [ "$#" -ne 6 ]; then
-    echo "This script should be run with 6 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size"
+if [ "$#" -ne 9 ]; then
+    echo "This script should be run with 9 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size, bugs folder, initial seed, final seed"
 
 else
 
