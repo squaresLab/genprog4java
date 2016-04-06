@@ -36,12 +36,19 @@ package clegoues.genprog4java.fitness;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.junit.runner.Request;
 
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
@@ -55,11 +62,11 @@ public class Fitness<G extends EditOperation> {
 	private static int generation = -1;
 	private static List<Integer> testSample = GlobalUtils.range(1,Fitness.numPositiveTests);
 	private static List<Integer> restSample = null;
-	
+
 	private static double negativeTestWeight = 2.0;
 	private static double sample = 1.0;
 	private static String sampleStrategy = "variant"; // options: all,
-														// generation, variant
+	// generation, variant
 	public static String posTestFile = "pos.tests";
 	public static String negTestFile = "neg.tests";
 	public static ArrayList<String> positiveTests = new ArrayList<String>();
@@ -87,19 +94,8 @@ public class Fitness<G extends EditOperation> {
 			negTestFile = prop.getProperty("negativeTests").trim();
 		}
 
-		try {
-			positiveTests.addAll(getTests(posTestFile));
-		} catch (IOException e) {
-			logger.error("failed to read " + posTestFile + " giving up");
-			Runtime.getRuntime().exit(1);
-		}
-		try {
-			negativeTests.addAll(getTests(negTestFile));
-		} catch (IOException e) {
-			logger.error("failed to read " + negTestFile + " giving up");
-			Runtime.getRuntime().exit(1);
-		}
-		if (prop.getProperty("pos-tests") != null) {
+
+		if (prop.getProperty("pos-tests") != null) { // FIXME: what is this supposed to do?
 			Fitness.numPositiveTests = Integer.parseInt(prop
 					.getProperty("pos-tests"));
 		} else {
@@ -111,18 +107,109 @@ public class Fitness<G extends EditOperation> {
 		} else {
 			Fitness.numNegativeTests = Fitness.negativeTests.size();
 		}
+
+		Fitness.configureTests();
 	}
 
-	private static ArrayList<String> getTests(String filename)
-			throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader(filename));
-		String line;
-		ArrayList<String> allLines = new ArrayList<String>();
-		while ((line = br.readLine()) != null) {
-			// print the line.
-			allLines.add(line);
+
+	public static void configureTests() {
+		ArrayList<String> addToPos = null, addToNeg = null, intermedPosTests = null, intermedNegTests = null;
+		try {
+			intermedPosTests = getTests(posTestFile);
+			intermedNegTests = getTests(negTestFile);
+			URLClassLoader urlClassLoader = null;
+
+			String[] testClassPathFolders = Configuration.testClassPath.split(":");
+			URL[] classLoaderUrls = new URL[testClassPathFolders.length];
+			try {
+				int i = 0;
+				for(String folder : testClassPathFolders) {
+					// URLClassLoader assumes that URLs that end with a slash are directories and those that don't are jars.
+					URL url = new URL("file://" + folder + "/");
+					classLoaderUrls[i] = url;
+					i++;
+				}
+				urlClassLoader = new URLClassLoader(classLoaderUrls);
+				addToPos = filterTests(intermedPosTests, intermedNegTests, urlClassLoader);
+				addToNeg = filterTests(intermedNegTests, intermedPosTests, urlClassLoader);
+			} catch(ClassNotFoundException e) {
+				logger.error("classNotFound exception in test filter, giving up");
+				Runtime.getRuntime().exit(1);
+			} catch(MalformedURLException e) {
+				logger.error("malformedURLException, indicating a problem with your test classPath, giving up");
+				Runtime.getRuntime().exit(1);
+			} finally {
+				if(urlClassLoader != null) 
+					urlClassLoader.close();
+			}
+		} catch(IOException e) {
+			// and this is why Java is the worst. 
+			// silently ignoring this on purpose: it happens if the urlclassloader fails to close
+			// which should never happen, and if it does, I don't care. W00t.
 		}
-		br.close();
+		if(addToPos != null && addToNeg != null && intermedPosTests != null && intermedNegTests != null) {
+			positiveTests.addAll(intermedPosTests);
+			positiveTests.addAll(addToPos);
+			negativeTests.addAll(intermedNegTests);
+			negativeTests.addAll(addToNeg);
+		}
+	}
+	
+	public static ArrayList<String> filterTests(ArrayList<String> toFilter, ArrayList<String> filterBy, URLClassLoader testClassLoader) throws ClassNotFoundException {
+		HashMap<String,List<String>> clazzAndMethods = new HashMap<String,List<String>>();
+
+		// stuff in negative tests, must remove class from positive test list and add non-negative tests to list
+		for(String specifiedMethod : filterBy) {
+			if(specifiedMethod.contains("::")) {
+				String[] split = specifiedMethod.split("::");
+				List<String> methodList = null;
+				if(!clazzAndMethods.containsKey(split[0])) {
+					methodList = new ArrayList<String>();
+					clazzAndMethods.put(split[0],  methodList);
+				} else {
+					methodList = clazzAndMethods.get(split[0]);
+				}
+				methodList.add(split[1]);
+			}
+		}
+
+		ArrayList<String> toAdd = new ArrayList<String>();
+		Set<String> clazzes = clazzAndMethods.keySet();
+		for(String clazzName : clazzes) {
+			List<String> specificMethods = clazzAndMethods.get(clazzName);
+			// some of the tests in that junit class are currently passing
+			// so we need to determine/specify which tests in particular should be run to pass vs. fail
+			if(toFilter.contains(clazzName)) {
+				toFilter.remove(clazzName); // stateful, right??
+				Class<?> testClazz = testClassLoader.loadClass(clazzName);
+				Method[] clazzMethods = testClazz.getMethods();
+				for(Method m : clazzMethods) {
+					String methodName = m.getName();
+					if(!specificMethods.contains(methodName)) {
+						toAdd.add(clazzName + "::" + methodName);
+					}
+				}
+			} else {
+				continue;
+			}
+		}
+		return toAdd;
+	}
+
+	private static ArrayList<String> getTests(String filename) {
+		ArrayList<String> allLines = new ArrayList<String>();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(filename));
+			String line;
+			allLines = new ArrayList<String>();
+			while ((line = br.readLine()) != null) {
+				allLines.add(line);
+			}
+			br.close();
+		} catch(IOException e) {
+			logger.error("failed to read " + filename + " giving up");
+			Runtime.getRuntime().exit(1);
+		}
 		return allLines;
 	}
 
@@ -141,7 +228,7 @@ public class Fitness<G extends EditOperation> {
 		}
 		return numPassed;
 	}
-	
+
 	/*
 	 * {b test_to_first_failure} variant returns true if the variant passes all
 	 * test cases and false otherwise; unlike other search strategies and as an
@@ -169,16 +256,16 @@ public class Fitness<G extends EditOperation> {
 		Long L = Math.round(sample * Fitness.numPositiveTests);
 		int sampleSize = Integer.valueOf(L.intValue());
 		Collections.shuffle(allPositiveTests, Configuration.randomizer);
-		Fitness.testSample = allPositiveTests.subList(0,sampleSize); //FIXME: make sure no off-by-one
-		Fitness.restSample = allPositiveTests.subList(sampleSize, allPositiveTests.size());
+		Fitness.testSample = allPositiveTests.subList(0,sampleSize-1); 
+		Fitness.restSample = allPositiveTests.subList(sampleSize, allPositiveTests.size()-1);
 	}
-	
+
 	private Pair<Double,Double> testFitnessSample(Representation<G> rep, double fac) {
 		int numNegPassed = this.testPassCount(rep,false,TestType.NEGATIVE, GlobalUtils.range(1, Fitness.numNegativeTests));
 		int numPosPassed = this.testPassCount(rep,false,TestType.POSITIVE, testSample);
 		int numRestPassed = 0;
 		if((numNegPassed == Fitness.numNegativeTests) &&
-			(numPosPassed == testSample.size())) {
+				(numPosPassed == testSample.size())) {
 			if(Fitness.sample < 1.0) { // restSample won't be null by definition here
 				numRestPassed = this.testPassCount(rep, false, TestType.POSITIVE, restSample);				
 			}
@@ -187,7 +274,7 @@ public class Fitness<G extends EditOperation> {
 		double totalFitness = sampleFitness + numRestPassed;
 		return new Pair<Double,Double>(totalFitness,sampleFitness);
 	}
-	
+
 	private Pair<Double, Double> testFitnessFull(Representation<G> rep,
 			double fac) {
 		double fitness = 0.0;
@@ -235,10 +322,10 @@ public class Fitness<G extends EditOperation> {
 		Pair<Double, Double> fitnessPair = new Pair<Double, Double>(-1.0, -1.0);
 		if (Fitness.sample < 1.0) {
 			if (((Fitness.sampleStrategy == "generation") && (Fitness.generation != generation)) ||
-				(Fitness.sampleStrategy == "variant")) {
-						generation = Fitness.generation;
-						Fitness.resample();
-				} 	
+					(Fitness.sampleStrategy == "variant")) {
+				generation = Fitness.generation;
+				Fitness.resample();
+			} 	
 			fitnessPair = this.testFitnessSample(rep, fac);
 		} else {
 			fitnessPair = this.testFitnessFull(rep, fac);
