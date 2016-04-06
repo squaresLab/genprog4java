@@ -12,10 +12,10 @@
 #cp runGenProgForBug.bash ./genprog4java/defects4jStuff/
 
 #Mau runs it like this:
-#./runGenProgForBug.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ allHuman 100
+#./runGenProgForBug.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ allHuman 100 /home/mau/Research/defects4j/ExamplesCheckedOut/ 1 5
 
 #VM:
-#./runGenProgForBug.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/ allHuman 100
+#./runGenProgForBug.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/ allHuman 100 /home/ubuntu/defects4j/ExamplesCheckedOut/ 1 5
 
 if [ "$#" -ne 6 ]; then
     echo "This script should be run with 6 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size"
@@ -118,8 +118,8 @@ cd $BUGWD/$WD
 #cd $BUGWD/$WD
 
 
-#for (( seed=$STARTSEED; seed<=$UNTILSEED; seed++ ))
-for seed in {0..20..2} #0 to 20, increments of 2
+for (( seed=$STARTSEED; seed<=$UNTILSEED; seed++ ))
+#for seed in {0..20..2} #0 to 20, increments of 2
   do	
 	echo "RUNNING THE BUG: $PROJECT $BUGNUMBER, WITH THE SEED: $seed"
 	
