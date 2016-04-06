@@ -38,7 +38,8 @@ public class JavaMethodReplacer extends JavaEditOperation {
 		MethodInvocation newNode = locationNode.getAST().newMethodInvocation();
 		SimpleName newMethodName = locationNode.getAST().newSimpleName(replaceWith.getName());
 		newNode.setName(newMethodName);
-		List<ASTNode> paramNodes = ((MethodInvocation) locationNode).arguments();
+		
+		List<ASTNode> paramNodes = ((MethodInvocation) toReplace).arguments();
 		for(ASTNode param : paramNodes) {
 			ASTNode newParam = rewriter.createCopyTarget(param);
 			newNode.arguments().add(newParam);
