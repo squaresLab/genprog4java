@@ -43,6 +43,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -60,7 +61,9 @@ public class Fitness<G extends EditOperation> {
 	protected static Logger logger = Logger.getLogger(Fitness.class);
 
 	private static int generation = -1;
-	private static List<Integer> testSample = GlobalUtils.range(1,Fitness.numPositiveTests);
+	// FIXME: we're already doing sampling, so note to self to kill it in the genprog setup scripts and just pass
+	// the desired sample size to genprog via the config.
+	private static List<Integer> testSample = GlobalUtils.range(1,Fitness.numPositiveTests); // FIXME: THIS IS WRONG
 	private static List<Integer> restSample = null;
 
 	private static double negativeTestWeight = 2.0;
@@ -113,87 +116,52 @@ public class Fitness<G extends EditOperation> {
 
 
 	public static void configureTests() {
-		ArrayList<String> addToPos = null, addToNeg = null, intermedPosTests = null, intermedNegTests = null;
-		try {
-			intermedPosTests = getTests(posTestFile);
-			intermedNegTests = getTests(negTestFile);
-			URLClassLoader urlClassLoader = null;
+		ArrayList<String> intermedPosTests = null, intermedNegTests = null;
 
-			String[] testClassPathFolders = Configuration.testClassPath.split(":");
-			URL[] classLoaderUrls = new URL[testClassPathFolders.length];
-			try {
-				int i = 0;
-				for(String folder : testClassPathFolders) {
-					// URLClassLoader assumes that URLs that end with a slash are directories and those that don't are jars.
-					URL url = new URL("file://" + folder + "/");
-					classLoaderUrls[i] = url;
-					i++;
-				}
-				urlClassLoader = new URLClassLoader(classLoaderUrls);
-				addToPos = filterTests(intermedPosTests, intermedNegTests, urlClassLoader);
-				addToNeg = filterTests(intermedNegTests, intermedPosTests, urlClassLoader);
-			} catch(ClassNotFoundException e) {
-				logger.error("classNotFound exception in test filter, giving up");
-				Runtime.getRuntime().exit(1);
-			} catch(MalformedURLException e) {
-				logger.error("malformedURLException, indicating a problem with your test classPath, giving up");
-				Runtime.getRuntime().exit(1);
-			} finally {
-				if(urlClassLoader != null) 
-					urlClassLoader.close();
-			}
-		} catch(IOException e) {
-			// and this is why Java is the worst. 
-			// silently ignoring this on purpose: it happens if the urlclassloader fails to close
-			// which should never happen, and if it does, I don't care. W00t.
-		}
-		if(addToPos != null && addToNeg != null && intermedPosTests != null && intermedNegTests != null) {
-			positiveTests.addAll(intermedPosTests);
-			positiveTests.addAll(addToPos);
-			negativeTests.addAll(intermedNegTests);
-			negativeTests.addAll(addToNeg);
-		}
+		intermedPosTests = getTests(posTestFile);
+		intermedNegTests = getTests(negTestFile);
+
+		filterTests(intermedPosTests, intermedNegTests);
+		filterTests(intermedNegTests, intermedPosTests);
+		positiveTests.addAll(intermedPosTests);
+		negativeTests.addAll(intermedNegTests);
 	}
-	
-	public static ArrayList<String> filterTests(ArrayList<String> toFilter, ArrayList<String> filterBy, URLClassLoader testClassLoader) throws ClassNotFoundException {
-		HashMap<String,List<String>> clazzAndMethods = new HashMap<String,List<String>>();
 
+	public static void filterTests(ArrayList<String> toFilter, ArrayList<String> filterBy) {
+		HashSet<String> clazzesInFilterSet = new HashSet<String>();
+		HashSet<String> removeFromFilterSet = new HashSet<String>();
+		
 		// stuff in negative tests, must remove class from positive test list and add non-negative tests to list
 		for(String specifiedMethod : filterBy) {
-			if(specifiedMethod.contains("::")) {
+			if(specifiedMethod.contains("::")) { 
+				// remove from toFilter all tests that have this class name
+				// remove from filterBy this particular entry and replace it with just the className
 				String[] split = specifiedMethod.split("::");
-				List<String> methodList = null;
-				if(!clazzAndMethods.containsKey(split[0])) {
-					methodList = new ArrayList<String>();
-					clazzAndMethods.put(split[0],  methodList);
-				} else {
-					methodList = clazzAndMethods.get(split[0]);
-				}
-				methodList.add(split[1]);
+				clazzesInFilterSet.add(split[0]);
+				removeFromFilterSet.add(specifiedMethod);
 			}
 		}
-
-		ArrayList<String> toAdd = new ArrayList<String>();
-		Set<String> clazzes = clazzAndMethods.keySet();
-		for(String clazzName : clazzes) {
-			List<String> specificMethods = clazzAndMethods.get(clazzName);
-			// some of the tests in that junit class are currently passing
-			// so we need to determine/specify which tests in particular should be run to pass vs. fail
-			if(toFilter.contains(clazzName)) {
-				toFilter.remove(clazzName); // stateful, right??
-				Class<?> testClazz = testClassLoader.loadClass(clazzName);
-				Method[] clazzMethods = testClazz.getMethods();
-				for(Method m : clazzMethods) {
-					String methodName = m.getName();
-					if(!specificMethods.contains(methodName)) {
-						toAdd.add(clazzName + "::" + methodName);
-					}
-				}
+		for(String removeFromFilterBy : removeFromFilterSet ) {
+			filterBy.remove(removeFromFilterBy);
+		}
+		filterBy.addAll(clazzesInFilterSet);
+		
+		HashSet<String> removeFromFilteredSet = new HashSet<String>();
+		for(String testNameInToFilter : toFilter ) {
+			String clazzName = "";
+			if(testNameInToFilter.contains("::")) {
+				String[] split = testNameInToFilter.split("::");
+				clazzName = split[0];
 			} else {
-				continue;
+				clazzName = testNameInToFilter;
+			}
+			if(clazzesInFilterSet.contains(clazzName)) {
+				removeFromFilteredSet.add(testNameInToFilter);
 			}
 		}
-		return toAdd;
+		for(String removeFromFiltered : removeFromFilteredSet) {
+			toFilter.remove(removeFromFiltered);
+		}
 	}
 
 	private static ArrayList<String> getTests(String filename) {
