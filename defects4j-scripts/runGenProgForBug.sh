@@ -38,10 +38,8 @@ LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 #Add the path of defects4j so the defects4j's commands run 
 export PATH=$PATH:$DEFECTS4JDIR/framework/bin
 
-PARENTDIR=$BUGSFOLDER
-
 # directory with the checked out buggy project
-BUGWD=$PARENTDIR"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
+BUGWD=$BUGSFOLDER"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
 
 
 #Compile Genprog and put the class files in /bin
