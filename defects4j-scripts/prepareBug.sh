@@ -6,6 +6,7 @@
 # 4td param: defects4j installation (ex: "/home/mau/Research/defects4j/" )
 # 5th param: testing option (ex: humanMade, generated)
 # 6th param: test suite sample size (ex: 1, 100)
+# 7th param is the folder where the bug files will be cloned to
 
 # Example usage, local for Mau
 #./prepareBug.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ humanMade 100
@@ -30,8 +31,9 @@ GENPROGDIR="$3"
 DEFECTS4JDIR="$4"
 OPTION="$5"
 TESTSUITEPERCENTAGE="$6"
+BUGSFOLDER="$7"
 
-PARENTDIR=$DEFECTS4JDIR"/ExamplesCheckedOut"
+PARENTDIR=$BUGSFOLDER
 
 
 #Add the path of defects4j so the defects4j's commands run 
@@ -49,7 +51,7 @@ BUGWD=$PARENTDIR"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
 
 #Checkout the buggy and fixed versions of the code (latter to make second testsuite
 defects4j checkout -p $1 -v "$BUGNUMBER"b -w $BUGWD
-defects4j checkout -p $1 -v "$BUGNUMBER"f -w "$DEFECTS4JDIR/"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Fixed
+defects4j checkout -p $1 -v "$BUGNUMBER"f -w $BUGSFOLDER/$LOWERCASEPACKAGE"$2"Fixed
 
 #Compile the both buggy and fixed code
 for dir in Buggy Fixed
@@ -68,7 +70,7 @@ if [ "$LOWERCASEPACKAGE" = "lang" ] ; then
     cp "$3"defects4j-scripts/Utilities/EntityArrays.java $BUGWD/src/main/java/org/apache/commons/lang3/text/translate/
 fi
 
-cd $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
+cd $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
 TESTWD=`defects4j export -p dir.src.tests`
 SRCFOLDER=`defects4j export -p dir.bin.classes`
 COMPILECP=`defects4j export -p cp.compile`
@@ -78,37 +80,37 @@ cd $BUGWD/$WD
 
 #Create file to run defects4j compile
 
-FILE="$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
+FILE=$BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 /bin/cat <<EOM >$FILE
 #!/bin/bash
-cd $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
+cd $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
 $DEFECTS4JDIR/framework/bin/defects4j compile
 EOM
 
-chmod 777 "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
+chmod 777 $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 
 
 cd $BUGWD
 
 #Create config file 
-FILE="$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/defects4j.config
+FILE=$BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/defects4j.config
 /bin/cat <<EOM >$FILE
 popsize = 20
 seed = 0
 javaVM = /usr/bin/java
-workingDir = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
-outputDir = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/tmp
+workingDir = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
+outputDir = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/tmp
 classSourceFolder = $SRCFOLDER
 libs = $CONFIGLIBS
 sanity = yes
 regenPaths
 sourceDir = $WD
-positiveTests = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/pos.tests
-negativeTests = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/neg.tests
+positiveTests = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/pos.tests
+negativeTests = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/neg.tests
 jacocoPath = $3/lib/jacocoagent.jar
 testClassPath=$TESTCP
 srcClassPath=$COMPILECP
-compileCommand = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
+compileCommand = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 targetClassName = $BUGWD/bugfiles.txt
 EOM
 
@@ -144,12 +146,12 @@ esac
 # FIXME: make this nicer
 
 #Remove a percentage of the positive tests in the test suite
-cd "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
+cd $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
 
 if [[ $TESTSUITEPERCENTAGE -ne 100 ]]
 then
     PERCENTAGETOREMOVE=$(echo "$TESTSUITEPERCENTAGE * 0.01" | bc -l )
-    echo "sample = $PERCENTAGETOREMOVE" >> "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/defects4j.config
+    echo "sample = $PERCENTAGETOREMOVE" >> $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/defects4j.config
 fi
 
 # get the class names to be repaired
@@ -158,4 +160,4 @@ fi
 defects4j export -p classes.modified > $BUGWD/bugfiles.txt
 
 echo "This is the working directory: "
-echo $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$WD
+echo $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/$WD
