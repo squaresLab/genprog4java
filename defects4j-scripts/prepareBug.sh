@@ -47,10 +47,8 @@ LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 # directory with the checked out buggy project
 BUGWD=$PARENTDIR"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
 
-#Checkout the buggy version of the code
+#Checkout the buggy and fixed versions of the code (latter to make second testsuite
 defects4j checkout -p $1 -v "$BUGNUMBER"b -w $BUGWD
-
-#Checkout the fixed version of the code, primarily to make the second test suite
 defects4j checkout -p $1 -v "$BUGNUMBER"f -w "$DEFECTS4JDIR/"ExamplesCheckedOut/$LOWERCASEPACKAGE"$2"Fixed
 
 #Compile the both buggy and fixed code
@@ -60,11 +58,6 @@ do
     defects4j compile
     popd
 done
-
-#Specific variables per project
-#TESTWD: location of project test files (relative to root)
-#WD: location of project src files (relative to root)
-#CONFIGLIBS: libraries to be included in the configuration file so that GenProg can run it.
 
 # Common genprog libs: junit test runner and the like
 
@@ -88,8 +81,6 @@ cd $BUGWD/$WD
 FILE="$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 /bin/cat <<EOM >$FILE
 #!/bin/bash
-export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/
-export PATH=$JAVA_HOME/bin/:$PATH
 cd $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
 $DEFECTS4JDIR/framework/bin/defects4j compile
 EOM
@@ -107,6 +98,7 @@ seed = 0
 javaVM = /usr/bin/java
 workingDir = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
 outputDir = $DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/tmp
+classSourceFolder = $SRCFOLDER
 libs = $CONFIGLIBS
 sanity = yes
 regenPaths
@@ -156,32 +148,12 @@ cd "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/
 
 if [[ $TESTSUITEPERCENTAGE -ne 100 ]]
 then
-TESTCOUNT=$(cat pos.tests | wc -l)
-
-PERCENTAGETOREMOVE=$(echo "$TESTSUITEPERCENTAGE * 0.01" | bc -l )
-
-PERCENTAGETOREMOVE=$(echo "1-$PERCENTAGETOREMOVE" | bc -l )
-
-TESTCOUNT=$(echo "$TESTCOUNT * $PERCENTAGETOREMOVE" | bc -l )
-
-TESTCOUNT=$(echo "($TESTCOUNT+0.5)/1" | bc)
-
-DELETELINES="sed -i -e 1,"$TESTCOUNT"d pos.tests"
-
-eval $DELETELINES
-
+    PERCENTAGETOREMOVE=$(echo "$TESTSUITEPERCENTAGE * 0.01" | bc -l )
+    echo "sample = $PERCENTAGETOREMOVE" >> "$DEFECTS4JDIR"/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/defects4j.config
 fi
-
-TESTCOUNT=$(cat pos.tests | wc -l)
-
-echo "The positive tests file has $TESTCOUNT lines. Which is a $TESTSUITEPERCENTAGE% of the original amount of test cases."
-
-
 
 # get the class names to be repaired
 
-
-echo "GETTING CLASS NAMES"
 
 defects4j export -p classes.modified > $BUGWD/bugfiles.txt
 
