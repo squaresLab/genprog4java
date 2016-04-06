@@ -983,7 +983,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		case LBOUNDSET:
 		case RANGECHECK:
 			return locationStmt.containsArrayAccesses();
-		case FUNREP:
+		case FUNREP: 
 			return locationStmt.methodReplacerApplies(methodDecls);
 		case NULLCHECK: 
 			return locationStmt.nullCheckApplies();

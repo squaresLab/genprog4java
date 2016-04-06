@@ -222,7 +222,7 @@ public class JavaStatement {
 	private Map<ASTNode, List<MethodInfo>> candidateReplacements = null;
 	public Map<ASTNode, List<ASTNode>> getMethodReplacements() { return methodReplacements; }
 	public Map<ASTNode, List<MethodInfo>> getCandidateReplacements() { return candidateReplacements; }
-	
+
 	private ArrayList<ITypeBinding> paramsToTypes(List<SingleVariableDeclaration> params) {
 		int i = 0; 
 		ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>();
@@ -238,6 +238,7 @@ public class JavaStatement {
 			methodReplacements = new HashMap<ASTNode, List<ASTNode>>();
 			candidateReplacements = new HashMap<ASTNode, List<MethodInfo>>();
 
+			// (sort of doing that already....)
 			this.getASTNode().accept(new ASTVisitor() {
 				// method to visit all Expressions relevant for this in locationNode and
 				// store their parents
@@ -250,6 +251,9 @@ public class JavaStatement {
 					ITypeBinding thisReturnType = invokedMethod.getReturnType();
 
 					for(MethodInfo mi : methodDecls) {
+						IMethodBinding optionMethodBinding = mi.getNode().resolveBinding();
+						if(optionMethodBinding.equals(invokedMethod)) // don't include self as valid replacement
+							continue;
 						if((mi.getNumArgs() == paramTypes.size())) {
 							ITypeBinding candReturnType = mi.getReturnType().resolveBinding();
 							if(candReturnType.isAssignmentCompatible(thisReturnType)) {

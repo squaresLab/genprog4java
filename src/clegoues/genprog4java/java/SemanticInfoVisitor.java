@@ -135,7 +135,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 		if(node.isConstructor() || node.isVarargs()) return true; // ain't nobody got time for that
 		else {
-		this.methodDecls.add(new MethodInfo(node.getName().getIdentifier(),node.parameters().size(),node.getReturnType2(), node.parameters()));
+		this.methodDecls.add(new MethodInfo(node.getName().getIdentifier(),node.parameters().size(),node.getReturnType2(), node.parameters(), node));
 		}
 
 		for (Object o : node.parameters()) {
