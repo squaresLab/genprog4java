@@ -28,7 +28,7 @@ GENPROGDIR="$3"
 DEFECTS4JDIR="$4"
 OPTION="$5"
 TESTSUITEPERCENTAGE="$6"
-
+BUGSFOLDER="$7"
 STARTSEED="$8"
 UNTILSEED="$9"
 
@@ -38,7 +38,7 @@ LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 #Add the path of defects4j so the defects4j's commands run 
 export PATH=$PATH:$DEFECTS4JDIR/framework/bin
 
-PARENTDIR=$DEFECTS4JDIR"/ExamplesCheckedOut"
+PARENTDIR=$BUGSFOLDER
 
 # directory with the checked out buggy project
 BUGWD=$PARENTDIR"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
@@ -123,15 +123,15 @@ for seed in {0..20..2} #0 to 20, increments of 2
   do	
 	echo "RUNNING THE BUG: $PROJECT $BUGNUMBER, WITH THE SEED: $seed"
 	
-	CHANGESEEDCOMMAND="sed -i '2s/.*/seed = $seed/' ""$DEFECTS4JDIR"/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/defects4j.config
+	CHANGESEEDCOMMAND="sed -i '2s/.*/seed = $seed/' "$BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/defects4j.config
 
 	eval $CHANGESEEDCOMMAND
 
-	$JAVALOCATION -ea -Dlog4j.configuration=file:"$GENPROGDIR"/src/log4j.properties -Dfile.encoding=UTF-8 -classpath "$GENPROGDIR"/bin:/usr/share/eclipse/dropins/jdt/plugins/org.junit_4.8.2.dist/junit.jar:/usr/share/eclipse/dropins/jdt/plugins/org.hamcrest.core_1.3.0.jar:"$GENPROGDIR"/lib/commons-cli-1.1.jar:"$GENPROGDIR"/lib/commons-collections-3.2.1.jar:"$GENPROGDIR"/lib/commons-exec-1.0.0-SNAPSHOT.jar:"$GENPROGDIR"/lib/commons-io-1.4.jar:"$GENPROGDIR"/lib/jstests.jar:"$GENPROGDIR"/lib/junit-4.10.jar:"$GENPROGDIR"/lib/org.eclipse.core.commands_3.6.0.I20100512-1500.jar:"$GENPROGDIR"/lib/org.eclipse.core.contenttype_3.4.100.v20100505-1235.jar:"$GENPROGDIR"/lib/org.eclipse.core.jobs_3.5.1.R36x_v20100824.jar:"$GENPROGDIR"/lib/org.eclipse.core.resources_3.6.0.R36x_v20100825-0600.jar:"$GENPROGDIR"/lib/org.eclipse.core.runtime_3.6.0.v20100505.jar:"$GENPROGDIR"/lib/org.eclipse.core.runtime.compatibility_3.2.100.v20100505.jar:"$GENPROGDIR"/lib/org.eclipse.equinox.common_3.6.0.v20100503.jar:"$GENPROGDIR"/lib/org.eclipse.equinox.preferences_3.3.0.v20100503.jar:"$GENPROGDIR"/lib/org.eclipse.jdt_3.6.1.v201009090800.jar:"$GENPROGDIR"/lib/org.eclipse.jdt.ui_3.6.1.r361_v20100825-0800.jar:"$GENPROGDIR"/lib/org.eclipse.jface_3.6.1.M20100825-0800.jar:"$GENPROGDIR"/lib/org.eclipse.jface.text_3.6.1.r361_v20100825-0800.jar:"$GENPROGDIR"/lib/org.eclipse.osgi_3.6.1.R36x_v20100806.jar:"$GENPROGDIR"/lib/org.eclipse.osgi.services_3.2.100.v20100503.jar:"$GENPROGDIR"/lib/org.eclipse.osgi.util_3.2.100.v20100503.jar:"$GENPROGDIR"/lib/org.eclipse.text_3.5.0.v20100601-1300.jar:"$GENPROGDIR"/lib/org.eclipse.jdt.core_3.6.1.v_A68_R36x.jar:"$GENPROGDIR"/lib/log4j-1.2.17.jar:"$GENPROGDIR"/lib/org.jacoco.agent-0.7.6.201511241051.jar:"$GENPROGDIR"/lib/org.jacoco.core-0.7.6.201511241051.jar:"$GENPROGDIR"/lib/jacocoagent.jar:"$GENPROGDIR"/lib/asm-all-5.0.4.jar clegoues.genprog4java.main.Main "$DEFECTS4JDIR"/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/defects4j.config | tee "$DEFECTS4JDIR"/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/logBug"$BUGNUMBER"Seed$seed.txt
+	$JAVALOCATION -ea -Dlog4j.configuration=file:"$GENPROGDIR"/src/log4j.properties -Dfile.encoding=UTF-8 -classpath "$GENPROGDIR"/bin:/usr/share/eclipse/dropins/jdt/plugins/org.junit_4.8.2.dist/junit.jar:/usr/share/eclipse/dropins/jdt/plugins/org.hamcrest.core_1.3.0.jar:"$GENPROGDIR"/lib/commons-cli-1.1.jar:"$GENPROGDIR"/lib/commons-collections-3.2.1.jar:"$GENPROGDIR"/lib/commons-exec-1.0.0-SNAPSHOT.jar:"$GENPROGDIR"/lib/commons-io-1.4.jar:"$GENPROGDIR"/lib/jstests.jar:"$GENPROGDIR"/lib/junit-4.10.jar:"$GENPROGDIR"/lib/org.eclipse.core.commands_3.6.0.I20100512-1500.jar:"$GENPROGDIR"/lib/org.eclipse.core.contenttype_3.4.100.v20100505-1235.jar:"$GENPROGDIR"/lib/org.eclipse.core.jobs_3.5.1.R36x_v20100824.jar:"$GENPROGDIR"/lib/org.eclipse.core.resources_3.6.0.R36x_v20100825-0600.jar:"$GENPROGDIR"/lib/org.eclipse.core.runtime_3.6.0.v20100505.jar:"$GENPROGDIR"/lib/org.eclipse.core.runtime.compatibility_3.2.100.v20100505.jar:"$GENPROGDIR"/lib/org.eclipse.equinox.common_3.6.0.v20100503.jar:"$GENPROGDIR"/lib/org.eclipse.equinox.preferences_3.3.0.v20100503.jar:"$GENPROGDIR"/lib/org.eclipse.jdt_3.6.1.v201009090800.jar:"$GENPROGDIR"/lib/org.eclipse.jdt.ui_3.6.1.r361_v20100825-0800.jar:"$GENPROGDIR"/lib/org.eclipse.jface_3.6.1.M20100825-0800.jar:"$GENPROGDIR"/lib/org.eclipse.jface.text_3.6.1.r361_v20100825-0800.jar:"$GENPROGDIR"/lib/org.eclipse.osgi_3.6.1.R36x_v20100806.jar:"$GENPROGDIR"/lib/org.eclipse.osgi.services_3.2.100.v20100503.jar:"$GENPROGDIR"/lib/org.eclipse.osgi.util_3.2.100.v20100503.jar:"$GENPROGDIR"/lib/org.eclipse.text_3.5.0.v20100601-1300.jar:"$GENPROGDIR"/lib/org.eclipse.jdt.core_3.6.1.v_A68_R36x.jar:"$GENPROGDIR"/lib/log4j-1.2.17.jar:"$GENPROGDIR"/lib/org.jacoco.agent-0.7.6.201511241051.jar:"$GENPROGDIR"/lib/org.jacoco.core-0.7.6.201511241051.jar:"$GENPROGDIR"/lib/jacocoagent.jar:"$GENPROGDIR"/lib/asm-all-5.0.4.jar clegoues.genprog4java.main.Main $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/defects4j.config | tee $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/logBug"$BUGNUMBER"Seed$seed.txt
 
 
 	#Save the variants in a tar file
-	tar -cvf "$DEFECTS4JDIR"/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/variants"$PROJECT""$BUGNUMBER"Seed$seed.tar "$DEFECTS4JDIR"/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/tmp/
+	tar -cvf $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/variants"$PROJECT""$BUGNUMBER"Seed$seed.tar $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/tmp/
 
  done
 
