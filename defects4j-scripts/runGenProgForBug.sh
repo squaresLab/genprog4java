@@ -76,37 +76,6 @@ cd "$GENPROGDIR"/defects4j-scripts/
 
 
 
-#Specific variables per every project
-if [ $LOWERCASEPACKAGE = "chart" ]; then
-#NEED TO CHANGE WD BECAUSE TESTS IS IN THE ROOT
-#  TESTSDIR=tests.org.jfree
-  WD=source
-#  JAVADIR=org/jfree
-
-elif [ $LOWERCASEPACKAGE = "closure" ]; then
-#NEED TO CHANGE WD BECAUSE TESTS IS IN THE ROOT
-#  TESTSDIR=test.com.google
-  WD=src
-#  JAVADIR=com/google
-
-elif [ $LOWERCASEPACKAGE = "lang" ]; then
-#  TESTSDIR=src.test.java.org.apache.commons.lang3
-  WD=src/main/java
-#  JAVADIR=org/apache/commons/lang3 
-
-elif [ $LOWERCASEPACKAGE = "math" ]; then 
-#  TESTSDIR=src.test.java.org.apache.commons.math3
-  WD=src/main/java
-#  JAVADIR=org/apache/commons/math3
-
-elif [ $LOWERCASEPACKAGE = "time" ]; then
-#  TESTSDIR=src.test.java.org.joda.time
-  WD=src/main/java
-#  JAVADIR=org/joda/time
-
-fi
-
-
 JAVALOCATION=$(which java)
 
 #Go to the working directory
