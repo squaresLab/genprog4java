@@ -48,7 +48,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.Search.Population;
-import clegoues.genprog4java.Search.Search;
+import clegoues.genprog4java.Search.GeneticProgramming;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.FaultLocRepresentation;
@@ -157,7 +157,7 @@ public class Configuration {
 		//saveTargetFiles();
 	
 		
-		Search.configure(prop);
+		GeneticProgramming.configure(prop);
 		Population.configure(prop);
 		Fitness.configure(prop);
 		JavaRepresentation.configure(prop);

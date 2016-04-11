@@ -41,7 +41,7 @@ import org.apache.log4j.BasicConfigurator;
 
 import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.RepairFoundException;
-import clegoues.genprog4java.Search.Search;
+import clegoues.genprog4java.Search.GeneticProgramming;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
@@ -54,7 +54,7 @@ public class Main {
 
 	public static void main(String[] args) throws IOException,
 			UnexpectedCoverageResultException {
-		Search searchEngine = null;
+		GeneticProgramming searchEngine = null;
 		Representation baseRep = null;
 		Fitness fitnessEngine = null;
 		Population incomingPopulation = null;
@@ -69,13 +69,13 @@ public class Main {
 		logger.info("Configuration file loaded");
 		
 		if (Configuration.globalExtension == ".java") {
-			if (Search.searchStrategy.equals("io")) {
+			if (GeneticProgramming.searchStrategy.equals("io")) {
 				baseRep = (Representation) new LocalizationRepresentation();
 			} else {
 				baseRep = (Representation) new JavaRepresentation();
 			}
 			fitnessEngine = new Fitness<JavaEditOperation>();
-			searchEngine = new Search<JavaEditOperation>(fitnessEngine);
+			searchEngine = new GeneticProgramming<JavaEditOperation>(fitnessEngine);
 			incomingPopulation = new Population<JavaEditOperation>(); 
 		}
 		// loads the class file into the representation.
@@ -86,7 +86,7 @@ public class Main {
 		baseRep.load(Configuration.targetClassNames);
 
 		try {
-			switch (Search.searchStrategy) {
+			switch (GeneticProgramming.searchStrategy) {
 			case "ga":
 				searchEngine.geneticAlgorithm(baseRep, incomingPopulation);
 				break;

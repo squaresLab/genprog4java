@@ -51,7 +51,7 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-import clegoues.genprog4java.Search.Search;
+import clegoues.genprog4java.Search.GeneticProgramming;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.fitness.TestType;
@@ -233,7 +233,7 @@ CachingRepresentation<G> {
 
 	public TreeSet<Pair<Mutation, Double>> availableMutations(int atomId) {
 		TreeSet<Pair<Mutation, Double>> retVal = new TreeSet<Pair<Mutation, Double>>();
-		for (Map.Entry mutation : Search.availableMutations.entrySet()) {
+		for (Map.Entry mutation : GeneticProgramming.availableMutations.entrySet()) {
 			if(this.doesEditApply(atomId, (Mutation) mutation.getKey())) {
 				retVal.add(new Pair<Mutation,Double>((Mutation) mutation.getKey(), (Double) mutation.getValue()));
 			}
