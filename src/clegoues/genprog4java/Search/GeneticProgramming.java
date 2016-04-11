@@ -55,101 +55,32 @@ import clegoues.genprog4java.util.GlobalUtils;
 import clegoues.genprog4java.util.Pair;
 
 @SuppressWarnings("rawtypes")
-public class Search<G extends EditOperation> {
-	protected Logger logger = Logger.getLogger(Search.class);
-
-	private static int generations = 10;
+public class GeneticProgramming<G extends EditOperation> extends Search {
 	//The proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
 	private static double promut = 1; 
-	private static boolean continueSearch = false;
-
-	//20 mutations 1/20 = 0.05
-	public static HashMap<Mutation,Double> availableMutations = new HashMap<Mutation,Double>();
 
 	private static String startingGenome = "";
 	public static String searchStrategy = "ga";
 	private Fitness<G> fitnessEngine = null;
 	private int generationsRun = 0;
 
-	public Search(Fitness<G> engine) {
+	public GeneticProgramming(Fitness<G> engine) {
 		this.fitnessEngine = engine;
 	}
 
-	public static void parseEdits(String[] editList, Boolean withWeight) {
-		for(String oneItem : editList) {
-			String edit = "";
-			Double weight = 1.0;
-			if(withWeight) {
-				String[] editAndWeight = oneItem.split(",");
-				edit = editAndWeight[0];
-				weight = Double.parseDouble(editAndWeight[1]);
-			} else {
-				edit = oneItem;
-			}
-			switch(edit.toLowerCase()) {
-			case "append": availableMutations.put(Mutation.APPEND, weight); break;
-			case "swap":  availableMutations.put(Mutation.SWAP, weight); break;
-			case "delete":  availableMutations.put(Mutation.DELETE, weight); break;
-			case "replace":  availableMutations.put(Mutation.REPLACE, weight); break;
-			case "nullinsert":  availableMutations.put(Mutation.NULLINSERT, weight); break;
-			case "funrep":  availableMutations.put(Mutation.FUNREP, weight); break;
-			case "parrep":  availableMutations.put(Mutation.PARREP, weight); break;
-			case "paradd":  availableMutations.put(Mutation.PARADD, weight); break;
-			case "parrem":  availableMutations.put(Mutation.PARREM, weight); break;
-			case "exprep":  availableMutations.put(Mutation.EXPREP, weight); break;
-			case "expadd":  availableMutations.put(Mutation.EXPADD, weight); break;
-			case "exprem":  availableMutations.put(Mutation.EXPREM, weight); break;
-			case "nullcheck":  availableMutations.put(Mutation.NULLCHECK, weight); break;
-			case "objinit":  availableMutations.put(Mutation.OBJINIT, weight); break;
-			case "rangecheck":  availableMutations.put(Mutation.RANGECHECK, weight); break;
-			case "sizecheck":  availableMutations.put(Mutation.SIZECHECK, weight); break;
-			case "castcheck":  availableMutations.put(Mutation.CASTCHECK, weight); break;
-			case "lbset":  availableMutations.put(Mutation.LBOUNDSET, weight); break;
-			case "ubset":  availableMutations.put(Mutation.UBOUNDSET, weight); break;
-			case "offbyone":  availableMutations.put(Mutation.OFFBYONE, weight); break;
-			}
+	public static void configure(Properties props) { 
+		Search.configure(props);
+		if (props.getProperty("generations") != null) {
+			GeneticProgramming.generations = Integer.parseInt(props.getProperty(
+					"generations").trim());
 		}
-	}
-	public static void configure(Properties props) {
-		try {
-			if (props.getProperty("generations") != null) {
-				Search.generations = Integer.parseInt(props.getProperty(
-						"generations").trim());
-			}
-			if (props.getProperty("oracleGenome") != null) {
-				Search.startingGenome = props.getProperty("startingGenome").trim();
-			}
-			if (props.getProperty("promut") != null) {
-				Search.promut = Double.parseDouble(props.getProperty("pMutation")
-						.trim());
-			}
-			if (props.getProperty("continue") != null) {
-				Search.continueSearch = true;
-			}
-			if(props.getProperty("edits") != null) {
-				String edits = props.getProperty("edits");
-				edits = edits.toLowerCase().trim();
-				String[] editList = edits.split(";");
-				parseEdits(editList, false);
-			} else if (props.getProperty("editsWithWeights") != null) { 
-				String edits = props.getProperty("editsWithWeights");
-				edits = edits.toLowerCase().trim();
-				String[] editList = edits.split(",");
-				parseEdits(editList, true);
-			} else { // edits set to defaults
-				availableMutations.put(Mutation.APPEND, 1.0);
-				availableMutations.put(Mutation.REPLACE, 1.0);
-				availableMutations.put(Mutation.DELETE, 1.0); 
-			}
-
-			if (props.getProperty("search") != null) {
-				Search.searchStrategy = props.getProperty("search").trim();
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (props.getProperty("oracleGenome") != null) {
+			GeneticProgramming.startingGenome = props.getProperty("startingGenome").trim();
 		}
-
+		if (props.getProperty("promut") != null) {
+			GeneticProgramming.promut = Double.parseDouble(props.getProperty("pMutation")
+					.trim());
+		}
 	}
 
 	/*
@@ -178,27 +109,14 @@ public class Search<G extends EditOperation> {
 		rep.outputSource(repairFilename);
 	}
 
-	private TreeSet<WeightedAtom> rescaleAtomPairs(TreeSet<WeightedAtom> items) {
-		double fullSum = 0.0;
-		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for (Pair<?, Double> item : items) {
-			fullSum += item.getSecond();
-		}
-		double scale = 1.0 / fullSum;
-		for (WeightedAtom item : items) {
-			WeightedAtom newItem = new WeightedAtom(item.getAtom(),
-					item.getWeight() * scale);
-			retVal.add(newItem);
-		}
-		return retVal;
-	}
+
 
 	private boolean doWork(Representation<G> rep, Representation<G> original,
 			Mutation mut, int first, int second) {
 		rep.performEdit(mut, first, second);
 		if (fitnessEngine.testToFirstFailure(rep)) {
 			this.noteSuccess(rep, original, 1);
-			if (!Search.continueSearch) {
+			if (!GeneticProgramming.continueSearch) {
 				return true;
 			}
 		}
@@ -324,7 +242,7 @@ public class Search<G extends EditOperation> {
 			// "/" + sofar + "/" + count + "(w: " + probs +")" +
 			// rep.getName());
 			sofar++;
-			if (repairFound && !Search.continueSearch) {
+			if (repairFound && !GeneticProgramming.continueSearch) {
 				return true;
 			}
 		}
@@ -358,7 +276,7 @@ public class Search<G extends EditOperation> {
 		boolean foundMutationThatCanApplyToAtom = false;
 		while(!foundMutationThatCanApplyToAtom){
 			//promut default is 1
-			for (int i = 0; i < Search.promut; i++) {
+			for (int i = 0; i < GeneticProgramming.promut; i++) {
 				WeightedAtom wa = null;
 				boolean alreadyOnList = false;
 				//only adds the random atom if it is different from the others already added
@@ -439,8 +357,9 @@ public class Search<G extends EditOperation> {
 	 * 
 	 * @return initial_population generated by mutating the original
 	 */
-	private Population<G> initializeGa(Representation<G> original,
-			Population<G> incomingPopulation) throws RepairFoundException {
+	@Override
+	protected Population initializeSearch(Representation original, Population incomingPopulation)
+			throws RepairFoundException {
 		original.reduceSearchSpace();
 
 		Population<G> initialPopulation = incomingPopulation;
@@ -553,13 +472,13 @@ public class Search<G extends EditOperation> {
 			Population<G> incomingPopulation) throws
 			CloneNotSupportedException {
 		logger.info("search: genetic algorithm begins\n");
-		assert (Search.generations >= 0);
+		assert (GeneticProgramming.generations >= 0);
 
 		try {
-			Population<G> initialPopulation = this.initializeGa(original,
+			Population<G> initialPopulation = this.initializeSearch(original,
 					incomingPopulation);
 			generationsRun++;
-			this.runGa(1, Search.generations, initialPopulation, original);
+			this.runGa(1, GeneticProgramming.generations, initialPopulation, original);
 		} catch(RepairFoundException e) {
 			return;
 		}
@@ -576,13 +495,18 @@ public class Search<G extends EditOperation> {
 	 */
 	public void oracleSearch(Representation<G> original){
 		Representation<G> theRepair = original.copy();
-		theRepair.loadGenomeFromString(Search.startingGenome);
+		theRepair.loadGenomeFromString(GeneticProgramming.startingGenome);
 		assert (fitnessEngine.testToFirstFailure(theRepair));
 		this.noteSuccess(theRepair, original, 1);
 	}
 
+	public void rsRepair(Representation<G> original) {
+		
+	}
 	public void ioSearch(Representation<G> original) {
 		throw new UnsupportedOperationException();
 	}
+
+
 
 }
