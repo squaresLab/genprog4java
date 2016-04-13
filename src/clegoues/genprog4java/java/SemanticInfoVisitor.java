@@ -196,13 +196,14 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		}
 		
 		//if it is a final variable 
-		List<Modifier> modifiersOfTheVariableBeingDeclared = node.modifiers();
-		for(Modifier m : modifiersOfTheVariableBeingDeclared){
-			if(m.getKeyword().toString().equals("final")){
+		List modifiersOfTheVariableBeingDeclared = node.modifiers();
+		for(Object m : modifiersOfTheVariableBeingDeclared){
+			if(m instanceof Modifier && ((Modifier)m).getKeyword().toString().equals("final")){
 				VariableDeclarationFragment df = (VariableDeclarationFragment) node.fragments().get(0);
 				finalVariables.add(df.getName().getIdentifier());
 			}
 		}
+		
 		return super.visit(node);
 	}
 
