@@ -15,6 +15,9 @@ import clegoues.genprog4java.util.Pair;
 public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 	//The proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
 	private static double promut = 1; 
+	private static int generations = 10;
+	private int generationsRun = 0;
+
 	public GeneticProgramming(Fitness<G> engine) {
 		super(engine);
 	}
@@ -24,6 +27,11 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			GeneticProgramming.promut = Double.parseDouble(props.getProperty("pMutation")
 					.trim());
 		}
+		if (props.getProperty("generations") != null) {
+			GeneticProgramming.generations = Integer.parseInt(props.getProperty(
+					"generations").trim());
+		}
+
 	}
 	/*
 	 * 
@@ -179,18 +187,22 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 	 * 
 	 * @return population produced by this iteration *)
 	 */
-	protected void runAlgorithm(int startGen, int numGens,
-			Population<G> incomingPopulation, Representation<G> original) {
+	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation) throws RepairFoundException {
 		/*
 		 * the bulk of run_ga is performed by the recursive inner helper
 		 * function, which Claire modeled off the MatLab code sent to her by the
 		 * UNM team
 		 */
-		int gen = startGen;
-		while (gen < startGen + numGens) {
+		logger.info("search: genetic algorithm begins\n");
+
+		assert (GeneticProgramming.generations >= 0);
+		Population<G> incomingPopulation = this.initialize(original,
+				initialPopulation);
+		int gen = 1;
+		while (gen < GeneticProgramming.generations) {
 			logger.info("search: generation" + gen);
 			generationsRun++;
-			assert (incomingPopulation.getPopsize() > 0);
+			assert (initialPopulation.getPopsize() > 0);
 			// Step 1: selection
 			logger.info("before selection, generation: " + gen + " incoming popsize: " + incomingPopulation.size());
 			incomingPopulation.selection(incomingPopulation.getPopsize());

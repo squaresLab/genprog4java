@@ -58,8 +58,6 @@ import clegoues.genprog4java.util.Pair;
 public abstract class Search<G extends EditOperation> {
 	protected Logger logger = Logger.getLogger(Search.class);
 
-	private static int generations = 10;
-
 	protected static boolean continueSearch = false;
 
 	//20 mutations 1/20 = 0.05
@@ -67,7 +65,6 @@ public abstract class Search<G extends EditOperation> {
 
 	public static String searchStrategy = "ga";
 	protected Fitness<G> fitnessEngine = null;
-	protected int generationsRun = 0;
 
 	public Search(Fitness<G> engine) {
 		this.fitnessEngine = engine;
@@ -110,11 +107,6 @@ public abstract class Search<G extends EditOperation> {
 	}
 	public static void configure(Properties props) {
 		try {
-			if (props.getProperty("generations") != null) {
-				Search.generations = Integer.parseInt(props.getProperty(
-						"generations").trim());
-			}
-	
 
 			if (props.getProperty("continue") != null) {
 				Search.continueSearch = true;
@@ -173,8 +165,6 @@ public abstract class Search<G extends EditOperation> {
 
 
 
-
-
 	/*
 	 * prepares for GA by registering available mutations (including templates
 	 * if applicable) and reducing the search space, and then generates the
@@ -212,22 +202,16 @@ public abstract class Search<G extends EditOperation> {
 	public void doSearch(Representation<G> original,
 			Population<G> incomingPopulation) throws
 			CloneNotSupportedException {
-		logger.info("search: genetic algorithm begins\n");
-		assert (Search.generations >= 0);
 
 		try {
-			Population<G> initialPopulation = this.initialize(original,
-					incomingPopulation);
-			generationsRun++;
-			this.runAlgorithm(1, Search.generations, initialPopulation, original);
+
+			this.runAlgorithm(original, incomingPopulation);
 		} catch(RepairFoundException e) {
 			return;
 		}
 	}
 
-	protected abstract void runAlgorithm(int gen, int maxGen, Population<G> initialPopulation, Representation<G> original) throws RepairFoundException;
-
-
+	protected abstract void runAlgorithm(Representation<G> original, Population<G> initialPopulation) throws RepairFoundException;
 
 
 }
