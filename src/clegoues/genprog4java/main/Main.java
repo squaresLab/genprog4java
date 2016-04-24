@@ -62,7 +62,11 @@ public class Main {
 		long startTime = System.currentTimeMillis();
 		BasicConfigurator.configure();
 
+		ConfigurationBuilder.register( Configuration.token );
+		ConfigurationBuilder.register( Search.token );
+		ConfigurationBuilder.parseArgs( args );
 		Configuration.setProperties(args[0]);
+		ConfigurationBuilder.storeProperties();
 		File workDir = new File(Configuration.outputDir);
 		if (!workDir.exists())
 			workDir.mkdir();
