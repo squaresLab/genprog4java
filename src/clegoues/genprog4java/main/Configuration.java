@@ -196,40 +196,10 @@ public class Configuration {
 		.withHelp( "command for compiling the program" )
 		.build();
 
-	public Configuration() {
-	}
+	private Configuration() {}
 
-	public Configuration(String configFile) {
-		Configuration.setProperties(configFile);
-	}
-
-	public static void setProperties(String name) {
-		Properties prop = new Properties();
-		try {
-			prop.load(new FileReader(new File(name)));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		/*
-		try {
-			targetClassNames.addAll(getClasses(prop.getProperty(
-					"targetClassName").trim()));
-		} catch (Exception e) {
-			// FIXME handle exception
-			e.printStackTrace();
-		}
-		*/
-		
-		//saveTargetFiles();
-	
-		Population.configure(prop);
-		Fitness.configure(prop);
-		JavaRepresentation.configure(prop);
-		FaultLocRepresentation.configure(prop);
-		CachingRepresentation.configure(prop);
+	public static void configure() {
+		Fitness.configure();
 		
 		//Save original target file to an outside folder if it is the first run. Or load it if it is not.
 		saveOrLoadTargetFiles();
