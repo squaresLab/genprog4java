@@ -64,7 +64,7 @@ import static clegoues.genprog4java.main.ConfigurationBuilder.STRING;
 public class Search<G extends EditOperation> {
 	protected Logger logger = Logger.getLogger(Search.class);
 
-	public static ConfigurationBuilder.RegistryToken token =
+	public static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
 	
 	//private static int generations = 10;
@@ -72,6 +72,7 @@ public class Search<G extends EditOperation> {
 		.withVarName( "generations" )
 		.withDefault( "10" )
 		.withHelp( "number of search generations to run" )
+		.inGroup( "Search Parameters" )
 		.build();
 	//The proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
 	//private static double promut = 1; 
@@ -80,12 +81,14 @@ public class Search<G extends EditOperation> {
 		.withFlag( "pMutation" )
 		.withDefault( "1" )
 		.withHelp( "the proportional mutation rate = number of genes to modify" )
+		.inGroup( "Search Parameters" )
 		.build();
 	//private static boolean continueSearch = false;
 	private static boolean continueSearch = ConfigurationBuilder.of( BOOLEAN )
 		.withVarName( "continueSearch" )
 		.withFlag( "continue" )
 		.withHelp( "continue searching after finding a repair" )
+		.inGroup( "Search Parameters" )
 		.build();
 
 	//20 mutations 1/20 = 0.05
@@ -96,6 +99,7 @@ public class Search<G extends EditOperation> {
 			.withFlag( "edits" )
 			.withDefault( "append;replace;delete" )
 			.withHelp( "mutations to use in search, with optional weights" )
+			.inGroup( "Search Parameters" )
 			.withCast( new ConfigurationBuilder.LexicalCast< Map< Mutation, Double > >() {
 				public Map<Mutation, Double> parse(String value) {
 					String[] values = value.toLowerCase().split( ";" );
@@ -114,6 +118,7 @@ public class Search<G extends EditOperation> {
 		.withFlag( "oracleGenome" )
 		.withDefault( "" )
 		.withHelp( "genome for oracle search" )
+		.inGroup( "Search Parameters" )
 		.build();
 	//public static String searchStrategy = "ga";
 	public static String searchStrategy = ConfigurationBuilder.of( STRING )
@@ -121,6 +126,7 @@ public class Search<G extends EditOperation> {
 		.withFlag( "search" )
 		.withDefault( "ga" )
 		.withHelp( "the search strategy to employ" )
+		.inGroup( "Search Parameters" )
 		.build();
 	private Fitness<G> fitnessEngine = null;
 	private int generationsRun = 0;

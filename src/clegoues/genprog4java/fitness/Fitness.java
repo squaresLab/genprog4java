@@ -45,59 +45,77 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.junit.runner.Request;
 
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.main.ConfigurationBuilder;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.util.GlobalUtils;
 import clegoues.genprog4java.util.Pair;
 
+import static clegoues.genprog4java.main.ConfigurationBuilder.DOUBLE;
+import static clegoues.genprog4java.main.ConfigurationBuilder.STRING;
+
 public class Fitness<G extends EditOperation> {
 	protected static Logger logger = Logger.getLogger(Fitness.class);
 
+	public static final ConfigurationBuilder.RegistryToken token =
+		ConfigurationBuilder.getToken();
+	
 	private static int generation = -1;
 	// FIXME: we're already doing sampling, so note to self to kill it in the genprog setup scripts and just pass
 	// the desired sample size to genprog via the config.
 	private static List<Integer> testSample = null; // FIXME: THIS IS WRONG
 	private static List<Integer> restSample = null;
 
-	private static double negativeTestWeight = 2.0;
-	private static double sample = 1.0;
-	private static String sampleStrategy = "variant"; // options: all,
+	//private static double negativeTestWeight = 2.0;
+	private static double negativeTestWeight = ConfigurationBuilder.of( DOUBLE )
+		.withVarName( "negativeTestWeight" )
+		.withDefault( "2.0" )
+		.withHelp( "weighting to give results of negative test cases" )
+		.inGroup( "Fitness Parameters" )
+		.build();
+	//private static double sample = 1.0;
+	private static double sample = ConfigurationBuilder.of( DOUBLE )
+		.withVarName( "sample" )
+		.withDefault( "1.0" )
+		.withHelp( "fraction of the positive tests to sample" )
+		.inGroup( "Fitness Parameters" )
+		.build();
+	//private static String sampleStrategy = "variant"; // options: all,
+	private static String sampleStrategy = ConfigurationBuilder.of( STRING )
+		.withVarName( "sampleStrategy" )
+		.withDefault( "variant" )
+		.withHelp( "strategy to use for resampling tests" )
+		.inGroup( "Fitness Parameters" )
+		.build();
 	// generation, variant
-	public static String posTestFile = "pos.tests";
-	public static String negTestFile = "neg.tests";
+	//public static String posTestFile = "pos.tests";
+	public static String posTestFile = ConfigurationBuilder.of( STRING )
+		.withVarName( "posTestFile" )
+		.withFlag( "positiveTests" )
+		.withDefault( "pos.tests" )
+		.withHelp( "file containing names of positive test classes" )
+		.inGroup( "Fitness Parameters" )
+		.build();
+	//public static String negTestFile = "neg.tests";
+	public static String negTestFile = ConfigurationBuilder.of( STRING )
+		.withVarName( "negTestFile" )
+		.withFlag( "negativeTests" )
+		.withDefault( "neg.tests" )
+		.withHelp( "file containing names of negative test classes" )
+		.inGroup( "Fitness Parameters" )
+		.build();
 	public static ArrayList<String> positiveTests = new ArrayList<String>();
 	public static ArrayList<String> negativeTests = new ArrayList<String>();
 	public static int numPositiveTests = 5;
 	public static int numNegativeTests = 1;
 
-	public static void configure(Properties prop) {
-		if (prop.getProperty("negativeTestWeight") != null) {
-			Fitness.negativeTestWeight = Double.parseDouble(prop.getProperty(
-					"negativeTestWeight").trim());
-		}
-		if (prop.getProperty("sample") != null) {
-			Fitness.sample = Double.parseDouble(prop.getProperty("sample")
-					.trim());
-		}
-		if (prop.getProperty("sampleStrategy") != null) {
-			Fitness.sampleStrategy = prop.getProperty("sampleStrategy").trim();
-		}
-		if (prop.getProperty("positiveTests") != null) {
-			posTestFile = prop.getProperty("positiveTests").trim();
-		}
-
-		if (prop.getProperty("negativeTests") != null) {
-			negTestFile = prop.getProperty("negativeTests").trim();
-		}
-
-
+	public static void configure() {
 		Fitness.configureTests();
 		Fitness.numPositiveTests = Fitness.positiveTests.size();
 		Fitness.numNegativeTests = Fitness.negativeTests.size();

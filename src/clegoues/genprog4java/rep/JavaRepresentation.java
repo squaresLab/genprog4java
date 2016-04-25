@@ -123,6 +123,7 @@ import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.java.ScopeInfo;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.main.ConfigurationBuilder;
 import clegoues.genprog4java.main.Utils;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.JavaAppendOperation;
@@ -139,10 +140,15 @@ import clegoues.genprog4java.mut.JavaUpperBoundSetOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.util.Pair;
 
+import static clegoues.genprog4java.main.ConfigurationBuilder.STRING;
+
 public class JavaRepresentation extends
 FaultLocRepresentation<JavaEditOperation> {
 	protected Logger logger = Logger.getLogger(JavaRepresentation.class);
 
+	public static final ConfigurationBuilder.RegistryToken token =
+		ConfigurationBuilder.getToken();
+	
 	private static HashMap<Integer, JavaStatement> codeBank = new HashMap<Integer, JavaStatement>();
 	private static HashMap<Integer, JavaStatement> base = new HashMap<Integer, JavaStatement>();
 	private static HashMap<ClassInfo, CompilationUnit> baseCompilationUnits = new HashMap<ClassInfo, CompilationUnit>();
@@ -155,7 +161,14 @@ FaultLocRepresentation<JavaEditOperation> {
 	// times unnecessarily
 	// should be the same for all of append, replace, and swap, so we only need
 	// the one.
-	private static String semanticCheck = "scope";
+	//private static String semanticCheck = "scope";
+	private static String semanticCheck = ConfigurationBuilder.of( STRING )
+		.withVarName( "semanticCheck" )
+		.withFlag( "semantic-check" )
+		.withDefault( "scope" )
+		.withHelp( "the semantic check to perform on inserted variables" )
+		.inGroup( "JavaRepresentation Parameters" )
+		.build();
 	private static int stmtCounter = 0;
 
 	private static HashMap<Integer, TreeSet<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, TreeSet<WeightedAtom>>();
@@ -166,13 +179,6 @@ FaultLocRepresentation<JavaEditOperation> {
 
 
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
-
-	public static void configure(Properties prop) {
-		if (prop.getProperty("semantic-check") != null) {
-			JavaRepresentation.semanticCheck = prop.getProperty(
-					"semantic-check").trim(); // options: scope, none
-		}
-	}
 
 	public JavaRepresentation(ArrayList<HistoryEle> history,
 			ArrayList<JavaEditOperation> genome2,
