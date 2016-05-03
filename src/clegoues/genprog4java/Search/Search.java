@@ -47,6 +47,7 @@ import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.main.ConfigurationBuilder;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.rep.Representation;
@@ -54,20 +55,79 @@ import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.genprog4java.util.GlobalUtils;
 import clegoues.genprog4java.util.Pair;
 
+import static clegoues.genprog4java.main.ConfigurationBuilder.BOOLEAN;
+import static clegoues.genprog4java.main.ConfigurationBuilder.DOUBLE;
+import static clegoues.genprog4java.main.ConfigurationBuilder.INT;
+import static clegoues.genprog4java.main.ConfigurationBuilder.STRING;
+
 @SuppressWarnings("rawtypes")
 public class Search<G extends EditOperation> {
 	protected Logger logger = Logger.getLogger(Search.class);
 
-	private static int generations = 10;
+	public static final ConfigurationBuilder.RegistryToken token =
+		ConfigurationBuilder.getToken();
+	
+	//private static int generations = 10;
+	private static int generations = ConfigurationBuilder.of( INT )
+		.withVarName( "generations" )
+		.withDefault( "10" )
+		.withHelp( "number of search generations to run" )
+		.inGroup( "Search Parameters" )
+		.build();
 	//The proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
-	private static double promut = 1; 
-	private static boolean continueSearch = false;
+	//private static double promut = 1; 
+	private static double promut = ConfigurationBuilder.of( DOUBLE )
+		.withVarName( "promut" )
+		.withFlag( "pMutation" )
+		.withDefault( "1" )
+		.withHelp( "the proportional mutation rate = number of genes to modify" )
+		.inGroup( "Search Parameters" )
+		.build();
+	//private static boolean continueSearch = false;
+	private static boolean continueSearch = ConfigurationBuilder.of( BOOLEAN )
+		.withVarName( "continueSearch" )
+		.withFlag( "continue" )
+		.withHelp( "continue searching after finding a repair" )
+		.inGroup( "Search Parameters" )
+		.build();
 
 	//20 mutations 1/20 = 0.05
-	public static HashMap<Mutation,Double> availableMutations = new HashMap<Mutation,Double>();
+	//public static HashMap<Mutation,Double> availableMutations = new HashMap<Mutation,Double>();
+	public static Map< Mutation, Double > availableMutations =
+		new ConfigurationBuilder< Map< Mutation, Double > >()
+			.withVarName( "availableMutations" )
+			.withFlag( "edits" )
+			.withDefault( "append;replace;delete" )
+			.withHelp( "mutations to use in search, with optional weights" )
+			.inGroup( "Search Parameters" )
+			.withCast( new ConfigurationBuilder.LexicalCast< Map< Mutation, Double > >() {
+				public Map<Mutation, Double> parse(String value) {
+					String[] values = value.toLowerCase().split( ";" );
+					for ( int i = 0; i < values.length; ++i )
+						values[ i ] = values[ i ].trim();
+					return parseEdits(
+						values, new HashMap< Mutation, Double >()
+					);
+				}
+			})
+			.build();
 
-	private static String startingGenome = "";
-	public static String searchStrategy = "ga";
+	//private static String startingGenome = "";
+	private static String startingGenome = ConfigurationBuilder.of( STRING )
+		.withVarName( "startingGenome" )
+		.withFlag( "oracleGenome" )
+		.withDefault( "" )
+		.withHelp( "genome for oracle search" )
+		.inGroup( "Search Parameters" )
+		.build();
+	//public static String searchStrategy = "ga";
+	public static String searchStrategy = ConfigurationBuilder.of( STRING )
+		.withVarName( "searchStrategy" )
+		.withFlag( "search" )
+		.withDefault( "ga" )
+		.withHelp( "the search strategy to employ" )
+		.inGroup( "Search Parameters" )
+		.build();
 	private Fitness<G> fitnessEngine = null;
 	private int generationsRun = 0;
 
@@ -75,11 +135,11 @@ public class Search<G extends EditOperation> {
 		this.fitnessEngine = engine;
 	}
 
-	public static void parseEdits(String[] editList, Boolean withWeight) {
+	public static Map<Mutation,Double> parseEdits(String[] editList, Map<Mutation,Double> mutations) {
 		for(String oneItem : editList) {
 			String edit = "";
 			Double weight = 1.0;
-			if(withWeight) {
+			if ( oneItem.contains( "," ) ) {
 				String[] editAndWeight = oneItem.split(",");
 				edit = editAndWeight[0];
 				weight = Double.parseDouble(editAndWeight[1]);
@@ -87,69 +147,29 @@ public class Search<G extends EditOperation> {
 				edit = oneItem;
 			}
 			switch(edit.toLowerCase()) {
-			case "append": availableMutations.put(Mutation.APPEND, weight); break;
-			case "swap":  availableMutations.put(Mutation.SWAP, weight); break;
-			case "delete":  availableMutations.put(Mutation.DELETE, weight); break;
-			case "replace":  availableMutations.put(Mutation.REPLACE, weight); break;
-			case "nullinsert":  availableMutations.put(Mutation.NULLINSERT, weight); break;
-			case "funrep":  availableMutations.put(Mutation.FUNREP, weight); break;
-			case "parrep":  availableMutations.put(Mutation.PARREP, weight); break;
-			case "paradd":  availableMutations.put(Mutation.PARADD, weight); break;
-			case "parrem":  availableMutations.put(Mutation.PARREM, weight); break;
-			case "exprep":  availableMutations.put(Mutation.EXPREP, weight); break;
-			case "expadd":  availableMutations.put(Mutation.EXPADD, weight); break;
-			case "exprem":  availableMutations.put(Mutation.EXPREM, weight); break;
-			case "nullcheck":  availableMutations.put(Mutation.NULLCHECK, weight); break;
-			case "objinit":  availableMutations.put(Mutation.OBJINIT, weight); break;
-			case "rangecheck":  availableMutations.put(Mutation.RANGECHECK, weight); break;
-			case "sizecheck":  availableMutations.put(Mutation.SIZECHECK, weight); break;
-			case "castcheck":  availableMutations.put(Mutation.CASTCHECK, weight); break;
-			case "lbset":  availableMutations.put(Mutation.LBOUNDSET, weight); break;
-			case "ubset":  availableMutations.put(Mutation.UBOUNDSET, weight); break;
-			case "offbyone":  availableMutations.put(Mutation.OFFBYONE, weight); break;
+			case "append": mutations.put(Mutation.APPEND, weight); break;
+			case "swap":  mutations.put(Mutation.SWAP, weight); break;
+			case "delete":  mutations.put(Mutation.DELETE, weight); break;
+			case "replace":  mutations.put(Mutation.REPLACE, weight); break;
+			case "nullinsert":  mutations.put(Mutation.NULLINSERT, weight); break;
+			case "funrep":  mutations.put(Mutation.FUNREP, weight); break;
+			case "parrep":  mutations.put(Mutation.PARREP, weight); break;
+			case "paradd":  mutations.put(Mutation.PARADD, weight); break;
+			case "parrem":  mutations.put(Mutation.PARREM, weight); break;
+			case "exprep":  mutations.put(Mutation.EXPREP, weight); break;
+			case "expadd":  mutations.put(Mutation.EXPADD, weight); break;
+			case "exprem":  mutations.put(Mutation.EXPREM, weight); break;
+			case "nullcheck":  mutations.put(Mutation.NULLCHECK, weight); break;
+			case "objinit":  mutations.put(Mutation.OBJINIT, weight); break;
+			case "rangecheck":  mutations.put(Mutation.RANGECHECK, weight); break;
+			case "sizecheck":  mutations.put(Mutation.SIZECHECK, weight); break;
+			case "castcheck":  mutations.put(Mutation.CASTCHECK, weight); break;
+			case "lbset":  mutations.put(Mutation.LBOUNDSET, weight); break;
+			case "ubset":  mutations.put(Mutation.UBOUNDSET, weight); break;
+			case "offbyone":  mutations.put(Mutation.OFFBYONE, weight); break;
 			}
 		}
-	}
-	public static void configure(Properties props) {
-		try {
-			if (props.getProperty("generations") != null) {
-				Search.generations = Integer.parseInt(props.getProperty(
-						"generations").trim());
-			}
-			if (props.getProperty("oracleGenome") != null) {
-				Search.startingGenome = props.getProperty("startingGenome").trim();
-			}
-			if (props.getProperty("promut") != null) {
-				Search.promut = Double.parseDouble(props.getProperty("pMutation")
-						.trim());
-			}
-			if (props.getProperty("continue") != null) {
-				Search.continueSearch = true;
-			}
-			if(props.getProperty("edits") != null) {
-				String edits = props.getProperty("edits");
-				edits = edits.toLowerCase().trim();
-				String[] editList = edits.split(";");
-				parseEdits(editList, false);
-			} else if (props.getProperty("editsWithWeights") != null) { 
-				String edits = props.getProperty("editsWithWeights");
-				edits = edits.toLowerCase().trim();
-				String[] editList = edits.split(",");
-				parseEdits(editList, true);
-			} else { // edits set to defaults
-				availableMutations.put(Mutation.APPEND, 1.0);
-				availableMutations.put(Mutation.REPLACE, 1.0);
-				availableMutations.put(Mutation.DELETE, 1.0); 
-			}
-
-			if (props.getProperty("search") != null) {
-				Search.searchStrategy = props.getProperty("search").trim();
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+		return mutations;
 	}
 
 	/*
