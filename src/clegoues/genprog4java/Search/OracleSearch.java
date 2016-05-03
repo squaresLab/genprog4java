@@ -25,7 +25,7 @@ public class OracleSearch<G extends EditOperation> extends Search<G> {
 		return null;
 	}
 	@Override
-	protected void runAlgorithm(int gen, int maxGen, Population<G> initialPopulation, Representation<G> original)
+	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
 			throws RepairFoundException {
 		Representation<G> theRepair = original.copy();
 		theRepair.loadGenomeFromString(OracleSearch.startingGenome);

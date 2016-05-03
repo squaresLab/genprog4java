@@ -204,18 +204,14 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			generationsRun++;
 			assert (initialPopulation.getPopsize() > 0);
 			// Step 1: selection
-			logger.info("before selection, generation: " + gen + " incoming popsize: " + incomingPopulation.size());
 			incomingPopulation.selection(incomingPopulation.getPopsize());
-			logger.info("after selection, generation: " + gen + " incoming popsize: " + incomingPopulation.size());
 			// step 2: crossover
 			incomingPopulation.crossover(original);
-			logger.info("after crossover, generation: " + gen + " incoming popsize: " + incomingPopulation.size());
 
 			// step 3: mutation
 			for (Representation<G> item : incomingPopulation) {
 				this.mutate(item);
 			}
-			logger.info("after mutation, generation: " + gen + " incoming popsize: " + incomingPopulation.size());
 
 			// step 4: fitness
 			int count = 0;
