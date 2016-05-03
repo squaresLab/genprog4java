@@ -18,10 +18,12 @@ public class RSRepair<G extends EditOperation> extends Search<G>{
 	}
 
 	@Override
-	protected void runAlgorithm(int gen, int maxGen, Population<G> initialPopulation, Representation<G> original)
+	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
 			throws RepairFoundException {
 		// TODO Auto-generated method stub
 		
 	}
+
+
 
 }

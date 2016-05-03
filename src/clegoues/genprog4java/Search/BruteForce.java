@@ -52,7 +52,7 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 	}
 
 	@Override
-	protected void runAlgorithm(int gen, int maxGen, Population<G> initialPopulation, Representation<G> original)
+	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
 			throws RepairFoundException {
 		original.reduceFixSpace();
 
@@ -168,10 +168,11 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 
 			sofar++;
 			if (repairFound && !Search.continueSearch) {
-				return true;
+				throw new RepairFoundException();
 			}
 		}
 		logger.info("search: brute_force_1 ends\n");
-		return repairFound;		
+		if(repairFound) 
+			throw new RepairFoundException();		
 	}
 }
