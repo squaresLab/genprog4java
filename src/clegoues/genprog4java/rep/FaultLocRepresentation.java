@@ -33,6 +33,10 @@
 
 package clegoues.genprog4java.rep;
 
+import static clegoues.util.ConfigurationBuilder.BOOLEAN;
+import static clegoues.util.ConfigurationBuilder.DOUBLE;
+import static clegoues.util.ConfigurationBuilder.STRING;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -57,15 +61,11 @@ import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.fitness.TestType;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.main.ConfigurationBuilder;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.util.Pair;
-
-import static clegoues.genprog4java.main.ConfigurationBuilder.BOOLEAN;
-import static clegoues.genprog4java.main.ConfigurationBuilder.DOUBLE;
-import static clegoues.genprog4java.main.ConfigurationBuilder.STRING;
+import clegoues.util.ConfigurationBuilder;
+import clegoues.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class FaultLocRepresentation<G extends EditOperation> extends

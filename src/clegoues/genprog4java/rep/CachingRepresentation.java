@@ -33,6 +33,8 @@
 
 package clegoues.genprog4java.rep;
 
+import static clegoues.util.ConfigurationBuilder.BOOL_ARG;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
@@ -56,12 +58,10 @@ import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.fitness.TestType;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.main.ConfigurationBuilder;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
-import clegoues.genprog4java.util.Pair;
-
-import static clegoues.genprog4java.main.ConfigurationBuilder.BOOL_ARG;
+import clegoues.util.ConfigurationBuilder;
+import clegoues.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class CachingRepresentation<G extends EditOperation> extends

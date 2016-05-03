@@ -31,7 +31,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package clegoues.genprog4java.util;
+package clegoues.util;
 
 import java.util.ArrayList;
 import java.util.List;

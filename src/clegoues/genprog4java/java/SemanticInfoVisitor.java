@@ -52,7 +52,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import clegoues.genprog4java.rep.JavaRepresentation;
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.Pair;
 
 public class SemanticInfoVisitor extends ASTVisitor {
 

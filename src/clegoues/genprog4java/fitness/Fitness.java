@@ -33,6 +33,9 @@
 
 package clegoues.genprog4java.fitness;
 
+import static clegoues.util.ConfigurationBuilder.DOUBLE;
+import static clegoues.util.ConfigurationBuilder.STRING;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -51,14 +54,11 @@ import org.apache.log4j.Logger;
 import org.junit.runner.Request;
 
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.main.ConfigurationBuilder;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
-import clegoues.genprog4java.util.GlobalUtils;
-import clegoues.genprog4java.util.Pair;
-
-import static clegoues.genprog4java.main.ConfigurationBuilder.DOUBLE;
-import static clegoues.genprog4java.main.ConfigurationBuilder.STRING;
+import clegoues.util.ConfigurationBuilder;
+import clegoues.util.GlobalUtils;
+import clegoues.util.Pair;
 
 public class Fitness<G extends EditOperation> {
 	protected static Logger logger = Logger.getLogger(Fitness.class);

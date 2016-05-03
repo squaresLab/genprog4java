@@ -33,6 +33,10 @@
 
 package clegoues.genprog4java.Search;
 
+import static clegoues.util.ConfigurationBuilder.DOUBLE;
+import static clegoues.util.ConfigurationBuilder.INT;
+import static clegoues.util.ConfigurationBuilder.STRING;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -45,14 +49,10 @@ import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.main.ConfigurationBuilder;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
-import clegoues.genprog4java.util.GlobalUtils;
-
-import static clegoues.genprog4java.main.ConfigurationBuilder.DOUBLE;
-import static clegoues.genprog4java.main.ConfigurationBuilder.INT;
-import static clegoues.genprog4java.main.ConfigurationBuilder.STRING;
+import clegoues.util.ConfigurationBuilder;
+import clegoues.util.GlobalUtils;
 
 public class Population<G extends EditOperation> implements Iterable<Representation<G>>{
 

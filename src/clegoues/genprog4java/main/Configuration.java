@@ -33,6 +33,10 @@
 
 package clegoues.genprog4java.main;
 
+import static clegoues.util.ConfigurationBuilder.BOOL_ARG;
+import static clegoues.util.ConfigurationBuilder.LONG;
+import static clegoues.util.ConfigurationBuilder.STRING;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -53,10 +57,7 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
-
-import static clegoues.genprog4java.main.ConfigurationBuilder.BOOL_ARG;
-import static clegoues.genprog4java.main.ConfigurationBuilder.LONG;
-import static clegoues.genprog4java.main.ConfigurationBuilder.STRING;
+import clegoues.util.ConfigurationBuilder;
 
 public class Configuration {
 	protected static Logger logger = Logger.getLogger(Configuration.class);
