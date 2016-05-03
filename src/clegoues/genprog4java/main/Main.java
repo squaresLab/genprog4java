@@ -50,6 +50,7 @@ import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.LocalizationRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
+import clegoues.util.ConfigurationBuilder;
 
 public class Main {
 	protected static Logger logger = Logger.getLogger(Main.class);

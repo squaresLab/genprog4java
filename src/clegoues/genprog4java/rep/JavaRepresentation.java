@@ -33,6 +33,8 @@
 
 package clegoues.genprog4java.rep;
 
+import static clegoues.util.ConfigurationBuilder.STRING;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -123,7 +125,6 @@ import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.java.ScopeInfo;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.main.ConfigurationBuilder;
 import clegoues.genprog4java.main.Utils;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.JavaAppendOperation;
@@ -138,9 +139,8 @@ import clegoues.genprog4java.mut.JavaReplaceOperation;
 import clegoues.genprog4java.mut.JavaSwapOperation;
 import clegoues.genprog4java.mut.JavaUpperBoundSetOperation;
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.util.Pair;
-
-import static clegoues.genprog4java.main.ConfigurationBuilder.STRING;
+import clegoues.util.ConfigurationBuilder;
+import clegoues.util.Pair;
 
 public class JavaRepresentation extends
 FaultLocRepresentation<JavaEditOperation> {

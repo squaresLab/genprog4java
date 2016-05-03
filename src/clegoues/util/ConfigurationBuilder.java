@@ -32,7 +32,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package clegoues.genprog4java.main;
+package clegoues.util;
 
 import java.io.File;
 import java.io.FileReader;

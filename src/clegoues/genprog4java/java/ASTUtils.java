@@ -45,7 +45,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import clegoues.genprog4java.main.ClassInfo;
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.Pair;
 
 public class ASTUtils {
 
