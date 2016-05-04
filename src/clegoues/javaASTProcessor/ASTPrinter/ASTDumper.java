@@ -151,14 +151,14 @@ public class ASTDumper {
 			dumpComments(comments.trailingComments(node), false);
 		}
 		for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {
-			final Object desciptor = iterator.next();
+			final Object descriptor = iterator.next();
 
-			if (desciptor instanceof SimplePropertyDescriptor) {
-				SimplePropertyDescriptor simple = (SimplePropertyDescriptor) desciptor;
+			if (descriptor instanceof SimplePropertyDescriptor) {
+				SimplePropertyDescriptor simple = (SimplePropertyDescriptor) descriptor;
 				Object value = node.getStructuralProperty(simple);
 				printer.literal(simple.getId(), value);
-			} else if (desciptor instanceof ChildPropertyDescriptor) {
-				ChildPropertyDescriptor child = (ChildPropertyDescriptor) desciptor;
+			} else if (descriptor instanceof ChildPropertyDescriptor) {
+				ChildPropertyDescriptor child = (ChildPropertyDescriptor) descriptor;
 				ASTNode childNode = (ASTNode) node.getStructuralProperty(child);
 				if (childNode != null) {
 					printer.startElement(child.getId(), false);
@@ -168,7 +168,7 @@ public class ASTDumper {
 					printer.literal(child.getId(), null);
 				}
 			} else {
-				ChildListPropertyDescriptor list = (ChildListPropertyDescriptor) desciptor;
+				ChildListPropertyDescriptor list = (ChildListPropertyDescriptor) descriptor;
 				List<?> value = new ArrayList<>((List<?>) node.getStructuralProperty(list));
 				if (value.size() > 0) {
 					printer.startElement(list.getId(), true);
