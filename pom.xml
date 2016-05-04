@@ -74,5 +74,10 @@
   		<version>3.3.0-v20070604</version>
   		<scope>runtime</scope>
   	</dependency>
+  	<dependency>
+  		<groupId>org.apache.commons</groupId>
+  		<artifactId>commons-lang3</artifactId>
+  		<version>3.4</version>
+  	</dependency>
   </dependencies>
 </project>
