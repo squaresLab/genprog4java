@@ -9,8 +9,8 @@ import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.WeightedAtom;
-import clegoues.genprog4java.util.GlobalUtils;
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.GlobalUtils;
+import clegoues.util.Pair;
 
 public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 	//The proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.

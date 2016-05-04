@@ -39,7 +39,11 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.apache.log4j.BasicConfigurator;
 
+import clegoues.genprog4java.Search.BruteForce;
+import clegoues.genprog4java.Search.GeneticProgramming;
+import clegoues.genprog4java.Search.OracleSearch;
 import clegoues.genprog4java.Search.Population;
+import clegoues.genprog4java.Search.RSRepair;
 import clegoues.genprog4java.Search.RepairFoundException;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
@@ -88,7 +92,18 @@ public class Main {
 				baseRep = (Representation) new JavaRepresentation();
 			}
 			fitnessEngine = new Fitness<JavaEditOperation>();
-			searchEngine = new Search<JavaEditOperation>(fitnessEngine);
+			switch(Search.searchStrategy.trim()) {
+
+			case "brute": searchEngine = new BruteForce<JavaEditOperation>(fitnessEngine);
+				break;
+			case "rsrepair": searchEngine = new RSRepair<JavaEditOperation>(fitnessEngine);
+				break;
+			case "oracle": searchEngine = new OracleSearch<JavaEditOperation>(fitnessEngine);
+			break;
+			case "ga":
+			default: searchEngine = new GeneticProgramming<JavaEditOperation>(fitnessEngine);
+				break;
+			}
 			incomingPopulation = new Population<JavaEditOperation>(); 
 		}
 		// loads the class file into the representation.
@@ -97,22 +112,8 @@ public class Main {
 		// check.
 		// 2)
 		baseRep.load(Configuration.targetClassNames);
-
 		try {
-			switch (Search.searchStrategy) {
-			case "ga":
-				searchEngine.geneticAlgorithm(baseRep, incomingPopulation);
-				break;
-			case "brute":
-				searchEngine.bruteForceOne(baseRep);
-				break;
-			case "oracle":
-				searchEngine.oracleSearch(baseRep);
-				break;
-			case "io":
-				searchEngine.ioSearch(baseRep);
-				break;
-			}
+			searchEngine.doSearch(baseRep, incomingPopulation);
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
 		}
