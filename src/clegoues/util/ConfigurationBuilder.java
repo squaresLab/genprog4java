@@ -111,7 +111,12 @@ public class ConfigurationBuilder< T > {
 	 * {@code true} when it is used. Similarly, any appearance of the option
 	 * name in a properties file will assign {@code true} to the field.
 	 */
-	public static final LexicalCast< Boolean > BOOLEAN = Boolean::valueOf;
+	public static final LexicalCast< Boolean > BOOLEAN =
+		new LexicalCast< Boolean >() {
+			public Boolean parse(String value) {
+				return Boolean.valueOf(value);
+			}
+		};
 	
 	/**
 	 * Generates an option that takes an argument and assigns a boolean. Values
@@ -148,38 +153,73 @@ public class ConfigurationBuilder< T > {
 	/**
 	 * Interprets option arguments as {@code byte} values.
 	 */
-	public static final LexicalCast< Byte > BYTE    = Byte::valueOf;
+	public static final LexicalCast< Byte > BYTE =
+		new LexicalCast< Byte >() {
+			public Byte parse(String value) {
+				return Byte.valueOf(value);
+			}
+		};
 	
 	/**
 	 * Interprets option arguments as {@code double} values.
 	 */
-	public static final LexicalCast< Double > DOUBLE  = Double::valueOf;
+	public static final LexicalCast< Double > DOUBLE =
+		new LexicalCast<Double>() {
+			public Double parse(String value) {
+				return Double.valueOf(value);
+			}
+		};
 	
 	/**
 	 * Interprets option arguments as {@code float} values.
 	 */
-	public static final LexicalCast< Float > FLOAT   = Float::valueOf;
+	public static final LexicalCast< Float > FLOAT =
+		new LexicalCast<Float>() {
+			public Float parse(String value) {
+				return Float.valueOf(value);
+			}
+		};
 	
 	/**
 	 * Interprets option arguments as {@code int} values.
 	 */
-	public static final LexicalCast< Integer > INT     = Integer::valueOf;
+	public static final LexicalCast< Integer > INT =
+		new LexicalCast<Integer>() {
+			public Integer parse(String value) {
+				return Integer.valueOf(value);
+			}
+		};
 	
 	/**
 	 * Interprets option arguments as {@code long} values.
 	 */
-	public static final LexicalCast< Long > LONG    = Long::valueOf;
+	public static final LexicalCast< Long > LONG =
+		new LexicalCast<Long>() {
+			public Long parse(String value) {
+				return Long.valueOf(value);
+			}
+		};
 	
 	/**
 	 * Interprets option arguments as {@code short} values.
 	 */
-	public static final LexicalCast< Short > SHORT   = Short::valueOf;
+	public static final LexicalCast< Short > SHORT =
+		new LexicalCast<Short>() {
+			public Short parse(String value) {
+				return Short.valueOf(value);
+			}
+		};
 	
 	/**
 	 * Interprets option arguments as {@code String}s. That is, the arguments
 	 * are passed to the field unchanged.
 	 */
-	public static final LexicalCast< String > STRING  = (String v) -> v;
+	public static final LexicalCast< String > STRING =
+		new LexicalCast<String>() {
+			public String parse(String value) {
+				return value;
+			}
+		};
 
 	/**
 	 * Creates a new {@code ConfigurationBuilder} instance that uses the given
@@ -348,7 +388,11 @@ public class ConfigurationBuilder< T > {
 				"class " + owner.getName() + " was not registered before "
 				+ "building. Please register to ensure help text is accurate."
 			);
-			register( () -> owner );
+			register( new RegistryToken() {
+				public Class<?> getOwnerClass() {
+					return owner;
+				}
+			} );
 		}
 
 		Option opt = optbuilder.create();
@@ -418,7 +462,11 @@ public class ConfigurationBuilder< T > {
 	 */
 	public static RegistryToken getToken() {
 		final Class< ? > caller = getCallingClass();
-		return () -> caller;
+		return new RegistryToken() {
+			public Class<?> getOwnerClass() {
+				return caller;
+			}
+		};
 	}
 
 	/**
