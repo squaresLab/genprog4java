@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.FileASTRequestor;
 import org.eclipse.jdt.core.dom.InfixExpression;
 
 import clegoues.javaASTProcessor.ASTPrinter.ASTDumper;
+import clegoues.javaASTProcessor.ASTPrinter.ASTPrinterVisitor;
 import clegoues.javaASTProcessor.ASTPrinter.IASTPrinter;
 import clegoues.javaASTProcessor.ASTPrinter.JSONStyleASTPrinter;
 import clegoues.javaASTProcessor.ASTPrinter.SimpleTextASTPrinter;
@@ -105,6 +106,21 @@ public class Main {
 		ConfigurationBuilder.parseArgs( args );
 		ConfigurationBuilder.storeProperties();
 		IASTPrinter myPrinter = null;
+
+		if(Configuration.outputFormat.trim().toLowerCase() == "super") {
+			ASTPrinterVisitor visit = new ASTPrinterVisitor(System.out);
+			
+			// FIXME: hideous temporary mess
+			for(String fname : Configuration.targetClassNames) {
+				List<CompilationUnit> cus = parseCompilationUnit(fname, Configuration.libs.split(File.pathSeparator));
+				for(CompilationUnit cu : cus) {
+					cu.accept(visit);
+				}
+			}
+
+				visit.endVisit();
+		} else {
+		dumper = new ASTDumper(myPrinter, null);
 		switch(Configuration.outputFormat.trim().toLowerCase()) {
 		case "json" : myPrinter = new JSONStyleASTPrinter(System.out);
 			break;
@@ -112,13 +128,11 @@ public class Main {
 		default: myPrinter = new SimpleTextASTPrinter(System.out);
 			break;
 		}
-		
-		dumper = new ASTDumper(myPrinter, null);
 		for(String fname : Configuration.targetClassNames) {
 			List<CompilationUnit> cus = parseCompilationUnit(fname, Configuration.libs.split(File.pathSeparator));
 			printCompilationUnits(cus);
 		}
 		
 	}
-
+	}
 }

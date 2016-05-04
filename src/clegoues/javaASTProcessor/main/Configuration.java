@@ -39,7 +39,7 @@ public class Configuration {
 	public static String outputFormat = ConfigurationBuilder.of( STRING )
 			.withVarName("outputFormat")
 			.withHelp("outputFormat: either JSON(-like) or Simple")
-			.withDefault ("simple")
+			.withDefault ("super")
 			.build();
 	
 	public static ArrayList<String> targetClassNames =
