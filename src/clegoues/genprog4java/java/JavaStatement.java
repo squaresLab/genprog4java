@@ -55,7 +55,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.Pair;
 
 public class JavaStatement {
 

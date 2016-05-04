@@ -33,6 +33,10 @@
 
 package clegoues.genprog4java.Search;
 
+import static clegoues.util.ConfigurationBuilder.DOUBLE;
+import static clegoues.util.ConfigurationBuilder.INT;
+import static clegoues.util.ConfigurationBuilder.STRING;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -47,18 +51,47 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
-import clegoues.genprog4java.util.GlobalUtils;
+import clegoues.util.ConfigurationBuilder;
+import clegoues.util.GlobalUtils;
 
 public class Population<G extends EditOperation> implements Iterable<Representation<G>>{
 
 	protected static Logger logger = Logger.getLogger(Fitness.class);
 	
-	private static int popsize = 20;
-	private static double crossp = 0.5; 
-
-	private static int tournamentK = (int) (popsize *0.2); //tournament size, 20% of the population
+	public static final ConfigurationBuilder.RegistryToken token =
+		ConfigurationBuilder.getToken();
+	
+	//private static int popsize = 20;
+	private static int popsize = ConfigurationBuilder.of( INT )
+		.withVarName( "popsize" )
+		.withDefault( "20" )
+		.withHelp( "size of the population" )
+		.inGroup( "Population Parameters" )
+		.withCast( new ConfigurationBuilder.LexicalCast< Integer >(){
+			public Integer parse(String value) {
+				int size = Integer.parseInt( value );
+				tournamentK = size / 5;
+				return size;
+			}
+		} )
+		.build();
+	//private static double crossp = 0.5; 
+	private static double crossp = ConfigurationBuilder.of( DOUBLE )
+		.withVarName( "crossp" )
+		.withDefault( "0.5" )
+		.withHelp( "probability of crossover" )
+		.inGroup( "Population Parameters" )
+		.build();
+	//tournament size, 20% of the population, set when popsize is updated
+	private static int tournamentK;
 	private double tournamentP = 1.0; //tournament probability
-	private static String crossover = "onepoint";
+	//private static String crossover = "onepoint";
+	private static String crossover = ConfigurationBuilder.of( STRING )
+		.withVarName( "crossover" )
+		.withDefault( "onepoint" )
+		.withHelp( "crossover algorithm" )
+		.inGroup( "Population Parameters" )
+		.build();
 	private ArrayList<Representation<G>> population = new ArrayList<Representation<G>>(this.popsize);
 
 	public Population() {
@@ -76,20 +109,6 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	public int getPopsize() {
 		return Population.popsize;
 	}
-	public static void configure(Properties prop) {
-		if(prop.getProperty("crossp") != null) {
-			crossp = Double.parseDouble(prop.getProperty("crossp").trim());
-		}
-		if(prop.getProperty("popsize") != null) {
-			popsize = Integer.parseInt(prop.getProperty("popsize").trim());
-			tournamentK = (int) (popsize *0.2);
-		}
-		if(prop.getProperty("crossover") != null) {
-			crossover = prop.getProperty("crossover").trim();
-		}
-		tournamentK = (int) (popsize *0.2); //tournament size, 20% of the population
-	}
-
 
 	/* {b serialize} serializes a population to disk.  The first variant is
 	      optionally instructed to print out the global information necessary for a

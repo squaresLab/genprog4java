@@ -33,6 +33,8 @@
 
 package clegoues.genprog4java.rep;
 
+import static clegoues.util.ConfigurationBuilder.STRING;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,8 +64,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -137,12 +137,16 @@ import clegoues.genprog4java.mut.JavaReplaceOperation;
 import clegoues.genprog4java.mut.JavaSwapOperation;
 import clegoues.genprog4java.mut.JavaUpperBoundSetOperation;
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.ConfigurationBuilder;
+import clegoues.util.Pair;
 
 public class JavaRepresentation extends
 FaultLocRepresentation<JavaEditOperation> {
 	protected Logger logger = Logger.getLogger(JavaRepresentation.class);
 
+	public static final ConfigurationBuilder.RegistryToken token =
+		ConfigurationBuilder.getToken();
+	
 	private static HashMap<Integer, JavaStatement> codeBank = new HashMap<Integer, JavaStatement>();
 	private static HashMap<Integer, JavaStatement> base = new HashMap<Integer, JavaStatement>();
 	private static HashMap<ClassInfo, CompilationUnit> baseCompilationUnits = new HashMap<ClassInfo, CompilationUnit>();
@@ -155,7 +159,14 @@ FaultLocRepresentation<JavaEditOperation> {
 	// times unnecessarily
 	// should be the same for all of append, replace, and swap, so we only need
 	// the one.
-	private static String semanticCheck = "scope";
+	//private static String semanticCheck = "scope";
+	private static String semanticCheck = ConfigurationBuilder.of( STRING )
+		.withVarName( "semanticCheck" )
+		.withFlag( "semantic-check" )
+		.withDefault( "scope" )
+		.withHelp( "the semantic check to perform on inserted variables" )
+		.inGroup( "JavaRepresentation Parameters" )
+		.build();
 	private static int stmtCounter = 0;
 
 	private static HashMap<Integer, TreeSet<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, TreeSet<WeightedAtom>>();
@@ -166,13 +177,6 @@ FaultLocRepresentation<JavaEditOperation> {
 
 
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
-
-	public static void configure(Properties prop) {
-		if (prop.getProperty("semantic-check") != null) {
-			JavaRepresentation.semanticCheck = prop.getProperty(
-					"semantic-check").trim(); // options: scope, none
-		}
-	}
 
 	public JavaRepresentation(ArrayList<HistoryEle> history,
 			ArrayList<JavaEditOperation> genome2,

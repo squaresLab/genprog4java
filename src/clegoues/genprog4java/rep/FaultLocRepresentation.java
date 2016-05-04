@@ -33,6 +33,10 @@
 
 package clegoues.genprog4java.rep;
 
+import static clegoues.util.ConfigurationBuilder.BOOLEAN;
+import static clegoues.util.ConfigurationBuilder.DOUBLE;
+import static clegoues.util.ConfigurationBuilder.STRING;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -60,19 +64,57 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.ConfigurationBuilder;
+import clegoues.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class FaultLocRepresentation<G extends EditOperation> extends
 CachingRepresentation<G> {
 	protected Logger logger = Logger.getLogger(FaultLocRepresentation.class);
 
-	private static double positivePathWeight = 0.1;
-	private static double negativePathWeight = 1.0;
-	protected static boolean allowCoverageFail = false;
-	protected static String posCoverageFile = "coverage.path.pos";
-	protected static String negCoverageFile = "coverage.path.neg";
-	protected static boolean regenPaths = false;
+	public static final ConfigurationBuilder.RegistryToken token =
+		ConfigurationBuilder.getToken();
+	
+	//private static double positivePathWeight = 0.1;
+	private static double positivePathWeight = ConfigurationBuilder.of( DOUBLE )
+		.withVarName( "positivePathWeight" )
+		.withDefault( "0.1" )
+		.withHelp( "weighting for statements on the positive path" )
+		.inGroup( "FaultLocRepresentation Parameters" )
+		.build();
+	//private static double negativePathWeight = 1.0;
+	private static double negativePathWeight = ConfigurationBuilder.of( DOUBLE )
+		.withVarName( "negativePathWeight" )
+		.withDefault( "1.0" )
+		.withHelp( "weighting for statements on the negative path" )
+		.inGroup( "FaultLocRepresentation Parameters" )
+		.build();
+	//protected static boolean allowCoverageFail = false;
+	protected static boolean allowCoverageFail = ConfigurationBuilder.of( BOOLEAN )
+		.withVarName( "allowCoverageFail" )
+		.withHelp( "ignore unexpected test results in coverage" )
+		.inGroup( "FaultLocRepresentation Parameters" )
+		.build();
+	//protected static String posCoverageFile = "coverage.path.pos";
+	protected static String posCoverageFile = ConfigurationBuilder.of( STRING )
+		.withVarName( "posCoverageFile" )
+		.withDefault( "coverage.path.pos" )
+		.withHelp( "file containing the statements covered by positive tests" )
+		.inGroup( "FaultLocRepresentation Parameters" )
+		.build();
+	//protected static String negCoverageFile = "coverage.path.neg";
+	protected static String negCoverageFile = ConfigurationBuilder.of( STRING )
+		.withVarName( "negCoverageFile" )
+		.withDefault( "coverage.path.neg" )
+		.withHelp( "file containing the statements covered by negative tests" )
+		.inGroup( "FaultLocRepresentation Parameters" )
+		.build();
+	//protected static boolean regenPaths = false;
+	protected static boolean regenPaths = ConfigurationBuilder.of( BOOLEAN )
+		.withVarName( "regenPaths" )
+		.withHelp( "regenerate coverage information" )
+		.inGroup( "FaultLocRepresentation Parameters" )
+		.build();
 
 	protected boolean doingCoverage = false;
 	private ArrayList<WeightedAtom> faultLocalization = new ArrayList<WeightedAtom>();
@@ -88,29 +130,6 @@ CachingRepresentation<G> {
 
 	public FaultLocRepresentation() {
 		super();
-	}
-
-	public static void configure(Properties prop) {
-		if (prop.getProperty("positivePathWeight") != null) {
-			positivePathWeight = Double.parseDouble(prop.getProperty(
-					"positivePathWeight").trim());
-		}
-		if (prop.getProperty("negativePathWeight") != null) {
-			negativePathWeight = Double.parseDouble(prop.getProperty(
-					"negativePathWeight").trim());
-		}
-		if (prop.getProperty("allowCoverageFail") != null) {
-			allowCoverageFail = true;
-		}
-		if (prop.getProperty("posCoverageFile") != null) {
-			posCoverageFile = prop.getProperty("posCoverageFile").trim();
-		}
-		if (prop.getProperty("negCoverageFile") != null) {
-			negCoverageFile = prop.getProperty("negCoverageFile").trim();
-		}
-		if (prop.getProperty("regenPaths") != null) {
-			regenPaths = true;
-		}
 	}
 
 	@Override

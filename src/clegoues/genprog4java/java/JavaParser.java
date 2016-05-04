@@ -48,7 +48,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.Pair;
 
 
 public class JavaParser

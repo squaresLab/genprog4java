@@ -44,10 +44,13 @@ import clegoues.genprog4java.Search.RepairFoundException;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.JavaEditOperation;
+import clegoues.genprog4java.rep.CachingRepresentation;
+import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.LocalizationRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
+import clegoues.util.ConfigurationBuilder;
 
 public class Main {
 	protected static Logger logger = Logger.getLogger(Main.class);
@@ -62,7 +65,17 @@ public class Main {
 		long startTime = System.currentTimeMillis();
 		BasicConfigurator.configure();
 
-		Configuration.setProperties(args[0]);
+		ConfigurationBuilder.register( Configuration.token );
+		ConfigurationBuilder.register( Fitness.token );
+		ConfigurationBuilder.register( CachingRepresentation.token );
+		ConfigurationBuilder.register( FaultLocRepresentation.token );
+		ConfigurationBuilder.register( JavaRepresentation.token );
+		ConfigurationBuilder.register( Population.token );
+		ConfigurationBuilder.register( Search.token );
+		ConfigurationBuilder.parseArgs( args );
+		Configuration.configure();
+		ConfigurationBuilder.storeProperties();
+
 		File workDir = new File(Configuration.outputDir);
 		if (!workDir.exists())
 			workDir.mkdir();

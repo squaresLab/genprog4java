@@ -33,6 +33,8 @@
 
 package clegoues.genprog4java.rep;
 
+import static clegoues.util.ConfigurationBuilder.BOOL_ARG;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
@@ -58,30 +60,29 @@ import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.ConfigurationBuilder;
+import clegoues.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class CachingRepresentation<G extends EditOperation> extends
 Representation<G> {
 	protected Logger logger = Logger.getLogger(CachingRepresentation.class);
 
-	public static boolean skipFailedSanity = true;
+	public static final ConfigurationBuilder.RegistryToken token =
+		ConfigurationBuilder.getToken();
+	
+	//public static boolean skipFailedSanity = true;
+	public static boolean skipFailedSanity = ConfigurationBuilder.of( BOOL_ARG )
+		.withVarName( "skipFailedSanity" )
+		.withDefault( "true" )
+		.withHelp( "do not include positive tests if they fail sanity" )
+		.inGroup( "CachingRepresentation Parameters" )
+		.build();
 	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
 
 	// persistent test cache
 	private static HashMap<List<Integer>, HashMap<String, FitnessValue>> fitnessCache = new HashMap<List<Integer>, HashMap<String, FitnessValue>>();
-
-	public static void configure(Properties prop) {
-		if (prop.getProperty("skipFailedSanity") != null) {
-			String sanity = prop.getProperty("skipFailedSanity").trim();
-			if (sanity.equals("no")) {
-				skipFailedSanity = false;
-			} else if (sanity.equals("yes")) {
-				skipFailedSanity = true;
-			}
-		}
-	}
 
 	private double fitness = -1.0;
 
