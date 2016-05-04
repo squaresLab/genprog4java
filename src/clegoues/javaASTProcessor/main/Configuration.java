@@ -20,6 +20,7 @@ import clegoues.util.ConfigurationBuilder;
 public class Configuration {
 	protected static Logger logger = Logger.getLogger(Configuration.class);
 
+
 	public static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
 
@@ -34,6 +35,12 @@ public class Configuration {
 		.withVarName( "libs" )
 		.withHelp( "classpath to compile the project" )
 		.build();
+	
+	public static String outputFormat = ConfigurationBuilder.of( STRING )
+			.withVarName("outputFormat")
+			.withHelp("outputFormat: either JSON(-like) or Simple")
+			.withDefault ("simple")
+			.build();
 	
 	public static ArrayList<String> targetClassNames =
 		new ConfigurationBuilder< ArrayList< String > >()
