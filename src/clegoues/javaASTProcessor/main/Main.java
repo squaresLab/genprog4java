@@ -18,24 +18,21 @@ import org.eclipse.jdt.core.dom.FileASTRequestor;
 import org.eclipse.jdt.core.dom.InfixExpression;
 
 import clegoues.javaASTProcessor.ASTPrinter.ASTDumper;
+import clegoues.javaASTProcessor.ASTPrinter.IASTPrinter;
+import clegoues.javaASTProcessor.ASTPrinter.JSONStyleASTPrinter;
+import clegoues.javaASTProcessor.ASTPrinter.SimpleTextASTPrinter;
 import clegoues.javaASTProcessor.main.Configuration;
 import clegoues.util.ConfigurationBuilder;
 
 
 
 public class Main {
-
+	private static ASTDumper dumper = null;
 
 	protected static List<CompilationUnit> parseCompilationUnit(String file, String[] libs) {
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		String fileName = "./" + Configuration.sourceDir + "/" + file; //"./" + file.replace('.', '/') + ".java";
 		File f = new File(fileName);
-		if(f.exists()) {
-			System.out.println(fileName + "Exists!");
-		} else {
-			System.out.println(fileName + "Doesn't exists!");
-
-		}
 		parser.setEnvironment(libs, new String[] {}, null, true);
 		Map options = JavaCore.getOptions();
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
@@ -95,7 +92,6 @@ public class Main {
 				return super.visit(node);
 			}
 		});
-		final ASTDumper dumper = new ASTDumper();
 		for (final Object comment : cu.getCommentList()) {
 			((Comment) comment).delete();
 		}
@@ -105,10 +101,19 @@ public class Main {
 	
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
-
 		ConfigurationBuilder.register( Configuration.token );
 		ConfigurationBuilder.parseArgs( args );
 		ConfigurationBuilder.storeProperties();
+		IASTPrinter myPrinter = null;
+		switch(Configuration.outputFormat.trim().toLowerCase()) {
+		case "json" : myPrinter = new JSONStyleASTPrinter(System.out);
+			break;
+		case "simple" : 
+		default: myPrinter = new SimpleTextASTPrinter(System.out);
+			break;
+		}
+		
+		dumper = new ASTDumper(myPrinter, null);
 		for(String fname : Configuration.targetClassNames) {
 			List<CompilationUnit> cus = parseCompilationUnit(fname, Configuration.libs.split(File.pathSeparator));
 			printCompilationUnits(cus);

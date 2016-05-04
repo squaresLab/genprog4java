@@ -22,7 +22,7 @@ public class Indenter {
 
 	private final StringBuffer indent = new StringBuffer();
 
-	private int indentationSize = 4;
+	private int indentationSize = 2;
 
 	/**
 	 * Gets the indentation string.
