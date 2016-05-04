@@ -25,6 +25,8 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 /**
 * Outputs the AST in JSON-style format.
@@ -68,6 +70,7 @@ public class JSONStyleASTPrinter extends Indenter implements IASTPrinter {
 		hasItemsStack.pop();
 	}
 
+	
 	public void startType(String name, boolean parentIsList) {
 		if (hasItemsStack.peek() == true) {
 			printer.println(",");

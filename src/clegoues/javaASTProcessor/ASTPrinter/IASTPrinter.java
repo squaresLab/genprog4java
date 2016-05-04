@@ -1,4 +1,8 @@
 package clegoues.javaASTProcessor.ASTPrinter;
+
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+
 //===========================================================================
 //
 //This program use Eclipse JDT to parse java source files 

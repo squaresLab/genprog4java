@@ -152,7 +152,6 @@ public class ASTDumper {
 		}
 		for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {
 			final Object descriptor = iterator.next();
-
 			if (descriptor instanceof SimplePropertyDescriptor) {
 				SimplePropertyDescriptor simple = (SimplePropertyDescriptor) descriptor;
 				Object value = node.getStructuralProperty(simple);
