@@ -11,6 +11,7 @@ import java.util.Stack;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
+
 public class SimpleTextASTPrinter extends Indenter implements IASTPrinter {
 	private final PrintWriter printer;
 
@@ -26,9 +27,10 @@ public class SimpleTextASTPrinter extends Indenter implements IASTPrinter {
 			// the root node.
 			push(false);
 		}
-	};
-
+	};	
+	
 	public void startElement(String name, boolean isList) {
+		
 		if (hasItemsStack.peek() == true) {
 			printer.println(",");
 		} else {
@@ -47,6 +49,7 @@ public class SimpleTextASTPrinter extends Indenter implements IASTPrinter {
 		hasItemsStack.pop();
 	}
 
+	
 	public void startType(String name, boolean parentIsList) {
 		if (hasItemsStack.peek() == true) {
 			printer.println(",");
@@ -60,7 +63,7 @@ public class SimpleTextASTPrinter extends Indenter implements IASTPrinter {
 			indent();
 		}
 
-		printer.print(getIndentString() + "node: \"" + name + "\"");
+		printer.print(getIndentString() + name + "\"");
 	}
 
 	public void endType(String name, boolean parentIsList) {
@@ -77,11 +80,8 @@ public class SimpleTextASTPrinter extends Indenter implements IASTPrinter {
 	private static boolean isJsonAllowedType(Class<? extends Object> clazz) {
 		return JSON_ALLOWED_WRAPPER_TYPES.contains(clazz);
 	}
-	
 
 	public void literal(String name, Object value) {
-		if(value == null) return;
-		if(value instanceof List && ((List) value).size() == 0) return;
 		if (hasItemsStack.peek() == true) {
 			printer.println(",");
 		} else {
