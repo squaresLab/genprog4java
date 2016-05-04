@@ -9,7 +9,7 @@ import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.WeightedAtom;
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.Pair;
 
 public class BruteForce<G extends EditOperation> extends Search<G> {
 
@@ -72,8 +72,7 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 			}
 
 		}
-		logger.info("search: bruteForce: " + count
-				+ " mutants in search space\n");
+		logger.info("search: bruteForce: " + count + " mutants in search space\n");
 
 		int wins = 0;
 		int sofar = 1;
@@ -94,7 +93,7 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 			};
 			// wouldn't real polymorphism be the actual legitimate best right
 			// here?
-			TreeSet<Pair<Mutation, Double>> availableMutations = original
+			TreeSet<clegoues.util.Pair<Mutation, Double>> availableMutations = original
 					.availableMutations(stmt);
 			TreeSet<Pair<Mutation, Double>> rescaledMutations = new TreeSet<Pair<Mutation, Double>>(
 					descendingMutations);
