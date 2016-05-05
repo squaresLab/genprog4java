@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -22,6 +24,7 @@ import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -56,19 +59,20 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 public class ASTPrinterVisitor extends ASTVisitor {
 
-	private final PrintWriter printer;
+	private final IASTPrinter printer;
 
-	public ASTPrinterVisitor(OutputStream destination) {
-		this.printer = new PrintWriter(destination);
+	public ASTPrinterVisitor(IASTPrinter printer) {
+		this.printer = printer; 
 	}
 	public void endVisit() {
-		printer.flush();
-		printer.close();
+		printer.endPrint();
 	}
 
 	
@@ -77,21 +81,41 @@ public class ASTPrinterVisitor extends ASTVisitor {
 //    }
 //	
 	public boolean visit(ArrayAccess node)  {
+		printer.startElement("arrayAccess", false);
 		node.getArray().accept(this);
-		printer.print(" [ ");
+		printer.literal("[");
 		node.getIndex().accept(this);
-		printer.print(" ] ");
+		printer.literal("]");
+		printer.endElement("arrayAccess", false);
         return false;
     }
 	
 
-//	FIXME: boolean visit(ArrayCreation node)  {
-//        return true;
-//    }
-//	
-//	boolean	visit(ArrayInitializer node)  {
-//        return true;
-//    }
+	@SuppressWarnings("unchecked")
+	public boolean visit(ArrayCreation node)  {
+		printer.startElement("new", true);
+		node.getType().accept(this);
+		// FIXME: type parameters.
+		printer.literal("[");
+		for(Expression dim : ((List<Expression>) node.dimensions())) {
+			dim.accept(this);
+		}
+
+		printer.literal("]");
+		if(node.getInitializer() != null)
+			node.getInitializer().accept(this);
+	    printer.endElement("new", false);
+		return false;
+    }
+	
+	@SuppressWarnings("unchecked")
+	public boolean	visit(ArrayInitializer node)  {
+		List<Expression> exps = node.expressions();
+		for(Expression e : exps) {
+			e.accept(this);
+		}
+        return false;
+    }
 //	
 //FIXME: boolean visit(ArrayType node)  {
 //        return true;
@@ -99,15 +123,18 @@ public class ASTPrinterVisitor extends ASTVisitor {
 	
 	public boolean visit(AssertStatement node)  {
 		// FIXME: ignoring message
-		printer.print("assert ");
+		printer.startType("assert", false);
 		node.getExpression().accept(this);
+		printer.endType("assert", false);
         return false;
     }
 	
 	public boolean visit(Assignment node)  {
+		printer.startElement("assignment", false);
 		node.getLeftHandSide().accept(this);
-		printer.print(node.getOperator().toString() + " ");
+		printer.literal(node.getOperator().toString());
 		node.getRightHandSide().accept(this);
+		printer.endElement("assignment", false);
         return false;
     }
 
@@ -116,28 +143,30 @@ public class ASTPrinterVisitor extends ASTVisitor {
 		List<Statement> stmts = node.statements();
 		for(Statement s : stmts) {
 			s.accept(this);
-			printer.println();
 		}
+
 		return false;
 	}
 	
 	public boolean visit(BooleanLiteral node)  {
-		printer.print(node.toString());
+		printer.literal(node.toString());
         return false;
     }
 	public boolean visit(BreakStatement node)  {
-		printer.print("break ");
-        return true;
+		printer.startType("break", true);
+		printer.endType("", false);
+        return false;
     }
 	
 	public boolean visit(CastExpression node)  {
-		printer.print("(" + node.getType().toString() + ") ");
+		printer.startType("(" + node.getType().toString() + ")", false);
 		node.getExpression().accept(this);
+		printer.endType("", false);
 		return false;
     }
 
 	public boolean	visit(CharacterLiteral node)  {
-		printer.print(node.toString());
+		printer.literal(node.toString());
         return false;
     }
 	
@@ -146,7 +175,7 @@ public class ASTPrinterVisitor extends ASTVisitor {
 	if(node.getExpression() != null) {
 		node.getExpression().accept(this); // omitting ".".  FIXME: should I?
 	}
-	printer.print("new ");
+	printer.literal("new");
 	this.printTypeArguments(node.typeArguments());
 	node.getType().accept(this);
 	this.printArguments(node.arguments());
@@ -158,21 +187,21 @@ public class ASTPrinterVisitor extends ASTVisitor {
 	
 	public boolean visit(ConditionalExpression node)  {
 		node.getExpression().accept(this);
-		printer.print(" ? ");
+		printer.literal("?");
 		node.getThenExpression().accept(this);
-		printer.print(" : ");
+		printer.literal(":");
 		node.getElseExpression().accept(this);
         return false;
     }
 	@SuppressWarnings("unchecked")
 	public boolean visit(ConstructorInvocation node)  {
 		this.printTypeArguments(node.typeArguments());
-		printer.print("this ");
+		printer.literal("this");
 		this.printArguments(node.arguments());
         return false;
     }
 	public boolean	visit(ContinueStatement node)  {
-		printer.println("continue");
+		printer.literal("continue");
         return false;
     }
 	
@@ -185,19 +214,20 @@ public class ASTPrinterVisitor extends ASTVisitor {
 //    }
 	
 	public boolean visit(DoStatement node)  {
-		printer.println("do ");
+		printer.startType("do", true);
 		node.getBody().accept(this);
-		printer.print("while ");
+		printer.literal("while");
 		node.getExpression().accept(this);
-		printer.println();
+		printer.endType("do", false);
         return false;
     }
 	
 	public boolean visit(EnhancedForStatement node)  {
-		printer.print("for ");
+		printer.startType("for", true);
 		node.getParameter().accept(this); // omitting the ':'
 		node.getExpression().accept(this);
 		node.getBody().accept(this);
+		printer.endType("for", false);
         return false;
     }
 	
@@ -209,70 +239,78 @@ public class ASTPrinterVisitor extends ASTVisitor {
 //	JLS8 : boolean visit(ExpressionMethodReference node)  {
 //        return true;
 //    }
-	
+	public boolean visit(ExpressionStatement node) {
+		node.getExpression().accept(this);
+		printer.literal("\n");
+		return false;
+	}
 
 	public boolean visit(FieldAccess node)  {
+		printer.startElement("fieldAccess", false); 
 		node.getExpression().accept(this);
-		printer.print(". ");
-		printer.print(node.getName());
+		printer.literal("."); // FIXME: don't want this dot separated with a space, maybe?
+		printer.literal(node.getName().toString());
+		printer.endElement("fieldAccess", false);
         return false;
     }
 	
 	@SuppressWarnings("unchecked")
 	public boolean visit(FieldDeclaration node)  {
+		printer.startType("fieldDecl", false);
 		this.printModifiers(node.modifiers());
-		printer.print(node.getType().toString());
+		printer.literal(node.getType().toString());
 		List<VariableDeclarationFragment> fragments = node.fragments();
 		for(VariableDeclarationFragment f : fragments) {
 			f.accept(this);
 		}
-        return true;
+		printer.endType("fieldDecl", false);
+        return false;
     }
 	
 	@SuppressWarnings("unchecked")
 	public boolean visit(ForStatement node)  { 
-		printer.print("for ");
+		printer.startType("for", true);
 		List<Expression> initializers = node.initializers();
 		for(Expression initializer : initializers) {
 			initializer.accept(this);
-			printer.print(" ");
 		}
 		Expression exp = node.getExpression();
 		if(exp != null) {
 			exp.accept(this);
-			printer.print(' ');
 		}
 		List<Expression> updaters = node.updaters();
 		for(Expression updater : updaters) {
 			updater.accept(this);
-			printer.print(' ');
 		}
 		node.getBody().accept(this);
+		printer.endType("for", false);
         return false;
     }
 	
 	public boolean visit(IfStatement node)  {
-		printer.print("if ");
+		printer.startType("if", true);
 		node.getExpression().accept(this);
-		printer.println("");
-		printer.println("then ");
+		printer.literal("\n");
+		printer.literal("then");
 		node.getThenStatement().accept(this);
-		printer.println();
 		if(node.getElseStatement() != null) {
-		printer.print("else ");
+		printer.literal("else");
 		node.getElseStatement().accept(this);
 		}
+		printer.endType("if", false);
         return false;
     }
 	
 	public boolean visit(ImportDeclaration node)  {
-		printer.println("import " + node.getName());
+		printer.startType("import", true);
+		printer.literal(node.getName().toString(), null);
+		printer.endType("import",false);
         return false;
     }
 	
 	public boolean visit(InfixExpression node)  {
 		node.getLeftOperand().accept(this);
-		printer.print(node.getOperator().toString());
+		printer.literal(node.getOperator().toString());
 		node.getRightOperand().accept(this);
         return false;
     }
@@ -280,7 +318,7 @@ public class ASTPrinterVisitor extends ASTVisitor {
 	
 	public boolean visit(InstanceofExpression node)  {
 		node.getLeftOperand().accept(this);
-		printer.print("instanceof ");
+		printer.literal("instanceof");
 		node.getRightOperand().accept(this);
         return false;
     }
@@ -290,7 +328,7 @@ public class ASTPrinterVisitor extends ASTVisitor {
 //    }
 
 	public boolean visit(LabeledStatement node)  {
-		printer.print(node.getLabel() + ": ");
+		printer.literal(node.getLabel() + ":");
 		node.getBody().accept(this);
         return false;
     }
@@ -298,21 +336,21 @@ public class ASTPrinterVisitor extends ASTVisitor {
 	
 	private void printTypeParameters(List<TypeParameter> tParams) {
 		if(tParams.size() > 0) {
-			printer.print("<");
-			for(TypeParameter t : tParams) { // FIXME trailing comma
-				printer.print(t.toString() + ",");
+			printer.literal("<");
+			for(TypeParameter t : tParams) {
+				printer.literal(t.toString());
 			}
-			printer.print(">");
+			printer.literal(">");
 		}
 	}
 	
 	private void printTypeArguments(List<Type> tParams) {
 		if(tParams.size() > 0) {
-			printer.print("<");
-			for(Type t : tParams) { // FIXME trailing comma
-				printer.print(t.toString() + ",");
+			printer.literal("<");
+			for(Type t : tParams) {
+				printer.literal(t.toString());
 			}
-			printer.print(">");
+			printer.literal(">");
 		}
 	}
 	
@@ -324,37 +362,40 @@ public class ASTPrinterVisitor extends ASTVisitor {
 	
 	private void printModifiers(List<Modifier> modifiers) {
 		for(Modifier mod : modifiers) {
-			printer.print(mod.toString() + " ");
+			printer.literal(mod.toString());
 		}
 	}
 	@SuppressWarnings("unchecked")
 	public boolean visit(MethodDeclaration node)  {
+		printer.startType("methodDecl", false);
+		printer.literal("\n");
+
 		// am omitting extraDimensions, receiverQualifier, and receiverType properties for now
 		this.printModifiers(node.modifiers());
 		if(!node.isConstructor()) {
 			Type returnType = node.getReturnType2();
-			printer.print(returnType.toString() + " ");
+			printer.literal(returnType.toString());
 		}
-		printer.print(node.getName());
+		printer.literal(node.getName().toString());
 		List<TypeParameter> typeParameters = node.typeParameters();
 		this.printTypeParameters(typeParameters);
-		printer.print(" ");
 		
 		// FIXME: varargs are stupid node.isVarargs();
 		List<SingleVariableDeclaration> params = node.parameters();
 		for(SingleVariableDeclaration p : params) {
 			p.accept(this);
 		}
+		@SuppressWarnings("deprecation")
 		List<Type> thrownExceptions = node.thrownExceptions();
 		if(thrownExceptions.size() > 0) {
-			printer.print(" throws ");
+			printer.literal("throws");
 			for(Type t : thrownExceptions) {
-				printer.print(t.toString() + " ");
+				printer.literal(t.toString());
 			}
 		}
-		printer.println("");
+		printer.literal("\n");
 		node.getBody().accept(this);
-		printer.println();
+		printer.endType("methodDecl",  false);
         return false;
     }
 	
@@ -363,12 +404,12 @@ public class ASTPrinterVisitor extends ASTVisitor {
 	public boolean	visit(MethodInvocation node)  {
 		if(node.getExpression() != null) {
 			node.getExpression().accept(this);
-			printer.print(". ");
+			printer.literal("."); // FIXME: dot?
 		}
 		this.printTypeArguments(node.typeArguments());
-		printer.print(node.getName() + " ");
+		printer.literal(node.getName().toString());
 		this.printArguments(node.arguments());
-        return true;
+        return false;
     }
 
 //	FIXME: boolean visit(NameQualifiedType node)  {
@@ -376,34 +417,36 @@ public class ASTPrinterVisitor extends ASTVisitor {
 //    }
 
 	public boolean visit(NullLiteral node)  {
-		printer.print("NULL ");
+		printer.literal("NULL");
         return false;
     }
 	
 	public boolean visit(NumberLiteral node)  {
-		printer.print(node.toString() + " ");
+		printer.literal(node.toString());
         return false;
     }
 	
 	public boolean visit(PackageDeclaration node)  {
-		printer.println("package " + node.getName().toString());
+		printer.startType("package",true); 
+		printer.literal(node.getName().toString());
+		printer.endType("package", false);
         return false;
     }
 
 	public boolean visit(PostfixExpression node)  {
 		node.getOperand().accept(this);
-		printer.print(node.getOperator() + " ");
+		printer.literal(node.getOperator().toString());
         return false;
     }
 	
 	public boolean visit(PrefixExpression node)  {
-		printer.print(node.getOperator() + " ");
+		printer.literal(node.getOperator().toString());
 		node.getOperand().accept(this);
         return false;
     }
 	
 	public boolean visit(PrimitiveType node)  {
-		printer.print(node.toString());
+		printer.literal(node.toString());
         return false;
     }
 	
@@ -416,38 +459,39 @@ public class ASTPrinterVisitor extends ASTVisitor {
 //    }
 	
 	public boolean visit(ReturnStatement node)  {
-		printer.print("return ");
+		printer.startType("return", true);
 		Expression retval = node.getExpression();
 		if(retval != null) {
 			retval.accept(this);
 		}
+		printer.endType("return", false);
 		return false;
     }
 	
 	public boolean visit(SimpleName node)  {
-		printer.print(node.getIdentifier());
+		printer.literal(node.getIdentifier());
         return false;
     }
 	
 	public boolean	visit(SimpleType node)  {
-		printer.print(node.getName().toString());
+		printer.literal(node.getName().toString());
         return false;
     }
 
 	@SuppressWarnings("unchecked")
 	public boolean visit(SingleVariableDeclaration node)  {
 		this.printModifiers(node.modifiers());
-		printer.print(node.getType() + " ");
-		printer.print(node.getName() + " ");
+		printer.literal(node.getType().toString());
+		printer.literal(node.getName().toString());
 		if(node.getInitializer() != null) {
-			printer.print(" = ");
+			printer.literal("=");
 			node.getInitializer().accept(this);
 		}
 		return false;
     }
 	
 	public boolean visit(StringLiteral node)  {
-		printer.print(node.getLiteralValue() + " ");
+		printer.literal(node.getLiteralValue());
         return false;
     }
 	
@@ -458,17 +502,17 @@ public class ASTPrinterVisitor extends ASTVisitor {
 			exp.accept(this);
 		}
 		this.printTypeArguments(node.typeArguments());
-		printer.print("super ");
+		printer.literal("super");
 		List<Expression> args = node.arguments();
 		for(Expression e : args) {
 			e.accept(this);
 		}
-		printer.println();
         return false;
     }
 	
 	public boolean visit(SuperFieldAccess node)  {
-		printer.println("super. " + node.getName());
+		printer.literal("super."); // FIXME: change all getName().toString() to getName.getIdentifier
+		printer.literal(node.getName().toString());
         return false;
     }
 //FIXME: bored boolean visit(SuperMethodInvocation node)  {
@@ -481,9 +525,9 @@ public class ASTPrinterVisitor extends ASTVisitor {
 //	
 	public boolean visit(SwitchCase node)  {
 		if(node.isDefault()) {
-			printer.print("default ");
+			printer.literal("default");
 		} else {
-			printer.print("case ");
+			printer.literal("case");
 			node.getExpression().accept(this);
 		}
 		return false;
@@ -491,14 +535,13 @@ public class ASTPrinterVisitor extends ASTVisitor {
 	
 	@SuppressWarnings("unchecked")
 	public boolean visit(SwitchStatement node)  {
-		printer.print("switch ");
+		printer.startType("switch", true);
 		node.getExpression().accept(this);
-		printer.println("");
 		List<Statement> stmts = node.statements();
 		for(Statement s: stmts) {
 			s.accept(this);
 		}
-		printer.println();
+		printer.endType("switch", false);
 		return false;
     }
 	
@@ -508,71 +551,74 @@ public class ASTPrinterVisitor extends ASTVisitor {
 //    }
 
 	public boolean visit(ThisExpression node)  {
-		printer.print("this ");
+		printer.literal("this");
         return false;
     }
 	
 	public boolean visit(ThrowStatement node)  {
-		printer.print("throw ");
+		printer.startType("throw", true);
 		node.getExpression().accept(this);
+		printer.endType("throw", false);
         return false;
     }
 	
 	@SuppressWarnings("unchecked")
 	public boolean visit(TryStatement node)  {
 		// FIXME: with resources not handled
-		printer.println("try ");
+		printer.startType("try",true);
 		node.getBody().accept(this);
 		List<CatchClause> catchClauses = node.catchClauses();
 		for(CatchClause c : catchClauses) {
-			printer.print("catch ");
+			printer.literal("catch");
 			c.getException().accept(this);
 			c.getBody().accept(this);
-			printer.println();
 		}
 		Block f = node.getFinally();
 		if(f != null) {
-			printer.println("finally ");
+			printer.literal("finally");
 			f.accept(this);
 		}
+		printer.endType("try", false);
 		return false;
     }
 	
 
 	@SuppressWarnings("unchecked")
 	public boolean visit(TypeDeclaration node)  {
-		List<Modifier> modifiers = node.modifiers();
-		for(Modifier mod : modifiers) {
-			printer.print(mod.toString() + " ");
-		}
+		printer.startType("typeDecl",false); // FIXME: this will print typeDecl, which we don't want.
+		this.printModifiers(node.modifiers());
+
 		if(node.isInterface()) {
 			List<Type> superTypes = node.superInterfaceTypes();
-			printer.print("interface " + node.getName().toString());
+			printer.literal("interface");
+			printer.literal(node.getName().toString());
 			if(superTypes.size() > 0) {
-				printer.print("extends ");
+				printer.literal("extends");
 			}
-			for(Type t : superTypes) { // FIXME: trailing comma
-				printer.print(t.toString() + ",");
+			for(Type t : superTypes) { 
+				printer.literal(t.toString());
 			}
 		} else {
-			printer.print("class " + node.getName().toString());
+			printer.literal("class");
+			printer.literal(node.getName().toString());
 			Type superType = node.getSuperclassType();
 			if(superType != null) {
-				printer.print("extends " + superType.toString());
+				printer.literal("extends");
+				printer.literal(superType.toString());
 			}
 		}
 		List<TypeParameter> tParams = node.typeParameters();
 		this.printTypeParameters(tParams);
-		printer.print("\n");
 		List<BodyDeclaration> bodyDecls = node.bodyDeclarations();
 		for(BodyDeclaration b : bodyDecls) {
 			b.accept(this);
 		}
+		printer.endType("typeDecl", false);
         return false;
     }
 
 	public boolean visit(TypeLiteral node)  {
-		printer.print(node.getType().toString());
+		printer.literal(node.getType().toString());
         return false;
     }
 	
@@ -584,20 +630,40 @@ public class ASTPrinterVisitor extends ASTVisitor {
 //        return true;
 //    }
 
+	@SuppressWarnings("unchecked")
+	public boolean visit(VariableDeclarationExpression node) {
+		this.printModifiers(node.modifiers());
+		node.getType().accept(this);
+		for(VariableDeclarationFragment f : ((List<VariableDeclarationFragment>) node.fragments())) {
+			f.accept(this);
+		}
+		return false;
+	}
+	@SuppressWarnings("unchecked")
+	public boolean visit(VariableDeclarationStatement node) {
+		this.printModifiers(node.modifiers());
+		node.getType().accept(this);
+		for(VariableDeclarationFragment f : ((List<VariableDeclarationFragment>) node.fragments())) {
+			f.accept(this);
+		}
+		printer.literal("\n");
+		return false;
+		
+	}
 	public boolean visit(VariableDeclarationFragment node) {
-		printer.print(node.getName() + " ");
+		printer.literal(node.getName().toString());
 		if(node.getInitializer() != null) {
-			printer.print(" = ");
+			printer.literal("=");
 			node.getInitializer().accept(this);
 		}
 		return false;
 	}
 
 	 public boolean visit(WhileStatement node)  {
-		 printer.print("while ");
+		 printer.startType("while", true);
 		 node.getExpression().accept(this);
-		 printer.println("");
 		 node.getBody().accept(this);
+		 printer.endType("while", false);
         return false;
     }
 
