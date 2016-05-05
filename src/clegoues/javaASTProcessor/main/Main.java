@@ -21,7 +21,6 @@ import clegoues.javaASTProcessor.ASTPrinter.ASTDumper;
 import clegoues.javaASTProcessor.ASTPrinter.ASTPrinterVisitor;
 import clegoues.javaASTProcessor.ASTPrinter.IASTPrinter;
 import clegoues.javaASTProcessor.ASTPrinter.JSONStyleASTPrinter;
-import clegoues.javaASTProcessor.ASTPrinter.SimpleTextASTPrinter;
 import clegoues.javaASTProcessor.main.Configuration;
 import clegoues.util.ConfigurationBuilder;
 
@@ -60,6 +59,20 @@ public class Main {
 	}
 	
 	protected static void printCompilationUnits(List<CompilationUnit> cus) {
+		ASTPrinterVisitor visit = null;;
+
+		switch(Configuration.outputFormat.trim().toLowerCase()) {
+		case "json" : 
+			IASTPrinter myPrinter = null;
+			myPrinter = new JSONStyleASTPrinter(System.out);
+			dumper = new ASTDumper(myPrinter, null);
+			break;
+		case "simple" : 
+		default: 
+			visit = new ASTPrinterVisitor(System.out);  // this is kind of gross but whatever
+			break;
+		}
+
 		for(CompilationUnit cu : cus) {
 		cu.accept(new ASTVisitor() {
 			// Eclipse AST optimize deeply nested expressions of the form L op R
@@ -96,8 +109,14 @@ public class Main {
 		for (final Object comment : cu.getCommentList()) {
 			((Comment) comment).delete();
 		}
+		if(visit != null) {
+			cu.accept(visit);
+		} else {
 		dumper.dump(cu);
+		}
 	}
+		if(visit != null) 
+			visit.endVisit();
 	}
 	
 	public static void main(String[] args) {
@@ -105,34 +124,11 @@ public class Main {
 		ConfigurationBuilder.register( Configuration.token );
 		ConfigurationBuilder.parseArgs( args );
 		ConfigurationBuilder.storeProperties();
-		IASTPrinter myPrinter = null;
 
-		if(Configuration.outputFormat.trim().toLowerCase() == "super") {
-			ASTPrinterVisitor visit = new ASTPrinterVisitor(System.out);
-			
-			// FIXME: hideous temporary mess
-			for(String fname : Configuration.targetClassNames) {
-				List<CompilationUnit> cus = parseCompilationUnit(fname, Configuration.libs.split(File.pathSeparator));
-				for(CompilationUnit cu : cus) {
-					cu.accept(visit);
-				}
-			}
-
-				visit.endVisit();
-		} else {
-		dumper = new ASTDumper(myPrinter, null);
-		switch(Configuration.outputFormat.trim().toLowerCase()) {
-		case "json" : myPrinter = new JSONStyleASTPrinter(System.out);
-			break;
-		case "simple" : 
-		default: myPrinter = new SimpleTextASTPrinter(System.out);
-			break;
-		}
 		for(String fname : Configuration.targetClassNames) {
 			List<CompilationUnit> cus = parseCompilationUnit(fname, Configuration.libs.split(File.pathSeparator));
 			printCompilationUnits(cus);
 		}
 		
-	}
 	}
 }
