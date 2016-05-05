@@ -440,12 +440,12 @@ public class ASTPrinterVisitor extends ASTVisitor {
 	 Name qualifier = node.getQualifier();
 	 printer.literal(qualifier.toString());
 	 printer.literal(node.getName().getIdentifier());
-        return true;
+        return false;
    }
 	
-	public boolean visit(QualifiedType node)  {
-        return true;
-    }
+//	FIXME: public boolean visit(QualifiedType node)  {
+//        return true;
+//    }
 	
 	public boolean visit(ReturnStatement node)  {
 		printer.literal("return");
@@ -595,6 +595,7 @@ public class ASTPrinterVisitor extends ASTVisitor {
 		}
 		List<TypeParameter> tParams = node.typeParameters();
 		this.printTypeParameters(tParams);
+		printer.literal("\n");
 		List<BodyDeclaration> bodyDecls = node.bodyDeclarations();
 		for(BodyDeclaration b : bodyDecls) {
 			b.accept(this);
