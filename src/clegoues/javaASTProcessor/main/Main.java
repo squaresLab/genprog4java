@@ -69,8 +69,7 @@ public class Main {
 			break;
 		case "simple" : 
 		default: 
-			myPrinter = new SimpleASTPrinter(System.out);
-			visit = new ASTPrinterVisitor(myPrinter);  // this is kind of gross but whatever
+			visit = new ASTPrinterVisitor(System.out);  // this is kind of gross but whatever
 			break;
 		}
 
