@@ -340,8 +340,11 @@ public class ASTPrinterVisitor extends ASTVisitor {
 		this.printTypeParameters(typeParameters);
 		printer.print(" ");
 		
-		node.isVarargs();
-		node.parameters();
+		// FIXME: varargs are stupid node.isVarargs();
+		List<SingleVariableDeclaration> params = node.parameters();
+		for(SingleVariableDeclaration p : params) {
+			p.accept(this);
+		}
 		List<Type> thrownExceptions = node.thrownExceptionTypes();
 		if(thrownExceptions.size() > 0) {
 			printer.print(" throws ");
@@ -349,6 +352,7 @@ public class ASTPrinterVisitor extends ASTVisitor {
 				printer.print(t.toString() + " ");
 			}
 		}
+		printer.println("");
 		node.getBody().accept(this);
 		printer.println();
         return false;
