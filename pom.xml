@@ -26,7 +26,19 @@
       </plugin>
     </plugins>
   </build>
+    <repositories>
+<repository>
+<id>in-project</id>
+<name>In Project Repo</name>
+<url>file://${project.basedir}/lib</url>
+</repository>
+  </repositories>
   <dependencies>
+  <dependency>
+    <groupId>log4j</groupId>
+    <artifactId>log4j</artifactId>
+    <version>1.2.17</version>
+</dependency>
   	<dependency>
   		<groupId>org.eclipse.tycho</groupId>
   		<artifactId>org.eclipse.jdt.core</artifactId>
