@@ -21,6 +21,7 @@ import clegoues.javaASTProcessor.ASTPrinter.ASTDumper;
 import clegoues.javaASTProcessor.ASTPrinter.ASTPrinterVisitor;
 import clegoues.javaASTProcessor.ASTPrinter.IASTPrinter;
 import clegoues.javaASTProcessor.ASTPrinter.JSONStyleASTPrinter;
+import clegoues.javaASTProcessor.ASTPrinter.SimpleASTPrinter;
 import clegoues.javaASTProcessor.main.Configuration;
 import clegoues.util.ConfigurationBuilder;
 
@@ -31,8 +32,7 @@ public class Main {
 
 	protected static List<CompilationUnit> parseCompilationUnit(String file, String[] libs) {
 		ASTParser parser = ASTParser.newParser(AST.JLS3);
-		String fileName = "./" + Configuration.sourceDir + "/" + file; //"./" + file.replace('.', '/') + ".java";
-		File f = new File(fileName);
+		String fileName = "./" + Configuration.sourceDir + "/" + file + ".java"; //"./" + file.replace('.', '/') + ".java";
 		parser.setEnvironment(libs, new String[] {}, null, true);
 		Map options = JavaCore.getOptions();
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
@@ -69,7 +69,8 @@ public class Main {
 			break;
 		case "simple" : 
 		default: 
-			visit = new ASTPrinterVisitor(System.out);  // this is kind of gross but whatever
+			myPrinter = new SimpleASTPrinter(System.out);
+			visit = new ASTPrinterVisitor(myPrinter);  // this is kind of gross but whatever
 			break;
 		}
 

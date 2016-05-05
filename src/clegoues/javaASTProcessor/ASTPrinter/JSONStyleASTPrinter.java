@@ -101,6 +101,9 @@ public class JSONStyleASTPrinter extends Indenter implements IASTPrinter {
 	private static boolean isJsonAllowedType(Class<? extends Object> clazz) {
 		return JSON_ALLOWED_WRAPPER_TYPES.contains(clazz);
 	}
+	public void literal(String name) {
+		this.literal(name, null);
+	}
 
 	public void literal(String name, Object value) {
 		if (hasItemsStack.peek() == true) {

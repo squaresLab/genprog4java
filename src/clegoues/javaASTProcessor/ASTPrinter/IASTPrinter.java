@@ -82,4 +82,6 @@ public interface IASTPrinter {
 	 *            the value to write.
 	 */
 	public void literal(String name, Object value);
+	public void literal(String name);
+
 }
