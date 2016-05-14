@@ -328,6 +328,7 @@ CachingRepresentation<G> {
 			TestCase newTest = new TestCase(testT, test);
 
 			System.out.println(test);
+			logger.info(test);
 			// this expectedResult is just 'true' for positive tests and 'false'
 			// for neg tests
 			if (this.testCase(newTest) != expectedResult
