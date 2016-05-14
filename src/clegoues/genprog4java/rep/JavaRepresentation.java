@@ -591,6 +591,7 @@ FaultLocRepresentation<JavaEditOperation> {
 
 		command.addArgument(test.toString());
 		logger.info("Command: " + command.toString());
+		System.out.println(command.toString());
 		return command;
 
 	}
