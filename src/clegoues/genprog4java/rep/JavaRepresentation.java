@@ -914,7 +914,6 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			}
 
-
 			if (ok) {
 				retVal.add(potentialFixAtom);
 			}

@@ -1,9 +1,11 @@
-package packageTemplatePlaygroundTest;
+package packageSimpleExample;
 
-public class TemplatePlaygroundTest {
+public class SimpleExample {
 
     public int mid(int x, int y, int z){
-    	int ret = z;
+
+        int ret;
+	ret = z;
 	if(y<z){
 	   if(x<y){
 		ret = y;
@@ -20,5 +22,3 @@ public class TemplatePlaygroundTest {
 	return ret;
     }
 }
-
-
