@@ -923,14 +923,6 @@ FaultLocRepresentation<JavaEditOperation> {
 		return retVal;
 	}
 
-	private int getIndexOfStmt(HashMap<Integer, JavaStatement> codeBank, ASTNode stmt){
-		for(int i =0; i < codeBank.size(); ++i){
-			if(stmt.equals(codeBank.get(i).getASTNode())){ 
-				return i; 
-			}
-		}
-		return -1;
-	}
 
 	private ASTNode blockThatContainsThisStatement(ASTNode stmt){
 		ASTNode parent = stmt.getParent();

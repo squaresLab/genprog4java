@@ -18,8 +18,7 @@ public class SimpleASTPrinter extends Indenter implements IASTPrinter {
 
 	// FIXME: this overloading of the bool is really not cool, but I'm just playng...
 	public void startElement(String name, boolean pushName) {
-		if(pushName)
-			outputQueue.add(name);
+		outputQueue.add(name);
 	}
 
 	private void flushQueue() {
@@ -35,8 +34,7 @@ public class SimpleASTPrinter extends Indenter implements IASTPrinter {
 
 	
 	public void startType(String name, boolean pushName) {
-		if(pushName)
-			outputQueue.add(name);
+		outputQueue.add(name);
 	}
 
 	public void endType(String name, boolean pushName) {
