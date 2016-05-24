@@ -4,8 +4,6 @@ bin/*
 tmp/
 *~
 .*\.orig$
-tests/TemplatePlaygroundTest/*
-tests/SimpleExample/*
 *.log
 
 syntax: regexp
