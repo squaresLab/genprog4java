@@ -5,6 +5,6 @@ tmp/
 *~
 .*\.orig$
 *.log
-
+tests/TemplatePlaygroundTest/src/*
 syntax: regexp
 ^target$

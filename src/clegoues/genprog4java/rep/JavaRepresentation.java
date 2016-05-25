@@ -147,8 +147,8 @@ FaultLocRepresentation<JavaEditOperation> {
 	protected Logger logger = Logger.getLogger(JavaRepresentation.class);
 
 	public static final ConfigurationBuilder.RegistryToken token =
-		ConfigurationBuilder.getToken();
-	
+			ConfigurationBuilder.getToken();
+
 	private static HashMap<Integer, JavaStatement> codeBank = new HashMap<Integer, JavaStatement>();
 	private static HashMap<Integer, JavaStatement> base = new HashMap<Integer, JavaStatement>();
 	private static HashMap<ClassInfo, CompilationUnit> baseCompilationUnits = new HashMap<ClassInfo, CompilationUnit>();
@@ -163,12 +163,12 @@ FaultLocRepresentation<JavaEditOperation> {
 	// the one.
 	//private static String semanticCheck = "scope";
 	private static String semanticCheck = ConfigurationBuilder.of( STRING )
-		.withVarName( "semanticCheck" )
-		.withFlag( "semantic-check" )
-		.withDefault( "scope" )
-		.withHelp( "the semantic check to perform on inserted variables" )
-		.inGroup( "JavaRepresentation Parameters" )
-		.build();
+			.withVarName( "semanticCheck" )
+			.withFlag( "semantic-check" )
+			.withDefault( "scope" )
+			.withHelp( "the semantic check to perform on inserted variables" )
+			.inGroup( "JavaRepresentation Parameters" )
+			.build();
 	private static int stmtCounter = 0;
 
 	private static HashMap<Integer, TreeSet<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, TreeSet<WeightedAtom>>();
@@ -568,10 +568,10 @@ FaultLocRepresentation<JavaEditOperation> {
 				+ Configuration.libs + System.getProperty("path.separator") 
 				+ Configuration.testClassPath + System.getProperty("path.separator") 
 				+ Configuration.srcClassPath;
-//; 
-//		if(Configuration.classSourceFolder != "") {
-//			classPath += System.getProperty("path.separator") + Configuration.classSourceFolder;
-//		}
+		//; 
+		//		if(Configuration.classSourceFolder != "") {
+		//			classPath += System.getProperty("path.separator") + Configuration.classSourceFolder;
+		//		}
 		// Positive tests
 		command.addArgument("-classpath");
 		command.addArgument(classPath);
@@ -810,7 +810,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			}
 
-			//No need to assign a value to a final variable
+			//Heuristic: No need to assign a value to a final variable
 			if(potentialFixStmt.getASTNode() instanceof Assignment){
 				if(((Assignment) potentialFixStmt.getASTNode()).getLeftHandSide() instanceof SimpleName){
 					SimpleName leftHand = (SimpleName) ((Assignment) potentialFixStmt.getASTNode()).getLeftHandSide();
@@ -820,7 +820,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			}
 
-			//No need to insert a declaration of a final variable
+			//Heuristic: No need to insert a declaration of a final variable
 			if(potentialFixStmt.getASTNode() instanceof VariableDeclarationStatement){
 				VariableDeclarationStatement ds = (VariableDeclarationStatement) potentialFixStmt.getASTNode();
 				VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
@@ -830,7 +830,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			}
 
-			//Do not insert a return statement on a func whose return type is void
+			//Heuristic: Do not insert a return statement on a func whose return type is void
 			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
 				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
 				while(!(parent instanceof MethodDeclaration) && parent != null){
@@ -847,7 +847,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			}
 
-			//Do not insert a return statement on a constructor
+			//Heuristic: Do not insert a return statement on a constructor
 			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
 				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
 				while(!(parent instanceof MethodDeclaration) && parent != null){
@@ -859,7 +859,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			}
 
-			//Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is probably wrong
+			//Heuristic: Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is probably wrong
 			if(potentialFixStmt.getASTNode() instanceof ConstructorInvocation || potentialFixStmt.getASTNode() instanceof SuperConstructorInvocation){
 				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
 				while(!(parent instanceof MethodDeclaration) && parent != null){
@@ -881,7 +881,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			}
 
-			//Swapping, Appending or Replacing a return stmt to the middle of a block will make the code after it unreachable
+			//Heuristic: Swapping, Appending or Replacing a return stmt to the middle of a block will make the code after it unreachable
 			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
 				StructuralPropertyDescriptor locationPotBuggy = potentiallyBuggyStmt.getASTNode().getLocationInParent();
 
@@ -901,7 +901,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			}
 
-			//Don't allow to move breaks outside of switch stmts
+			//Heuristic: Don't allow to move breaks outside of switch stmts
 			if(potentialFixStmt.getASTNode() instanceof BreakStatement){
 				ASTNode buggyNode = potentiallyBuggyStmt.getASTNode();
 				boolean isWithinASwitch = buggyNode instanceof SwitchStatement;
@@ -913,6 +913,19 @@ FaultLocRepresentation<JavaEditOperation> {
 					ok=false;
 				}
 			}
+
+			//Heuristic: should not return a value from a method whose result type is void
+			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
+				ASTNode parent = potentialFixStmt.getASTNode().getParent();
+				while (!(parent instanceof MethodDeclaration)){
+					parent = parent.getParent();
+				}
+				boolean returnTypeIsVoid = ((MethodDeclaration)parent).getReturnType2().toString().equalsIgnoreCase("void"); //FIXME: DEBUG TO SEE IF THIS IS CORRECT.
+				if(returnTypeIsVoid){
+					ok=false;
+				}
+			}
+
 
 			if (ok) {
 				retVal.add(potentialFixAtom);
@@ -960,13 +973,16 @@ FaultLocRepresentation<JavaEditOperation> {
 		case NULLINSERT:
 		case DELETE: 
 			boolean itApplies = true;
-			//If it is the body of an if, while, or for, it should not be removed
 			ASTNode faultyNode = locationStmt.getASTNode();
+
+			//Heuristic: If it is the body of an if, while, or for, it should not be removed
 			boolean ifCase = false, elseCase = false, whileCase = false, forCase = false;
 
 			if(faultyNode instanceof Block){
+				//this boolean states if the faultyNode is the body of an IfStatement
 				ifCase = faultyNode.getParent() instanceof IfStatement
 						&& ((IfStatement)faultyNode.getParent()).getThenStatement().equals(faultyNode);
+				//same for all these booleans
 				whileCase = faultyNode.getParent() instanceof WhileStatement
 						&& ((WhileStatement)faultyNode.getParent()).getBody().equals(faultyNode);
 				forCase = faultyNode.getParent() instanceof ForStatement
@@ -975,14 +991,26 @@ FaultLocRepresentation<JavaEditOperation> {
 					elseCase = faultyNode.getParent() instanceof IfStatement
 							&& ((IfStatement)faultyNode.getParent()).getElseStatement().equals(faultyNode);
 				}
-
 			}
 
+			//if any of these booleans is true, then the change should not be allowed
 			if(ifCase || whileCase || forCase || elseCase){
 				itApplies = false;
-			}else{
-				itApplies = true;
 			}
+
+			//Heuristic: Don´t remove/replace/swap returns from functions that have only one return statement.
+			if(faultyNode instanceof ReturnStatement){
+				ASTNode parent = faultyNode.getParent();
+				while (!(parent instanceof MethodDeclaration)){
+					parent = parent.getParent();
+				}
+				boolean moreThanOneReturn = hasMoreThanOneReturn((MethodDeclaration)parent);
+				if(!moreThanOneReturn){
+					itApplies = false;
+				}
+			}
+
+
 			return itApplies;
 		case OFFBYONE:  // FIXME: CLG suspects this should only apply to particular statements, not every statement in the program.  Maybe?
 		case UBOUNDSET:
@@ -993,7 +1021,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			return locationStmt.methodReplacerApplies(methodDecls);
 		case NULLCHECK: 
 			return locationStmt.nullCheckApplies();
-			
+
 		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;
@@ -1001,6 +1029,17 @@ FaultLocRepresentation<JavaEditOperation> {
 		return false;
 	}
 
+	int howManyReturns = 0;
+	private boolean hasMoreThanOneReturn(MethodDeclaration method){
+		method.accept(new ASTVisitor() {
+			@Override
+			public boolean visit(ReturnStatement node) {
+				howManyReturns++;
+				return true;
+			}
+		});
+		return howManyReturns>=2;
+	}
 
 	@Override
 
@@ -1011,7 +1050,6 @@ FaultLocRepresentation<JavaEditOperation> {
 			if (JavaRepresentation.semanticCheck.equals("scope")) {
 				JavaStatement locationStmt = codeBank.get(stmtId);
 				//If it is a return statement, nothing should be appended after it, since it would be dead code
-				// FIXME: what about REPLACE?
 				if(!(locationStmt.getASTNode() instanceof ReturnStatement)){
 					return this.scopeHelper(stmtId);
 				}else{

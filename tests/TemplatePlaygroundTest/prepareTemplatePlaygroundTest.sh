@@ -1,6 +1,5 @@
 #!/bin/bash
 # 1st param is the path to genprog for java
-# 2nd param is the path to the junit jars on your machine
 # claire note to self: junit jars on her machine are: /Applications/eclipse/external-jars/
 #Example of how to run it:
 #./prepareTemplatePlaygroundTest.sh /home/mau/Research/genprog4java
@@ -18,7 +17,7 @@ fi
 
 javac -d bin/ src/packageTemplatePlaygroundTest/TemplatePlaygroundTest.java 
 javac -classpath $JUNITJARS/junit-4.12.jar:$JUNITJARS/hamcrest-core-1.3.jar:bin/ -sourcepath src/tests/*java -d bin/ src/tests/*java
-rm -rf bin/packageTemplatePlaygroundTest/
+#rm -rf bin/packageTemplatePlaygroundTest/
 
 #PACKAGEDIR=${JAVADIR//"/"/"."}
 
