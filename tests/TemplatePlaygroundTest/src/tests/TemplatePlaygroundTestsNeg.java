@@ -14,7 +14,7 @@ public class TemplatePlaygroundTestsNeg {
     TemplatePlaygroundTest tester = new TemplatePlaygroundTest();
 
     // assert statements
-    assertEquals("Should be 2", 2, tester.retOne()); 
+    assertEquals("Should be 2", 2, tester.mid(2,1,3)); 
  
    }
 
