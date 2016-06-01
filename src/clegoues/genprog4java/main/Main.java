@@ -36,11 +36,11 @@ package clegoues.genprog4java.main;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import clegoues.genprog4java.Search.Population;
-import clegoues.genprog4java.Search.RepairFoundException;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.JavaEditOperation;
@@ -57,6 +57,14 @@ public class Main {
 
 	public static void main(String[] args) throws IOException,
 			UnexpectedCoverageResultException {
+		//FIXME: looks like it is not finding the properties file so it uses the default one, with just errors
+		//BasicConfigurator.configure();
+		//logger.debug("Sample debug message");
+		//logger.info("Sample info message");
+		//logger.warn("Sample warn message");
+		//logger.error("Sample error message");
+		//logger.fatal("Sample fatal message");
+		System.out.println(System.getProperty("log4j.configuration")); 
 		Search searchEngine = null;
 		Representation baseRep = null;
 		Fitness fitnessEngine = null;

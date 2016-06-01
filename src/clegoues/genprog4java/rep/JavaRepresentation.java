@@ -883,17 +883,12 @@ FaultLocRepresentation<JavaEditOperation> {
 
 			//Heuristic: Swapping, Appending or Replacing a return stmt to the middle of a block will make the code after it unreachable
 			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
-				StructuralPropertyDescriptor locationPotBuggy = potentiallyBuggyStmt.getASTNode().getLocationInParent();
-
 				ASTNode parentBlock = blockThatContainsThisStatement(potentiallyBuggyStmt.getASTNode());
 				if(parentBlock instanceof Block){
 
 					List<ASTNode> statementsInBlock = ((Block)parentBlock).statements();
 					ASTNode lastStmtInTheBlock = statementsInBlock.get(statementsInBlock.size()-1);
-
-					StructuralPropertyDescriptor locationLastInBlock = lastStmtInTheBlock.getLocationInParent();
-
-					if(!locationLastInBlock.equals(locationPotBuggy)){
+					if(!lastStmtInTheBlock.equals(potentiallyBuggyStmt.getASTNode())){
 						ok=false;
 					}
 				}else{
@@ -914,17 +909,23 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			}
 
-			//Heuristic: should not return a value from a method whose result type is void
-			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
-				ASTNode parent = potentialFixStmt.getASTNode().getParent();
+			//Heuristic: Don´t replace/swap returns from functions that have only one return statement.
+			if(potentiallyBuggyStmt.getASTNode() instanceof ReturnStatement){
+				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
 				while (!(parent instanceof MethodDeclaration)){
 					parent = parent.getParent();
 				}
-				boolean returnTypeIsVoid = ((MethodDeclaration)parent).getReturnType2().toString().equalsIgnoreCase("void"); //FIXME: DEBUG TO SEE IF THIS IS CORRECT.
-				if(returnTypeIsVoid){
-					ok=false;
+				boolean moreThanOneReturn = hasMoreThanOneReturn((MethodDeclaration)parent);
+				if(!moreThanOneReturn){
+					ok = false;
 				}
 			}
+
+			//Heuristic: Don’t replace or swap (or append) an stmt with one just like it
+			if(potentiallyBuggyStmt.getASTNode().equals(potentialFixStmt.getASTNode()) || potentiallyBuggyStmt.getStmtId()==potentialFixStmt.getStmtId()){
+				ok = false;
+			}
+
 
 
 			if (ok) {
@@ -998,7 +999,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				itApplies = false;
 			}
 
-			//Heuristic: Don´t remove/replace/swap returns from functions that have only one return statement.
+			//Heuristic: Don´t remove returns from functions that have only one return statement.
 			if(faultyNode instanceof ReturnStatement){
 				ASTNode parent = faultyNode.getParent();
 				while (!(parent instanceof MethodDeclaration)){
@@ -1009,6 +1010,17 @@ FaultLocRepresentation<JavaEditOperation> {
 					itApplies = false;
 				}
 			}
+
+			//Heuristic: If an stmt is the only stmt in a block, don´t delete it
+			ASTNode parent = blockThatContainsThisStatement(faultyNode);
+			if(parent instanceof Block){
+				if(((Block)parent).statements().size()==1){
+					itApplies = false;
+				}
+			}
+
+
+
 
 
 			return itApplies;
@@ -1046,11 +1058,10 @@ FaultLocRepresentation<JavaEditOperation> {
 	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
 		switch(editType) {
 		case APPEND: 	
-		case REPLACE:
 			if (JavaRepresentation.semanticCheck.equals("scope")) {
 				JavaStatement locationStmt = codeBank.get(stmtId);
 				//If it is a return statement, nothing should be appended after it, since it would be dead code
-				if(!(locationStmt.getASTNode() instanceof ReturnStatement)){
+				if(!(locationStmt.getASTNode() instanceof ReturnStatement || locationStmt.getASTNode() instanceof ThrowStatement)){
 					return this.scopeHelper(stmtId);
 				}else{
 					return new TreeSet<WeightedAtom>();
@@ -1058,10 +1069,19 @@ FaultLocRepresentation<JavaEditOperation> {
 			} else {
 				return super.editSources(stmtId, editType);
 			}
+			//break; 
+		case REPLACE:
+			if (JavaRepresentation.semanticCheck.equals("scope")) {
+				return this.scopeHelper(stmtId);
+			} else {
+				return super.editSources(stmtId, editType);
+			}
+			//break; this is unreachable
 		case DELETE: 
 			TreeSet<WeightedAtom> retval = new TreeSet<WeightedAtom>();
 			retval.add(new WeightedAtom(stmtId, 1.0));
 			return retval;
+			//break; this is unreachable
 		case SWAP:
 			if (JavaRepresentation.semanticCheck.equals("scope")) {
 				TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
@@ -1083,6 +1103,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			} else {
 				return super.editSources(stmtId, editType);
 			}
+			//break; This is unreachable
 		case NULLINSERT:
 		case FUNREP:
 		case PARREP:
@@ -1102,6 +1123,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			retval = new TreeSet<WeightedAtom>();
 			retval.add(new WeightedAtom(stmtId, 1.0));
 			return retval;
+			//break; this is unreachable
 		default:
 			// IMPORTANT FIXME FOR MANISH AND MAU: you must add handling here to check legality for templates as you add them.
 			// if a template always applies, then you can move the template type to the DELETE case, above.
@@ -1135,7 +1157,6 @@ FaultLocRepresentation<JavaEditOperation> {
 				logger.debug("\t\t" + t);
 			}
 		}
-
 	}
 
 	public void test() {
