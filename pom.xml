@@ -99,25 +99,16 @@
   		<artifactId>commons-lang3</artifactId>
   		<version>3.4</version>
   	</dependency>
-  	  <dependency>
-    <groupId>org.apache.logging.log4j</groupId>
-    <artifactId>log4j-api</artifactId>
-    <version>1.2.12</version>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.logging.log4j</groupId>
-    <artifactId>log4j-core</artifactId>
-    <version>1.2.12</version>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.logging.log4j</groupId>
-    <artifactId>log4j-1.2-api</artifactId>
-    <version>1.2.12</version>
-  </dependency>
+<dependency>
+    <groupId>log4j</groupId>
+    <artifactId>log4j</artifactId>
+    <version>1.2.17</version>
+</dependency>
+
   <dependency>
   	<groupId>org.junit</groupId>
   	<artifactId>junit4-runner</artifactId>
-  	<version>1.2.12</version>
+  	<version>5.0.0-ALPHA</version>
   </dependency>
   </dependencies>
 </project>
