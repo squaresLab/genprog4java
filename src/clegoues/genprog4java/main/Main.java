@@ -52,6 +52,7 @@ import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 import clegoues.util.ConfigurationBuilder;
 
 public class Main {
+
 	protected static Logger logger = Logger.getLogger(Main.class);
 
 	public static void main(String[] args) throws IOException,
