@@ -105,7 +105,7 @@ public class GlobalUtils {
 				counter++;
 			}			
 		}
-		if(counter>=2){
+		if(counter>=5){
 			return true;
 		}else{
 			return false;
