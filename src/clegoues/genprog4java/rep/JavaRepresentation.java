@@ -171,7 +171,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			.build();
 	private static int stmtCounter = 0;
 
-	private static HashMap<Integer, TreeSet<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, TreeSet<WeightedAtom>>();
+	private static HashMap<Integer, ArrayList<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, ArrayList<WeightedAtom>>();
 	private static HashMap<Integer, Set<String>> inScopeMap = new HashMap<Integer, Set<String>>();
 	private static TreeSet<Pair<String,String>> methodReturnType = new TreeSet<Pair<String,String>>();
 	private static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
@@ -194,6 +194,10 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	private static HashMap<ClassInfo, String> getOriginalSource() {
 		return originalSource;
+	}
+	
+	public HashMap<Integer, JavaStatement> getCodeBank(){
+		return codeBank;
 	}
 
 	protected void instrumentForFaultLocalization() {
@@ -774,7 +778,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		return copy;
 	}
 
-	private TreeSet<WeightedAtom> scopeHelper(int stmtId) {
+	private ArrayList<WeightedAtom> scopeHelper(int stmtId) {
 		if (JavaRepresentation.scopeSafeAtomMap.containsKey(stmtId)) {
 			return JavaRepresentation.scopeSafeAtomMap.get(stmtId);
 		}
@@ -787,7 +791,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		// at parse time and thus could be considered here.
 		Set<String> inScopeAt = JavaRepresentation.inScopeMap.get(potentiallyBuggyStmt
 				.getStmtId());
-		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+		ArrayList<WeightedAtom> retVal = new ArrayList<WeightedAtom>();
 
 		//potentialFix is a potential fix statement
 		for (WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {
@@ -1114,7 +1118,7 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	@Override
 
-	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
+	public ArrayList<WeightedAtom> editSources(int stmtId, Mutation editType) {
 		switch(editType) {
 		case APPEND: 	
 			if (JavaRepresentation.semanticCheck.equals("scope")) {
@@ -1123,7 +1127,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				if(!(locationStmt.getASTNode() instanceof ReturnStatement || locationStmt.getASTNode() instanceof ThrowStatement)){
 					return this.scopeHelper(stmtId);
 				}else{
-					return new TreeSet<WeightedAtom>();
+					return new ArrayList<WeightedAtom>();
 				}
 			} else {
 				return super.editSources(stmtId, editType);
@@ -1137,16 +1141,16 @@ FaultLocRepresentation<JavaEditOperation> {
 			}
 			//break; this is unreachable
 		case DELETE: 
-			TreeSet<WeightedAtom> retval = new TreeSet<WeightedAtom>();
+			ArrayList<WeightedAtom> retval = new ArrayList<WeightedAtom>();
 			retval.add(new WeightedAtom(stmtId, 1.0));
 			return retval;
 			//break; this is unreachable
 		case SWAP:
 			if (JavaRepresentation.semanticCheck.equals("scope")) {
-				TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+				ArrayList<WeightedAtom> retVal = new ArrayList<WeightedAtom>();
 				for (WeightedAtom item : this.scopeHelper(stmtId)) {
 					int atom = item.getAtom();
-					TreeSet<WeightedAtom> inScopeThere = this.scopeHelper(atom);
+					ArrayList<WeightedAtom> inScopeThere = this.scopeHelper(atom);
 					boolean containsThisAtom = false;
 					for (WeightedAtom there : inScopeThere) {
 						if (there.getAtom() == stmtId) {
@@ -1179,7 +1183,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		case LBOUNDSET:
 		case UBOUNDSET:
 		case OFFBYONE:
-			retval = new TreeSet<WeightedAtom>();
+			retval = new ArrayList<WeightedAtom>();
 			retval.add(new WeightedAtom(stmtId, 1.0));
 			return retval;
 			//break; this is unreachable
@@ -1189,7 +1193,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			// however, I don't think most templates always apply; it doesn't make sense to null check a statement in which nothing
 			// could conceivably be null, for example.
 			logger.fatal("Unhandled template type in editSources!  Fix code in JavaRepresentation to do this properly.");
-			return new TreeSet<WeightedAtom>();
+			return new ArrayList<WeightedAtom>();
 		}
 	}
 

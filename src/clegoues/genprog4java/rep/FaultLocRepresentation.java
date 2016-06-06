@@ -261,8 +261,8 @@ CachingRepresentation<G> {
 	}
 	
 	@Override
-	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
-		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+	public ArrayList<WeightedAtom> editSources(int stmtId, Mutation editType) {
+		ArrayList<WeightedAtom> retVal = new ArrayList<WeightedAtom>();
 		switch(editType) {
 		case APPEND:
 		case SWAP:

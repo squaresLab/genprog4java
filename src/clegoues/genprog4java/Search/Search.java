@@ -54,6 +54,7 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.util.ConfigurationBuilder;
@@ -197,14 +198,14 @@ public class Search<G extends EditOperation> {
 		rep.outputSource(repairFilename);
 	}
 
-	private TreeSet<WeightedAtom> rescaleAtomPairs(TreeSet<WeightedAtom> items) {
+	private ArrayList<WeightedAtom> rescaleAtomPairs(ArrayList<WeightedAtom> arrayList) {
 		double fullSum = 0.0;
-		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for (Pair<?, Double> item : items) {
+		ArrayList<WeightedAtom> retVal = new ArrayList<WeightedAtom>();
+		for (Pair<?, Double> item : arrayList) {
 			fullSum += item.getSecond();
 		}
 		double scale = 1.0 / fullSum;
-		for (WeightedAtom item : items) {
+		for (WeightedAtom item : arrayList) {
 			WeightedAtom newItem = new WeightedAtom(item.getAtom(),
 					item.getWeight() * scale);
 			retVal.add(newItem);
@@ -229,7 +230,7 @@ public class Search<G extends EditOperation> {
 		original.reduceFixSpace();
 
 		int count = 0;
-		TreeSet<WeightedAtom> allFaultyAtoms = new TreeSet<WeightedAtom>(
+		ArrayList<WeightedAtom> allFaultyAtoms = new ArrayList<WeightedAtom>(
 				original.getFaultyAtoms());
 
 		for (WeightedAtom faultyAtom : allFaultyAtoms) {
@@ -251,7 +252,7 @@ public class Search<G extends EditOperation> {
 		int sofar = 1;
 		boolean repairFound = false;
 
-		TreeSet<WeightedAtom> rescaledAtoms = rescaleAtomPairs(allFaultyAtoms);
+		ArrayList<WeightedAtom> rescaledAtoms = rescaleAtomPairs(allFaultyAtoms);
 
 		for (WeightedAtom faultyAtom : rescaledAtoms) {
 			int stmt = faultyAtom.getAtom();
@@ -376,13 +377,13 @@ public class Search<G extends EditOperation> {
 		ArrayList<WeightedAtom> proMutList = new ArrayList<WeightedAtom>();
 		boolean foundMutationThatCanApplyToAtom = false;
 		while(!foundMutationThatCanApplyToAtom){
-			//promut default is 1
+			//promut default is 1 // promut stands for proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
 			for (int i = 0; i < Search.promut; i++) {
 				WeightedAtom wa = null;
 				boolean alreadyOnList = false;
 				//only adds the random atom if it is different from the others already added
 				do{
-					//chooses a random atom
+					//chooses a random faulty atom from the subset of faulty atoms
 					wa = (WeightedAtom) GlobalUtils.chooseOneWeighted(faultyAtoms);
 					alreadyOnList = proMutList.contains(wa);
 				}while(alreadyOnList);
@@ -397,7 +398,7 @@ public class Search<G extends EditOperation> {
 				}else{
 					foundMutationThatCanApplyToAtom = true;
 				}
-				//choose one at random
+				//choose a mutation at random
 				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(new ArrayList(availableMutations));
 				Mutation mut = chosenMutation.getFirst();
 				switch (mut) {
@@ -412,25 +413,24 @@ public class Search<G extends EditOperation> {
 					variant.performEdit(mut, stmtid, (-1));
 					break;
 				case APPEND:
-					TreeSet<WeightedAtom> allowedA = variant.editSources(stmtid,mut);
+					ArrayList<WeightedAtom> allowedA = variant.editSources(stmtid,mut);
 					WeightedAtom afterA = (WeightedAtom) GlobalUtils
 							.chooseOneWeighted(new ArrayList(allowedA));
 					variant.performEdit(mut, stmtid,  afterA.getAtom()); 
 					break;
 				case SWAP:
-					TreeSet<WeightedAtom> allowedS = variant.editSources(stmtid,mut);
+					ArrayList<WeightedAtom> allowedS = variant.editSources(stmtid,mut);
 					WeightedAtom afterS = (WeightedAtom) GlobalUtils
 							.chooseOneWeighted(new ArrayList(allowedS));
 					variant.performEdit(mut, stmtid,  afterS.getAtom()); 
 					break;
 				case REPLACE: 
-					TreeSet<WeightedAtom> allowedR = variant.editSources(stmtid,mut);
-					WeightedAtom afterR = (WeightedAtom) GlobalUtils
-							.chooseOneWeighted(new ArrayList(allowedR));
-					variant.performEdit(mut, stmtid,  afterR.getAtom()); 
+					ArrayList<WeightedAtom> allowedR = variant.editSources(stmtid,mut);
+					int afterR = GlobalUtils.chooseReplacementBasedOnPredictingModel(new ArrayList(allowedR),variant,stmtid);
+					variant.performEdit(mut, stmtid,  afterR); 
 					break;
 				case OFFBYONE:
-					TreeSet<WeightedAtom> allowedO = variant.editSources(stmtid,mut);
+					ArrayList<WeightedAtom> allowedO = variant.editSources(stmtid,mut);
 					WeightedAtom afterO = (WeightedAtom) GlobalUtils
 							.chooseOneWeighted(new ArrayList(allowedO));
 					variant.performEdit(mut, stmtid,  afterO.getAtom()); 
