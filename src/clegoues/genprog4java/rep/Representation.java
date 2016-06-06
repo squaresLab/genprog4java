@@ -251,7 +251,7 @@ Comparable<Representation<G>> {
 		return allLines;
 	}
 
-	public abstract TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType);
+	public abstract ArrayList<WeightedAtom> editSources(int stmtId, Mutation editType);
 
 	public abstract Boolean doesEditApply(int location, Mutation editType);
 
