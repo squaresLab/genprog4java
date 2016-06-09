@@ -97,7 +97,7 @@ seed = 0
 javaVM = /usr/bin/java
 workingDir = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
 outputDir = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/tmp
-classSourceFolder = $SRCFOLDER
+classSourceFolder = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/$SRCFOLDER
 libs = $CONFIGLIBS
 sanity = yes
 regenPaths
