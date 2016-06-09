@@ -1036,7 +1036,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			ASTNode faultyNode = locationStmt.getASTNode();
 
 			//Heuristic: If it is the body of an if, while, or for, it should not be removed
-			boolean ifCase = false, elseCase = false, whileCase = false, forCase = false;
+			boolean ifCase = false, elseCase = false, whileCase = false, forCase = false, eForCase = false;
 
 			if(faultyNode instanceof Block){
 				//this boolean states if the faultyNode is the body of an IfStatement
@@ -1047,6 +1047,8 @@ FaultLocRepresentation<JavaEditOperation> {
 						&& ((WhileStatement)faultyNode.getParent()).getBody().equals(faultyNode);
 				forCase = faultyNode.getParent() instanceof ForStatement
 						&& ((ForStatement)faultyNode.getParent()).getBody().equals(faultyNode);
+				eForCase = faultyNode.getParent() instanceof EnhancedForStatement
+						&& ((EnhancedForStatement)faultyNode.getParent()).getBody().equals(faultyNode);
 				if(faultyNode.getParent() instanceof IfStatement && ((IfStatement)faultyNode.getParent()).getElseStatement() != null){
 					elseCase = faultyNode.getParent() instanceof IfStatement
 							&& ((IfStatement)faultyNode.getParent()).getElseStatement().equals(faultyNode);
@@ -1054,7 +1056,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			}
 
 			//if any of these booleans is true, then the change should not be allowed
-			if(ifCase || whileCase || forCase || elseCase){
+			if(ifCase || whileCase || forCase || elseCase || eForCase){
 				itApplies = false;
 			}
 
