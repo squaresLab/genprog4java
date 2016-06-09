@@ -49,7 +49,6 @@ if [ -d "$GENPROGDIR" ]; then
   mvn package
 
   if [ -d "$GENPROGDIR/defects4j-scripts/" ]; then
-    echo scripts
     cd "$GENPROGDIR"/defects4j-scripts/
 
     ./prepareBug.sh $PROJECT $BUGNUMBER $GENPROGDIR $DEFECTS4JDIR $OPTION $TESTSUITEPERCENTAGE $BUGSFOLDER
