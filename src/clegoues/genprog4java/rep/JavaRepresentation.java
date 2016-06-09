@@ -502,6 +502,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				.getOriginalSource().entrySet()) {
 			ClassInfo ci = pair.getKey();
 			String filename = ci.getClassName();
+			String path = ci.getPackage();
 			String source = pair.getValue();
 			Document original = new Document(source);
 			CompilationUnit cu = baseCompilationUnits.get(ci);
@@ -510,7 +511,8 @@ FaultLocRepresentation<JavaEditOperation> {
 
 			try {
 				for (JavaEditOperation edit : genome) {
-					if(edit.getFileInfo().getClassName().equalsIgnoreCase(filename)){
+					if(edit.getFileInfo().getClassName().equalsIgnoreCase(filename) 
+							&& edit.getFileInfo().getPackage().equalsIgnoreCase(path)){
 						edit.edit(rewriter, ast, cu);
 					}
 				}
@@ -1155,7 +1157,6 @@ FaultLocRepresentation<JavaEditOperation> {
 							containsThisAtom = true;
 							break;
 						}
-
 					}
 					if (containsThisAtom)
 						retVal.add(item);
