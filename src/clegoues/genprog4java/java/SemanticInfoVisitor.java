@@ -33,8 +33,8 @@
 
 package clegoues.genprog4java.java;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -47,7 +47,6 @@ import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -66,6 +65,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private TreeSet<String> currentMethodScope;
 	private TreeSet<Pair<String,String>> methodReturnType;
 	private TreeSet<String> finalVariables;
+	private HashMap<String,String> variableType;
 
 	// unlike in the OCaml implementation, this only collects the statements and
 	// the semantic information. It doesn't number.
@@ -96,6 +96,14 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	public void setMethodReturnType(TreeSet<Pair<String,String>> methodReturnTypeSet) {
 		this.methodReturnType = methodReturnTypeSet;
+	}
+	
+	public HashMap<String,String> getVariableType() {
+		return this.variableType;
+	}
+
+	public void setVariableType(HashMap<String,String> variableTypeSet) {
+		this.variableType = variableTypeSet;
 	}
 	
 	public TreeSet<String> getFinalVariables() {
@@ -192,6 +200,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			if (o instanceof VariableDeclarationFragment) {
 				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
 				this.currentMethodScope.add(v.getName().getIdentifier());
+				variableType.put(v.getName().toString(), node.getType().toString());
 			}
 		}
 		

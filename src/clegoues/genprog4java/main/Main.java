@@ -36,15 +36,14 @@ package clegoues.genprog4java.main;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.Search.BruteForce;
 import clegoues.genprog4java.Search.GeneticProgramming;
 import clegoues.genprog4java.Search.OracleSearch;
 import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.RSRepair;
-import clegoues.genprog4java.Search.RepairFoundException;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.JavaEditOperation;
@@ -57,6 +56,7 @@ import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 import clegoues.util.ConfigurationBuilder;
 
 public class Main {
+
 	protected static Logger logger = Logger.getLogger(Main.class);
 
 	public static void main(String[] args) throws IOException,

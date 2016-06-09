@@ -18,9 +18,10 @@ import org.eclipse.jdt.core.dom.FileASTRequestor;
 import org.eclipse.jdt.core.dom.InfixExpression;
 
 import clegoues.javaASTProcessor.ASTPrinter.ASTDumper;
+import clegoues.javaASTProcessor.ASTPrinter.ASTPrinterVisitor;
 import clegoues.javaASTProcessor.ASTPrinter.IASTPrinter;
 import clegoues.javaASTProcessor.ASTPrinter.JSONStyleASTPrinter;
-import clegoues.javaASTProcessor.ASTPrinter.SimpleTextASTPrinter;
+import clegoues.javaASTProcessor.ASTPrinter.SimpleASTPrinter;
 import clegoues.javaASTProcessor.main.Configuration;
 import clegoues.util.ConfigurationBuilder;
 
@@ -30,9 +31,8 @@ public class Main {
 	private static ASTDumper dumper = null;
 
 	protected static List<CompilationUnit> parseCompilationUnit(String file, String[] libs) {
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
-		String fileName = "./" + Configuration.sourceDir + "/" + file; //"./" + file.replace('.', '/') + ".java";
-		File f = new File(fileName);
+		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		String fileName = "./" + Configuration.sourceDir + "/" + file + ".java"; //"./" + file.replace('.', '/') + ".java";
 		parser.setEnvironment(libs, new String[] {}, null, true);
 		Map options = JavaCore.getOptions();
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
@@ -59,6 +59,20 @@ public class Main {
 	}
 	
 	protected static void printCompilationUnits(List<CompilationUnit> cus) {
+		ASTPrinterVisitor visit = null;;
+
+		switch(Configuration.outputFormat.trim().toLowerCase()) {
+		case "json" : 
+			IASTPrinter myPrinter = null;
+			myPrinter = new JSONStyleASTPrinter(System.out);
+			dumper = new ASTDumper(myPrinter, null);
+			break;
+		case "simple" : 
+		default: 
+			visit = new ASTPrinterVisitor(System.out);  // this is kind of gross but whatever
+			break;
+		}
+
 		for(CompilationUnit cu : cus) {
 		cu.accept(new ASTVisitor() {
 			// Eclipse AST optimize deeply nested expressions of the form L op R
@@ -95,8 +109,14 @@ public class Main {
 		for (final Object comment : cu.getCommentList()) {
 			((Comment) comment).delete();
 		}
+		if(visit != null) {
+			cu.accept(visit);
+		} else {
 		dumper.dump(cu);
+		}
 	}
+		if(visit != null) 
+			visit.endVisit();
 	}
 	
 	public static void main(String[] args) {
@@ -104,21 +124,11 @@ public class Main {
 		ConfigurationBuilder.register( Configuration.token );
 		ConfigurationBuilder.parseArgs( args );
 		ConfigurationBuilder.storeProperties();
-		IASTPrinter myPrinter = null;
-		switch(Configuration.outputFormat.trim().toLowerCase()) {
-		case "json" : myPrinter = new JSONStyleASTPrinter(System.out);
-			break;
-		case "simple" : 
-		default: myPrinter = new SimpleTextASTPrinter(System.out);
-			break;
-		}
-		
-		dumper = new ASTDumper(myPrinter, null);
+
 		for(String fname : Configuration.targetClassNames) {
 			List<CompilationUnit> cus = parseCompilationUnit(fname, Configuration.libs.split(File.pathSeparator));
 			printCompilationUnits(cus);
 		}
 		
 	}
-
 }

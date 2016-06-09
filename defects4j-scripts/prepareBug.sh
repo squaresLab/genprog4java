@@ -60,7 +60,7 @@ done
 
 # Common genprog libs: junit test runner and the like
 
-CONFIGLIBS=$GENPROGDIR"/lib/junittestrunner.jar:"$GENPROGDIR"/lib/commons-io-1.4.jar:"$GENPROGDIR"/lib/junit-4.10.jar"
+CONFIGLIBS=$GENPROGDIR"/lib/junittestrunner.jar:"$GENPROGDIR"/lib/commons-io-1.4.jar:"$GENPROGDIR"/lib/junit-4.12.jar:"$GENPROGDIR"/lib/hamcrest-core-1.3.jar"
 
 if [ "$LOWERCASEPACKAGE" = "lang" ] ; then
     # special handling...do we still need this?
@@ -97,7 +97,7 @@ seed = 0
 javaVM = /usr/bin/java
 workingDir = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
 outputDir = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/tmp
-classSourceFolder = $SRCFOLDER
+classSourceFolder = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/$SRCFOLDER
 libs = $CONFIGLIBS
 sanity = yes
 regenPaths
