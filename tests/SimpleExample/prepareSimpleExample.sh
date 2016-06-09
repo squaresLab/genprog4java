@@ -12,15 +12,15 @@ JUNITJARS="$PATHTOGENPROG"/lib
 
 PATHTOSIMPLEEXAMPLE=`pwd`
 
-if [[ ! -d bin/ ]] ; then
+if [ ! -d bin/ ] ; then
     mkdir bin
 fi
 
 javac -d bin/ src/packageSimpleExample/SimpleExample.java 
 javac -classpath $JUNITJARS/junit-4.12.jar:$JUNITJARS/hamcrest-core-1.3.jar:bin/ -sourcepath src/tests/*java -d bin/ src/tests/*java
-rm -rf bin/packageSimpleExample/
+#rm -rf bin/packageSimpleExample/
 
-PACKAGEDIR=${JAVADIR//"/"/"."}
+#PACKAGEDIR=${JAVADIR//"/"/"."}
 
 #Create config file 
 FILE=./simpleExample.config
@@ -31,7 +31,7 @@ seed = 0
 classTestFolder = bin/
 workingDir = $PATHTOSIMPLEEXAMPLE/
 outputDir = $PATHTOSIMPLEEXAMPLE/tmp/
-libs = $PATHTOGENPROG/lib/junit-4.12.jar:$PATHTOGENPROG/lib/junittestrunner.jar:$JUNITJARS/hamcrest-core-1.3.jar
+libs = $PATHTOGENPROG/lib/junit-4.12.jar:$PATHTOGENPROG/lib/junittestrunner.jar:$JUNITJARS/hamcrest-core-1.3.jar:$PATHTOSIMPLEEXAMPLE/bin/
 sanity = yes
 regenPaths
 sourceDir = src/

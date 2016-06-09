@@ -59,6 +59,7 @@ public class JavaParser
 	private Set<String> fields;
 	private TreeSet<Pair<String,String>> methodReturnType;
 	private List<MethodInfo> methodDecls;
+	private HashMap<String,String> variableTypes;
 	private TreeSet<String> finalVariables;
 
 	public JavaParser(ScopeInfo scopeList)
@@ -67,12 +68,14 @@ public class JavaParser
 		this.methodReturnType = new TreeSet<Pair<String,String>>();
 		this.finalVariables =  new TreeSet<String>();
 		this.methodDecls = new ArrayList<MethodInfo>();
+		this.variableTypes = new HashMap<String,String>();
 		this.visitor = new SemanticInfoVisitor();
 		this.visitor.setNodeSet(this.stmts);		
 		this.visitor.setScopeList(scopeList);
 		this.visitor.setMethodReturnType(methodReturnType);
 		this.visitor.setFinalVariables(finalVariables);
 		this.visitor.setMethodDecls(methodDecls);
+		this.visitor.setVariableType(variableTypes);
 	}
 
 	public TreeSet<Pair<String,String>> getMethodReturnTypeSet(){
@@ -80,6 +83,12 @@ public class JavaParser
 	}
 	
 	public List<MethodInfo> getMethodDeclarations() { return this.methodDecls; }
+	
+	public HashMap<String,String> getVariableDataTypes(){
+		return variableTypes;
+	}
+	
+	
 	public TreeSet<String> getFinalVariableSet(){
 		return this.finalVariables;
 	}

@@ -189,8 +189,7 @@ public abstract class Search<G extends EditOperation> {
 	void noteSuccess(Representation<G> rep, Representation<G> original,
 			int generation) {
 
-		logger.info("\nRepair Found: " + rep.getName() + " (in " + rep.getVariantFolder() + ")\n");
-
+		logger.info("\n\nREPAIR FOUND: " + rep.getName() + " (in " + rep.getVariantFolder() + ")\n\n");
 		File repairDir = new File("repair/");
 		if (!repairDir.exists())
 			repairDir.mkdir();

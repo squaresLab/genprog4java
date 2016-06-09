@@ -133,6 +133,7 @@ public class ASTDumper {
 		}
 	}
 
+	
 	/**
 	 * Walks the tree of objects from the specified node, sending events to the
 	 * specified printer.
