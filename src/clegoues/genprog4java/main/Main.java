@@ -43,7 +43,7 @@ import clegoues.genprog4java.Search.BruteForce;
 import clegoues.genprog4java.Search.GeneticProgramming;
 import clegoues.genprog4java.Search.OracleSearch;
 import clegoues.genprog4java.Search.Population;
-import clegoues.genprog4java.Search.RSRepair;
+import clegoues.genprog4java.Search.RandomSingleEdit;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.JavaEditOperation;
@@ -96,7 +96,7 @@ public class Main {
 
 			case "brute": searchEngine = new BruteForce<JavaEditOperation>(fitnessEngine);
 				break;
-			case "rsrepair": searchEngine = new RSRepair<JavaEditOperation>(fitnessEngine);
+			case "rsrepair": searchEngine = new RandomSingleEdit<JavaEditOperation>(fitnessEngine);
 				break;
 			case "oracle": searchEngine = new OracleSearch<JavaEditOperation>(fitnessEngine);
 			break;
