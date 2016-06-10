@@ -29,7 +29,6 @@ public class LocalizationRepresentation extends JavaRepresentation {
 			File coverageRaw = new File("jacoco.exec"); // FIXME: likely a
 														// mistake to put this
 														// in this class
-
 			if (coverageRaw.exists()) {
 				coverageRaw.delete();
 			}
