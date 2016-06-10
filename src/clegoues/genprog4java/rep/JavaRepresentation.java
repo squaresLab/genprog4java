@@ -262,6 +262,8 @@ FaultLocRepresentation<JavaEditOperation> {
 						break;
 					case ICounter.NOT_COVERED:
 						break;
+					case ICounter.EMPTY:
+						break;
 					default:
 						break;
 					}
