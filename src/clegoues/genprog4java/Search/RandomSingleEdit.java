@@ -4,16 +4,17 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 
-public class RSRepair<G extends EditOperation> extends Search<G>{
+public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 
-	public RSRepair(Fitness<G> engine) {
+	public RandomSingleEdit(Fitness<G> engine) {
 		super(engine);
+		
 	}
 
 	@Override
 	protected Population<G> initialize(Representation<G> original, Population<G> incomingPopulation)
 			throws RepairFoundException {
-		// TODO Auto-generated method stub
+		// FIXME: register just the basic mutations?
 		return null;
 	}
 
