@@ -39,12 +39,19 @@ public class TestCase {
 	private String testName = null;
 
 	public TestCase(TestType t, String name) {
-		this.posOrNeg = t;
+		this.setPosOrNeg(t);
 		this.testName = name; 
 	}
 	public String toString () {
 		return this.testName;
+	}
 
+
+	public TestType getPosOrNeg() {
+		return posOrNeg;
+	}
+	public void setPosOrNeg(TestType posOrNeg) {
+		this.posOrNeg = posOrNeg;
 	}
 
 }
