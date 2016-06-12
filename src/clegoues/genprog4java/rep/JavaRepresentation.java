@@ -1125,59 +1125,47 @@ for(Integer i: atomIds){
 		case SWAP:
 			return this.editSources(location,  editType).size() > 0;
 		case DELETE: 
-			boolean itApplies = true;
 			ASTNode faultyNode = locationStmt.getASTNode();
-
+			ASTNode parent = faultyNode.getParent();
 			//Heuristic: If it is the body of an if, while, or for, it should not be removed
-			boolean ifCase = false, elseCase = false, whileCase = false, forCase = false, eForCase = false;
-
 			if(faultyNode instanceof Block){
 				//this boolean states if the faultyNode is the body of an IfStatement
-				ifCase = faultyNode.getParent() instanceof IfStatement
-						&& ((IfStatement)faultyNode.getParent()).getThenStatement().equals(faultyNode);
+				if (parent instanceof IfStatement
+						&& ((IfStatement)parent).getThenStatement().equals(faultyNode))
+					return false;
 				//same for all these booleans
-				whileCase = faultyNode.getParent() instanceof WhileStatement
-						&& ((WhileStatement)faultyNode.getParent()).getBody().equals(faultyNode);
-				forCase = faultyNode.getParent() instanceof ForStatement
-						&& ((ForStatement)faultyNode.getParent()).getBody().equals(faultyNode);
-				eForCase = faultyNode.getParent() instanceof EnhancedForStatement
-						&& ((EnhancedForStatement)faultyNode.getParent()).getBody().equals(faultyNode);
-				if(faultyNode.getParent() instanceof IfStatement && ((IfStatement)faultyNode.getParent()).getElseStatement() != null){
-					elseCase = faultyNode.getParent() instanceof IfStatement
-							&& ((IfStatement)faultyNode.getParent()).getElseStatement().equals(faultyNode);
-				}
+				if(parent instanceof WhileStatement
+						&& ((WhileStatement)parent).getBody().equals(faultyNode))
+					return false;
+				if(parent instanceof ForStatement
+						&& ((ForStatement)parent).getBody().equals(faultyNode))
+					return false;
+				if(parent instanceof EnhancedForStatement
+						&& ((EnhancedForStatement)parent).getBody().equals(faultyNode))
+					return false;
+				if(parent instanceof IfStatement && (((IfStatement)parent).getElseStatement() != null) &&
+							((IfStatement)parent).getElseStatement().equals(faultyNode))
+						return false;
 			}
 
-			//if any of these booleans is true, then the change should not be allowed
-			if(ifCase || whileCase || forCase || elseCase || eForCase){
-				itApplies = false;
-			}
 
 			//Heuristic: Don´t remove returns from functions that have only one return statement.
 			if(faultyNode instanceof ReturnStatement){
-				ASTNode parent = faultyNode.getParent();
 				while (!(parent instanceof MethodDeclaration)){
 					parent = parent.getParent();
 				}
-				boolean moreThanOneReturn = hasMoreThanOneReturn((MethodDeclaration)parent);
-				if(!moreThanOneReturn){
-					itApplies = false;
-				}
+				if(hasMoreThanOneReturn((MethodDeclaration)parent))
+					return false;
 			}
 
 			//Heuristic: If an stmt is the only stmt in a block, don´t delete it
-			ASTNode parent = blockThatContainsThisStatement(faultyNode);
+			parent = blockThatContainsThisStatement(faultyNode);
 			if(parent instanceof Block){
 				if(((Block)parent).statements().size()==1){
-					itApplies = false;
+					return false;
 				}
 			}
-
-
-
-
-
-			return itApplies;
+			return true;
 		case OFFBYONE:  // FIXME: CLG suspects this should only apply to particular statements, not every statement in the program.  Maybe?
 		case UBOUNDSET:
 		case LBOUNDSET:
