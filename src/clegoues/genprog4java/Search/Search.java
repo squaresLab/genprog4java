@@ -112,14 +112,7 @@ public abstract class Search<G extends EditOperation> {
 			})
 			.build();
 
-	//private static String startingGenome = "";
-	private static String startingGenome = ConfigurationBuilder.of( STRING )
-		.withVarName( "startingGenome" )
-		.withFlag( "oracleGenome" )
-		.withDefault( "" )
-		.withHelp( "genome for oracle search" )
-		.inGroup( "Search Parameters" )
-		.build();
+
 	//public static String searchStrategy = "ga";
 	public static String searchStrategy = ConfigurationBuilder.of( STRING )
 		.withVarName( "searchStrategy" )
@@ -196,8 +189,6 @@ public abstract class Search<G extends EditOperation> {
 				+ Configuration.globalExtension;
 		rep.outputSource(repairFilename);
 	}
-
-
 
 	/*
 	 * prepares for GA by registering available mutations (including templates

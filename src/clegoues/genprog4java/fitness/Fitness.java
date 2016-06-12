@@ -114,6 +114,7 @@ public class Fitness<G extends EditOperation> {
 	public static int numPositiveTests = 5;
 	public static int numNegativeTests = 1;
 
+	// do I want configure any more? 
 	public static void configure() {
 		Fitness.configureTests();
 		Fitness.numPositiveTests = Fitness.positiveTests.size();
@@ -134,7 +135,9 @@ public class Fitness<G extends EditOperation> {
 		positiveTests.addAll(intermedPosTests);
 		negativeTests.addAll(intermedNegTests);
 	}
-
+	
+	
+	// FIXME: what does this do, again?
 	public static void filterTests(ArrayList<String> toFilter, ArrayList<String> filterBy) {
 		HashSet<String> clazzesInFilterSet = new HashSet<String>();
 		HashSet<String> removeFromFilterSet = new HashSet<String>();
@@ -195,16 +198,42 @@ public class Fitness<G extends EditOperation> {
 	 * test cases and false otherwise; unlike other search strategies and as an
 	 * optimization for brute_force search, gives up on a variant as soon as it
 	 * fails a test case. This makes less sense for single_fitness, but
-	 * single_fitness being true won't break it. Does do sampling if specified.
+	 * single_fitness being true won't break it. Does not currently sample, but does  
+	 * do the model thing (like for RSRepair and AE, I think) if specified. 
 	 */
 
-	public boolean testToFirstFailure(Representation<G> rep) {
-		int numNegativePassed = this.testPassCount(rep, true, TestType.NEGATIVE, GlobalUtils.range(1, Fitness.numNegativeTests), Fitness.negativeTests);
+	private void initializeModel() { 
+		// TODO: fix me.  Who should call me?
+	}
+	private void updateModel() { 
+		// TODO: fix me
+	}
+	
+	public boolean testToFirstFailure(Representation<G> rep, boolean withModel) {
+		List<Integer> tests;
+		
+		if(withModel) {
+			tests = GlobalUtils.range(1, Fitness.numNegativeTests);
+		} else {
+			tests = GlobalUtils.range(1, Fitness.numNegativeTests);
+		}
+		int numNegativePassed = this.testPassCount(rep, true, TestType.NEGATIVE, tests, Fitness.negativeTests);
+		if(withModel) {
+			this.updateModel();
+		}
 		if(numNegativePassed < Fitness.numNegativeTests) {
 			return false;
 		}
 
-		int numPositivePassed = this.testPassCount(rep,  true, TestType.POSITIVE, GlobalUtils.range(1, Fitness.numPositiveTests), Fitness.positiveTests);
+		if(withModel) {
+			tests = GlobalUtils.range(1, Fitness.numPositiveTests);  
+		} else {
+			tests = GlobalUtils.range(1, Fitness.numPositiveTests);  
+		}
+		int numPositivePassed = this.testPassCount(rep,  true, TestType.POSITIVE, tests, Fitness.positiveTests);
+		if(withModel) {
+			this.updateModel();
+		}
 		if(numPositivePassed < Fitness.numPositiveTests) {
 			return false;
 		}
