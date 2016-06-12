@@ -34,7 +34,7 @@
 package clegoues.genprog4java.fitness;
 
 
-public class TestCase {
+public class TestCase implements Comparable<TestCase> {
 	private TestType posOrNeg;
 	private String testName = null;
 
@@ -52,6 +52,12 @@ public class TestCase {
 	}
 	public void setPosOrNeg(TestType posOrNeg) {
 		this.posOrNeg = posOrNeg;
+	}
+
+	@Override
+	public int compareTo(TestCase o) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }
