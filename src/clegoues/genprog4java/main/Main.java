@@ -77,7 +77,7 @@ public class Main {
 		ConfigurationBuilder.register( Population.token );
 		ConfigurationBuilder.register( Search.token );
 		ConfigurationBuilder.parseArgs( args );
-		Configuration.configure();
+		Configuration.saveOrLoadTargetFiles();
 		ConfigurationBuilder.storeProperties();
 
 		File workDir = new File(Configuration.outputDir);

@@ -114,8 +114,7 @@ public class Fitness<G extends EditOperation> {
 	public static int numPositiveTests = 5;
 	public static int numNegativeTests = 1;
 
-	// do I want configure any more? 
-	public static void configure() {
+	public Fitness() {
 		Fitness.configureTests();
 		Fitness.numPositiveTests = Fitness.positiveTests.size();
 		Fitness.numNegativeTests = Fitness.negativeTests.size();
