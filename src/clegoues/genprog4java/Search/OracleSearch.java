@@ -1,23 +1,28 @@
 package clegoues.genprog4java.Search;
 
+import static clegoues.util.ConfigurationBuilder.STRING;
+
 import java.util.Properties;
 
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
+import clegoues.util.ConfigurationBuilder;
 
 public class OracleSearch<G extends EditOperation> extends Search<G> {
 	public OracleSearch(Fitness<G> engine) {
 		super(engine);
 	}
 	
-	private static String startingGenome = "";
-	public static void configure(Properties props) {
-		if (props.getProperty("oracleGenome") != null) {
-			OracleSearch.startingGenome = props.getProperty("startingGenome").trim();
-		}
-
-	}
+	public static final ConfigurationBuilder.RegistryToken token =
+			ConfigurationBuilder.getToken();
+	
+	protected static String startingGenome = ConfigurationBuilder.of( STRING )
+			.withVarName( "oracleGenome" )
+			.withDefault( "" )
+			.withHelp( "oracle genome" )
+			.inGroup( "Search Parameters" )
+			.build();
 
 	@Override
 	protected Population<G> initialize(Representation<G> original, Population<G> incomingPopulation)

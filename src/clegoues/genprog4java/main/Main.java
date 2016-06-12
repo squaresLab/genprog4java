@@ -76,8 +76,6 @@ public class Main {
 		ConfigurationBuilder.register( JavaRepresentation.token );
 		ConfigurationBuilder.register( Population.token );
 		ConfigurationBuilder.register( Search.token );
-		ConfigurationBuilder.register( GeneticProgramming.token );
-		ConfigurationBuilder.register( BruteForce.token );
 		ConfigurationBuilder.register( OracleSearch.token );
 		ConfigurationBuilder.register( RandomSingleEdit.token );
 
