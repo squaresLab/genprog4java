@@ -29,7 +29,7 @@ public class OracleSearch<G extends EditOperation> extends Search<G> {
 			throws RepairFoundException {
 		Representation<G> theRepair = original.copy();
 		theRepair.loadGenomeFromString(OracleSearch.startingGenome);
-		assert (fitnessEngine.testToFirstFailure(theRepair));
+		assert (fitnessEngine.testToFirstFailure(theRepair, false));
 		this.noteSuccess(theRepair, original, 1);		
 	}
 }

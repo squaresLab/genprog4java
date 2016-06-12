@@ -20,7 +20,7 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 	private boolean doWork(Representation<G> rep, Representation<G> original,
 			Mutation mut, int first, int second) {
 		rep.performEdit(mut, first, second);
-		if (fitnessEngine.testToFirstFailure(rep)) {
+		if (fitnessEngine.testToFirstFailure(rep, false)) {
 			this.noteSuccess(rep, original, 1);
 			if (!Search.continueSearch) {
 				return true;
