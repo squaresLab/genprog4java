@@ -315,28 +315,27 @@ CachingRepresentation<G> {
 
 	protected abstract ArrayList<Integer> atomIDofSourceLine(int lineno);
 
-	private TreeSet<Integer> runTestsCoverage(String pathFile, TestType testT,
-			ArrayList<String> tests, boolean expectedResult, String wd)
+	private TreeSet<Integer> runTestsCoverage(String pathFile,
+			ArrayList<TestCase> tests, boolean expectedResult, String wd)
 					throws IOException, UnexpectedCoverageResultException {
 		int counterCoverageErrors = 0;
 
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
-		for (String test : tests) {
+		for (TestCase test : tests) {
 			File coverageRaw = new File("jacoco.exec");
 
 			if (coverageRaw.exists()) {
 				coverageRaw.delete();
 			}
-			TestCase newTest = new TestCase(testT, test);
 
 			//System.out.println(test);
 			logger.info(test);
 			// this expectedResult is just 'true' for positive tests and 'false'
 			// for neg tests
-			if (this.testCase(newTest) != expectedResult
+			if (this.testCase(test) != expectedResult
 					&& !FaultLocRepresentation.allowCoverageFail) {
 				logger.error("FaultLocRep: unexpected coverage result: "
-						+ newTest.toString());
+						+ test.toString());
 				logger.error("Number of coverage errors so far: "
 						+ ++counterCoverageErrors);
 
@@ -412,7 +411,7 @@ CachingRepresentation<G> {
 			positivePath = readPathFile(FaultLocRepresentation.posCoverageFile);
 		} else {
 			positivePath = runTestsCoverage(
-					FaultLocRepresentation.posCoverageFile, TestType.POSITIVE,
+					FaultLocRepresentation.posCoverageFile,
 					Fitness.positiveTests, true, Configuration.outputDir + "/coverage/");
 		}
 		File negativePathFile = new File(FaultLocRepresentation.negCoverageFile);
@@ -421,7 +420,7 @@ CachingRepresentation<G> {
 			negativePath = readPathFile(FaultLocRepresentation.negCoverageFile);
 		} else {
 			negativePath = runTestsCoverage(
-					FaultLocRepresentation.negCoverageFile, TestType.NEGATIVE,
+					FaultLocRepresentation.negCoverageFile,
 					Fitness.negativeTests, false, Configuration.outputDir + "/coverage/");
 		}
 		HashMap<Integer, Double> fw = new HashMap<Integer, Double>();

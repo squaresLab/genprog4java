@@ -155,7 +155,6 @@ FaultLocRepresentation<JavaEditOperation> {
 	private static HashMap<Integer, ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer, ArrayList<Integer>>();
 	private static HashMap<ClassInfo, String> originalSource = new HashMap<ClassInfo, String>();
 	private static HashMap<Integer, ClassInfo> stmtToFile = new HashMap<Integer, ClassInfo>();
-	private int mutationNumber = 0;
 
 	// semantic check cache stuff, so we don't have to walk stuff a million
 	// times unnecessarily
@@ -700,7 +699,6 @@ for(Integer i: atomIds){
 
 		command.addArgument(test.toString());
 		logger.info("Command: " + command.toString());
-		//System.out.println(command.toString());
 		return command;
 
 	}
@@ -1316,10 +1314,6 @@ for(Integer i: atomIds){
 		}
 	}
 
-	public void test() {
-		String newName = CachingRepresentation.newVariantFolder();
-		internalCompile(newName, newName);
-	}
 
 	public void setAllPossibleStmtsToFixLocalization(){
 		try {
