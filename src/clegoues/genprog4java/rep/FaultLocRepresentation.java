@@ -118,7 +118,7 @@ CachingRepresentation<G> {
 
 	protected boolean doingCoverage = false;
 	private ArrayList<WeightedAtom> faultLocalization = new ArrayList<WeightedAtom>();
-	private ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
+	protected ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
 	public FaultLocRepresentation(ArrayList<HistoryEle> history,
 			ArrayList<G> genome2, ArrayList<WeightedAtom> arrayList,
@@ -131,6 +131,8 @@ CachingRepresentation<G> {
 	public FaultLocRepresentation() {
 		super();
 	}
+	
+	
 
 	@Override
 	public void serialize(String filename, ObjectOutputStream fout,
@@ -327,7 +329,7 @@ CachingRepresentation<G> {
 			}
 			TestCase newTest = new TestCase(testT, test);
 
-			System.out.println(test);
+			//System.out.println(test);
 			logger.info(test);
 			// this expectedResult is just 'true' for positive tests and 'false'
 			// for neg tests
