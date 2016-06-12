@@ -349,14 +349,14 @@ FaultLocRepresentation<JavaEditOperation> {
 				ArrayList<Integer> atomIds = this.atomIDofSourceLine(line);
 				if (atomIds != null && atomIds.size() >= 0) {
 					//atoms.addAll(atomIds);
-for(Integer i: atomIds){
-					WeightedAtom wa = new WeightedAtom(i, 0.1);
-					int index = wa.getAtom();
-					JavaStatement potentialFixStmt = codeBank.get(index);
-					Set<String> scopes = new TreeSet<String>();
-					potentialFixStmt.setRequiredNames(scopes);
-					atoms.add(wa);
-}
+					for(Integer i: atomIds){
+						WeightedAtom wa = new WeightedAtom(i, 0.1);
+						int index = wa.getAtom();
+						JavaStatement potentialFixStmt = codeBank.get(index);
+						Set<String> scopes = new TreeSet<String>();
+						potentialFixStmt.setRequiredNames(scopes);
+						atoms.add(wa);
+					}
 				}
 			}
 			/*
@@ -673,9 +673,9 @@ for(Integer i: atomIds){
 			outputDir += Configuration.outputDir + File.separator + exeName + "/";
 		}
 		String classPath = outputDir + System.getProperty("path.separator")
-				+ Configuration.libs + System.getProperty("path.separator") 
-				+ Configuration.testClassPath + System.getProperty("path.separator") 
-				+ Configuration.srcClassPath;
+		+ Configuration.libs + System.getProperty("path.separator") 
+		+ Configuration.testClassPath + System.getProperty("path.separator") 
+		+ Configuration.srcClassPath;
 		//; 
 		//		if(Configuration.classSourceFolder != "") {
 		//			classPath += System.getProperty("path.separator") + Configuration.classSourceFolder;
@@ -876,6 +876,91 @@ for(Integer i: atomIds){
 		return copy;
 	}
 
+	@Override
+	public void reduceSearchSpace() {
+		ArrayList<WeightedAtom> toRemove = new ArrayList<WeightedAtom>();
+		//potentialFix is a potential fix statement
+		for (WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {
+			int index = potentialFixAtom.getAtom();
+			JavaStatement potentialFixStmt = codeBank.get(index);
+			//Don't make a call to a constructor
+			if(potentialFixStmt.getASTNode() instanceof MethodRef){
+				MethodRef mr = (MethodRef) potentialFixStmt.getASTNode();
+				// mrt = method return type
+				String returnType = returnTypeOfThisMethod(mr.getName().toString());
+				if(returnType != null && returnType.equalsIgnoreCase("null")) {
+					toRemove.add(potentialFixAtom);
+					continue;
+				}
+			}
+
+			//Heuristic: No need to insert a declaration of a final variable
+			if(potentialFixStmt.getASTNode() instanceof VariableDeclarationStatement){
+				VariableDeclarationStatement ds = (VariableDeclarationStatement) potentialFixStmt.getASTNode();
+				VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
+				if(finalVariables.contains(df.getName().getIdentifier())){
+					toRemove.add(potentialFixAtom);
+					continue;
+				}
+			}
+			//Heuristic: Don't assign a value to a final variable
+			if (potentialFixStmt.getASTNode() instanceof ExpressionStatement) {
+				ExpressionStatement exstat= (ExpressionStatement) potentialFixStmt.getASTNode();
+				if (exstat.getExpression() instanceof Assignment) {
+					Assignment assignment= (Assignment) exstat.getExpression();
+					if(assignment.getLeftHandSide() instanceof SimpleName){
+						SimpleName leftHand = (SimpleName) assignment.getLeftHandSide();
+						if(finalVariables.contains(leftHand.toString())){
+							toRemove.add(potentialFixAtom);
+							continue;
+						}
+					}
+				}
+			}
+			//If it moves a block, this block should not have an assignment of final variables, or a declaration of already existing final variables
+			if (potentialFixStmt.getASTNode() instanceof Block) {
+				List<ASTNode> statementsInBlock = ((Block)potentialFixStmt.getASTNode()).statements();
+				boolean ok = true;
+				for (int i = 0; i < statementsInBlock.size(); i++) {
+					//Heuristic: Don't assign a value to a final variable
+					if (statementsInBlock.get(i) instanceof ExpressionStatement) {
+						ExpressionStatement exstat= (ExpressionStatement) statementsInBlock.get(i);
+						if (exstat.getExpression() instanceof Assignment) {
+							Assignment assignment= (Assignment) exstat.getExpression();
+							if(assignment.getLeftHandSide() instanceof SimpleName){
+								SimpleName leftHand = (SimpleName) assignment.getLeftHandSide();
+								if(finalVariables.contains(leftHand.toString())){
+									ok = false;
+									break;
+								}
+							}
+						}
+					}
+
+					//Heuristic: No need to insert a declaration of a final variable
+					if(statementsInBlock.get(i) instanceof VariableDeclarationStatement){
+						VariableDeclarationStatement ds = (VariableDeclarationStatement) statementsInBlock.get(i);
+						VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
+
+						if(finalVariables.contains(df.getName().getIdentifier())){
+							ok = false;
+							break;
+						}
+					}
+				}
+				if(!ok) {
+					toRemove.add(potentialFixAtom);
+					continue;
+				}
+			}
+		}
+		
+		for(WeightedAtom atom : toRemove) {
+			fixLocalization.remove(atom);
+		}
+
+	}
+
 	private TreeSet<WeightedAtom> scopeHelper(int stmtId) {
 		if (JavaRepresentation.scopeSafeAtomMap.containsKey(stmtId) && !JavaRepresentation.scopeSafeAtomMap.get(stmtId).isEmpty()) {
 			return JavaRepresentation.scopeSafeAtomMap.get(stmtId);
@@ -905,50 +990,23 @@ for(Integer i: atomIds){
 				}
 			}
 
-			//Don't make a call to a constructor
-			if(potentialFixStmt.getASTNode() instanceof MethodRef){
-				MethodRef mr = (MethodRef) potentialFixStmt.getASTNode();
-				
-				// mrt = method return type
-				String returnType = returnTypeOfThisMethod(mr.getName().toString());
-				if(returnType != null){
-					if( returnType.equalsIgnoreCase("null")){
-						ok=false;
-					}
-				}
-			}
-
-			//Heuristic: Don't assign a value to a final variable
-			if (potentialFixStmt.getASTNode() instanceof ExpressionStatement) {
-				ExpressionStatement exstat= (ExpressionStatement) potentialFixStmt.getASTNode();
-				if (exstat.getExpression() instanceof Assignment) {
-					Assignment assignment= (Assignment) exstat.getExpression();
-					if(assignment.getLeftHandSide() instanceof SimpleName){
-						SimpleName leftHand = (SimpleName) assignment.getLeftHandSide();
-						if(finalVariables.contains(leftHand.toString())){
-							ok=false;
-						}
-					}
-				}
-			}
-
-			//Heuristic: No need to insert a declaration of a final variable
-			if(potentialFixStmt.getASTNode() instanceof VariableDeclarationStatement){
-				VariableDeclarationStatement ds = (VariableDeclarationStatement) potentialFixStmt.getASTNode();
-				VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
-
-				if(finalVariables.contains(df.getName().getIdentifier())){
-					ok=false;
-				}
-			}
-
 			//Heuristic: Do not insert a return statement on a func whose return type is void
 			//Heuristic: Do not insert a return statement in a constructor
-
 			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
 				if(potentiallyBuggyStmt.parentMethodReturnsVoid() ||
 						potentiallyBuggyStmt.isLikelyAConstructor())
 					ok = false;
+				//Heuristic: Swapping, Appending or Replacing a return stmt to the middle of a block will make the code after it unreachable
+				ASTNode parentBlock = JavaStatement.blockThatContainsThisStatement(potentiallyBuggyStmt.getASTNode());
+				if(parentBlock instanceof Block){
+					List<ASTNode> statementsInBlock = ((Block)parentBlock).statements();
+					ASTNode lastStmtInTheBlock = statementsInBlock.get(statementsInBlock.size()-1);
+					if(!lastStmtInTheBlock.equals(potentiallyBuggyStmt.getASTNode())){
+						ok=false;
+					}
+				}else{
+					ok=false;
+				}
 			}
 
 			//Heuristic: Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is wrong
@@ -973,20 +1031,6 @@ for(Integer i: atomIds){
 				}
 			}
 
-			//Heuristic: Swapping, Appending or Replacing a return stmt to the middle of a block will make the code after it unreachable
-			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
-				ASTNode parentBlock = JavaStatement.blockThatContainsThisStatement(potentiallyBuggyStmt.getASTNode());
-				if(parentBlock instanceof Block){
-					List<ASTNode> statementsInBlock = ((Block)parentBlock).statements();
-					ASTNode lastStmtInTheBlock = statementsInBlock.get(statementsInBlock.size()-1);
-					if(!lastStmtInTheBlock.equals(potentiallyBuggyStmt.getASTNode())){
-						ok=false;
-					}
-				}else{
-					ok=false;
-				}
-			}
-
 			//Heuristic: Don't allow to move breaks outside of switch stmts
 			// OR loops!
 			if(potentialFixStmt.getASTNode() instanceof BreakStatement){
@@ -999,8 +1043,7 @@ for(Integer i: atomIds){
 				while (!(parent instanceof MethodDeclaration)){
 					parent = parent.getParent();
 				}
-				boolean moreThanOneReturn = JavaStatement.hasMoreThanOneReturn((MethodDeclaration)parent);
-				if(!moreThanOneReturn){
+				if(!JavaStatement.hasMoreThanOneReturn((MethodDeclaration)parent)) {
 					ok = false;
 				}
 			}
@@ -1010,35 +1053,6 @@ for(Integer i: atomIds){
 				ok = false;
 			}
 
-			//If it moves a block, this block should not have an assignment of final variables, or a declaration of already existing final variables
-			if (potentialFixStmt.getASTNode() instanceof Block) {
-				List<ASTNode> statementsInBlock = ((Block)potentialFixStmt.getASTNode()).statements();
-				for (int i = 0; i < statementsInBlock.size(); i++) {
-					//Heuristic: Don't assign a value to a final variable
-					if (statementsInBlock.get(i) instanceof ExpressionStatement) {
-						ExpressionStatement exstat= (ExpressionStatement) statementsInBlock.get(i);
-						if (exstat.getExpression() instanceof Assignment) {
-							Assignment assignment= (Assignment) exstat.getExpression();
-							if(assignment.getLeftHandSide() instanceof SimpleName){
-								SimpleName leftHand = (SimpleName) assignment.getLeftHandSide();
-								if(finalVariables.contains(leftHand.toString())){
-									ok=false;
-								}
-							}
-						}
-					}
-
-					//Heuristic: No need to insert a declaration of a final variable
-					if(statementsInBlock.get(i) instanceof VariableDeclarationStatement){
-						VariableDeclarationStatement ds = (VariableDeclarationStatement) statementsInBlock.get(i);
-						VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
-
-						if(finalVariables.contains(df.getName().getIdentifier())){
-							ok=false;
-						}
-					}
-				}
-			}
 
 			//If we move a return statement into a function, the parameter in the return must match the function’s return type
 			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
@@ -1192,7 +1206,7 @@ for(Integer i: atomIds){
 			ASTNode actualStmt = stmt.getASTNode();
 			String stmtStr = actualStmt.toString();
 			logger.debug("statement " + atomid + " at line " + stmt.getLineno()
-					+ ": " + stmtStr);
+			+ ": " + stmtStr);
 			logger.debug("\t Names:");
 			for (String name : stmt.getNames()) {
 				logger.debug("\t\t" + name);
