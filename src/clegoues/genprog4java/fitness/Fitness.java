@@ -207,51 +207,47 @@ public class Fitness<G extends EditOperation> {
 	 * implemented in this codebase yet) if specified. 
 	 */
 
-	private ArrayList<Pair<Integer,TestCase>> testModel = null;
+	private ArrayList<TestCase> testModel = null;
 	
 	public void initializeModel() { 
-		testModel = new ArrayList<Pair<Integer,TestCase>>(Fitness.numNegativeTests + Fitness.numPositiveTests);
-		int j = 0;
-		for(int i = 0; i < Fitness.numNegativeTests; i++) {
-			
+		testModel = new ArrayList<TestCase>(Fitness.numNegativeTests + Fitness.numPositiveTests);
+		for(TestCase negTest : Fitness.negativeTests) {
+			negTest.incrementPatchesKilled();
+			testModel.add(negTest);
 		}
-		for(int i = 0; i < Fitness.numPositiveTests; i++) {
-			
+		for(TestCase posTest : Fitness.positiveTests) {
+			testModel.add(posTest);
 		}
+		Collections.sort(testModel,Collections.reverseOrder());
 	}
-	private void updateModel() { 
-		// TODO: fix me
-	}
-	
+
 	public boolean testToFirstFailure(Representation<G> rep, boolean withModel) {
-		List<TestCase> tests;
-		
 		if(withModel) {
-			tests = Fitness.negativeTests;
+			boolean foundFail = false;
+			for(TestCase thisTest : testModel) {
+				if (!rep.testCase(thisTest)) {
+					rep.cleanup();
+					thisTest.incrementPatchesKilled();
+					foundFail = true;
+					break;
+			 }
+			}
+			if(foundFail) {
+				Collections.sort(testModel,Collections.reverseOrder());
+				return false;
+			}
+			return true;
 		} else {
-			tests = Fitness.negativeTests;
-		}
-		int numNegativePassed = this.testPassCount(rep, true, TestType.NEGATIVE, tests);
-		if(withModel) {
-			this.updateModel();
-		}
+		int numNegativePassed = this.testPassCount(rep, true, Fitness.negativeTests);
 		if(numNegativePassed < Fitness.numNegativeTests) {
 			return false;
 		}
-
-		if(withModel) {
-			tests = Fitness.positiveTests;
-		} else {
-			tests = Fitness.positiveTests;
-		}
-		int numPositivePassed = this.testPassCount(rep,  true, TestType.POSITIVE, tests);
-		if(withModel) {
-			this.updateModel();
-		}
+		int numPositivePassed = this.testPassCount(rep,  true, Fitness.positiveTests);
 		if(numPositivePassed < Fitness.numPositiveTests) {
 			return false;
 		}
 		return true;
+		}
 	}
 
 	private static void resample() {
@@ -273,13 +269,13 @@ public class Fitness<G extends EditOperation> {
 	}
 
 	private Pair<Double,Double> testFitnessSample(Representation<G> rep, double fac) {
-		int numNegPassed = this.testPassCount(rep,false,TestType.NEGATIVE, Fitness.negativeTests);
-		int numPosPassed = this.testPassCount(rep,false,TestType.POSITIVE, Fitness.testSample);
+		int numNegPassed = this.testPassCount(rep,false, Fitness.negativeTests);
+		int numPosPassed = this.testPassCount(rep,false, Fitness.testSample);
 		int numRestPassed = 0;
 		if((numNegPassed == Fitness.numNegativeTests) &&
 				(numPosPassed == testSample.size())) {
 			if(Fitness.sample < 1.0) { // restSample won't be null by definition here
-				numRestPassed = this.testPassCount(rep, false, TestType.POSITIVE, Fitness.restSample);				
+				numRestPassed = this.testPassCount(rep, false, Fitness.restSample);				
 			}
 		} 
 		double sampleFitness = fac * numNegPassed + numPosPassed;
@@ -287,7 +283,7 @@ public class Fitness<G extends EditOperation> {
 		return new Pair<Double,Double>(totalFitness,sampleFitness);
 	}
 
-	private int testPassCount(Representation<G> rep, boolean shortCircuit, TestType type, List<TestCase> tests) {
+	private int testPassCount(Representation<G> rep, boolean shortCircuit, List<TestCase> tests) {
 		int numPassed = 0;
 		for (TestCase thisTest : tests) {
 			if (!rep.testCase(thisTest)) {
