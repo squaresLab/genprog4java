@@ -261,6 +261,8 @@ FaultLocRepresentation<JavaEditOperation> {
 						break;
 					case ICounter.NOT_COVERED:
 						break;
+					case ICounter.EMPTY:
+						break;
 					default:
 						break;
 					}
@@ -275,6 +277,107 @@ FaultLocRepresentation<JavaEditOperation> {
 					atoms.addAll(atomIds);
 				}
 			}
+		}
+		return atoms;
+	}
+
+	public ArrayList<WeightedAtom> getAllPosibleStmts() throws IOException {
+		ArrayList<WeightedAtom> atoms = new ArrayList<WeightedAtom>();
+
+		for (Map.Entry<ClassInfo, String> ele : JavaRepresentation.originalSource
+				.entrySet()) {
+			ClassInfo targetClassInfo = ele.getKey();
+			String pathToCoverageClass = Configuration.outputDir + File.separator
+					+ "coverage/coverage.out" + File.separator + targetClassInfo.pathToClassFile();
+			File compiledClass = new File(pathToCoverageClass);
+			if(!compiledClass.exists()) {
+				pathToCoverageClass = Configuration.classSourceFolder + File.separator + targetClassInfo.pathToClassFile();
+				compiledClass = new File(pathToCoverageClass);
+			}
+
+			if (executionData == null) {
+				executionData = new ExecutionDataStore();
+			}
+
+			final FileInputStream in = new FileInputStream(new File(
+					"jacoco.exec"));
+			final ExecutionDataReader reader = new ExecutionDataReader(in);
+			reader.setSessionInfoVisitor(new ISessionInfoVisitor() {
+				public void visitSessionInfo(final SessionInfo info) {
+				}
+			});
+			reader.setExecutionDataVisitor(new IExecutionDataVisitor() {
+				public void visitClassExecution(final ExecutionData data) {
+					executionData.put(data);
+				}
+			});
+
+
+			reader.read();
+			in.close();
+
+			final CoverageBuilder coverageBuilder = new CoverageBuilder();
+			final Analyzer analyzer = new Analyzer(executionData,
+					coverageBuilder);
+			analyzer.analyzeAll(new File(pathToCoverageClass));
+
+			TreeSet<Integer> coveredLines = new TreeSet<Integer>();
+			for (final IClassCoverage cc : coverageBuilder.getClasses()) {
+				for (int i = cc.getFirstLine(); i <= cc.getLastLine(); i++) {
+					boolean covered = false;
+					switch (cc.getLine(i).getStatus()) {
+					case ICounter.PARTLY_COVERED:
+						covered = true;
+						break;
+					case ICounter.FULLY_COVERED:
+						covered = true;
+						break;
+					case ICounter.NOT_COVERED:
+						covered = true;
+						break;
+					case ICounter.EMPTY:
+						break;
+					default:
+						break;
+					}
+					if (covered) {
+						coveredLines.add(i);
+					}
+				}
+			}
+			for (int line : coveredLines) {
+				ArrayList<Integer> atomIds = this.atomIDofSourceLine(line);
+				if (atomIds != null && atomIds.size() >= 0) {
+					//atoms.addAll(atomIds);
+for(Integer i: atomIds){
+					WeightedAtom wa = new WeightedAtom(i, 0.1);
+					int index = wa.getAtom();
+					JavaStatement potentialFixStmt = codeBank.get(index);
+					Set<String> scopes = new TreeSet<String>();
+					potentialFixStmt.setRequiredNames(scopes);
+					atoms.add(wa);
+}
+				}
+			}
+			/*
+			for (int line : coveredLines) {
+				ArrayList<Integer> atomIds = this.atomIDofSourceLine(line);
+				if (atomIds != null && atomIds.size() >= 0) {
+					atoms.addAll(atomIds);
+				}
+			}
+			for (Integer i : negativePath) {
+				if (!negHt.contains(i)) {
+					double negWeight = FaultLocRepresentation.negativePathWeight;
+					if (posHt.contains(i)) {
+						negWeight = FaultLocRepresentation.positivePathWeight;
+					}
+					negHt.add(i);
+					fw.put(i, 0.5);
+					faultLocalization.add(new WeightedAtom(i, negWeight));
+				}
+			}
+			 */
 		}
 		return atoms;
 	}
@@ -775,7 +878,7 @@ FaultLocRepresentation<JavaEditOperation> {
 	}
 
 	private TreeSet<WeightedAtom> scopeHelper(int stmtId) {
-		if (JavaRepresentation.scopeSafeAtomMap.containsKey(stmtId)) {
+		if (JavaRepresentation.scopeSafeAtomMap.containsKey(stmtId) && !JavaRepresentation.scopeSafeAtomMap.get(stmtId).isEmpty()) {
 			return JavaRepresentation.scopeSafeAtomMap.get(stmtId);
 		}
 
@@ -1211,5 +1314,14 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 	}
 
+
+	public void setAllPossibleStmtsToFixLocalization(){
+		try {
+			super.fixLocalization = getAllPosibleStmts();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 }
