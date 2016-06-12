@@ -39,6 +39,7 @@ import static clegoues.util.ConfigurationBuilder.INT;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -54,6 +55,8 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.rep.FaultLocRepresentation;
+import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.util.ConfigurationBuilder;
@@ -223,7 +226,7 @@ public abstract class Search<G extends EditOperation> {
 	 */
 	public void mutate(Representation<G> variant) {
 		ArrayList faultyAtoms = variant.getFaultyAtoms();
-		ArrayList<WeightedAtom> proMutList = new ArrayList<WeightedAtom>();
+		TreeSet<WeightedAtom> proMutList = new TreeSet<WeightedAtom>();
 		boolean foundMutationThatCanApplyToAtom = false;
 		while(!foundMutationThatCanApplyToAtom){
 			//promut default is 1
@@ -235,8 +238,15 @@ public abstract class Search<G extends EditOperation> {
 					//chooses a random atom
 					wa = (WeightedAtom) GlobalUtils.chooseOneWeighted(faultyAtoms);
 					alreadyOnList = proMutList.contains(wa);
+					
 				}while(alreadyOnList);
 				proMutList.add(wa);
+				
+				//If it already picked all the possible faulty atoms
+				if(proMutList.size()>=faultyAtoms.size()){ 
+					((JavaRepresentation)variant).setAllPossibleStmtsToFixLocalization();
+					//alreadyOnList=false;
+				}
 			}
 			for (WeightedAtom atom : proMutList) {
 				int stmtid = atom.getAtom();
