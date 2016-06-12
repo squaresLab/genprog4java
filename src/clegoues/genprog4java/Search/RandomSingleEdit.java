@@ -10,6 +10,9 @@ import clegoues.util.ConfigurationBuilder;
 public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 
 	
+	public static final ConfigurationBuilder.RegistryToken token =
+			ConfigurationBuilder.getToken();
+	
 	protected static int maxVariants = ConfigurationBuilder.of( INT )
 			.withVarName( "maxVariants" )
 			.withDefault( "10" )
