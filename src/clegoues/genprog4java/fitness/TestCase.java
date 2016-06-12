@@ -61,8 +61,10 @@ public class TestCase implements Comparable<TestCase> {
 
 	@Override
 	public int compareTo(TestCase o) {
-		// TODO Auto-generated method stub
-		return 0;
+		if(this.numPatchesKilled == o.numPatchesKilled) {
+			return this.testName.compareTo(o.testName);
+		} 
+		return this.numPatchesKilled - o.numPatchesKilled;
 	}
 
 }
