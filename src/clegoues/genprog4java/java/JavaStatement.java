@@ -44,16 +44,24 @@ import java.util.TreeSet;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.WhileStatement;
 
 import clegoues.util.Pair;
 
@@ -293,6 +301,113 @@ public class JavaStatement {
 		}
 		return methodReplacements.size() > 0;
 	}
+	
 
+	public static ASTNode blockThatContainsThisStatement(ASTNode stmt){
+		ASTNode parent = stmt.getParent();
+		while(parent != null && !(parent instanceof Block)){
+			parent = parent.getParent();
+		}
+		return parent;
+	}
 
+	private static int howManyReturns = 0;
+	
+	public static boolean hasMoreThanOneReturn(MethodDeclaration method){
+		method.accept(new ASTVisitor() {
+			@Override
+			public boolean visit(ReturnStatement node) {
+				howManyReturns++;
+				return true;
+			}
+		});
+		return howManyReturns>=2;
+	}
+
+	public boolean canBeDeleted() {
+		ASTNode faultyNode = this.getASTNode();
+		ASTNode parent = faultyNode.getParent();
+		//Heuristic: If it is the body of an if, while, or for, it should not be removed
+		if(faultyNode instanceof Block){
+			//this boolean states if the faultyNode is the body of an IfStatement
+			if (parent instanceof IfStatement
+					&& ((IfStatement)parent).getThenStatement().equals(faultyNode))
+				return false;
+			//same for all these booleans
+			if(parent instanceof WhileStatement
+					&& ((WhileStatement)parent).getBody().equals(faultyNode))
+				return false;
+			if(parent instanceof ForStatement
+					&& ((ForStatement)parent).getBody().equals(faultyNode))
+				return false;
+			if(parent instanceof EnhancedForStatement
+					&& ((EnhancedForStatement)parent).getBody().equals(faultyNode))
+				return false;
+			if(parent instanceof IfStatement && (((IfStatement)parent).getElseStatement() != null) &&
+						((IfStatement)parent).getElseStatement().equals(faultyNode))
+					return false;
+		}
+
+		//Heuristic: Don't remove returns from functions that have only one return statement.
+		if(faultyNode instanceof ReturnStatement){
+			while (!(parent instanceof MethodDeclaration)){
+				parent = parent.getParent();
+			}
+			if(hasMoreThanOneReturn((MethodDeclaration)parent))
+				return false;
+		}
+
+		//Heuristic: If an stmt is the only stmt in a block, don´t delete it
+		parent = blockThatContainsThisStatement(faultyNode);
+		if(parent instanceof Block){
+			if(((Block)parent).statements().size()==1){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private ASTNode getEnclosingMethod() {
+		ASTNode parent = this.getASTNode().getParent();
+		while(parent != null && !(parent instanceof MethodDeclaration)){
+			parent = parent.getParent();
+		}
+		return parent;
+	}
+	public boolean isLikelyAConstructor() {
+		ASTNode enclosingMethod = this.getEnclosingMethod();
+		return (enclosingMethod != null) && (enclosingMethod instanceof MethodDeclaration) && 
+				((MethodDeclaration) enclosingMethod).isConstructor();
+	}
+
+	public boolean parentMethodReturnsVoid() {
+		ASTNode enclosingMethod = this.getEnclosingMethod();
+		if (enclosingMethod != null & enclosingMethod instanceof MethodDeclaration) {
+			MethodDeclaration asMd = (MethodDeclaration) enclosingMethod;
+			String returnType = asMd.getReturnType2().toString(); // FIXME: this probably is qualified
+			return returnType.equalsIgnoreCase("void") || returnType.equalsIgnoreCase("null");
+		}
+		return false;
+	}
+	
+	public boolean isWithinLoopOrCase() {
+		ASTNode buggyNode = this.getASTNode();
+		if(buggyNode instanceof SwitchStatement 
+				|| buggyNode instanceof ForStatement 
+				|| buggyNode instanceof WhileStatement
+				|| buggyNode instanceof DoStatement
+				|| buggyNode instanceof EnhancedForStatement)
+		return true;
+		
+		while(buggyNode.getParent() != null){
+			buggyNode = buggyNode.getParent();
+			if(buggyNode instanceof SwitchStatement 
+			|| buggyNode instanceof ForStatement 
+			|| buggyNode instanceof WhileStatement
+			|| buggyNode instanceof DoStatement
+			|| buggyNode instanceof EnhancedForStatement)
+				return true;
+		}
+		return false;
+	}
 }

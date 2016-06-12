@@ -908,6 +908,7 @@ for(Integer i: atomIds){
 			//Don't make a call to a constructor
 			if(potentialFixStmt.getASTNode() instanceof MethodRef){
 				MethodRef mr = (MethodRef) potentialFixStmt.getASTNode();
+				
 				// mrt = method return type
 				String returnType = returnTypeOfThisMethod(mr.getName().toString());
 				if(returnType != null){
@@ -942,32 +943,12 @@ for(Integer i: atomIds){
 			}
 
 			//Heuristic: Do not insert a return statement on a func whose return type is void
-			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
-				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
-				while(!(parent instanceof MethodDeclaration) && parent != null){
-					parent = parent.getParent();
-				}
-
-				if (parent instanceof MethodDeclaration) {
-					String returnType = returnTypeOfThisMethod(((MethodDeclaration)parent).getName().toString());
-					if(returnType != null){
-						if( returnType.equalsIgnoreCase("void") || returnType.equalsIgnoreCase("null")){
-							ok=false;
-						}
-					}
-				}
-			}
-
 			//Heuristic: Do not insert a return statement in a constructor
-			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
-				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
-				while(!(parent instanceof MethodDeclaration) && parent != null){
-					parent = parent.getParent();
-				}
 
-				if (parent != null && parent instanceof MethodDeclaration && ((MethodDeclaration) parent).isConstructor()) {
-					ok=false;
-				}
+			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
+				if(potentiallyBuggyStmt.parentMethodReturnsVoid() ||
+						potentiallyBuggyStmt.isLikelyAConstructor())
+					ok = false;
 			}
 
 			//Heuristic: Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is wrong
@@ -994,7 +975,7 @@ for(Integer i: atomIds){
 
 			//Heuristic: Swapping, Appending or Replacing a return stmt to the middle of a block will make the code after it unreachable
 			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
-				ASTNode parentBlock = blockThatContainsThisStatement(potentiallyBuggyStmt.getASTNode());
+				ASTNode parentBlock = JavaStatement.blockThatContainsThisStatement(potentiallyBuggyStmt.getASTNode());
 				if(parentBlock instanceof Block){
 					List<ASTNode> statementsInBlock = ((Block)parentBlock).statements();
 					ASTNode lastStmtInTheBlock = statementsInBlock.get(statementsInBlock.size()-1);
@@ -1007,25 +988,18 @@ for(Integer i: atomIds){
 			}
 
 			//Heuristic: Don't allow to move breaks outside of switch stmts
+			// OR loops!
 			if(potentialFixStmt.getASTNode() instanceof BreakStatement){
-				ASTNode buggyNode = potentiallyBuggyStmt.getASTNode();
-				boolean isWithinASwitch = buggyNode instanceof SwitchStatement;
-				while(!isWithinASwitch && buggyNode.getParent() != null){
-					buggyNode = buggyNode.getParent();
-					isWithinASwitch = buggyNode instanceof SwitchStatement;
-				}
-				if(!isWithinASwitch){
-					ok=false;
-				}
+				ok = potentiallyBuggyStmt.isWithinLoopOrCase();
 			}
 
-			//Heuristic: Don´t replace/swap returns from functions that have only one return statement.
+			//Heuristic: Don´t replace/swap returns within functions that have only one return statement.
 			if(potentiallyBuggyStmt.getASTNode() instanceof ReturnStatement){
 				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
 				while (!(parent instanceof MethodDeclaration)){
 					parent = parent.getParent();
 				}
-				boolean moreThanOneReturn = hasMoreThanOneReturn((MethodDeclaration)parent);
+				boolean moreThanOneReturn = JavaStatement.hasMoreThanOneReturn((MethodDeclaration)parent);
 				if(!moreThanOneReturn){
 					ok = false;
 				}
@@ -1086,25 +1060,12 @@ for(Integer i: atomIds){
 					}
 				}
 			}
-
-
-
 			if (ok) {
 				retVal.add(potentialFixAtom);
 			}
-
 		}
 		JavaRepresentation.scopeSafeAtomMap.put(stmtId, retVal);
 		return retVal;
-	}
-
-
-	private ASTNode blockThatContainsThisStatement(ASTNode stmt){
-		ASTNode parent = stmt.getParent();
-		while(parent != null && !(parent instanceof Block)){
-			parent = parent.getParent();
-		}
-		return parent;
 	}
 
 	private String returnTypeOfThisMethod(String matchString){
@@ -1125,48 +1086,8 @@ for(Integer i: atomIds){
 		case SWAP:
 			return this.editSources(location,  editType).size() > 0;
 		case DELETE: 
-			ASTNode faultyNode = locationStmt.getASTNode();
-			ASTNode parent = faultyNode.getParent();
-			//Heuristic: If it is the body of an if, while, or for, it should not be removed
-			if(faultyNode instanceof Block){
-				//this boolean states if the faultyNode is the body of an IfStatement
-				if (parent instanceof IfStatement
-						&& ((IfStatement)parent).getThenStatement().equals(faultyNode))
-					return false;
-				//same for all these booleans
-				if(parent instanceof WhileStatement
-						&& ((WhileStatement)parent).getBody().equals(faultyNode))
-					return false;
-				if(parent instanceof ForStatement
-						&& ((ForStatement)parent).getBody().equals(faultyNode))
-					return false;
-				if(parent instanceof EnhancedForStatement
-						&& ((EnhancedForStatement)parent).getBody().equals(faultyNode))
-					return false;
-				if(parent instanceof IfStatement && (((IfStatement)parent).getElseStatement() != null) &&
-							((IfStatement)parent).getElseStatement().equals(faultyNode))
-						return false;
-			}
-
-
-			//Heuristic: Don´t remove returns from functions that have only one return statement.
-			if(faultyNode instanceof ReturnStatement){
-				while (!(parent instanceof MethodDeclaration)){
-					parent = parent.getParent();
-				}
-				if(hasMoreThanOneReturn((MethodDeclaration)parent))
-					return false;
-			}
-
-			//Heuristic: If an stmt is the only stmt in a block, don´t delete it
-			parent = blockThatContainsThisStatement(faultyNode);
-			if(parent instanceof Block){
-				if(((Block)parent).statements().size()==1){
-					return false;
-				}
-			}
-			return true;
-		case OFFBYONE:  // FIXME: CLG suspects this should only apply to particular statements, not every statement in the program.  Maybe?
+			return locationStmt.canBeDeleted();
+		case OFFBYONE:  
 		case UBOUNDSET:
 		case LBOUNDSET:
 		case RANGECHECK:
@@ -1175,7 +1096,6 @@ for(Integer i: atomIds){
 			return locationStmt.methodReplacerApplies(methodDecls);
 		case NULLCHECK: 
 			return locationStmt.nullCheckApplies();
-
 		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;
@@ -1183,17 +1103,6 @@ for(Integer i: atomIds){
 		return false;
 	}
 
-	int howManyReturns = 0;
-	private boolean hasMoreThanOneReturn(MethodDeclaration method){
-		method.accept(new ASTVisitor() {
-			@Override
-			public boolean visit(ReturnStatement node) {
-				howManyReturns++;
-				return true;
-			}
-		});
-		return howManyReturns>=2;
-	}
 
 	@Override
 
