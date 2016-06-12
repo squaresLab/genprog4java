@@ -37,15 +37,20 @@ package clegoues.genprog4java.fitness;
 public class TestCase implements Comparable<TestCase> {
 	private TestType posOrNeg;
 	private String testName = null;
+	private int numPatchesKilled = 0;
 
 	public TestCase(TestType t, String name) {
 		this.setPosOrNeg(t);
 		this.testName = name; 
+		this.numPatchesKilled = 0;
 	}
 	public String toString () {
 		return this.testName;
 	}
 
+	public void incrementPatchesKilled() {
+		this.numPatchesKilled++;
+	}
 
 	public TestType getPosOrNeg() {
 		return posOrNeg;
