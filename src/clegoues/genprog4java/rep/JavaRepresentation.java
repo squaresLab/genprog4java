@@ -726,7 +726,6 @@ for(Integer i: atomIds){
 
 		switch(edit) {
 		case DELETE: 
-		case NULLINSERT:
 			JavaEditOperation newEdit = new JavaDeleteOperation(fileName, locationStatement);
 			this.genome.add(newEdit);
 			break;
@@ -1125,7 +1124,6 @@ for(Integer i: atomIds){
 		case REPLACE:
 		case SWAP:
 			return this.editSources(location,  editType).size() > 0;
-		case NULLINSERT:
 		case DELETE: 
 			boolean itApplies = true;
 			ASTNode faultyNode = locationStmt.getASTNode();
@@ -1259,7 +1257,6 @@ for(Integer i: atomIds){
 				return super.editSources(stmtId, editType);
 			}
 			//break; This is unreachable
-		case NULLINSERT:
 		case FUNREP:
 		case PARREP:
 		case PARADD:

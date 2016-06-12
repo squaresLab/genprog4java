@@ -146,7 +146,6 @@ public abstract class Search<G extends EditOperation> {
 			case "swap":  mutations.put(Mutation.SWAP, weight); break;
 			case "delete":  mutations.put(Mutation.DELETE, weight); break;
 			case "replace":  mutations.put(Mutation.REPLACE, weight); break;
-			case "nullinsert":  mutations.put(Mutation.NULLINSERT, weight); break;
 			case "funrep":  mutations.put(Mutation.FUNREP, weight); break;
 			case "parrep":  mutations.put(Mutation.PARREP, weight); break;
 			case "paradd":  mutations.put(Mutation.PARADD, weight); break;
@@ -266,7 +265,6 @@ public abstract class Search<G extends EditOperation> {
 				case DELETE:
 				case UBOUNDSET:
 				case RANGECHECK:
-				case NULLINSERT:
 				case FUNREP:
 					// FIXME: this -1 hack is pretty gross; note to self, CLG should fix it
 					variant.performEdit(mut, stmtid, (-1));
