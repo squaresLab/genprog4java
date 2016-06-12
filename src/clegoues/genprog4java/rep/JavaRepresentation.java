@@ -952,7 +952,8 @@ FaultLocRepresentation<JavaEditOperation> {
 	}
 
 	private TreeSet<WeightedAtom> scopeHelper(int stmtId) {
-		if (JavaRepresentation.scopeSafeAtomMap.containsKey(stmtId) && !JavaRepresentation.scopeSafeAtomMap.get(stmtId).isEmpty()) {
+		if (JavaRepresentation.scopeSafeAtomMap.containsKey(stmtId) && !
+				JavaRepresentation.scopeSafeAtomMap.get(stmtId).isEmpty()) {
 			return JavaRepresentation.scopeSafeAtomMap.get(stmtId);
 		}
 
@@ -964,13 +965,16 @@ FaultLocRepresentation<JavaEditOperation> {
 		Set<String> inScopeAt = JavaRepresentation.inScopeMap.get(potentiallyBuggyStmt
 				.getStmtId());
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+		ASTNode faultAST = potentiallyBuggyStmt.getASTNode();
 
 		for (WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {
 			int index = potentialFixAtom.getAtom();
 			JavaStatement potentialFixStmt = codeBank.get(index);
+			ASTNode fixAST = potentialFixStmt.getASTNode();
+
 			Set<String> requiredScopes = potentialFixStmt.getRequiredNames();
 
-			{ // scoping OK
+			{ // scoping the ok variable
 				boolean ok = true;
 				for (String req : requiredScopes) {
 					if (!inScopeAt.contains(req)) {
@@ -981,74 +985,39 @@ FaultLocRepresentation<JavaEditOperation> {
 				if(!ok)
 					continue;
 			}
-			
+
+			//Heuristic: Don’t replace or swap (or append) an stmt with one just like it
+			if(faultAST.equals(fixAST) || potentiallyBuggyStmt.getStmtId()==potentialFixStmt.getStmtId()){
+				continue;
+			}
+
 			//Heuristic: Do not insert a return statement on a func whose return type is void
 			//Heuristic: Do not insert a return statement in a constructor
-			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
+
+			if(fixAST instanceof ReturnStatement){
 				if(potentiallyBuggyStmt.parentMethodReturnsVoid() ||
 						potentiallyBuggyStmt.isLikelyAConstructor())
 					continue;
+
 				//Heuristic: Swapping, Appending or Replacing a return stmt to the middle of a block will make the code after it unreachable
 				ASTNode parentBlock = potentiallyBuggyStmt.blockThatContainsThisStatement();
-				if(parentBlock instanceof Block){
+				if(parentBlock != null && parentBlock instanceof Block) {
 					List<ASTNode> statementsInBlock = ((Block)parentBlock).statements();
 					ASTNode lastStmtInTheBlock = statementsInBlock.get(statementsInBlock.size()-1);
-					if(!lastStmtInTheBlock.equals(potentiallyBuggyStmt.getASTNode())){
+					if(!lastStmtInTheBlock.equals(faultAST)){
 						continue;
 					}
-				}else{
+				} else {
 					continue;
 				}
-			}
-
-			//Heuristic: Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is wrong
-			if(potentialFixStmt.getASTNode() instanceof ConstructorInvocation || potentialFixStmt.getASTNode() instanceof SuperConstructorInvocation){
+				
+				//If we move a return statement into a function, the parameter in the return must match the function’s return type
 				ASTNode enclosingMethod = potentiallyBuggyStmt.getEnclosingMethod();
 
-				if (enclosingMethod != null && enclosingMethod instanceof MethodDeclaration && ((MethodDeclaration) enclosingMethod).isConstructor()) {
-					StructuralPropertyDescriptor locationPotBuggy = potentiallyBuggyStmt.getASTNode().getLocationInParent();
-					List<ASTNode> statementsInBlock = ((MethodDeclaration) enclosingMethod).getBody().statements();
-					ASTNode firstStmtInTheBlock = statementsInBlock.get(0);
-					StructuralPropertyDescriptor locationFirstInBlock = firstStmtInTheBlock.getLocationInParent();
-					//This will catch replacements and swaps, but it will append after the first stmt, so append will still create a non compiling variant
-					if(!locationFirstInBlock.equals(locationPotBuggy)){
-						continue;
-					}
-				}else{
-					continue;
-				}
-			}
-
-			//Heuristic: Don't allow to move breaks outside of switch stmts
-			// OR loops!
-			// TODO: check for continues as well
-			if(potentialFixStmt.getASTNode() instanceof BreakStatement && !potentiallyBuggyStmt.isWithinLoopOrCase()){
-				continue;
-			}
-
-			//Heuristic: Don´t replace/swap returns within functions that have only one return statement.
-			if(potentiallyBuggyStmt.getASTNode() instanceof ReturnStatement){
-				ASTNode parent = potentiallyBuggyStmt.getEnclosingMethod();
-				if(parent instanceof MethodDeclaration && 
-						!JavaStatement.hasMoreThanOneReturn((MethodDeclaration)parent)) {
-					continue;
-				}
-			}
-
-			//Heuristic: Don’t replace or swap (or append) an stmt with one just like it
-			if(potentiallyBuggyStmt.getASTNode().equals(potentialFixStmt.getASTNode()) || potentiallyBuggyStmt.getStmtId()==potentialFixStmt.getStmtId()){
-				continue;
-			}
-
-
-			//If we move a return statement into a function, the parameter in the return must match the function’s return type
-			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
-				ASTNode parent = potentiallyBuggyStmt.getEnclosingMethod();
-
-				if (parent instanceof MethodDeclaration) {
-					String returnType = returnTypeOfThisMethod(((MethodDeclaration)parent).getName().toString());
+				if (enclosingMethod instanceof MethodDeclaration) {
+					String returnType = returnTypeOfThisMethod(((MethodDeclaration)enclosingMethod).getName().toString());
 					if(returnType != null){
-						ReturnStatement potFix = (ReturnStatement) potentialFixStmt.getASTNode();
+						ReturnStatement potFix = (ReturnStatement) fixAST;
 						if(potFix.getExpression() instanceof SimpleName){
 							String variableType = variableDataTypes.get(potFix.getExpression().toString());
 							if( !returnType.equalsIgnoreCase(variableType)){
@@ -1056,6 +1025,47 @@ FaultLocRepresentation<JavaEditOperation> {
 							}
 						}
 					}
+				}
+			}
+
+			//Heuristic: Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is wrong
+			if(fixAST instanceof ConstructorInvocation || 
+					fixAST instanceof SuperConstructorInvocation){
+				ASTNode enclosingMethod = potentiallyBuggyStmt.getEnclosingMethod();
+
+				if (enclosingMethod != null && 
+						enclosingMethod instanceof MethodDeclaration && 
+						((MethodDeclaration) enclosingMethod).isConstructor()) {
+					StructuralPropertyDescriptor locationPotBuggy = faultAST.getLocationInParent();
+					List<ASTNode> statementsInBlock = ((MethodDeclaration) enclosingMethod).getBody().statements();
+					ASTNode firstStmtInTheBlock = statementsInBlock.get(0);
+					StructuralPropertyDescriptor locationFirstInBlock = firstStmtInTheBlock.getLocationInParent();
+					//This will catch replacements and swaps, but it will append after the first stmt, so append will still create a non compiling variant
+					if(!locationFirstInBlock.equals(locationPotBuggy)){
+						continue;
+					}
+				} else {
+					continue;
+				}
+			}
+
+			//Heuristic: Don't allow to move breaks outside of switch stmts
+			// OR loops!
+			// TODO: check for continues as well
+			if(fixAST instanceof BreakStatement && 
+					!potentiallyBuggyStmt.isWithinLoopOrCase()){
+				continue;
+			}
+
+			//Heuristic: Don't replace/swap returns within functions that have only one return statement
+			// (unless the replacer is also a return statement); could also check if it's a block or
+			// other sequence of statements with a return within it, but I'm lazy
+			if((!(fixAST instanceof ReturnStatement)) && 
+					faultAST instanceof ReturnStatement) {
+				ASTNode parent = potentiallyBuggyStmt.getEnclosingMethod();
+				if(parent instanceof MethodDeclaration && 
+						!JavaStatement.hasMoreThanOneReturn((MethodDeclaration)parent)) {
+					continue;
 				}
 			}
 			// if we made it this far without continuing, we're good to go.
