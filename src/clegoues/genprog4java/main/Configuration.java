@@ -199,13 +199,9 @@ public class Configuration {
 
 	private Configuration() {}
 
-	public static void configure() {
-		Fitness.configure();
-		
-		//Save original target file to an outside folder if it is the first run. Or load it if it is not.
-		saveOrLoadTargetFiles();
-	}
 	
+	//Save original target file to an outside folder if it is the first run. Or load it if it is not.
+
 	public static void saveOrLoadTargetFiles(){
 		
 		String safeFolder = Configuration.outputDir  + File.separatorChar + "original" + File.separatorChar;
