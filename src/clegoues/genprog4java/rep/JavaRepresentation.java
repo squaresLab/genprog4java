@@ -155,7 +155,6 @@ FaultLocRepresentation<JavaEditOperation> {
 	private static HashMap<Integer, ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer, ArrayList<Integer>>();
 	private static HashMap<ClassInfo, String> originalSource = new HashMap<ClassInfo, String>();
 	private static HashMap<Integer, ClassInfo> stmtToFile = new HashMap<Integer, ClassInfo>();
-	private int mutationNumber = 0;
 
 	// semantic check cache stuff, so we don't have to walk stuff a million
 	// times unnecessarily
@@ -1213,9 +1212,5 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 	}
 
-	public void test() {
-		String newName = CachingRepresentation.newVariantFolder();
-		internalCompile(newName, newName);
-	}
 
 }

@@ -66,10 +66,10 @@ public class Fitness<G extends EditOperation> {
 		ConfigurationBuilder.getToken();
 	
 	private static int generation = -1;
-	// FIXME: we're already doing sampling, so note to self to kill it in the genprog setup scripts and just pass
-	// the desired sample size to genprog via the config.
-	private static List<Integer> testSample = null; // FIXME: THIS IS WRONG
-	private static List<Integer> restSample = null;
+
+	
+	private static List<String> testSample = null;
+	private static List<String> restSample = null;
 
 	//private static double negativeTestWeight = 2.0;
 	private static double negativeTestWeight = ConfigurationBuilder.of( DOUBLE )
@@ -78,7 +78,7 @@ public class Fitness<G extends EditOperation> {
 		.withHelp( "weighting to give results of negative test cases" )
 		.inGroup( "Fitness Parameters" )
 		.build();
-	//private static double sample = 1.0;
+
 	private static double sample = ConfigurationBuilder.of( DOUBLE )
 		.withVarName( "sample" )
 		.withDefault( "1.0" )
@@ -93,7 +93,6 @@ public class Fitness<G extends EditOperation> {
 		.inGroup( "Fitness Parameters" )
 		.build();
 	// generation, variant
-	//public static String posTestFile = "pos.tests";
 	public static String posTestFile = ConfigurationBuilder.of( STRING )
 		.withVarName( "posTestFile" )
 		.withFlag( "positiveTests" )
@@ -101,7 +100,7 @@ public class Fitness<G extends EditOperation> {
 		.withHelp( "file containing names of positive test classes" )
 		.inGroup( "Fitness Parameters" )
 		.build();
-	//public static String negTestFile = "neg.tests";
+
 	public static String negTestFile = ConfigurationBuilder.of( STRING )
 		.withVarName( "negTestFile" )
 		.withFlag( "negativeTests" )
@@ -109,6 +108,7 @@ public class Fitness<G extends EditOperation> {
 		.withHelp( "file containing names of negative test classes" )
 		.inGroup( "Fitness Parameters" )
 		.build();
+	
 	public static ArrayList<String> positiveTests = new ArrayList<String>();
 	public static ArrayList<String> negativeTests = new ArrayList<String>();
 	public static int numPositiveTests = 5;
@@ -118,8 +118,7 @@ public class Fitness<G extends EditOperation> {
 		Fitness.configureTests();
 		Fitness.numPositiveTests = Fitness.positiveTests.size();
 		Fitness.numNegativeTests = Fitness.negativeTests.size();
-
-		testSample = GlobalUtils.range(1,Fitness.numPositiveTests);
+		testSample = Fitness.positiveTests; // FIXME: I don't really like this.
 	}
 
 
@@ -131,6 +130,7 @@ public class Fitness<G extends EditOperation> {
 
 		filterTests(intermedPosTests, intermedNegTests);
 		filterTests(intermedNegTests, intermedPosTests);
+		
 		positiveTests.addAll(intermedPosTests);
 		negativeTests.addAll(intermedNegTests);
 	}
@@ -198,25 +198,35 @@ public class Fitness<G extends EditOperation> {
 	 * optimization for brute_force search, gives up on a variant as soon as it
 	 * fails a test case. This makes less sense for single_fitness, but
 	 * single_fitness being true won't break it. Does not currently sample, but does  
-	 * do the model thing (like for RSRepair and AE, I think) if specified. 
+	 * do the model thing (like for RSRepair and AE, I think, though the latter isn't
+	 * implemented in this codebase yet) if specified. 
 	 */
 
-	private void initializeModel() { 
-		// TODO: fix me.  Who should call me?
+	private ArrayList<Pair<Integer,Integer>> testModel = null;
+	
+	public void initializeModel() { 
+		testModel = new ArrayList<Pair<Integer,Integer>>(Fitness.numNegativeTests + Fitness.numPositiveTests);
+		int j = 0;
+		for(int i = 0; i < Fitness.numNegativeTests; i++) {
+			
+		}
+		for(int i = 0; i < Fitness.numPositiveTests; i++) {
+			
+		}
 	}
 	private void updateModel() { 
 		// TODO: fix me
 	}
 	
 	public boolean testToFirstFailure(Representation<G> rep, boolean withModel) {
-		List<Integer> tests;
+		List<String> tests;
 		
 		if(withModel) {
-			tests = GlobalUtils.range(1, Fitness.numNegativeTests);
+			tests = Fitness.negativeTests;
 		} else {
-			tests = GlobalUtils.range(1, Fitness.numNegativeTests);
+			tests = Fitness.negativeTests;
 		}
-		int numNegativePassed = this.testPassCount(rep, true, TestType.NEGATIVE, tests, Fitness.negativeTests);
+		int numNegativePassed = this.testPassCount(rep, true, TestType.NEGATIVE, tests);
 		if(withModel) {
 			this.updateModel();
 		}
@@ -225,11 +235,11 @@ public class Fitness<G extends EditOperation> {
 		}
 
 		if(withModel) {
-			tests = GlobalUtils.range(1, Fitness.numPositiveTests);  
+			tests = Fitness.positiveTests;
 		} else {
-			tests = GlobalUtils.range(1, Fitness.numPositiveTests);  
+			tests = Fitness.positiveTests;
 		}
-		int numPositivePassed = this.testPassCount(rep,  true, TestType.POSITIVE, tests, Fitness.positiveTests);
+		int numPositivePassed = this.testPassCount(rep,  true, TestType.POSITIVE, tests);
 		if(withModel) {
 			this.updateModel();
 		}
@@ -245,18 +255,26 @@ public class Fitness<G extends EditOperation> {
 		Long L = Math.round(sample * Fitness.numPositiveTests);
 		int sampleSize = Integer.valueOf(L.intValue());
 		Collections.shuffle(allPositiveTests, Configuration.randomizer);
-		Fitness.testSample = allPositiveTests.subList(0,sampleSize-1); 
-		Fitness.restSample = allPositiveTests.subList(sampleSize, allPositiveTests.size()-1);
+		
+		List<Integer> intSample = allPositiveTests.subList(0,sampleSize-1); 
+		List<Integer> intRestSample = allPositiveTests.subList(sampleSize, allPositiveTests.size()-1);
+		Fitness.testSample = new ArrayList<String> (); 
+		for(Integer test : intSample) {
+			Fitness.testSample.add(Fitness.positiveTests.get(test));
+		}
+		for(Integer test : intRestSample) {
+			Fitness.restSample.add(Fitness.positiveTests.get(test));
+		}
 	}
 
 	private Pair<Double,Double> testFitnessSample(Representation<G> rep, double fac) {
-		int numNegPassed = this.testPassCount(rep,false,TestType.NEGATIVE, GlobalUtils.range(1, Fitness.numNegativeTests), Fitness.negativeTests);
-		int numPosPassed = this.testPassCount(rep,false,TestType.POSITIVE, testSample, Fitness.positiveTests);
+		int numNegPassed = this.testPassCount(rep,false,TestType.NEGATIVE, Fitness.negativeTests);
+		int numPosPassed = this.testPassCount(rep,false,TestType.POSITIVE, Fitness.testSample);
 		int numRestPassed = 0;
 		if((numNegPassed == Fitness.numNegativeTests) &&
 				(numPosPassed == testSample.size())) {
 			if(Fitness.sample < 1.0) { // restSample won't be null by definition here
-				numRestPassed = this.testPassCount(rep, false, TestType.POSITIVE, restSample, Fitness.positiveTests);				
+				numRestPassed = this.testPassCount(rep, false, TestType.POSITIVE, Fitness.restSample);				
 			}
 		} 
 		double sampleFitness = fac * numNegPassed + numPosPassed;
@@ -264,10 +282,10 @@ public class Fitness<G extends EditOperation> {
 		return new Pair<Double,Double>(totalFitness,sampleFitness);
 	}
 
-	private int testPassCount(Representation<G> rep, boolean shortCircuit, TestType type, List<Integer> tests, ArrayList<String> actualTests) {
+	private int testPassCount(Representation<G> rep, boolean shortCircuit, TestType type, List<String> tests) {
 		int numPassed = 0;
-		for (Integer testNum : tests) {
-			TestCase thisTest = new TestCase(type, actualTests.get(testNum));
+		for (String testName : tests) {
+			TestCase thisTest = new TestCase(type, testName);
 			if (!rep.testCase(thisTest)) {
 				rep.cleanup();
 				if(shortCircuit) {
