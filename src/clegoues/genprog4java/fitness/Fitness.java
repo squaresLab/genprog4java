@@ -68,8 +68,8 @@ public class Fitness<G extends EditOperation> {
 	private static int generation = -1;
 
 	
-	private static List<String> testSample = null;
-	private static List<String> restSample = null;
+	private static List<TestCase> testSample = null;
+	private static List<TestCase> restSample = null;
 
 	//private static double negativeTestWeight = 2.0;
 	private static double negativeTestWeight = ConfigurationBuilder.of( DOUBLE )
@@ -109,8 +109,8 @@ public class Fitness<G extends EditOperation> {
 		.inGroup( "Fitness Parameters" )
 		.build();
 	
-	public static ArrayList<String> positiveTests = new ArrayList<String>();
-	public static ArrayList<String> negativeTests = new ArrayList<String>();
+	public static ArrayList<TestCase> positiveTests = new ArrayList<TestCase>();
+	public static ArrayList<TestCase> negativeTests = new ArrayList<TestCase>();
 	public static int numPositiveTests = 5;
 	public static int numNegativeTests = 1;
 
@@ -131,8 +131,13 @@ public class Fitness<G extends EditOperation> {
 		filterTests(intermedPosTests, intermedNegTests);
 		filterTests(intermedNegTests, intermedPosTests);
 		
-		positiveTests.addAll(intermedPosTests);
-		negativeTests.addAll(intermedNegTests);
+		for(String posTest : intermedPosTests) {
+			positiveTests.add(new TestCase(TestType.POSITIVE, posTest));
+		}
+		
+		for(String negTest : intermedNegTests) {
+			negativeTests.add(new TestCase(TestType.NEGATIVE, negTest));
+		}
 	}
 	
 	
@@ -202,10 +207,10 @@ public class Fitness<G extends EditOperation> {
 	 * implemented in this codebase yet) if specified. 
 	 */
 
-	private ArrayList<Pair<Integer,Integer>> testModel = null;
+	private ArrayList<Pair<Integer,TestCase>> testModel = null;
 	
 	public void initializeModel() { 
-		testModel = new ArrayList<Pair<Integer,Integer>>(Fitness.numNegativeTests + Fitness.numPositiveTests);
+		testModel = new ArrayList<Pair<Integer,TestCase>>(Fitness.numNegativeTests + Fitness.numPositiveTests);
 		int j = 0;
 		for(int i = 0; i < Fitness.numNegativeTests; i++) {
 			
@@ -219,7 +224,7 @@ public class Fitness<G extends EditOperation> {
 	}
 	
 	public boolean testToFirstFailure(Representation<G> rep, boolean withModel) {
-		List<String> tests;
+		List<TestCase> tests;
 		
 		if(withModel) {
 			tests = Fitness.negativeTests;
@@ -258,7 +263,7 @@ public class Fitness<G extends EditOperation> {
 		
 		List<Integer> intSample = allPositiveTests.subList(0,sampleSize-1); 
 		List<Integer> intRestSample = allPositiveTests.subList(sampleSize, allPositiveTests.size()-1);
-		Fitness.testSample = new ArrayList<String> (); 
+		Fitness.testSample.clear(); 
 		for(Integer test : intSample) {
 			Fitness.testSample.add(Fitness.positiveTests.get(test));
 		}
@@ -282,10 +287,9 @@ public class Fitness<G extends EditOperation> {
 		return new Pair<Double,Double>(totalFitness,sampleFitness);
 	}
 
-	private int testPassCount(Representation<G> rep, boolean shortCircuit, TestType type, List<String> tests) {
+	private int testPassCount(Representation<G> rep, boolean shortCircuit, TestType type, List<TestCase> tests) {
 		int numPassed = 0;
-		for (String testName : tests) {
-			TestCase thisTest = new TestCase(type, testName);
+		for (TestCase thisTest : tests) {
 			if (!rep.testCase(thisTest)) {
 				rep.cleanup();
 				if(shortCircuit) {
@@ -301,14 +305,12 @@ public class Fitness<G extends EditOperation> {
 	private Pair<Double, Double> testFitnessFull(Representation<G> rep,
 			double fac) {
 		double fitness = 0.0;
-		for (String test : Fitness.positiveTests) {
-			TestCase thisTest = new TestCase(TestType.POSITIVE, test);
+		for (TestCase thisTest : Fitness.positiveTests) {
 			if (rep.testCase(thisTest)) {
 				fitness += 1.0;
 			}
 		}
-		for (String test : Fitness.negativeTests) {
-			TestCase thisTest = new TestCase(TestType.NEGATIVE, test);
+		for (TestCase thisTest : Fitness.negativeTests) {
 			if (rep.testCase(thisTest)) {
 				fitness += fac;
 			}
