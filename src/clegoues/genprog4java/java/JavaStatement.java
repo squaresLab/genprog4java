@@ -303,8 +303,8 @@ public class JavaStatement {
 	}
 	
 
-	public static ASTNode blockThatContainsThisStatement(ASTNode stmt){
-		ASTNode parent = stmt.getParent();
+	public ASTNode blockThatContainsThisStatement(){
+		ASTNode parent = this.getASTNode().getParent();
 		while(parent != null && !(parent instanceof Block)){
 			parent = parent.getParent();
 		}
@@ -350,15 +350,15 @@ public class JavaStatement {
 
 		//Heuristic: Don't remove returns from functions that have only one return statement.
 		if(faultyNode instanceof ReturnStatement){
-			while (!(parent instanceof MethodDeclaration)){
-				parent = parent.getParent();
-			}
+			parent = this.getEnclosingMethod();
+			if(parent != null && parent instanceof MethodDeclaration) {
 			if(hasMoreThanOneReturn((MethodDeclaration)parent))
 				return false;
+			}
 		}
 
 		//Heuristic: If an stmt is the only stmt in a block, don´t delete it
-		parent = blockThatContainsThisStatement(faultyNode);
+		parent = blockThatContainsThisStatement();
 		if(parent instanceof Block){
 			if(((Block)parent).statements().size()==1){
 				return false;
@@ -367,7 +367,7 @@ public class JavaStatement {
 		return true;
 	}
 	
-	private ASTNode getEnclosingMethod() {
+	public ASTNode getEnclosingMethod() {
 		ASTNode parent = this.getASTNode().getParent();
 		while(parent != null && !(parent instanceof MethodDeclaration)){
 			parent = parent.getParent();
