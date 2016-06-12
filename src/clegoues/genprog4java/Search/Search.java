@@ -66,7 +66,7 @@ public abstract class Search<G extends EditOperation> {
 
 	public static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
-	
+
 	//private static int generations = 10;
 	protected static int generations = ConfigurationBuilder.of( INT )
 		.withVarName( "generations" )

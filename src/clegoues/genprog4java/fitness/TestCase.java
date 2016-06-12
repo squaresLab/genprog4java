@@ -63,7 +63,7 @@ public class TestCase implements Comparable<TestCase> {
 	public int compareTo(TestCase o) {
 		if(this.numPatchesKilled == o.numPatchesKilled) {
 			return this.testName.compareTo(o.testName);
-		} 
+		} // FIXME: possibly also consider type?
 		return this.numPatchesKilled - o.numPatchesKilled;
 	}
 
