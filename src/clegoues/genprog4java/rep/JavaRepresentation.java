@@ -47,11 +47,9 @@ import java.io.ObjectOutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -64,8 +62,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -77,23 +73,18 @@ import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
-import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
@@ -101,7 +92,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.internal.compiler.ast.ForeachStatement;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.MalformedTreeException;
@@ -954,7 +944,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			}
 		}
-		
+
 		for(WeightedAtom atom : toRemove) {
 			fixLocalization.remove(atom);
 		}
@@ -966,7 +956,6 @@ FaultLocRepresentation<JavaEditOperation> {
 			return JavaRepresentation.scopeSafeAtomMap.get(stmtId);
 		}
 
-		//potentiallyBuggyStmt is a potentially buggy statement
 		JavaStatement potentiallyBuggyStmt = codeBank.get(stmtId);
 
 		// I *believe* this is just variable names and doesn't check required
@@ -976,90 +965,85 @@ FaultLocRepresentation<JavaEditOperation> {
 				.getStmtId());
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
 
-		//potentialFix is a potential fix statement
 		for (WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {
 			int index = potentialFixAtom.getAtom();
 			JavaStatement potentialFixStmt = codeBank.get(index);
 			Set<String> requiredScopes = potentialFixStmt.getRequiredNames();
 
-			boolean ok = true;
-			for (String req : requiredScopes) {
-				if (!inScopeAt.contains(req)) {
-					ok = false;
-					break;
+			{ // scoping OK
+				boolean ok = true;
+				for (String req : requiredScopes) {
+					if (!inScopeAt.contains(req)) {
+						ok = false;
+						break;
+					}
 				}
+				if(!ok)
+					continue;
 			}
-
+			
 			//Heuristic: Do not insert a return statement on a func whose return type is void
 			//Heuristic: Do not insert a return statement in a constructor
 			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
 				if(potentiallyBuggyStmt.parentMethodReturnsVoid() ||
 						potentiallyBuggyStmt.isLikelyAConstructor())
-					ok = false;
+					continue;
 				//Heuristic: Swapping, Appending or Replacing a return stmt to the middle of a block will make the code after it unreachable
-				ASTNode parentBlock = JavaStatement.blockThatContainsThisStatement(potentiallyBuggyStmt.getASTNode());
+				ASTNode parentBlock = potentiallyBuggyStmt.blockThatContainsThisStatement();
 				if(parentBlock instanceof Block){
 					List<ASTNode> statementsInBlock = ((Block)parentBlock).statements();
 					ASTNode lastStmtInTheBlock = statementsInBlock.get(statementsInBlock.size()-1);
 					if(!lastStmtInTheBlock.equals(potentiallyBuggyStmt.getASTNode())){
-						ok=false;
+						continue;
 					}
 				}else{
-					ok=false;
+					continue;
 				}
 			}
 
 			//Heuristic: Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is wrong
 			if(potentialFixStmt.getASTNode() instanceof ConstructorInvocation || potentialFixStmt.getASTNode() instanceof SuperConstructorInvocation){
-				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
-				while(!(parent instanceof MethodDeclaration) && parent != null){
-					parent = parent.getParent();
-				}
+				ASTNode enclosingMethod = potentiallyBuggyStmt.getEnclosingMethod();
 
-				if (parent != null && parent instanceof MethodDeclaration && ((MethodDeclaration) parent).isConstructor()) {
+				if (enclosingMethod != null && enclosingMethod instanceof MethodDeclaration && ((MethodDeclaration) enclosingMethod).isConstructor()) {
 					StructuralPropertyDescriptor locationPotBuggy = potentiallyBuggyStmt.getASTNode().getLocationInParent();
-					List<ASTNode> statementsInBlock = ((MethodDeclaration) parent).getBody().statements();
+					List<ASTNode> statementsInBlock = ((MethodDeclaration) enclosingMethod).getBody().statements();
 					ASTNode firstStmtInTheBlock = statementsInBlock.get(0);
 					StructuralPropertyDescriptor locationFirstInBlock = firstStmtInTheBlock.getLocationInParent();
-
 					//This will catch replacements and swaps, but it will append after the first stmt, so append will still create a non compiling variant
 					if(!locationFirstInBlock.equals(locationPotBuggy)){
-						ok=false;
+						continue;
 					}
 				}else{
-					ok=false;
+					continue;
 				}
 			}
 
 			//Heuristic: Don't allow to move breaks outside of switch stmts
 			// OR loops!
-			if(potentialFixStmt.getASTNode() instanceof BreakStatement){
-				ok = potentiallyBuggyStmt.isWithinLoopOrCase();
+			// TODO: check for continues as well
+			if(potentialFixStmt.getASTNode() instanceof BreakStatement && !potentiallyBuggyStmt.isWithinLoopOrCase()){
+				continue;
 			}
 
 			//Heuristic: Don´t replace/swap returns within functions that have only one return statement.
 			if(potentiallyBuggyStmt.getASTNode() instanceof ReturnStatement){
-				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
-				while (!(parent instanceof MethodDeclaration)){
-					parent = parent.getParent();
-				}
-				if(!JavaStatement.hasMoreThanOneReturn((MethodDeclaration)parent)) {
-					ok = false;
+				ASTNode parent = potentiallyBuggyStmt.getEnclosingMethod();
+				if(parent instanceof MethodDeclaration && 
+						!JavaStatement.hasMoreThanOneReturn((MethodDeclaration)parent)) {
+					continue;
 				}
 			}
 
 			//Heuristic: Don’t replace or swap (or append) an stmt with one just like it
 			if(potentiallyBuggyStmt.getASTNode().equals(potentialFixStmt.getASTNode()) || potentiallyBuggyStmt.getStmtId()==potentialFixStmt.getStmtId()){
-				ok = false;
+				continue;
 			}
 
 
 			//If we move a return statement into a function, the parameter in the return must match the function’s return type
 			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
-				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
-				while(!(parent instanceof MethodDeclaration) && parent != null){
-					parent = parent.getParent();
-				}
+				ASTNode parent = potentiallyBuggyStmt.getEnclosingMethod();
 
 				if (parent instanceof MethodDeclaration) {
 					String returnType = returnTypeOfThisMethod(((MethodDeclaration)parent).getName().toString());
@@ -1068,15 +1052,16 @@ FaultLocRepresentation<JavaEditOperation> {
 						if(potFix.getExpression() instanceof SimpleName){
 							String variableType = variableDataTypes.get(potFix.getExpression().toString());
 							if( !returnType.equalsIgnoreCase(variableType)){
-								ok=false;
+								continue;
 							}
 						}
 					}
 				}
 			}
-			if (ok) {
-				retVal.add(potentialFixAtom);
-			}
+			// if we made it this far without continuing, we're good to go.
+
+			retVal.add(potentialFixAtom);
+
 		}
 		JavaRepresentation.scopeSafeAtomMap.put(stmtId, retVal);
 		return retVal;
