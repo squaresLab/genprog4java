@@ -384,8 +384,13 @@ public class JavaStatement {
 		ASTNode enclosingMethod = this.getEnclosingMethod();
 		if (enclosingMethod != null & enclosingMethod instanceof MethodDeclaration) {
 			MethodDeclaration asMd = (MethodDeclaration) enclosingMethod;
-			String returnType = asMd.getReturnType2().toString(); // FIXME: this probably is qualified
-			return returnType.equalsIgnoreCase("void") || returnType.equalsIgnoreCase("null");
+			Type returnType = asMd.getReturnType2();
+			if(returnType != null) {
+				String asStr = returnType.toString(); 
+				return asStr.equalsIgnoreCase("void") || asStr.equalsIgnoreCase("null");
+			} else {
+				return true;
+			}
 		}
 		return false;
 	}
