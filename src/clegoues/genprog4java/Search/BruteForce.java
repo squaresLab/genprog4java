@@ -48,16 +48,16 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 		}
 		return retVal;
 	}
-	private TreeSet<WeightedAtom> rescaleAtomPairs(TreeSet<WeightedAtom> items) {
+	private TreeSet<EditHole> rescaleAtomPairs(TreeSet<EditHole> items) {
 		double fullSum = 0.0;
-		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for (WeightedAtom item : items) {
+		TreeSet<EditHole> retVal = new TreeSet<EditHole>();
+		for (EditHole item : items) {
 			fullSum += item.getWeight();
 		}
 		double scale = 1.0 / fullSum;
-		for (WeightedAtom item : items) { 
-			WeightedAtom newItem = item;
-			newItem.setSecond(item.getWeight() * scale);
+		for (EditHole item : items) { 
+			EditHole newItem = item;
+			newItem.setWeight(item.getWeight() * scale);
 			retVal.add(newItem);
 		}
 		return retVal;
@@ -71,6 +71,7 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 		return null;
 	}
 
+	// FIXME: this thing is such a mess.
 	@Override
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
 			throws RepairFoundException {
@@ -154,15 +155,14 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 					break;
 				case APPEND:
 				case REPLACE:
-					TreeSet<WeightedAtom> sources1 = new TreeSet<WeightedAtom>(
-							descendingAtom);
+					TreeSet<EditHole> sources1 = new TreeSet<EditHole>();
 					// FIXME: HACK: fix this hard-coding of the hole name, and below, too
-					TreeSet<WeightedAtom> editSources = original.editSources(faultyLocation, mut, "singleHole");
+					TreeSet<EditHole> editSources = original.editSources(faultyLocation, mut, "singleHole");
 					sources1.addAll(this.rescaleAtomPairs(editSources));
-					for (WeightedAtom append : sources1) {
+					for (EditHole append : sources1) {
 						Representation<G> rep = original.copy();
 						HashMap<String,EditHole> sources = new HashMap<String,EditHole>();
-						sources.put("singleHole", rep.instantiateHole("singleHole", append));
+						sources.put("singleHole", append); 
 						if (this.doWork(rep, original, mut, faultyLocation,
 								sources)) {
 							wins++;
@@ -171,13 +171,13 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 					}
 					break;
 				case SWAP:
-					TreeSet<WeightedAtom> sources = new TreeSet<WeightedAtom>(descendingAtom);
+					TreeSet<EditHole> sources = new TreeSet<EditHole>();
 					sources.addAll(this.rescaleAtomPairs(original
 							.editSources(faultyLocation, mut, "singleHole")));
-					for (WeightedAtom append : sources) {
+					for (EditHole append : sources) {
 						Representation<G> rep = original.copy();
 						HashMap<String,EditHole> swapSources = new HashMap<String,EditHole>();
-						swapSources.put("singleHole", rep.instantiateHole("singleHole", append));
+						swapSources.put("singleHole", append); 
 						if (this.doWork(rep, original, mut, faultyLocation, swapSources)) {
 							wins++;
 							repairFound = true;

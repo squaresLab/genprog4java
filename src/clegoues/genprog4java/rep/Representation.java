@@ -56,6 +56,7 @@ import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.JavaHole;
 import clegoues.util.Pair;
 
 // it's not clear that this EditOperation thing is a good choice because 
@@ -253,13 +254,10 @@ Comparable<Representation<G>> {
 		return allLines;
 	}
 
-	public abstract TreeSet<WeightedAtom> editSources(Location stmtId, Mutation editType, String hole);
+	public abstract TreeSet<EditHole> editSources(Location stmtId, Mutation editType, String hole);
 
 	public abstract Boolean doesEditApply(Location location, Mutation editType);
 
 	public abstract List<String> holesForMutation(Mutation mut);
-
-	public abstract EditHole instantiateHole(String holeName, WeightedAtom selected);
-
 
 }

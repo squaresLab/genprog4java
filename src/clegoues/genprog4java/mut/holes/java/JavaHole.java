@@ -7,9 +7,12 @@ public class JavaHole implements EditHole<ASTNode> {
 
 	private String name;
 	private ASTNode holeCode;
+	private ASTNode holeParent;
 	
-	public JavaHole(String name, ASTNode holeCode) {
+	public JavaHole(String name, ASTNode holeCode, ASTNode holeParent) {
 		this.name = name;
+		this.holeCode = holeCode;
+		this.setHoleParent(holeParent);
 	}
 	
 	@Override
@@ -31,4 +34,21 @@ public class JavaHole implements EditHole<ASTNode> {
 		this.holeCode = code;		
 	}
 
+	public ASTNode getHoleParent() {
+		return holeParent;
+	}
+
+	public void setHoleParent(ASTNode holeParent) {
+		this.holeParent = holeParent;
+	}
+
+	@Override
+	public double getWeight() {
+		// FIXME: terrible hack
+		return 1.0;
+	}
+	@Override
+	public void setWeight(double weight) {
+		// FIXME: terrible hack
+	}
 }

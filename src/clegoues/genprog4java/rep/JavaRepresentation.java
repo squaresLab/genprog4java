@@ -909,12 +909,9 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public TreeSet<WeightedAtom> editSources(Location location, Mutation editType, String holeName) {
-		if (semanticCheck.equals("scope")) {
+	public TreeSet<EditHole> editSources(Location location, Mutation editType, String holeName) {
 		return editFactory.editSources(this,location,editType,holeName);
-		} else {
-			return super.editSources(location, editType, holeName);
-		}
+
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -966,16 +963,6 @@ FaultLocRepresentation<JavaEditOperation> {
 		return editFactory.holesForMutation(mut);
 	}
 
-	@SuppressWarnings("rawtypes")
-	@Override
-	public EditHole instantiateHole(String holeName, WeightedAtom selected) {
-		int stmtId = selected.getAtom();
-		// FIXME: STRONGLY ASSUMES it's a statement; this is not always true!  Null checking, for example
-		// need to think about how to handle this...
-		// give types to atoms?
-		JavaStatement stmt = this.getFromCodeBank(stmtId);
-		return new JavaHole(holeName, stmt.getASTNode());
-	}
 	public void setAllPossibleStmtsToFixLocalization(){
 		try {
 			super.fixLocalization = getAllPosibleStmts();
