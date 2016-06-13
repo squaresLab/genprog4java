@@ -234,7 +234,7 @@ public abstract class Search<G extends EditOperation> {
 				Location wa = null;
 				boolean alreadyOnList = false;
 				do{
-					Location selected = GlobalUtils.chooseLocationWeighted(faultyAtoms);
+					wa = GlobalUtils.chooseLocationWeighted(faultyAtoms);
 					alreadyOnList = proMutList.contains(wa);
 				}while(alreadyOnList);
 				proMutList.add(wa);
