@@ -64,18 +64,27 @@ import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import clegoues.util.Pair;
+import clegoues.genprog4java.main.ClassInfo;
 
-public class JavaStatement {
+public class JavaStatement implements Comparable<JavaStatement>{
 
 	private ASTNode astNode;
+	private ClassInfo classInfo;
+	
 	private int lineno;
 	private int stmtId; // unique
 	private Set<String> names;
 	private Set<String> types;
-
 	private Set<String> mustBeInScope;
 
+	public void setClassInfo(ClassInfo ci) {
+		this.classInfo = ci;
+	}
+	
+	public ClassInfo getClassInfo() {
+		return this.classInfo;
+	}
+	
 	public void setStmtId(int id) {
 		this.stmtId = id;
 	}
@@ -139,11 +148,19 @@ public class JavaStatement {
 		}
 		return parent;
 	}
-
+	
+	@Override
+	public int compareTo(JavaStatement other) {
+		return this.stmtId - other.getStmtId();
+	}
+	
+	// FIXME: does it make sense to put this in the edits themselves?
+	// maybe not for cached info...
+	
 	/******* Cached information for applicability of various mutations/templates ******/
 	private Map<ASTNode, List<ASTNode>> arrayAccesses = null; // to track the parent nodes of array access nodes
 
-	public boolean containsArrayAccesses() {
+	public Map<ASTNode, List<ASTNode>> getArrayAccesses() {
 		if(arrayAccesses == null) {
 			arrayAccesses =  new HashMap<ASTNode, List<ASTNode>>();
 			this.getASTNode().accept(new ASTVisitor() {
@@ -166,18 +183,13 @@ public class JavaStatement {
 			});
 
 		}
-		return this.arrayAccesses.size() > 0;
-	}
-
-	// DOES NOT CHECK that it isn't null; precondition is that the previous function was called!
-	public Map<ASTNode, List<ASTNode>> getArrayAccesses() {
 		return this.arrayAccesses;
 	}
 
 
 	private Map<ASTNode, List<ASTNode>> nullCheckable = null;
 
-	public boolean nullCheckApplies() {
+	public  Map<ASTNode, List<ASTNode>> getNullCheckables() {
 		if(nullCheckable == null) {
 			nullCheckable = new HashMap<ASTNode, List<ASTNode>>();
 			if(this.getASTNode() instanceof MethodInvocation 
@@ -220,17 +232,11 @@ public class JavaStatement {
 
 			}
 		}
-		return nullCheckable.size() > 0;
-	}
-	// DOES NOT CHECK that it isn't null; precondition is that the previous function was called!
-	public Map<ASTNode, List<ASTNode>> getNullCheckables() {
-		return this.nullCheckable;
+		return nullCheckable;
 	}
 
-	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
-	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
-	public Map<ASTNode, List<ASTNode>> getMethodReplacements() { return methodReplacements; }
-	public Map<ASTNode, List<MethodInfo>> getCandidateMethodReplacements() { return candidateMethodReplacements; }
+
+	
 
 	private ArrayList<ITypeBinding> paramsToTypes(List<SingleVariableDeclaration> params) {
 		int i = 0; 
@@ -321,8 +327,11 @@ public class JavaStatement {
 //			
 //		} else { return false; }
 	}
+	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
+	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
+	public Map<ASTNode, List<MethodInfo>> getCandidateMethodReplacements() { return candidateMethodReplacements; }
 	
-	public boolean methodReplacerApplies(final List<MethodInfo> methodDecls) {
+	public Map<ASTNode, List<ASTNode>> getReplacableMethods(final List<MethodInfo> methodDecls) {
 		if(methodReplacements == null) {
 			methodReplacements = new HashMap<ASTNode, List<ASTNode>>();
 			candidateMethodReplacements = new HashMap<ASTNode, List<MethodInfo>>();
@@ -379,7 +388,7 @@ public class JavaStatement {
 
 			});
 		}
-		return methodReplacements.size() > 0;
+		return methodReplacements;
 	}
 	
 

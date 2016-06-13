@@ -21,9 +21,17 @@ public class JavaSemanticInfo {
 	private static TreeSet<String> finalVariables = new TreeSet<String>();
 	private static List<MethodInfo> methodDecls = new ArrayList<MethodInfo>();
 	
+	public static List<MethodInfo> getMethodDecls() {
+		return methodDecls;
+	}
+
+	public static void setMethodDecls(List<MethodInfo> methodDecls) {
+		JavaSemanticInfo.methodDecls = methodDecls;
+	}
+
 	public void addAllSemanticInfo(JavaParser myParser) {
 		JavaSemanticInfo.methodReturnType.addAll(myParser.getMethodReturnTypeSet());
-		JavaSemanticInfo.variableDataTypes.putAll(myParser.getVariableDataTypes());
+		JavaSemanticInfo.getVariableDataTypes().putAll(myParser.getVariableDataTypes());
 		JavaSemanticInfo.finalVariables.addAll(myParser.getFinalVariableSet());
 		JavaSemanticInfo.methodDecls.addAll(myParser.getMethodDeclarations());		
 	}
@@ -62,6 +70,18 @@ public class JavaSemanticInfo {
 				}
 			}
 			return true;
+	}
+
+	public TreeSet<Pair<String,String>> getMethodReturnTypes() {
+		return JavaSemanticInfo.methodReturnType;
+	}
+
+	public static HashMap<String, String> getVariableDataTypes() {
+		return variableDataTypes;
+	}
+
+	public static void setVariableDataTypes(HashMap<String, String> variableDataTypes) {
+		JavaSemanticInfo.variableDataTypes = variableDataTypes;
 	}
 
 }
