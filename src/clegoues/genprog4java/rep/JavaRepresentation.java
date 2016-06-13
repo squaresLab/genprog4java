@@ -77,6 +77,7 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -110,6 +111,8 @@ import org.jacoco.core.data.SessionInfo;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaParser;
+import clegoues.genprog4java.java.JavaSemanticInfo;
+import clegoues.genprog4java.java.JavaSourceInfo;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.java.ScopeInfo;
@@ -139,35 +142,11 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
+	
+	private JavaSourceInfo sourceInfo = new JavaSourceInfo();
+	private JavaSemanticInfo semanticInfo = new JavaSemanticInfo();
 
-	private static HashMap<Integer, JavaStatement> codeBank = new HashMap<Integer, JavaStatement>();
-	private static HashMap<Integer, JavaStatement> base = new HashMap<Integer, JavaStatement>();
-	private static HashMap<ClassInfo, CompilationUnit> baseCompilationUnits = new HashMap<ClassInfo, CompilationUnit>();
-	private static HashMap<Integer, ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer, ArrayList<Integer>>();
-	private static HashMap<ClassInfo, String> originalSource = new HashMap<ClassInfo, String>();
-	private static HashMap<Integer, ClassInfo> stmtToFile = new HashMap<Integer, ClassInfo>();
-
-	// semantic check cache stuff, so we don't have to walk stuff a million
-	// times unnecessarily
-	// should be the same for all of append, replace, and swap, so we only need
-	// the one.
-	//private static String semanticCheck = "scope";
-	private static String semanticCheck = ConfigurationBuilder.of( STRING )
-			.withVarName( "semanticCheck" )
-			.withFlag( "semantic-check" )
-			.withDefault( "scope" )
-			.withHelp( "the semantic check to perform on inserted variables" )
-			.inGroup( "JavaRepresentation Parameters" )
-			.build();
 	private static int stmtCounter = 0;
-
-	private static HashMap<Integer, TreeSet<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, TreeSet<WeightedAtom>>();
-	private static HashMap<Integer, Set<String>> inScopeMap = new HashMap<Integer, Set<String>>();
-	private static TreeSet<Pair<String,String>> methodReturnType = new TreeSet<Pair<String,String>>();
-	private static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
-	private static TreeSet<String> finalVariables = new TreeSet<String>();
-	private static List<MethodInfo> methodDecls = new ArrayList<MethodInfo>();
-
 
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
 
@@ -182,10 +161,6 @@ FaultLocRepresentation<JavaEditOperation> {
 		super();
 	}
 
-	private static HashMap<ClassInfo, String> getOriginalSource() {
-		return originalSource;
-	}
-
 	protected void instrumentForFaultLocalization() {
 		// needs nothing for Java. Don't love the "doing coverage" boolean flag
 		// thing, but it's possible I just decided it's fine.
@@ -196,13 +171,13 @@ FaultLocRepresentation<JavaEditOperation> {
 	private ExecutionDataStore executionData = null;
 
 	protected ArrayList<Integer> atomIDofSourceLine(int lineno) {
-		return lineNoToAtomIDMap.get(lineno);
+		return sourceInfo.atomIDofSourceLine(lineno);
 	}
 
 	public TreeSet<Integer> getCoverageInfo() throws IOException {
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
 
-		for (Map.Entry<ClassInfo, String> ele : JavaRepresentation.originalSource
+		for (Map.Entry<ClassInfo, String> ele : sourceInfo.getOriginalSource()
 				.entrySet()) {
 			ClassInfo targetClassInfo = ele.getKey();
 			String pathToCoverageClass = Configuration.outputDir + File.separator
@@ -275,8 +250,7 @@ FaultLocRepresentation<JavaEditOperation> {
 	public ArrayList<WeightedAtom> getAllPosibleStmts() throws IOException {
 		ArrayList<WeightedAtom> atoms = new ArrayList<WeightedAtom>();
 
-		for (Map.Entry<ClassInfo, String> ele : JavaRepresentation.originalSource
-				.entrySet()) {
+		for (Map.Entry<ClassInfo, String> ele : sourceInfo.getOriginalSource().entrySet()) {
 			ClassInfo targetClassInfo = ele.getKey();
 			String pathToCoverageClass = Configuration.outputDir + File.separator
 					+ "coverage/coverage.out" + File.separator + targetClassInfo.pathToClassFile();
@@ -343,32 +317,13 @@ FaultLocRepresentation<JavaEditOperation> {
 					for(Integer i: atomIds){
 						WeightedAtom wa = new WeightedAtom(i, 0.1);
 						int index = wa.getAtom();
-						JavaStatement potentialFixStmt = codeBank.get(index);
+						JavaStatement potentialFixStmt = getFromCodeBank(index); 
 						Set<String> scopes = new TreeSet<String>();
 						potentialFixStmt.setRequiredNames(scopes);
 						atoms.add(wa);
 					}
 				}
 			}
-			/*
-			for (int line : coveredLines) {
-				ArrayList<Integer> atomIds = this.atomIDofSourceLine(line);
-				if (atomIds != null && atomIds.size() >= 0) {
-					atoms.addAll(atomIds);
-				}
-			}
-			for (Integer i : negativePath) {
-				if (!negHt.contains(i)) {
-					double negWeight = FaultLocRepresentation.negativePathWeight;
-					if (posHt.contains(i)) {
-						negWeight = FaultLocRepresentation.positivePathWeight;
-					}
-					negHt.add(i);
-					fw.put(i, 0.5);
-					faultLocalization.add(new WeightedAtom(i, negWeight));
-				}
-			}
-			 */
 		}
 		return atoms;
 	}
@@ -386,59 +341,38 @@ FaultLocRepresentation<JavaEditOperation> {
 		// originalSource entire class file written as a string
 		String path = Configuration.outputDir +  "/original/" + pair.pathToJavaFile();
 		String source = FileUtils.readFileToString(new File(path));
-		JavaRepresentation.originalSource.put(pair, source);
+		sourceInfo.addToOriginalSource(pair, source);
 
 		myParser.parse(path, Configuration.libs.split(File.pathSeparator));
+		
 		List<ASTNode> stmts = myParser.getStatements();
-		baseCompilationUnits.put(pair, myParser.getCompilationUnit());
-		JavaRepresentation.methodReturnType.addAll(myParser.getMethodReturnTypeSet());
-		JavaRepresentation.variableDataTypes.putAll(myParser.getVariableDataTypes());
-		JavaRepresentation.finalVariables.addAll(myParser.getFinalVariableSet());
-		JavaRepresentation.methodDecls.addAll(myParser.getMethodDeclarations());
+		sourceInfo.addToBaseCompilationUnits(pair, myParser.getCompilationUnit());
+		semanticInfo.addAllSemanticInfo(myParser);
+
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
 				JavaStatement s = new JavaStatement();
-				s.setStmtId(stmtCounter);
-				//System.out.println("Stmt: " + stmtCounter);
+
 				logger.info("Stmt: " + stmtCounter);
-				//System.out.println(node);
 				logger.info(node);
+
+				s.setInfo(stmtCounter, node);
 				stmtCounter++;
-				int lineNo = ASTUtils.getLineNumber(node);
-				s.setLineno(lineNo);
-				s.setNames(ASTUtils.getNames(node));
-				s.setTypes(ASTUtils.getTypes(node));
-				s.setRequiredNames(ASTUtils.getScope(node));
-				s.setASTNode(node);
-				ArrayList<Integer> lineNoList = null;
-				if (lineNoToAtomIDMap.containsKey(lineNo)) {
-					lineNoList = lineNoToAtomIDMap.get(lineNo);
-				} else {
-					lineNoList = new ArrayList<Integer>();
-				}
-				lineNoList.add(s.getStmtId());
-				lineNoToAtomIDMap.put(lineNo, lineNoList);
-				if (semanticCheck.equals("scope")
-						|| semanticCheck.equals("none")
-						|| semanticCheck.equals("javaspecial")) {
-					base.put(s.getStmtId(), s);
-					codeBank.put(s.getStmtId(), s);
-					stmtToFile.put(s.getStmtId(),pair);
-				}
+				
+				sourceInfo.augmentLineInfo(s.getStmtId(), node);
+				sourceInfo.storeStmtInfo(s, pair);
+
 				scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
-				JavaRepresentation.inScopeMap.put(s.getStmtId(),
-						scopeInfo.getScope(s.getASTNode()));
+				semanticInfo.addToScopeMap(s, scopeInfo.getScope(s.getASTNode()));
 			}
 		}
 
 	}
 
 	public static boolean canRepair(ASTNode node) {
-
-
 		return node instanceof AssertStatement 
 				|| node instanceof Block
-				//|| node instanceof MethodInvocation
+				|| node instanceof MethodInvocation
 				|| node instanceof BreakStatement
 				|| node instanceof ConstructorInvocation
 				|| node instanceof ContinueStatement
@@ -591,14 +525,13 @@ FaultLocRepresentation<JavaEditOperation> {
 	@Override
 	protected ArrayList<Pair<ClassInfo, String>> internalComputeSourceBuffers() {
 		ArrayList<Pair<ClassInfo, String>> retVal = new ArrayList<Pair<ClassInfo, String>>();
-		for (Map.Entry<ClassInfo, String> pair : JavaRepresentation
-				.getOriginalSource().entrySet()) {
+		for (Map.Entry<ClassInfo, String> pair : sourceInfo.getOriginalSource().entrySet()) {
 			ClassInfo ci = pair.getKey();
 			String filename = ci.getClassName();
 			String path = ci.getPackage();
 			String source = pair.getValue();
 			Document original = new Document(source);
-			CompilationUnit cu = baseCompilationUnits.get(ci);
+			CompilationUnit cu = sourceInfo.getBaseCompilationUnits().get(ci);
 			AST ast = cu.getAST();
 			ASTRewrite rewriter = ASTRewrite.create(ast);
 
@@ -693,10 +626,18 @@ FaultLocRepresentation<JavaEditOperation> {
 		return command;
 
 	}
+	
+	private JavaStatement getLocationStatement(int location) {
+		return sourceInfo.getBase().get(location);
+	}
+	
+	private JavaStatement getFromCodeBank(int atomId) {
+		return sourceInfo.getCodeBank().get(atomId);
+	}
 	private void editHelper(int location, int fixCode, Mutation mutType) {
-		JavaStatement locationStatement = base.get(location);
-		JavaStatement fixCodeStatement = codeBank.get(fixCode);
-		ClassInfo fileName = stmtToFile.get(location);
+		JavaStatement locationStatement = this.getLocationStatement(location);
+		JavaStatement fixCodeStatement = this.getFromCodeBank(fixCode); 
+		ClassInfo fileName = sourceInfo.getFileFromStmt(location);
 		JavaEditOperation newEdit = null;
 		switch(mutType) {
 		case REPLACE: newEdit = new JavaReplaceOperation(fileName,
@@ -712,8 +653,8 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	public void performEdit(Mutation edit, int dst, int source) {
 		super.performEdit(edit, dst, source);
-		JavaStatement locationStatement = base.get(dst);
-		ClassInfo fileName = stmtToFile.get(dst);
+		JavaStatement locationStatement = this.getLocationStatement(dst);
+		ClassInfo fileName = sourceInfo.getFileFromStmt(dst); 
 
 		switch(edit) {
 		case DELETE: 
@@ -752,7 +693,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		case REPLACE: this.editHelper(dst, source, edit);
 		break;
 		case SWAP:
-			JavaStatement fixCodeStatement = base.get(source);
+			JavaStatement fixCodeStatement = this.getLocationStatement(source); 
 			JavaEditOperation swapEdit = new JavaSwapOperation(fileName, 
 					locationStatement, fixCodeStatement);
 			this.genome.add(swapEdit);
@@ -877,7 +818,8 @@ FaultLocRepresentation<JavaEditOperation> {
 		//potentialFix is a potential fix statement
 		for (WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {
 			int index = potentialFixAtom.getAtom();
-			JavaStatement potentialFixStmt = codeBank.get(index);
+			JavaStatement potentialFixStmt = this.getFromCodeBank(index); 
+			
 			//Don't make a call to a constructor
 			if(potentialFixStmt.getASTNode() instanceof MethodRef){
 				MethodRef mr = (MethodRef) potentialFixStmt.getASTNode();
@@ -891,13 +833,12 @@ FaultLocRepresentation<JavaEditOperation> {
 
 			//Heuristic: No need to insert a declaration of a final variable
 			if(potentialFixStmt.getASTNode() instanceof VariableDeclarationStatement){
-				VariableDeclarationStatement ds = (VariableDeclarationStatement) potentialFixStmt.getASTNode();
-				VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
-				if(finalVariables.contains(df.getName().getIdentifier())){
+				if(semanticInfo.possibleFinalVariable((VariableDeclarationStatement) potentialFixStmt.getASTNode())) {
 					toRemove.add(potentialFixAtom);
 					continue;
 				}
 			}
+			
 			//Heuristic: Don't assign a value to a final variable
 			if (potentialFixStmt.getASTNode() instanceof ExpressionStatement) {
 				ExpressionStatement exstat= (ExpressionStatement) potentialFixStmt.getASTNode();
@@ -955,6 +896,8 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 
 	}
+
+	private static HashMap<Integer, TreeSet<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, TreeSet<WeightedAtom>>();
 
 	private TreeSet<WeightedAtom> scopeHelper(int stmtId) {
 		if (JavaRepresentation.scopeSafeAtomMap.containsKey(stmtId) && !
@@ -1092,7 +1035,7 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	@Override
 	public Boolean doesEditApply(int location, Mutation editType) {
-		JavaStatement locationStmt = codeBank.get(location);
+		JavaStatement locationStmt = this.getFromCodeBank(location); 
 		switch(editType) {
 		case APPEND: 
 		case REPLACE:
@@ -1121,12 +1064,11 @@ FaultLocRepresentation<JavaEditOperation> {
 
 
 	@Override
-
 	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
 		switch(editType) {
 		case APPEND: 	
 			if (JavaRepresentation.semanticCheck.equals("scope")) {
-				JavaStatement locationStmt = codeBank.get(stmtId);
+				JavaStatement locationStmt = this.getFromCodeBank(stmtId); 
 				//If it is a return statement or a throw statement, nothing should be appended after it, since it would be dead code
 				if(!(locationStmt.getASTNode() instanceof ReturnStatement || locationStmt.getASTNode() instanceof ThrowStatement)){
 					return this.scopeHelper(stmtId);
@@ -1136,19 +1078,16 @@ FaultLocRepresentation<JavaEditOperation> {
 			} else {
 				return super.editSources(stmtId, editType);
 			}
-			//break; 
 		case REPLACE:
 			if (JavaRepresentation.semanticCheck.equals("scope")) {
 				return this.scopeHelper(stmtId);
 			} else {
 				return super.editSources(stmtId, editType);
 			}
-			//break; this is unreachable
 		case DELETE: 
 			TreeSet<WeightedAtom> retval = new TreeSet<WeightedAtom>();
 			retval.add(new WeightedAtom(stmtId, 1.0));
 			return retval;
-			//break; this is unreachable
 		case SWAP:
 			if (JavaRepresentation.semanticCheck.equals("scope")) {
 				TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
@@ -1204,7 +1143,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		ArrayList<WeightedAtom> buggyStatements = this.getFaultyAtoms();
 		for (WeightedAtom atom : buggyStatements) {
 			int atomid = atom.getAtom();
-			JavaStatement stmt = JavaRepresentation.base.get(atomid);
+			JavaStatement stmt = this.getFromCodeBank(atomid);
 			ASTNode actualStmt = stmt.getASTNode();
 			String stmtStr = actualStmt.toString();
 			logger.debug("statement " + atomid + " at line " + stmt.getLineno()
