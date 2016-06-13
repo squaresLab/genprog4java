@@ -313,7 +313,6 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			});
 
-
 			reader.read();
 			in.close();
 
@@ -337,6 +336,7 @@ FaultLocRepresentation<JavaEditOperation> {
 						covered = true;
 						break;
 					case ICounter.EMPTY:
+						covered = true;
 						break;
 					default:
 						break;
@@ -350,14 +350,14 @@ FaultLocRepresentation<JavaEditOperation> {
 				ArrayList<Integer> atomIds = this.atomIDofSourceLine(line);
 				if (atomIds != null && atomIds.size() >= 0) {
 					//atoms.addAll(atomIds);
-for(Integer i: atomIds){
-					WeightedAtom wa = new WeightedAtom(i, 0.1);
-					int index = wa.getAtom();
-					JavaStatement potentialFixStmt = codeBank.get(index);
-					Set<String> scopes = new TreeSet<String>();
-					potentialFixStmt.setRequiredNames(scopes);
-					atoms.add(wa);
-}
+					for(Integer i: atomIds){
+						WeightedAtom wa = new WeightedAtom(i, 0.1);
+						int index = wa.getAtom();
+						JavaStatement potentialFixStmt = codeBank.get(index);
+						Set<String> scopes = new TreeSet<String>();
+						potentialFixStmt.setRequiredNames(scopes);
+						atoms.add(wa);
+					}
 				}
 			}
 			/*
