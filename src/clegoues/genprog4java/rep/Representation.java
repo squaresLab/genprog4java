@@ -216,8 +216,6 @@ Comparable<Representation<G>> {
 
 	public abstract void reduceSearchSpace(); // do this?
 
-	public abstract void reduceFixSpace();
-
 	public abstract TreeSet<Pair<Mutation, Double>> availableMutations(
 			Location faultyLocation);
 
