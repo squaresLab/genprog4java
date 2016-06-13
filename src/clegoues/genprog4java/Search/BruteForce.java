@@ -75,7 +75,7 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 	@Override
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
 			throws RepairFoundException {
-		original.reduceFixSpace();
+		original.reduceSearchSpace();
 
 		int count = 0;
 		TreeSet<Location> allFaultyLocations = new TreeSet<Location>(
