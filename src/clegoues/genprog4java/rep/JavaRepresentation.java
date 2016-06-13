@@ -142,7 +142,7 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
-	
+
 	private JavaSourceInfo sourceInfo = new JavaSourceInfo();
 	private JavaSemanticInfo semanticInfo = new JavaSemanticInfo();
 
@@ -344,7 +344,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		sourceInfo.addToOriginalSource(pair, source);
 
 		myParser.parse(path, Configuration.libs.split(File.pathSeparator));
-		
+
 		List<ASTNode> stmts = myParser.getStatements();
 		sourceInfo.addToBaseCompilationUnits(pair, myParser.getCompilationUnit());
 		semanticInfo.addAllSemanticInfo(myParser);
@@ -358,7 +358,7 @@ FaultLocRepresentation<JavaEditOperation> {
 
 				s.setInfo(stmtCounter, node);
 				stmtCounter++;
-				
+
 				sourceInfo.augmentLineInfo(s.getStmtId(), node);
 				sourceInfo.storeStmtInfo(s, pair);
 
@@ -626,11 +626,11 @@ FaultLocRepresentation<JavaEditOperation> {
 		return command;
 
 	}
-	
+
 	private JavaStatement getLocationStatement(int location) {
 		return sourceInfo.getBase().get(location);
 	}
-	
+
 	private JavaStatement getFromCodeBank(int atomId) {
 		return sourceInfo.getCodeBank().get(atomId);
 	}
@@ -819,9 +819,10 @@ FaultLocRepresentation<JavaEditOperation> {
 		for (WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {
 			int index = potentialFixAtom.getAtom();
 			JavaStatement potentialFixStmt = this.getFromCodeBank(index); 
-			
+			ASTNode fixASTNode = potentialFixStmt.getASTNode();
+
 			//Don't make a call to a constructor
-			if(potentialFixStmt.getASTNode() instanceof MethodRef){
+			if(fixASTNode instanceof MethodRef){
 				MethodRef mr = (MethodRef) potentialFixStmt.getASTNode();
 				// mrt = method return type
 				String returnType = returnTypeOfThisMethod(mr.getName().toString());
@@ -832,53 +833,38 @@ FaultLocRepresentation<JavaEditOperation> {
 			}
 
 			//Heuristic: No need to insert a declaration of a final variable
-			if(potentialFixStmt.getASTNode() instanceof VariableDeclarationStatement){
-				if(semanticInfo.possibleFinalVariable((VariableDeclarationStatement) potentialFixStmt.getASTNode())) {
+			if(fixASTNode instanceof VariableDeclarationStatement){
+				if(semanticInfo.vdPossibleFinalVariable((VariableDeclarationStatement) fixASTNode)) {
 					toRemove.add(potentialFixAtom);
 					continue;
 				}
 			}
-			
+
 			//Heuristic: Don't assign a value to a final variable
-			if (potentialFixStmt.getASTNode() instanceof ExpressionStatement) {
-				ExpressionStatement exstat= (ExpressionStatement) potentialFixStmt.getASTNode();
-				if (exstat.getExpression() instanceof Assignment) {
-					Assignment assignment= (Assignment) exstat.getExpression();
-					if(assignment.getLeftHandSide() instanceof SimpleName){
-						SimpleName leftHand = (SimpleName) assignment.getLeftHandSide();
-						if(finalVariables.contains(leftHand.toString())){
-							toRemove.add(potentialFixAtom);
-							continue;
-						}
-					}
+			if (fixASTNode instanceof ExpressionStatement) {
+				if(semanticInfo.expPossibleFinalAssignment((ExpressionStatement) fixASTNode)) {
+					toRemove.add(potentialFixAtom);
+					continue;
 				}
 			}
+
 			//If it moves a block, this block should not have an assignment of final variables, or a declaration of already existing final variables
-			if (potentialFixStmt.getASTNode() instanceof Block) {
+			if (fixASTNode instanceof Block) {
 				List<ASTNode> statementsInBlock = ((Block)potentialFixStmt.getASTNode()).statements();
 				boolean ok = true;
 				for (int i = 0; i < statementsInBlock.size(); i++) {
 					//Heuristic: Don't assign a value to a final variable
-					if (statementsInBlock.get(i) instanceof ExpressionStatement) {
-						ExpressionStatement exstat= (ExpressionStatement) statementsInBlock.get(i);
-						if (exstat.getExpression() instanceof Assignment) {
-							Assignment assignment= (Assignment) exstat.getExpression();
-							if(assignment.getLeftHandSide() instanceof SimpleName){
-								SimpleName leftHand = (SimpleName) assignment.getLeftHandSide();
-								if(finalVariables.contains(leftHand.toString())){
-									ok = false;
-									break;
-								}
-							}
+					ASTNode stmtInBlock = statementsInBlock.get(i);
+					if (stmtInBlock instanceof ExpressionStatement) {
+						if(semanticInfo.expPossibleFinalAssignment((ExpressionStatement) stmtInBlock)) {
+							ok = false;
+							break;
 						}
 					}
 
 					//Heuristic: No need to insert a declaration of a final variable
-					if(statementsInBlock.get(i) instanceof VariableDeclarationStatement){
-						VariableDeclarationStatement ds = (VariableDeclarationStatement) statementsInBlock.get(i);
-						VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
-
-						if(finalVariables.contains(df.getName().getIdentifier())){
+					if(stmtInBlock instanceof VariableDeclarationStatement){
+						if(semanticInfo.vdPossibleFinalVariable((VariableDeclarationStatement) stmtInBlock)) {
 							ok = false;
 							break;
 						}
@@ -894,7 +880,6 @@ FaultLocRepresentation<JavaEditOperation> {
 		for(WeightedAtom atom : toRemove) {
 			fixLocalization.remove(atom);
 		}
-
 	}
 
 	private static HashMap<Integer, TreeSet<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, TreeSet<WeightedAtom>>();
@@ -905,37 +890,27 @@ FaultLocRepresentation<JavaEditOperation> {
 			return JavaRepresentation.scopeSafeAtomMap.get(stmtId);
 		}
 
-		JavaStatement potentiallyBuggyStmt = codeBank.get(stmtId);
-
-		// I *believe* this is just variable names and doesn't check required
-		// types, which are also collected
-		// at parse time and thus could be considered here.
-		Set<String> inScopeAt = JavaRepresentation.inScopeMap.get(potentiallyBuggyStmt
-				.getStmtId());
-		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+		JavaStatement potentiallyBuggyStmt = this.getLocationStatement(stmtId); 
 		ASTNode faultAST = potentiallyBuggyStmt.getASTNode();
+		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
 
 		for (WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {
 			int index = potentialFixAtom.getAtom();
-			JavaStatement potentialFixStmt = codeBank.get(index);
+			JavaStatement potentialFixStmt = this.getFromCodeBank(index);
 			ASTNode fixAST = potentialFixStmt.getASTNode();
 
-			Set<String> requiredScopes = potentialFixStmt.getRequiredNames();
-
-			{ // scoping the ok variable
-				boolean ok = true;
-				for (String req : requiredScopes) {
-					if (!inScopeAt.contains(req)) {
-						ok = false;
-						break;
-					}
-				}
-				if(!ok)
-					continue;
+			// check variable names (but not types right now I don't think) in scope.
+			if(!semanticInfo.scopeCheckOK(potentiallyBuggyStmt, potentialFixStmt)) {
+				continue;
 			}
 
 			//Heuristic: Don’t replace or swap (or append) an stmt with one just like it
-			if(faultAST.equals(fixAST) || potentiallyBuggyStmt.getStmtId()==potentialFixStmt.getStmtId()){
+			// CLG killed the stmt ID equivalence check because it's possible for a statement 
+			// in a location to have been modified previously such that the statement in the code bank is
+			// different from what is now at that location.
+			// this comes down to our having overloaded statement IDs to mean both location and statement ID
+			// which is a problem I keep meaning to solve.
+			if(faultAST.equals(fixAST)) {
 				continue;
 			}
 
@@ -957,7 +932,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				} else {
 					continue;
 				}
-				
+
 				//If we move a return statement into a function, the parameter in the return must match the function’s return type
 				ASTNode enclosingMethod = potentiallyBuggyStmt.getEnclosingMethod();
 
@@ -1067,48 +1042,35 @@ FaultLocRepresentation<JavaEditOperation> {
 	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
 		switch(editType) {
 		case APPEND: 	
-			if (JavaRepresentation.semanticCheck.equals("scope")) {
-				JavaStatement locationStmt = this.getFromCodeBank(stmtId); 
-				//If it is a return statement or a throw statement, nothing should be appended after it, since it would be dead code
-				if(!(locationStmt.getASTNode() instanceof ReturnStatement || locationStmt.getASTNode() instanceof ThrowStatement)){
-					return this.scopeHelper(stmtId);
-				}else{
-					return new TreeSet<WeightedAtom>();
-				}
+			JavaStatement locationStmt = this.getFromCodeBank(stmtId); 
+			//If it is a return statement or a throw statement, nothing should be appended after it, since it would be dead code
+			if(locationStmt.getASTNode() instanceof ReturnStatement || locationStmt.getASTNode() instanceof ThrowStatement){
+				return new TreeSet<WeightedAtom>();
 			} else {
-				return super.editSources(stmtId, editType);
+				return this.scopeHelper(stmtId);
 			}
 		case REPLACE:
-			if (JavaRepresentation.semanticCheck.equals("scope")) {
-				return this.scopeHelper(stmtId);
-			} else {
-				return super.editSources(stmtId, editType);
-			}
+			return this.scopeHelper(stmtId);
 		case DELETE: 
 			TreeSet<WeightedAtom> retval = new TreeSet<WeightedAtom>();
 			retval.add(new WeightedAtom(stmtId, 1.0));
 			return retval;
 		case SWAP:
-			if (JavaRepresentation.semanticCheck.equals("scope")) {
-				TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-				for (WeightedAtom item : this.scopeHelper(stmtId)) {
-					int atom = item.getAtom();
-					TreeSet<WeightedAtom> inScopeThere = this.scopeHelper(atom);
-					boolean containsThisAtom = false;
-					for (WeightedAtom there : inScopeThere) {
-						if (there.getAtom() == stmtId) {
-							containsThisAtom = true;
-							break;
-						}
+			TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+			for (WeightedAtom item : this.scopeHelper(stmtId)) {
+				int atom = item.getAtom();
+				TreeSet<WeightedAtom> inScopeThere = this.scopeHelper(atom);
+				boolean containsThisAtom = false;
+				for (WeightedAtom there : inScopeThere) {
+					if (there.getAtom() == stmtId) {
+						containsThisAtom = true;
+						break;
 					}
-					if (containsThisAtom)
-						retVal.add(item);
 				}
-				return retVal;
-			} else {
-				return super.editSources(stmtId, editType);
+				if (containsThisAtom)
+					retVal.add(item);
 			}
-			//break; This is unreachable
+			return retVal;
 		case FUNREP:
 		case PARREP:
 		case PARADD:

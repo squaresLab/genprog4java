@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -30,9 +32,36 @@ public class JavaSemanticInfo {
 	JavaSemanticInfo.inScopeMap.put(s.getStmtId(),scope);
 	}
 
-	public boolean possibleFinalVariable(VariableDeclarationStatement ds) {
+	public boolean vdPossibleFinalVariable(VariableDeclarationStatement ds) {
 		VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
-		return finalVariables.contains(df.getName().getIdentifier()));
+		return finalVariables.contains(df.getName().getIdentifier());
+	}
+
+	public boolean expPossibleFinalAssignment(ExpressionStatement exstat) {
+		if (exstat.getExpression() instanceof Assignment) {
+			Assignment assignment= (Assignment) exstat.getExpression();
+			if(assignment.getLeftHandSide() instanceof SimpleName){
+				SimpleName leftHand = (SimpleName) assignment.getLeftHandSide();
+				return finalVariables.contains(leftHand.toString());
+				}
+			}
+		return false;
+		}
+
+	
+	public boolean scopeCheckOK(JavaStatement potentiallyBuggyStmt, JavaStatement potentialFixStmt) {
+		// I *believe* this is just variable names and doesn't check required
+		// types, which are also collected
+		// at parse time and thus could be considered here.
+		Set<String> inScopeAt = inScopeMap.get(potentiallyBuggyStmt.getStmtId());
+
+		Set<String> requiredScopes = potentialFixStmt.getRequiredNames();
+			for (String req : requiredScopes) {
+				if (!inScopeAt.contains(req)) {
+					return false;
+				}
+			}
+			return true;
 	}
 
 }
