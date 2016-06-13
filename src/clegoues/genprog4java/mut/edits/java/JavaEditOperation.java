@@ -49,15 +49,11 @@ import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
-public abstract class JavaEditOperation implements
-EditOperation<ASTRewrite> {
+public abstract class JavaEditOperation implements EditOperation<ASTRewrite> {
 
 	private Mutation mutType;
-	// I don't think the location abstraction is strictly necessary functionally, but conceptually it makes
-	// sense to me to keep it (because edits apply to a location; it's important).
-	// Alternatively, make it a hole? 
 	private Location<JavaStatement> location = null;
-	private ArrayList<String> holeNames = null; // FIXME: responsibility of subclasses to define? 
+	protected ArrayList<String> holeNames = new ArrayList<String>(); 
 	private HashMap<String,EditHole> holeCode = new HashMap<String,EditHole>();
 
 	public JavaEditOperation(Mutation mutType, JavaLocation location) {

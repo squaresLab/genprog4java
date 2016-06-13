@@ -123,7 +123,7 @@ import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.edits.java.JavaEditFactory;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
-import clegoues.genprog4java.mut.holes.java.JavaHole;
+import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.Pair;
@@ -640,7 +640,6 @@ FaultLocRepresentation<JavaEditOperation> {
 		JavaEditOperation thisEdit = this.editFactory.makeEdit(edit, dst, sources);
 		this.genome.add(thisEdit);
 	}
-
 
 	@Override
 	protected boolean internalCompile(String progName, String exeName) {

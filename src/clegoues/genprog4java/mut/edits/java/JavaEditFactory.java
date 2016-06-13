@@ -4,38 +4,30 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
-import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.MethodRef;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.mut.holes.java.JavaHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
+import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
+import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.WeightedAtom;
-import clegoues.util.Pair;
 
 public class JavaEditFactory {
 
@@ -83,23 +75,23 @@ public class JavaEditFactory {
 			JavaStatement potentialFixStmt = variant.getFromCodeBank(index);
 			ASTNode fixAST = potentialFixStmt.getASTNode();
 
-		// I *believe* this is just variable names and doesn't check required
-		// types, which are also collected
-		// at parse time and thus could be considered here.
-		if(!variant.semanticInfo.scopeCheckOK(potentiallyBuggyStmt, potentialFixStmt)) {
-			continue;
-		}
+			// I *believe* this is just variable names and doesn't check required
+			// types, which are also collected
+			// at parse time and thus could be considered here.
+			if(!variant.semanticInfo.scopeCheckOK(potentiallyBuggyStmt, potentialFixStmt)) {
+				continue;
+			}
 
-		//Heuristic: Don’t replace or swap (or append) an stmt with one just like it
-		// CLG killed the stmt ID equivalence check because it's possible for a statement 
-		// in a location to have been modified previously such that the statement in the code bank is
-		// different from what is now at that location.
-		// this comes down to our having overloaded statement IDs to mean both location and statement ID
-		// which is a problem I keep meaning to solve.
-		if(faultAST.equals(fixAST)) {
-			continue;
-		}
-	
+			//Heuristic: Don’t replace or swap (or append) an stmt with one just like it
+			// CLG killed the stmt ID equivalence check because it's possible for a statement 
+			// in a location to have been modified previously such that the statement in the code bank is
+			// different from what is now at that location.
+			// this comes down to our having overloaded statement IDs to mean both location and statement ID
+			// which is a problem I keep meaning to solve.
+			if(faultAST.equals(fixAST)) {
+				continue;
+			}
+
 
 			//Heuristic: Do not insert a return statement on a func whose return type is void
 			//Heuristic: Do not insert a return statement in a constructor
@@ -137,7 +129,7 @@ public class JavaEditFactory {
 				}
 			}
 
-		
+
 			//Heuristic: Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is wrong
 			if(fixAST instanceof ConstructorInvocation || 
 					fixAST instanceof SuperConstructorInvocation){
@@ -185,8 +177,8 @@ public class JavaEditFactory {
 		JavaEditFactory.scopeSafeAtomMap.put(stmtId, retVal);
 		return retVal;
 	}
-	
-	
+
+
 
 	public TreeSet<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType,
 			String holeName) { // FIXME: I notice that I'm really not using hole name, here, hm...maybe I can get rid of it?
@@ -203,7 +195,7 @@ public class JavaEditFactory {
 				for(WeightedAtom fixStmt : fixStmts) {
 					JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
 					ASTNode fixAST = potentialFixStmt.getASTNode();
-					retVal.add(new JavaHole(holeName, fixAST, null));
+					retVal.add(new SimpleJavaHole(holeName, fixAST));
 				}
 			} 
 			break;
@@ -217,26 +209,31 @@ public class JavaEditFactory {
 					if (there.getAtom() == location.getId()) {
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
 						ASTNode fixAST = potentialFixStmt.getASTNode();
-						retVal.add(new JavaHole(holeName, fixAST, null));
+						retVal.add(new SimpleJavaHole(holeName, fixAST));
 						break;
 					}
 				}
 			}
 			break;
-		case OFFBYONE:  
-		case UBOUNDSET:
 		case LBOUNDSET:
-		case RANGECHECK:
+		case UBOUNDSET:
 			Map<ASTNode, List<ASTNode>> arrayAccesses = locationStmt.getArrayAccesses();
 			if(arrayAccesses.size() > 0) {
 				for(Map.Entry<ASTNode, List<ASTNode>> entry : arrayAccesses.entrySet()) {
-					ASTNode parent = entry.getKey();
-					List<ASTNode> possibleReplacements = entry.getValue();
-					for(ASTNode possRep : possibleReplacements) {
-						retVal.add(new JavaHole(holeName, possRep,parent));
+					retVal.add(new SubExpsHole(holeName, entry.getKey(), entry.getValue()));
+				} 
+			}
+			break;
+		case OFFBYONE:  
+		case RANGECHECK:
+			arrayAccesses = locationStmt.getArrayAccesses();
+			if(arrayAccesses.size() > 0) {
+				for(Map.Entry<ASTNode, List<ASTNode>> entry : arrayAccesses.entrySet()) {
+					for(ASTNode arrayAccess : entry.getValue()) {
+						retVal.add(new SimpleJavaHole(holeName, arrayAccess));
 					}
-				}
-			} 
+				} 
+			}
 			break;
 		case NULLCHECK:
 			Map<ASTNode, List<ASTNode>> nullCheckables = locationStmt.getNullCheckables();
@@ -244,9 +241,7 @@ public class JavaEditFactory {
 				for(Map.Entry<ASTNode, List<ASTNode>> entry : nullCheckables.entrySet()) {
 					ASTNode parent = entry.getKey();
 					List<ASTNode> possibleReplacements = entry.getValue();
-					for(ASTNode possRep : possibleReplacements) {
-						retVal.add(new JavaHole(holeName, possRep,parent));
-					}
+					retVal.add(new SubExpsHole(holeName,parent, possibleReplacements));
 				}
 			} 
 			break;

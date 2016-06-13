@@ -3,16 +3,16 @@ package clegoues.genprog4java.mut.holes.java;
 import org.eclipse.jdt.core.dom.ASTNode;
 import clegoues.genprog4java.mut.EditHole;
 
-public class JavaHole implements EditHole<ASTNode> {
+public class SimpleJavaHole implements EditHole<ASTNode> {
 
 	private String name;
 	private ASTNode holeCode;
-	private ASTNode holeParent;
 	
-	public JavaHole(String name, ASTNode holeCode, ASTNode holeParent) {
+	public SimpleJavaHole () { }
+	
+	public SimpleJavaHole(String name, ASTNode holeCode) {
 		this.name = name;
 		this.holeCode = holeCode;
-		this.setHoleParent(holeParent);
 	}
 	
 	@Override
@@ -32,14 +32,6 @@ public class JavaHole implements EditHole<ASTNode> {
 	@Override
 	public void setCode(ASTNode code) {
 		this.holeCode = code;		
-	}
-
-	public ASTNode getHoleParent() {
-		return holeParent;
-	}
-
-	public void setHoleParent(ASTNode holeParent) {
-		this.holeParent = holeParent;
 	}
 
 	@Override

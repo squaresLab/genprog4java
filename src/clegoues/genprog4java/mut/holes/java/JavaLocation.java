@@ -1,5 +1,7 @@
 package clegoues.genprog4java.mut.holes.java;
 
+import org.eclipse.jdt.core.dom.ASTNode;
+
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.Location;
@@ -11,6 +13,9 @@ public class JavaLocation implements Location<JavaStatement> {
 	private JavaStatement location = null;
 	private Double weight;
 	private int id;
+	// this is a bit tricky, because I may want to use *either* the id or this node depending and that
+	// feels like a bad idea.  But let's try it.
+	private ASTNode codeElement = null;
 	
 	public JavaLocation(JavaStatement location, Double weight) {
 		this.location = location;
@@ -68,6 +73,14 @@ public class JavaLocation implements Location<JavaStatement> {
 	@Override
 	public int getId() {
 		return this.id;
+	}
+
+	public ASTNode getCodeElement() {
+		return codeElement;
+	}
+
+	public void setCodeElement(ASTNode codeElement) {
+		this.codeElement = codeElement;
 	}
 
 }
