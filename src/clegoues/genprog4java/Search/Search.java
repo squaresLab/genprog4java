@@ -257,11 +257,10 @@ public abstract class Search<G extends EditOperation> {
 				HashMap<String,EditHole> filledHoles = new HashMap<String,EditHole>();
 				List<String> holes = variant.holesForMutation(mut);
 				for(String hole : holes) {
-					TreeSet<WeightedAtom> allowed = variant.editSources(location, mut, hole);
-					WeightedAtom selected = (WeightedAtom) GlobalUtils
+					TreeSet<EditHole> allowed = variant.editSources(location, mut, hole);
+					EditHole selected = (EditHole) GlobalUtils
 							.chooseOneWeighted(new ArrayList(allowed));
-					EditHole instantiatedHole = variant.instantiateHole(hole, selected);
-					filledHoles.put(hole, instantiatedHole);
+					filledHoles.put(hole, selected);
 				}
 				variant.performEdit(mut, location, filledHoles);
 			}

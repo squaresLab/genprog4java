@@ -61,10 +61,12 @@ import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.fitness.TestType;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.JavaHole;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.Pair;
 
@@ -260,30 +262,6 @@ CachingRepresentation<G> {
 		}
 		return retVal;
 	}
-	
-	@Override
-	public TreeSet<WeightedAtom> editSources(Location stmtId, Mutation editType, String holeName) {
-		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		switch(editType) {
-		case APPEND:
-		case SWAP:
-		case REPLACE:
-			for (WeightedAtom item : this.fixLocalization) {
-				retVal.add(item);
-			}
-			break;
-		case OFFBYONE:
-			for (WeightedAtom item : this.fixLocalization) {
-				retVal.add(item);
-			}
-			break;
-		case DELETE:
-			break;
-		default: break;
-		}
-		return retVal;
-	}
-
 
 
 	/*

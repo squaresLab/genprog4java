@@ -29,6 +29,7 @@ import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.JavaHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.WeightedAtom;
@@ -36,6 +37,7 @@ import clegoues.util.Pair;
 
 public class JavaEditFactory {
 
+	// FIXME: handling of holes for templates is all wrong!
 	private static HashMap<Location, TreeSet<WeightedAtom>> scopeSafeAtomMap = new HashMap<Location, TreeSet<WeightedAtom>>();
 
 	protected Logger logger = Logger.getLogger(JavaEditOperation.class);
@@ -197,7 +199,7 @@ public class JavaEditFactory {
 		return retVal;
 	}
 
-	public TreeSet<WeightedAtom> editSources(JavaRepresentation variant, Location location, Mutation editType,
+	public TreeSet<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType,
 			String holeName) {
 		switch(editType) {
 		case APPEND: 	
@@ -206,19 +208,29 @@ public class JavaEditFactory {
 			//If it is a return statement, nothing should be appended after it, since it would be dead code
 			// FIXME: replace?
 			if(!(locationStmt.getASTNode() instanceof ReturnStatement || locationStmt.getASTNode() instanceof ThrowStatement )){
-				return this.scopeHelper(location, variant);
+				TreeSet<WeightedAtom> fixStmts = this.scopeHelper(location, variant);
+				TreeSet<EditHole> retVal = new TreeSet<EditHole>();
+				for(WeightedAtom fixStmt : fixStmts) {
+					JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
+					ASTNode fixAST = potentialFixStmt.getASTNode();
+					retVal.add(new JavaHole(holeName, fixAST, null));
+				}
+				return retVal;
 			}else{
 				return null;
 			}
 		case DELETE: return null;
 		case SWAP:
-			TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+			TreeSet<EditHole> retVal = new TreeSet<EditHole>();
 			for (WeightedAtom item : this.scopeHelper(location, variant)) {
 				int atom = item.getAtom();
 				TreeSet<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getSecond()), variant);
 				for (WeightedAtom there : inScopeThere) {
 					if (there.getAtom() == location.getId()) {
-						retVal.add(item);
+						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
+						ASTNode fixAST = potentialFixStmt.getASTNode();
+						retVal.add(new JavaHole(holeName, fixAST, null));
+						retVal.add(new JavaHole(holeName, fixAST, null));
 						break;
 					}
 				}
@@ -239,16 +251,14 @@ public class JavaEditFactory {
 		case LBOUNDSET:
 		case UBOUNDSET:
 		case OFFBYONE:
-			TreeSet<WeightedAtom> retval = new TreeSet<WeightedAtom>();
-			retval.add(new WeightedAtom(location.getId(), 1.0)); // FIXME: this is definitely wrong
-			return retval;
+		return null;
 		default:
 			// IMPORTANT FIXME FOR MANISH AND MAU: you must add handling here to check legality for templates as you add them.
 			// if a template always applies, then you can move the template type to the DELETE case, above.
 			// however, I don't think most templates always apply; it doesn't make sense to null check a statement in which nothing
 			// could conceivably be null, for example.
 			logger.fatal("Unhandled template type in editSources!  Fix code in JavaRepresentation to do this properly.");
-			return new TreeSet<WeightedAtom>();
+			return new TreeSet<EditHole>();
 		}
 	}
 
