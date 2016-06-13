@@ -302,7 +302,6 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			});
 
-
 			reader.read();
 			in.close();
 
@@ -326,6 +325,7 @@ FaultLocRepresentation<JavaEditOperation> {
 						covered = true;
 						break;
 					case ICounter.EMPTY:
+						covered = true;
 						break;
 					default:
 						break;
