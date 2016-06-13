@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -227,9 +228,9 @@ public class JavaStatement {
 	}
 
 	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
-	private Map<ASTNode, List<MethodInfo>> candidateReplacements = null;
+	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
 	public Map<ASTNode, List<ASTNode>> getMethodReplacements() { return methodReplacements; }
-	public Map<ASTNode, List<MethodInfo>> getCandidateReplacements() { return candidateReplacements; }
+	public Map<ASTNode, List<MethodInfo>> getCandidateMethodReplacements() { return candidateMethodReplacements; }
 
 	private ArrayList<ITypeBinding> paramsToTypes(List<SingleVariableDeclaration> params) {
 		int i = 0; 
@@ -241,12 +242,91 @@ public class JavaStatement {
 		}
 		return paramTypes;
 	}
+	
+	private Map<ASTNode, List<ASTNode>> methodParamReplacements = null;
+	private Map<ASTNode, Map<String,ASTNode>> candidateMethodParamReplacements= null;
+	private Map<String, Map<String,Set<ASTNode>>> expressionsInScope = null;
+
+	
+	private void saveMethodParamReplacerInfo(String methodName, String typeName, ASTNode expNode) {
+//		HashMap<String,Set<ASTNode>> typeToExpressions = null;
+//		if(!expressionsInScope.containsKey(methodName)) {
+//			typeToExpressions = (HashMap) expressionsInScope.get(methodName);
+//		} else {
+//			typeToExpressions = new HashMap<String,Set<ASTNode>>();
+//			expressionsInScope.put(methodName, typeToExpressions);
+//		}
+//		Set<ASTNode> ofType = null;
+//		if(expressionsInScope.containsKey(typeName)) {
+//			ofType = typeToExpressions.get(typeName);
+//		} else {
+//			ofType = new TreeSet<ASTNode>();
+//			expressionsInScope.put(typeName, ofType);
+//		}
+//		ofType.add(expNode);
+	}
+	
+	public boolean methodParamReplacerApplies() {
+		return false;
+//		if(methodParamReplacements == null) {
+//			methodParamReplacements = new HashMap<ASTNode, List<ASTNode>>();
+//			candidateMethodParamReplacements = new HashMap<ASTNode, Map<String,ASTNode>>();
+//			expressionsInScope = new HashMap<String,Map<String, Set<ASTNode>>>();
+//		}
+//		final ASTNode myASTNode = this.getASTNode();
+//		if(methodParamReplacements.containsKey(myASTNode)) {
+//			return !methodParamReplacements.get(myASTNode).isEmpty();
+//		}
+//		MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
+//		final String methodName = md.getName().getIdentifier();
+//
+//		md.accept(new ASTVisitor() {
+//				public boolean visit(Expression node) {
+//					ITypeBinding typeBinding = node.resolveTypeBinding();
+//					String typeName = typeBinding.getName();
+//					saveMethodParamReplacerInfo(methodName, typeName, node);
+//					return true;
+//				}
+//				
+//			});
+//					
+//			this.getASTNode().accept(new ASTVisitor() {
+//				// method to visit all Expressions relevant for this in locationNode and
+//				// store their parents
+//				public boolean visit(MethodInvocation node) {
+//					// if there exists another invocation that this works for...
+//					ASTNode parent = getParent(node);
+//					IMethodBinding invokedMethod = node.resolveMethodBinding().getMethodDeclaration();
+//					node.arguments();
+//					ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>(Arrays.asList(invokedMethod.getParameterTypes()));
+//					if(paramTypes.size() > 0) {
+//						for(ITypeBinding paramType : paramTypes) {
+//							if(expressionsInScope.containsKey(paramType.getName())) {
+//								List<ASTNode> thisList = null;
+//								if(methodParamReplacements.containsKey(myASTNode)) {
+//									thisList = methodParamReplacements.get(myASTNode);
+//								} else {
+//									thisList = new ArrayList<ASTNode>();
+//									methodParamReplacements.put(myASTNode, thisList);
+//								}
+//								thisList.add(node);
+//							}
+//						}
+//					}
+//				}
+//
+//			});
+//			if(methodParamReplacements.get(this.getASTNode()) != null && methodParamReplacements.get(this.getASTNode()).size() > 0) {
+//				
+//			
+//		} else { return false; }
+	}
+	
 	public boolean methodReplacerApplies(final List<MethodInfo> methodDecls) {
 		if(methodReplacements == null) {
 			methodReplacements = new HashMap<ASTNode, List<ASTNode>>();
-			candidateReplacements = new HashMap<ASTNode, List<MethodInfo>>();
+			candidateMethodReplacements = new HashMap<ASTNode, List<MethodInfo>>();
 
-			// (sort of doing that already....)
 			this.getASTNode().accept(new ASTVisitor() {
 				// method to visit all Expressions relevant for this in locationNode and
 				// store their parents
@@ -293,7 +373,7 @@ public class JavaStatement {
 							methodNodes.add(node);
 						methodReplacements.put(parent, methodNodes);	
 					}
-					candidateReplacements.put(node, possibleReps);
+					candidateMethodReplacements.put(node, possibleReps);
 					return true;
 				}
 
@@ -415,4 +495,5 @@ public class JavaStatement {
 		}
 		return false;
 	}
+
 }

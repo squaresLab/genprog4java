@@ -266,6 +266,7 @@ public abstract class Search<G extends EditOperation> {
 				case UBOUNDSET:
 				case RANGECHECK:
 				case FUNREP:
+				case PARREP:
 					// FIXME: this -1 hack is pretty gross; note to self, CLG should fix it
 					variant.performEdit(mut, stmtid, (-1));
 					break;

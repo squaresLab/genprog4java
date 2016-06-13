@@ -121,6 +121,7 @@ import clegoues.genprog4java.mut.JavaAppendOperation;
 import clegoues.genprog4java.mut.JavaDeleteOperation;
 import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.mut.JavaLowerBoundSetOperation;
+import clegoues.genprog4java.mut.JavaMethodParameterReplacer;
 import clegoues.genprog4java.mut.JavaMethodReplacer;
 import clegoues.genprog4java.mut.JavaNullCheckOperation;
 import clegoues.genprog4java.mut.JavaOffByOneOperation;
@@ -719,6 +720,10 @@ FaultLocRepresentation<JavaEditOperation> {
 			JavaEditOperation newEdit = new JavaDeleteOperation(fileName, locationStatement);
 			this.genome.add(newEdit);
 			break;
+		case PARREP:
+			JavaEditOperation parrep = new JavaMethodParameterReplacer(fileName, locationStatement);
+			this.genome.add(parrep);
+			break;
 		case FUNREP:
 			JavaEditOperation funEdit = new JavaMethodReplacer(fileName, locationStatement);
 			this.genome.add(funEdit);
@@ -993,7 +998,6 @@ FaultLocRepresentation<JavaEditOperation> {
 
 			//Heuristic: Do not insert a return statement on a func whose return type is void
 			//Heuristic: Do not insert a return statement in a constructor
-
 			if(fixAST instanceof ReturnStatement){
 				if(potentiallyBuggyStmt.parentMethodReturnsVoid() ||
 						potentiallyBuggyStmt.isLikelyAConstructor())
@@ -1103,6 +1107,9 @@ FaultLocRepresentation<JavaEditOperation> {
 			return locationStmt.containsArrayAccesses();
 		case FUNREP: 
 			return locationStmt.methodReplacerApplies(methodDecls);
+		case PARREP:
+			return locationStmt.methodParamReplacerApplies(/* expressions/vars in scope? */);
+
 		case NULLCHECK: 
 			return locationStmt.nullCheckApplies();
 		default:
