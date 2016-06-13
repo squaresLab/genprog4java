@@ -118,7 +118,8 @@ public class Fitness<G extends EditOperation> {
 		Fitness.configureTests();
 		Fitness.numPositiveTests = Fitness.positiveTests.size();
 		Fitness.numNegativeTests = Fitness.negativeTests.size();
-		testSample = Fitness.positiveTests; // FIXME: I don't really like this.
+		testSample = new ArrayList<TestCase>(Fitness.positiveTests);
+		restSample = new ArrayList<TestCase>();
 	}
 
 
@@ -141,7 +142,6 @@ public class Fitness<G extends EditOperation> {
 	}
 	
 	
-	// FIXME: what does this do, again?
 	public static void filterTests(ArrayList<String> toFilter, ArrayList<String> filterBy) {
 		HashSet<String> clazzesInFilterSet = new HashSet<String>();
 		HashSet<String> removeFromFilterSet = new HashSet<String>();
@@ -251,20 +251,18 @@ public class Fitness<G extends EditOperation> {
 	}
 
 	private static void resample() {
-		ArrayList<Integer> allPositiveTests = GlobalUtils.range(1,
-				Fitness.numPositiveTests);
 		Long L = Math.round(sample * Fitness.numPositiveTests);
 		int sampleSize = Integer.valueOf(L.intValue());
-		Collections.shuffle(allPositiveTests, Configuration.randomizer);
-		
-		List<Integer> intSample = allPositiveTests.subList(0,sampleSize-1); 
-		List<Integer> intRestSample = allPositiveTests.subList(sampleSize, allPositiveTests.size()-1);
+		Collections.shuffle(Fitness.positiveTests, Configuration.randomizer);
+		List<TestCase> intSample = Fitness.positiveTests.subList(0,sampleSize-1); 
+		List<TestCase> intRestSample = Fitness.positiveTests.subList(sampleSize, positiveTests.size()-1);
 		Fitness.testSample.clear(); 
-		for(Integer test : intSample) {
-			Fitness.testSample.add(Fitness.positiveTests.get(test));
+		Fitness.restSample.clear();
+		for(TestCase test : intSample) {
+			Fitness.testSample.add(test);
 		}
-		for(Integer test : intRestSample) {
-			Fitness.restSample.add(Fitness.positiveTests.get(test));
+		for(TestCase test : intRestSample) {
+			Fitness.restSample.add(test);
 		}
 	}
 
