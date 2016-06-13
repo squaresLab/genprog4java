@@ -9,7 +9,6 @@ public interface Location<G extends Comparable<G>> extends Cloneable {
 	public void setLocation(G location);
 	public Double getWeight();
 	public void setWeight(Double weight);
-	public Pair<G,Double> asPair(); // FIXME: life would be better if the first argument were the code
 	public Object clone();
 }
 

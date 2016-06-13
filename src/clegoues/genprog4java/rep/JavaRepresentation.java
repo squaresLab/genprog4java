@@ -840,7 +840,6 @@ FaultLocRepresentation<JavaEditOperation> {
 	public TreeSet<EditHole> editSources(Location location, Mutation editType, String holeName) {
 		return editFactory.editSources(this,location,editType,holeName);
 	}
-
 	
 	@SuppressWarnings("rawtypes")
 	@Override
