@@ -3,6 +3,7 @@ package clegoues.genprog4java.mut.edits.java;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -26,6 +27,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
@@ -200,28 +202,27 @@ public class JavaEditFactory {
 	}
 
 	public TreeSet<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType,
-			String holeName) {
+			String holeName) { // FIXME: I notice that I'm really not using hole name, here, hm...maybe I can get rid of it?
+		JavaStatement locationStmt = (JavaStatement) location.getLocation();
+		TreeSet<EditHole> retVal = new TreeSet<EditHole>();
+
 		switch(editType) {
 		case APPEND: 	
 		case REPLACE:
-			JavaStatement locationStmt = (JavaStatement) location.getLocation();
 			//If it is a return statement, nothing should be appended after it, since it would be dead code
 			// FIXME: replace?
 			if(!(locationStmt.getASTNode() instanceof ReturnStatement || locationStmt.getASTNode() instanceof ThrowStatement )){
 				TreeSet<WeightedAtom> fixStmts = this.scopeHelper(location, variant);
-				TreeSet<EditHole> retVal = new TreeSet<EditHole>();
 				for(WeightedAtom fixStmt : fixStmts) {
 					JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
 					ASTNode fixAST = potentialFixStmt.getASTNode();
 					retVal.add(new JavaHole(holeName, fixAST, null));
 				}
-				return retVal;
-			}else{
-				return null;
-			}
-		case DELETE: return null;
+			} 
+			break;
+		case DELETE: 
+			break;
 		case SWAP:
-			TreeSet<EditHole> retVal = new TreeSet<EditHole>();
 			for (WeightedAtom item : this.scopeHelper(location, variant)) {
 				int atom = item.getAtom();
 				TreeSet<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getSecond()), variant);
@@ -230,36 +231,61 @@ public class JavaEditFactory {
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
 						ASTNode fixAST = potentialFixStmt.getASTNode();
 						retVal.add(new JavaHole(holeName, fixAST, null));
-						retVal.add(new JavaHole(holeName, fixAST, null));
 						break;
 					}
 				}
 			}
-			return retVal;
+			break;
+		case OFFBYONE:  
+		case UBOUNDSET:
+		case LBOUNDSET:
+		case RANGECHECK:
+			Map<ASTNode, List<ASTNode>> arrayAccesses = locationStmt.getArrayAccesses();
+			if(arrayAccesses.size() > 0) {
+				for(Map.Entry<ASTNode, List<ASTNode>> entry : arrayAccesses.entrySet()) {
+					ASTNode parent = entry.getKey();
+					List<ASTNode> possibleReplacements = entry.getValue();
+					for(ASTNode possRep : possibleReplacements) {
+						retVal.add(new JavaHole(holeName, possRep,parent));
+					}
+				}
+			} 
+			break;
+		case NULLCHECK:
+			Map<ASTNode, List<ASTNode>> nullCheckables = locationStmt.getNullCheckables();
+			if(nullCheckables.size() > 0) {
+				for(Map.Entry<ASTNode, List<ASTNode>> entry : nullCheckables.entrySet()) {
+					ASTNode parent = entry.getKey();
+					List<ASTNode> possibleReplacements = entry.getValue();
+					for(ASTNode possRep : possibleReplacements) {
+						retVal.add(new JavaHole(holeName, possRep,parent));
+					}
+				}
+			} 
+			break;
 		case FUNREP:
+			Map<ASTNode, List<ASTNode>> methodReplacements = locationStmt.getReplacableMethods(JavaRepresentation.methodDecls);
+			Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
+			// OK I think I've just realized the tricky bit here.  How can I denote the "replacable method" as a location?
+			break;
 		case PARREP:
 		case PARADD:
 		case PARREM:
 		case EXPREP:
 		case EXPADD:
 		case EXPREM:
-		case NULLCHECK:
 		case OBJINIT:
-		case RANGECHECK:
 		case SIZECHECK:
 		case CASTCHECK:
-		case LBOUNDSET:
-		case UBOUNDSET:
-		case OFFBYONE:
-		return null;
 		default:
 			// IMPORTANT FIXME FOR MANISH AND MAU: you must add handling here to check legality for templates as you add them.
 			// if a template always applies, then you can move the template type to the DELETE case, above.
 			// however, I don't think most templates always apply; it doesn't make sense to null check a statement in which nothing
 			// could conceivably be null, for example.
 			logger.fatal("Unhandled template type in editSources!  Fix code in JavaRepresentation to do this properly.");
-			return new TreeSet<EditHole>();
+			return null;
 		}
+		return retVal;
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -276,14 +302,14 @@ public class JavaEditFactory {
 		case UBOUNDSET:
 		case LBOUNDSET:
 		case RANGECHECK:
-			return locationStmt.containsArrayAccesses();
+			return locationStmt.getArrayAccesses().size() > 0;
 		case FUNREP: 
-			return locationStmt.methodReplacerApplies(JavaRepresentation.methodDecls);
+			return locationStmt.getReplacableMethods(JavaRepresentation.methodDecls).size() > 0;
 		case PARREP:
 			return locationStmt.methodParamReplacerApplies(/* expressions/vars in scope? */);
 
 		case NULLCHECK: 
-			return locationStmt.nullCheckApplies();
+			return locationStmt.getNullCheckables().size() > 0;
 		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;

@@ -160,7 +160,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	/******* Cached information for applicability of various mutations/templates ******/
 	private Map<ASTNode, List<ASTNode>> arrayAccesses = null; // to track the parent nodes of array access nodes
 
-	public boolean containsArrayAccesses() {
+	public Map<ASTNode, List<ASTNode>> getArrayAccesses() {
 		if(arrayAccesses == null) {
 			arrayAccesses =  new HashMap<ASTNode, List<ASTNode>>();
 			this.getASTNode().accept(new ASTVisitor() {
@@ -183,18 +183,13 @@ public class JavaStatement implements Comparable<JavaStatement>{
 			});
 
 		}
-		return this.arrayAccesses.size() > 0;
-	}
-
-	// DOES NOT CHECK that it isn't null; precondition is that the previous function was called!
-	public Map<ASTNode, List<ASTNode>> getArrayAccesses() {
 		return this.arrayAccesses;
 	}
 
 
 	private Map<ASTNode, List<ASTNode>> nullCheckable = null;
 
-	public boolean nullCheckApplies() {
+	public  Map<ASTNode, List<ASTNode>> getNullCheckables() {
 		if(nullCheckable == null) {
 			nullCheckable = new HashMap<ASTNode, List<ASTNode>>();
 			if(this.getASTNode() instanceof MethodInvocation 
@@ -237,17 +232,11 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 			}
 		}
-		return nullCheckable.size() > 0;
-	}
-	// DOES NOT CHECK that it isn't null; precondition is that the previous function was called!
-	public Map<ASTNode, List<ASTNode>> getNullCheckables() {
-		return this.nullCheckable;
+		return nullCheckable;
 	}
 
-	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
-	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
-	public Map<ASTNode, List<ASTNode>> getMethodReplacements() { return methodReplacements; }
-	public Map<ASTNode, List<MethodInfo>> getCandidateMethodReplacements() { return candidateMethodReplacements; }
+
+	
 
 	private ArrayList<ITypeBinding> paramsToTypes(List<SingleVariableDeclaration> params) {
 		int i = 0; 
@@ -338,8 +327,11 @@ public class JavaStatement implements Comparable<JavaStatement>{
 //			
 //		} else { return false; }
 	}
+	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
+	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
+	public Map<ASTNode, List<MethodInfo>> getCandidateMethodReplacements() { return candidateMethodReplacements; }
 	
-	public boolean methodReplacerApplies(final List<MethodInfo> methodDecls) {
+	public Map<ASTNode, List<ASTNode>> getReplacableMethods(final List<MethodInfo> methodDecls) {
 		if(methodReplacements == null) {
 			methodReplacements = new HashMap<ASTNode, List<ASTNode>>();
 			candidateMethodReplacements = new HashMap<ASTNode, List<MethodInfo>>();
@@ -396,7 +388,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 			});
 		}
-		return methodReplacements.size() > 0;
+		return methodReplacements;
 	}
 	
 
