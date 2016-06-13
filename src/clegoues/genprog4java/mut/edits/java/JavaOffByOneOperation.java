@@ -1,10 +1,11 @@
-package clegoues.genprog4java.mut;
+package clegoues.genprog4java.mut.edits.java;
 
-import org.eclipse.jdt.core.dom.AST;
+import java.util.HashMap;
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.NumberLiteral;
@@ -15,20 +16,22 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.mut.EditHole;
+import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class JavaOffByOneOperation extends JavaEditOperation {
 
-	public JavaOffByOneOperation(ClassInfo fileName, JavaStatement location) {
-		super(Mutation.OFFBYONE, fileName, location);
+	public JavaOffByOneOperation(JavaLocation location, HashMap<String, EditHole> sources) {
+		super(Mutation.OFFBYONE, location, sources);
 	}
 	public enum mutationType { ADD, SUBTRACT};
 	@Override
-	public void edit(final ASTRewrite rewriter, AST ast, CompilationUnit cu) {
-		ASTNode locationNode = this.getLocation().getASTNode();
+	public void edit(final ASTRewrite rewriter) {
+		ASTNode locationNode = ((JavaStatement) this.getLocation()).getASTNode();
 		locationNode.accept(new ASTVisitor() {
-			    
+
 			mutationType mutationtype;	// used to randomly add or subtract 1 while mutating array index
 			// method to visit all ArrayAccess nodes modify array index by 1
 			public boolean visit(ArrayAccess node) {
@@ -46,8 +49,8 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 				rewriter.replace(arrayindex, mutatedindex, null);	// replacing original index with mutated index
 				return false;
 			}
-			
-			
+
+
 			// recursive method to mutate array index. (increase or decrease the index by one)
 			private Expression mutateIndex(Expression arrayindex, Boolean mutateflag) { // arrayindex is the index to be mutated, mutateflag is used to check if mutation is to be performed.
 				if (arrayindex instanceof SimpleName) {  // if index is simple variable name

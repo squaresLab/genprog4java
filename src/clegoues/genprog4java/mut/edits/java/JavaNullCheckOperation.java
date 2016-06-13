@@ -1,4 +1,4 @@
-package clegoues.genprog4java.mut;
+package clegoues.genprog4java.mut.edits.java;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -26,20 +25,20 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.main.ClassInfo;
+import clegoues.genprog4java.mut.EditHole;
+import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class JavaNullCheckOperation extends JavaEditOperation {
 
-	public JavaNullCheckOperation(ClassInfo fileName, JavaStatement location) {
-		super(Mutation.NULLCHECK, fileName, location);
+	public JavaNullCheckOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
+		super(Mutation.NULLCHECK, location, sources);
 	}
 
-
-
 	@Override
-	public void edit(final ASTRewrite rewriter, AST ast, CompilationUnit cu) {
-		ASTNode locationNode = this.getLocation().getASTNode();
-		Map<ASTNode, List<ASTNode>> nodestmts = this.getLocation().getNullCheckables();
+	public void edit(final ASTRewrite rewriter) {
+		ASTNode locationNode = ((JavaStatement) this.getLocation()).getASTNode();
+		Map<ASTNode, List<ASTNode>> nodestmts = ((JavaStatement) this.getLocation()).getNullCheckables();
 		Set<ASTNode> parentnodes = nodestmts.keySet();
 
 		for(ASTNode parent: parentnodes){
