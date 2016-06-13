@@ -21,54 +21,21 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class JavaUpperBoundSetOperation extends JavaEditOperation {
 
-	public JavaUpperBoundSetOperation(JavaLocation location) {
-		super(Mutation.UBOUNDSET, location);
+	public JavaUpperBoundSetOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
+		super(Mutation.UBOUNDSET, location, sources);
 	}
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-
-		ASTNode locationNode = this.getLocationNode();
-		final Map<ASTNode, String> upperbound = new HashMap<ASTNode, String>();			// to set the upper-bound values of array. currently set to arrayname.length
-		final Map<ASTNode, List<ASTNode>> nodestmts = new HashMap<ASTNode, List<ASTNode>>();	// to track the parent nodes of array access nodes
-		Set<ASTNode> parentnodes = null;
-
-		locationNode.accept(new ASTVisitor() {
-
-			// method to visit all ArrayAccess nodes in locationNode and store their parents
-			public boolean visit(ArrayAccess node) {
-				upperbound.put(node, node.getArray().toString().concat(".length"));
-				ASTNode parent = getParent(node);				
-				if(!nodestmts.containsKey(parent)){		
-					List<ASTNode> arraynodes = new ArrayList<ASTNode>();
-					arraynodes.add(node);
-					nodestmts.put(parent, arraynodes);		
-				}else{
-					List<ASTNode> arraynodes = (List<ASTNode>) nodestmts.get(parent);
-					if(!arraynodes.contains(node))
-						arraynodes.add(node);
-					nodestmts.put(parent, arraynodes);	
-				}
-				return true;
-			}
-
-			// method to get the parent of ArrayAccess node. We traverse the ast upwards until the parent node is an instance of statement
-			// if statement is(are) added to this parent node
-			private ASTNode getParent(ArrayAccess node) {
-				ASTNode parent = node.getParent();
-				while(!(parent instanceof Statement)){
-					parent = parent.getParent();
-				}
-				return parent;
-			}
-		});
-
-		parentnodes = nodestmts.keySet();
+		final Map<ASTNode, List<ASTNode>> nodestmts = ((JavaStatement) this.getLocation()).getArrayAccesses(); 
+		Set<ASTNode> parentnodes = nodestmts.keySet();
 		// for each parent node which may have multiple array access instances 
 		for(ASTNode parent: parentnodes){
 			// create a newnode

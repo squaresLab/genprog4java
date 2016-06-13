@@ -36,20 +36,27 @@ package clegoues.genprog4java.main;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 
+import clegoues.genprog4java.Search.BruteForce;
+import clegoues.genprog4java.Search.GeneticProgramming;
+import clegoues.genprog4java.Search.OracleSearch;
 import clegoues.genprog4java.Search.Population;
-import clegoues.genprog4java.Search.RepairFoundException;
+import clegoues.genprog4java.Search.RandomSingleEdit;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
+import clegoues.genprog4java.rep.CachingRepresentation;
+import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.LocalizationRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
+import clegoues.util.ConfigurationBuilder;
 
 public class Main {
+
 	protected static Logger logger = Logger.getLogger(Main.class);
 
 	public static void main(String[] args) throws IOException,
@@ -62,7 +69,20 @@ public class Main {
 		long startTime = System.currentTimeMillis();
 		BasicConfigurator.configure();
 
-		Configuration.setProperties(args[0]);
+		ConfigurationBuilder.register( Configuration.token );
+		ConfigurationBuilder.register( Fitness.token );
+		ConfigurationBuilder.register( CachingRepresentation.token );
+		ConfigurationBuilder.register( FaultLocRepresentation.token );
+		ConfigurationBuilder.register( JavaRepresentation.token );
+		ConfigurationBuilder.register( Population.token );
+		ConfigurationBuilder.register( Search.token );
+		ConfigurationBuilder.register( OracleSearch.token );
+		ConfigurationBuilder.register( RandomSingleEdit.token );
+
+		ConfigurationBuilder.parseArgs( args );
+		Configuration.saveOrLoadTargetFiles();
+		ConfigurationBuilder.storeProperties();
+
 		File workDir = new File(Configuration.outputDir);
 		if (!workDir.exists())
 			workDir.mkdir();
@@ -75,7 +95,18 @@ public class Main {
 				baseRep = (Representation) new JavaRepresentation();
 			}
 			fitnessEngine = new Fitness<JavaEditOperation>();
-			searchEngine = new Search<JavaEditOperation>(fitnessEngine);
+			switch(Search.searchStrategy.trim()) {
+
+			case "brute": searchEngine = new BruteForce<JavaEditOperation>(fitnessEngine);
+				break;
+			case "rsrepair": searchEngine = new RandomSingleEdit<JavaEditOperation>(fitnessEngine);
+				break;
+			case "oracle": searchEngine = new OracleSearch<JavaEditOperation>(fitnessEngine);
+			break;
+			case "ga":
+			default: searchEngine = new GeneticProgramming<JavaEditOperation>(fitnessEngine);
+				break;
+			}
 			incomingPopulation = new Population<JavaEditOperation>(); 
 		}
 		// loads the class file into the representation.
@@ -84,22 +115,8 @@ public class Main {
 		// check.
 		// 2)
 		baseRep.load(Configuration.targetClassNames);
-
 		try {
-			switch (Search.searchStrategy) {
-			case "ga":
-				searchEngine.geneticAlgorithm(baseRep, incomingPopulation);
-				break;
-			case "brute":
-				searchEngine.bruteForceOne(baseRep);
-				break;
-			case "oracle":
-				searchEngine.oracleSearch(baseRep);
-				break;
-			case "io":
-				searchEngine.ioSearch(baseRep);
-				break;
-			}
+			searchEngine.doSearch(baseRep, incomingPopulation);
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
 		}

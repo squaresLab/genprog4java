@@ -56,7 +56,7 @@ import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.Pair;
 
 // it's not clear that this EditOperation thing is a good choice because 
 // it basically forces the patch representation.  Possibly it's flexible and the naming scheme is 

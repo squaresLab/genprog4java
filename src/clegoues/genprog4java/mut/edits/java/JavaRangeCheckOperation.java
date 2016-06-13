@@ -23,57 +23,25 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class JavaRangeCheckOperation extends JavaEditOperation {
 
-	public JavaRangeCheckOperation(JavaLocation location) {
-		super(Mutation.RANGECHECK, location);
+	public JavaRangeCheckOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
+		super(Mutation.RANGECHECK, location, sources);
 	}
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = this.getLocationNode();
-		final Map<ASTNode, List<ASTNode>> nodestmts = new HashMap<ASTNode, List<ASTNode>>();	// to track the parent nodes of array access nodes
-		Set<ASTNode> parentnodes = null;
-		final Map<ASTNode, String> lowerbound = new HashMap<ASTNode, String>();			// to set the lower-bound values of array. currently set to arrayname.length
+		ASTNode locationNode = ((JavaStatement) this.getLocation()).getASTNode();
 		// FIXME: should lowerbound be called lowerbound in the range check operator?
 		Block newNode = locationNode.getAST().newBlock(); 
 
-
-	locationNode.accept(new ASTVisitor() {
-
-		// method to visit all ArrayAccess nodes in locationNode and
-		// store their parents
-		public boolean visit(ArrayAccess node) {
-			lowerbound.put(node, "0");
-			ASTNode parent = getParent(node);
-			if (!nodestmts.containsKey(parent)) {
-				List<ASTNode> arraynodes = new ArrayList<ASTNode>();
-				arraynodes.add(node);
-				nodestmts.put(parent, arraynodes);
-			} else {
-				List<ASTNode> arraynodes = (List<ASTNode>) nodestmts
-						.get(parent);
-				if (!arraynodes.contains(node))
-					arraynodes.add(node);
-				nodestmts.put(parent, arraynodes);
-			}
-			return true;
-		}
-
-		// method to get the parent of ArrayAccess node. We traverse the
-		// ast upwards until the parent node is an instance of statement
-		// if statement is(are) added to this parent node
-		private ASTNode getParent(ArrayAccess node) {
-			ASTNode parent = node.getParent();
-			while (!(parent instanceof Statement)) {
-				parent = parent.getParent();
-			}
-			return parent;
-		}
-	});
+		final Map<ASTNode, List<ASTNode>> nodestmts =  ((JavaStatement) this.getLocation()).getArrayAccesses(); 
+		Set<ASTNode> parentnodes = nodestmts.keySet();
 
 	parentnodes = nodestmts.keySet();
 	// for each parent node which may have multiple array access
@@ -133,7 +101,7 @@ public class JavaRangeCheckOperation extends JavaEditOperation {
 				checklboundexpression
 				.setOperator(Operator.GREATER_EQUALS);
 				checklboundexpression.setRightOperand(parent.getAST()
-						.newNumberLiteral(lowerbound.get(array)));
+						.newNumberLiteral("0"));
 
 				// create infix expression to check upper bound
 				InfixExpression checkuboundexpression = null;

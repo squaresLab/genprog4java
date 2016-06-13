@@ -33,6 +33,7 @@
 
 package clegoues.genprog4java.java;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -50,7 +51,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import clegoues.genprog4java.rep.JavaRepresentation;
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.Pair;
 
 public class SemanticInfoVisitor extends ASTVisitor {
 
@@ -58,11 +59,13 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	private List<ASTNode> nodeSet;
 	private ScopeInfo scopes;
+	private List<MethodInfo> methodDecls;
 
 	private TreeSet<String> fieldName;
 	private TreeSet<String> currentMethodScope;
 	private TreeSet<Pair<String,String>> methodReturnType;
 	private TreeSet<String> finalVariables;
+	private HashMap<String,String> variableType;
 
 	// unlike in the OCaml implementation, this only collects the statements and
 	// the semantic information. It doesn't number.
@@ -77,10 +80,12 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.fieldName.add("this");
 	}
 
+	public List<MethodInfo> getMethodDecls() { 
+		return this.methodDecls;
+	}
 	public Set<String> getFieldSet() {
 		return this.fieldName;
 	}
-
 	public void setNodeSet(List<ASTNode> o) {
 		this.nodeSet = o;
 	}
@@ -93,6 +98,14 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.methodReturnType = methodReturnTypeSet;
 	}
 	
+	public HashMap<String,String> getVariableType() {
+		return this.variableType;
+	}
+
+	public void setVariableType(HashMap<String,String> variableTypeSet) {
+		this.variableType = variableTypeSet;
+	}
+	
 	public TreeSet<String> getFinalVariables() {
 		return this.finalVariables;
 	}
@@ -100,6 +113,10 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	public void setFinalVariables(TreeSet<String> finalVariables) {
 		this.finalVariables = finalVariables;
 	}
+	public void setMethodDecls(List<MethodInfo> methodDecls2) {
+		this.methodDecls = methodDecls2;
+	}
+
 	
 	public List<ASTNode> getNodeSet() {
 		return this.nodeSet;
@@ -123,6 +140,11 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(MethodDeclaration node) {
 		this.currentMethodScope = new TreeSet<String>();
+
+		if(node.isConstructor() || node.isVarargs()) return true; // ain't nobody got time for that
+		else {
+		this.methodDecls.add(new MethodInfo(node.getName().getIdentifier(),node.parameters().size(),node.getReturnType2(), node.parameters(), node));
+		}
 
 		for (Object o : node.parameters()) {
 			if (o instanceof SingleVariableDeclaration) {
@@ -178,17 +200,19 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			if (o instanceof VariableDeclarationFragment) {
 				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
 				this.currentMethodScope.add(v.getName().getIdentifier());
+				variableType.put(v.getName().toString(), node.getType().toString());
 			}
 		}
 		
 		//if it is a final variable 
-		List<Modifier> modifiersOfTheVariableBeingDeclared = node.modifiers();
-		for(Modifier m : modifiersOfTheVariableBeingDeclared){
-			if(m.getKeyword().toString().equals("final")){
+		List modifiersOfTheVariableBeingDeclared = node.modifiers();
+		for(Object m : modifiersOfTheVariableBeingDeclared){
+			if(m instanceof Modifier && ((Modifier)m).getKeyword().toString().equals("final")){
 				VariableDeclarationFragment df = (VariableDeclarationFragment) node.fragments().get(0);
 				finalVariables.add(df.getName().getIdentifier());
 			}
 		}
+		
 		return super.visit(node);
 	}
 

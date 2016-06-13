@@ -32,7 +32,7 @@
  */
 
 package clegoues.genprog4java.rep;
-import clegoues.genprog4java.util.*;
+import clegoues.util.*;
 
 public class WeightedAtom extends Pair<Integer,Double> {
 

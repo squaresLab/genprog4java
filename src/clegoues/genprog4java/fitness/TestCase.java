@@ -34,26 +34,37 @@
 package clegoues.genprog4java.fitness;
 
 
-public class TestCase {
+public class TestCase implements Comparable<TestCase> {
 	private TestType posOrNeg;
-	private int testNum = -1;
 	private String testName = null;
-	public TestCase(TestType t, int num) {
-		this.posOrNeg = t;
-		this.testNum = num;
-	}
+	private int numPatchesKilled = 0;
+
 	public TestCase(TestType t, String name) {
-		this.posOrNeg = t;
+		this.setPosOrNeg(t);
 		this.testName = name; 
+		this.numPatchesKilled = 0;
 	}
 	public String toString () {
-		if(this.testName != null)
-			return this.testName;
-		if(posOrNeg == TestType.POSITIVE) {
-			return "p" + this.testNum;
-		} else {
-			return "n" + this.testNum;
-		}
+		return this.testName;
 	}
-	
+
+	public void incrementPatchesKilled() {
+		this.numPatchesKilled++;
+	}
+
+	public TestType getPosOrNeg() {
+		return posOrNeg;
+	}
+	public void setPosOrNeg(TestType posOrNeg) {
+		this.posOrNeg = posOrNeg;
+	}
+
+	@Override
+	public int compareTo(TestCase o) {
+		if(this.numPatchesKilled == o.numPatchesKilled) {
+			return this.testName.compareTo(o.testName);
+		} // FIXME: possibly also consider type?
+		return this.numPatchesKilled - o.numPatchesKilled;
+	}
+
 }

@@ -1,10 +1,9 @@
 package clegoues.genprog4java.mut;
 
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.Pair;
 
 public interface Location<G extends Comparable<G>> extends Cloneable {
 	
-	// FIXME: add a toString
 	public G getLocation();
 	public int getId();
 	public void setLocation(G location);

@@ -33,6 +33,8 @@
 
 package clegoues.genprog4java.rep;
 
+import static clegoues.util.ConfigurationBuilder.STRING;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,7 +50,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -62,6 +63,7 @@ import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AssertStatement;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -74,7 +76,9 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
@@ -82,6 +86,8 @@ import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.BadLocationException;
@@ -103,6 +109,7 @@ import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.java.ScopeInfo;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
@@ -115,13 +122,17 @@ import clegoues.genprog4java.mut.edits.java.JavaEditFactory;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.mut.holes.java.JavaHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.ConfigurationBuilder;
+import clegoues.util.Pair;
 
 public class JavaRepresentation extends
 FaultLocRepresentation<JavaEditOperation> {
 	protected Logger logger = Logger.getLogger(JavaRepresentation.class);
 	
 	private JavaEditFactory editFactory = new JavaEditFactory();
+
+	public static final ConfigurationBuilder.RegistryToken token =
+			ConfigurationBuilder.getToken();
 
 	private static HashMap<Integer, JavaStatement> codeBank = new HashMap<Integer, JavaStatement>();
 	private static HashMap<Integer, JavaStatement> base = new HashMap<Integer, JavaStatement>();
@@ -134,26 +145,27 @@ FaultLocRepresentation<JavaEditOperation> {
 	// times unnecessarily
 	// should be the same for all of append, replace, and swap, so we only need
 	// the one.
-	private static String semanticCheck = "scope";
+	//private static String semanticCheck = "scope";
+	private static String semanticCheck = ConfigurationBuilder.of( STRING )
+			.withVarName( "semanticCheck" )
+			.withFlag( "semantic-check" )
+			.withDefault( "scope" )
+			.withHelp( "the semantic check to perform on inserted variables" )
+			.inGroup( "JavaRepresentation Parameters" )
+			.build();
 	private static int stmtCounter = 0;
 
 	public static HashMap<Integer, Set<String>> inScopeMap = new HashMap<Integer, Set<String>>();
 	private static TreeSet<Pair<String,String>> methodReturnType = new TreeSet<Pair<String,String>>();
-	// Mau, please FIXME: the final variables check doesn't make sense for the append, swap, etc edits.  Please fix it so it does.
+	public static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
 	public static TreeSet<String> finalVariables = new TreeSet<String>();
+	public static List<MethodInfo> methodDecls = new ArrayList<MethodInfo>();
 
 	public static TreeSet<Pair<String,String>> getMethodReturns() {
 		return methodReturnType;
 	}
 
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
-
-	public static void configure(Properties prop) {
-		if (prop.getProperty("semantic-check") != null) {
-			JavaRepresentation.semanticCheck = prop.getProperty(
-					"semantic-check").trim(); // options: scope, none
-		}
-	}
 
 	public JavaRepresentation(ArrayList<HistoryEle> history,
 			ArrayList<JavaEditOperation> genome2,
@@ -234,6 +246,10 @@ FaultLocRepresentation<JavaEditOperation> {
 					case ICounter.FULLY_COVERED:
 						covered = true;
 						break;
+					case ICounter.NOT_COVERED:
+						break;
+					case ICounter.EMPTY:
+						break;
 					default:
 						break;
 					}
@@ -248,6 +264,107 @@ FaultLocRepresentation<JavaEditOperation> {
 					atoms.addAll(atomIds);
 				}
 			}
+		}
+		return atoms;
+	}
+
+	public ArrayList<WeightedAtom> getAllPosibleStmts() throws IOException {
+		ArrayList<WeightedAtom> atoms = new ArrayList<WeightedAtom>();
+
+		for (Map.Entry<ClassInfo, String> ele : JavaRepresentation.originalSource
+				.entrySet()) {
+			ClassInfo targetClassInfo = ele.getKey();
+			String pathToCoverageClass = Configuration.outputDir + File.separator
+					+ "coverage/coverage.out" + File.separator + targetClassInfo.pathToClassFile();
+			File compiledClass = new File(pathToCoverageClass);
+			if(!compiledClass.exists()) {
+				pathToCoverageClass = Configuration.classSourceFolder + File.separator + targetClassInfo.pathToClassFile();
+				compiledClass = new File(pathToCoverageClass);
+			}
+
+			if (executionData == null) {
+				executionData = new ExecutionDataStore();
+			}
+
+			final FileInputStream in = new FileInputStream(new File(
+					"jacoco.exec"));
+			final ExecutionDataReader reader = new ExecutionDataReader(in);
+			reader.setSessionInfoVisitor(new ISessionInfoVisitor() {
+				public void visitSessionInfo(final SessionInfo info) {
+				}
+			});
+			reader.setExecutionDataVisitor(new IExecutionDataVisitor() {
+				public void visitClassExecution(final ExecutionData data) {
+					executionData.put(data);
+				}
+			});
+
+
+			reader.read();
+			in.close();
+
+			final CoverageBuilder coverageBuilder = new CoverageBuilder();
+			final Analyzer analyzer = new Analyzer(executionData,
+					coverageBuilder);
+			analyzer.analyzeAll(new File(pathToCoverageClass));
+
+			TreeSet<Integer> coveredLines = new TreeSet<Integer>();
+			for (final IClassCoverage cc : coverageBuilder.getClasses()) {
+				for (int i = cc.getFirstLine(); i <= cc.getLastLine(); i++) {
+					boolean covered = false;
+					switch (cc.getLine(i).getStatus()) {
+					case ICounter.PARTLY_COVERED:
+						covered = true;
+						break;
+					case ICounter.FULLY_COVERED:
+						covered = true;
+						break;
+					case ICounter.NOT_COVERED:
+						covered = true;
+						break;
+					case ICounter.EMPTY:
+						break;
+					default:
+						break;
+					}
+					if (covered) {
+						coveredLines.add(i);
+					}
+				}
+			}
+			for (int line : coveredLines) {
+				ArrayList<Integer> atomIds = this.atomIDofSourceLine(line);
+				if (atomIds != null && atomIds.size() >= 0) {
+					//atoms.addAll(atomIds);
+					for(Integer i: atomIds){
+						WeightedAtom wa = new WeightedAtom(i, 0.1);
+						int index = wa.getAtom();
+						JavaStatement potentialFixStmt = codeBank.get(index);
+						Set<String> scopes = new TreeSet<String>();
+						potentialFixStmt.setRequiredNames(scopes);
+						atoms.add(wa);
+					}
+				}
+			}
+			/*
+			for (int line : coveredLines) {
+				ArrayList<Integer> atomIds = this.atomIDofSourceLine(line);
+				if (atomIds != null && atomIds.size() >= 0) {
+					atoms.addAll(atomIds);
+				}
+			}
+			for (Integer i : negativePath) {
+				if (!negHt.contains(i)) {
+					double negWeight = FaultLocRepresentation.negativePathWeight;
+					if (posHt.contains(i)) {
+						negWeight = FaultLocRepresentation.positivePathWeight;
+					}
+					negHt.add(i);
+					fw.put(i, 0.5);
+					faultLocalization.add(new WeightedAtom(i, negWeight));
+				}
+			}
+			 */
 		}
 		return atoms;
 	}
@@ -271,16 +388,19 @@ FaultLocRepresentation<JavaEditOperation> {
 		List<ASTNode> stmts = myParser.getStatements();
 		baseCompilationUnits.put(pair, myParser.getCompilationUnit());
 		JavaRepresentation.methodReturnType.addAll(myParser.getMethodReturnTypeSet());
+		JavaRepresentation.variableDataTypes.putAll(myParser.getVariableDataTypes());
 		JavaRepresentation.finalVariables.addAll(myParser.getFinalVariableSet());
-
+		JavaRepresentation.methodDecls.addAll(myParser.getMethodDeclarations());
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
 				JavaStatement s = new JavaStatement();
 				s.setStmtId(stmtCounter);
 				s.setClassInfo(pair);
 				
-				System.out.println("Stmt: " + stmtCounter);
-				System.out.println(node);
+				//System.out.println("Stmt: " + stmtCounter);
+				logger.info("Stmt: " + stmtCounter);
+				//System.out.println(node);
+				logger.info(node);
 				
 				
 				stmtCounter++;
@@ -298,9 +418,8 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 				lineNoList.add(s.getStmtId());
 				lineNoToAtomIDMap.put(lineNo, lineNoList);
-				base.put(s.getStmtId(), s);
-				
-				codeBank.put(s.getStmtId(), s);
+					base.put(s.getStmtId(), s);
+					codeBank.put(s.getStmtId(), s);
 				scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
 				JavaRepresentation.inScopeMap.put(s.getStmtId(),
 							scopeInfo.getScope(s.getASTNode()));
@@ -449,8 +568,8 @@ FaultLocRepresentation<JavaEditOperation> {
 						fileIn.close();
 				}
 			} catch (IOException e) {
-				System.err
-				.println("javaRepresentation: IOException in file close in deserialize "
+				//System.err.println("javaRepresentation: IOException in file close in deserialize " + filename + " which is weird?");
+				logger.error("javaRepresentation: IOException in file close in deserialize "
 						+ filename + " which is weird?");
 				e.printStackTrace();
 			}
@@ -540,10 +659,12 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 		String classPath = outputDir + System.getProperty("path.separator")
 		+ Configuration.libs + System.getProperty("path.separator") 
-		+ Configuration.classTestFolder; 
-		if(Configuration.classSourceFolder != "") {
-			classPath += System.getProperty("path.separator") + Configuration.classSourceFolder;
-		}
+		+ Configuration.testClassPath + System.getProperty("path.separator") 
+		+ Configuration.srcClassPath;
+		//; 
+		//		if(Configuration.classSourceFolder != "") {
+		//			classPath += System.getProperty("path.separator") + Configuration.classSourceFolder;
+		//		}
 		// Positive tests
 		command.addArgument("-classpath");
 		command.addArgument(classPath);
@@ -685,7 +806,101 @@ FaultLocRepresentation<JavaEditOperation> {
 		return copy;
 	}
 
+	@Override
+	public void reduceSearchSpace() {
+		ArrayList<WeightedAtom> toRemove = new ArrayList<WeightedAtom>();
+		//potentialFix is a potential fix statement
+		for (WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {
+			int index = potentialFixAtom.getAtom();
+			JavaStatement potentialFixStmt = codeBank.get(index);
+			//Don't make a call to a constructor
+			if(potentialFixStmt.getASTNode() instanceof MethodRef){
+				MethodRef mr = (MethodRef) potentialFixStmt.getASTNode();
+				// mrt = method return type
+				String returnType = returnTypeOfThisMethod(mr.getName().toString());
+				if(returnType != null && returnType.equalsIgnoreCase("null")) {
+					toRemove.add(potentialFixAtom);
+					continue;
+				}
+			}
+
+			//Heuristic: No need to insert a declaration of a final variable
+			if(potentialFixStmt.getASTNode() instanceof VariableDeclarationStatement){
+				VariableDeclarationStatement ds = (VariableDeclarationStatement) potentialFixStmt.getASTNode();
+				VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
+				if(finalVariables.contains(df.getName().getIdentifier())){
+					toRemove.add(potentialFixAtom);
+					continue;
+				}
+			}
+			//Heuristic: Don't assign a value to a final variable
+			if (potentialFixStmt.getASTNode() instanceof ExpressionStatement) {
+				ExpressionStatement exstat= (ExpressionStatement) potentialFixStmt.getASTNode();
+				if (exstat.getExpression() instanceof Assignment) {
+					Assignment assignment= (Assignment) exstat.getExpression();
+					if(assignment.getLeftHandSide() instanceof SimpleName){
+						SimpleName leftHand = (SimpleName) assignment.getLeftHandSide();
+						if(finalVariables.contains(leftHand.toString())){
+							toRemove.add(potentialFixAtom);
+							continue;
+						}
+					}
+				}
+			}
+			//If it moves a block, this block should not have an assignment of final variables, or a declaration of already existing final variables
+			if (potentialFixStmt.getASTNode() instanceof Block) {
+				List<ASTNode> statementsInBlock = ((Block)potentialFixStmt.getASTNode()).statements();
+				boolean ok = true;
+				for (int i = 0; i < statementsInBlock.size(); i++) {
+					//Heuristic: Don't assign a value to a final variable
+					if (statementsInBlock.get(i) instanceof ExpressionStatement) {
+						ExpressionStatement exstat= (ExpressionStatement) statementsInBlock.get(i);
+						if (exstat.getExpression() instanceof Assignment) {
+							Assignment assignment= (Assignment) exstat.getExpression();
+							if(assignment.getLeftHandSide() instanceof SimpleName){
+								SimpleName leftHand = (SimpleName) assignment.getLeftHandSide();
+								if(finalVariables.contains(leftHand.toString())){
+									ok = false;
+									break;
+								}
+							}
+						}
+					}
+
+					//Heuristic: No need to insert a declaration of a final variable
+					if(statementsInBlock.get(i) instanceof VariableDeclarationStatement){
+						VariableDeclarationStatement ds = (VariableDeclarationStatement) statementsInBlock.get(i);
+						VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
+
+						if(finalVariables.contains(df.getName().getIdentifier())){
+							ok = false;
+							break;
+						}
+					}
+				}
+				if(!ok) {
+					toRemove.add(potentialFixAtom);
+					continue;
+				}
+			}
+		}
+
+		for(WeightedAtom atom : toRemove) {
+			fixLocalization.remove(atom);
+		}
+
+	}
+
 	@SuppressWarnings("rawtypes")
+	public static String returnTypeOfThisMethod(String matchString){
+		for (Pair<String,String> p : methodReturnType) {
+			if(p.getFirst().equalsIgnoreCase(matchString)){
+				return p.getSecond();
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public Boolean doesEditApply(Location location, Mutation editType) {
 		return editFactory.doesEditApply(this,location,editType); 
@@ -760,6 +975,14 @@ FaultLocRepresentation<JavaEditOperation> {
 		// give types to atoms?
 		JavaStatement stmt = this.getFromCodeBank(stmtId);
 		return new JavaHole(holeName, stmt.getASTNode());
+	}
+	public void setAllPossibleStmtsToFixLocalization(){
+		try {
+			super.fixLocalization = getAllPosibleStmts();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

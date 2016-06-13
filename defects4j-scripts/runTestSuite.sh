@@ -22,6 +22,37 @@ LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 
 POSTESTS=$DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/pos.tests
 
+case "$LOWERCASEPACKAGE" in 
+'chart') 
+	    SRCFOLDER=build
+	    TESTFOLDER=build-tests
+        ;;
+
+'closure')
+	    SRCFOLDER=build/classes
+	    TESTFOLDER=build/test
+        ;;
+
+'lang')
+
+	    SRCFOLDER=target/classes
+	    TESTFOLDER=target/tests
+        ;;
+
+'math')
+	    SRCFOLDER=target/classes
+	    TESTFOLDER=target/test-classes
+        ;;
+
+'time')
+ 	    SRCFOLDER=target/classes
+	    TESTFOLDER=target/test-classes
+        ;;
+esac
+
+classSourceFolder=$DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$SRCFOLDER
+classTestFolder=$DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$TESTFOLDER
+
 JAVALOCATION=$(which java)
 
 
@@ -36,7 +67,10 @@ while read p; do
 COUNTER=$(($COUNTER + 1))
 
   echo Running test $COUNTER out of $TESTCOUNT: $p
-OUTPUT=$($JAVALOCATION -cp .:$DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllSourceClasses.jar:$DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/"$LOWERCASEPACKAGE"AllTestClasses.jar:$DEFECTS4JDIR/framework/projects/lib/junit-4.11.jar org.junit.runner.JUnitCore $p)
+command=($DEFECTS4JDIR/framework/projects/lib/junit-4.10.jar org.junit.runner.JUnitCore $p)
+echo Command: $command
+
+OUTPUT=$($JAVALOCATION -cp .:$classSourceFolder:$classTestFolder:$DEFECTS4JDIR/framework/projects/lib/junit-4.11.jar org.junit.runner.JUnitCore $p)
 
 echo $OUTPUT
 

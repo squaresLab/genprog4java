@@ -33,6 +33,10 @@
 
 package clegoues.genprog4java.Search;
 
+import static clegoues.util.ConfigurationBuilder.DOUBLE;
+import static clegoues.util.ConfigurationBuilder.INT;
+import static clegoues.util.ConfigurationBuilder.STRING;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,19 +45,53 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+
+import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
-import clegoues.genprog4java.util.GlobalUtils;
+import clegoues.util.ConfigurationBuilder;
+import clegoues.util.GlobalUtils;
 
 public class Population<G extends EditOperation> implements Iterable<Representation<G>>{
 
-	private static int popsize = 20;
-	private static double crossp = 0.5; 
-
-	private static int tournamentK = (int) (popsize *0.2); //tournament size, 20% of the population
+	protected static Logger logger = Logger.getLogger(Fitness.class);
+	
+	public static final ConfigurationBuilder.RegistryToken token =
+		ConfigurationBuilder.getToken();
+	
+	//private static int popsize = 20;
+	private static int popsize = ConfigurationBuilder.of( INT )
+		.withVarName( "popsize" )
+		.withDefault( "20" )
+		.withHelp( "size of the population" )
+		.inGroup( "Population Parameters" )
+		.withCast( new ConfigurationBuilder.LexicalCast< Integer >(){
+			public Integer parse(String value) {
+				int size = Integer.parseInt( value );
+				tournamentK = size / 5;
+				return size;
+			}
+		} )
+		.build();
+	//private static double crossp = 0.5; 
+	private static double crossp = ConfigurationBuilder.of( DOUBLE )
+		.withVarName( "crossp" )
+		.withDefault( "0.5" )
+		.withHelp( "probability of crossover" )
+		.inGroup( "Population Parameters" )
+		.build();
+	//tournament size, 20% of the population, set when popsize is updated
+	private static int tournamentK;
 	private double tournamentP = 1.0; //tournament probability
-	private static String crossover = "onepoint";
+	//private static String crossover = "onepoint";
+	private static String crossover = ConfigurationBuilder.of( STRING )
+		.withVarName( "crossover" )
+		.withDefault( "onepoint" )
+		.withHelp( "crossover algorithm" )
+		.inGroup( "Population Parameters" )
+		.build();
 	private ArrayList<Representation<G>> population = new ArrayList<Representation<G>>(this.popsize);
 
 	public Population() {
@@ -71,20 +109,6 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	public int getPopsize() {
 		return Population.popsize;
 	}
-	public static void configure(Properties prop) {
-		if(prop.getProperty("crossp") != null) {
-			crossp = Double.parseDouble(prop.getProperty("crossp").trim());
-		}
-		if(prop.getProperty("popsize") != null) {
-			popsize = Integer.parseInt(prop.getProperty("popsize").trim());
-			tournamentK = (int) (popsize *0.2);
-		}
-		if(prop.getProperty("crossover") != null) {
-			crossover = prop.getProperty("crossover").trim();
-		}
-		tournamentK = (int) (popsize *0.2); //tournament size, 20% of the population
-	}
-
 
 	/* {b serialize} serializes a population to disk.  The first variant is
 	      optionally instructed to print out the global information necessary for a
@@ -195,12 +219,12 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 				}
 			}
 			if(taken) {
-				return indiv;	
+				return indiv.copy();	
 			} else {
 				step += 1.0;
 			}
 		}
-		return population.get(0); // FIXME: this should never happen, right?
+		return population.get(0).copy(); // FIXME: this should never happen, right?
 	}
 	private ArrayList<Representation<G>> tournamentSelection(int desired) {
 		assert(desired >= 0);
@@ -218,12 +242,10 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 				//replace that variant with the original
 				population.remove(indiv);
 				//first element of the population should be the original, which should always compile
-				Representation<G> toInsert = population.get(0);
+				Representation<G> toInsert = population.get(0).copy();
 				population.add(toInsert);
 			}
-
 		}
-
 
 		for(int i = 0 ; i < desired; i++) {
 			result.add(selectOne());
@@ -367,8 +389,8 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		ArrayList<Representation<G>> output = new ArrayList<Representation<G>>(this.population);
 		int half = population.size() / 2;
 		for(int it = 0 ; it < half-1; it++) {
-			Representation<G> parent1 = population.get(it);
-			Representation<G> parent2 = population.get(it + half);
+			Representation<G> parent1 = population.get(it); //copy?
+			Representation<G> parent2 = population.get(it + half); //copy?
 			if(GlobalUtils.probability(crossp)) {
 				ArrayList<Representation<G>> children = this.doCross(original, parent1, parent2);
 				output.addAll(children); // I *think* this is OK, because we include all the parents in output above, so we don't need to add them here

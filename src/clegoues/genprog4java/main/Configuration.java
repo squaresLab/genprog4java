@@ -33,6 +33,10 @@
 
 package clegoues.genprog4java.main;
 
+import static clegoues.util.ConfigurationBuilder.BOOL_ARG;
+import static clegoues.util.ConfigurationBuilder.LONG;
+import static clegoues.util.ConfigurationBuilder.STRING;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -53,113 +57,151 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
+import clegoues.util.ConfigurationBuilder;
 
 public class Configuration {
 	protected static Logger logger = Logger.getLogger(Configuration.class);
 
-	public static String sourceDir = "./";
-	public static String outputDir = "./tmp/";
-	public static String libs;
-	public static String sourceVersion = "1.6";
-	public static String targetVersion = "1.6";
-	public static String globalExtension = ".java";
-	public static ArrayList<ClassInfo> targetClassNames = new ArrayList<ClassInfo>();
-	public static String javaRuntime = "";
-	public static String javaVM;
-	public static String jacocoPath = "";
-	public static long seed;
-	public static boolean doSanity = true;
-	public static String workingDir = "./";
-	public static Random randomizer = null;
-	public static String classSourceFolder = "";
-	public static String classTestFolder = "";
-	public static String compileCommand = "";
+	public static final ConfigurationBuilder.RegistryToken token =
+		ConfigurationBuilder.getToken();
 
-	public Configuration() {
-	}
-
-	public Configuration(String configFile) {
-		Configuration.setProperties(configFile);
-	}
-
-	public static void setProperties(String name) {
-		Properties prop = new Properties();
-		try {
-			prop.load(new FileReader(new File(name)));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		javaVM = prop.getProperty("javaVM").trim();
-		if (prop.getProperty("sourceDir") != null) {
-			sourceDir = prop.getProperty("sourceDir").trim();
-		}
-		javaRuntime = Runtime.getRuntime().toString();
-		libs = prop.getProperty("libs").trim();
-
-		if (prop.getProperty("sourceVersion") != null) {
-			sourceVersion = prop.getProperty("sourceVersion").trim();
-		}
-		if (prop.getProperty("outputDir") != null) {
-			outputDir = prop.getProperty("outputDir").trim();
-		}
-		if(prop.getProperty("compileCommand") != null) {
-			compileCommand = prop.getProperty("compileCommand").trim();
-		}
-		if (prop.getProperty("targetVersion") != null) {
-			targetVersion = prop.getProperty("targetVersion").trim();
-		}
-		if (prop.getProperty("jacocoPath") != null) {
-			jacocoPath = prop.getProperty("jacocoPath").trim();
-		}
-		if (prop.getProperty("classSourceFolder") != null) {
-			classSourceFolder = prop.getProperty("classSourceFolder").trim();
-		}
-		if (prop.getProperty("classTestFolder") != null) {
-			classTestFolder = prop.getProperty("classTestFolder").trim();
-		}
-		if (prop.getProperty("sanity") != null) {
-			String sanity = prop.getProperty("sanity").trim();
-			if (sanity.equals("no")) {
-				doSanity = false;
+	//public static String sourceDir = "./";
+	public static String sourceDir = ConfigurationBuilder.of( STRING )
+		.withVarName( "sourceDir" )
+		.withDefault( "./" )
+		.withHelp( "directory containing the source files" )
+		.build();
+	//public static String outputDir = "./tmp/";
+	public static String outputDir = ConfigurationBuilder.of( STRING )
+		.withVarName( "outputDir" )
+		.withDefault( "./tmp/" )
+		.withHelp( "directory to contain generated files" )
+		.build();
+	public static String libs = ConfigurationBuilder.of( STRING )
+		.withVarName( "libs" )
+		.withHelp( "classpath to compile the project" )
+		.build();
+	//public static String sourceVersion = "1.6";
+	public static String sourceVersion = ConfigurationBuilder.of( STRING )
+		.withVarName( "sourceVersion" )
+		.withDefault( "1.6" )
+		.withHelp( "Java version of the source code" )
+		.build();
+	//public static String targetVersion = "1.6";
+	public static String targetVersion = ConfigurationBuilder.of( STRING )
+		.withVarName( "targetVersion" )
+		.withDefault( "1.6" )
+		.withHelp( "Java version of the generated classes" )
+		.build();
+	//public static String globalExtension = ".java";
+	public static String globalExtension = ConfigurationBuilder.of( STRING )
+		.withVarName( "globalExtension" )
+		.withDefault( ".java" )
+		.withHelp( "source file extension" )
+		.build();
+	//public static ArrayList<ClassInfo> targetClassNames = new ArrayList<ClassInfo>();
+	public static ArrayList<ClassInfo> targetClassNames =
+		new ConfigurationBuilder< ArrayList< ClassInfo > >()
+			.withVarName( "targetClassNames" )
+			.withFlag( "targetClassName" )
+			.withDefault( "" )
+			.withHelp( "the class(es) to repair" )
+			.withCast( new ConfigurationBuilder.LexicalCast< ArrayList< ClassInfo > >(){
+				public ArrayList<ClassInfo> parse( String value ) {
+					if ( ! value.isEmpty() ) {
+						try {
+							return getClasses( value );
+						} catch (FileNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					return new ArrayList< ClassInfo >();
+				}
+				
+			} )
+			.build();
+	//public static String javaRuntime = "";
+	public static String javaRuntime = ConfigurationBuilder.of( STRING )
+		.withVarName( "javaRuntime" )
+		.withDefault( Runtime.getRuntime().toString() )
+		.withHelp( "the java runtime to use" )
+		.build();
+	public static String javaVM = ConfigurationBuilder.of( STRING )
+		.withVarName( "javaVM" )
+		.withHelp( "path to Java" )
+		.build();
+	//public static String testClassPath = "";
+	public static String testClassPath = ConfigurationBuilder.of( STRING )
+		.withVarName( "testClassPath" )
+		.withDefault( "" )
+		.withHelp( "classpath to run the tests" )
+		.build();
+	//public static String srcClassPath = "";
+	public static String srcClassPath = ConfigurationBuilder.of( STRING )
+		.withVarName( "srcClassPath" )
+		.withDefault( "" )
+		.withHelp( "another classpath" )
+		.build();
+	//public static String jacocoPath = "";
+	public static String jacocoPath = ConfigurationBuilder.of( STRING )
+		.withVarName( "jacocoPath" )
+		.withDefault( "" )
+		.withHelp( "path to javaagent JAR file" )
+		.build();
+	public static Random randomizer;
+	public static long seed = ConfigurationBuilder.of( LONG )
+		.withVarName( "seed" )
+		.withDefault( Long.toString( System.currentTimeMillis() ) )
+		.withHelp( "seed to initialize random number generator" )
+		.withCast( new ConfigurationBuilder.LexicalCast< Long >() {
+			public Long parse(String value) {
+				long seed = Long.valueOf( value );
+				randomizer = new Random( seed );
+				return seed;
 			}
-		}
-		if (prop.getProperty("seed") != null) {
-			seed = (long) Integer.parseInt(prop.getProperty("seed").trim());
-		} else {
-			seed = System.currentTimeMillis();
-		}
-		randomizer = new Random(seed);
+		} )
+		.build();
+	//public static boolean doSanity = true;
+	public static boolean doSanity = ConfigurationBuilder.of( BOOL_ARG )
+		.withVarName( "doSanity" )
+		.withFlag( "sanity" )
+		.withDefault( "true" )
+		.withHelp( "indicates whether to run sanity check" )
+		.build();
+	//public static String workingDir = "./";
+	public static String workingDir = ConfigurationBuilder.of( STRING )
+		.withVarName( "workingDir" )
+		.withDefault( "./" )
+		.withHelp( "directory containing the source directory" )
+		.build();
+	//public static String classSourceFolder = "";
+	public static String classSourceFolder = ConfigurationBuilder.of( STRING )
+		.withVarName( "classSourceFolder" )
+		.withDefault( "" )
+		.withHelp( "directory to contain compiled classes" )
+		.build();
+	//public static String classTestFolder = "";
+	public static String classTestFolder = ConfigurationBuilder.of( STRING )
+		.withVarName( "classTestFolder" )
+		.withDefault( "" )
+		.withHelp( "unused" )
+		.build();
+	//public static String compileCommand = "";
+	public static String compileCommand = ConfigurationBuilder.of( STRING )
+		.withVarName( "compileCommand" )
+		.withDefault( "" )
+		.withHelp( "command for compiling the program" )
+		.build();
 
+	private Configuration() {}
 
-		if (prop.getProperty("workingDir") != null) {
-			workingDir = prop.getProperty("workingDir").trim();
-		}
-
-
-		try {
-			targetClassNames.addAll(getClasses(prop.getProperty(
-					"targetClassName").trim()));
-		} catch (Exception e) {
-			// FIXME handle exception
-			e.printStackTrace();
-		}
-		
-		//saveTargetFiles();
 	
-		
-		Search.configure(prop);
-		Population.configure(prop);
-		Fitness.configure(prop);
-		JavaRepresentation.configure(prop);
-		FaultLocRepresentation.configure(prop);
-		CachingRepresentation.configure(prop);
-		
-		//Save original target file to an outside folder if it is the first run. Or load it if it is not.
-		saveOrLoadTargetFiles();
-	}
-	
+	//Save original target file to an outside folder if it is the first run. Or load it if it is not.
+
 	public static void saveOrLoadTargetFiles(){
 		
 		String safeFolder = Configuration.outputDir  + File.separatorChar + "original" + File.separatorChar;

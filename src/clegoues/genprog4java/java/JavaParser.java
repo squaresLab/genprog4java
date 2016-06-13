@@ -33,7 +33,10 @@
 
 package clegoues.genprog4java.java;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -43,8 +46,9 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.Pair;
 
 
 public class JavaParser
@@ -54,24 +58,36 @@ public class JavaParser
 	private CompilationUnit compilationUnit;
 	private Set<String> fields;
 	private TreeSet<Pair<String,String>> methodReturnType;
+	private List<MethodInfo> methodDecls;
+	private HashMap<String,String> variableTypes;
 	private TreeSet<String> finalVariables;
-	
 
 	public JavaParser(ScopeInfo scopeList)
 	{
 		this.stmts = new LinkedList<ASTNode>();
 		this.methodReturnType = new TreeSet<Pair<String,String>>();
 		this.finalVariables =  new TreeSet<String>();
+		this.methodDecls = new ArrayList<MethodInfo>();
+		this.variableTypes = new HashMap<String,String>();
 		this.visitor = new SemanticInfoVisitor();
 		this.visitor.setNodeSet(this.stmts);		
 		this.visitor.setScopeList(scopeList);
 		this.visitor.setMethodReturnType(methodReturnType);
 		this.visitor.setFinalVariables(finalVariables);
+		this.visitor.setMethodDecls(methodDecls);
+		this.visitor.setVariableType(variableTypes);
 	}
 
 	public TreeSet<Pair<String,String>> getMethodReturnTypeSet(){
 		return this.methodReturnType;
 	}
+	
+	public List<MethodInfo> getMethodDeclarations() { return this.methodDecls; }
+	
+	public HashMap<String,String> getVariableDataTypes(){
+		return variableTypes;
+	}
+	
 	
 	public TreeSet<String> getFinalVariableSet(){
 		return this.finalVariables;
@@ -107,6 +123,7 @@ public class JavaParser
 		
 		this.compilationUnit = visitor.getCompilationUnit();
 		this.setFields(visitor.getFieldSet());
+		
 
 	}
 

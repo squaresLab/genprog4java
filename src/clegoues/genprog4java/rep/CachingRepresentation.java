@@ -33,6 +33,8 @@
 
 package clegoues.genprog4java.rep;
 
+import static clegoues.util.ConfigurationBuilder.BOOL_ARG;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
@@ -58,30 +60,29 @@ import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.ConfigurationBuilder;
+import clegoues.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class CachingRepresentation<G extends EditOperation> extends
 Representation<G> {
 	protected Logger logger = Logger.getLogger(CachingRepresentation.class);
 
-	public static boolean skipFailedSanity = true;
+	public static final ConfigurationBuilder.RegistryToken token =
+		ConfigurationBuilder.getToken();
+	
+	//public static boolean skipFailedSanity = true;
+	public static boolean skipFailedSanity = ConfigurationBuilder.of( BOOL_ARG )
+		.withVarName( "skipFailedSanity" )
+		.withDefault( "true" )
+		.withHelp( "do not include positive tests if they fail sanity" )
+		.inGroup( "CachingRepresentation Parameters" )
+		.build();
 	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
 
 	// persistent test cache
 	private static HashMap<List<Integer>, HashMap<String, FitnessValue>> fitnessCache = new HashMap<List<Integer>, HashMap<String, FitnessValue>>();
-
-	public static void configure(Properties prop) {
-		if (prop.getProperty("skipFailedSanity") != null) {
-			String sanity = prop.getProperty("skipFailedSanity").trim();
-			if (sanity.equals("no")) {
-				skipFailedSanity = false;
-			} else if (sanity.equals("yes")) {
-				skipFailedSanity = true;
-			}
-		}
-	}
 
 	private double fitness = -1.0;
 
@@ -157,24 +158,23 @@ Representation<G> {
 		}
 		int testNum = 1;
 
-		ArrayList<String> passingTests = new ArrayList<String>();
+		ArrayList<TestCase> passingTests = new ArrayList<TestCase>();
 		// make list of passing files (sanitizing out of scope tests)
 		int testsOutOfScope = 0;
 		int testNumber = 0;
-		for (String posTest : Fitness.positiveTests) {
+		for (TestCase posTest : Fitness.positiveTests) {
 			testNumber++;
 			logger.info("Checking test number " + testNumber + " out of " + Fitness.positiveTests.size());
-			TestCase thisTest = new TestCase(TestType.POSITIVE, posTest);
 			FitnessValue res = this.internalTestCase(
 					CachingRepresentation.sanityExename,
-					CachingRepresentation.sanityFilename, thisTest);
+					CachingRepresentation.sanityFilename, posTest);
 			if (!res.isAllPassed()) {
 				testsOutOfScope++;
 				logger.info(testsOutOfScope + " tests out of scope so far, out of " + Fitness.positiveTests.size());
 				logger.info("false (0)\n");
 				logger.error("cacheRep: sanity: "
 						+ CachingRepresentation.sanityFilename
-						+ " failed positive test " + thisTest.toString());
+						+ " failed positive test " + posTest.toString());
 				if (!skipFailedSanity) {
 					return false;
 				}
@@ -195,17 +195,16 @@ Representation<G> {
 		printTestsInScope(passingTests);
 
 		testNum = 1;
-		for (String negTest : Fitness.negativeTests) {
+		for (TestCase negTest : Fitness.negativeTests) {
 			logger.info("\tn" + testNum + ": ");
-			TestCase thisTest = new TestCase(TestType.NEGATIVE, negTest);
 			FitnessValue res = this.internalTestCase(
 					CachingRepresentation.sanityExename,
-					CachingRepresentation.sanityFilename, thisTest);
+					CachingRepresentation.sanityFilename, negTest);
 			if (res.isAllPassed()) {
 				logger.info("true (1)\n");
 				logger.error("cacheRep: sanity: "
 						+ CachingRepresentation.sanityFilename
-						+ " passed negative test " + thisTest.toString());
+						+ " passed negative test " + negTest.toString());
 				return false;
 			}
 			logger.info("false (0)\n");
@@ -218,7 +217,8 @@ Representation<G> {
 		return true;
 	}
 
-	private void printTestsInScope(ArrayList<String> passingTests){
+	// FIXME: why?
+	private void printTestsInScope(ArrayList<TestCase> passingTests){
 
 		String path = Fitness.posTestFile;
 		//Set up to write to txt file
@@ -232,14 +232,13 @@ Representation<G> {
 		PrintWriter printer = new PrintWriter(write);
 
 		//Now write data to the file
-		for(String s : passingTests){
+		for(TestCase s : passingTests){
 			printer.println(s);
 		}
 		printer.close();
 
 	}
 
-	
 	public boolean testCase(TestCase test) {
 		List<Integer> hash = astHash();
 		HashMap<String, FitnessValue> thisVariantsFitness = null;
@@ -255,6 +254,7 @@ Representation<G> {
 		if (this.alreadyCompiled == null) {
 			String newName = CachingRepresentation.newVariantFolder();
 			this.variantFolder = newName;
+			logger.info("History of variant " + getVariantFolder() + " is: " + getHistory());
 			if (!this.compile(newName, newName)) {
 				this.setFitness(0.0);
 				logger.info(this.getName() + " at " + newName + " fails to compile\n");
@@ -354,13 +354,7 @@ Representation<G> {
 		CommandLine command = this.internalTestCaseCommand(sanityExename,
 				sanityFilename, thisTest);
 		// System.out.println("command: " + command.toString());
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);// Mau had to
-		// change this
-		// to be able to
-		// run longer
-		// tests. It was
-		// on 6000
-		// originally
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");
 		executor.setWorkingDirectory(new File(workingDirectory));

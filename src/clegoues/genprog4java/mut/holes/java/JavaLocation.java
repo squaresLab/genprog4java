@@ -3,7 +3,7 @@ package clegoues.genprog4java.mut.holes.java;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.Location;
-import clegoues.genprog4java.util.Pair;
+import clegoues.util.Pair;
 
 public class JavaLocation implements Location<JavaStatement> {
 
