@@ -46,7 +46,7 @@ import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.RandomSingleEdit;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
-import clegoues.genprog4java.mut.JavaEditOperation;
+import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;

@@ -64,18 +64,27 @@ import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import clegoues.util.Pair;
+import clegoues.genprog4java.main.ClassInfo;
 
-public class JavaStatement {
+public class JavaStatement implements Comparable<JavaStatement>{
 
 	private ASTNode astNode;
+	private ClassInfo classInfo;
+	
 	private int lineno;
 	private int stmtId; // unique
 	private Set<String> names;
 	private Set<String> types;
-
 	private Set<String> mustBeInScope;
 
+	public void setClassInfo(ClassInfo ci) {
+		this.classInfo = ci;
+	}
+	
+	public ClassInfo getClassInfo() {
+		return this.classInfo;
+	}
+	
 	public void setStmtId(int id) {
 		this.stmtId = id;
 	}
@@ -139,7 +148,15 @@ public class JavaStatement {
 		}
 		return parent;
 	}
-
+	
+	@Override
+	public int compareTo(JavaStatement other) {
+		return this.stmtId - other.getStmtId();
+	}
+	
+	// FIXME: does it make sense to put this in the edits themselves?
+	// maybe not for cached info...
+	
 	/******* Cached information for applicability of various mutations/templates ******/
 	private Map<ASTNode, List<ASTNode>> arrayAccesses = null; // to track the parent nodes of array access nodes
 

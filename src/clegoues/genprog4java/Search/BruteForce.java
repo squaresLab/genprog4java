@@ -1,11 +1,15 @@
 package clegoues.genprog4java.Search;
 
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
 import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.WeightedAtom;
@@ -16,10 +20,9 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 	public BruteForce(Fitness<G> engine) {
 		super(engine);
 	}
-
 	private boolean doWork(Representation<G> rep, Representation<G> original,
-			Mutation mut, int first, int second) {
-		rep.performEdit(mut, first, second);
+			Mutation mut, Location first, HashMap<String,EditHole> fixCode) {
+		rep.performEdit(mut, first, fixCode);
 		if (fitnessEngine.testToFirstFailure(rep, false)) {
 			this.noteSuccess(rep, original, 1);
 			if (!Search.continueSearch) {
@@ -28,16 +31,33 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 		}
 		return false;
 	}
+
+	
+	private TreeSet<Location> rescaleLocations(TreeSet<Location> items) {
+		double fullSum = 0.0;
+		TreeSet<Location> retVal = new TreeSet<Location>();
+		for (Location item : items) {
+			fullSum += item.getWeight();
+		}
+		double scale = 1.0 / fullSum;
+		for (Location item : items) { 
+			Location newItem = item;
+			newItem.setLocation(item.getLocation());
+			newItem.setWeight(item.getWeight() * scale);
+			retVal.add(newItem);
+		}
+		return retVal;
+	}
 	private TreeSet<WeightedAtom> rescaleAtomPairs(TreeSet<WeightedAtom> items) {
 		double fullSum = 0.0;
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-		for (Pair<?, Double> item : items) {
-			fullSum += item.getSecond();
+		for (WeightedAtom item : items) {
+			fullSum += item.getWeight();
 		}
 		double scale = 1.0 / fullSum;
-		for (WeightedAtom item : items) {
-			WeightedAtom newItem = new WeightedAtom(item.getAtom(),
-					item.getWeight() * scale);
+		for (WeightedAtom item : items) { 
+			WeightedAtom newItem = item;
+			newItem.setSecond(item.getWeight() * scale);
 			retVal.add(newItem);
 		}
 		return retVal;
@@ -57,32 +77,33 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 		original.reduceFixSpace();
 
 		int count = 0;
-		TreeSet<WeightedAtom> allFaultyAtoms = new TreeSet<WeightedAtom>(
-				original.getFaultyAtoms());
+		TreeSet<Location> allFaultyLocations = new TreeSet<Location>(
+				original.getFaultyLocations());
 
-		for (WeightedAtom faultyAtom : allFaultyAtoms) {
-			int faultyLocation = faultyAtom.getAtom();
+		for (Location faultyLocation : allFaultyLocations) {
 
 			for(Map.Entry mutation : availableMutations.entrySet()) {
 				Mutation key = (Mutation) mutation.getKey();
 				Double prob = (Double) mutation.getValue();
+				List<String> holes = original.holesForMutation(key);
 				if(prob > 0.0) {
-					count += original.editSources(faultyLocation, key).size(); 
+					for(String hole : holes) { // FIXME: this math is wrong for multi-holed edits
+					count += original.editSources(faultyLocation, key, hole).size();
+					}
 				}
 			}
 
 		}
-		logger.info("search: bruteForce: " + count + " mutants in search space\n");
+		logger.info("search: bruteForce: " + count
+				+ " mutants in search space\n");
 
 		int wins = 0;
 		int sofar = 1;
 		boolean repairFound = false;
 
-		TreeSet<WeightedAtom> rescaledAtoms = rescaleAtomPairs(allFaultyAtoms);
+		TreeSet<Location> rescaledAtoms = rescaleLocations(allFaultyLocations);
 
-		for (WeightedAtom faultyAtom : rescaledAtoms) {
-			int stmt = faultyAtom.getAtom();
-			double weight = faultyAtom.getWeight();
+		for (Location faultyLocation : rescaledAtoms) {
 			Comparator<Pair<Mutation, Double>> descendingMutations = new Comparator<Pair<Mutation, Double>>() {
 				@Override
 				public int compare(Pair<Mutation, Double> one,
@@ -93,8 +114,8 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 			};
 			// wouldn't real polymorphism be the actual legitimate best right
 			// here?
-			TreeSet<clegoues.util.Pair<Mutation, Double>> availableMutations = original
-					.availableMutations(stmt);
+			TreeSet<Pair<Mutation, Double>> availableMutations = original
+					.availableMutations(faultyLocation);
 			TreeSet<Pair<Mutation, Double>> rescaledMutations = new TreeSet<Pair<Mutation, Double>>(
 					descendingMutations);
 			double sumMutScale = 0.0;
@@ -120,58 +141,69 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 			for (Pair<Mutation, Double> mutation : rescaledMutations) {
 				Mutation mut = mutation.getFirst();
 				double prob = mutation.getSecond();
-				logger.info(weight + " " + prob);
+				logger.info(faultyLocation.getWeight() + " " + prob);
+				
+				List<String> holes = original.holesForMutation(mut);
 				switch(mut) {
 				case DELETE:
 					Representation<G> delRep = original.copy();
-					if (this.doWork(delRep, original, mut, stmt, stmt)) {
+					if (this.doWork(delRep, original, mut, faultyLocation, null)) {
 						wins++;
 						repairFound = true;
 					}
 					break;
 				case APPEND:
 				case REPLACE:
-				case OFFBYONE:
 					TreeSet<WeightedAtom> sources1 = new TreeSet<WeightedAtom>(
 							descendingAtom);
-					sources1.addAll(this.rescaleAtomPairs(original
-							.editSources(stmt, mut)));
+					// FIXME: HACK: fix this hard-coding of the hole name, and below, too
+					TreeSet<WeightedAtom> editSources = original.editSources(faultyLocation, mut, "singleHole");
+					sources1.addAll(this.rescaleAtomPairs(editSources));
 					for (WeightedAtom append : sources1) {
 						Representation<G> rep = original.copy();
-						if (this.doWork(rep, original, mut, stmt,
-								append.getAtom())) {
+						HashMap<String,EditHole> sources = new HashMap<String,EditHole>();
+						sources.put("singleHole", rep.instantiateHole("singleHole", append));
+						if (this.doWork(rep, original, mut, faultyLocation,
+								sources)) {
 							wins++;
 							repairFound = true;
 						}
 					}
 					break;
 				case SWAP:
-					TreeSet<WeightedAtom> sources = new TreeSet<WeightedAtom>(
-							descendingAtom);
+					TreeSet<WeightedAtom> sources = new TreeSet<WeightedAtom>(descendingAtom);
 					sources.addAll(this.rescaleAtomPairs(original
-							.editSources(stmt, mut)));
+							.editSources(faultyLocation, mut, "singleHole")));
 					for (WeightedAtom append : sources) {
 						Representation<G> rep = original.copy();
-						if (this.doWork(rep, original, mut, stmt,
-								append.getAtom())) {
+						HashMap<String,EditHole> swapSources = new HashMap<String,EditHole>();
+						swapSources.put("singleHole", rep.instantiateHole("singleHole", append));
+						if (this.doWork(rep, original, mut, faultyLocation, swapSources)) {
 							wins++;
 							repairFound = true;
 						}
 					}
 					break;
+				case OFFBYONE: // Manish, FIXME: this can't go up with Append/replace; that code tries to append
+					// or replace the current location with every available fix statement, a concept that doesn't make sense
+					// with OffByOne
 				default:
 					logger.fatal("FATAL: unhandled template type in bruteForceOne.  Add handling (probably by adding a case either to the DELETE case or the other one); and try again");
 					break;
 				}
-			}
 
+
+			}
+			// FIXME: debug output System.out.printf("\t variant " + wins +
+			// "/" + sofar + "/" + count + "(w: " + probs +")" +
+			// rep.getName());
 			sofar++;
 			if (repairFound && !Search.continueSearch) {
 				throw new RepairFoundException();
 			}
 		}
 		logger.info("search: brute_force_1 ends\n");
-		if(repairFound) 
-			throw new RepairFoundException();		
+		if(repairFound)
+			throw new RepairFoundException();
 	}
 }

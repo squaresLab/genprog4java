@@ -63,6 +63,7 @@ import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.Pair;
@@ -71,68 +72,66 @@ import clegoues.util.Pair;
 public abstract class FaultLocRepresentation<G extends EditOperation> extends
 CachingRepresentation<G> {
 	protected Logger logger = Logger.getLogger(FaultLocRepresentation.class);
-
 	public static final ConfigurationBuilder.RegistryToken token =
-		ConfigurationBuilder.getToken();
-	
-	//private static double positivePathWeight = 0.1;
-	private static double positivePathWeight = ConfigurationBuilder.of( DOUBLE )
-		.withVarName( "positivePathWeight" )
-		.withDefault( "0.1" )
-		.withHelp( "weighting for statements on the positive path" )
-		.inGroup( "FaultLocRepresentation Parameters" )
-		.build();
-	//private static double negativePathWeight = 1.0;
-	private static double negativePathWeight = ConfigurationBuilder.of( DOUBLE )
-		.withVarName( "negativePathWeight" )
-		.withDefault( "1.0" )
-		.withHelp( "weighting for statements on the negative path" )
-		.inGroup( "FaultLocRepresentation Parameters" )
-		.build();
-	//protected static boolean allowCoverageFail = false;
-	protected static boolean allowCoverageFail = ConfigurationBuilder.of( BOOLEAN )
-		.withVarName( "allowCoverageFail" )
-		.withHelp( "ignore unexpected test results in coverage" )
-		.inGroup( "FaultLocRepresentation Parameters" )
-		.build();
-	//protected static String posCoverageFile = "coverage.path.pos";
-	protected static String posCoverageFile = ConfigurationBuilder.of( STRING )
-		.withVarName( "posCoverageFile" )
-		.withDefault( "coverage.path.pos" )
-		.withHelp( "file containing the statements covered by positive tests" )
-		.inGroup( "FaultLocRepresentation Parameters" )
-		.build();
-	//protected static String negCoverageFile = "coverage.path.neg";
-	protected static String negCoverageFile = ConfigurationBuilder.of( STRING )
-		.withVarName( "negCoverageFile" )
-		.withDefault( "coverage.path.neg" )
-		.withHelp( "file containing the statements covered by negative tests" )
-		.inGroup( "FaultLocRepresentation Parameters" )
-		.build();
-	//protected static boolean regenPaths = false;
-	protected static boolean regenPaths = ConfigurationBuilder.of( BOOLEAN )
-		.withVarName( "regenPaths" )
-		.withHelp( "regenerate coverage information" )
-		.inGroup( "FaultLocRepresentation Parameters" )
-		.build();
+			ConfigurationBuilder.getToken();
+		
+		//private static double positivePathWeight = 0.1;
+		private static double positivePathWeight = ConfigurationBuilder.of( DOUBLE )
+			.withVarName( "positivePathWeight" )
+			.withDefault( "0.1" )
+			.withHelp( "weighting for statements on the positive path" )
+			.inGroup( "FaultLocRepresentation Parameters" )
+			.build();
+		//private static double negativePathWeight = 1.0;
+		private static double negativePathWeight = ConfigurationBuilder.of( DOUBLE )
+			.withVarName( "negativePathWeight" )
+			.withDefault( "1.0" )
+			.withHelp( "weighting for statements on the negative path" )
+			.inGroup( "FaultLocRepresentation Parameters" )
+			.build();
+		//protected static boolean allowCoverageFail = false;
+		protected static boolean allowCoverageFail = ConfigurationBuilder.of( BOOLEAN )
+			.withVarName( "allowCoverageFail" )
+			.withHelp( "ignore unexpected test results in coverage" )
+			.inGroup( "FaultLocRepresentation Parameters" )
+			.build();
+		//protected static String posCoverageFile = "coverage.path.pos";
+		protected static String posCoverageFile = ConfigurationBuilder.of( STRING )
+			.withVarName( "posCoverageFile" )
+			.withDefault( "coverage.path.pos" )
+			.withHelp( "file containing the statements covered by positive tests" )
+			.inGroup( "FaultLocRepresentation Parameters" )
+			.build();
+		//protected static String negCoverageFile = "coverage.path.neg";
+		protected static String negCoverageFile = ConfigurationBuilder.of( STRING )
+			.withVarName( "negCoverageFile" )
+			.withDefault( "coverage.path.neg" )
+			.withHelp( "file containing the statements covered by negative tests" )
+			.inGroup( "FaultLocRepresentation Parameters" )
+			.build();
+		//protected static boolean regenPaths = false;
+		protected static boolean regenPaths = ConfigurationBuilder.of( BOOLEAN )
+			.withVarName( "regenPaths" )
+			.withHelp( "regenerate coverage information" )
+			.inGroup( "FaultLocRepresentation Parameters" )
+			.build();
+
 
 	protected boolean doingCoverage = false;
-	private ArrayList<WeightedAtom> faultLocalization = new ArrayList<WeightedAtom>();
+	private ArrayList<Location> faultLocalization = new ArrayList<Location>();
 	protected ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
 	public FaultLocRepresentation(ArrayList<HistoryEle> history,
-			ArrayList<G> genome2, ArrayList<WeightedAtom> arrayList,
+			ArrayList<G> genome2, ArrayList<Location> arrayList,
 			ArrayList<WeightedAtom> arrayList2) {
 		super(history, genome2);
-		this.faultLocalization = new ArrayList<WeightedAtom>(arrayList);
+		this.faultLocalization = new ArrayList<Location>(arrayList);
 		this.fixLocalization = new ArrayList<WeightedAtom>(arrayList2);
 	}
 
 	public FaultLocRepresentation() {
 		super();
 	}
-	
-	
 
 	@Override
 	public void serialize(String filename, ObjectOutputStream fout,
@@ -191,7 +190,7 @@ CachingRepresentation<G> {
 				in = fin;
 			}
 			if (super.deserialize(filename, in, globalinfo)) {
-				this.faultLocalization = (ArrayList<WeightedAtom>) in
+				this.faultLocalization = (ArrayList<Location>) in
 						.readObject();
 				this.fixLocalization = (ArrayList<WeightedAtom>) in
 						.readObject();
@@ -244,7 +243,7 @@ CachingRepresentation<G> {
 		return succeeded;
 	}
 
-	public ArrayList<WeightedAtom> getFaultyAtoms() {
+	public ArrayList<Location> getFaultyLocations() {
 		return this.faultLocalization;
 	}
 
@@ -252,7 +251,7 @@ CachingRepresentation<G> {
 		return this.fixLocalization;
 	}
 
-	public TreeSet<Pair<Mutation, Double>> availableMutations(int atomId) {
+	public TreeSet<Pair<Mutation, Double>> availableMutations(Location atomId) {
 		TreeSet<Pair<Mutation, Double>> retVal = new TreeSet<Pair<Mutation, Double>>();
 		for (Map.Entry mutation : Search.availableMutations.entrySet()) {
 			if(this.doesEditApply(atomId, (Mutation) mutation.getKey())) {
@@ -263,7 +262,7 @@ CachingRepresentation<G> {
 	}
 	
 	@Override
-	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
+	public TreeSet<WeightedAtom> editSources(Location stmtId, Mutation editType, String holeName) {
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
 		switch(editType) {
 		case APPEND:
@@ -279,7 +278,6 @@ CachingRepresentation<G> {
 			}
 			break;
 		case DELETE:
-			retVal.add(new WeightedAtom(stmtId, 1.0));
 			break;
 		default: break;
 		}
@@ -444,7 +442,7 @@ CachingRepresentation<G> {
 				}
 				negHt.add(i);
 				fw.put(i, 0.5);
-				faultLocalization.add(new WeightedAtom(i, negWeight));
+				faultLocalization.add(this.instantiateLocation(i, negWeight)); 
 			}
 		}
 		for (Map.Entry<Integer, Double> entry : fw.entrySet()) {
@@ -457,6 +455,8 @@ CachingRepresentation<G> {
 		this.doingCoverage = false;
 		logger.info("Finish Fault Localization");
 	}
+
+	protected abstract Location instantiateLocation(Integer i, double negWeight);
 
 	protected abstract void printDebugInfo();
 
