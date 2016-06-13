@@ -389,11 +389,10 @@ public class Search<G extends EditOperation> {
 					wa = (WeightedAtom) GlobalUtils.chooseOneWeighted(faultyAtoms);
 					alreadyOnList = proMutList.contains(wa);
 					
-					
 				}while(alreadyOnList);
 				proMutList.add(wa);
 				
-				//If it already picked all the possible faulty atoms
+				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
 				if(proMutList.size()>=faultyAtoms.size()){ 
 					((JavaRepresentation)variant).setAllPossibleStmtsToFixLocalization();
 					//alreadyOnList=false;
