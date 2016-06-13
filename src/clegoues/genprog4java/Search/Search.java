@@ -234,11 +234,7 @@ public abstract class Search<G extends EditOperation> {
 				Location wa = null;
 				boolean alreadyOnList = false;
 				do{
-					ArrayList<Pair<?,Double>> pairList = new ArrayList<Pair<?,Double>>();
-					for(Location atom : faultyAtoms) {
-						pairList.add(atom.asPair());
-					}
-					wa = (Location) GlobalUtils.chooseOneWeighted(pairList);
+					Location selected = GlobalUtils.chooseLocationWeighted(faultyAtoms);
 					alreadyOnList = proMutList.contains(wa);
 				}while(alreadyOnList);
 				proMutList.add(wa);

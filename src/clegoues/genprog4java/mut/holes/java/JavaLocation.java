@@ -53,11 +53,6 @@ public class JavaLocation implements Location<JavaStatement> {
 	}
 
 	@Override
-	public Pair<JavaStatement, Double> asPair() {
-		return new Pair<JavaStatement,Double>(this.location, this.weight);
-	}
-	
-	@Override
 	public Object clone() {
 		JavaLocation clone = null;
 		try {

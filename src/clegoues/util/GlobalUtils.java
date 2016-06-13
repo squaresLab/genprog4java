@@ -39,6 +39,7 @@ import java.util.Random;
 import java.util.TreeSet;
 
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.rep.WeightedAtom;
 
 public class GlobalUtils {
@@ -71,6 +72,26 @@ public class GlobalUtils {
 		}
 		return null;
 	}
+	
+	public static Location chooseLocationWeighted(ArrayList<Location> atoms) {
+		assert(atoms.size() > 0);
+		double totalWeight = 0.0;
+		for(Location atom : atoms) {
+			totalWeight += atom.getWeight();
+		}
+		assert(totalWeight > 0.0) ;
+		double wanted = Configuration.randomizer.nextDouble() * totalWeight;
+		double sofar = 0.0;
+		for(Location atom : atoms) {
+			double here = sofar + atom.getWeight();
+			if(here >= wanted) {
+				return atom;
+			}
+			sofar = here;
+		}
+		return null;
+	}
+
 
 	public static boolean probability(double p) {
 		if(p < 0.0) return false;

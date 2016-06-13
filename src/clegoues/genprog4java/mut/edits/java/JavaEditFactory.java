@@ -29,9 +29,9 @@ import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.WeightedAtom;
 
+@SuppressWarnings("rawtypes")
 public class JavaEditFactory {
 
-	// FIXME: handling of holes for templates is all wrong!
 	private static HashMap<Location, TreeSet<WeightedAtom>> scopeSafeAtomMap = new HashMap<Location, TreeSet<WeightedAtom>>();
 
 	protected Logger logger = Logger.getLogger(JavaEditOperation.class);
@@ -92,7 +92,6 @@ public class JavaEditFactory {
 				continue;
 			}
 
-
 			//Heuristic: Do not insert a return statement on a func whose return type is void
 			//Heuristic: Do not insert a return statement in a constructor
 			if(fixAST instanceof ReturnStatement){
@@ -128,7 +127,6 @@ public class JavaEditFactory {
 					}
 				}
 			}
-
 
 			//Heuristic: Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is wrong
 			if(fixAST instanceof ConstructorInvocation || 
@@ -177,9 +175,7 @@ public class JavaEditFactory {
 		JavaEditFactory.scopeSafeAtomMap.put(stmtId, retVal);
 		return retVal;
 	}
-
-
-
+	
 	public TreeSet<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType,
 			String holeName) { // FIXME: I notice that I'm really not using hole name, here, hm...maybe I can get rid of it?
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
@@ -189,7 +185,6 @@ public class JavaEditFactory {
 		case APPEND: 	
 		case REPLACE:
 			//If it is a return statement, nothing should be appended after it, since it would be dead code
-			// FIXME: replace?
 			if(!(locationStmt.getASTNode() instanceof ReturnStatement || locationStmt.getASTNode() instanceof ThrowStatement )){
 				TreeSet<WeightedAtom> fixStmts = this.scopeHelper(location, variant);
 				for(WeightedAtom fixStmt : fixStmts) {
@@ -270,13 +265,12 @@ public class JavaEditFactory {
 		return retVal;
 	}
 
-	@SuppressWarnings("rawtypes")
 	public Boolean doesEditApply(JavaRepresentation variant, Location location, Mutation editType) {
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 		switch(editType) {
 		case APPEND: 
 		case REPLACE:
-		case SWAP: // FIXME: a bit hacky
+		case SWAP: 
 			return this.editSources(variant, location,  editType, "singleHole").size() > 0;
 		case DELETE: 			
 			return locationStmt.canBeDeleted();
