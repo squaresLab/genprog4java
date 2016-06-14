@@ -64,17 +64,26 @@ import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import clegoues.util.Pair;
+import clegoues.genprog4java.main.ClassInfo;
 
-public class JavaStatement {
+public class JavaStatement implements Comparable<JavaStatement>{
 
 	private ASTNode astNode;
+	private ClassInfo classInfo;
+
 	private int lineno;
 	private int stmtId; // unique
 	private Set<String> names;
 	private Set<String> types;
-
 	private Set<String> mustBeInScope;
+
+	public void setClassInfo(ClassInfo ci) {
+		this.classInfo = ci;
+	}
+
+	public ClassInfo getClassInfo() {
+		return this.classInfo;
+	}
 
 	public void setStmtId(int id) {
 		this.stmtId = id;
@@ -140,10 +149,18 @@ public class JavaStatement {
 		return parent;
 	}
 
+	@Override
+	public int compareTo(JavaStatement other) {
+		return this.stmtId - other.getStmtId();
+	}
+
+	// FIXME: does it make sense to put this in the edits themselves?
+	// maybe not for cached info...
+
 	/******* Cached information for applicability of various mutations/templates ******/
 	private Map<ASTNode, List<ASTNode>> arrayAccesses = null; // to track the parent nodes of array access nodes
 
-	public boolean containsArrayAccesses() {
+	public Map<ASTNode, List<ASTNode>> getArrayAccesses() {
 		if(arrayAccesses == null) {
 			arrayAccesses =  new HashMap<ASTNode, List<ASTNode>>();
 			this.getASTNode().accept(new ASTVisitor() {
@@ -166,18 +183,13 @@ public class JavaStatement {
 			});
 
 		}
-		return this.arrayAccesses.size() > 0;
-	}
-
-	// DOES NOT CHECK that it isn't null; precondition is that the previous function was called!
-	public Map<ASTNode, List<ASTNode>> getArrayAccesses() {
 		return this.arrayAccesses;
 	}
 
 
 	private Map<ASTNode, List<ASTNode>> nullCheckable = null;
 
-	public boolean nullCheckApplies() {
+	public  Map<ASTNode, List<ASTNode>> getNullCheckables() {
 		if(nullCheckable == null) {
 			nullCheckable = new HashMap<ASTNode, List<ASTNode>>();
 			if(this.getASTNode() instanceof MethodInvocation 
@@ -220,17 +232,11 @@ public class JavaStatement {
 
 			}
 		}
-		return nullCheckable.size() > 0;
-	}
-	// DOES NOT CHECK that it isn't null; precondition is that the previous function was called!
-	public Map<ASTNode, List<ASTNode>> getNullCheckables() {
-		return this.nullCheckable;
+		return nullCheckable;
 	}
 
-	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
-	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
-	public Map<ASTNode, List<ASTNode>> getMethodReplacements() { return methodReplacements; }
-	public Map<ASTNode, List<MethodInfo>> getCandidateMethodReplacements() { return candidateMethodReplacements; }
+
+
 
 	private ArrayList<ITypeBinding> paramsToTypes(List<SingleVariableDeclaration> params) {
 		int i = 0; 
@@ -242,87 +248,93 @@ public class JavaStatement {
 		}
 		return paramTypes;
 	}
-	
+
 	private Map<ASTNode, List<ASTNode>> methodParamReplacements = null;
 	private Map<ASTNode, Map<String,ASTNode>> candidateMethodParamReplacements= null;
 	private Map<String, Map<String,Set<ASTNode>>> expressionsInScope = null;
 
-	
+
 	private void saveMethodParamReplacerInfo(String methodName, String typeName, ASTNode expNode) {
-//		HashMap<String,Set<ASTNode>> typeToExpressions = null;
-//		if(!expressionsInScope.containsKey(methodName)) {
-//			typeToExpressions = (HashMap) expressionsInScope.get(methodName);
-//		} else {
-//			typeToExpressions = new HashMap<String,Set<ASTNode>>();
-//			expressionsInScope.put(methodName, typeToExpressions);
-//		}
-//		Set<ASTNode> ofType = null;
-//		if(expressionsInScope.containsKey(typeName)) {
-//			ofType = typeToExpressions.get(typeName);
-//		} else {
-//			ofType = new TreeSet<ASTNode>();
-//			expressionsInScope.put(typeName, ofType);
-//		}
-//		ofType.add(expNode);
+		//		HashMap<String,Set<ASTNode>> typeToExpressions = null;
+		//		if(!expressionsInScope.containsKey(methodName)) {
+		//			typeToExpressions = (HashMap) expressionsInScope.get(methodName);
+		//		} else {
+		//			typeToExpressions = new HashMap<String,Set<ASTNode>>();
+		//			expressionsInScope.put(methodName, typeToExpressions);
+		//		}
+		//		Set<ASTNode> ofType = null;
+		//		if(expressionsInScope.containsKey(typeName)) {
+		//			ofType = typeToExpressions.get(typeName);
+		//		} else {
+		//			ofType = new TreeSet<ASTNode>();
+		//			expressionsInScope.put(typeName, ofType);
+		//		}
+		//		ofType.add(expNode);
 	}
-	
+
 	public boolean methodParamReplacerApplies() {
 		return false;
-//		if(methodParamReplacements == null) {
-//			methodParamReplacements = new HashMap<ASTNode, List<ASTNode>>();
-//			candidateMethodParamReplacements = new HashMap<ASTNode, Map<String,ASTNode>>();
-//			expressionsInScope = new HashMap<String,Map<String, Set<ASTNode>>>();
-//		}
-//		final ASTNode myASTNode = this.getASTNode();
-//		if(methodParamReplacements.containsKey(myASTNode)) {
-//			return !methodParamReplacements.get(myASTNode).isEmpty();
-//		}
-//		MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
-//		final String methodName = md.getName().getIdentifier();
-//
-//		md.accept(new ASTVisitor() {
-//				public boolean visit(Expression node) {
-//					ITypeBinding typeBinding = node.resolveTypeBinding();
-//					String typeName = typeBinding.getName();
-//					saveMethodParamReplacerInfo(methodName, typeName, node);
-//					return true;
-//				}
-//				
-//			});
-//					
-//			this.getASTNode().accept(new ASTVisitor() {
-//				// method to visit all Expressions relevant for this in locationNode and
-//				// store their parents
-//				public boolean visit(MethodInvocation node) {
-//					// if there exists another invocation that this works for...
-//					ASTNode parent = getParent(node);
-//					IMethodBinding invokedMethod = node.resolveMethodBinding().getMethodDeclaration();
-//					node.arguments();
-//					ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>(Arrays.asList(invokedMethod.getParameterTypes()));
-//					if(paramTypes.size() > 0) {
-//						for(ITypeBinding paramType : paramTypes) {
-//							if(expressionsInScope.containsKey(paramType.getName())) {
-//								List<ASTNode> thisList = null;
-//								if(methodParamReplacements.containsKey(myASTNode)) {
-//									thisList = methodParamReplacements.get(myASTNode);
-//								} else {
-//									thisList = new ArrayList<ASTNode>();
-//									methodParamReplacements.put(myASTNode, thisList);
-//								}
-//								thisList.add(node);
-//							}
-//						}
-//					}
-//				}
-//
-//			});
-//			if(methodParamReplacements.get(this.getASTNode()) != null && methodParamReplacements.get(this.getASTNode()).size() > 0) {
-//				
-//			
-//		} else { return false; }
+		//		if(methodParamReplacements == null) {
+		//			methodParamReplacements = new HashMap<ASTNode, List<ASTNode>>();
+		//			candidateMethodParamReplacements = new HashMap<ASTNode, Map<String,ASTNode>>();
+		//			expressionsInScope = new HashMap<String,Map<String, Set<ASTNode>>>();
+		//		}
+		//		final ASTNode myASTNode = this.getASTNode();
+		//		if(methodParamReplacements.containsKey(myASTNode)) {
+		//			return !methodParamReplacements.get(myASTNode).isEmpty();
+		//		}
+		//		MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
+		//		final String methodName = md.getName().getIdentifier();
+		//
+		//		md.accept(new ASTVisitor() {
+		//				public boolean visit(Expression node) {
+		//					ITypeBinding typeBinding = node.resolveTypeBinding();
+		//					String typeName = typeBinding.getName();
+		//					saveMethodParamReplacerInfo(methodName, typeName, node);
+		//					return true;
+		//				}
+		//				
+		//			});
+		//					
+		//			this.getASTNode().accept(new ASTVisitor() {
+		//				// method to visit all Expressions relevant for this in locationNode and
+		//				// store their parents
+		//				public boolean visit(MethodInvocation node) {
+		//					// if there exists another invocation that this works for...
+		//					ASTNode parent = getParent(node);
+		//					IMethodBinding invokedMethod = node.resolveMethodBinding().getMethodDeclaration();
+		//					node.arguments();
+		//					ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>(Arrays.asList(invokedMethod.getParameterTypes()));
+		//					if(paramTypes.size() > 0) {
+		//						for(ITypeBinding paramType : paramTypes) {
+		//							if(expressionsInScope.containsKey(paramType.getName())) {
+		//								List<ASTNode> thisList = null;
+		//								if(methodParamReplacements.containsKey(myASTNode)) {
+		//									thisList = methodParamReplacements.get(myASTNode);
+		//								} else {
+		//									thisList = new ArrayList<ASTNode>();
+		//									methodParamReplacements.put(myASTNode, thisList);
+		//								}
+		//								thisList.add(node);
+		//							}
+		//						}
+		//					}
+		//				}
+		//
+		//			});
+		//			if(methodParamReplacements.get(this.getASTNode()) != null && methodParamReplacements.get(this.getASTNode()).size() > 0) {
+		//				
+		//			
+		//		} else { return false; }
 	}
-	
-	public boolean methodReplacerApplies(final List<MethodInfo> methodDecls) {
+	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
+	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
+	public List<MethodInfo> getCandidateMethodReplacements(ASTNode methodToReplace ) 
+	{ return candidateMethodReplacements.get(methodToReplace); }
+
+	// FIXME: replacement methods should apparently be in the same scope; can we safely assume
+	// that everything in the methoddecls field qualifies?
+	public Map<ASTNode, List<ASTNode>> getReplacableMethods(final List<MethodInfo> methodDecls) {
 		if(methodReplacements == null) {
 			methodReplacements = new HashMap<ASTNode, List<ASTNode>>();
 			candidateMethodReplacements = new HashMap<ASTNode, List<MethodInfo>>();
@@ -334,54 +346,56 @@ public class JavaStatement {
 					// if there exists another invocation that this works for...
 					ArrayList<MethodInfo> possibleReps = new ArrayList<MethodInfo> ();
 					ASTNode parent = getParent(node);
-					IMethodBinding invokedMethod = node.resolveMethodBinding().getMethodDeclaration();
-					ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>(Arrays.asList(invokedMethod.getParameterTypes()));
-					ITypeBinding thisReturnType = invokedMethod.getReturnType();
+					IMethodBinding binding = node.resolveMethodBinding();
+					if(binding != null) {
+						IMethodBinding invokedMethod = binding.getMethodDeclaration();
+						ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>(Arrays.asList(invokedMethod.getParameterTypes()));
+						ITypeBinding thisReturnType = invokedMethod.getReturnType();
 
-					for(MethodInfo mi : methodDecls) {
-						IMethodBinding optionMethodBinding = mi.getNode().resolveBinding();
-						if(optionMethodBinding.equals(invokedMethod)) // don't include self as valid replacement
-							continue;
-						if((mi.getNumArgs() == paramTypes.size())) {
-							ITypeBinding candReturnType = mi.getReturnType().resolveBinding();
-							if(candReturnType.isAssignmentCompatible(thisReturnType)) {
-								ArrayList<ITypeBinding> candParamTypes = paramsToTypes(mi.getParameters());
-								boolean isCompatible = true;
-								for(int i = 0; i < mi.getNumArgs(); i++) {
-									ITypeBinding candParam = candParamTypes.get(i);
-									ITypeBinding myParam = paramTypes.get(i);
-									if(!myParam.isAssignmentCompatible(candParam)) {
-										isCompatible = false;
-										break;
+						for(MethodInfo mi : methodDecls) {
+							IMethodBinding optionMethodBinding = mi.getNode().resolveBinding();
+							if(optionMethodBinding.equals(invokedMethod)) // don't include self as valid replacement
+								continue;
+							if((mi.getNumArgs() == paramTypes.size())) {
+								ITypeBinding candReturnType = mi.getReturnType().resolveBinding();
+								if(candReturnType.isAssignmentCompatible(thisReturnType)) {
+									ArrayList<ITypeBinding> candParamTypes = paramsToTypes(mi.getParameters());
+									boolean isCompatible = true;
+									for(int i = 0; i < mi.getNumArgs(); i++) {
+										ITypeBinding candParam = candParamTypes.get(i);
+										ITypeBinding myParam = paramTypes.get(i);
+										if(!myParam.isAssignmentCompatible(candParam)) {
+											isCompatible = false;
+											break;
+										}
+									}
+									if(isCompatible) {
+										possibleReps.add(mi);
 									}
 								}
-								if(isCompatible) {
-									possibleReps.add(mi);
-								}
+
 							}
-
 						}
-					}
-
-					if(!methodReplacements.containsKey(parent)){
-						List<ASTNode> methodNodes = new ArrayList<ASTNode>();
-						methodNodes.add(node);
-						methodReplacements.put(parent, methodNodes);		
-					}else{
-						List<ASTNode> methodNodes = (List<ASTNode>) arrayAccesses.get(parent);
-						if(!methodNodes.contains(node))
+						if(!methodReplacements.containsKey(parent)){
+							List<ASTNode> methodNodes = new ArrayList<ASTNode>();
 							methodNodes.add(node);
-						methodReplacements.put(parent, methodNodes);	
-					}
-					candidateMethodReplacements.put(node, possibleReps);
+							methodReplacements.put(parent, methodNodes);		
+						}else{
+							List<ASTNode> methodNodes = (List<ASTNode>) methodReplacements.get(parent);
+							if(!methodNodes.contains(node))
+								methodNodes.add(node);
+							methodReplacements.put(parent, methodNodes);	
+						}
+						candidateMethodReplacements.put(node, possibleReps);
+					} 
 					return true;
 				}
 
 			});
 		}
-		return methodReplacements.size() > 0;
+		return methodReplacements;
 	}
-	
+
 
 	public ASTNode blockThatContainsThisStatement(){
 		ASTNode parent = this.getASTNode().getParent();
@@ -392,7 +406,7 @@ public class JavaStatement {
 	}
 
 	private static int howManyReturns = 0;
-	
+
 	public static boolean hasMoreThanOneReturn(MethodDeclaration method){
 		method.accept(new ASTVisitor() {
 			@Override
@@ -424,16 +438,16 @@ public class JavaStatement {
 					&& ((EnhancedForStatement)parent).getBody().equals(faultyNode))
 				return false;
 			if(parent instanceof IfStatement && (((IfStatement)parent).getElseStatement() != null) &&
-						((IfStatement)parent).getElseStatement().equals(faultyNode))
-					return false;
+					((IfStatement)parent).getElseStatement().equals(faultyNode))
+				return false;
 		}
 
 		//Heuristic: Don't remove returns from functions that have only one return statement.
 		if(faultyNode instanceof ReturnStatement){
 			parent = this.getEnclosingMethod();
 			if(parent != null && parent instanceof MethodDeclaration) {
-			if(hasMoreThanOneReturn((MethodDeclaration)parent))
-				return false;
+				if(hasMoreThanOneReturn((MethodDeclaration)parent))
+					return false;
 			}
 		}
 
@@ -446,7 +460,7 @@ public class JavaStatement {
 		}
 		return true;
 	}
-	
+
 	public ASTNode getEnclosingMethod() {
 		ASTNode parent = this.getASTNode().getParent();
 		while(parent != null && !(parent instanceof MethodDeclaration)){
@@ -474,7 +488,7 @@ public class JavaStatement {
 		}
 		return false;
 	}
-	
+
 	public boolean isWithinLoopOrCase() {
 		ASTNode buggyNode = this.getASTNode();
 		if(buggyNode instanceof SwitchStatement 
@@ -482,15 +496,15 @@ public class JavaStatement {
 				|| buggyNode instanceof WhileStatement
 				|| buggyNode instanceof DoStatement
 				|| buggyNode instanceof EnhancedForStatement)
-		return true;
-		
+			return true;
+
 		while(buggyNode.getParent() != null){
 			buggyNode = buggyNode.getParent();
 			if(buggyNode instanceof SwitchStatement 
-			|| buggyNode instanceof ForStatement 
-			|| buggyNode instanceof WhileStatement
-			|| buggyNode instanceof DoStatement
-			|| buggyNode instanceof EnhancedForStatement)
+					|| buggyNode instanceof ForStatement 
+					|| buggyNode instanceof WhileStatement
+					|| buggyNode instanceof DoStatement
+					|| buggyNode instanceof EnhancedForStatement)
 				return true;
 		}
 		return false;
@@ -503,7 +517,7 @@ public class JavaStatement {
 		this.setTypes(ASTUtils.getTypes(node));
 		this.setRequiredNames(ASTUtils.getScope(node));
 		this.setASTNode(node);
-		
+
 	}
 
 }

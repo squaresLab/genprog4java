@@ -76,12 +76,10 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
@@ -119,32 +117,30 @@ import clegoues.genprog4java.java.ScopeInfo;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.main.Utils;
+import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.HistoryEle;
-import clegoues.genprog4java.mut.JavaAppendOperation;
-import clegoues.genprog4java.mut.JavaDeleteOperation;
-import clegoues.genprog4java.mut.JavaEditOperation;
-import clegoues.genprog4java.mut.JavaLowerBoundSetOperation;
-import clegoues.genprog4java.mut.JavaMethodParameterReplacer;
-import clegoues.genprog4java.mut.JavaMethodReplacer;
-import clegoues.genprog4java.mut.JavaNullCheckOperation;
-import clegoues.genprog4java.mut.JavaOffByOneOperation;
-import clegoues.genprog4java.mut.JavaRangeCheckOperation;
-import clegoues.genprog4java.mut.JavaReplaceOperation;
-import clegoues.genprog4java.mut.JavaSwapOperation;
-import clegoues.genprog4java.mut.JavaUpperBoundSetOperation;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.WeightedHole;
+import clegoues.genprog4java.mut.edits.java.JavaEditFactory;
+import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
+import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.Pair;
 
 public class JavaRepresentation extends
 FaultLocRepresentation<JavaEditOperation> {
 	protected Logger logger = Logger.getLogger(JavaRepresentation.class);
+	
+	private JavaEditFactory editFactory = new JavaEditFactory();
 
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
 
 	private JavaSourceInfo sourceInfo = new JavaSourceInfo();
-	private JavaSemanticInfo semanticInfo = new JavaSemanticInfo();
+	public JavaSemanticInfo semanticInfo = new JavaSemanticInfo();
+	private static HashMap<Integer,JavaLocation> locationInformation = new HashMap<Integer,JavaLocation>();
 
 	private static int stmtCounter = 0;
 
@@ -152,7 +148,7 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	public JavaRepresentation(ArrayList<HistoryEle> history,
 			ArrayList<JavaEditOperation> genome2,
-			ArrayList<WeightedAtom> arrayList,
+			ArrayList<Location> arrayList,
 			ArrayList<WeightedAtom> arrayList2) {
 		super(history, genome2, arrayList, arrayList2);
 	}
@@ -348,13 +344,18 @@ FaultLocRepresentation<JavaEditOperation> {
 		List<ASTNode> stmts = myParser.getStatements();
 		sourceInfo.addToBaseCompilationUnits(pair, myParser.getCompilationUnit());
 		semanticInfo.addAllSemanticInfo(myParser);
-
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
 				JavaStatement s = new JavaStatement();
+				s.setStmtId(stmtCounter);
+				s.setClassInfo(pair);
+				
+				//System.out.println("Stmt: " + stmtCounter);
 
 				logger.info("Stmt: " + stmtCounter);
 				logger.info(node);
+				
+				
 
 				s.setInfo(stmtCounter, node);
 				stmtCounter++;
@@ -366,13 +367,15 @@ FaultLocRepresentation<JavaEditOperation> {
 				semanticInfo.addToScopeMap(s, scopeInfo.getScope(s.getASTNode()));
 			}
 		}
-
+		
 	}
 
 	public static boolean canRepair(ASTNode node) {
+
+
 		return node instanceof AssertStatement 
 				|| node instanceof Block
-				|| node instanceof MethodInvocation
+			//	|| node instanceof MethodInvocation
 				|| node instanceof BreakStatement
 				|| node instanceof ConstructorInvocation
 				|| node instanceof ContinueStatement
@@ -528,7 +531,6 @@ FaultLocRepresentation<JavaEditOperation> {
 		for (Map.Entry<ClassInfo, String> pair : sourceInfo.getOriginalSource().entrySet()) {
 			ClassInfo ci = pair.getKey();
 			String filename = ci.getClassName();
-			String path = ci.getPackage();
 			String source = pair.getValue();
 			Document original = new Document(source);
 			CompilationUnit cu = sourceInfo.getBaseCompilationUnits().get(ci);
@@ -537,9 +539,9 @@ FaultLocRepresentation<JavaEditOperation> {
 
 			try {
 				for (JavaEditOperation edit : genome) {
-					if(edit.getFileInfo().getClassName().equalsIgnoreCase(filename) 
-							&& edit.getFileInfo().getPackage().equalsIgnoreCase(path)){
-						edit.edit(rewriter, ast, cu);
+					JavaLocation locationStatement = (JavaLocation) edit.getLocation();
+					if(locationStatement.getClassInfo().getClassName().equalsIgnoreCase(filename)){
+						edit.edit(rewriter);
 					}
 				}
 
@@ -622,86 +624,23 @@ FaultLocRepresentation<JavaEditOperation> {
 		command.addArgument("clegoues.genprog4java.fitness.JUnitTestRunner");
 
 		command.addArgument(test.toString());
-		logger.info("Command: " + command.toString());
+		//logger.info("Command: " + command.toString());
 		return command;
 
 	}
 
-	private JavaStatement getLocationStatement(int location) {
-		return sourceInfo.getBase().get(location);
-	}
 
-	private JavaStatement getFromCodeBank(int atomId) {
+	public JavaStatement getFromCodeBank(int atomId) {
 		return sourceInfo.getCodeBank().get(atomId);
 	}
-	private void editHelper(int location, int fixCode, Mutation mutType) {
-		JavaStatement locationStatement = this.getLocationStatement(location);
-		JavaStatement fixCodeStatement = this.getFromCodeBank(fixCode); 
-		ClassInfo fileName = sourceInfo.getFileFromStmt(location);
-		JavaEditOperation newEdit = null;
-		switch(mutType) {
-		case REPLACE: newEdit = new JavaReplaceOperation(fileName,
-				locationStatement, fixCodeStatement);
-		break; 
-		case APPEND: newEdit = new JavaAppendOperation(fileName,
-				locationStatement, fixCodeStatement);
-		break;
-		default: break;
-		}
-		this.genome.add(newEdit);
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void performEdit(Mutation edit, Location dst, HashMap<String,EditHole> sources) {
+		super.performEdit(edit, dst, sources);
+		JavaEditOperation thisEdit = this.editFactory.makeEdit(edit, dst, sources);
+		this.genome.add(thisEdit);
 	}
-
-	public void performEdit(Mutation edit, int dst, int source) {
-		super.performEdit(edit, dst, source);
-		JavaStatement locationStatement = this.getLocationStatement(dst);
-		ClassInfo fileName = sourceInfo.getFileFromStmt(dst); 
-
-		switch(edit) {
-		case DELETE: 
-			JavaEditOperation newEdit = new JavaDeleteOperation(fileName, locationStatement);
-			this.genome.add(newEdit);
-			break;
-		case PARREP:
-			JavaEditOperation parrep = new JavaMethodParameterReplacer(fileName, locationStatement);
-			this.genome.add(parrep);
-			break;
-		case FUNREP:
-			JavaEditOperation funEdit = new JavaMethodReplacer(fileName, locationStatement);
-			this.genome.add(funEdit);
-			break;
-		case LBOUNDSET:
-			JavaEditOperation lboundEdit = new JavaLowerBoundSetOperation(fileName, locationStatement);
-			this.genome.add(lboundEdit);
-			break;
-		case UBOUNDSET:
-			JavaEditOperation uboundEdit = new JavaUpperBoundSetOperation(fileName, locationStatement);
-			this.genome.add(uboundEdit);
-			break;
-		case RANGECHECK:
-			JavaEditOperation rcheckedit = new JavaRangeCheckOperation(fileName, locationStatement);
-			this.genome.add(rcheckedit);
-			break;
-		case OFFBYONE:
-			JavaEditOperation offbyoneEdit = new JavaOffByOneOperation(fileName, locationStatement);
-			this.genome.add(offbyoneEdit);
-			break;
-		case NULLCHECK:
-			JavaEditOperation nullcheckEdit = new JavaNullCheckOperation(fileName,locationStatement);
-			this.genome.add(nullcheckEdit);
-			break;
-		case APPEND:
-		case REPLACE: this.editHelper(dst, source, edit);
-		break;
-		case SWAP:
-			JavaStatement fixCodeStatement = this.getLocationStatement(source); 
-			JavaEditOperation swapEdit = new JavaSwapOperation(fileName, 
-					locationStatement, fixCodeStatement);
-			this.genome.add(swapEdit);
-			break;
-		default: logger.fatal("unhandled edit template type in performEdit; this should be impossible (famous last words...)");
-		}
-	}
-
 
 	@Override
 	protected boolean internalCompile(String progName, String exeName) {
@@ -807,11 +746,20 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	public JavaRepresentation copy() {
 		JavaRepresentation copy = new JavaRepresentation(this.getHistory(),
-				this.getGenome(), this.getFaultyAtoms(),
+				this.getGenome(), this.getFaultyLocations(),
 				this.getFixSourceAtoms());
 		return copy;
 	}
 
+	public String returnTypeOfThisMethod(String matchString){
+		for (Pair<String,String> p : semanticInfo.getMethodReturnTypes()) {
+			if(p.getFirst().equalsIgnoreCase(matchString)){
+				return p.getSecond();
+			}
+		}
+		return null;
+	}
+	
 	@Override
 	public void reduceSearchSpace() {
 		ArrayList<WeightedAtom> toRemove = new ArrayList<WeightedAtom>();
@@ -882,230 +830,33 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 	}
 
-	private static HashMap<Integer, TreeSet<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, TreeSet<WeightedAtom>>();
 
-	private TreeSet<WeightedAtom> scopeHelper(int stmtId) {
-		if (JavaRepresentation.scopeSafeAtomMap.containsKey(stmtId) && !
-				JavaRepresentation.scopeSafeAtomMap.get(stmtId).isEmpty()) {
-			return JavaRepresentation.scopeSafeAtomMap.get(stmtId);
+	@Override
+	public Boolean doesEditApply(Location location, Mutation editType) {
+		return editFactory.doesEditApply(this,location,editType); 
+	}
+
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public TreeSet<WeightedHole> editSources(Location location, Mutation editType, String holeName) {
+		TreeSet<EditHole> holes = editFactory.editSources(this,location,editType,holeName);
+		TreeSet<WeightedHole> retVal = new TreeSet<WeightedHole>();
+		for(EditHole hole : holes) {
+			// possible FIXME for later: weighting options equally for the time being.  One day
+			// maybe we'll do something smarter...
+			retVal.add(new WeightedHole(hole));
 		}
-
-		JavaStatement potentiallyBuggyStmt = this.getLocationStatement(stmtId); 
-		ASTNode faultAST = potentiallyBuggyStmt.getASTNode();
-		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-
-		for (WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {
-			int index = potentialFixAtom.getAtom();
-			JavaStatement potentialFixStmt = this.getFromCodeBank(index);
-			ASTNode fixAST = potentialFixStmt.getASTNode();
-
-			// check variable names (but not types right now I don't think) in scope.
-			if(!semanticInfo.scopeCheckOK(potentiallyBuggyStmt, potentialFixStmt)) {
-				continue;
-			}
-
-			//Heuristic: Don’t replace or swap (or append) an stmt with one just like it
-			// CLG killed the stmt ID equivalence check because it's possible for a statement 
-			// in a location to have been modified previously such that the statement in the code bank is
-			// different from what is now at that location.
-			// this comes down to our having overloaded statement IDs to mean both location and statement ID
-			// which is a problem I keep meaning to solve.
-			if(faultAST.equals(fixAST)) {
-				continue;
-			}
-
-			//Heuristic: Do not insert a return statement on a func whose return type is void
-			//Heuristic: Do not insert a return statement in a constructor
-			if(fixAST instanceof ReturnStatement){
-				if(potentiallyBuggyStmt.parentMethodReturnsVoid() ||
-						potentiallyBuggyStmt.isLikelyAConstructor())
-					continue;
-
-				//Heuristic: Swapping, Appending or Replacing a return stmt to the middle of a block will make the code after it unreachable
-				ASTNode parentBlock = potentiallyBuggyStmt.blockThatContainsThisStatement();
-				if(parentBlock != null && parentBlock instanceof Block) {
-					List<ASTNode> statementsInBlock = ((Block)parentBlock).statements();
-					ASTNode lastStmtInTheBlock = statementsInBlock.get(statementsInBlock.size()-1);
-					if(!lastStmtInTheBlock.equals(faultAST)){
-						continue;
-					}
-				} else {
-					continue;
-				}
-
-				//If we move a return statement into a function, the parameter in the return must match the function’s return type
-				ASTNode enclosingMethod = potentiallyBuggyStmt.getEnclosingMethod();
-
-				if (enclosingMethod instanceof MethodDeclaration) {
-					String returnType = returnTypeOfThisMethod(((MethodDeclaration)enclosingMethod).getName().toString());
-					if(returnType != null){
-						ReturnStatement potFix = (ReturnStatement) fixAST;
-						if(potFix.getExpression() instanceof SimpleName){
-							String variableType = variableDataTypes.get(potFix.getExpression().toString());
-							if( !returnType.equalsIgnoreCase(variableType)){
-								continue;
-							}
-						}
-					}
-				}
-			}
-
-			//Heuristic: Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is wrong
-			if(fixAST instanceof ConstructorInvocation || 
-					fixAST instanceof SuperConstructorInvocation){
-				ASTNode enclosingMethod = potentiallyBuggyStmt.getEnclosingMethod();
-
-				if (enclosingMethod != null && 
-						enclosingMethod instanceof MethodDeclaration && 
-						((MethodDeclaration) enclosingMethod).isConstructor()) {
-					StructuralPropertyDescriptor locationPotBuggy = faultAST.getLocationInParent();
-					List<ASTNode> statementsInBlock = ((MethodDeclaration) enclosingMethod).getBody().statements();
-					ASTNode firstStmtInTheBlock = statementsInBlock.get(0);
-					StructuralPropertyDescriptor locationFirstInBlock = firstStmtInTheBlock.getLocationInParent();
-					//This will catch replacements and swaps, but it will append after the first stmt, so append will still create a non compiling variant
-					if(!locationFirstInBlock.equals(locationPotBuggy)){
-						continue;
-					}
-				} else {
-					continue;
-				}
-			}
-
-			//Heuristic: Don't allow to move breaks outside of switch stmts
-			// OR loops!
-			// TODO: check for continues as well
-			if(fixAST instanceof BreakStatement && 
-					!potentiallyBuggyStmt.isWithinLoopOrCase()){
-				continue;
-			}
-
-			//Heuristic: Don't replace/swap returns within functions that have only one return statement
-			// (unless the replacer is also a return statement); could also check if it's a block or
-			// other sequence of statements with a return within it, but I'm lazy
-			if((!(fixAST instanceof ReturnStatement)) && 
-					faultAST instanceof ReturnStatement) {
-				ASTNode parent = potentiallyBuggyStmt.getEnclosingMethod();
-				if(parent instanceof MethodDeclaration && 
-						!JavaStatement.hasMoreThanOneReturn((MethodDeclaration)parent)) {
-					continue;
-				}
-			}
-			// if we made it this far without continuing, we're good to go.
-
-			retVal.add(potentialFixAtom);
-
-		}
-		JavaRepresentation.scopeSafeAtomMap.put(stmtId, retVal);
 		return retVal;
 	}
-
-	private String returnTypeOfThisMethod(String matchString){
-		for (Pair<String,String> p : methodReturnType) {
-			if(p.getFirst().equalsIgnoreCase(matchString)){
-				return p.getSecond();
-			}
-		}
-		return null;
-	}
-
-	@Override
-	public Boolean doesEditApply(int location, Mutation editType) {
-		JavaStatement locationStmt = this.getFromCodeBank(location); 
-		switch(editType) {
-		case APPEND: 
-		case REPLACE:
-		case SWAP:
-			return this.editSources(location,  editType).size() > 0;
-		case DELETE: 
-			return locationStmt.canBeDeleted();
-		case OFFBYONE:  
-		case UBOUNDSET:
-		case LBOUNDSET:
-		case RANGECHECK:
-			return locationStmt.containsArrayAccesses();
-		case FUNREP: 
-			return locationStmt.methodReplacerApplies(methodDecls);
-		case PARREP:
-			return locationStmt.methodParamReplacerApplies(/* expressions/vars in scope? */);
-
-		case NULLCHECK: 
-			return locationStmt.nullCheckApplies();
-		default:
-			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
-			break;
-		}
-		return false;
-	}
-
-
-	@Override
-	public TreeSet<WeightedAtom> editSources(int stmtId, Mutation editType) {
-		switch(editType) {
-		case APPEND: 	
-			JavaStatement locationStmt = this.getFromCodeBank(stmtId); 
-			//If it is a return statement or a throw statement, nothing should be appended after it, since it would be dead code
-			if(locationStmt.getASTNode() instanceof ReturnStatement || locationStmt.getASTNode() instanceof ThrowStatement){
-				return new TreeSet<WeightedAtom>();
-			} else {
-				return this.scopeHelper(stmtId);
-			}
-		case REPLACE:
-			return this.scopeHelper(stmtId);
-		case DELETE: 
-			TreeSet<WeightedAtom> retval = new TreeSet<WeightedAtom>();
-			retval.add(new WeightedAtom(stmtId, 1.0));
-			return retval;
-		case SWAP:
-			TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
-			for (WeightedAtom item : this.scopeHelper(stmtId)) {
-				int atom = item.getAtom();
-				TreeSet<WeightedAtom> inScopeThere = this.scopeHelper(atom);
-				boolean containsThisAtom = false;
-				for (WeightedAtom there : inScopeThere) {
-					if (there.getAtom() == stmtId) {
-						containsThisAtom = true;
-						break;
-					}
-				}
-				if (containsThisAtom)
-					retVal.add(item);
-			}
-			return retVal;
-		case FUNREP:
-		case PARREP:
-		case PARADD:
-		case PARREM:
-		case EXPREP:
-		case EXPADD:
-		case EXPREM:
-		case NULLCHECK:
-		case OBJINIT:
-		case RANGECHECK:
-		case SIZECHECK:
-		case CASTCHECK:
-		case LBOUNDSET:
-		case UBOUNDSET:
-		case OFFBYONE:
-			retval = new TreeSet<WeightedAtom>();
-			retval.add(new WeightedAtom(stmtId, 1.0));
-			return retval;
-			//break; this is unreachable
-		default:
-			// IMPORTANT FIXME FOR MANISH AND MAU: you must add handling here to check legality for templates as you add them.
-			// if a template always applies, then you can move the template type to the DELETE case, above.
-			// however, I don't think most templates always apply; it doesn't make sense to null check a statement in which nothing
-			// could conceivably be null, for example.
-			logger.fatal("Unhandled template type in editSources!  Fix code in JavaRepresentation to do this properly.");
-			return new TreeSet<WeightedAtom>();
-		}
-	}
-
+	
+	@SuppressWarnings("rawtypes")
 	@Override
 	protected void printDebugInfo() {
-		ArrayList<WeightedAtom> buggyStatements = this.getFaultyAtoms();
-		for (WeightedAtom atom : buggyStatements) {
-			int atomid = atom.getAtom();
-			JavaStatement stmt = this.getFromCodeBank(atomid);
+		ArrayList<Location> buggyLocations = this.getFaultyLocations();
+		for (Location location : buggyLocations) {
+			int atomid = ((JavaStatement) location.getLocation()).getStmtId(); 
+			JavaStatement stmt = sourceInfo.getBase().get(atomid);
 			ASTNode actualStmt = stmt.getASTNode();
 			String stmtStr = actualStmt.toString();
 			logger.debug("statement " + atomid + " at line " + stmt.getLineno()
@@ -1123,8 +874,26 @@ FaultLocRepresentation<JavaEditOperation> {
 				logger.debug("\t\t" + t);
 			}
 		}
+
 	}
 
+	@SuppressWarnings("rawtypes")
+	@Override
+	public Location instantiateLocation(Integer i, double negWeight) {
+		if(locationInformation.containsKey(i)) {
+			return locationInformation.get(i);
+		}
+		JavaStatement stmt = sourceInfo.getBase().get(i);
+		JavaLocation location = new JavaLocation(stmt, negWeight);
+		location.setClassInfo(stmt.getClassInfo());
+		locationInformation.put(i, location);
+		return location;
+	}
+
+	@Override
+	public List<String> holesForMutation(Mutation mut) {
+		return editFactory.holesForMutation(mut);
+	}
 
 	public void setAllPossibleStmtsToFixLocalization(){
 		try {

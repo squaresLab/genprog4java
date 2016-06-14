@@ -39,6 +39,7 @@ import java.util.Random;
 import java.util.TreeSet;
 
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.rep.WeightedAtom;
 
 public class GlobalUtils {
@@ -49,9 +50,7 @@ public class GlobalUtils {
 			returnVal.add(i);
 		}
 		return returnVal;
-
 	}
-
 
 	public static Pair<?,Double> chooseOneWeighted(ArrayList<Pair<?,Double>> atoms) {
 		assert(atoms.size() > 0);

@@ -31,38 +31,51 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package clegoues.genprog4java.mut;
+package clegoues.genprog4java.mut.edits.java;
 
-import org.eclipse.jdt.core.dom.AST;
+
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.main.ClassInfo;
+import clegoues.genprog4java.mut.EditHole;
+import clegoues.genprog4java.mut.EditOperation;
+import clegoues.genprog4java.mut.Location;
+import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
-public abstract class JavaEditOperation implements
-EditOperation<JavaStatement, ASTRewrite, AST> {
+public abstract class JavaEditOperation implements EditOperation<ASTRewrite> {
 
 	private Mutation mutType;
-	private JavaStatement location = null;
-	private JavaStatement fixCode = null;
-	private ClassInfo fileInfo = null;
-
-	protected JavaEditOperation(Mutation mutType, ClassInfo fileName, JavaStatement location) {
+	private Location<JavaStatement> location = null;
+	protected ArrayList<String> holeNames = new ArrayList<String>(); 
+	private HashMap<String,EditHole> holeCode = new HashMap<String,EditHole>();
+	
+	public JavaEditOperation(Mutation mutType, JavaLocation location) {
 		this.mutType = mutType;
 		this.location = location;
-		this.fileInfo = fileName;
+	}
+	
+	public Location getLocation() {
+		return this.location;
 	}
 
-
-	protected JavaEditOperation(Mutation mutType, ClassInfo fileName, JavaStatement location,
-			JavaStatement fixCode) {
+	protected JavaEditOperation(Mutation mutType, JavaLocation location, HashMap<String,EditHole> sources) {
 		this.mutType = mutType;
 		this.location = location;
-		this.fixCode = fixCode;
-		this.fileInfo = fileName;
+		this.holeCode = new HashMap<String,EditHole>(sources);
 	}
 
-
+	@Override
+	public List<String> getHoles() {
+		return this.holeNames;
+	}
+	
 	@Override
 	public Mutation getType() {
 		return this.mutType;
@@ -73,30 +86,20 @@ EditOperation<JavaStatement, ASTRewrite, AST> {
 		this.mutType = type;
 	}
 
-	public JavaStatement getLocation() {
-		return this.location;
+	protected ASTNode getLocationNode() {
+		JavaStatement actualLocation = this.location.getLocation();
+		return actualLocation.getASTNode();
 	}
 
-	public void setLocation(JavaStatement location) {
-		this.location = location;
+	public void setHoleCode(String name, EditHole fixCode) {
+		this.holeCode.put(name, fixCode);
 	}
 
-	public void setFixCode(JavaStatement fixCode) {
-		this.fixCode = fixCode;
+	public EditHole getHoleCode(String name) {
+		return this.holeCode.get(name);
 	}
-
-	public JavaStatement getFixCode() {
-		return this.fixCode;
+	public void setAllHoles(HashMap<String,EditHole> holes) {
+		holeCode = new HashMap<String,EditHole>(holes);
 	}
-
-	public ClassInfo getFileInfo() {
-		return this.fileInfo;
-	}
-
-	public void setFileInfo(ClassInfo newFileName){
-		fileInfo = newFileName;
-	}
-	
-
 
 }
