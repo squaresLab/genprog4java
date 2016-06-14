@@ -2,6 +2,7 @@ package clegoues.genprog4java.Search;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeSet;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
@@ -90,21 +91,26 @@ public class ReplacementModel {
 	};
 	
 	
-	public Pair<?,Double> chooseReplacementBasedOnPredictingModel(ArrayList<Pair<?,Double>> atoms, Representation<?> variant, int stmtIdBuggy) {
+	@SuppressWarnings("rawtypes")
+	public TreeSet<Pair<?,Double>> rescaleBasedOnModel(ArrayList<Pair<?,Double>> atoms, Representation<?> variant, int stmtIdBuggy) {
 		assert(atoms.size() > 0);
 		
+		TreeSet retVal = new TreeSet();
 		HashMap<Integer, JavaStatement> codeBank = ((JavaRepresentation)variant).getCodeBank();
 
 		JavaStatement buggyStmt = codeBank.get(stmtIdBuggy);
 		int row = stmtKindOfJavaStmt(buggyStmt);
 		
 		for(Pair<?,Double> atom: atoms){
+			Pair newAtom = new Pair();
+			newAtom.setFirst(atom.getFirst());
 			JavaStatement fixStmt = codeBank.get(atom.getFirst());
 			int column = stmtKindOfJavaStmt(fixStmt);
 			//plus one so no stmt has 0% chance of getting picked
-			atom.setSecond(Double.valueOf(replacementModel[row][column]+1));
+			newAtom.setSecond(Double.valueOf(replacementModel[row][column]+1));
+			retVal.add(newAtom);
 		}
-		return GlobalUtils.chooseOneWeighted(atoms);
+		return retVal;
 	}
 	
 		
