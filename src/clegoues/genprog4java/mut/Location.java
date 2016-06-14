@@ -2,13 +2,12 @@ package clegoues.genprog4java.mut;
 
 import clegoues.util.Pair;
 
-public interface Location<G extends Comparable<G>> extends Cloneable {
+public abstract class Location<G extends Comparable<G>> extends Pair<G, Double> implements Cloneable {
 	
-	public G getLocation();
-	public int getId();
-	public void setLocation(G location);
-	public Double getWeight();
-	public void setWeight(Double weight);
-	public Object clone();
+	public abstract G getLocation();
+	public abstract int getId();
+	public abstract void setLocation(G location);
+	public abstract Double getWeight();
+	public abstract void setWeight(Double weight);
 }
 

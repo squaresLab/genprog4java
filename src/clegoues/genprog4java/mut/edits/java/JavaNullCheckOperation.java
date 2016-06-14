@@ -39,7 +39,7 @@ public class JavaNullCheckOperation extends JavaEditOperation {
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = ((JavaStatement) this.getLocation()).getASTNode();
+		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode();
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("checkForNull");
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> expressionsFromThisParent = thisHole.getSubExps();

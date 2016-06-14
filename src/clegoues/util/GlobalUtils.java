@@ -50,9 +50,7 @@ public class GlobalUtils {
 			returnVal.add(i);
 		}
 		return returnVal;
-
 	}
-
 
 	public static Pair<?,Double> chooseOneWeighted(ArrayList<Pair<?,Double>> atoms) {
 		assert(atoms.size() > 0);
@@ -72,26 +70,6 @@ public class GlobalUtils {
 		}
 		return null;
 	}
-	
-	public static Location chooseLocationWeighted(ArrayList<Location> atoms) {
-		assert(atoms.size() > 0);
-		double totalWeight = 0.0;
-		for(Location atom : atoms) {
-			totalWeight += atom.getWeight();
-		}
-		assert(totalWeight > 0.0) ;
-		double wanted = Configuration.randomizer.nextDouble() * totalWeight;
-		double sofar = 0.0;
-		for(Location atom : atoms) {
-			double here = sofar + atom.getWeight();
-			if(here >= wanted) {
-				return atom;
-			}
-			sofar = here;
-		}
-		return null;
-	}
-
 
 	public static boolean probability(double p) {
 		if(p < 0.0) return false;
