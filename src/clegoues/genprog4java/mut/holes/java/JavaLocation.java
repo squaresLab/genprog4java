@@ -53,4 +53,7 @@ public class JavaLocation extends Location<JavaStatement> {
 		this.codeElement = codeElement;
 	}
 
+	public String toString() {
+		return ((Integer) this.getId()).toString();
+	}
 }
