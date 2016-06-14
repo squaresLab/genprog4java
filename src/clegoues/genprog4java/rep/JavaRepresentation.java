@@ -243,87 +243,6 @@ FaultLocRepresentation<JavaEditOperation> {
 		return atoms;
 	}
 
-	public ArrayList<WeightedAtom> getAllPosibleStmts() throws IOException {
-		ArrayList<WeightedAtom> atoms = new ArrayList<WeightedAtom>();
-
-		for (Map.Entry<ClassInfo, String> ele : sourceInfo.getOriginalSource().entrySet()) {
-			ClassInfo targetClassInfo = ele.getKey();
-			String pathToCoverageClass = Configuration.outputDir + File.separator
-					+ "coverage/coverage.out" + File.separator + targetClassInfo.pathToClassFile();
-			File compiledClass = new File(pathToCoverageClass);
-			if(!compiledClass.exists()) {
-				pathToCoverageClass = Configuration.classSourceFolder + File.separator + targetClassInfo.pathToClassFile();
-				compiledClass = new File(pathToCoverageClass);
-			}
-
-			if (executionData == null) {
-				executionData = new ExecutionDataStore();
-			}
-
-			final FileInputStream in = new FileInputStream(new File(
-					"jacoco.exec"));
-			final ExecutionDataReader reader = new ExecutionDataReader(in);
-			reader.setSessionInfoVisitor(new ISessionInfoVisitor() {
-				public void visitSessionInfo(final SessionInfo info) {
-				}
-			});
-			reader.setExecutionDataVisitor(new IExecutionDataVisitor() {
-				public void visitClassExecution(final ExecutionData data) {
-					executionData.put(data);
-				}
-			});
-
-
-			reader.read();
-			in.close();
-
-			final CoverageBuilder coverageBuilder = new CoverageBuilder();
-			final Analyzer analyzer = new Analyzer(executionData,
-					coverageBuilder);
-			analyzer.analyzeAll(new File(pathToCoverageClass));
-
-			TreeSet<Integer> coveredLines = new TreeSet<Integer>();
-			for (final IClassCoverage cc : coverageBuilder.getClasses()) {
-				for (int i = cc.getFirstLine(); i <= cc.getLastLine(); i++) {
-					boolean covered = false;
-					switch (cc.getLine(i).getStatus()) {
-					case ICounter.PARTLY_COVERED:
-						covered = true;
-						break;
-					case ICounter.FULLY_COVERED:
-						covered = true;
-						break;
-					case ICounter.NOT_COVERED:
-						covered = true;
-						break;
-					case ICounter.EMPTY:
-						break;
-					default:
-						break;
-					}
-					if (covered) {
-						coveredLines.add(i);
-					}
-				}
-			}
-			for (int line : coveredLines) {
-				ArrayList<Integer> atomIds = this.atomIDofSourceLine(line);
-				if (atomIds != null && atomIds.size() >= 0) {
-					//atoms.addAll(atomIds);
-					for(Integer i: atomIds){
-						WeightedAtom wa = new WeightedAtom(i, 0.1);
-						int index = wa.getAtom();
-						JavaStatement potentialFixStmt = getFromCodeBank(index); 
-						Set<String> scopes = new TreeSet<String>();
-						potentialFixStmt.setRequiredNames(scopes);
-						atoms.add(wa);
-					}
-				}
-			}
-		}
-		return atoms;
-	}
-
 	public void fromSource(ClassInfo pair) throws IOException {
 		// load here, get all statements and the compilation unit saved
 		// parser can visit at the same time to collect scope info
@@ -375,7 +294,7 @@ FaultLocRepresentation<JavaEditOperation> {
 
 		return node instanceof AssertStatement 
 				|| node instanceof Block
-			//	|| node instanceof MethodInvocation
+				//|| node instanceof MethodInvocation
 				|| node instanceof BreakStatement
 				|| node instanceof ConstructorInvocation
 				|| node instanceof ContinueStatement
@@ -850,6 +769,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		return retVal;
 	}
 	
+	
 	@SuppressWarnings("rawtypes")
 	@Override
 	protected void printDebugInfo() {
@@ -874,7 +794,6 @@ FaultLocRepresentation<JavaEditOperation> {
 				logger.debug("\t\t" + t);
 			}
 		}
-
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -896,12 +815,10 @@ FaultLocRepresentation<JavaEditOperation> {
 	}
 
 	public void setAllPossibleStmtsToFixLocalization(){
-		try {
-			super.fixLocalization = getAllPosibleStmts();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		super.fixLocalization.clear();
+		for(int i = 0; i < JavaRepresentation.stmtCounter; i++) {
+		super.fixLocalization.add(new WeightedAtom(i,1.0));
+	}
 	}
 
 }
