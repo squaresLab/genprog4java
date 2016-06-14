@@ -903,8 +903,6 @@ FaultLocRepresentation<JavaEditOperation> {
 					if(!lastStmtInTheBlock.equals(potentiallyBuggyStmt.getASTNode())){
 						ok=false;
 					}
-				}else{
-					ok=false;
 				}
 			}
 
@@ -921,8 +919,8 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			}
 
-			//Heuristic: Don´t replace/swap returns from functions that have only one return statement.
-			if(potentiallyBuggyStmt.getASTNode() instanceof ReturnStatement){
+			//Heuristic: Don´t replace/swap returns from functions that have only one return statement. Unless it is another return stmt
+			if(potentiallyBuggyStmt.getASTNode() instanceof ReturnStatement && !(potentialFixStmt.getASTNode() instanceof ReturnStatement)){
 				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
 				while (!(parent instanceof MethodDeclaration)){
 					parent = parent.getParent();
@@ -1030,12 +1028,12 @@ FaultLocRepresentation<JavaEditOperation> {
 	public Boolean doesEditApply(int location, Mutation editType) {
 		JavaStatement locationStmt = codeBank.get(location);
 		switch(editType) {
-		case APPEND: 
-		case REPLACE:
-		case SWAP:
+		case APPEND: //return false;
+		case REPLACE: //return true;
+		case SWAP: //return false;
 			return this.editSources(location,  editType).size() > 0;
 		case NULLINSERT:
-		case DELETE: 
+		case DELETE:  //return false;
 			boolean itApplies = true;
 			ASTNode faultyNode = locationStmt.getASTNode();
 
@@ -1081,8 +1079,6 @@ FaultLocRepresentation<JavaEditOperation> {
 					itApplies = false;
 				}
 			}
-
-
 
 
 

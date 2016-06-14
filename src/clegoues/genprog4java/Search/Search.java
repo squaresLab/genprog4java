@@ -60,6 +60,7 @@ import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
 import clegoues.util.Pair;
+import clegoues.util.ReplacementModel;
 
 @SuppressWarnings("rawtypes")
 public class Search<G extends EditOperation> {
@@ -426,8 +427,12 @@ public class Search<G extends EditOperation> {
 					break;
 				case REPLACE: 
 					ArrayList<WeightedAtom> allowedR = variant.editSources(stmtid,mut);
-					int afterR = GlobalUtils.chooseReplacementBasedOnPredictingModel(new ArrayList(allowedR),variant,stmtid);
-					variant.performEdit(mut, stmtid,  afterR); 
+					ReplacementModel rm = new ReplacementModel();
+
+					WeightedAtom afterR = (WeightedAtom)rm.chooseReplacementBasedOnPredictingModel(new ArrayList(allowedR),variant,stmtid);
+					//WeightedAtom afterR = (WeightedAtom)GlobalUtils.chooseOneWeighted(new ArrayList(allowedR));
+					
+					variant.performEdit(mut, stmtid,  afterR.getAtom()); 
 					break;
 				case OFFBYONE:
 					ArrayList<WeightedAtom> allowedO = variant.editSources(stmtid,mut);
