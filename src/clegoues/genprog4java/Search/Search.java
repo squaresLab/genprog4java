@@ -58,6 +58,7 @@ import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.util.ConfigurationBuilder;
@@ -252,11 +253,13 @@ public abstract class Search<G extends EditOperation> {
 				Mutation mut = chosenMutation.getFirst();
 				HashMap<String,EditHole> filledHoles = new HashMap<String,EditHole>();
 				List<String> holes = variant.holesForMutation(mut);
+				if(holes != null && holes.size() > 0) { // some edits have no holes (like delete)
 				for(String hole : holes) {
-					TreeSet<EditHole> allowed = variant.editSources(location, mut, hole);
-					EditHole selected = (EditHole) GlobalUtils
+					TreeSet<WeightedHole> allowed = variant.editSources(location, mut, hole);
+					WeightedHole selected = (WeightedHole) GlobalUtils
 							.chooseOneWeighted(new ArrayList(allowed));
-					filledHoles.put(hole, selected);
+					filledHoles.put(hole, selected.getHole());
+				}
 				}
 				variant.performEdit(mut, location, filledHoles);
 			}

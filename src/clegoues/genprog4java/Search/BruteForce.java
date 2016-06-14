@@ -11,10 +11,12 @@ import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.util.Pair;
 
+@SuppressWarnings("rawtypes")
 public class BruteForce<G extends EditOperation> extends Search<G> {
 
 	public BruteForce(Fitness<G> engine) {
@@ -48,15 +50,15 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 		}
 		return retVal;
 	}
-	private TreeSet<EditHole> rescaleAtomPairs(TreeSet<EditHole> items) {
+	private TreeSet<WeightedHole> rescaleAtomPairs(TreeSet<WeightedHole> items) {
 		double fullSum = 0.0;
-		TreeSet<EditHole> retVal = new TreeSet<EditHole>();
-		for (EditHole item : items) {
+		TreeSet<WeightedHole> retVal = new TreeSet<WeightedHole>();
+		for (WeightedHole item : items) {
 			fullSum += item.getWeight();
 		}
 		double scale = 1.0 / fullSum;
-		for (EditHole item : items) { 
-			EditHole newItem = item;
+		for (WeightedHole item : items) { 
+			WeightedHole newItem = item;
 			newItem.setWeight(item.getWeight() * scale);
 			retVal.add(newItem);
 		}
@@ -157,8 +159,10 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 				case REPLACE:
 					TreeSet<EditHole> sources1 = new TreeSet<EditHole>();
 					// FIXME: HACK: fix this hard-coding of the hole name, and below, too
-					TreeSet<EditHole> editSources = original.editSources(faultyLocation, mut, "singleHole");
-					sources1.addAll(this.rescaleAtomPairs(editSources));
+					for(WeightedHole hole : this.rescaleAtomPairs(original
+							.editSources(faultyLocation, mut, "singleHole"))) {
+						sources1.add(hole.getHole());
+					}
 					for (EditHole append : sources1) {
 						Representation<G> rep = original.copy();
 						HashMap<String,EditHole> sources = new HashMap<String,EditHole>();
@@ -172,8 +176,10 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 					break;
 				case SWAP:
 					TreeSet<EditHole> sources = new TreeSet<EditHole>();
-					sources.addAll(this.rescaleAtomPairs(original
-							.editSources(faultyLocation, mut, "singleHole")));
+					for(WeightedHole hole : this.rescaleAtomPairs(original
+							.editSources(faultyLocation, mut, "singleHole"))) {
+						sources.add(hole.getHole());
+					}
 					for (EditHole append : sources) {
 						Representation<G> rep = original.copy();
 						HashMap<String,EditHole> swapSources = new HashMap<String,EditHole>();

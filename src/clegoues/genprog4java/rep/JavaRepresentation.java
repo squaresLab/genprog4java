@@ -121,6 +121,7 @@ import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.mut.edits.java.JavaEditFactory;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
@@ -837,8 +838,15 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public TreeSet<EditHole> editSources(Location location, Mutation editType, String holeName) {
-		return editFactory.editSources(this,location,editType,holeName);
+	public TreeSet<WeightedHole> editSources(Location location, Mutation editType, String holeName) {
+		TreeSet<EditHole> holes = editFactory.editSources(this,location,editType,holeName);
+		TreeSet<WeightedHole> retVal = new TreeSet<WeightedHole>();
+		for(EditHole hole : holes) {
+			// possible FIXME for later: weighting options equally for the time being.  One day
+			// maybe we'll do something smarter...
+			retVal.add(new WeightedHole(hole));
+		}
+		return retVal;
 	}
 	
 	@SuppressWarnings("rawtypes")
