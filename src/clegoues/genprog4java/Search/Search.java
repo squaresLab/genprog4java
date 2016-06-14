@@ -72,61 +72,61 @@ public abstract class Search<G extends EditOperation> {
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
 
-		//private static int generations = 10;
-		protected static int generations = ConfigurationBuilder.of( INT )
+	//private static int generations = 10;
+	protected static int generations = ConfigurationBuilder.of( INT )
 			.withVarName( "generations" )
 			.withDefault( "10" )
 			.withHelp( "number of search generations to run" )
 			.inGroup( "Search Parameters" )
 			.build();
-		//The proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
-		//private static double promut = 1; 
-		protected static double promut = ConfigurationBuilder.of( DOUBLE )
+	//The proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
+	//private static double promut = 1; 
+	protected static double promut = ConfigurationBuilder.of( DOUBLE )
 			.withVarName( "promut" )
 			.withFlag( "pMutation" )
 			.withDefault( "1" )
 			.withHelp( "the proportional mutation rate = number of genes to modify" )
 			.inGroup( "Search Parameters" )
 			.build();
-		//private static boolean continueSearch = false;
-		static boolean continueSearch = ConfigurationBuilder.of( BOOLEAN )
+	//private static boolean continueSearch = false;
+	static boolean continueSearch = ConfigurationBuilder.of( BOOLEAN )
 			.withVarName( "continueSearch" )
 			.withFlag( "continue" )
 			.withHelp( "continue searching after finding a repair" )
 			.inGroup( "Search Parameters" )
 			.build();
 
-		//20 mutations 1/20 = 0.05
-		//public static HashMap<Mutation,Double> availableMutations = new HashMap<Mutation,Double>();
-		public static Map< Mutation, Double > availableMutations =
+	//20 mutations 1/20 = 0.05
+	//public static HashMap<Mutation,Double> availableMutations = new HashMap<Mutation,Double>();
+	public static Map< Mutation, Double > availableMutations =
 			new ConfigurationBuilder< Map< Mutation, Double > >()
-				.withVarName( "availableMutations" )
-				.withFlag( "edits" )
-				.withDefault( "append;replace;delete" )
-				.withHelp( "mutations to use in search, with optional weights" )
-				.inGroup( "Search Parameters" )
-				.withCast( new ConfigurationBuilder.LexicalCast< Map< Mutation, Double > >() {
-					public Map<Mutation, Double> parse(String value) {
-						String[] values = value.toLowerCase().split( ";" );
-						for ( int i = 0; i < values.length; ++i )
-							values[ i ] = values[ i ].trim();
-						return parseEdits(
+			.withVarName( "availableMutations" )
+			.withFlag( "edits" )
+			.withDefault( "append;replace;delete" )
+			.withHelp( "mutations to use in search, with optional weights" )
+			.inGroup( "Search Parameters" )
+			.withCast( new ConfigurationBuilder.LexicalCast< Map< Mutation, Double > >() {
+				public Map<Mutation, Double> parse(String value) {
+					String[] values = value.toLowerCase().split( ";" );
+					for ( int i = 0; i < values.length; ++i )
+						values[ i ] = values[ i ].trim();
+					return parseEdits(
 							values, new HashMap< Mutation, Double >()
-						);
-					}
-				})
-				.build();
+							);
+				}
+			})
+			.build();
 
 
-		//public static String searchStrategy = "ga";
-		public static String searchStrategy = ConfigurationBuilder.of( STRING )
+	//public static String searchStrategy = "ga";
+	public static String searchStrategy = ConfigurationBuilder.of( STRING )
 			.withVarName( "searchStrategy" )
 			.withFlag( "search" )
 			.withDefault( "ga" )
 			.withHelp( "the search strategy to employ" )
 			.inGroup( "Search Parameters" )
 			.build();
-		protected Fitness<G> fitnessEngine = null;
+	protected Fitness<G> fitnessEngine = null;
 
 	public Search(Fitness<G> engine) {
 		this.fitnessEngine = engine;
@@ -238,7 +238,13 @@ public abstract class Search<G extends EditOperation> {
 					wa = GlobalUtils.chooseOneWeighted(new ArrayList(faultyAtoms));
 					alreadyOnList = proMutList.contains(wa);
 				}while(alreadyOnList);
-				proMutList.add((Location) wa);
+				proMutList.add((Location)wa);
+
+				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
+				if(proMutList.size()>=faultyAtoms.size()){ 
+					variant.setAllPossibleStmtsToFixLocalization();
+					//alreadyOnList=false;
+				}
 			}
 			for (Location location : proMutList) {
 				//the available mutations for this stmt
@@ -254,12 +260,12 @@ public abstract class Search<G extends EditOperation> {
 				HashMap<String,EditHole> filledHoles = new HashMap<String,EditHole>();
 				List<String> holes = variant.holesForMutation(mut);
 				if(holes != null && holes.size() > 0) { // some edits have no holes (like delete)
-				for(String hole : holes) {
-					TreeSet<WeightedHole> allowed = variant.editSources(location, mut, hole);
-					WeightedHole selected = (WeightedHole) GlobalUtils
-							.chooseOneWeighted(new ArrayList(allowed));
-					filledHoles.put(hole, selected.getHole());
-				}
+					for(String hole : holes) {
+						TreeSet<WeightedHole> allowed = variant.editSources(location, mut, hole);
+						WeightedHole selected = (WeightedHole) GlobalUtils
+								.chooseOneWeighted(new ArrayList(allowed));
+						filledHoles.put(hole, selected.getHole());
+					}
 				}
 				variant.performEdit(mut, location, filledHoles);
 			}
@@ -284,7 +290,7 @@ public abstract class Search<G extends EditOperation> {
 	 */
 	public void doSearch(Representation<G> original,
 			Population<G> incomingPopulation) throws
-			CloneNotSupportedException {
+	CloneNotSupportedException {
 
 		try {
 			this.runAlgorithm(original, incomingPopulation);

@@ -17,7 +17,7 @@ public class OracleSearch<G extends EditOperation> extends Search<G> {
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
 	
-	protected static String startingGenome = ConfigurationBuilder.of( STRING )
+	protected static String oracleGenome = ConfigurationBuilder.of( STRING )
 			.withVarName( "oracleGenome" )
 			.withDefault( "" )
 			.withHelp( "oracle genome" )
@@ -33,7 +33,7 @@ public class OracleSearch<G extends EditOperation> extends Search<G> {
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
 			throws RepairFoundException {
 		Representation<G> theRepair = original.copy();
-		theRepair.loadGenomeFromString(OracleSearch.startingGenome);
+		theRepair.loadGenomeFromString(OracleSearch.oracleGenome);
 		assert (fitnessEngine.testToFirstFailure(theRepair, false));
 		this.noteSuccess(theRepair, original, 1);		
 	}
