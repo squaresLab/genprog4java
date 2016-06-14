@@ -6,7 +6,6 @@ sourceDir = source/
 outputDir = ./tmp/
 libs = ./lib/junittestrunner.jar:./lib/junit-4.10.jar:./jacocoagent.jar:./lib/gcdTest.jar:./lib/gcdTestPos.jar
 classDir = bin/
-packageName = test
-targetClassName = gcd.txt
+targetClassName = test.GCD
 sanity = yes
 regenPaths

@@ -54,7 +54,6 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.util.ConfigurationBuilder;
@@ -63,14 +62,14 @@ import clegoues.util.Pair;
 import clegoues.util.ReplacementModel;
 
 @SuppressWarnings("rawtypes")
-public class Search<G extends EditOperation> {
+public abstract class Search<G extends EditOperation> {
 	protected Logger logger = Logger.getLogger(Search.class);
 
 	public static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
 	
 	//private static int generations = 10;
-	private static int generations = ConfigurationBuilder.of( INT )
+	protected static int generations = ConfigurationBuilder.of( INT )
 		.withVarName( "generations" )
 		.withDefault( "10" )
 		.withHelp( "number of search generations to run" )
@@ -78,7 +77,7 @@ public class Search<G extends EditOperation> {
 		.build();
 	//The proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
 	//private static double promut = 1; 
-	private static double promut = ConfigurationBuilder.of( DOUBLE )
+	protected static double promut = ConfigurationBuilder.of( DOUBLE )
 		.withVarName( "promut" )
 		.withFlag( "pMutation" )
 		.withDefault( "1" )
@@ -86,7 +85,7 @@ public class Search<G extends EditOperation> {
 		.inGroup( "Search Parameters" )
 		.build();
 	//private static boolean continueSearch = false;
-	private static boolean continueSearch = ConfigurationBuilder.of( BOOLEAN )
+	protected static boolean continueSearch = ConfigurationBuilder.of( BOOLEAN )
 		.withVarName( "continueSearch" )
 		.withFlag( "continue" )
 		.withHelp( "continue searching after finding a repair" )
@@ -114,14 +113,7 @@ public class Search<G extends EditOperation> {
 			})
 			.build();
 
-	//private static String startingGenome = "";
-	private static String startingGenome = ConfigurationBuilder.of( STRING )
-		.withVarName( "startingGenome" )
-		.withFlag( "oracleGenome" )
-		.withDefault( "" )
-		.withHelp( "genome for oracle search" )
-		.inGroup( "Search Parameters" )
-		.build();
+
 	//public static String searchStrategy = "ga";
 	public static String searchStrategy = ConfigurationBuilder.of( STRING )
 		.withVarName( "searchStrategy" )
@@ -130,8 +122,7 @@ public class Search<G extends EditOperation> {
 		.withHelp( "the search strategy to employ" )
 		.inGroup( "Search Parameters" )
 		.build();
-	private Fitness<G> fitnessEngine = null;
-	private int generationsRun = 0;
+	protected Fitness<G> fitnessEngine = null;
 
 	public Search(Fitness<G> engine) {
 		this.fitnessEngine = engine;
@@ -153,7 +144,6 @@ public class Search<G extends EditOperation> {
 			case "swap":  mutations.put(Mutation.SWAP, weight); break;
 			case "delete":  mutations.put(Mutation.DELETE, weight); break;
 			case "replace":  mutations.put(Mutation.REPLACE, weight); break;
-			case "nullinsert":  mutations.put(Mutation.NULLINSERT, weight); break;
 			case "funrep":  mutations.put(Mutation.FUNREP, weight); break;
 			case "parrep":  mutations.put(Mutation.PARREP, weight); break;
 			case "paradd":  mutations.put(Mutation.PARADD, weight); break;
@@ -199,165 +189,23 @@ public class Search<G extends EditOperation> {
 		rep.outputSource(repairFilename);
 	}
 
-	private ArrayList<WeightedAtom> rescaleAtomPairs(ArrayList<WeightedAtom> arrayList) {
-		double fullSum = 0.0;
-		ArrayList<WeightedAtom> retVal = new ArrayList<WeightedAtom>();
-		for (Pair<?, Double> item : arrayList) {
-			fullSum += item.getSecond();
-		}
-		double scale = 1.0 / fullSum;
-		for (WeightedAtom item : arrayList) {
-			WeightedAtom newItem = new WeightedAtom(item.getAtom(),
-					item.getWeight() * scale);
-			retVal.add(newItem);
-		}
-		return retVal;
-	}
-
-	private boolean doWork(Representation<G> rep, Representation<G> original,
-			Mutation mut, int first, int second) {
-		rep.performEdit(mut, first, second);
-		if (fitnessEngine.testToFirstFailure(rep)) {
-			this.noteSuccess(rep, original, 1);
-			if (!Search.continueSearch) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public boolean bruteForceOne(Representation<G> original) {
-
-		original.reduceFixSpace();
-
-		int count = 0;
-		ArrayList<WeightedAtom> allFaultyAtoms = new ArrayList<WeightedAtom>(
-				original.getFaultyAtoms());
-
-		for (WeightedAtom faultyAtom : allFaultyAtoms) {
-			int faultyLocation = faultyAtom.getAtom();
-
-			for(Map.Entry mutation : availableMutations.entrySet()) {
-				Mutation key = (Mutation) mutation.getKey();
-				Double prob = (Double) mutation.getValue();
-				if(prob > 0.0) {
-					count += original.editSources(faultyLocation, key).size(); 
-				}
-			}
-
-		}
-		logger.info("search: bruteForce: " + count
-				+ " mutants in search space\n");
-
-		int wins = 0;
-		int sofar = 1;
-		boolean repairFound = false;
-
-		ArrayList<WeightedAtom> rescaledAtoms = rescaleAtomPairs(allFaultyAtoms);
-
-		for (WeightedAtom faultyAtom : rescaledAtoms) {
-			int stmt = faultyAtom.getAtom();
-			double weight = faultyAtom.getWeight();
-			Comparator<Pair<Mutation, Double>> descendingMutations = new Comparator<Pair<Mutation, Double>>() {
-				@Override
-				public int compare(Pair<Mutation, Double> one,
-						Pair<Mutation, Double> two) {
-					return (new Double(two.getSecond())).compareTo((new Double(
-							one.getSecond())));
-				}
-			};
-			// wouldn't real polymorphism be the actual legitimate best right
-			// here?
-			TreeSet<Pair<Mutation, Double>> availableMutations = original
-					.availableMutations(stmt);
-			TreeSet<Pair<Mutation, Double>> rescaledMutations = new TreeSet<Pair<Mutation, Double>>(
-					descendingMutations);
-			double sumMutScale = 0.0;
-			for (Pair<Mutation, Double> item : availableMutations) {
-				sumMutScale += item.getSecond();
-			}
-			double mutScale = 1 / sumMutScale;
-			for (Pair<Mutation, Double> item : availableMutations) {
-				rescaledMutations.add(new Pair<Mutation, Double>(item
-						.getFirst(), item.getSecond() * mutScale));
-			}
-
-			// rescaled Mutations gives us the mutation,weight pairs available
-			// at this atom
-			// which itself has its own weight
-			Comparator<WeightedAtom> descendingAtom = new Comparator<WeightedAtom>() {
-				@Override
-				public int compare(WeightedAtom one, WeightedAtom two) {
-					return (new Double(two.getWeight())).compareTo((new Double(
-							one.getWeight())));
-				}
-			};
-			for (Pair<Mutation, Double> mutation : rescaledMutations) {
-				Mutation mut = mutation.getFirst();
-				double prob = mutation.getSecond();
-				logger.info(weight + " " + prob);
-				switch(mut) {
-				case DELETE:
-					Representation<G> delRep = original.copy();
-					if (this.doWork(delRep, original, mut, stmt, stmt)) {
-						wins++;
-						repairFound = true;
-					}
-					break;
-				case APPEND:
-				case REPLACE:
-				case OFFBYONE:
-					TreeSet<WeightedAtom> sources1 = new TreeSet<WeightedAtom>(
-							descendingAtom);
-					sources1.addAll(this.rescaleAtomPairs(original
-							.editSources(stmt, mut)));
-					for (WeightedAtom append : sources1) {
-						Representation<G> rep = original.copy();
-						if (this.doWork(rep, original, mut, stmt,
-								append.getAtom())) {
-							wins++;
-							repairFound = true;
-						}
-					}
-					break;
-				case SWAP:
-					TreeSet<WeightedAtom> sources = new TreeSet<WeightedAtom>(
-							descendingAtom);
-					sources.addAll(this.rescaleAtomPairs(original
-							.editSources(stmt, mut)));
-					for (WeightedAtom append : sources) {
-						Representation<G> rep = original.copy();
-						if (this.doWork(rep, original, mut, stmt,
-								append.getAtom())) {
-							wins++;
-							repairFound = true;
-						}
-					}
-					break;
-				default:
-					logger.fatal("FATAL: unhandled template type in bruteForceOne.  Add handling (probably by adding a case either to the DELETE case or the other one); and try again");
-					break;
-				}
-
-
-			}
-			// FIXME: debug output System.out.printf("\t variant " + wins +
-			// "/" + sofar + "/" + count + "(w: " + probs +")" +
-			// rep.getName());
-			sofar++;
-			if (repairFound && !Search.continueSearch) {
-				return true;
-			}
-		}
-		logger.info("search: brute_force_1 ends\n");
-		return repairFound;
-	}
 
 	/*
+	 * prepares for GA by registering available mutations (including templates
+	 * if applicable) and reducing the search space, and then generates the
+	 * initial population, using [incoming_pop] if non-empty, or by randomly
+	 * mutating the [original]. The resulting population is evaluated for
+	 * fitness before being returned. This may terminate early if a repair is
+	 * found in the initial population (by [calculate_fitness]).
 	 * 
-	 * Basic Genetic Algorithm
+	 * @param original original variant
+	 * 
+	 * @param incoming_pop possibly empty, incoming population
+	 * 
+	 * @return initial_population generated by mutating the original
 	 */
-
+	protected abstract Population<G> initialize(Representation<G> original,
+			Population<G> incomingPopulation) throws RepairFoundException;
 	/*
 	 * 
 	 * (** randomly chooses an atomic mutation operator, instantiates it as
@@ -408,7 +256,6 @@ public class Search<G extends EditOperation> {
 				case DELETE:
 				case UBOUNDSET:
 				case RANGECHECK:
-				case NULLINSERT:
 				case FUNREP:
 					// FIXME: this -1 hack is pretty gross; note to self, CLG should fix it
 					variant.performEdit(mut, stmtid, (-1));
@@ -450,114 +297,6 @@ public class Search<G extends EditOperation> {
 	}
 
 	/*
-	 * prepares for GA by registering available mutations (including templates
-	 * if applicable) and reducing the search space, and then generates the
-	 * initial population, using [incoming_pop] if non-empty, or by randomly
-	 * mutating the [original]. The resulting population is evaluated for
-	 * fitness before being returned. This may terminate early if a repair is
-	 * found in the initial population (by [calculate_fitness]).
-	 * 
-	 * @param original original variant
-	 * 
-	 * @param incoming_pop possibly empty, incoming population
-	 * 
-	 * @return initial_population generated by mutating the original
-	 */
-	private Population<G> initializeGa(Representation<G> original,
-			Population<G> incomingPopulation) throws RepairFoundException {
-		original.reduceSearchSpace();
-
-		Population<G> initialPopulation = incomingPopulation;
-
-		if (incomingPopulation != null
-				&& incomingPopulation.size() > incomingPopulation.getPopsize()) {
-			initialPopulation = incomingPopulation.firstN(incomingPopulation
-					.getPopsize());
-		} 
-		int stillNeed = initialPopulation.getPopsize()
-				- initialPopulation.size();
-		if (stillNeed > 0) {
-			initialPopulation.add(original.copy());
-			stillNeed--;
-		}
-		for (int i = 0; i < stillNeed; i++) {
-			Representation<G> newItem = original.copy();
-			this.mutate(newItem);
-			initialPopulation.add(newItem);
-		}
-
-		for (Representation<G> item : initialPopulation) {
-			if (fitnessEngine.testFitness(0, item)) {
-				this.noteSuccess(item, original, 0);
-				if(!continueSearch) {
-					throw new RepairFoundException();
-				}
-			}
-		}
-		return initialPopulation;
-	}
-
-	/*
-	 * runs the genetic algorithm for a certain number of iterations, given the
-	 * most recent/previous generation as input. Returns the last generation,
-	 * unless it is killed early by the search strategy/fitness evaluation. The
-	 * optional parameters are set to the obvious defaults if omitted.
-	 * 
-	 * @param start_gen optional; generation to start on (defaults to 1)
-	 * 
-	 * @param num_gens optional; number of generations to run (defaults to
-	 * [generations])
-	 * 
-	 * @param incoming_population population produced by the previous iteration
-	 * 
-	 * @raise Found_Repair if a repair is found
-	 * 
-	 * @raise Max_evals if the maximum fitness evaluation count is reached
-	 * 
-	 * @return population produced by this iteration *)
-	 */
-	private void runGa(int startGen, int numGens,
-			Population<G> incomingPopulation, Representation<G> original) {
-		/*
-		 * the bulk of run_ga is performed by the recursive inner helper
-		 * function, which Claire modeled off the MatLab code sent to her by the
-		 * UNM team
-		 */
-		int gen = startGen;
-		while (gen < startGen + numGens) {
-			logger.info("search: generation" + gen);
-			generationsRun++;
-			assert (incomingPopulation.getPopsize() > 0);
-			// Step 1: selection
-			logger.info("before selection, generation: " + gen + " incoming popsize: " + incomingPopulation.size());
-			incomingPopulation.selection(incomingPopulation.getPopsize());
-			logger.info("after selection, generation: " + gen + " incoming popsize: " + incomingPopulation.size());
-			// step 2: crossover
-			incomingPopulation.crossover(original);
-			logger.info("after crossover, generation: " + gen + " incoming popsize: " + incomingPopulation.size());
-
-			// step 3: mutation
-			for (Representation<G> item : incomingPopulation) {
-				this.mutate(item);
-			}
-			logger.info("after mutation, generation: " + gen + " incoming popsize: " + incomingPopulation.size());
-
-			// step 4: fitness
-			int count = 0;
-			for (Representation<G> item : incomingPopulation) {
-				count++;
-				if (fitnessEngine.testFitness(gen, item)) {
-					this.noteSuccess(item, original, gen);
-					if(!continueSearch) 
-						return;
-				}
-			}
-			logger.info("Generation: " + gen + " I think I tested " + count + " variants.");
-			gen++;
-		}
-	}
-
-	/*
 	 * {b genetic_algorithm } is parametric with respect to a number of choices
 	 * (e.g., population size, selection method, fitness function, fault
 	 * localization, many of which are set at the command line or at the
@@ -573,40 +312,17 @@ public class Search<G extends EditOperation> {
 	 * @raise Max_evals if the maximum fitness evaluation count is set and then
 	 * reached
 	 */
-	public void geneticAlgorithm(Representation<G> original,
+	public void doSearch(Representation<G> original,
 			Population<G> incomingPopulation) throws
 			CloneNotSupportedException {
-		logger.info("search: genetic algorithm begins\n");
-		assert (Search.generations >= 0);
 
 		try {
-			Population<G> initialPopulation = this.initializeGa(original,
-					incomingPopulation);
-			generationsRun++;
-			this.runGa(1, Search.generations, initialPopulation, original);
+			this.runAlgorithm(original, incomingPopulation);
 		} catch(RepairFoundException e) {
 			return;
 		}
 	}
 
-	/*
-	 * constructs a representation out of the genome as specified at the command
-	 * line and tests to first failure. This assumes that the oracle genome
-	 * corresponds to a maximally fit variant.
-	 * 
-	 * @param original individual representation
-	 * 
-	 * @param starting_genome string; a string representation of the genome
-	 */
-	public void oracleSearch(Representation<G> original){
-		Representation<G> theRepair = original.copy();
-		theRepair.loadGenomeFromString(Search.startingGenome);
-		assert (fitnessEngine.testToFirstFailure(theRepair));
-		this.noteSuccess(theRepair, original, 1);
-	}
-
-	public void ioSearch(Representation<G> original) {
-		throw new UnsupportedOperationException();
-	}
+	protected abstract void runAlgorithm(Representation<G> original, Population<G> initialPopulation) throws RepairFoundException;
 
 }

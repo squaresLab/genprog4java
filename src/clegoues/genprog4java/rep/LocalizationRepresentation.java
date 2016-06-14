@@ -19,31 +19,29 @@ public class LocalizationRepresentation extends JavaRepresentation {
 			.getLogger(LocalizationRepresentation.class);
 
 	private HashMap<String, TreeSet<Integer>> testAtomMap = new HashMap<String, TreeSet<Integer>>();
-	private TreeSet<String> interestingPositiveTests = new TreeSet<String>();
+	private TreeSet<TestCase> interestingPositiveTests = new TreeSet<TestCase>();
 
-	private TreeSet<Integer> runTestsCoverage(String pathFile, TestType testT,
-			ArrayList<String> tests, boolean expectedResult, String wd)
+	private TreeSet<Integer> runTestsCoverage(String pathFile, 
+			ArrayList<TestCase> tests, boolean expectedResult, String wd)
 			throws IOException, UnexpectedCoverageResultException {
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
-		for (String test : tests) {
+		for (TestCase test : tests) {
 			File coverageRaw = new File("jacoco.exec"); // FIXME: likely a
 														// mistake to put this
 														// in this class
-
 			if (coverageRaw.exists()) {
 				coverageRaw.delete();
 			}
-			TestCase newTest = new TestCase(testT, test);
 
-			if (this.testCase(newTest) != expectedResult
+			if (this.testCase(test) != expectedResult
 					&& !FaultLocRepresentation.allowCoverageFail) {
 				throw new UnexpectedCoverageResultException(
 						"FaultLocRep: unexpected coverage result: "
-								+ newTest.toString());
+								+ test.toString());
 			}
 			TreeSet<Integer> thisTestResult = this.getCoverageInfo();
 			atoms.addAll(thisTestResult);
-			testAtomMap.put(test, thisTestResult);
+			testAtomMap.put(test.toString(), thisTestResult);
 		}
 
 		BufferedWriter out = new BufferedWriter(new FileWriter(new File(
@@ -86,15 +84,15 @@ public class LocalizationRepresentation extends JavaRepresentation {
 		}
 
 		runTestsCoverage(FaultLocRepresentation.posCoverageFile,
-				TestType.POSITIVE, Fitness.positiveTests, true, "coverage/");
+				 Fitness.positiveTests, true, "coverage/");
 		runTestsCoverage(FaultLocRepresentation.negCoverageFile,
-				TestType.NEGATIVE, Fitness.negativeTests, false, "coverage/");
+				Fitness.negativeTests, false, "coverage/");
 		TreeSet<Integer> allNegativeAtoms = new TreeSet<Integer>();
-		for (String negativeTest : Fitness.negativeTests) {
+		for (TestCase negativeTest : Fitness.negativeTests) {
 			TreeSet<Integer> negativeAtoms = testAtomMap.get(negativeTest);
 			allNegativeAtoms.addAll(negativeAtoms);
 		}
-		for (String positiveTest : Fitness.positiveTests) {
+		for (TestCase positiveTest : Fitness.positiveTests) {
 			TreeSet<Integer> atoms = testAtomMap.get(positiveTest);
 			TreeSet<Integer> intersection = new TreeSet<Integer>(
 					allNegativeAtoms);
@@ -103,8 +101,8 @@ public class LocalizationRepresentation extends JavaRepresentation {
 				interestingPositiveTests.add(positiveTest);
 			}
 		}
-		for (String interestingTest : interestingPositiveTests) {
-			logger.info(interestingTest);
+		for (TestCase interestingTest : interestingPositiveTests) {
+			logger.info(interestingTest.toString());
 		}
 		super.computeLocalization();
 		this.doingCoverage = false;

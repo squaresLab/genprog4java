@@ -44,16 +44,25 @@ import java.util.TreeSet;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.WhileStatement;
 
 import clegoues.util.Pair;
 
@@ -219,9 +228,9 @@ public class JavaStatement {
 	}
 
 	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
-	private Map<ASTNode, List<MethodInfo>> candidateReplacements = null;
+	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
 	public Map<ASTNode, List<ASTNode>> getMethodReplacements() { return methodReplacements; }
-	public Map<ASTNode, List<MethodInfo>> getCandidateReplacements() { return candidateReplacements; }
+	public Map<ASTNode, List<MethodInfo>> getCandidateMethodReplacements() { return candidateMethodReplacements; }
 
 	private ArrayList<ITypeBinding> paramsToTypes(List<SingleVariableDeclaration> params) {
 		int i = 0; 
@@ -233,12 +242,91 @@ public class JavaStatement {
 		}
 		return paramTypes;
 	}
+	
+	private Map<ASTNode, List<ASTNode>> methodParamReplacements = null;
+	private Map<ASTNode, Map<String,ASTNode>> candidateMethodParamReplacements= null;
+	private Map<String, Map<String,Set<ASTNode>>> expressionsInScope = null;
+
+	
+	private void saveMethodParamReplacerInfo(String methodName, String typeName, ASTNode expNode) {
+//		HashMap<String,Set<ASTNode>> typeToExpressions = null;
+//		if(!expressionsInScope.containsKey(methodName)) {
+//			typeToExpressions = (HashMap) expressionsInScope.get(methodName);
+//		} else {
+//			typeToExpressions = new HashMap<String,Set<ASTNode>>();
+//			expressionsInScope.put(methodName, typeToExpressions);
+//		}
+//		Set<ASTNode> ofType = null;
+//		if(expressionsInScope.containsKey(typeName)) {
+//			ofType = typeToExpressions.get(typeName);
+//		} else {
+//			ofType = new TreeSet<ASTNode>();
+//			expressionsInScope.put(typeName, ofType);
+//		}
+//		ofType.add(expNode);
+	}
+	
+	public boolean methodParamReplacerApplies() {
+		return false;
+//		if(methodParamReplacements == null) {
+//			methodParamReplacements = new HashMap<ASTNode, List<ASTNode>>();
+//			candidateMethodParamReplacements = new HashMap<ASTNode, Map<String,ASTNode>>();
+//			expressionsInScope = new HashMap<String,Map<String, Set<ASTNode>>>();
+//		}
+//		final ASTNode myASTNode = this.getASTNode();
+//		if(methodParamReplacements.containsKey(myASTNode)) {
+//			return !methodParamReplacements.get(myASTNode).isEmpty();
+//		}
+//		MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
+//		final String methodName = md.getName().getIdentifier();
+//
+//		md.accept(new ASTVisitor() {
+//				public boolean visit(Expression node) {
+//					ITypeBinding typeBinding = node.resolveTypeBinding();
+//					String typeName = typeBinding.getName();
+//					saveMethodParamReplacerInfo(methodName, typeName, node);
+//					return true;
+//				}
+//				
+//			});
+//					
+//			this.getASTNode().accept(new ASTVisitor() {
+//				// method to visit all Expressions relevant for this in locationNode and
+//				// store their parents
+//				public boolean visit(MethodInvocation node) {
+//					// if there exists another invocation that this works for...
+//					ASTNode parent = getParent(node);
+//					IMethodBinding invokedMethod = node.resolveMethodBinding().getMethodDeclaration();
+//					node.arguments();
+//					ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>(Arrays.asList(invokedMethod.getParameterTypes()));
+//					if(paramTypes.size() > 0) {
+//						for(ITypeBinding paramType : paramTypes) {
+//							if(expressionsInScope.containsKey(paramType.getName())) {
+//								List<ASTNode> thisList = null;
+//								if(methodParamReplacements.containsKey(myASTNode)) {
+//									thisList = methodParamReplacements.get(myASTNode);
+//								} else {
+//									thisList = new ArrayList<ASTNode>();
+//									methodParamReplacements.put(myASTNode, thisList);
+//								}
+//								thisList.add(node);
+//							}
+//						}
+//					}
+//				}
+//
+//			});
+//			if(methodParamReplacements.get(this.getASTNode()) != null && methodParamReplacements.get(this.getASTNode()).size() > 0) {
+//				
+//			
+//		} else { return false; }
+	}
+	
 	public boolean methodReplacerApplies(final List<MethodInfo> methodDecls) {
 		if(methodReplacements == null) {
 			methodReplacements = new HashMap<ASTNode, List<ASTNode>>();
-			candidateReplacements = new HashMap<ASTNode, List<MethodInfo>>();
+			candidateMethodReplacements = new HashMap<ASTNode, List<MethodInfo>>();
 
-			// (sort of doing that already....)
 			this.getASTNode().accept(new ASTVisitor() {
 				// method to visit all Expressions relevant for this in locationNode and
 				// store their parents
@@ -285,7 +373,7 @@ public class JavaStatement {
 							methodNodes.add(node);
 						methodReplacements.put(parent, methodNodes);	
 					}
-					candidateReplacements.put(node, possibleReps);
+					candidateMethodReplacements.put(node, possibleReps);
 					return true;
 				}
 
@@ -293,6 +381,119 @@ public class JavaStatement {
 		}
 		return methodReplacements.size() > 0;
 	}
+	
 
+	public ASTNode blockThatContainsThisStatement(){
+		ASTNode parent = this.getASTNode().getParent();
+		while(parent != null && !(parent instanceof Block)){
+			parent = parent.getParent();
+		}
+		return parent;
+	}
+
+	private static int howManyReturns = 0;
+	
+	public static boolean hasMoreThanOneReturn(MethodDeclaration method){
+		method.accept(new ASTVisitor() {
+			@Override
+			public boolean visit(ReturnStatement node) {
+				howManyReturns++;
+				return true;
+			}
+		});
+		return howManyReturns>=2;
+	}
+
+	public boolean canBeDeleted() {
+		ASTNode faultyNode = this.getASTNode();
+		ASTNode parent = faultyNode.getParent();
+		//Heuristic: If it is the body of an if, while, or for, it should not be removed
+		if(faultyNode instanceof Block){
+			//this boolean states if the faultyNode is the body of an IfStatement
+			if (parent instanceof IfStatement
+					&& ((IfStatement)parent).getThenStatement().equals(faultyNode))
+				return false;
+			//same for all these booleans
+			if(parent instanceof WhileStatement
+					&& ((WhileStatement)parent).getBody().equals(faultyNode))
+				return false;
+			if(parent instanceof ForStatement
+					&& ((ForStatement)parent).getBody().equals(faultyNode))
+				return false;
+			if(parent instanceof EnhancedForStatement
+					&& ((EnhancedForStatement)parent).getBody().equals(faultyNode))
+				return false;
+			if(parent instanceof IfStatement && (((IfStatement)parent).getElseStatement() != null) &&
+						((IfStatement)parent).getElseStatement().equals(faultyNode))
+					return false;
+		}
+
+		//Heuristic: Don't remove returns from functions that have only one return statement.
+		if(faultyNode instanceof ReturnStatement){
+			parent = this.getEnclosingMethod();
+			if(parent != null && parent instanceof MethodDeclaration) {
+			if(hasMoreThanOneReturn((MethodDeclaration)parent))
+				return false;
+			}
+		}
+
+		//Heuristic: If an stmt is the only stmt in a block, don´t delete it
+		parent = blockThatContainsThisStatement();
+		if(parent instanceof Block){
+			if(((Block)parent).statements().size()==1){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public ASTNode getEnclosingMethod() {
+		ASTNode parent = this.getASTNode().getParent();
+		while(parent != null && !(parent instanceof MethodDeclaration)){
+			parent = parent.getParent();
+		}
+		return parent;
+	}
+	public boolean isLikelyAConstructor() {
+		ASTNode enclosingMethod = this.getEnclosingMethod();
+		return (enclosingMethod != null) && (enclosingMethod instanceof MethodDeclaration) && 
+				((MethodDeclaration) enclosingMethod).isConstructor();
+	}
+
+	public boolean parentMethodReturnsVoid() {
+		ASTNode enclosingMethod = this.getEnclosingMethod();
+		if (enclosingMethod != null & enclosingMethod instanceof MethodDeclaration) {
+			MethodDeclaration asMd = (MethodDeclaration) enclosingMethod;
+			Type returnType = asMd.getReturnType2();
+			if(returnType != null) {
+				String asStr = returnType.toString(); 
+				return asStr.equalsIgnoreCase("void") || asStr.equalsIgnoreCase("null");
+			} else {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isWithinLoopOrCase() {
+		ASTNode buggyNode = this.getASTNode();
+		if(buggyNode instanceof SwitchStatement 
+				|| buggyNode instanceof ForStatement 
+				|| buggyNode instanceof WhileStatement
+				|| buggyNode instanceof DoStatement
+				|| buggyNode instanceof EnhancedForStatement)
+		return true;
+		
+		while(buggyNode.getParent() != null){
+			buggyNode = buggyNode.getParent();
+			if(buggyNode instanceof SwitchStatement 
+			|| buggyNode instanceof ForStatement 
+			|| buggyNode instanceof WhileStatement
+			|| buggyNode instanceof DoStatement
+			|| buggyNode instanceof EnhancedForStatement)
+				return true;
+		}
+		return false;
+	}
 
 }
