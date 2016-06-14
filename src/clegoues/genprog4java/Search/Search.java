@@ -62,7 +62,7 @@ import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
 import clegoues.util.Pair;
-import clegoues.util.ReplacementModel;
+import clegoues.genprog4java.Search.ReplacementModel;
 
 @SuppressWarnings("rawtypes")
 public abstract class Search<G extends EditOperation> {
