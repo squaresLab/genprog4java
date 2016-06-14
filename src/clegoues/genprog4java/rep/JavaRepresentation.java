@@ -375,7 +375,7 @@ FaultLocRepresentation<JavaEditOperation> {
 
 		return node instanceof AssertStatement 
 				|| node instanceof Block
-				|| node instanceof MethodInvocation
+			//	|| node instanceof MethodInvocation
 				|| node instanceof BreakStatement
 				|| node instanceof ConstructorInvocation
 				|| node instanceof ContinueStatement
