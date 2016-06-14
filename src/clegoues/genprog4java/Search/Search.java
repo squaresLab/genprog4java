@@ -271,6 +271,7 @@ public abstract class Search<G extends EditOperation> {
 				if(holes != null && holes.size() > 0) { // some edits have no holes (like delete)
 					for(String hole : holes) {
 						TreeSet<WeightedHole> allowed = variant.editSources(location, mut, hole);
+						allowed = rescaleAllowed(mut,allowed, variant,location.getId());
 						WeightedHole selected = (WeightedHole) GlobalUtils
 								.chooseOneWeighted(new ArrayList(allowed));
 						filledHoles.put(hole, selected.getHole());
@@ -281,11 +282,8 @@ public abstract class Search<G extends EditOperation> {
 		 * FIXME: CLG commented the handling of replace out for the purposes of merging things in
 		 * will have to think about how to do this properly, but want to fix this awful merge, first.
 		 * case REPLACE: 
-				TreeSet<WeightedAtom> allowedR = variant.editSources(stmtid,mut);
 				
-				WeightedAtom afterR = null;
-				if(Search.model.equalsIgnoreCase("random")){
-					afterR = (WeightedAtom)GlobalUtils.chooseOneWeighted(new ArrayList(allowedR));
+			
 				}else if(Search.model.equalsIgnoreCase("probabilistic")){
 					
 					afterR = (WeightedAtom)rm.chooseReplacementBasedOnPredictingModel(new ArrayList(allowedR),variant,stmtid);
@@ -296,6 +294,16 @@ public abstract class Search<G extends EditOperation> {
 				variant.performEdit(mut, location, filledHoles);
 			}
 		}
+	}
+
+	private TreeSet rescaleAllowed(Mutation mut, TreeSet<WeightedHole> allowed, Representation variant, int stmtid) {
+		if(mut != Mutation.REPLACE || Search.model.equalsIgnoreCase("random")){
+			return allowed;
+		}else if(Search.model.equalsIgnoreCase("probabilistic")){
+			return rm.rescaleBasedOnModel(new ArrayList(allowed), variant, stmtid);
+		}
+		
+		return null;
 	}
 
 	/*
