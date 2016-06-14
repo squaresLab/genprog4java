@@ -70,7 +70,7 @@ public abstract class Search<G extends EditOperation> {
 
 	protected static String model = ConfigurationBuilder.of( STRING )
 			.withVarName( "model" )
-			.withDefault( "probabilistic" )
+			.withDefault( "default" )
 			.withHelp( "model chosen to pick the fix atom from the pool of possible fix atoms with respect to the buggy atom" )
 			.inGroup( "Search Parameters" )
 			.build();
@@ -297,7 +297,7 @@ public abstract class Search<G extends EditOperation> {
 	}
 
 	private TreeSet rescaleAllowed(Mutation mut, TreeSet<WeightedHole> allowed, Representation variant, int stmtid) {
-		if(mut != Mutation.REPLACE || Search.model.equalsIgnoreCase("random")){
+		if(mut != Mutation.REPLACE || Search.model.equalsIgnoreCase("default")){
 			return allowed;
 		}else if(Search.model.equalsIgnoreCase("probabilistic")){
 			return rm.rescaleBasedOnModel(new ArrayList(allowed), variant, stmtid);
