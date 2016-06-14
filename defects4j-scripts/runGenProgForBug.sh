@@ -44,25 +44,27 @@ BUGWD=$BUGSFOLDER"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
 
 #Compile Genprog and put the class files in /bin
 #Go to the GenProg folder
-cd "$GENPROGDIR"
-mvn package
+if [ -d "$GENPROGDIR" ]; then
+  cd "$GENPROGDIR"
+  mvn package
 
+  if [ -d "$GENPROGDIR/defects4j-scripts/" ]; then
+    cd "$GENPROGDIR"/defects4j-scripts/
 
-cd "$GENPROGDIR"/defects4j-scripts/
+    ./prepareBug.sh $PROJECT $BUGNUMBER $GENPROGDIR $DEFECTS4JDIR $OPTION $TESTSUITEPERCENTAGE $BUGSFOLDER
 
-./prepareBug.sh $PROJECT $BUGNUMBER $GENPROGDIR $DEFECTS4JDIR $OPTION $TESTSUITEPERCENTAGE $BUGSFOLDER
+    JAVALOCATION=$(which java)
 
-JAVALOCATION=$(which java)
+    if [ -d "$BUGWD/$WD" ]; then
+      #Go to the working directory
+      cd $BUGWD/$WD
 
-#Go to the working directory
-cd $BUGWD/$WD
+      #CHANGE TO THE WORKING DIRECTORY
+      #cd $BUGWD/$WD
 
-#CHANGE TO THE WORKING DIRECTORY
-#cd $BUGWD/$WD
-
-for (( seed=$STARTSEED; seed<=$UNTILSEED; seed++ ))
-#for seed in {0..20..2} #0 to 20, increments of 2
-  do	
+      for (( seed=$STARTSEED; seed<=$UNTILSEED; seed++ ))
+      #for seed in {0..20..2} #0 to 20, increments of 2
+      do	
 	echo "RUNNING THE BUG: $PROJECT $BUGNUMBER, WITH THE SEED: $seed"
 	
 	CHANGESEEDCOMMAND="sed -i '2s/.*/seed = $seed/' "$BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/defects4j.config
@@ -74,8 +76,11 @@ for (( seed=$STARTSEED; seed<=$UNTILSEED; seed++ ))
 
 	#Save the variants in a tar file
 	tar -cvf $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/variants"$PROJECT""$BUGNUMBER"Seed$seed.tar $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/tmp/
+      done
 
- done
+    fi
+  fi
+fi
 
 fi #correct number of params
 

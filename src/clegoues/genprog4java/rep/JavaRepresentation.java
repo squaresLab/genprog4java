@@ -47,11 +47,9 @@ import java.io.ObjectOutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -64,8 +62,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -77,23 +73,18 @@ import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
-import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
@@ -101,7 +92,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.internal.compiler.ast.ForeachStatement;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.MalformedTreeException;
@@ -131,6 +121,7 @@ import clegoues.genprog4java.mut.JavaAppendOperation;
 import clegoues.genprog4java.mut.JavaDeleteOperation;
 import clegoues.genprog4java.mut.JavaEditOperation;
 import clegoues.genprog4java.mut.JavaLowerBoundSetOperation;
+import clegoues.genprog4java.mut.JavaMethodParameterReplacer;
 import clegoues.genprog4java.mut.JavaMethodReplacer;
 import clegoues.genprog4java.mut.JavaNullCheckOperation;
 import clegoues.genprog4java.mut.JavaOffByOneOperation;
@@ -155,7 +146,6 @@ FaultLocRepresentation<JavaEditOperation> {
 	private static HashMap<Integer, ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer, ArrayList<Integer>>();
 	private static HashMap<ClassInfo, String> originalSource = new HashMap<ClassInfo, String>();
 	private static HashMap<Integer, ClassInfo> stmtToFile = new HashMap<Integer, ClassInfo>();
-	private int mutationNumber = 0;
 
 	// semantic check cache stuff, so we don't have to walk stuff a million
 	// times unnecessarily
@@ -194,10 +184,6 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	private static HashMap<ClassInfo, String> getOriginalSource() {
 		return originalSource;
-	}
-	
-	public HashMap<Integer, JavaStatement> getCodeBank(){
-		return codeBank;
 	}
 
 	protected void instrumentForFaultLocalization() {
@@ -265,6 +251,8 @@ FaultLocRepresentation<JavaEditOperation> {
 						covered = true;
 						break;
 					case ICounter.NOT_COVERED:
+						break;
+					case ICounter.EMPTY:
 						break;
 					default:
 						break;
@@ -506,6 +494,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				.getOriginalSource().entrySet()) {
 			ClassInfo ci = pair.getKey();
 			String filename = ci.getClassName();
+			String path = ci.getPackage();
 			String source = pair.getValue();
 			Document original = new Document(source);
 			CompilationUnit cu = baseCompilationUnits.get(ci);
@@ -514,7 +503,8 @@ FaultLocRepresentation<JavaEditOperation> {
 
 			try {
 				for (JavaEditOperation edit : genome) {
-					if(edit.getFileInfo().getClassName().equalsIgnoreCase(filename)){
+					if(edit.getFileInfo().getClassName().equalsIgnoreCase(filename) 
+							&& edit.getFileInfo().getPackage().equalsIgnoreCase(path)){
 						edit.edit(rewriter, ast, cu);
 					}
 				}
@@ -573,9 +563,9 @@ FaultLocRepresentation<JavaEditOperation> {
 			outputDir += Configuration.outputDir + File.separator + exeName + "/";
 		}
 		String classPath = outputDir + System.getProperty("path.separator")
-				+ Configuration.libs + System.getProperty("path.separator") 
-				+ Configuration.testClassPath + System.getProperty("path.separator") 
-				+ Configuration.srcClassPath;
+		+ Configuration.libs + System.getProperty("path.separator") 
+		+ Configuration.testClassPath + System.getProperty("path.separator") 
+		+ Configuration.srcClassPath;
 		//; 
 		//		if(Configuration.classSourceFolder != "") {
 		//			classPath += System.getProperty("path.separator") + Configuration.classSourceFolder;
@@ -599,7 +589,6 @@ FaultLocRepresentation<JavaEditOperation> {
 
 		command.addArgument(test.toString());
 		logger.info("Command: " + command.toString());
-		//System.out.println(command.toString());
 		return command;
 
 	}
@@ -627,9 +616,12 @@ FaultLocRepresentation<JavaEditOperation> {
 
 		switch(edit) {
 		case DELETE: 
-		case NULLINSERT:
 			JavaEditOperation newEdit = new JavaDeleteOperation(fileName, locationStatement);
 			this.genome.add(newEdit);
+			break;
+		case PARREP:
+			JavaEditOperation parrep = new JavaMethodParameterReplacer(fileName, locationStatement);
+			this.genome.add(parrep);
 			break;
 		case FUNREP:
 			JavaEditOperation funEdit = new JavaMethodReplacer(fileName, locationStatement);
@@ -778,47 +770,33 @@ FaultLocRepresentation<JavaEditOperation> {
 		return copy;
 	}
 
-	private ArrayList<WeightedAtom> scopeHelper(int stmtId) {
-		if (JavaRepresentation.scopeSafeAtomMap.containsKey(stmtId)) {
-			return JavaRepresentation.scopeSafeAtomMap.get(stmtId);
-		}
-
-		//potentiallyBuggyStmt is a potentially buggy statement
-		JavaStatement potentiallyBuggyStmt = codeBank.get(stmtId);
-
-		// I *believe* this is just variable names and doesn't check required
-		// types, which are also collected
-		// at parse time and thus could be considered here.
-		Set<String> inScopeAt = JavaRepresentation.inScopeMap.get(potentiallyBuggyStmt
-				.getStmtId());
-		ArrayList<WeightedAtom> retVal = new ArrayList<WeightedAtom>();
-
+	@Override
+	public void reduceSearchSpace() {
+		ArrayList<WeightedAtom> toRemove = new ArrayList<WeightedAtom>();
 		//potentialFix is a potential fix statement
 		for (WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {
 			int index = potentialFixAtom.getAtom();
 			JavaStatement potentialFixStmt = codeBank.get(index);
-			Set<String> requiredScopes = potentialFixStmt.getRequiredNames();
-
-			boolean ok = true;
-			for (String req : requiredScopes) {
-				if (!inScopeAt.contains(req)) {
-					ok = false;
-					break;
-				}
-			}
-
 			//Don't make a call to a constructor
 			if(potentialFixStmt.getASTNode() instanceof MethodRef){
 				MethodRef mr = (MethodRef) potentialFixStmt.getASTNode();
 				// mrt = method return type
 				String returnType = returnTypeOfThisMethod(mr.getName().toString());
-				if(returnType != null){
-					if( returnType.equalsIgnoreCase("null")){
-						ok=false;
-					}
+				if(returnType != null && returnType.equalsIgnoreCase("null")) {
+					toRemove.add(potentialFixAtom);
+					continue;
 				}
 			}
 
+			//Heuristic: No need to insert a declaration of a final variable
+			if(potentialFixStmt.getASTNode() instanceof VariableDeclarationStatement){
+				VariableDeclarationStatement ds = (VariableDeclarationStatement) potentialFixStmt.getASTNode();
+				VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
+				if(finalVariables.contains(df.getName().getIdentifier())){
+					toRemove.add(potentialFixAtom);
+					continue;
+				}
+			}
 			//Heuristic: Don't assign a value to a final variable
 			if (potentialFixStmt.getASTNode() instanceof ExpressionStatement) {
 				ExpressionStatement exstat= (ExpressionStatement) potentialFixStmt.getASTNode();
@@ -827,118 +805,16 @@ FaultLocRepresentation<JavaEditOperation> {
 					if(assignment.getLeftHandSide() instanceof SimpleName){
 						SimpleName leftHand = (SimpleName) assignment.getLeftHandSide();
 						if(finalVariables.contains(leftHand.toString())){
-							ok=false;
+							toRemove.add(potentialFixAtom);
+							continue;
 						}
 					}
 				}
 			}
-
-			//Heuristic: No need to insert a declaration of a final variable
-			if(potentialFixStmt.getASTNode() instanceof VariableDeclarationStatement){
-				VariableDeclarationStatement ds = (VariableDeclarationStatement) potentialFixStmt.getASTNode();
-				VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
-
-				if(finalVariables.contains(df.getName().getIdentifier())){
-					ok=false;
-				}
-			}
-
-			//Heuristic: Do not insert a return statement on a func whose return type is void
-			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
-				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
-				while(!(parent instanceof MethodDeclaration) && parent != null){
-					parent = parent.getParent();
-				}
-
-				if (parent instanceof MethodDeclaration) {
-					String returnType = returnTypeOfThisMethod(((MethodDeclaration)parent).getName().toString());
-					if(returnType != null){
-						if( returnType.equalsIgnoreCase("void") || returnType.equalsIgnoreCase("null")){
-							ok=false;
-						}
-					}
-				}
-			}
-
-			//Heuristic: Do not insert a return statement in a constructor
-			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
-				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
-				while(!(parent instanceof MethodDeclaration) && parent != null){
-					parent = parent.getParent();
-				}
-
-				if (parent != null && parent instanceof MethodDeclaration && ((MethodDeclaration) parent).isConstructor()) {
-					ok=false;
-				}
-			}
-
-			//Heuristic: Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is wrong
-			if(potentialFixStmt.getASTNode() instanceof ConstructorInvocation || potentialFixStmt.getASTNode() instanceof SuperConstructorInvocation){
-				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
-				while(!(parent instanceof MethodDeclaration) && parent != null){
-					parent = parent.getParent();
-				}
-
-				if (parent != null && parent instanceof MethodDeclaration && ((MethodDeclaration) parent).isConstructor()) {
-					StructuralPropertyDescriptor locationPotBuggy = potentiallyBuggyStmt.getASTNode().getLocationInParent();
-					List<ASTNode> statementsInBlock = ((MethodDeclaration) parent).getBody().statements();
-					ASTNode firstStmtInTheBlock = statementsInBlock.get(0);
-					StructuralPropertyDescriptor locationFirstInBlock = firstStmtInTheBlock.getLocationInParent();
-
-					//This will catch replacements and swaps, but it will append after the first stmt, so append will still create a non compiling variant
-					if(!locationFirstInBlock.equals(locationPotBuggy)){
-						ok=false;
-					}
-				}else{
-					ok=false;
-				}
-			}
-
-			//Heuristic: Swapping, Appending or Replacing a return stmt to the middle of a block will make the code after it unreachable
-			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
-				ASTNode parentBlock = blockThatContainsThisStatement(potentiallyBuggyStmt.getASTNode());
-				if(parentBlock instanceof Block){
-					List<ASTNode> statementsInBlock = ((Block)parentBlock).statements();
-					ASTNode lastStmtInTheBlock = statementsInBlock.get(statementsInBlock.size()-1);
-					if(!lastStmtInTheBlock.equals(potentiallyBuggyStmt.getASTNode())){
-						ok=false;
-					}
-				}
-			}
-
-			//Heuristic: Don't allow to move breaks outside of switch stmts
-			if(potentialFixStmt.getASTNode() instanceof BreakStatement){
-				ASTNode buggyNode = potentiallyBuggyStmt.getASTNode();
-				boolean isWithinASwitch = buggyNode instanceof SwitchStatement;
-				while(!isWithinASwitch && buggyNode.getParent() != null){
-					buggyNode = buggyNode.getParent();
-					isWithinASwitch = buggyNode instanceof SwitchStatement;
-				}
-				if(!isWithinASwitch){
-					ok=false;
-				}
-			}
-
-			//Heuristic: Don´t replace/swap returns from functions that have only one return statement. Unless it is another return stmt
-			if(potentiallyBuggyStmt.getASTNode() instanceof ReturnStatement && !(potentialFixStmt.getASTNode() instanceof ReturnStatement)){
-				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
-				while (!(parent instanceof MethodDeclaration)){
-					parent = parent.getParent();
-				}
-				boolean moreThanOneReturn = hasMoreThanOneReturn((MethodDeclaration)parent);
-				if(!moreThanOneReturn){
-					ok = false;
-				}
-			}
-
-			//Heuristic: Don’t replace or swap (or append) an stmt with one just like it
-			if(potentiallyBuggyStmt.getASTNode().equals(potentialFixStmt.getASTNode()) || potentiallyBuggyStmt.getStmtId()==potentialFixStmt.getStmtId()){
-				ok = false;
-			}
-
 			//If it moves a block, this block should not have an assignment of final variables, or a declaration of already existing final variables
 			if (potentialFixStmt.getASTNode() instanceof Block) {
 				List<ASTNode> statementsInBlock = ((Block)potentialFixStmt.getASTNode()).statements();
+				boolean ok = true;
 				for (int i = 0; i < statementsInBlock.size(); i++) {
 					//Heuristic: Don't assign a value to a final variable
 					if (statementsInBlock.get(i) instanceof ExpressionStatement) {
@@ -948,7 +824,8 @@ FaultLocRepresentation<JavaEditOperation> {
 							if(assignment.getLeftHandSide() instanceof SimpleName){
 								SimpleName leftHand = (SimpleName) assignment.getLeftHandSide();
 								if(finalVariables.contains(leftHand.toString())){
-									ok=false;
+									ok = false;
+									break;
 								}
 							}
 						}
@@ -960,59 +837,147 @@ FaultLocRepresentation<JavaEditOperation> {
 						VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
 
 						if(finalVariables.contains(df.getName().getIdentifier())){
-							ok=false;
+							ok = false;
+							break;
 						}
 					}
 				}
+				if(!ok) {
+					toRemove.add(potentialFixAtom);
+					continue;
+				}
+			}
+		}
+
+		for(WeightedAtom atom : toRemove) {
+			fixLocalization.remove(atom);
+		}
+
+	}
+
+	private ArrayList<WeightedAtom> scopeHelper(int stmtId) {
+		if (JavaRepresentation.scopeSafeAtomMap.containsKey(stmtId) && !
+				JavaRepresentation.scopeSafeAtomMap.get(stmtId).isEmpty()) {
+			return JavaRepresentation.scopeSafeAtomMap.get(stmtId);
+		}
+
+		JavaStatement potentiallyBuggyStmt = codeBank.get(stmtId);
+
+		// I *believe* this is just variable names and doesn't check required
+		// types, which are also collected
+		// at parse time and thus could be considered here.
+		Set<String> inScopeAt = JavaRepresentation.inScopeMap.get(potentiallyBuggyStmt
+				.getStmtId());
+		ArrayList<WeightedAtom> retVal = new ArrayList<WeightedAtom>();
+		ASTNode faultAST = potentiallyBuggyStmt.getASTNode();
+
+		for (WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {
+			int index = potentialFixAtom.getAtom();
+			JavaStatement potentialFixStmt = codeBank.get(index);
+			ASTNode fixAST = potentialFixStmt.getASTNode();
+
+			Set<String> requiredScopes = potentialFixStmt.getRequiredNames();
+
+			{ // scoping the ok variable
+				boolean ok = true;
+				for (String req : requiredScopes) {
+					if (!inScopeAt.contains(req)) {
+						ok = false;
+						break;
+					}
+				}
+				if(!ok)
+					continue;
 			}
 
-			//If we move a return statement into a function, the parameter in the return must match the function’s return type
-			if(potentialFixStmt.getASTNode() instanceof ReturnStatement){
-				ASTNode parent = potentiallyBuggyStmt.getASTNode().getParent();
-				while(!(parent instanceof MethodDeclaration) && parent != null){
-					parent = parent.getParent();
+			//Heuristic: Don’t replace or swap (or append) an stmt with one just like it
+			if(faultAST.equals(fixAST) || potentiallyBuggyStmt.getStmtId()==potentialFixStmt.getStmtId()){
+				continue;
+			}
+
+			//Heuristic: Do not insert a return statement on a func whose return type is void
+			//Heuristic: Do not insert a return statement in a constructor
+			if(fixAST instanceof ReturnStatement){
+				if(potentiallyBuggyStmt.parentMethodReturnsVoid() ||
+						potentiallyBuggyStmt.isLikelyAConstructor())
+					continue;
+
+				//Heuristic: Swapping, Appending or Replacing a return stmt to the middle of a block will make the code after it unreachable
+				ASTNode parentBlock = potentiallyBuggyStmt.blockThatContainsThisStatement();
+				if(parentBlock != null && parentBlock instanceof Block) {
+					List<ASTNode> statementsInBlock = ((Block)parentBlock).statements();
+					ASTNode lastStmtInTheBlock = statementsInBlock.get(statementsInBlock.size()-1);
+					if(!lastStmtInTheBlock.equals(faultAST)){
+						continue;
+					}
+				} else {
+					continue;
 				}
 
-				if (parent instanceof MethodDeclaration) {
-					String returnType = returnTypeOfThisMethod(((MethodDeclaration)parent).getName().toString());
+				//If we move a return statement into a function, the parameter in the return must match the function’s return type
+				ASTNode enclosingMethod = potentiallyBuggyStmt.getEnclosingMethod();
+
+				if (enclosingMethod instanceof MethodDeclaration) {
+					String returnType = returnTypeOfThisMethod(((MethodDeclaration)enclosingMethod).getName().toString());
 					if(returnType != null){
-						ReturnStatement potFix = (ReturnStatement) potentialFixStmt.getASTNode();
+						ReturnStatement potFix = (ReturnStatement) fixAST;
 						if(potFix.getExpression() instanceof SimpleName){
 							String variableType = variableDataTypes.get(potFix.getExpression().toString());
 							if( !returnType.equalsIgnoreCase(variableType)){
-								ok=false;
+								continue;
 							}
 						}
 					}
 				}
 			}
 
+			//Heuristic: Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is wrong
+			if(fixAST instanceof ConstructorInvocation || 
+					fixAST instanceof SuperConstructorInvocation){
+				ASTNode enclosingMethod = potentiallyBuggyStmt.getEnclosingMethod();
 
-
-			if (ok) {
-				retVal.add(potentialFixAtom);
+				if (enclosingMethod != null && 
+						enclosingMethod instanceof MethodDeclaration && 
+						((MethodDeclaration) enclosingMethod).isConstructor()) {
+					StructuralPropertyDescriptor locationPotBuggy = faultAST.getLocationInParent();
+					List<ASTNode> statementsInBlock = ((MethodDeclaration) enclosingMethod).getBody().statements();
+					ASTNode firstStmtInTheBlock = statementsInBlock.get(0);
+					StructuralPropertyDescriptor locationFirstInBlock = firstStmtInTheBlock.getLocationInParent();
+					//This will catch replacements and swaps, but it will append after the first stmt, so append will still create a non compiling variant
+					if(!locationFirstInBlock.equals(locationPotBuggy)){
+						continue;
+					}
+				} else {
+					continue;
+				}
 			}
+
+			//Heuristic: Don't allow to move breaks outside of switch stmts
+			// OR loops!
+			// TODO: check for continues as well
+			if(fixAST instanceof BreakStatement && 
+					!potentiallyBuggyStmt.isWithinLoopOrCase()){
+				continue;
+			}
+
+			//Heuristic: Don't replace/swap returns within functions that have only one return statement
+			// (unless the replacer is also a return statement); could also check if it's a block or
+			// other sequence of statements with a return within it, but I'm lazy
+			if((!(fixAST instanceof ReturnStatement)) && 
+					faultAST instanceof ReturnStatement) {
+				ASTNode parent = potentiallyBuggyStmt.getEnclosingMethod();
+				if(parent instanceof MethodDeclaration && 
+						!JavaStatement.hasMoreThanOneReturn((MethodDeclaration)parent)) {
+					continue;
+				}
+			}
+			// if we made it this far without continuing, we're good to go.
+
+			retVal.add(potentialFixAtom);
 
 		}
 		JavaRepresentation.scopeSafeAtomMap.put(stmtId, retVal);
 		return retVal;
-	}
-
-	private int getIndexOfStmt(HashMap<Integer, JavaStatement> codeBank, ASTNode stmt){
-		for(int i =0; i < codeBank.size(); ++i){
-			if(stmt.equals(codeBank.get(i).getASTNode())){ 
-				return i; 
-			}
-		}
-		return -1;
-	}
-
-	private ASTNode blockThatContainsThisStatement(ASTNode stmt){
-		ASTNode parent = stmt.getParent();
-		while(parent != null && !(parent instanceof Block)){
-			parent = parent.getParent();
-		}
-		return parent;
 	}
 
 	private String returnTypeOfThisMethod(String matchString){
@@ -1028,71 +993,24 @@ FaultLocRepresentation<JavaEditOperation> {
 	public Boolean doesEditApply(int location, Mutation editType) {
 		JavaStatement locationStmt = codeBank.get(location);
 		switch(editType) {
-		case APPEND: //return false;
-		case REPLACE: //return true;
-		case SWAP: //return false;
+		case APPEND: 
+		case REPLACE:
+		case SWAP:
 			return this.editSources(location,  editType).size() > 0;
-		case NULLINSERT:
-		case DELETE:  //return false;
-			boolean itApplies = true;
-			ASTNode faultyNode = locationStmt.getASTNode();
-
-			//Heuristic: If it is the body of an if, while, or for, it should not be removed
-			boolean ifCase = false, elseCase = false, whileCase = false, forCase = false;
-
-			if(faultyNode instanceof Block){
-				//this boolean states if the faultyNode is the body of an IfStatement
-				ifCase = faultyNode.getParent() instanceof IfStatement
-						&& ((IfStatement)faultyNode.getParent()).getThenStatement().equals(faultyNode);
-				//same for all these booleans
-				whileCase = faultyNode.getParent() instanceof WhileStatement
-						&& ((WhileStatement)faultyNode.getParent()).getBody().equals(faultyNode);
-				forCase = faultyNode.getParent() instanceof ForStatement
-						&& ((ForStatement)faultyNode.getParent()).getBody().equals(faultyNode);
-				if(faultyNode.getParent() instanceof IfStatement && ((IfStatement)faultyNode.getParent()).getElseStatement() != null){
-					elseCase = faultyNode.getParent() instanceof IfStatement
-							&& ((IfStatement)faultyNode.getParent()).getElseStatement().equals(faultyNode);
-				}
-			}
-
-			//if any of these booleans is true, then the change should not be allowed
-			if(ifCase || whileCase || forCase || elseCase){
-				itApplies = false;
-			}
-
-			//Heuristic: Don´t remove returns from functions that have only one return statement.
-			if(faultyNode instanceof ReturnStatement){
-				ASTNode parent = faultyNode.getParent();
-				while (!(parent instanceof MethodDeclaration)){
-					parent = parent.getParent();
-				}
-				boolean moreThanOneReturn = hasMoreThanOneReturn((MethodDeclaration)parent);
-				if(!moreThanOneReturn){
-					itApplies = false;
-				}
-			}
-
-			//Heuristic: If an stmt is the only stmt in a block, don´t delete it
-			ASTNode parent = blockThatContainsThisStatement(faultyNode);
-			if(parent instanceof Block){
-				if(((Block)parent).statements().size()==1){
-					itApplies = false;
-				}
-			}
-
-
-
-			return itApplies;
-		case OFFBYONE:  // FIXME: CLG suspects this should only apply to particular statements, not every statement in the program.  Maybe?
+		case DELETE: 
+			return locationStmt.canBeDeleted();
+		case OFFBYONE:  
 		case UBOUNDSET:
 		case LBOUNDSET:
 		case RANGECHECK:
 			return locationStmt.containsArrayAccesses();
 		case FUNREP: 
 			return locationStmt.methodReplacerApplies(methodDecls);
+		case PARREP:
+			return locationStmt.methodParamReplacerApplies(/* expressions/vars in scope? */);
+
 		case NULLCHECK: 
 			return locationStmt.nullCheckApplies();
-
 		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;
@@ -1100,20 +1018,8 @@ FaultLocRepresentation<JavaEditOperation> {
 		return false;
 	}
 
-	int howManyReturns = 0;
-	private boolean hasMoreThanOneReturn(MethodDeclaration method){
-		method.accept(new ASTVisitor() {
-			@Override
-			public boolean visit(ReturnStatement node) {
-				howManyReturns++;
-				return true;
-			}
-		});
-		return howManyReturns>=2;
-	}
-
+	
 	@Override
-
 	public ArrayList<WeightedAtom> editSources(int stmtId, Mutation editType) {
 		switch(editType) {
 		case APPEND: 	
@@ -1153,7 +1059,6 @@ FaultLocRepresentation<JavaEditOperation> {
 							containsThisAtom = true;
 							break;
 						}
-
 					}
 					if (containsThisAtom)
 						retVal.add(item);
@@ -1163,7 +1068,6 @@ FaultLocRepresentation<JavaEditOperation> {
 				return super.editSources(stmtId, editType);
 			}
 			//break; This is unreachable
-		case NULLINSERT:
 		case FUNREP:
 		case PARREP:
 		case PARADD:
@@ -1202,7 +1106,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			ASTNode actualStmt = stmt.getASTNode();
 			String stmtStr = actualStmt.toString();
 			logger.debug("statement " + atomid + " at line " + stmt.getLineno()
-					+ ": " + stmtStr);
+			+ ": " + stmtStr);
 			logger.debug("\t Names:");
 			for (String name : stmt.getNames()) {
 				logger.debug("\t\t" + name);
@@ -1218,9 +1122,17 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 	}
 
-	public void test() {
-		String newName = CachingRepresentation.newVariantFolder();
-		internalCompile(newName, newName);
+
+
+	public void setAllPossibleStmtsToFixLocalization(){
+		super.fixLocalization.clear();
+		for(int i = 0; i < JavaRepresentation.stmtCounter; i++) {
+			super.fixLocalization.add(new WeightedAtom(i,1.0));
+		}
+	}
+
+	public HashMap<Integer, JavaStatement> getCodeBank() {
+		return JavaRepresentation.codeBank;
 	}
 
 }
