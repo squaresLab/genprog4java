@@ -190,7 +190,7 @@ public class JavaEditFactory {
 				for(WeightedAtom fixStmt : fixStmts) {
 					JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
 					ASTNode fixAST = potentialFixStmt.getASTNode();
-					retVal.add(new SimpleJavaHole(holeName, fixAST));
+					retVal.add(new SimpleJavaHole(holeName, fixAST, potentialFixStmt.getStmtId()));
 				}
 			} 
 			break;
@@ -204,7 +204,7 @@ public class JavaEditFactory {
 					if (there.getAtom() == location.getId()) {
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
 						ASTNode fixAST = potentialFixStmt.getASTNode();
-						retVal.add(new SimpleJavaHole(holeName, fixAST));
+						retVal.add(new SimpleJavaHole(holeName, fixAST, potentialFixStmt.getStmtId()));
 						break;
 					}
 				}
@@ -225,7 +225,8 @@ public class JavaEditFactory {
 			if(arrayAccesses.size() > 0) {
 				for(Map.Entry<ASTNode, List<ASTNode>> entry : arrayAccesses.entrySet()) {
 					for(ASTNode arrayAccess : entry.getValue()) {
-						retVal.add(new SimpleJavaHole(holeName, arrayAccess));
+						// FIXME: the stmtId here makes no sense, fix toString?
+						retVal.add(new SimpleJavaHole(holeName, arrayAccess, locationStmt.getStmtId()));
 					}
 				} 
 			}
