@@ -57,15 +57,9 @@ do
     defects4j compile
     popd
 done
-
 # Common genprog libs: junit test runner and the like
 
 CONFIGLIBS=$GENPROGDIR"/lib/junittestrunner.jar:"$GENPROGDIR"/lib/commons-io-1.4.jar:"$GENPROGDIR"/lib/junit-4.12.jar:"$GENPROGDIR"/lib/hamcrest-core-1.3.jar"
-
-if [ "$LOWERCASEPACKAGE" = "lang" ] ; then
-    # special handling...do we still need this?
-    cp "$3"defects4j-scripts/Utilities/EntityArrays.java $BUGWD/src/main/java/org/apache/commons/lang3/text/translate/
-fi
 
 cd $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
 TESTWD=`defects4j export -p dir.src.tests`

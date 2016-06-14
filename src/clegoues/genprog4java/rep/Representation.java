@@ -259,4 +259,6 @@ Comparable<Representation<G>> {
 
 	public abstract List<String> holesForMutation(Mutation mut);
 
+	// FIXME: this is a temporary hack to get around a merge with the template refactor
+	public abstract void setAllPossibleStmtsToFixLocalization();
 }
