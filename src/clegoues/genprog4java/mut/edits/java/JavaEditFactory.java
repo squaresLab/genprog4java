@@ -24,6 +24,7 @@ import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
+import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
 import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 import clegoues.genprog4java.rep.JavaRepresentation;
@@ -175,9 +176,9 @@ public class JavaEditFactory {
 		JavaEditFactory.scopeSafeAtomMap.put(stmtId, retVal);
 		return retVal;
 	}
-	
+
 	public TreeSet<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType,
-			String holeName) { // FIXME: I notice that I'm really not using hole name, here, hm...maybe I can get rid of it?
+			String holeName) { // I notice that I'm really not using hole name, here, hm...maybe I can get rid of it?
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 		TreeSet<EditHole> retVal = new TreeSet<EditHole>();
 
@@ -225,7 +226,6 @@ public class JavaEditFactory {
 			if(arrayAccesses.size() > 0) {
 				for(Map.Entry<ASTNode, List<ASTNode>> entry : arrayAccesses.entrySet()) {
 					for(ASTNode arrayAccess : entry.getValue()) {
-						// FIXME: the stmtId here makes no sense, fix toString?
 						retVal.add(new SimpleJavaHole(holeName, arrayAccess, locationStmt.getStmtId()));
 					}
 				} 
@@ -243,8 +243,16 @@ public class JavaEditFactory {
 			break;
 		case FUNREP:
 			Map<ASTNode, List<ASTNode>> methodReplacements = locationStmt.getReplacableMethods(variant.semanticInfo.getMethodDecls());
-			Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
-			// OK I think I've just realized the tricky bit here.  How can I denote the "replacable method" as a location?
+			for(Map.Entry<ASTNode,List<ASTNode>> entry : methodReplacements.entrySet()) {
+				List<ASTNode> replacableMethods = entry.getValue();
+				for(ASTNode replacableMethod : replacableMethods) {
+					List<MethodInfo> possibleReplacements = 
+							locationStmt.getCandidateMethodReplacements(replacableMethod);
+					for(MethodInfo possibleReplacement : possibleReplacements) {
+						retVal.add(new MethodInfoHole(holeName,replacableMethod, locationStmt.getStmtId(), possibleReplacement));
+					}
+				}
+			}
 			break;
 		case PARREP:
 		case PARADD:
@@ -322,6 +330,8 @@ public class JavaEditFactory {
 			retVal.add("rangeCheck");
 			return retVal;
 		case FUNREP:
+			retVal.add("replaceMethod");
+			return retVal;
 		case PARREP:
 		case PARADD:
 		case PARREM:

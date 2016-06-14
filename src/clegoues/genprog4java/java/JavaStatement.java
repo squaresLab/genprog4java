@@ -329,7 +329,8 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	}
 	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
 	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
-	public Map<ASTNode, List<MethodInfo>> getCandidateMethodReplacements() { return candidateMethodReplacements; }
+	public List<MethodInfo> getCandidateMethodReplacements(ASTNode methodToReplace ) 
+	{ return candidateMethodReplacements.get(methodToReplace); }
 	
 	public Map<ASTNode, List<ASTNode>> getReplacableMethods(final List<MethodInfo> methodDecls) {
 		if(methodReplacements == null) {
@@ -371,13 +372,12 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 						}
 					}
-
 					if(!methodReplacements.containsKey(parent)){
 						List<ASTNode> methodNodes = new ArrayList<ASTNode>();
 						methodNodes.add(node);
 						methodReplacements.put(parent, methodNodes);		
 					}else{
-						List<ASTNode> methodNodes = (List<ASTNode>) arrayAccesses.get(parent);
+						List<ASTNode> methodNodes = (List<ASTNode>) methodReplacements.get(parent);
 						if(!methodNodes.contains(node))
 							methodNodes.add(node);
 						methodReplacements.put(parent, methodNodes);	

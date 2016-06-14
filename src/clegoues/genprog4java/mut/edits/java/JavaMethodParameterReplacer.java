@@ -31,26 +31,26 @@ public class JavaMethodParameterReplacer extends JavaEditOperation {
 
 	@Override
 	public void edit(ASTRewrite rewriter) {
-		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
-		ASTNode locationNode = locationStmt.getASTNode();
-		Map<ASTNode, List<MethodInfo>> candidateReplacements = locationStmt.getCandidateMethodReplacements();
-		List<ASTNode> optionsToBeReplaced = new ArrayList<ASTNode>(candidateReplacements.keySet());
-		Collections.shuffle(optionsToBeReplaced, Configuration.randomizer);
-		ASTNode toReplace = optionsToBeReplaced.get(0);
-		List<MethodInfo> options = candidateReplacements.get(toReplace);
-		Collections.shuffle(options, Configuration.randomizer);
-		MethodInfo replaceWith = options.get(0);
-		
-		MethodInvocation newNode = locationNode.getAST().newMethodInvocation();
-		SimpleName newMethodName = locationNode.getAST().newSimpleName(replaceWith.getName());
-		newNode.setName(newMethodName);
-		
-		List<ASTNode> paramNodes = ((MethodInvocation) toReplace).arguments();
-		for(ASTNode param : paramNodes) {
-			ASTNode newParam = rewriter.createCopyTarget(param);
-			newNode.arguments().add(newParam);
-		}		
-		rewriter.replace(toReplace, newNode, null);
+//		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
+//		ASTNode locationNode = locationStmt.getASTNode();
+//		Map<ASTNode, List<MethodInfo>> candidateReplacements = locationStmt.getCandidateMethodReplacements();
+//		List<ASTNode> optionsToBeReplaced = new ArrayList<ASTNode>(candidateReplacements.keySet());
+//		Collections.shuffle(optionsToBeReplaced, Configuration.randomizer);
+//		ASTNode toReplace = optionsToBeReplaced.get(0);
+//		List<MethodInfo> options = candidateReplacements.get(toReplace);
+//		Collections.shuffle(options, Configuration.randomizer);
+//		MethodInfo replaceWith = options.get(0);
+//
+//		MethodInvocation newNode = locationNode.getAST().newMethodInvocation();
+//		SimpleName newMethodName = locationNode.getAST().newSimpleName(replaceWith.getName());
+//		newNode.setName(newMethodName);
+//
+//		List<ASTNode> paramNodes = ((MethodInvocation) toReplace).arguments();
+//		for(ASTNode param : paramNodes) {
+//			ASTNode newParam = rewriter.createCopyTarget(param);
+//			newNode.arguments().add(newParam);
+//		}		
+//		rewriter.replace(toReplace, newNode, null);
 /*
  * [Parameter Replacer]
 P = program

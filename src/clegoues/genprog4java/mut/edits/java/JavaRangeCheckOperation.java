@@ -36,6 +36,8 @@ public class JavaRangeCheckOperation extends JavaEditOperation {
 		this.holeNames.add("rangeCheck");
 
 	}
+	
+	// FIXME: make this nicer.
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {

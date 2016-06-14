@@ -5,14 +5,14 @@ public class TemplatePlaygroundTest {
 	
     public int mid(int x, int y, int z){
 
-    	int[] foo = new int[5];
     	int ret = z;
-    	int bar = 2;
+    	retTwo(2);
+    	retThree();
 	if(y<z){
 	   if(x<y){
 		ret = y;
 	   }else if(x<z){
-		   foo[bar] = 0;
+		 retOne(5);
 		ret = y; // bug, it should be ret = x;
 		// retOne();
 		
@@ -29,7 +29,24 @@ public class TemplatePlaygroundTest {
 	return ret;
     }
     
-    public void retOne(){
+    public void retOne(int foo){
+	int i = 0;
+	
+	int e = 3;	
+	double r = 5;
+	String w = "Ello";
+ 	TemplatePlaygroundTest ww = new TemplatePlaygroundTest();
+    }
+    
+    public void retTwo(int bar){
+	int i = 0;
+	
+	int e = 3;	
+	double r = 5;
+	String w = "Ello";
+ 	TemplatePlaygroundTest ww = new TemplatePlaygroundTest();
+    }
+    public void retThree(){
 	int i = 0;
 	
 	int e = 3;	
