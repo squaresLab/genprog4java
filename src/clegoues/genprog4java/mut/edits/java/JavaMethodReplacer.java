@@ -20,26 +20,24 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
+import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
+import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
 public class JavaMethodReplacer extends JavaEditOperation {
 
 	public JavaMethodReplacer(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.METHODREPLACE, location, sources);
-
+		this.holeNames.add("replaceMethod");
 	}
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
 		ASTNode locationNode = locationStmt.getASTNode();
-		Map<ASTNode, List<MethodInfo>> candidateReplacements = locationStmt.getCandidateMethodReplacements();
-		List<ASTNode> optionsToBeReplaced = new ArrayList<ASTNode>(candidateReplacements.keySet());
-		Collections.shuffle(optionsToBeReplaced, Configuration.randomizer);
-		ASTNode toReplace = optionsToBeReplaced.get(0);
-		List<MethodInfo> options = candidateReplacements.get(toReplace);
-		Collections.shuffle(options, Configuration.randomizer);
-		MethodInfo replaceWith = options.get(0);
-		
+		MethodInfoHole thisHole = (MethodInfoHole) this.getHoleCode("replaceMethod");
+		ASTNode toReplace = thisHole.getCode();
+		MethodInfo replaceWith = thisHole.getMethodInfo();
+
 		MethodInvocation newNode = locationNode.getAST().newMethodInvocation();
 		SimpleName newMethodName = locationNode.getAST().newSimpleName(replaceWith.getName());
 		newNode.setName(newMethodName);
