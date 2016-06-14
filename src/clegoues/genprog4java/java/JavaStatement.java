@@ -332,6 +332,8 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	public List<MethodInfo> getCandidateMethodReplacements(ASTNode methodToReplace ) 
 	{ return candidateMethodReplacements.get(methodToReplace); }
 
+	// FIXME: replacement methods should apparently be in the same scope; can we safely assume
+	// that everything in the methoddecls field qualifies?
 	public Map<ASTNode, List<ASTNode>> getReplacableMethods(final List<MethodInfo> methodDecls) {
 		if(methodReplacements == null) {
 			methodReplacements = new HashMap<ASTNode, List<ASTNode>>();
