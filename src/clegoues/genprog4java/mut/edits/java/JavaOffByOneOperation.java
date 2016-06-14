@@ -39,14 +39,13 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 		}else{
 			mutType = mutationType.ADD;
 		}
-
 	}
+	
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode(); // not used, but being completist
 		SimpleJavaHole thisHole = (SimpleJavaHole) this.getHoleCode("arrayCheck");
 		ArrayAccess arrayAccess  = (ArrayAccess) thisHole.getCode();
-
 		Expression arrayindex = arrayAccess.getIndex(); // original index
 		Expression mutatedindex = mutateIndex(arrayindex, true); // method call to get mutated index
 		rewriter.replace(arrayindex, mutatedindex, null);	// replacing original index with mutated index

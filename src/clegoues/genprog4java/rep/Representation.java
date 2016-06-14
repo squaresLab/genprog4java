@@ -215,7 +215,7 @@ Comparable<Representation<G>> {
 
 	public abstract boolean testCase(TestCase test);
 
-	public abstract void reduceSearchSpace(); // do this?
+	public abstract void reduceSearchSpace(); 
 
 	public abstract TreeSet<Pair<Mutation, Double>> availableMutations(
 			Location faultyLocation);

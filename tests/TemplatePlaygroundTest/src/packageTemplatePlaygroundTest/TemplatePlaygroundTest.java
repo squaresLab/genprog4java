@@ -2,14 +2,19 @@ package packageTemplatePlaygroundTest;
 
 public class TemplatePlaygroundTest {
 
+	
     public int mid(int x, int y, int z){
+
+    	int[] foo = new int[5];
     	int ret = z;
+    	int bar = 2;
 	if(y<z){
 	   if(x<y){
 		ret = y;
 	   }else if(x<z){
-		//ret = y; // bug, it should be ret = x;
-		retOne();
+		   foo[bar] = 0;
+		ret = y; // bug, it should be ret = x;
+		// retOne();
 		
 	   }
 	}else{
@@ -23,6 +28,7 @@ public class TemplatePlaygroundTest {
 	}
 	return ret;
     }
+    
     public void retOne(){
 	int i = 0;
 	

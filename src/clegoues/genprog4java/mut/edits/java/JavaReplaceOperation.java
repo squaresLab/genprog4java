@@ -15,6 +15,7 @@ public class JavaReplaceOperation extends JavaEditOperation {
 	public JavaReplaceOperation(JavaLocation location,
 			HashMap<String,EditHole> fixCode) {
 		super(Mutation.REPLACE, location, fixCode);
+		holeNames.add("singleHole");
 	}
 	@Override
 	public void edit(final ASTRewrite rewriter) {

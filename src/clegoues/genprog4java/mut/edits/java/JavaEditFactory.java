@@ -212,6 +212,7 @@ public class JavaEditFactory {
 			break;
 		case LBOUNDSET:
 		case UBOUNDSET:
+		case RANGECHECK:
 			Map<ASTNode, List<ASTNode>> arrayAccesses = locationStmt.getArrayAccesses();
 			if(arrayAccesses.size() > 0) {
 				for(Map.Entry<ASTNode, List<ASTNode>> entry : arrayAccesses.entrySet()) {
@@ -220,7 +221,6 @@ public class JavaEditFactory {
 			}
 			break;
 		case OFFBYONE:  
-		case RANGECHECK:
 			arrayAccesses = locationStmt.getArrayAccesses();
 			if(arrayAccesses.size() > 0) {
 				for(Map.Entry<ASTNode, List<ASTNode>> entry : arrayAccesses.entrySet()) {
@@ -297,15 +297,30 @@ public class JavaEditFactory {
 
 
 	public List<String> holesForMutation(Mutation mut) { // this info should probably be static, and it's weird
-		// to have it split between this factory and the individual edits
+		// to have it split between this factory and the individual edits (FIXME)
+		ArrayList<String> retVal = new ArrayList<String>();
 		switch(mut) {
 		case APPEND:
 		case REPLACE: 
 		case SWAP: 
-			ArrayList<String> singleHole = new ArrayList<String>();
-			singleHole.add("singleHole"); 
-			return singleHole;
+			retVal.add("singleHole"); 
+			return retVal;
 		case DELETE: return null;
+		case NULLCHECK: 
+			retVal.add("checkForNull");
+			return retVal;
+		case UBOUNDSET:
+			retVal.add("upperBoundCheck");
+			return retVal;
+		case LBOUNDSET:
+			retVal.add("lowerBoundCheck");
+			return retVal;
+		case OFFBYONE:
+			retVal.add("arrayCheck");
+			return retVal;
+		case RANGECHECK: 
+			retVal.add("rangeCheck");
+			return retVal;
 		case FUNREP:
 		case PARREP:
 		case PARADD:
@@ -313,14 +328,9 @@ public class JavaEditFactory {
 		case EXPREP:
 		case EXPADD:
 		case EXPREM: 
-		case NULLCHECK: 
 		case OBJINIT:
-		case RANGECHECK: 
 		case SIZECHECK:
 		case CASTCHECK:
-		case LBOUNDSET:
-		case UBOUNDSET:
-		case OFFBYONE:
 			logger.fatal("Unhandled edit type in holesForMutation.  Handle it in JavaEditFactory and try again.");
 			return null;
 		}
