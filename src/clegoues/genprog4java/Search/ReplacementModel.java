@@ -1,17 +1,15 @@
-package clegoues.util;
+package clegoues.genprog4java.Search;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
-import clegoues.genprog4java.rep.WeightedAtom;
+import clegoues.util.GlobalUtils;
+import clegoues.util.Pair;
 
 public class ReplacementModel {
 	
