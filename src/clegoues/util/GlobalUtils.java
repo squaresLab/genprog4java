@@ -34,20 +34,15 @@
 package clegoues.util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+import java.util.TreeSet;
 
-import org.eclipse.jdt.core.dom.ASTNode;
-
-import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.rep.JavaRepresentation;
-import clegoues.genprog4java.rep.Representation;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.rep.WeightedAtom;
 
 public class GlobalUtils {
-	
-	
-
 	// range is inclusive!
 	public static ArrayList<Integer> range(int start, int end) {
 		ArrayList<Integer> returnVal = new ArrayList<Integer>();
@@ -55,9 +50,8 @@ public class GlobalUtils {
 			returnVal.add(i);
 		}
 		return returnVal;
-
 	}
-	
+
 	public static Pair<?,Double> chooseOneWeighted(ArrayList<Pair<?,Double>> atoms) {
 		assert(atoms.size() > 0);
 		double totalWeight = 0.0;

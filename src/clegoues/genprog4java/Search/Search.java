@@ -39,30 +39,25 @@ import static clegoues.util.ConfigurationBuilder.INT;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.rep.FaultLocRepresentation;
-import clegoues.genprog4java.rep.JavaRepresentation;
+import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.rep.Representation;
-import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
 import clegoues.util.Pair;
-import clegoues.genprog4java.Search.ReplacementModel;
 
 @SuppressWarnings("rawtypes")
 public abstract class Search<G extends EditOperation> {
@@ -178,7 +173,6 @@ public abstract class Search<G extends EditOperation> {
 		return mutations;
 	}
 
-
 	/*
 	 * Different strategies and representation types can do different things
 	 * when a repair is found. This at least stores information about the
@@ -195,7 +189,7 @@ public abstract class Search<G extends EditOperation> {
 	void noteSuccess(Representation<G> rep, Representation<G> original,
 			int generation) {
 
-		logger.info("\n\nREPAIR FOUND: " + rep.getName() + " (in " + rep.getVariantFolder() + ")\n\n");
+		logger.info("\nRepair Found: " + rep.getName() + " (in " + rep.getVariantFolder() + ")\n");
 		File repairDir = new File("repair/");
 		if (!repairDir.exists())
 			repairDir.mkdir();
@@ -221,6 +215,7 @@ public abstract class Search<G extends EditOperation> {
 	 */
 	protected abstract Population<G> initialize(Representation<G> original,
 			Population<G> incomingPopulation) throws RepairFoundException;
+
 	/*
 	 * 
 	 * (** randomly chooses an atomic mutation operator, instantiates it as
@@ -237,33 +232,32 @@ public abstract class Search<G extends EditOperation> {
 	 * @return variant' modified/potentially mutated variant
 	 */
 	public void mutate(Representation<G> variant) {
-		ArrayList faultyAtoms = variant.getFaultyAtoms();
-		TreeSet<WeightedAtom> proMutList = new TreeSet<WeightedAtom>();
+		ArrayList<Location> faultyAtoms = variant.getFaultyLocations();
+		ArrayList<Location> proMutList = new ArrayList<Location>();
 		boolean foundMutationThatCanApplyToAtom = false;
 		while(!foundMutationThatCanApplyToAtom){
 			//promut default is 1 // promut stands for proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
 			for (int i = 0; i < Search.promut; i++) {
-				WeightedAtom wa = null;
+				//chooses a random location
+				Pair<?, Double> wa = null;
 				boolean alreadyOnList = false;
 				//only adds the random atom if it is different from the others already added
 				do{
 					//chooses a random faulty atom from the subset of faulty atoms
-					wa = (WeightedAtom) GlobalUtils.chooseOneWeighted(faultyAtoms);
+					wa = GlobalUtils.chooseOneWeighted(new ArrayList(faultyAtoms));
 					alreadyOnList = proMutList.contains(wa);
-					
 				}while(alreadyOnList);
-				proMutList.add(wa);
-				
+				proMutList.add((Location)wa);
+
 				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
 				if(proMutList.size()>=faultyAtoms.size()){ 
-					((JavaRepresentation)variant).setAllPossibleStmtsToFixLocalization();
+					variant.setAllPossibleStmtsToFixLocalization();
 					//alreadyOnList=false;
 				}
 			}
-			for (WeightedAtom atom : proMutList) {
-				int stmtid = atom.getAtom();
+			for (Location location : proMutList) {
 				//the available mutations for this stmt
-				TreeSet<Pair<Mutation, Double>> availableMutations = variant.availableMutations(stmtid);
+				TreeSet<Pair<Mutation, Double>> availableMutations = variant.availableMutations(location);
 				if(availableMutations.isEmpty()){
 					continue; 
 				}else{
@@ -272,53 +266,34 @@ public abstract class Search<G extends EditOperation> {
 				//choose a mutation at random
 				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(new ArrayList(availableMutations));
 				Mutation mut = chosenMutation.getFirst();
-				switch (mut) {
-				case LBOUNDSET:
-				case NULLCHECK:
-				case DELETE:
-				case UBOUNDSET:
-				case RANGECHECK:
-				case FUNREP:
-				case PARREP:
-					// FIXME: this -1 hack is pretty gross; note to self, CLG should fix it
-					variant.performEdit(mut, stmtid, (-1));
-					break;
-				case APPEND:
-					TreeSet<WeightedAtom> allowedA = variant.editSources(stmtid,mut);
-					WeightedAtom afterA = (WeightedAtom) GlobalUtils
-							.chooseOneWeighted(new ArrayList(allowedA));
-					variant.performEdit(mut, stmtid,  afterA.getAtom()); 
-					break;
-				case SWAP:
-					TreeSet<WeightedAtom> allowedS = variant.editSources(stmtid,mut);
-					WeightedAtom afterS = (WeightedAtom) GlobalUtils
-							.chooseOneWeighted(new ArrayList(allowedS));
-					variant.performEdit(mut, stmtid,  afterS.getAtom()); 
-					break;
-				case REPLACE: 
-					TreeSet<WeightedAtom> allowedR = variant.editSources(stmtid,mut);
-					
-					WeightedAtom afterR = null;
-					if(Search.model.equalsIgnoreCase("random")){
-						afterR = (WeightedAtom)GlobalUtils.chooseOneWeighted(new ArrayList(allowedR));
-					}else if(Search.model.equalsIgnoreCase("probabilistic")){
-						
-						afterR = (WeightedAtom)rm.chooseReplacementBasedOnPredictingModel(new ArrayList(allowedR),variant,stmtid);
+				HashMap<String,EditHole> filledHoles = new HashMap<String,EditHole>();
+				List<String> holes = variant.holesForMutation(mut);
+				if(holes != null && holes.size() > 0) { // some edits have no holes (like delete)
+					for(String hole : holes) {
+						TreeSet<WeightedHole> allowed = variant.editSources(location, mut, hole);
+						WeightedHole selected = (WeightedHole) GlobalUtils
+								.chooseOneWeighted(new ArrayList(allowed));
+						filledHoles.put(hole, selected.getHole());
 					}
-					
-					variant.performEdit(mut, stmtid,  afterR.getAtom()); 
-					break;
-				case OFFBYONE:
-					TreeSet<WeightedAtom> allowedO = variant.editSources(stmtid,mut);
-					WeightedAtom afterO = (WeightedAtom) GlobalUtils
-							.chooseOneWeighted(new ArrayList(allowedO));
-					variant.performEdit(mut, stmtid,  afterO.getAtom()); 
-					break;
-				default: 
-					logger.fatal("Unhandled template type in search.mutate; add handling and try again!");
-					break;
-
 				}
+				
+		/*	
+		 * FIXME: CLG commented the handling of replace out for the purposes of merging things in
+		 * will have to think about how to do this properly, but want to fix this awful merge, first.
+		 * case REPLACE: 
+				TreeSet<WeightedAtom> allowedR = variant.editSources(stmtid,mut);
+				
+				WeightedAtom afterR = null;
+				if(Search.model.equalsIgnoreCase("random")){
+					afterR = (WeightedAtom)GlobalUtils.chooseOneWeighted(new ArrayList(allowedR));
+				}else if(Search.model.equalsIgnoreCase("probabilistic")){
+					
+					afterR = (WeightedAtom)rm.chooseReplacementBasedOnPredictingModel(new ArrayList(allowedR),variant,stmtid);
+				}
+				
+				variant.performEdit(mut, stmtid,  afterR.getAtom()); 
+				break;*/
+				variant.performEdit(mut, location, filledHoles);
 			}
 		}
 	}
@@ -341,7 +316,7 @@ public abstract class Search<G extends EditOperation> {
 	 */
 	public void doSearch(Representation<G> original,
 			Population<G> incomingPopulation) throws
-			CloneNotSupportedException {
+	CloneNotSupportedException {
 
 		try {
 			this.runAlgorithm(original, incomingPopulation);

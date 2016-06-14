@@ -134,8 +134,6 @@ tar xvjf outputOfEvoSuite/$PROJECT/evosuite-branch/1/"$PROJECT"-"$BUGNUMBER"f-ev
 ;;
 esac
 
-# FIXME: make this nicer
-
 #Remove a percentage of the positive tests in the test suite
 cd $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
 
