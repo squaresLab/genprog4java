@@ -55,7 +55,7 @@ public abstract class JavaEditOperation implements EditOperation<ASTRewrite> {
 	private Location<JavaStatement> location = null;
 	protected ArrayList<String> holeNames = new ArrayList<String>(); 
 	private HashMap<String,EditHole> holeCode = new HashMap<String,EditHole>();
-
+	
 	public JavaEditOperation(Mutation mutType, JavaLocation location) {
 		this.mutType = mutType;
 		this.location = location;

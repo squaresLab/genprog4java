@@ -15,6 +15,7 @@ public class JavaSwapOperation extends JavaEditOperation {
 
 	public JavaSwapOperation(JavaLocation location, HashMap<String,EditHole> fixCode) {
 		super(Mutation.SWAP, location, fixCode);
+		holeNames.add("singleHole");
 	}
 	
 	@Override

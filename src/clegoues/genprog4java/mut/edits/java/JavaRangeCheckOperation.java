@@ -27,34 +27,29 @@ import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
+import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
 public class JavaRangeCheckOperation extends JavaEditOperation {
 
 	public JavaRangeCheckOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.RANGECHECK, location, sources);
+		this.holeNames.add("rangeCheck");
+
 	}
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode();
-		// FIXME: should lowerbound be called lowerbound in the range check operator?
+		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode(); // not used, but being completist
+		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("rangeCheck");
+		ASTNode parent = thisHole.getHoleParent();
+		List<ASTNode> arrays = thisHole.getSubExps();
+		
 		Block newNode = locationNode.getAST().newBlock(); 
-
-		final Map<ASTNode, List<ASTNode>> nodestmts =  ((JavaStatement) (this.getLocation().getLocation())).getArrayAccesses(); 
-		Set<ASTNode> parentnodes = nodestmts.keySet();
-
-	parentnodes = nodestmts.keySet();
-	// for each parent node which may have multiple array access
-	// instances
-	for (ASTNode parent : parentnodes) {
-		// create a new node
-		newNode = parent.getAST().newBlock();
 
 		// if the parent is for statement then create a new for
 		// statement. this is special case
 		ForStatement newForStmt = null;
 
-		List<ASTNode> arrays = nodestmts.get(parent); // get all the arrays of the parent
 		boolean returnflag = false; // to check is parent node has a return statement
 		int counter = 0; // to keep track of the #range check conditions
 		boolean isforstmt = false; // to check if parent is of type ForStatement
@@ -217,4 +212,3 @@ public class JavaRangeCheckOperation extends JavaEditOperation {
 	}
 
 	}
-}

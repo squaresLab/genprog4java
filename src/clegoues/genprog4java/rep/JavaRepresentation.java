@@ -759,6 +759,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 		return null;
 	}
+	
 	@Override
 	public void reduceSearchSpace() {
 		ArrayList<WeightedAtom> toRemove = new ArrayList<WeightedAtom>();
