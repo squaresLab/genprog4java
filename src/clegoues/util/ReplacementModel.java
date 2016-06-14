@@ -91,6 +91,7 @@ public class ReplacementModel {
 	{0.72,5.00,8.02,5.00,3.82,1.96,5.00,5.00,5.00,23.16,19.78,0.12,16.48,5.00,6.56,3.09,1.64,6.81,7.80,0.04,5.00,5.00}
 	};
 	
+	
 	public Pair<?,Double> chooseReplacementBasedOnPredictingModel(ArrayList<Pair<?,Double>> atoms, Representation<?> variant, int stmtIdBuggy) {
 		assert(atoms.size() > 0);
 		
