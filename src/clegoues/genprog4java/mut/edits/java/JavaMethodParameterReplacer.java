@@ -31,7 +31,7 @@ public class JavaMethodParameterReplacer extends JavaEditOperation {
 
 	@Override
 	public void edit(ASTRewrite rewriter) {
-		JavaStatement locationStmt = (JavaStatement) this.getLocation();
+		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
 		ASTNode locationNode = locationStmt.getASTNode();
 		Map<ASTNode, List<MethodInfo>> candidateReplacements = locationStmt.getCandidateMethodReplacements();
 		List<ASTNode> optionsToBeReplaced = new ArrayList<ASTNode>(candidateReplacements.keySet());

@@ -48,6 +48,7 @@ public class Pair<A extends Comparable<A>,B extends Comparable<B>> implements Co
 	public B getSecond () { return two; }
 	public void setFirst(A first) { this.one = first; }
 	public void setSecond(B second) { this.two = second; }
+	
 	@Override
 	public int compareTo(Pair<A, B> o) {
 		if(this.getFirst().compareTo(o.getFirst()) != 0) {

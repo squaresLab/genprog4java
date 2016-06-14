@@ -43,4 +43,9 @@ public class SimpleJavaHole implements EditHole<ASTNode> {
 	public void setWeight(double weight) {
 		// FIXME: terrible hack
 	}
+
+	@Override
+	public int compareTo(EditHole<ASTNode> o) {
+		return 1; //I think this doesn't matter?
+	}
 }

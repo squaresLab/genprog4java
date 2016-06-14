@@ -5,27 +5,24 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.Location;
-import clegoues.util.Pair;
 
-public class JavaLocation implements Location<JavaStatement> {
+public class JavaLocation extends Location<JavaStatement> {
 
 	private ClassInfo classInfo = null; 
-	private JavaStatement location = null;
-	private Double weight;
 	private int id;
 	// this is a bit tricky, because I may want to use *either* the id or this node depending and that
 	// feels like a bad idea.  But let's try it.
 	private ASTNode codeElement = null;
 	
 	public JavaLocation(JavaStatement location, Double weight) {
-		this.location = location;
-		this.weight = weight;
 		this.id = location.getStmtId();
+		this.setFirst(location);
+		this.setSecond(weight);
 	}
 	
 	@Override
 	public JavaStatement getLocation() {
-		return this.location;
+		return this.getFirst();
 	}
 	
 	public ClassInfo getClassInfo() {
@@ -39,17 +36,7 @@ public class JavaLocation implements Location<JavaStatement> {
 
 	@Override
 	public void setLocation(JavaStatement location) {
-		this.location = location;	
-	}
-
-	@Override
-	public Double getWeight() {
-		return this.weight;
-	}
-
-	@Override
-	public void setWeight(Double weight) {
-		this.weight = weight;
+		this.setFirst(location);	
 	}
 
 	@Override
@@ -76,6 +63,16 @@ public class JavaLocation implements Location<JavaStatement> {
 
 	public void setCodeElement(ASTNode codeElement) {
 		this.codeElement = codeElement;
+	}
+
+	@Override
+	public Double getWeight() {
+		return this.getSecond();
+	}
+
+	@Override
+	public void setWeight(Double weight) {
+		this.setSecond(weight);
 	}
 
 }

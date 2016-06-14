@@ -1,6 +1,7 @@
 package clegoues.genprog4java.mut;
 
-public interface EditHole<T> {
+
+public interface EditHole<T> extends Comparable<EditHole<T>> {
 
 	public String getName();
 	public T getCode();

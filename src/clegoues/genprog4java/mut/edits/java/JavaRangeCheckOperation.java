@@ -36,11 +36,11 @@ public class JavaRangeCheckOperation extends JavaEditOperation {
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = ((JavaStatement) this.getLocation()).getASTNode();
+		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode();
 		// FIXME: should lowerbound be called lowerbound in the range check operator?
 		Block newNode = locationNode.getAST().newBlock(); 
 
-		final Map<ASTNode, List<ASTNode>> nodestmts =  ((JavaStatement) this.getLocation()).getArrayAccesses(); 
+		final Map<ASTNode, List<ASTNode>> nodestmts =  ((JavaStatement) (this.getLocation().getLocation())).getArrayAccesses(); 
 		Set<ASTNode> parentnodes = nodestmts.keySet();
 
 	parentnodes = nodestmts.keySet();

@@ -231,13 +231,13 @@ public abstract class Search<G extends EditOperation> {
 		while(!foundMutationThatCanApplyToAtom){
 			for (int i = 0; i < Search.promut; i++) {
 				//chooses a random location
-				Location wa = null;
+				Pair<?, Double> wa = null;
 				boolean alreadyOnList = false;
 				do{
-					wa = GlobalUtils.chooseLocationWeighted(faultyAtoms);
+					wa = GlobalUtils.chooseOneWeighted(new ArrayList(faultyAtoms));
 					alreadyOnList = proMutList.contains(wa);
 				}while(alreadyOnList);
-				proMutList.add(wa);
+				proMutList.add((Location) wa);
 			}
 			for (Location location : proMutList) {
 				//the available mutations for this stmt
