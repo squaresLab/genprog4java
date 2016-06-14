@@ -158,24 +158,23 @@ Representation<G> {
 		}
 		int testNum = 1;
 
-		ArrayList<String> passingTests = new ArrayList<String>();
+		ArrayList<TestCase> passingTests = new ArrayList<TestCase>();
 		// make list of passing files (sanitizing out of scope tests)
 		int testsOutOfScope = 0;
 		int testNumber = 0;
-		for (String posTest : Fitness.positiveTests) {
+		for (TestCase posTest : Fitness.positiveTests) {
 			testNumber++;
 			logger.info("Checking test number " + testNumber + " out of " + Fitness.positiveTests.size());
-			TestCase thisTest = new TestCase(TestType.POSITIVE, posTest);
 			FitnessValue res = this.internalTestCase(
 					CachingRepresentation.sanityExename,
-					CachingRepresentation.sanityFilename, thisTest);
+					CachingRepresentation.sanityFilename, posTest);
 			if (!res.isAllPassed()) {
 				testsOutOfScope++;
 				logger.info(testsOutOfScope + " tests out of scope so far, out of " + Fitness.positiveTests.size());
 				logger.info("false (0)\n");
 				logger.error("cacheRep: sanity: "
 						+ CachingRepresentation.sanityFilename
-						+ " failed positive test " + thisTest.toString());
+						+ " failed positive test " + posTest.toString());
 				if (!skipFailedSanity) {
 					return false;
 				}
@@ -196,17 +195,16 @@ Representation<G> {
 		printTestsInScope(passingTests);
 
 		testNum = 1;
-		for (String negTest : Fitness.negativeTests) {
+		for (TestCase negTest : Fitness.negativeTests) {
 			logger.info("\tn" + testNum + ": ");
-			TestCase thisTest = new TestCase(TestType.NEGATIVE, negTest);
 			FitnessValue res = this.internalTestCase(
 					CachingRepresentation.sanityExename,
-					CachingRepresentation.sanityFilename, thisTest);
+					CachingRepresentation.sanityFilename, negTest);
 			if (res.isAllPassed()) {
 				logger.info("true (1)\n");
 				logger.error("cacheRep: sanity: "
 						+ CachingRepresentation.sanityFilename
-						+ " passed negative test " + thisTest.toString());
+						+ " passed negative test " + negTest.toString());
 				return false;
 			}
 			logger.info("false (0)\n");
@@ -219,7 +217,8 @@ Representation<G> {
 		return true;
 	}
 
-	private void printTestsInScope(ArrayList<String> passingTests){
+	// FIXME: why?
+	private void printTestsInScope(ArrayList<TestCase> passingTests){
 
 		String path = Fitness.posTestFile;
 		//Set up to write to txt file
@@ -233,7 +232,7 @@ Representation<G> {
 		PrintWriter printer = new PrintWriter(write);
 
 		//Now write data to the file
-		for(String s : passingTests){
+		for(TestCase s : passingTests){
 			printer.println(s);
 		}
 		printer.close();

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -12,19 +11,21 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 
-public class JavaMethodReplacer extends JavaEditOperation {
+public class JavaMethodParameterReplacer extends JavaEditOperation {
 
-	public JavaMethodReplacer(ClassInfo fileName, JavaStatement location) {
-		super(Mutation.METHODREPLACE, fileName, location);
+	public JavaMethodParameterReplacer(ClassInfo fileName, JavaStatement location) {
+		super(Mutation.PARREP, fileName, location);
+
 	}
 
 	@Override
-	public void edit(final ASTRewrite rewriter, AST ast, final CompilationUnit cu) {
+	public void edit(ASTRewrite rewriter, AST ast, CompilationUnit cu) {
 		JavaStatement locationStmt = this.getLocation();
 		ASTNode locationNode = locationStmt.getASTNode();
 		Map<ASTNode, List<MethodInfo>> candidateReplacements = locationStmt.getCandidateMethodReplacements();
@@ -45,5 +46,29 @@ public class JavaMethodReplacer extends JavaEditOperation {
 			newNode.arguments().add(newParam);
 		}		
 		rewriter.replace(toReplace, newNode, null);
+/*
+ * [Parameter Replacer]
+P = program
+B = fault location
+
+<AST Analysis> 
+M <- collect a method call of B in P 
+
+<Context Check>
+if there is any parameter in M -> continue
+otherwise -> stop 
+
+<Program Editing>
+TargetParam <- select a parameter in M
+
+I <- collect all method calls in the same scope of TargetParam in P
+I_selected <- select a method call which has at least one parameter whose type is compatible with                            TargetParam
+
+SourceParam <- select a parameter of I_selected, which has a compatible type with TargetParam
+
+replace TargetParam by SourceParam
+ */
+		
 	}
+
 }
