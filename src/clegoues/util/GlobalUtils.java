@@ -46,7 +46,7 @@ import clegoues.genprog4java.rep.WeightedAtom;
 
 public class GlobalUtils {
 	
-	static ArrayList<Pair> alreadyReplaced = new ArrayList<Pair>();
+	
 
 	// range is inclusive!
 	public static ArrayList<Integer> range(int start, int end) {

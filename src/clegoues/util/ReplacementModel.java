@@ -145,6 +145,7 @@ public class ReplacementModel {
 		
 		
 /*
+ * static ArrayList<Pair> alreadyReplaced = new ArrayList<Pair>();
 	public static int chooseReplacementBasedOnPredictingModel(ArrayList<Pair<?,Double>> atoms, Representation<?> variant, int stmtIdBuggy) {
 		assert(atoms.size() > 0);
 		ReplacementModel rm = new ReplacementModel();
