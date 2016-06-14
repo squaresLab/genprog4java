@@ -80,9 +80,6 @@ public class HistoryEle {
 		case REPLACE:    
 			result += "r(" + this.location + "," + this.fixCode + ")";
 			break;
-		case NULLINSERT: 
-			result += "n(" + this.location + ")";
-			break;
 		case FUNREP: 	 
 			result += "fr(" + this.location + ")";
 			break;
