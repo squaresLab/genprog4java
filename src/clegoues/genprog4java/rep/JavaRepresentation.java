@@ -33,8 +33,6 @@
 
 package clegoues.genprog4java.rep;
 
-import static clegoues.util.ConfigurationBuilder.STRING;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,7 +48,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 
 import javax.tools.JavaCompiler;
@@ -63,7 +60,6 @@ import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AssertStatement;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -76,10 +72,8 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
@@ -87,7 +81,6 @@ import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -112,7 +105,6 @@ import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaSemanticInfo;
 import clegoues.genprog4java.java.JavaSourceInfo;
 import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.java.ScopeInfo;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
@@ -124,7 +116,6 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.mut.edits.java.JavaEditFactory;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
-import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.Pair;
@@ -543,11 +534,10 @@ FaultLocRepresentation<JavaEditOperation> {
 		command.addArgument("clegoues.genprog4java.fitness.JUnitTestRunner");
 
 		command.addArgument(test.toString());
-		//logger.info("Command: " + command.toString());
+		logger.info("Command: " + command.toString());
 		return command;
 
 	}
-
 
 	public JavaStatement getFromCodeBank(int atomId) {
 		return sourceInfo.getCodeBank().get(atomId);
@@ -560,6 +550,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		JavaEditOperation thisEdit = this.editFactory.makeEdit(edit, dst, sources);
 		this.genome.add(thisEdit);
 	}
+
 
 	@Override
 	protected boolean internalCompile(String progName, String exeName) {
@@ -819,6 +810,11 @@ FaultLocRepresentation<JavaEditOperation> {
 		for(int i = 0; i < JavaRepresentation.stmtCounter; i++) {
 		super.fixLocalization.add(new WeightedAtom(i,1.0));
 	}
+	}
+
+	public HashMap<Integer, JavaStatement> getCodeBank() {
+		return sourceInfo.getCodeBank(); // FIXME: this is for the replacement model, there should be a better way to do this based on
+		// hole fill-in information, but I just want this thing to compile for now.
 	}
 
 }

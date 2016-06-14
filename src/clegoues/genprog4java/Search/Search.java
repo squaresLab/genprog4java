@@ -39,15 +39,10 @@ import static clegoues.util.ConfigurationBuilder.INT;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
@@ -60,7 +55,6 @@ import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.rep.Representation;
-import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
 import clegoues.util.Pair;
@@ -68,38 +62,46 @@ import clegoues.util.Pair;
 @SuppressWarnings("rawtypes")
 public abstract class Search<G extends EditOperation> {
 	protected Logger logger = Logger.getLogger(Search.class);
+	
+	ReplacementModel rm;
 
 	public static final ConfigurationBuilder.RegistryToken token =
-			ConfigurationBuilder.getToken();
+		ConfigurationBuilder.getToken();
 
-	//private static int generations = 10;
-	protected static int generations = ConfigurationBuilder.of( INT )
-			.withVarName( "generations" )
-			.withDefault( "10" )
-			.withHelp( "number of search generations to run" )
+	protected static String model = ConfigurationBuilder.of( STRING )
+			.withVarName( "model" )
+			.withDefault( "probabilistic" )
+			.withHelp( "model chosen to pick the fix atom from the pool of possible fix atoms with respect to the buggy atom" )
 			.inGroup( "Search Parameters" )
 			.build();
+	//private static int generations = 10;
+	protected static int generations = ConfigurationBuilder.of( INT )
+		.withVarName( "generations" )
+		.withDefault( "10" )
+		.withHelp( "number of search generations to run" )
+		.inGroup( "Search Parameters" )
+		.build();
 	//The proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
 	//private static double promut = 1; 
 	protected static double promut = ConfigurationBuilder.of( DOUBLE )
-			.withVarName( "promut" )
-			.withFlag( "pMutation" )
-			.withDefault( "1" )
-			.withHelp( "the proportional mutation rate = number of genes to modify" )
-			.inGroup( "Search Parameters" )
-			.build();
+		.withVarName( "promut" )
+		.withFlag( "pMutation" )
+		.withDefault( "1" )
+		.withHelp( "the proportional mutation rate = number of genes to modify" )
+		.inGroup( "Search Parameters" )
+		.build();
 	//private static boolean continueSearch = false;
 	static boolean continueSearch = ConfigurationBuilder.of( BOOLEAN )
-			.withVarName( "continueSearch" )
-			.withFlag( "continue" )
-			.withHelp( "continue searching after finding a repair" )
-			.inGroup( "Search Parameters" )
-			.build();
+		.withVarName( "continueSearch" )
+		.withFlag( "continue" )
+		.withHelp( "continue searching after finding a repair" )
+		.inGroup( "Search Parameters" )
+		.build();
 
 	//20 mutations 1/20 = 0.05
 	//public static HashMap<Mutation,Double> availableMutations = new HashMap<Mutation,Double>();
 	public static Map< Mutation, Double > availableMutations =
-			new ConfigurationBuilder< Map< Mutation, Double > >()
+		new ConfigurationBuilder< Map< Mutation, Double > >()
 			.withVarName( "availableMutations" )
 			.withFlag( "edits" )
 			.withDefault( "append;replace;delete" )
@@ -111,8 +113,8 @@ public abstract class Search<G extends EditOperation> {
 					for ( int i = 0; i < values.length; ++i )
 						values[ i ] = values[ i ].trim();
 					return parseEdits(
-							values, new HashMap< Mutation, Double >()
-							);
+						values, new HashMap< Mutation, Double >()
+					);
 				}
 			})
 			.build();
@@ -120,16 +122,19 @@ public abstract class Search<G extends EditOperation> {
 
 	//public static String searchStrategy = "ga";
 	public static String searchStrategy = ConfigurationBuilder.of( STRING )
-			.withVarName( "searchStrategy" )
-			.withFlag( "search" )
-			.withDefault( "ga" )
-			.withHelp( "the search strategy to employ" )
-			.inGroup( "Search Parameters" )
-			.build();
+		.withVarName( "searchStrategy" )
+		.withFlag( "search" )
+		.withDefault( "ga" )
+		.withHelp( "the search strategy to employ" )
+		.inGroup( "Search Parameters" )
+		.build();
 	protected Fitness<G> fitnessEngine = null;
 
 	public Search(Fitness<G> engine) {
 		this.fitnessEngine = engine;
+		if(Search.model.equalsIgnoreCase("probabilistic")){
+			rm = new ReplacementModel();
+		}
 	}
 
 	public static Map<Mutation,Double> parseEdits(String[] editList, Map<Mutation,Double> mutations) {
@@ -193,6 +198,7 @@ public abstract class Search<G extends EditOperation> {
 		rep.outputSource(repairFilename);
 	}
 
+
 	/*
 	 * prepares for GA by registering available mutations (including templates
 	 * if applicable) and reducing the search space, and then generates the
@@ -230,11 +236,14 @@ public abstract class Search<G extends EditOperation> {
 		ArrayList<Location> proMutList = new ArrayList<Location>();
 		boolean foundMutationThatCanApplyToAtom = false;
 		while(!foundMutationThatCanApplyToAtom){
+			//promut default is 1 // promut stands for proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
 			for (int i = 0; i < Search.promut; i++) {
 				//chooses a random location
 				Pair<?, Double> wa = null;
 				boolean alreadyOnList = false;
+				//only adds the random atom if it is different from the others already added
 				do{
+					//chooses a random faulty atom from the subset of faulty atoms
 					wa = GlobalUtils.chooseOneWeighted(new ArrayList(faultyAtoms));
 					alreadyOnList = proMutList.contains(wa);
 				}while(alreadyOnList);
@@ -254,7 +263,7 @@ public abstract class Search<G extends EditOperation> {
 				}else{
 					foundMutationThatCanApplyToAtom = true;
 				}
-				//choose one at random
+				//choose a mutation at random
 				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(new ArrayList(availableMutations));
 				Mutation mut = chosenMutation.getFirst();
 				HashMap<String,EditHole> filledHoles = new HashMap<String,EditHole>();
@@ -267,6 +276,23 @@ public abstract class Search<G extends EditOperation> {
 						filledHoles.put(hole, selected.getHole());
 					}
 				}
+				
+		/*	
+		 * FIXME: CLG commented the handling of replace out for the purposes of merging things in
+		 * will have to think about how to do this properly, but want to fix this awful merge, first.
+		 * case REPLACE: 
+				TreeSet<WeightedAtom> allowedR = variant.editSources(stmtid,mut);
+				
+				WeightedAtom afterR = null;
+				if(Search.model.equalsIgnoreCase("random")){
+					afterR = (WeightedAtom)GlobalUtils.chooseOneWeighted(new ArrayList(allowedR));
+				}else if(Search.model.equalsIgnoreCase("probabilistic")){
+					
+					afterR = (WeightedAtom)rm.chooseReplacementBasedOnPredictingModel(new ArrayList(allowedR),variant,stmtid);
+				}
+				
+				variant.performEdit(mut, stmtid,  afterR.getAtom()); 
+				break;*/
 				variant.performEdit(mut, location, filledHoles);
 			}
 		}
