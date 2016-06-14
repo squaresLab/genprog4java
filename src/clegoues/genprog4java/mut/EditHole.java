@@ -7,7 +7,5 @@ public interface EditHole<T> extends Comparable<EditHole<T>> {
 	public T getCode();
 	public void setCode(T hole);
 	public void setName(String name);
-	public double getWeight();
-	public void setWeight(double weight);
 
 }

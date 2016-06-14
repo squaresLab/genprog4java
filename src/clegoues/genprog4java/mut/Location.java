@@ -4,10 +4,26 @@ import clegoues.util.Pair;
 
 public abstract class Location<G extends Comparable<G>> extends Pair<G, Double> implements Cloneable {
 	
-	public abstract G getLocation();
 	public abstract int getId();
-	public abstract void setLocation(G location);
-	public abstract Double getWeight();
-	public abstract void setWeight(Double weight);
+
+	public Location(G location, Double weight) {
+		super(location, weight);
+	}
+	
+	public G getLocation() {
+		return this.getFirst();
+	}
+	public void setLocation(G location) {
+		this.setFirst(location);	
+	}
+
+	public Double getWeight() {
+		return this.getSecond();
+	}
+
+	public void setWeight(Double weight) {
+		this.setSecond(weight);
+	}
+
 }
 

@@ -15,28 +15,16 @@ public class JavaLocation extends Location<JavaStatement> {
 	private ASTNode codeElement = null;
 	
 	public JavaLocation(JavaStatement location, Double weight) {
+		super(location,weight);
 		this.id = location.getStmtId();
-		this.setFirst(location);
-		this.setSecond(weight);
-	}
-	
-	@Override
-	public JavaStatement getLocation() {
-		return this.getFirst();
 	}
 	
 	public ClassInfo getClassInfo() {
 		return this.classInfo;
 	}
-
 	
 	public void setClassInfo(ClassInfo ci) {
 		this.classInfo = ci;
-	}
-
-	@Override
-	public void setLocation(JavaStatement location) {
-		this.setFirst(location);	
 	}
 
 	@Override
@@ -63,16 +51,6 @@ public class JavaLocation extends Location<JavaStatement> {
 
 	public void setCodeElement(ASTNode codeElement) {
 		this.codeElement = codeElement;
-	}
-
-	@Override
-	public Double getWeight() {
-		return this.getSecond();
-	}
-
-	@Override
-	public void setWeight(Double weight) {
-		this.setSecond(weight);
 	}
 
 }
