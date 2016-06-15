@@ -238,6 +238,60 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 
 
+
+
+	private Map<ASTNode, Map<ASTNode,Set<ASTNode>>> methodParamReplacements = null;
+
+	public Map<ASTNode, Map<ASTNode,Set<ASTNode>>> getReplacableMethodParameters(final JavaSemanticInfo semanticInfo) {
+		if(methodParamReplacements != null) {
+			return methodParamReplacements;
+		} else {
+			methodParamReplacements = new HashMap<ASTNode, Map<ASTNode,Set<ASTNode>>>();
+		} 
+		final ASTNode myASTNode = this.getASTNode();
+
+		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
+		final String methodName = md.getName().getIdentifier();
+
+		this.getASTNode().accept(new ASTVisitor() {
+			// method to visit all Expressions relevant for this in locationNode and
+			// store their parents
+			public boolean visit(MethodInvocation node) {
+				// if there exists another invocation that this works for...
+				Map<ASTNode,Set<ASTNode>> thisMethodCall;
+				if(methodParamReplacements.containsKey(node)) {
+					thisMethodCall = methodParamReplacements.get(node);
+				} else {
+					thisMethodCall = new HashMap<ASTNode, Set<ASTNode>>();
+					methodParamReplacements.put(node, thisMethodCall);
+				}
+
+				List<Expression> args = node.arguments();
+				for(Expression arg : args) {
+					ITypeBinding paramType = arg.resolveTypeBinding();
+					Set<ASTNode> replacements = semanticInfo.getInScopeReplacementExpressions(methodName, md, paramType.getName());
+					Set<ASTNode> thisList = null;
+					if(thisMethodCall.containsKey(arg)) {
+						thisList = thisMethodCall.get(arg);
+					} else {
+						thisList = new TreeSet<ASTNode>();
+						thisMethodCall.put(arg, thisList);
+					}
+					thisList.addAll(replacements);
+				}
+				return true;
+
+			}
+		});
+		return methodParamReplacements;
+	}
+
+	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
+	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
+	
+	public List<MethodInfo> getCandidateMethodReplacements(ASTNode methodToReplace ) 
+	{ return candidateMethodReplacements.get(methodToReplace); }
+	
 	private ArrayList<ITypeBinding> paramsToTypes(List<SingleVariableDeclaration> params) {
 		int i = 0; 
 		ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>();
@@ -248,90 +302,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		}
 		return paramTypes;
 	}
-
-	private Map<ASTNode, List<ASTNode>> methodParamReplacements = null;
-	private Map<ASTNode, Map<String,ASTNode>> candidateMethodParamReplacements= null;
-	private Map<String, Map<String,Set<ASTNode>>> expressionsInScope = null;
-
-
-	private void saveMethodParamReplacerInfo(String methodName, String typeName, ASTNode expNode) {
-		//		HashMap<String,Set<ASTNode>> typeToExpressions = null;
-		//		if(!expressionsInScope.containsKey(methodName)) {
-		//			typeToExpressions = (HashMap) expressionsInScope.get(methodName);
-		//		} else {
-		//			typeToExpressions = new HashMap<String,Set<ASTNode>>();
-		//			expressionsInScope.put(methodName, typeToExpressions);
-		//		}
-		//		Set<ASTNode> ofType = null;
-		//		if(expressionsInScope.containsKey(typeName)) {
-		//			ofType = typeToExpressions.get(typeName);
-		//		} else {
-		//			ofType = new TreeSet<ASTNode>();
-		//			expressionsInScope.put(typeName, ofType);
-		//		}
-		//		ofType.add(expNode);
-	}
-
-	public boolean methodParamReplacerApplies() {
-		return false;
-		//		if(methodParamReplacements == null) {
-		//			methodParamReplacements = new HashMap<ASTNode, List<ASTNode>>();
-		//			candidateMethodParamReplacements = new HashMap<ASTNode, Map<String,ASTNode>>();
-		//			expressionsInScope = new HashMap<String,Map<String, Set<ASTNode>>>();
-		//		}
-		//		final ASTNode myASTNode = this.getASTNode();
-		//		if(methodParamReplacements.containsKey(myASTNode)) {
-		//			return !methodParamReplacements.get(myASTNode).isEmpty();
-		//		}
-		//		MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
-		//		final String methodName = md.getName().getIdentifier();
-		//
-		//		md.accept(new ASTVisitor() {
-		//				public boolean visit(Expression node) {
-		//					ITypeBinding typeBinding = node.resolveTypeBinding();
-		//					String typeName = typeBinding.getName();
-		//					saveMethodParamReplacerInfo(methodName, typeName, node);
-		//					return true;
-		//				}
-		//				
-		//			});
-		//					
-		//			this.getASTNode().accept(new ASTVisitor() {
-		//				// method to visit all Expressions relevant for this in locationNode and
-		//				// store their parents
-		//				public boolean visit(MethodInvocation node) {
-		//					// if there exists another invocation that this works for...
-		//					ASTNode parent = getParent(node);
-		//					IMethodBinding invokedMethod = node.resolveMethodBinding().getMethodDeclaration();
-		//					node.arguments();
-		//					ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>(Arrays.asList(invokedMethod.getParameterTypes()));
-		//					if(paramTypes.size() > 0) {
-		//						for(ITypeBinding paramType : paramTypes) {
-		//							if(expressionsInScope.containsKey(paramType.getName())) {
-		//								List<ASTNode> thisList = null;
-		//								if(methodParamReplacements.containsKey(myASTNode)) {
-		//									thisList = methodParamReplacements.get(myASTNode);
-		//								} else {
-		//									thisList = new ArrayList<ASTNode>();
-		//									methodParamReplacements.put(myASTNode, thisList);
-		//								}
-		//								thisList.add(node);
-		//							}
-		//						}
-		//					}
-		//				}
-		//
-		//			});
-		//			if(methodParamReplacements.get(this.getASTNode()) != null && methodParamReplacements.get(this.getASTNode()).size() > 0) {
-		//				
-		//			
-		//		} else { return false; }
-	}
-	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
-	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
-	public List<MethodInfo> getCandidateMethodReplacements(ASTNode methodToReplace ) 
-	{ return candidateMethodReplacements.get(methodToReplace); }
-
 	// FIXME: replacement methods should apparently be in the same scope; can we safely assume
 	// that everything in the methoddecls field qualifies?
 	public Map<ASTNode, List<ASTNode>> getReplacableMethods(final List<MethodInfo> methodDecls) {
