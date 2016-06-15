@@ -121,7 +121,7 @@ CachingRepresentation<G> {
 	protected static String fixStrategy = ConfigurationBuilder.of ( STRING )
 			.withVarName("fixStrategy")
 			.withHelp("Fix source strategy")
-			.withDefault("packageScope")
+			.withDefault("classScope")
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
 
