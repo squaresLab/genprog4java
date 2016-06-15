@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
@@ -255,6 +256,15 @@ public class JavaEditFactory {
 			}
 			break;
 		case PARREP:
+			Map<ASTNode, Map<ASTNode, Set<ASTNode>>> replacableParameters = locationStmt.getReplacableMethodParameters(variant.semanticInfo);
+			for(Map.Entry<ASTNode, Map<ASTNode,Set<ASTNode>>> funsite : replacableParameters.entrySet()) {
+				for(Map.Entry<ASTNode, Set<ASTNode>> exps : funsite.getValue().entrySet()) {
+					for(ASTNode replacementExp : exps.getValue()) { // simple hole here is terrible.  
+					retVal.add(new SimpleJavaHole(holeName, exps.getKey(), replacementExp, locationStmt.getStmtId()));
+					}
+				}
+			}
+			break;
 		case PARADD:
 		case PARREM:
 		case EXPREP:
@@ -291,8 +301,7 @@ public class JavaEditFactory {
 		case FUNREP: 
 			return locationStmt.getReplacableMethods(variant.semanticInfo.getMethodDecls()).size() > 0;
 		case PARREP:
-			return locationStmt.methodParamReplacerApplies(/* expressions/vars in scope? */);
-
+			return locationStmt.getReplacableMethodParameters(variant.semanticInfo).size() > 0;
 		case NULLCHECK: 
 			return locationStmt.getNullCheckables().size() > 0;
 		default:
@@ -333,6 +342,8 @@ public class JavaEditFactory {
 			retVal.add("replaceMethod");
 			return retVal;
 		case PARREP:
+			retVal.add("replaceParameter");
+			return retVal;
 		case PARADD:
 		case PARREM:
 		case EXPREP:
