@@ -39,15 +39,18 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import javax.tools.JavaCompiler;
@@ -57,6 +60,7 @@ import javax.tools.ToolProvider;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AssertStatement;
@@ -123,7 +127,7 @@ import clegoues.util.Pair;
 public class JavaRepresentation extends
 FaultLocRepresentation<JavaEditOperation> {
 	protected Logger logger = Logger.getLogger(JavaRepresentation.class);
-	
+
 	private JavaEditFactory editFactory = new JavaEditFactory();
 
 	public static final ConfigurationBuilder.RegistryToken token =
@@ -191,7 +195,6 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			});
 
-
 			reader.read();
 			in.close();
 
@@ -232,20 +235,12 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 		return atoms;
 	}
+	
+	private void fromSource(ClassInfo pair, String path, File sourceFile) throws IOException {
 
-	public void fromSource(ClassInfo pair) throws IOException {
-		// load here, get all statements and the compilation unit saved
-		// parser can visit at the same time to collect scope info
-		// apparently names and types and scopes are visited here below in
-		// the calls to ASTUtils
-
-		// we can assume that that's what Configuration.globalExtension is,
-		// because we're in JavaRepresentation
 		ScopeInfo scopeInfo = new ScopeInfo();
 		JavaParser myParser = new JavaParser(scopeInfo);
-		// originalSource entire class file written as a string
-		String path = Configuration.outputDir +  "/original/" + pair.pathToJavaFile();
-		String source = FileUtils.readFileToString(new File(path));
+		String source = FileUtils.readFileToString(sourceFile);
 		sourceInfo.addToOriginalSource(pair, source);
 
 		myParser.parse(path, Configuration.libs.split(File.pathSeparator));
@@ -258,13 +253,6 @@ FaultLocRepresentation<JavaEditOperation> {
 				JavaStatement s = new JavaStatement();
 				s.setStmtId(stmtCounter);
 				s.setClassInfo(pair);
-				
-				//System.out.println("Stmt: " + stmtCounter);
-
-				logger.info("Stmt: " + stmtCounter);
-				logger.info(node);
-				
-				
 
 				s.setInfo(stmtCounter, node);
 				stmtCounter++;
@@ -276,7 +264,18 @@ FaultLocRepresentation<JavaEditOperation> {
 				semanticInfo.addToScopeMap(s, scopeInfo.getScope(s.getASTNode()));
 			}
 		}
-		
+
+	}
+
+	public void fromSource(ClassInfo pair) throws IOException {
+		// load here, get all statements and the compilation unit saved
+		// parser can visit at the same time to collect scope info
+		// apparently names and types and scopes are visited here below in
+		// the calls to ASTUtils
+
+		// originalSource entire class file written as a string
+		String path = Configuration.outputDir +  "/original/" + pair.pathToJavaFile();
+		this.fromSource(pair, path, new File(path));
 	}
 
 	public static boolean canRepair(ASTNode node) {
@@ -668,7 +667,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public void reduceSearchSpace() {
 		ArrayList<WeightedAtom> toRemove = new ArrayList<WeightedAtom>();
@@ -757,8 +756,8 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 		return retVal;
 	}
-	
-	
+
+
 	@SuppressWarnings("rawtypes")
 	@Override
 	protected void printDebugInfo() {
@@ -806,8 +805,8 @@ FaultLocRepresentation<JavaEditOperation> {
 	public void setAllPossibleStmtsToFixLocalization(){
 		super.fixLocalization.clear();
 		for(int i = 0; i < JavaRepresentation.stmtCounter; i++) {
-		super.fixLocalization.add(new WeightedAtom(i,1.0));
-	}
+			super.fixLocalization.add(new WeightedAtom(i,1.0));
+		}
 	}
 
 	public HashMap<Integer, JavaStatement> getCodeBank() {
@@ -815,4 +814,41 @@ FaultLocRepresentation<JavaEditOperation> {
 		// hole fill-in information, but I just want this thing to compile for now.
 	}
 
+	@Override
+	protected void computeFixSpace(TreeSet<Integer> negativePath, TreeSet<Integer> positivePath) {
+		if(FaultLocRepresentation.fixStrategy.equalsIgnoreCase("packageScope")) {
+			HashMap<ClassInfo,String> originalSource = sourceInfo.getOriginalSource();
+			Set<String> packages = new TreeSet<String>();
+			final Set<String> clazzes = new TreeSet<String>();
+			ArrayList<File> packageFiles = new ArrayList<File>();
+			for(ClassInfo clazzInfo : originalSource.keySet()) {
+				packages.add(clazzInfo.getPackage());
+				clazzes.add(clazzInfo.getClassName() + ".java");
+			}
+			for(String packagePath : packages) {
+				// question: should I save the package code as well in original?  I think no...
+				List<File> list = Arrays.asList(new File(Configuration.workingDir + File.separatorChar + Configuration.sourceDir + File.separatorChar + packagePath).listFiles(new FilenameFilter(){
+					@Override
+					public boolean accept(File dir, String name) {
+						return name.endsWith(".java") && !clazzes.contains(name); // or something else
+					}}));
+				packageFiles.addAll(list);	
+			}
+			for(File packageFile : packageFiles) {
+				ClassInfo newCi = new ClassInfo(packageFile.getName(), packageFile.getPath()); // FIXME this is wrong
+				try {
+					this.fromSource(newCi, packageFile.getPath(), packageFile);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			this.fixLocalization.clear();
+			for(int i = 0; i < JavaRepresentation.stmtCounter; i++) {
+				this.fixLocalization.add(new WeightedAtom(i, 1.0));
+			}
+		} else {
+			super.computeFixSpace(negativePath, positivePath);
+		}
+	}
 }
