@@ -9,7 +9,7 @@ public class TemplatePlaygroundTest {
 		ret = y;
 	   }else if(x<z){
 		//ret = y; // bug, it should be ret = x;
-		retOne();
+		retOne(5);
 	   }
 	}else{
 	   if(x>y){
@@ -20,9 +20,10 @@ public class TemplatePlaygroundTest {
 		
 	   }	
 	}
+	retOne(6);
 	return ret;
     }
-    public void retOne(){
+    public void retOne(int foo){
 	int i = 0;
 	
 	int e = 3;	
