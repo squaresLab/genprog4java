@@ -241,6 +241,10 @@ public abstract class Search<G extends EditOperation> {
 				//chooses a random location
 				Pair<?, Double> wa = null;
 				boolean alreadyOnList = false;
+				if(proMutList.size()>=faultyAtoms.size()){ 
+					variant.setAllPossibleStmtsToFixLocalization();
+					//alreadyOnList=false;
+				}
 				//only adds the random atom if it is different from the others already added
 				do{
 					//chooses a random faulty atom from the subset of faulty atoms
@@ -250,10 +254,7 @@ public abstract class Search<G extends EditOperation> {
 				proMutList.add((Location)wa);
 
 				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
-				if(proMutList.size()>=faultyAtoms.size()){ 
-					variant.setAllPossibleStmtsToFixLocalization();
-					//alreadyOnList=false;
-				}
+
 			}
 			for (Location location : proMutList) {
 				//the available mutations for this stmt

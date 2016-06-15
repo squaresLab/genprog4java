@@ -254,6 +254,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				s.setStmtId(stmtCounter);
 				s.setClassInfo(pair);
 
+				logger.info("Stmt id: " + stmtCounter + " node: " + node.toString());
 				s.setInfo(stmtCounter, node);
 				stmtCounter++;
 
