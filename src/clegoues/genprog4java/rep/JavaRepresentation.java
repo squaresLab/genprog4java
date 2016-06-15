@@ -131,7 +131,6 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	private JavaSourceInfo sourceInfo = new JavaSourceInfo();
 	public JavaSemanticInfo semanticInfo = new JavaSemanticInfo();
-	private static HashMap<Integer,JavaLocation> locationInformation = new HashMap<Integer,JavaLocation>();
 
 	private static int stmtCounter = 0;
 
@@ -746,7 +745,6 @@ FaultLocRepresentation<JavaEditOperation> {
 		return editFactory.doesEditApply(this,location,editType); 
 	}
 
-
 	@SuppressWarnings("rawtypes")
 	@Override
 	public TreeSet<WeightedHole> editSources(Location location, Mutation editType, String holeName) {
@@ -790,13 +788,13 @@ FaultLocRepresentation<JavaEditOperation> {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Location instantiateLocation(Integer i, double negWeight) {
-		if(locationInformation.containsKey(i)) {
-			return locationInformation.get(i);
+		if(this.sourceInfo.getLocationInformation().containsKey(i)) {
+			return this.sourceInfo.getLocationInformation().get(i);
 		}
 		JavaStatement stmt = sourceInfo.getBase().get(i);
 		JavaLocation location = new JavaLocation(stmt, negWeight);
 		location.setClassInfo(stmt.getClassInfo());
-		locationInformation.put(i, location);
+		this.sourceInfo.getLocationInformation().put(i, location);
 		return location;
 	}
 

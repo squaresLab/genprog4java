@@ -76,48 +76,54 @@ CachingRepresentation<G> {
 	protected Logger logger = Logger.getLogger(FaultLocRepresentation.class);
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
-		
-		//private static double positivePathWeight = 0.1;
-		private static double positivePathWeight = ConfigurationBuilder.of( DOUBLE )
+
+	//private static double positivePathWeight = 0.1;
+	private static double positivePathWeight = ConfigurationBuilder.of( DOUBLE )
 			.withVarName( "positivePathWeight" )
 			.withDefault( "0.1" )
 			.withHelp( "weighting for statements on the positive path" )
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
-		//private static double negativePathWeight = 1.0;
-		private static double negativePathWeight = ConfigurationBuilder.of( DOUBLE )
+	//private static double negativePathWeight = 1.0;
+	private static double negativePathWeight = ConfigurationBuilder.of( DOUBLE )
 			.withVarName( "negativePathWeight" )
 			.withDefault( "1.0" )
 			.withHelp( "weighting for statements on the negative path" )
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
-		//protected static boolean allowCoverageFail = false;
-		protected static boolean allowCoverageFail = ConfigurationBuilder.of( BOOLEAN )
+	//protected static boolean allowCoverageFail = false;
+	protected static boolean allowCoverageFail = ConfigurationBuilder.of( BOOLEAN )
 			.withVarName( "allowCoverageFail" )
 			.withHelp( "ignore unexpected test results in coverage" )
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
-		//protected static String posCoverageFile = "coverage.path.pos";
-		protected static String posCoverageFile = ConfigurationBuilder.of( STRING )
+	//protected static String posCoverageFile = "coverage.path.pos";
+	protected static String posCoverageFile = ConfigurationBuilder.of( STRING )
 			.withVarName( "posCoverageFile" )
 			.withDefault( "coverage.path.pos" )
 			.withHelp( "file containing the statements covered by positive tests" )
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
-		//protected static String negCoverageFile = "coverage.path.neg";
-		protected static String negCoverageFile = ConfigurationBuilder.of( STRING )
+	//protected static String negCoverageFile = "coverage.path.neg";
+	protected static String negCoverageFile = ConfigurationBuilder.of( STRING )
 			.withVarName( "negCoverageFile" )
 			.withDefault( "coverage.path.neg" )
 			.withHelp( "file containing the statements covered by negative tests" )
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
-		//protected static boolean regenPaths = false;
-		protected static boolean regenPaths = ConfigurationBuilder.of( BOOLEAN )
+	//protected static boolean regenPaths = false;
+	protected static boolean regenPaths = ConfigurationBuilder.of( BOOLEAN )
 			.withVarName( "regenPaths" )
 			.withHelp( "regenerate coverage information" )
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
 
+	protected static String fixStrategy = ConfigurationBuilder.of ( STRING )
+			.withVarName("fixStrategy")
+			.withHelp("Fix source strategy")
+			.withDefault("classScope")
+			.inGroup( "FaultLocRepresentation Parameters" )
+			.build();
 
 	protected boolean doingCoverage = false;
 	private ArrayList<Location> faultLocalization = new ArrayList<Location>();
@@ -399,15 +405,25 @@ CachingRepresentation<G> {
 					FaultLocRepresentation.negCoverageFile,
 					Fitness.negativeTests, false, Configuration.outputDir + "/coverage/");
 		}
+
+		computeFixSpace(negativePath, positivePath);
+		computeFaultSpace(negativePath,positivePath); 
+
+		assert (faultLocalization.size() > 0);
+		assert (fixLocalization.size() > 0);
+		this.doingCoverage = false;
+		logger.info("Finish Fault Localization");
+	}
+
+	protected void computeFaultSpace(TreeSet<Integer> negativePath, TreeSet<Integer> positivePath) {
 		HashMap<Integer, Double> fw = new HashMap<Integer, Double>();
 		TreeSet<Integer> negHt = new TreeSet<Integer>();
 		TreeSet<Integer> posHt = new TreeSet<Integer>();
 
 		for (Integer i : positivePath) {
-			// this is negative path in the OCaml code and I think that may be
-			// wrong.
 			fw.put(i, FaultLocRepresentation.positivePathWeight);
 		}
+
 		for (Integer i : positivePath) {
 			posHt.add(i);
 			fw.put(i, 0.5);
@@ -422,16 +438,17 @@ CachingRepresentation<G> {
 				fw.put(i, 0.5);
 				faultLocalization.add(this.instantiateLocation(i, negWeight)); 
 			}
+		}		
+	}
+
+	protected void computeFixSpace(TreeSet<Integer> negativePath, TreeSet<Integer> positivePath) {
+		for (Integer i : positivePath) {
+			fixLocalization.add(new WeightedAtom(i, 0.5));
 		}
-		for (Map.Entry<Integer, Double> entry : fw.entrySet()) {
-			Integer key = entry.getKey();
-			Double value = entry.getValue();
-			fixLocalization.add(new WeightedAtom(key, value));
-		}
-		assert (faultLocalization.size() > 0);
-		assert (fixLocalization.size() > 0);
-		this.doingCoverage = false;
-		logger.info("Finish Fault Localization");
+		for (Integer i : negativePath) {
+			fixLocalization.add(new WeightedAtom(i, 0.5));
+
+		}	
 	}
 
 	protected abstract Location instantiateLocation(Integer i, double negWeight);
@@ -442,18 +459,6 @@ CachingRepresentation<G> {
 
 	@Override
 	public void load(ArrayList<ClassInfo> bases) throws IOException {
-
-		// SHOULD WE DO SOMETHING SO THAT THE FAULT LOCALIZATION ALSO CONSIDERS
-		// MULTIPLE FILES TO LOCATE THE FAULT?
-		// ArrayList<String> targetClassNames = new ArrayList<String>();
-		// targetClassNames.addAll(getClasses(classList));
-
-		// for(String fname : targetClassNames){
-
-		// String filename =
-		// fname.substring(fname.lastIndexOf(".")+1,fname.length());
-		// filename += Configuration.globalExtension;
-
 		super.load(bases); // calling super so that the code is loaded and the
 		// sanity check happens before localization is
 		// computed
