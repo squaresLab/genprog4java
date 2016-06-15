@@ -240,15 +240,14 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 
 
-	private Map<ASTNode, Map<ASTNode,Set<ASTNode>>> methodParamReplacements = null;
+	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> methodParamReplacements = null;
 
-	public Map<ASTNode, Map<ASTNode,Set<ASTNode>>> getReplacableMethodParameters(final JavaSemanticInfo semanticInfo) {
+	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> getReplacableMethodParameters(final JavaSemanticInfo semanticInfo) {
 		if(methodParamReplacements != null) {
 			return methodParamReplacements;
 		} else {
-			methodParamReplacements = new HashMap<ASTNode, Map<ASTNode,Set<ASTNode>>>();
+			methodParamReplacements = new HashMap<ASTNode, Map<ASTNode,List<ASTNode>>>();
 		} 
-		final ASTNode myASTNode = this.getASTNode();
 
 		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
 		final String methodName = md.getName().getIdentifier();
@@ -258,23 +257,23 @@ public class JavaStatement implements Comparable<JavaStatement>{
 			// store their parents
 			public boolean visit(MethodInvocation node) {
 				// if there exists another invocation that this works for...
-				Map<ASTNode,Set<ASTNode>> thisMethodCall;
+				Map<ASTNode,List<ASTNode>> thisMethodCall;
 				if(methodParamReplacements.containsKey(node)) {
 					thisMethodCall = methodParamReplacements.get(node);
 				} else {
-					thisMethodCall = new HashMap<ASTNode, Set<ASTNode>>();
+					thisMethodCall = new HashMap<ASTNode, List<ASTNode>>();
 					methodParamReplacements.put(node, thisMethodCall);
 				}
 
 				List<Expression> args = node.arguments();
 				for(Expression arg : args) {
 					ITypeBinding paramType = arg.resolveTypeBinding();
-					Set<ASTNode> replacements = semanticInfo.getInScopeReplacementExpressions(methodName, md, paramType.getName());
-					Set<ASTNode> thisList = null;
+					List<ASTNode> replacements = semanticInfo.getInScopeReplacementExpressions(methodName, md, paramType.getName());
+					List<ASTNode> thisList = null;
 					if(thisMethodCall.containsKey(arg)) {
 						thisList = thisMethodCall.get(arg);
 					} else {
-						thisList = new TreeSet<ASTNode>();
+						thisList = new ArrayList<ASTNode>();
 						thisMethodCall.put(arg, thisList);
 					}
 					thisList.addAll(replacements);
