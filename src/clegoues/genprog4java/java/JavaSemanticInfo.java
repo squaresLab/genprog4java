@@ -27,28 +27,31 @@ public class JavaSemanticInfo {
 	private static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
 	private static TreeSet<String> finalVariables = new TreeSet<String>();
 	private static List<MethodInfo> methodDecls = new ArrayList<MethodInfo>();
-	private static Map<String, Map<String,Set<ASTNode>>> expressionsInScope = null;
+	private static Map<String, Map<String,List<ASTNode>>> expressionsInScope = null;
 
-	public Set<ASTNode> getInScopeReplacementExpressions(final String methodName, MethodDeclaration md, String desiredType) {
-		Map<String,Set<ASTNode>> typeToExpressions = null;
+	public List<ASTNode> getInScopeReplacementExpressions(final String methodName, MethodDeclaration md, String desiredType) {
+		Map<String,List<ASTNode>> typeToExpressions = null;
+		if(expressionsInScope == null) {
+			expressionsInScope = new HashMap<String, Map<String,List<ASTNode>>>();
+		}
 		if(expressionsInScope.containsKey(methodName)) {
 			typeToExpressions = expressionsInScope.get(methodName);
 		} else {
-			typeToExpressions = new HashMap<String,Set<ASTNode>>();
+			typeToExpressions = new HashMap<String,List<ASTNode>>();
 			expressionsInScope.put(methodName, typeToExpressions);
 		}
-		final Map<String,Set<ASTNode>> forVisitor = expressionsInScope.get(methodName);
+		final Map<String,List<ASTNode>> forVisitor = expressionsInScope.get(methodName);
 			md.accept(new ASTVisitor() {
 				public boolean visit(MethodInvocation node) {
 					List<Expression> args = node.arguments();
 					for(Expression arg : args) {
 						ITypeBinding typeBinding = 	arg.resolveTypeBinding();
 						String typeName = typeBinding.getName();
-						Set<ASTNode> ofType = null;
+						List<ASTNode> ofType = null;
 						if(forVisitor.containsKey(typeName)) {
 							ofType = forVisitor.get(typeName);
 						} else {
-							ofType = new TreeSet<ASTNode>();
+							ofType = new ArrayList<ASTNode>();
 							forVisitor.put(typeName, ofType);
 						}
 						ofType.add(arg);			

@@ -256,9 +256,9 @@ public class JavaEditFactory {
 			}
 			break;
 		case PARREP:
-			Map<ASTNode, Map<ASTNode, Set<ASTNode>>> replacableParameters = locationStmt.getReplacableMethodParameters(variant.semanticInfo);
-			for(Map.Entry<ASTNode, Map<ASTNode,Set<ASTNode>>> funsite : replacableParameters.entrySet()) {
-				for(Map.Entry<ASTNode, Set<ASTNode>> exps : funsite.getValue().entrySet()) {
+			Map<ASTNode, Map<ASTNode, List<ASTNode>>> replacableParameters = locationStmt.getReplacableMethodParameters(variant.semanticInfo);
+			for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> funsite : replacableParameters.entrySet()) {
+				for(Map.Entry<ASTNode, List<ASTNode>> exps : funsite.getValue().entrySet()) {
 					for(ASTNode replacementExp : exps.getValue()) { // simple hole here is terrible.  
 					retVal.add(new SimpleJavaHole(holeName, exps.getKey(), replacementExp, locationStmt.getStmtId()));
 					}
