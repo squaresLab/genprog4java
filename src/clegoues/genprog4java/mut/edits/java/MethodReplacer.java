@@ -23,9 +23,9 @@ import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
-public class JavaMethodReplacer extends JavaEditOperation {
+public class MethodReplacer extends JavaEditOperation {
 
-	public JavaMethodReplacer(JavaLocation location,  HashMap<String, EditHole> sources) {
+	public MethodReplacer(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.METHODREPLACE, location, sources);
 		this.holeNames.add("replaceMethod");
 	}

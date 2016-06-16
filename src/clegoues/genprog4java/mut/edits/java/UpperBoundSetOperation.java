@@ -16,34 +16,35 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
-import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
-public class JavaLowerBoundSetOperation extends JavaEditOperation {
+public class UpperBoundSetOperation extends JavaEditOperation {
 
-	public JavaLowerBoundSetOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
-		super(Mutation.LBOUNDSET, location, sources);
-		this.holeNames.add("lowerBoundCheck");
-
+	public UpperBoundSetOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
+		super(Mutation.UBOUNDSET, location, sources);
+		this.holeNames.add("upperBoundCheck");
 	}
+
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode(); // not used, but being completist
-		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("lowerBoundCheck");
+		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("upperBoundCheck");
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> arrays = thisHole.getSubExps();
 		// possible FIXME: all array accesses in this location, or just the one? 
 		// check against the spec
 
 		Block newnode = parent.getAST().newBlock();
+
 
 		// for each of the array access instances
 		for( ASTNode  array : arrays){
@@ -58,20 +59,33 @@ public class JavaLowerBoundSetOperation extends JavaEditOperation {
 				// create if statement 
 				IfStatement stmt = parent.getAST().newIfStatement();
 
-				// with expression "index < 0" 
+				// with expression "index > arrayname.length" 
 				InfixExpression expression = null;
 				expression = parent.getAST().newInfixExpression();
 				expression.setLeftOperand(parent.getAST().newSimpleName(arrayindex));
-				expression.setOperator(Operator.LESS);
-				expression.setRightOperand(parent.getAST().newNumberLiteral("0"));
+				expression.setOperator(Operator.GREATER_EQUALS);
+
+				// and then part as "index = arrayname.length - 1"
+				SimpleName qualifier = parent.getAST().newSimpleName(((ArrayAccess)array).getArray().toString());
+				SimpleName name = parent.getAST().newSimpleName("length");
+				expression.setRightOperand(parent.getAST().newQualifiedName(qualifier, name));
 				stmt.setExpression(expression);
 
-				// and then part as "index = 0"
 				Assignment thenexpression = null;
 				thenexpression = parent.getAST().newAssignment();
 				thenexpression.setLeftHandSide(parent.getAST().newSimpleName(arrayindex));
 				thenexpression.setOperator(Assignment.Operator.ASSIGN);
-				thenexpression.setRightHandSide(parent.getAST().newNumberLiteral("0"));
+
+				InfixExpression setupperboundexpression = null;
+				setupperboundexpression = parent.getAST().newInfixExpression();
+				SimpleName qualifier1 = parent.getAST().newSimpleName(((ArrayAccess)array).getArray().toString());
+				SimpleName name1 = parent.getAST().newSimpleName("length");
+				setupperboundexpression.setLeftOperand(parent.getAST().newQualifiedName(qualifier1, name1));
+				setupperboundexpression.setOperator(Operator.MINUS);
+				setupperboundexpression.setRightOperand(parent.getAST().newNumberLiteral("1"));
+
+				thenexpression.setRightHandSide(setupperboundexpression);
+
 				ExpressionStatement thenstmt = parent.getAST().newExpressionStatement(thenexpression);
 				stmt.setThenStatement(thenstmt);
 
@@ -84,5 +98,5 @@ public class JavaLowerBoundSetOperation extends JavaEditOperation {
 			newnode.statements().add(stmt);
 			rewriter.replace(parent, newnode, null);
 		}
-	}
+	}	
 }

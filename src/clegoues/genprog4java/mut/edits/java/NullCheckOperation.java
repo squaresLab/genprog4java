@@ -24,9 +24,9 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
-public class JavaNullCheckOperation extends JavaEditOperation {
+public class NullCheckOperation extends JavaEditOperation {
 
-	public JavaNullCheckOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
+	public NullCheckOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.NULLCHECK, location, sources);
 		this.holeNames.add("checkForNull");
 	}

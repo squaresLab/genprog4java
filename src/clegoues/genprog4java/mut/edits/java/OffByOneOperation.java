@@ -23,13 +23,13 @@ import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
-public class JavaOffByOneOperation extends JavaEditOperation {
+public class OffByOneOperation extends JavaEditOperation {
 	private enum mutationType { ADD, SUBTRACT};
 
 	// used to randomly add or subtract 1 while mutating array index
 	private mutationType mutType;
 
-	public JavaOffByOneOperation(JavaLocation location, HashMap<String, EditHole> sources) {
+	public OffByOneOperation(JavaLocation location, HashMap<String, EditHole> sources) {
 		super(Mutation.OFFBYONE, location, sources);
 		this.holeNames.add("arrayCheck");
 		int randomNum = Configuration.randomizer.nextInt(11);
