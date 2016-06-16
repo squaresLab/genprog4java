@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -268,6 +269,28 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	
 		return casts;
 	}
+	
+	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> expressionReplacements = null;
+
+	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> replacableExpressions() {
+		if(expressionReplacements != null) {
+			return expressionReplacements;
+		} else {
+			expressionReplacements = new HashMap<ASTNode, Map<ASTNode, List<ASTNode>>>();
+		}
+		this.getASTNode().accept(new ASTVisitor() {
+			
+			public boolean visit(IfStatement node) {
+				return true;
+			}
+			
+			public boolean visit(ConditionalExpression node) {
+				return true;
+			}
+		});
+		return expressionReplacements;
+	}
+
 	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> methodParamReplacements = null;
 
 	// possibly want a better cache on param replacements to save recomputing on parent blocks.
