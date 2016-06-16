@@ -353,13 +353,11 @@ public class JavaEditFactory {
 			retVal.add("replaceMethod");
 			return retVal;
 		case PARREP:
+		case EXPREP:
 			retVal.add("replaceParameter");
 			return retVal;
 		case CASTCHECK:
 			retVal.add("classCast");
-			return retVal;
-		case EXPREP:
-			retVal.add("expReplace");
 			return retVal;
 		case PARADD:
 		case PARREM:

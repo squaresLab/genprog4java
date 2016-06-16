@@ -32,6 +32,12 @@ public class MethodParameterReplacer extends JavaEditOperation {
 		this.holeNames.add("replaceParameter");
 	}
 
+
+	public MethodParameterReplacer(Mutation mut, JavaLocation location,  HashMap<String, EditHole> sources) {
+		super(mut, location, sources);
+		this.holeNames.add("replaceParameter");
+	}
+
 	@Override
 	public void edit(ASTRewrite rewriter) {
 		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());

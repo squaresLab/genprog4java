@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -27,20 +28,21 @@ public class JavaSemanticInfo {
 	private static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
 	private static TreeSet<String> finalVariables = new TreeSet<String>();
 	private static List<MethodInfo> methodDecls = new ArrayList<MethodInfo>();
-	private static Map<String, Map<String,List<ASTNode>>> expressionsInScope = null;
+	private static Map<String, Map<String,List<ASTNode>>> methodParamExpressionsInScope = null;
+	private static Map<String, List<ASTNode>> conditionalExpressionsInScope = null;
 
-	public List<ASTNode> getInScopeReplacementExpressions(final String methodName, MethodDeclaration md, String desiredType) {
+	public List<ASTNode> getMethodParamReplacementExpressions(final String methodName, MethodDeclaration md, String desiredType) {
 		Map<String,List<ASTNode>> typeToExpressions = null;
-		if(expressionsInScope == null) {
-			expressionsInScope = new HashMap<String, Map<String,List<ASTNode>>>();
+		if(methodParamExpressionsInScope == null) {
+			methodParamExpressionsInScope = new HashMap<String, Map<String,List<ASTNode>>>();
 		}
-		if(expressionsInScope.containsKey(methodName)) {
-			typeToExpressions = expressionsInScope.get(methodName);
+		if(methodParamExpressionsInScope.containsKey(methodName)) {
+			typeToExpressions = methodParamExpressionsInScope.get(methodName);
 		} else {
 			typeToExpressions = new HashMap<String,List<ASTNode>>();
-			expressionsInScope.put(methodName, typeToExpressions);
+			methodParamExpressionsInScope.put(methodName, typeToExpressions);
 		}
-		final Map<String,List<ASTNode>> forVisitor = expressionsInScope.get(methodName);
+		final Map<String,List<ASTNode>> forVisitor = methodParamExpressionsInScope.get(methodName);
 		md.accept(new ASTVisitor() {
 			public boolean visit(MethodInvocation node) {
 				List<Expression> args = node.arguments();
@@ -65,6 +67,26 @@ public class JavaSemanticInfo {
 		return typeToExpressions.get(desiredType);
 	}
 
+	public List<ASTNode> getConditionalReplacementExpressions(final String methodName, MethodDeclaration md) {
+		if(conditionalExpressionsInScope == null) {
+			conditionalExpressionsInScope = new HashMap<String,List<ASTNode>>();
+		}
+		if(conditionalExpressionsInScope.containsKey(methodName)) {
+			return conditionalExpressionsInScope.get(methodName);
+		} else {		
+			final List<ASTNode> expressionsInScope = new ArrayList<ASTNode>();
+			conditionalExpressionsInScope.put(methodName, expressionsInScope);
+			md.accept(new ASTVisitor() {
+				public boolean visit(IfStatement node) {
+					expressionsInScope.add(node.getExpression());
+					return true;
+				}
+
+			});
+			return expressionsInScope;
+		}
+	}
+	
 	public static List<MethodInfo> getMethodDecls() {
 		return methodDecls;
 	}

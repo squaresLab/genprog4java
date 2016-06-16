@@ -45,7 +45,9 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -56,12 +58,20 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WhileStatement;
@@ -240,7 +250,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 
 	private Map<ASTNode, List<ASTNode>> casts = null;
-	
+
 	private void saveCastInfo(CastExpression node) {
 		ASTNode parent = this.getParent(node); 
 		List<ASTNode> thisParentsCasts;
@@ -266,38 +276,44 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				return true;
 			}
 		});
-	
+
 		return casts;
 	}
-	
-	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> expressionReplacements = null;
 
-	private class ExpReplacementVisitor extends ASTVisitor {
-		private JavaSemanticInfo semanticInfo;
-		private String methodName;
-		private MethodDeclaration md;
-		private Map<ASTNode, List<ASTNode>> replacementMap;
-		
-		ExpReplacementVisitor(JavaSemanticInfo semanticInfo, String methodName, MethodDeclaration md) 
-		{ 
-			this.semanticInfo = semanticInfo;
-			this.methodName = methodName;
-			this.md = md;
-		} 
-		
-		public void setReplacementMap(Map<ASTNode, List<ASTNode>> newMap) {
-			this.replacementMap = newMap;
+	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> expressionReplacements = null;
+	//
+	//	private void saveConditionalExpInfo(ConditionalExpression node, ExpReplacementVisitor expVisit) {
+	//		ASTNode parent = this.getParent(node);
+	//		Map<ASTNode,List<ASTNode>> expRepsThisCond = new HashMap<ASTNode,List<ASTNode>>();
+	//		expVisit.setReplacementMap(expRepsThisCond);
+	//		
+	//		node.getExpression().accept(expVisit);
+	//		expressionReplacements.put(parent, expRepsThisCond);
+	//	}
+	//
+	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> replacableConditionalExpressions(final JavaSemanticInfo semanticInfo) {
+		if(expressionReplacements != null) {
+			return expressionReplacements;
+		} else {
+			expressionReplacements = new HashMap<ASTNode, Map<ASTNode, List<ASTNode>>>();
 		}
-		@SuppressWarnings("unused")
-		public Map<ASTNode, List<ASTNode>> getReplacementMap(Map<ASTNode, List<ASTNode>> newMap) {
-			return this.replacementMap;
+		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
+		final String methodName = md.getName().getIdentifier();
+
+		final Map<ASTNode, List<ASTNode>> replacementMap;
+		if(expressionReplacements.containsKey(this.getASTNode())) {
+			replacementMap = expressionReplacements.get(this.getASTNode());
+		} else {
+			replacementMap = new HashMap<ASTNode, List<ASTNode>>();
+			expressionReplacements.put(this.getASTNode(), replacementMap);
 		}
-		
-		@SuppressWarnings("unused")
-		public boolean visit(Expression exp) {
-				ITypeBinding expType = exp.resolveTypeBinding();
-				if(expType != null) { // null if we can't resolve the type binding; maybe we don't want to just give up??
-					List<ASTNode> replacements = semanticInfo.getInScopeReplacementExpressions(methodName, md, expType.getName());
+
+		this.getASTNode().accept(new ASTVisitor() {
+
+			public boolean visit(IfStatement node) {
+				Expression exp = node.getExpression();
+				List<ASTNode> replacements = semanticInfo.getConditionalReplacementExpressions(methodName, md);
+				if(replacements != null) {
 					List<ASTNode> thisList = null;
 					if(replacementMap.containsKey(exp)) {
 						thisList = replacementMap.get(exp);
@@ -307,40 +323,11 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					}
 					thisList.addAll(replacements);
 				}
-			return true;
-		}
-	};
-	
-	private void saveConditionalExpInfo(ConditionalExpression node, ExpReplacementVisitor expVisit) {
-		ASTNode parent = this.getParent(node);
-		Map<ASTNode,List<ASTNode>> expRepsThisCond = new HashMap<ASTNode,List<ASTNode>>();
-		expVisit.setReplacementMap(expRepsThisCond);
-		node.getExpression().accept(expVisit);
-		expressionReplacements.put(parent, expRepsThisCond);
-	}
-	
-	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> replacableConditionalExpressions(JavaSemanticInfo semanticInfo) {
-		if(expressionReplacements != null) {
-			return expressionReplacements;
-		} else {
-			expressionReplacements = new HashMap<ASTNode, Map<ASTNode, List<ASTNode>>>();
-		}
-		MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
-		String methodName = md.getName().getIdentifier();
-
-		final ExpReplacementVisitor expVisit = new ExpReplacementVisitor(semanticInfo, methodName, md);
-		this.getASTNode().accept(new ASTVisitor() {
-			
-			public boolean visit(IfStatement node) {
-				Map<ASTNode,List<ASTNode>> expRepsThisIf = new HashMap<ASTNode,List<ASTNode>>();
-				expVisit.setReplacementMap(expRepsThisIf);
-				node.getExpression().accept(expVisit);
-				expressionReplacements.put(node, expRepsThisIf);
 				return true;
 			}
-			
+
 			public boolean visit(ConditionalExpression node) {
-				saveConditionalExpInfo(node, expVisit);
+				//				saveConditionalExpInfo(node, expVisit);
 				return true;
 			}
 		});
@@ -377,7 +364,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					ITypeBinding paramType = arg.resolveTypeBinding();
 					if(paramType != null) { // possible FIXME: null if we can't resolve the type binding; maybe we don't want to just give up??
 						String typName = paramType.getName();
-						List<ASTNode> replacements = semanticInfo.getInScopeReplacementExpressions(methodName, md, typName);
+						List<ASTNode> replacements = semanticInfo.getMethodParamReplacementExpressions(methodName, md, typName);
 						List<ASTNode> thisList = null;
 						if(thisMethodCall.containsKey(arg)) {
 							thisList = thisMethodCall.get(arg);
@@ -411,7 +398,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		}
 		return paramTypes;
 	}
-	
+
 	// FIXME: replacement methods should apparently be in the same scope; can we safely assume
 	// that everything in the methoddecls field qualifies?
 	public Map<ASTNode, List<ASTNode>> getReplacableMethods(final List<MethodInfo> methodDecls) {
