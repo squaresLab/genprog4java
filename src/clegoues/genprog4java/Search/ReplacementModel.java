@@ -102,33 +102,22 @@ public class ReplacementModel {
 		HashMap<Integer, JavaStatement> codeBank = ((JavaRepresentation)variant).getCodeBank();
 
 		JavaStatement buggyStmt = codeBank.get(stmtIdBuggy);
-		int row = stmtKindOfJavaStmt(buggyStmt);
+		ASTNode buggyAstNode = buggyStmt.getASTNode();
+		int row = stmtKindOfJavaStmt(buggyAstNode);
 
 		for(Pair<?,Double> atom: atoms){
+			ASTNode fixStmt = ((SimpleJavaHole)((WeightedHole)atom).getFirst()).getCode();
+			int column = stmtKindOfJavaStmt(fixStmt);
+			atom.setSecond(Double.valueOf(replacementModel[row][column]+1));
+			retVal.add(atom);
 		
-			boolean isJavaStmt = codeBank.get(((SimpleJavaHole)atom.getFirst()).getCodeBankId()) instanceof JavaStatement;
-			if(isJavaStmt){
-				Pair newAtom = new Pair();
-				newAtom.setFirst(((SimpleJavaHole)atom.getFirst()));
-				JavaStatement fixStmt = codeBank.get(((SimpleJavaHole)atom.getFirst()).getCodeBankId());
-				int column = stmtKindOfJavaStmt(fixStmt);
-				//plus one so no stmt has 0% chance of getting picked
-				newAtom.setSecond(Double.valueOf(replacementModel[row][column]+1));
-				//if(newAtom instanceof WeightedHole){
-					retVal.add(newAtom);
-				//}else if(newAtom instanceof Location){
-					//FIXME: THIS SHOUULDNT BE THE ID, BUT TRANSFORM THIS TO A WEIGHTEDHOLE
-					//retVal.add(((Location)newAtom).getId());
-				//}
-			}
 		}
 		return retVal;
 	}
 
 
 
-	private static int stmtKindOfJavaStmt(JavaStatement stmt){
-		ASTNode node = stmt.getASTNode();
+	private static int stmtKindOfJavaStmt(ASTNode node){
 		int retVal = -1;
 		switch(node.getNodeType()){
 		case ASTNode.ASSERT_STATEMENT: retVal=0; break;
