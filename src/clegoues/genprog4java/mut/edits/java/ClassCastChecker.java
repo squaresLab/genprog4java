@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -35,7 +36,6 @@ public class ClassCastChecker extends JavaEditOperation {
 
 	@Override
 	public void edit(ASTRewrite rewriter) {
-		// TODO Auto-generated method stub
 		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode();
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("classCast");
 		ASTNode parent = thisHole.getHoleParent();
@@ -52,7 +52,9 @@ public class ClassCastChecker extends JavaEditOperation {
 			InstanceofExpression expression = ifstmt.getAST().newInstanceofExpression();
 			Expression newExpression = (Expression) rewriter.createCopyTarget(asCast.getExpression());
 			expression.setLeftOperand(newExpression);
-			expression.setRightOperand(asCast.getType());
+			Type castType = asCast.getType();
+			Type newType = (Type) rewriter.createCopyTarget(asCast.getType());
+			expression.setRightOperand(newType);
 		
 			if(everythingInTheCondition == null)
 				everythingInTheCondition = expression;
