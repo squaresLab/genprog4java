@@ -20,37 +20,24 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
+import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
+import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
 public class JavaMethodParameterReplacer extends JavaEditOperation {
 
 
 	public JavaMethodParameterReplacer(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.PARREP, location, sources);
-
+		this.holeNames.add("replaceParameter");
 	}
 
 	@Override
 	public void edit(ASTRewrite rewriter) {
-//		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
-//		ASTNode locationNode = locationStmt.getASTNode();
-//		Map<ASTNode, List<MethodInfo>> candidateReplacements = locationStmt.getCandidateMethodReplacements();
-//		List<ASTNode> optionsToBeReplaced = new ArrayList<ASTNode>(candidateReplacements.keySet());
-//		Collections.shuffle(optionsToBeReplaced, Configuration.randomizer);
-//		ASTNode toReplace = optionsToBeReplaced.get(0);
-//		List<MethodInfo> options = candidateReplacements.get(toReplace);
-//		Collections.shuffle(options, Configuration.randomizer);
-//		MethodInfo replaceWith = options.get(0);
-//
-//		MethodInvocation newNode = locationNode.getAST().newMethodInvocation();
-//		SimpleName newMethodName = locationNode.getAST().newSimpleName(replaceWith.getName());
-//		newNode.setName(newMethodName);
-//
-//		List<ASTNode> paramNodes = ((MethodInvocation) toReplace).arguments();
-//		for(ASTNode param : paramNodes) {
-//			ASTNode newParam = rewriter.createCopyTarget(param);
-//			newNode.arguments().add(newParam);
-//		}		
-//		rewriter.replace(toReplace, newNode, null);
+		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
+		SimpleJavaHole thisHole = (SimpleJavaHole) this.getHoleCode("replaceParameter");
+		rewriter.replace(thisHole.getHoleSite(), thisHole.getCode(), null); 
+	}
+}
 /*
  * [Parameter Replacer]
 P = program
@@ -73,7 +60,3 @@ SourceParam <- select a parameter of I_selected, which has a compatible type wit
 
 replace TargetParam by SourceParam
  */
-		
-	}
-
-}

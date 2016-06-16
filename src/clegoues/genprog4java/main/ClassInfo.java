@@ -6,7 +6,8 @@ import java.io.File;
 public class ClassInfo implements Comparable<ClassInfo> {
 	private String className;
 	private String packageName;
-	ClassInfo(String className, String packageName) {
+	
+	public ClassInfo(String className, String packageName) {
 		this.setClassName(className);
 		this.setPackage(packageName);
 	}

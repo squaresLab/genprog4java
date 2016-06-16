@@ -122,7 +122,7 @@ Representation<G> {
 	}
 
 	public void load(ArrayList<ClassInfo> bases) throws IOException {
-
+		
 		// FIXME: do deserializing String cacheName = base + ".cache";
 		// boolean didDeserialize = this.deserialize(cacheName,null, true);
 		// if(!didDeserialize) {

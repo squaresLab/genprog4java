@@ -7,6 +7,7 @@ public class SimpleJavaHole implements EditHole<ASTNode> {
 
 	private String name;
 	private ASTNode holeCode;
+	private ASTNode holeSite;
 	private int codeBankId; // for debugging/ease of output, really
 	
 	public SimpleJavaHole () { }
@@ -15,6 +16,13 @@ public class SimpleJavaHole implements EditHole<ASTNode> {
 		this.name = name;
 		this.holeCode = holeCode;
 		this.codeBankId = codeBankId;
+	}
+	
+	public SimpleJavaHole(String name,ASTNode holeSite, ASTNode holeCode, int codeBankId) {
+		this.name = name;
+		this.holeCode = holeCode;
+		this.codeBankId = codeBankId;
+		this.holeSite = holeSite;
 	}
 	
 	@Override
@@ -51,5 +59,13 @@ public class SimpleJavaHole implements EditHole<ASTNode> {
 
 	public void setCodeBankId(int codeBankId) {
 		this.codeBankId = codeBankId;
+	}
+
+	public ASTNode getHoleSite() {
+		return holeSite;
+	}
+
+	public void setHoleSite(ASTNode holeSite) {
+		this.holeSite = holeSite;
 	}
 }

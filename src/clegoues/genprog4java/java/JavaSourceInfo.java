@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import clegoues.genprog4java.main.ClassInfo;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class JavaSourceInfo {
 
@@ -18,6 +19,8 @@ public class JavaSourceInfo {
 	private static HashMap<Integer, ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer, ArrayList<Integer>>();
 	private static HashMap<Integer, ClassInfo> stmtToFile = new HashMap<Integer, ClassInfo>();
 	
+	private static HashMap<Integer,JavaLocation> locationInformation = new HashMap<Integer,JavaLocation>();
+
 	public HashMap<ClassInfo, String> getOriginalSource() {
 		return originalSource;
 	}
@@ -79,5 +82,11 @@ public class JavaSourceInfo {
 	
 	public ClassInfo getFileFromStmt(int location) {
 		return JavaSourceInfo.stmtToFile.get(location);
+	}
+	public HashMap<Integer,JavaLocation> getLocationInformation() {
+		return locationInformation;
+	}
+	public void setLocationInformation(HashMap<Integer,JavaLocation> locationInformation) {
+		JavaSourceInfo.locationInformation = locationInformation;
 	}
 }
