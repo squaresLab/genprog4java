@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
+import clegoues.genprog4java.mut.holes.java.StatementHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.EditHole;
 
@@ -23,7 +23,7 @@ public class JavaAppendOperation extends JavaEditOperation {
 
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = this.getLocationNode(); 
-		SimpleJavaHole fixHole = (SimpleJavaHole) this.getHoleCode("singleHole");
+		StatementHole fixHole = (StatementHole) this.getHoleCode("singleHole");
 		ASTNode fixCodeNode =
 			 ASTNode.copySubtree(locationNode.getAST(), fixHole.getCode()); 
 

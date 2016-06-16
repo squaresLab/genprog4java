@@ -66,7 +66,7 @@ import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
+import clegoues.genprog4java.mut.holes.java.StatementHole;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.Pair;
 
