@@ -7,6 +7,7 @@ import java.util.TreeSet;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
 import clegoues.genprog4java.rep.JavaRepresentation;
@@ -113,7 +114,12 @@ public class ReplacementModel {
 				int column = stmtKindOfJavaStmt(fixStmt);
 				//plus one so no stmt has 0% chance of getting picked
 				newAtom.setSecond(Double.valueOf(replacementModel[row][column]+1));
-				retVal.add(newAtom);
+				//if(newAtom instanceof WeightedHole){
+					retVal.add(newAtom);
+				//}else if(newAtom instanceof Location){
+					//FIXME: THIS SHOUULDNT BE THE ID, BUT TRANSFORM THIS TO A WEIGHTEDHOLE
+					//retVal.add(((Location)newAtom).getId());
+				//}
 			}
 		}
 		return retVal;
