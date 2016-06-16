@@ -12,9 +12,11 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
@@ -25,9 +27,10 @@ import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
-import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
+import clegoues.genprog4java.mut.holes.java.StatementHole;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.WeightedAtom;
@@ -208,7 +211,7 @@ public class JavaEditFactory {
 				for(WeightedAtom fixStmt : fixStmts) {
 					JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
 					ASTNode fixAST = potentialFixStmt.getASTNode();
-					retVal.add(new SimpleJavaHole(holeName, fixAST, potentialFixStmt.getStmtId()));
+					retVal.add(new StatementHole(holeName, (Statement) fixAST, potentialFixStmt.getStmtId()));
 				}
 			break;
 		case SWAP:
@@ -219,7 +222,7 @@ public class JavaEditFactory {
 					if (there.getAtom() == location.getId()) {
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
 						ASTNode fixAST = potentialFixStmt.getASTNode();
-						retVal.add(new SimpleJavaHole(holeName, fixAST, potentialFixStmt.getStmtId()));
+						retVal.add(new StatementHole(holeName, (Statement) fixAST, potentialFixStmt.getStmtId()));
 						break;
 					}
 				}
@@ -228,17 +231,8 @@ public class JavaEditFactory {
 		case LBOUNDSET:
 		case UBOUNDSET:
 		case RANGECHECK:
-			return makeSubExpsHoles(holeName, locationStmt.getArrayAccesses()); 
 		case OFFBYONE:  
-			Map<ASTNode, List<ASTNode>> arrayAccesses = locationStmt.getArrayAccesses();
-			if(arrayAccesses.size() > 0) {
-				for(Map.Entry<ASTNode, List<ASTNode>> entry : arrayAccesses.entrySet()) {
-					for(ASTNode arrayAccess : entry.getValue()) {
-						retVal.add(new SimpleJavaHole(holeName, arrayAccess, locationStmt.getStmtId()));
-					}
-				} 
-			}
-			break;
+			return makeSubExpsHoles(holeName, locationStmt.getArrayAccesses()); 
 		case NULLCHECK:
 			return makeSubExpsHoles(holeName, locationStmt.getNullCheckables());
 		case FUNREP:
@@ -258,8 +252,8 @@ public class JavaEditFactory {
 			Map<ASTNode, Map<ASTNode, List<ASTNode>>> replacableParameters = locationStmt.getReplacableMethodParameters(variant.semanticInfo);
 			for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> funsite : replacableParameters.entrySet()) {
 				for(Map.Entry<ASTNode, List<ASTNode>> exps : funsite.getValue().entrySet()) {
-					for(ASTNode replacementExp : exps.getValue()) { // simple hole here is terrible.  
-						retVal.add(new SimpleJavaHole(holeName, exps.getKey(), replacementExp, locationStmt.getStmtId()));
+					for(ASTNode replacementExp : exps.getValue()) { 
+						retVal.add(new ExpHole(holeName, exps.getKey(), (Expression) replacementExp, locationStmt.getStmtId()));
 					}
 				}
 			}

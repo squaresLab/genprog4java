@@ -20,7 +20,7 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
-import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
+import clegoues.genprog4java.mut.holes.java.StatementHole;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
 public class MethodParameterReplacer extends JavaEditOperation {
@@ -34,7 +34,7 @@ public class MethodParameterReplacer extends JavaEditOperation {
 	@Override
 	public void edit(ASTRewrite rewriter) {
 		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
-		SimpleJavaHole thisHole = (SimpleJavaHole) this.getHoleCode("replaceParameter");
+		StatementHole thisHole = (StatementHole) this.getHoleCode("replaceParameter");
 		rewriter.replace(thisHole.getHoleSite(), thisHole.getCode(), null); 
 	}
 }
