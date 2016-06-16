@@ -23,10 +23,10 @@ import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
-public class JavaMethodParameterReplacer extends JavaEditOperation {
+public class MethodParameterReplacer extends JavaEditOperation {
 
 
-	public JavaMethodParameterReplacer(JavaLocation location,  HashMap<String, EditHole> sources) {
+	public MethodParameterReplacer(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.PARREP, location, sources);
 		this.holeNames.add("replaceParameter");
 	}

@@ -43,22 +43,22 @@ public class JavaEditFactory {
 		case DELETE: 
 			return new JavaDeleteOperation((JavaLocation) dst);
 		case OFFBYONE:
-			return new JavaOffByOneOperation((JavaLocation) dst, sources);
+			return new OffByOneOperation((JavaLocation) dst, sources);
 		case APPEND: return new JavaAppendOperation((JavaLocation) dst, sources);
 		case REPLACE: return new JavaReplaceOperation((JavaLocation) dst, sources);
 		case SWAP: return new JavaSwapOperation((JavaLocation) dst, sources);
 		case PARREP:
-			return new JavaMethodParameterReplacer((JavaLocation) dst, sources);
+			return new MethodParameterReplacer((JavaLocation) dst, sources);
 		case FUNREP:
-			return new JavaMethodReplacer((JavaLocation) dst, sources);	
+			return new MethodReplacer((JavaLocation) dst, sources);	
 		case LBOUNDSET:
-			return new JavaLowerBoundSetOperation((JavaLocation) dst, sources);
+			return new LowerBoundSetOperation((JavaLocation) dst, sources);
 		case UBOUNDSET:
-			return new JavaUpperBoundSetOperation((JavaLocation) dst, sources);
+			return new UpperBoundSetOperation((JavaLocation) dst, sources);
 		case RANGECHECK:
-			return new JavaRangeCheckOperation((JavaLocation) dst, sources);
+			return new RangeCheckOperation((JavaLocation) dst, sources);
 		case NULLCHECK:
-			return new JavaNullCheckOperation((JavaLocation) dst, sources);
+			return new NullCheckOperation((JavaLocation) dst, sources);
 		default: logger.fatal("unhandled edit template type in JavaEditFactory; this should be impossible (famous last words...)");
 		}		return null;
 	}
