@@ -34,7 +34,7 @@ public class OffByOneOperation extends JavaEditOperation {
 
 	public OffByOneOperation(JavaLocation location, HashMap<String, EditHole> sources) {
 		super(Mutation.OFFBYONE, location, sources);
-		this.holeNames.add("arrayCheck");
+		this.holeNames.add("offByOne");
 		int randomNum = Configuration.randomizer.nextInt(11);
 
 		if(randomNum%2==0){
@@ -47,7 +47,8 @@ public class OffByOneOperation extends JavaEditOperation {
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode(); // not used, but being completist
-		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("rangeCheck");
+		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("offByOne");
+		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> arrays = thisHole.getSubExps();
 		for(ASTNode array : arrays) {
 			ArrayAccess arrayAccess  = (ArrayAccess) array; 
