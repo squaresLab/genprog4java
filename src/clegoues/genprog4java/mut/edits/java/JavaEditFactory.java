@@ -301,7 +301,12 @@ public class JavaEditFactory {
 		case FUNREP: 
 			return locationStmt.getReplacableMethods(variant.semanticInfo.getMethodDecls()).size() > 0;
 		case PARREP:
-			return locationStmt.getReplacableMethodParameters(variant.semanticInfo).size() > 0;
+			Map<ASTNode, Map<ASTNode, List<ASTNode>>> methodParams = locationStmt.getReplacableMethodParameters(variant.semanticInfo);
+			for(Map.Entry<ASTNode, Map<ASTNode, List<ASTNode>>> entry : methodParams.entrySet()) {
+				if(!entry.getValue().isEmpty())
+					return true;
+			}
+			return false;
 		case NULLCHECK: 
 			return locationStmt.getNullCheckables().size() > 0;
 		default:

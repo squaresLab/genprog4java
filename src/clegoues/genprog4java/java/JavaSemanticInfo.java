@@ -41,11 +41,12 @@ public class JavaSemanticInfo {
 			expressionsInScope.put(methodName, typeToExpressions);
 		}
 		final Map<String,List<ASTNode>> forVisitor = expressionsInScope.get(methodName);
-			md.accept(new ASTVisitor() {
-				public boolean visit(MethodInvocation node) {
-					List<Expression> args = node.arguments();
-					for(Expression arg : args) {
-						ITypeBinding typeBinding = 	arg.resolveTypeBinding();
+		md.accept(new ASTVisitor() {
+			public boolean visit(MethodInvocation node) {
+				List<Expression> args = node.arguments();
+				for(Expression arg : args) {
+					ITypeBinding typeBinding = 	arg.resolveTypeBinding();
+					if(typeBinding != null) {
 						String typeName = typeBinding.getName();
 						List<ASTNode> ofType = null;
 						if(forVisitor.containsKey(typeName)) {
@@ -56,10 +57,11 @@ public class JavaSemanticInfo {
 						}
 						ofType.add(arg);			
 					}
-					return true;
 				}
+				return true;
+			}
 
-			});
+		});
 		return typeToExpressions.get(desiredType);
 	}
 
