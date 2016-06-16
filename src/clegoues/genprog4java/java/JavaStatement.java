@@ -240,6 +240,18 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 
 	private Map<ASTNode, List<ASTNode>> casts = null;
+	private void saveCastInfo(CastExpression node) {
+		ASTNode parent = this.getParent(node); 
+		List<ASTNode> thisParentsCasts;
+		if(casts.containsKey(parent)) {
+			thisParentsCasts = casts.get(parent);
+		} else {
+			thisParentsCasts = new ArrayList<ASTNode>();
+			casts.put(parent, thisParentsCasts);
+		}
+		thisParentsCasts.add(node);
+	}
+
 	public Map<ASTNode, List<ASTNode>> getCasts() {
 		if(casts != null) {
 			return casts;
@@ -249,17 +261,8 @@ public class JavaStatement implements Comparable<JavaStatement>{
 			// method to visit all Expressions relevant for this in locationNode and
 			// store their parents
 			public boolean visit(CastExpression node) {
-				ASTNode parent = node.getParent(); 
-				List<ASTNode> thisParentsCasts;
-				if(casts.containsKey(parent)) {
-					thisParentsCasts = casts.get(parent);
-				} else {
-					thisParentsCasts = new ArrayList<ASTNode>();
-					casts.put(parent, thisParentsCasts);
-				}
-				thisParentsCasts.add(node);
+				saveCastInfo(node);
 				return true;
-
 			}
 		});
 	
