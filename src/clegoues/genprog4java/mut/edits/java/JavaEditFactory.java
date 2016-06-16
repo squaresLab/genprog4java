@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
+import clegoues.genprog4java.java.JavaSemanticInfo;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.mut.EditHole;
@@ -61,6 +62,8 @@ public class JavaEditFactory {
 			return new NullCheckOperation((JavaLocation) dst, sources);
 		case CASTCHECK:
 			return new ClassCastChecker((JavaLocation) dst, sources);
+		case EXPREP:
+			return new ExpressionReplacer((JavaLocation) dst, sources);
 		default: logger.fatal("unhandled edit template type in JavaEditFactory; this should be impossible (famous last words...)");
 		}		return null;
 	}
@@ -306,7 +309,7 @@ public class JavaEditFactory {
 		case RANGECHECK:
 			return locationStmt.getArrayAccesses().size() > 0;
 		case FUNREP: 
-			return locationStmt.getReplacableMethods(variant.semanticInfo.getMethodDecls()).size() > 0;
+			return locationStmt.getReplacableMethods(JavaSemanticInfo.getMethodDecls()).size() > 0; // possible FIXME: make get MethodDecls not static
 		case PARREP:
 			Map<ASTNode, Map<ASTNode, List<ASTNode>>> methodParams = locationStmt.getReplacableMethodParameters(variant.semanticInfo);
 			for(Map.Entry<ASTNode, Map<ASTNode, List<ASTNode>>> entry : methodParams.entrySet()) {
@@ -318,6 +321,8 @@ public class JavaEditFactory {
 			return locationStmt.getNullCheckables().size() > 0;
 		case CASTCHECK:
 			return locationStmt.getCasts().size() > 0;
+		case EXPREP:
+			return locationStmt.replacableExpressions().size() > 0;
 		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;
@@ -361,9 +366,11 @@ public class JavaEditFactory {
 		case CASTCHECK:
 			retVal.add("classCast");
 			return retVal;
+		case EXPREP:
+			retVal.add("expReplace");
+			return retVal;
 		case PARADD:
 		case PARREM:
-		case EXPREP:
 		case EXPADD:
 		case EXPREM: 
 		case OBJINIT:
