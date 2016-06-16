@@ -7,13 +7,15 @@ import java.util.TreeSet;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.mut.WeightedHole;
+import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.GlobalUtils;
 import clegoues.util.Pair;
 
 public class ReplacementModel {
-	
+
 	final int AssertStatement = 0;
 	final int Block = 1;
 	final int BreakStatement = 2;
@@ -36,35 +38,35 @@ public class ReplacementModel {
 	final int TypeDeclarationStatement = 19;
 	final int VariableDeclarationStatement = 20;
 	final int WhileStatement = 21;
-	/*
-	int replacementModel[][] = {
-		{0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0}, 
-		{0,0,1,0,0,0,0,0,10,0,27,0,16,0,0,0,0,0,0,0,7,0}, 
-		{0,1,0,0,0,0,0,0,15,0,0,0,0,0,2,0,0,0,0,0,0,0}, 
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-		{0,0,0,0,0,0,0,0,2,1,4,0,0,0,0,0,2,0,1,0,4,0}, 
-		{0,8,21,0,0,0,0,0,0,1,71,0,5,0,0,0,1,0,9,0,42,0}, 
-		{0,0,0,0,0,0,0,1,2,0,2,0,0,0,0,0,0,0,0,0,1,0}, 
-		{0,16,1,0,0,0,0,0,12,0,0,0,0,0,0,0,3,0,3,0,7,0}, 
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-		{0,4,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,3,0,2,0}, 
-		{0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-		{0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-		{0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0}, 
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-		{0,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0}, 
-		{0,0,0,0,0,1,0,0,0,0,3,0,0,0,0,0,1,0,0,0,0,0}, 
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
-		{0,2,0,0,0,0,0,0,44,1,16,0,1,0,0,1,0,1,0,0,0,0}, 
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-	};
-	*/
-	
 
-	
+	int replacementModel[][] = {
+			{0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0}, 
+			{0,0,1,0,0,0,0,0,10,0,27,0,16,0,0,0,0,0,0,0,7,0}, 
+			{0,1,0,0,0,0,0,0,15,0,0,0,0,0,2,0,0,0,0,0,0,0}, 
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
+			{0,0,0,0,0,0,0,0,2,1,4,0,0,0,0,0,2,0,1,0,4,0}, 
+			{0,8,21,0,0,0,0,0,0,1,71,0,5,0,0,0,1,0,9,0,42,0}, 
+			{0,0,0,0,0,0,0,1,2,0,2,0,0,0,0,0,0,0,0,0,1,0}, 
+			{0,16,1,0,0,0,0,0,12,0,0,0,0,0,0,0,3,0,3,0,7,0}, 
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
+			{0,4,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,3,0,2,0}, 
+			{0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
+			{0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
+			{0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0}, 
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
+			{0,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0}, 
+			{0,0,0,0,0,1,0,0,0,0,3,0,0,0,0,0,1,0,0,0,0,0}, 
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 
+			{0,2,0,0,0,0,0,0,44,1,16,0,1,0,0,1,0,1,0,0,0,0}, 
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+	};
+
+	/*
+
+
 	double replacementModel[][] = {
 	{5.00,5.00,7.48,5.00,3.76,0.53,5.00,5.00,5.00,8.30,23.05,0.31,20.04,5.00,4.90,4.62,1.30,13.50,7.23,0.03,5.00,4.95},
 	{5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00},
@@ -89,32 +91,36 @@ public class ReplacementModel {
 	{5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00,5.00},
 	{0.72,5.00,8.02,5.00,3.82,1.96,5.00,5.00,5.00,23.16,19.78,0.12,16.48,5.00,6.56,3.09,1.64,6.81,7.80,0.04,5.00,5.00}
 	};
-	
-	
+
+	 */
 	@SuppressWarnings("rawtypes")
 	public TreeSet<Pair<?,Double>> rescaleBasedOnModel(ArrayList<Pair<?,Double>> atoms, Representation<?> variant, int stmtIdBuggy) {
 		assert(atoms.size() > 0);
-		
+
 		TreeSet retVal = new TreeSet();
 		HashMap<Integer, JavaStatement> codeBank = ((JavaRepresentation)variant).getCodeBank();
 
 		JavaStatement buggyStmt = codeBank.get(stmtIdBuggy);
 		int row = stmtKindOfJavaStmt(buggyStmt);
-		
+
 		for(Pair<?,Double> atom: atoms){
-			Pair newAtom = new Pair();
-			newAtom.setFirst(atom.getFirst());
-			JavaStatement fixStmt = codeBank.get(atom.getFirst());
-			int column = stmtKindOfJavaStmt(fixStmt);
-			//plus one so no stmt has 0% chance of getting picked
-			newAtom.setSecond(Double.valueOf(replacementModel[row][column]+1));
-			retVal.add(newAtom);
+		
+			boolean isJavaStmt = codeBank.get(((SimpleJavaHole)atom.getFirst()).getCodeBankId()) instanceof JavaStatement;
+			if(isJavaStmt){
+				Pair newAtom = new Pair();
+				newAtom.setFirst(((SimpleJavaHole)atom.getFirst()));
+				JavaStatement fixStmt = codeBank.get(((SimpleJavaHole)atom.getFirst()).getCodeBankId());
+				int column = stmtKindOfJavaStmt(fixStmt);
+				//plus one so no stmt has 0% chance of getting picked
+				newAtom.setSecond(Double.valueOf(replacementModel[row][column]+1));
+				retVal.add(newAtom);
+			}
 		}
 		return retVal;
 	}
-	
-		
-	
+
+
+
 	private static int stmtKindOfJavaStmt(JavaStatement stmt){
 		ASTNode node = stmt.getASTNode();
 		int retVal = -1;
@@ -145,11 +151,11 @@ public class ReplacementModel {
 		}
 		return retVal;
 	}
-		
-		
-		
-/*
- * static ArrayList<Pair> alreadyReplaced = new ArrayList<Pair>();
+
+
+
+	/*
+	 * static ArrayList<Pair> alreadyReplaced = new ArrayList<Pair>();
 	public static int chooseReplacementBasedOnPredictingModel(ArrayList<Pair<?,Double>> atoms, Representation<?> variant, int stmtIdBuggy) {
 		assert(atoms.size() > 0);
 		ReplacementModel rm = new ReplacementModel();
@@ -178,7 +184,7 @@ public class ReplacementModel {
 							wipeOutAllRecordedGuessesFor(stmtKindOfBuggyStmt);
 						}
 						return possibleFixStmts.get(i).getFirst();
-						
+
 					}
 				}
 			}
@@ -189,7 +195,7 @@ public class ReplacementModel {
 		WeightedAtom wa = (WeightedAtom)lastResource;
 		return wa.getAtom();
 	}
-	  
+
 	private static boolean alreadyPickedTopFiveGuessesFor(int buggyStmtKind){
 		int counter=0;
 		for (Pair<Integer,Integer> p: alreadyReplaced) {
@@ -203,7 +209,7 @@ public class ReplacementModel {
 			return false;
 		}
 	}
-	
+
 	private static boolean alreadyReplacedContains(int replacee, int replacer){
 		for (Pair<Integer,Integer> p: alreadyReplaced) {
 			if(p.getFirst()==replacee && p.getSecond()==replacer){
@@ -212,7 +218,7 @@ public class ReplacementModel {
 		}
 		return false;
 	}
-	
+
 	private static void wipeOutAllRecordedGuessesFor(int buggyStmtKind){
 		for (int j = 0; j < alreadyReplaced.size(); j++) {
 			Pair<Integer,Integer> p = alreadyReplaced.get(j);
@@ -222,9 +228,9 @@ public class ReplacementModel {
 			}			
 		}
 	}
-	*/
-	
-	
+	 */
+
+
 	/*
 	public ArrayList<Integer>  getRanking(int rowNumber){
 		SortedSet<Integer> rankingValues = new TreeSet<Integer>(Collections.reverseOrder());
@@ -233,7 +239,7 @@ public class ReplacementModel {
 			//TreeSet sorts the values as they get added. It is a set, so no repeated values
 			rankingValues.add(replacementModel[rowNumber][i]);
 		}
-		
+
 		//In case a row has a lot of 0, then instead of giving priority to the stmt kinds for their alphabetical name, we will give them priority regarding their historical frequency of replacing others as pointed in "A Deeper Look into Bug Fixes: Patterns, Replacements, Deletions, and Additions"
 		int bestReplacersHistorically[] = {12,10,8,7,9,18,17,1,2,21,14,15,4,16,0,5,11,19,20,13,3,6};
 		for (Integer valueInMatrix : rankingValues) {
@@ -244,12 +250,12 @@ public class ReplacementModel {
 				}
 			}
 		}
-		
+
 		return rankingStmtNumbers;
 	}
-	*/
-	
+	 */
 
-	
-	
+
+
+
 }
