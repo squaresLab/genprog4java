@@ -7,6 +7,7 @@ import java.util.TreeSet;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.rep.JavaRepresentation;
@@ -105,10 +106,10 @@ public class ReplacementModel {
 		int row = stmtKindOfJavaStmt(buggyAstNode);
 
 		for(Pair<?,Double> atom: atoms){
-//			ASTNode fixStmt = ((SimpleJavaHole)((WeightedHole)atom).getFirst()).getCode();
-//			int column = stmtKindOfJavaStmt(fixStmt);
-//			atom.setSecond(Double.valueOf(replacementModel[row][column]+1));
-//			retVal.add(atom);
+			ASTNode fixStmt = ((EditHole<ASTNode>)((WeightedHole)atom).getFirst()).getCode();
+			int column = stmtKindOfJavaStmt(fixStmt);
+			atom.setSecond(Double.valueOf(replacementModel[row][column]+1));
+			retVal.add(atom);
 //		
 		}
 		return retVal;
