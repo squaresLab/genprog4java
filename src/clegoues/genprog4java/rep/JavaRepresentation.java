@@ -76,6 +76,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -279,9 +280,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		this.fromSource(pair, path, new File(path));
 	}
 
-	public static boolean canRepair(ASTNode node) {
-
-
+	public static boolean canRepair(ASTNode node) { // FIXME: methodinvocation and, frankly, variable declarations that have bodies.
 		return node instanceof AssertStatement 
 				|| node instanceof Block
 				//|| node instanceof MethodInvocation

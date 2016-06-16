@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
+import clegoues.genprog4java.mut.holes.java.StatementHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class JavaSwapOperation extends JavaEditOperation {
@@ -21,7 +21,7 @@ public class JavaSwapOperation extends JavaEditOperation {
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = this.getLocationNode();
-		SimpleJavaHole fixCode = (SimpleJavaHole) this.getHoleCode("singleHole"); 
+		StatementHole fixCode = (StatementHole) this.getHoleCode("singleHole"); 
 		ASTNode fixCodeNode =
 			 ASTNode.copySubtree(locationNode.getAST(), fixCode.getCode()); 
 		rewriter.replace(locationNode, fixCodeNode, null);

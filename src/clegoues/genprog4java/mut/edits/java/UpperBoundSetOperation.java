@@ -27,9 +27,9 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
-public class JavaUpperBoundSetOperation extends JavaEditOperation {
+public class UpperBoundSetOperation extends JavaEditOperation {
 
-	public JavaUpperBoundSetOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
+	public UpperBoundSetOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.UBOUNDSET, location, sources);
 		this.holeNames.add("upperBoundCheck");
 	}

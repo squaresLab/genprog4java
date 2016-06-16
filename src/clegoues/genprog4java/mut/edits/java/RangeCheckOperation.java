@@ -29,9 +29,9 @@ import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
-public class JavaRangeCheckOperation extends JavaEditOperation {
+public class RangeCheckOperation extends JavaEditOperation {
 
-	public JavaRangeCheckOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
+	public RangeCheckOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.RANGECHECK, location, sources);
 		this.holeNames.add("rangeCheck");
 

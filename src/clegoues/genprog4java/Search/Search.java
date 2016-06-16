@@ -257,6 +257,7 @@ public abstract class Search<G extends EditOperation> {
 
 			}
 			for (Location location : proMutList) {
+				// FIXME: deal with the case where there are no edits that apply ever, because infinite loop
 				//the available mutations for this stmt
 				TreeSet<Pair<Mutation, Double>> availableMutations = variant.availableMutations(location);
 				if(availableMutations.isEmpty()){

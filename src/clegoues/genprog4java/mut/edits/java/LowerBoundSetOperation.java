@@ -24,12 +24,12 @@ import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
-import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
+import clegoues.genprog4java.mut.holes.java.StatementHole;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
-public class JavaLowerBoundSetOperation extends JavaEditOperation {
+public class LowerBoundSetOperation extends JavaEditOperation {
 
-	public JavaLowerBoundSetOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
+	public LowerBoundSetOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.LBOUNDSET, location, sources);
 		this.holeNames.add("lowerBoundCheck");
 
@@ -40,9 +40,6 @@ public class JavaLowerBoundSetOperation extends JavaEditOperation {
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("lowerBoundCheck");
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> arrays = thisHole.getSubExps();
-		// possible FIXME: all array accesses in this location, or just the one? 
-		// check against the spec
-
 		Block newnode = parent.getAST().newBlock();
 
 		// for each of the array access instances

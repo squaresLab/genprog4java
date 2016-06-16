@@ -12,21 +12,25 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
+import clegoues.genprog4java.java.JavaSemanticInfo;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
-import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
+import clegoues.genprog4java.mut.holes.java.StatementHole;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.WeightedAtom;
@@ -43,22 +47,26 @@ public class JavaEditFactory {
 		case DELETE: 
 			return new JavaDeleteOperation((JavaLocation) dst);
 		case OFFBYONE:
-			return new JavaOffByOneOperation((JavaLocation) dst, sources);
+			return new OffByOneOperation((JavaLocation) dst, sources);
 		case APPEND: return new JavaAppendOperation((JavaLocation) dst, sources);
 		case REPLACE: return new JavaReplaceOperation((JavaLocation) dst, sources);
 		case SWAP: return new JavaSwapOperation((JavaLocation) dst, sources);
 		case PARREP:
-			return new JavaMethodParameterReplacer((JavaLocation) dst, sources);
+			return new MethodParameterReplacer((JavaLocation) dst, sources);
 		case FUNREP:
-			return new JavaMethodReplacer((JavaLocation) dst, sources);	
+			return new MethodReplacer((JavaLocation) dst, sources);	
 		case LBOUNDSET:
-			return new JavaLowerBoundSetOperation((JavaLocation) dst, sources);
+			return new LowerBoundSetOperation((JavaLocation) dst, sources);
 		case UBOUNDSET:
-			return new JavaUpperBoundSetOperation((JavaLocation) dst, sources);
+			return new UpperBoundSetOperation((JavaLocation) dst, sources);
 		case RANGECHECK:
-			return new JavaRangeCheckOperation((JavaLocation) dst, sources);
+			return new RangeCheckOperation((JavaLocation) dst, sources);
 		case NULLCHECK:
-			return new JavaNullCheckOperation((JavaLocation) dst, sources);
+			return new NullCheckOperation((JavaLocation) dst, sources);
+		case CASTCHECK:
+			return new ClassCastChecker((JavaLocation) dst, sources);
+		case EXPREP:
+			return new ExpressionReplacer((JavaLocation) dst, sources);
 		default: logger.fatal("unhandled edit template type in JavaEditFactory; this should be impossible (famous last words...)");
 		}		return null;
 	}
@@ -178,25 +186,47 @@ public class JavaEditFactory {
 		return retVal;
 	}
 
+	private TreeSet<EditHole> makeSubExpsHoles(String holeName, Map<ASTNode, List<ASTNode>> entryMap) {
+		if(entryMap != null && entryMap.size() > 0) {
+			TreeSet<EditHole> retVal = new TreeSet<EditHole>();
+			for(Map.Entry<ASTNode, List<ASTNode>> entry : entryMap.entrySet()) {
+				retVal.add(new SubExpsHole(holeName, entry.getKey(), entry.getValue()));
+			} 
+			return retVal;
+		} 
+		return null;
+	}
+	
+	private TreeSet<EditHole> makeExpHole(String holeName, Map<ASTNode, Map<ASTNode, List<ASTNode>>> replacableExps, JavaStatement parentStmt) {
+		if(replacableExps != null && replacableExps.size() > 0) {
+			TreeSet<EditHole> retVal = new TreeSet<EditHole>();
+		for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> funsite : replacableExps.entrySet()) {
+			for(Map.Entry<ASTNode, List<ASTNode>> exps : funsite.getValue().entrySet()) {
+				for(ASTNode replacementExp : exps.getValue()) { 
+					retVal.add(new ExpHole(holeName, exps.getKey(), (Expression) replacementExp, parentStmt.getStmtId()));
+				}
+			}
+		}
+		return retVal;
+		}
+		return null;
+	}
 	public TreeSet<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType,
 			String holeName) { // I notice that I'm really not using hole name, here, hm...maybe I can get rid of it?
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 		TreeSet<EditHole> retVal = new TreeSet<EditHole>();
 
 		switch(editType) {
+		case DELETE: 
+			break;
 		case APPEND: 	
 		case REPLACE:
-			//If it is a return statement, nothing should be appended after it, since it would be dead code
-			if(!(locationStmt.getASTNode() instanceof ReturnStatement || locationStmt.getASTNode() instanceof ThrowStatement )){
 				TreeSet<WeightedAtom> fixStmts = this.scopeHelper(location, variant);
 				for(WeightedAtom fixStmt : fixStmts) {
 					JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
 					ASTNode fixAST = potentialFixStmt.getASTNode();
-					retVal.add(new SimpleJavaHole(holeName, fixAST, potentialFixStmt.getStmtId()));
+					retVal.add(new StatementHole(holeName, (Statement) fixAST, potentialFixStmt.getStmtId()));
 				}
-			} 
-			break;
-		case DELETE: 
 			break;
 		case SWAP:
 			for (WeightedAtom item : this.scopeHelper(location, variant)) {
@@ -206,7 +236,7 @@ public class JavaEditFactory {
 					if (there.getAtom() == location.getId()) {
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
 						ASTNode fixAST = potentialFixStmt.getASTNode();
-						retVal.add(new SimpleJavaHole(holeName, fixAST, potentialFixStmt.getStmtId()));
+						retVal.add(new StatementHole(holeName, (Statement) fixAST, potentialFixStmt.getStmtId()));
 						break;
 					}
 				}
@@ -215,33 +245,10 @@ public class JavaEditFactory {
 		case LBOUNDSET:
 		case UBOUNDSET:
 		case RANGECHECK:
-			Map<ASTNode, List<ASTNode>> arrayAccesses = locationStmt.getArrayAccesses();
-			if(arrayAccesses.size() > 0) {
-				for(Map.Entry<ASTNode, List<ASTNode>> entry : arrayAccesses.entrySet()) {
-					retVal.add(new SubExpsHole(holeName, entry.getKey(), entry.getValue()));
-				} 
-			}
-			break;
 		case OFFBYONE:  
-			arrayAccesses = locationStmt.getArrayAccesses();
-			if(arrayAccesses.size() > 0) {
-				for(Map.Entry<ASTNode, List<ASTNode>> entry : arrayAccesses.entrySet()) {
-					for(ASTNode arrayAccess : entry.getValue()) {
-						retVal.add(new SimpleJavaHole(holeName, arrayAccess, locationStmt.getStmtId()));
-					}
-				} 
-			}
-			break;
+			return makeSubExpsHoles(holeName, locationStmt.getArrayAccesses()); 
 		case NULLCHECK:
-			Map<ASTNode, List<ASTNode>> nullCheckables = locationStmt.getNullCheckables();
-			if(nullCheckables.size() > 0) {
-				for(Map.Entry<ASTNode, List<ASTNode>> entry : nullCheckables.entrySet()) {
-					ASTNode parent = entry.getKey();
-					List<ASTNode> possibleReplacements = entry.getValue();
-					retVal.add(new SubExpsHole(holeName,parent, possibleReplacements));
-				}
-			} 
-			break;
+			return makeSubExpsHoles(holeName, locationStmt.getNullCheckables());
 		case FUNREP:
 			Map<ASTNode, List<ASTNode>> methodReplacements = locationStmt.getReplacableMethods(variant.semanticInfo.getMethodDecls());
 			for(Map.Entry<ASTNode,List<ASTNode>> entry : methodReplacements.entrySet()) {
@@ -256,29 +263,19 @@ public class JavaEditFactory {
 			}
 			break;
 		case PARREP:
-			Map<ASTNode, Map<ASTNode, Set<ASTNode>>> replacableParameters = locationStmt.getReplacableMethodParameters(variant.semanticInfo);
-			for(Map.Entry<ASTNode, Map<ASTNode,Set<ASTNode>>> funsite : replacableParameters.entrySet()) {
-				for(Map.Entry<ASTNode, Set<ASTNode>> exps : funsite.getValue().entrySet()) {
-					for(ASTNode replacementExp : exps.getValue()) { // simple hole here is terrible.  
-					retVal.add(new SimpleJavaHole(holeName, exps.getKey(), replacementExp, locationStmt.getStmtId()));
-					}
-				}
-			}
-			break;
+			return makeExpHole(holeName, locationStmt.getReplacableMethodParameters(variant.semanticInfo), locationStmt);
+		case CASTCHECK:
+			return makeSubExpsHoles(holeName, locationStmt.getCasts());
+		case EXPREP:
+			return makeExpHole(holeName, locationStmt.replacableConditionalExpressions(variant.semanticInfo), locationStmt);
 		case PARADD:
 		case PARREM:
-		case EXPREP:
 		case EXPADD:
 		case EXPREM:
 		case OBJINIT:
 		case SIZECHECK:
-		case CASTCHECK:
 		default:
-			// IMPORTANT FIXME FOR MANISH AND MAU: you must add handling here to check legality for templates as you add them.
-			// if a template always applies, then you can move the template type to the DELETE case, above.
-			// however, I don't think most templates always apply; it doesn't make sense to null check a statement in which nothing
-			// could conceivably be null, for example.
-			logger.fatal("Unhandled template type in editSources!  Fix code in JavaRepresentation to do this properly.");
+			logger.fatal("Unhandled template type in editSources!  Fix code in JavaEditFactory to do this properly.");
 			return null;
 		}
 		return retVal;
@@ -289,6 +286,11 @@ public class JavaEditFactory {
 		switch(editType) {
 		case APPEND: 
 		case REPLACE:
+			//If it is a return statement, nothing should be appended after it, since it would be dead code
+			if(!(locationStmt.getASTNode() instanceof ReturnStatement || locationStmt.getASTNode() instanceof ThrowStatement )){
+				return this.editSources(variant, location,  editType, "singleHole").size() > 0;
+			}
+			return false;
 		case SWAP: 
 			return this.editSources(variant, location,  editType, "singleHole").size() > 0;
 		case DELETE: 			
@@ -299,11 +301,20 @@ public class JavaEditFactory {
 		case RANGECHECK:
 			return locationStmt.getArrayAccesses().size() > 0;
 		case FUNREP: 
-			return locationStmt.getReplacableMethods(variant.semanticInfo.getMethodDecls()).size() > 0;
+			return locationStmt.getReplacableMethods(JavaSemanticInfo.getMethodDecls()).size() > 0; // possible FIXME: make get MethodDecls not static
 		case PARREP:
-			return locationStmt.getReplacableMethodParameters(variant.semanticInfo).size() > 0;
+			Map<ASTNode, Map<ASTNode, List<ASTNode>>> methodParams = locationStmt.getReplacableMethodParameters(variant.semanticInfo);
+			for(Map.Entry<ASTNode, Map<ASTNode, List<ASTNode>>> entry : methodParams.entrySet()) {
+				if(!entry.getValue().isEmpty())
+					return true;
+			}
+			return false;
 		case NULLCHECK: 
 			return locationStmt.getNullCheckables().size() > 0;
+		case CASTCHECK:
+			return locationStmt.getCasts().size() > 0;
+		case EXPREP:
+			return locationStmt.replacableConditionalExpressions(variant.semanticInfo).size() > 0;
 		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;
@@ -333,7 +344,7 @@ public class JavaEditFactory {
 			retVal.add("lowerBoundCheck");
 			return retVal;
 		case OFFBYONE:
-			retVal.add("arrayCheck");
+			retVal.add("offByOne");
 			return retVal;
 		case RANGECHECK: 
 			retVal.add("rangeCheck");
@@ -342,16 +353,18 @@ public class JavaEditFactory {
 			retVal.add("replaceMethod");
 			return retVal;
 		case PARREP:
+		case EXPREP:
 			retVal.add("replaceParameter");
+			return retVal;
+		case CASTCHECK:
+			retVal.add("classCast");
 			return retVal;
 		case PARADD:
 		case PARREM:
-		case EXPREP:
 		case EXPADD:
 		case EXPREM: 
 		case OBJINIT:
 		case SIZECHECK:
-		case CASTCHECK:
 			logger.fatal("Unhandled edit type in holesForMutation.  Handle it in JavaEditFactory and try again.");
 			return null;
 		}
