@@ -236,18 +236,15 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	}
 
 
-
-
-
-
 	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> methodParamReplacements = null;
 
+	// possibly want a better cache on param replacements to save recomputing on parent blocks.
 	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> getReplacableMethodParameters(final JavaSemanticInfo semanticInfo) {
 		if(methodParamReplacements != null) {
 			return methodParamReplacements;
 		} else {
 			methodParamReplacements = new HashMap<ASTNode, Map<ASTNode,List<ASTNode>>>();
-		} 
+		}
 
 		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
 		final String methodName = md.getName().getIdentifier();
@@ -268,15 +265,18 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				List<Expression> args = node.arguments();
 				for(Expression arg : args) {
 					ITypeBinding paramType = arg.resolveTypeBinding();
-					List<ASTNode> replacements = semanticInfo.getInScopeReplacementExpressions(methodName, md, paramType.getName());
-					List<ASTNode> thisList = null;
-					if(thisMethodCall.containsKey(arg)) {
-						thisList = thisMethodCall.get(arg);
-					} else {
-						thisList = new ArrayList<ASTNode>();
-						thisMethodCall.put(arg, thisList);
+					if(paramType != null) { // possible FIXME: null if we can't resolve the type binding, so maybe we don't want to just give up??
+						String typName = paramType.getName();
+						List<ASTNode> replacements = semanticInfo.getInScopeReplacementExpressions(methodName, md, typName);
+						List<ASTNode> thisList = null;
+						if(thisMethodCall.containsKey(arg)) {
+							thisList = thisMethodCall.get(arg);
+						} else {
+							thisList = new ArrayList<ASTNode>();
+							thisMethodCall.put(arg, thisList);
+						}
+						thisList.addAll(replacements);
 					}
-					thisList.addAll(replacements);
 				}
 				return true;
 
@@ -287,10 +287,10 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
 	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
-	
+
 	public List<MethodInfo> getCandidateMethodReplacements(ASTNode methodToReplace ) 
 	{ return candidateMethodReplacements.get(methodToReplace); }
-	
+
 	private ArrayList<ITypeBinding> paramsToTypes(List<SingleVariableDeclaration> params) {
 		int i = 0; 
 		ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>();
