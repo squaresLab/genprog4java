@@ -281,16 +281,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	}
 
 	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> expressionReplacements = null;
-	//
-	//	private void saveConditionalExpInfo(ConditionalExpression node, ExpReplacementVisitor expVisit) {
-	//		ASTNode parent = this.getParent(node);
-	//		Map<ASTNode,List<ASTNode>> expRepsThisCond = new HashMap<ASTNode,List<ASTNode>>();
-	//		expVisit.setReplacementMap(expRepsThisCond);
-	//		
-	//		node.getExpression().accept(expVisit);
-	//		expressionReplacements.put(parent, expRepsThisCond);
-	//	}
-	//
+	
 	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> replacableConditionalExpressions(final JavaSemanticInfo semanticInfo) {
 		if(expressionReplacements != null) {
 			return expressionReplacements;
@@ -327,9 +318,20 @@ public class JavaStatement implements Comparable<JavaStatement>{
 			}
 
 			public boolean visit(ConditionalExpression node) {
-				//				saveConditionalExpInfo(node, expVisit);
+				Expression exp = node.getExpression();
+				List<ASTNode> replacements = semanticInfo.getConditionalReplacementExpressions(methodName, md);
+				if(replacements != null) {
+					List<ASTNode> thisList = null;
+					if(replacementMap.containsKey(exp)) {
+						thisList = replacementMap.get(exp);
+					} else {
+						thisList = new ArrayList<ASTNode>();
+						replacementMap.put(exp, thisList);
+					}
+					thisList.addAll(replacements);
+				}
 				return true;
-			}
+				}
 		});
 		return expressionReplacements;
 	}

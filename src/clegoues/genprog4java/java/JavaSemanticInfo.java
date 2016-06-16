@@ -10,6 +10,7 @@ import java.util.TreeSet;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -77,6 +78,10 @@ public class JavaSemanticInfo {
 			final List<ASTNode> expressionsInScope = new ArrayList<ASTNode>();
 			conditionalExpressionsInScope.put(methodName, expressionsInScope);
 			md.accept(new ASTVisitor() {
+				public boolean visit(ConditionalExpression node) {
+					expressionsInScope.add(node.getExpression());
+					return true;
+				}
 				public boolean visit(IfStatement node) {
 					expressionsInScope.add(node.getExpression());
 					return true;
