@@ -197,6 +197,20 @@ public class JavaEditFactory {
 		return null;
 	}
 	
+	private TreeSet<EditHole> makeExpHole(String holeName, Map<ASTNode, Map<ASTNode, List<ASTNode>>> replacableExps, JavaStatement parentStmt) {
+		if(replacableExps != null && replacableExps.size() > 0) {
+			TreeSet<EditHole> retVal = new TreeSet<EditHole>();
+		for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> funsite : replacableExps.entrySet()) {
+			for(Map.Entry<ASTNode, List<ASTNode>> exps : funsite.getValue().entrySet()) {
+				for(ASTNode replacementExp : exps.getValue()) { 
+					retVal.add(new ExpHole(holeName, exps.getKey(), (Expression) replacementExp, parentStmt.getStmtId()));
+				}
+			}
+		}
+		return retVal;
+		}
+		return null;
+	}
 	public TreeSet<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType,
 			String holeName) { // I notice that I'm really not using hole name, here, hm...maybe I can get rid of it?
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
@@ -249,23 +263,11 @@ public class JavaEditFactory {
 			}
 			break;
 		case PARREP:
-			Map<ASTNode, Map<ASTNode, List<ASTNode>>> replacableParameters = locationStmt.getReplacableMethodParameters(variant.semanticInfo);
-			for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> funsite : replacableParameters.entrySet()) {
-				for(Map.Entry<ASTNode, List<ASTNode>> exps : funsite.getValue().entrySet()) {
-					for(ASTNode replacementExp : exps.getValue()) { 
-						retVal.add(new ExpHole(holeName, exps.getKey(), (Expression) replacementExp, locationStmt.getStmtId()));
-					}
-				}
-			}
-			break;
+			return makeExpHole(holeName, locationStmt.getReplacableMethodParameters(variant.semanticInfo), locationStmt);
 		case CASTCHECK:
 			return makeSubExpsHoles(holeName, locationStmt.getCasts());
 		case EXPREP:
-			Map<ASTNode, Map<ASTNode, List<ASTNode>>> expReps = locationStmt.replacableConditionalExpressions(variant.semanticInfo);
-			for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> entry : expReps.entrySet()) {
-
-			}
-			break;
+			return makeExpHole(holeName, locationStmt.replacableConditionalExpressions(variant.semanticInfo), locationStmt);
 		case PARADD:
 		case PARREM:
 		case EXPADD:
@@ -342,7 +344,7 @@ public class JavaEditFactory {
 			retVal.add("lowerBoundCheck");
 			return retVal;
 		case OFFBYONE:
-			retVal.add("arrayCheck");
+			retVal.add("offByOne");
 			return retVal;
 		case RANGECHECK: 
 			retVal.add("rangeCheck");
