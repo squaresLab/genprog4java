@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -65,6 +66,8 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import clegoues.genprog4java.main.ClassInfo;
+import clegoues.genprog4java.mut.Location;
+import clegoues.genprog4java.rep.WeightedAtom;
 
 public class JavaStatement implements Comparable<JavaStatement>{
 
@@ -236,6 +239,32 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	}
 
 
+	private Map<ASTNode, List<ASTNode>> casts = null;
+	public Map<ASTNode, List<ASTNode>> getCasts() {
+		if(casts != null) {
+			return casts;
+		}
+		casts = new HashMap<ASTNode, List<ASTNode>>();
+		this.getASTNode().accept(new ASTVisitor() {
+			// method to visit all Expressions relevant for this in locationNode and
+			// store their parents
+			public boolean visit(CastExpression node) {
+				ASTNode parent = node.getParent(); 
+				List<ASTNode> thisParentsCasts;
+				if(casts.containsKey(parent)) {
+					thisParentsCasts = casts.get(parent);
+				} else {
+					thisParentsCasts = new ArrayList<ASTNode>();
+					casts.put(parent, thisParentsCasts);
+				}
+				thisParentsCasts.add(node);
+				return true;
+
+			}
+		});
+	
+		return casts;
+	}
 	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> methodParamReplacements = null;
 
 	// possibly want a better cache on param replacements to save recomputing on parent blocks.
@@ -488,5 +517,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		this.setASTNode(node);
 
 	}
+
 
 }

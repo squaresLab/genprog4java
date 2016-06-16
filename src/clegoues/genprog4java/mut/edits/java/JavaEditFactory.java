@@ -59,6 +59,8 @@ public class JavaEditFactory {
 			return new RangeCheckOperation((JavaLocation) dst, sources);
 		case NULLCHECK:
 			return new NullCheckOperation((JavaLocation) dst, sources);
+		case CASTCHECK:
+			return new ClassCastChecker((JavaLocation) dst, sources);
 		default: logger.fatal("unhandled edit template type in JavaEditFactory; this should be impossible (famous last words...)");
 		}		return null;
 	}
@@ -265,6 +267,12 @@ public class JavaEditFactory {
 				}
 			}
 			break;
+		case CASTCHECK:
+			Map<ASTNode, List<ASTNode>> casts = locationStmt.getCasts();
+			for(Map.Entry<ASTNode, List<ASTNode>> entry : casts.entrySet()) {
+				retVal.add(new SubExpsHole(holeName, entry.getKey(), entry.getValue()));
+			}
+			break;
 		case PARADD:
 		case PARREM:
 		case EXPREP:
@@ -272,7 +280,6 @@ public class JavaEditFactory {
 		case EXPREM:
 		case OBJINIT:
 		case SIZECHECK:
-		case CASTCHECK:
 		default:
 			// IMPORTANT FIXME FOR MANISH AND MAU: you must add handling here to check legality for templates as you add them.
 			// if a template always applies, then you can move the template type to the DELETE case, above.
@@ -309,6 +316,8 @@ public class JavaEditFactory {
 			return false;
 		case NULLCHECK: 
 			return locationStmt.getNullCheckables().size() > 0;
+		case CASTCHECK:
+			return locationStmt.getCasts().size() > 0;
 		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;
@@ -349,6 +358,9 @@ public class JavaEditFactory {
 		case PARREP:
 			retVal.add("replaceParameter");
 			return retVal;
+		case CASTCHECK:
+			retVal.add("classCast");
+			return retVal;
 		case PARADD:
 		case PARREM:
 		case EXPREP:
@@ -356,7 +368,6 @@ public class JavaEditFactory {
 		case EXPREM: 
 		case OBJINIT:
 		case SIZECHECK:
-		case CASTCHECK:
 			logger.fatal("Unhandled edit type in holesForMutation.  Handle it in JavaEditFactory and try again.");
 			return null;
 		}
