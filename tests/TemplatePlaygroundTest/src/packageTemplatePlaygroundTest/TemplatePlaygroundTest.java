@@ -4,12 +4,16 @@ public class TemplatePlaygroundTest {
 
     public int mid(int x, int y, int z){
     	int ret = z;
+     	TemplatePlaygroundTest ww = new TemplatePlaygroundTest();
+
 	if(y<z){
 	   if(x<y){
 		ret = y;
 	   }else if(x<z){
 		//ret = y; // bug, it should be ret = x;
-		retOne(5);
+		   Object castedObject;
+		   castedObject = (Object) ww;
+		   retOne(5);
 	   }
 	}else{
 	   if(x>y){
