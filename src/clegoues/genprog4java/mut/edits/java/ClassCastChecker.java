@@ -52,7 +52,6 @@ public class ClassCastChecker extends JavaEditOperation {
 			InstanceofExpression expression = ifstmt.getAST().newInstanceofExpression();
 			Expression newExpression = (Expression) rewriter.createCopyTarget(asCast.getExpression());
 			expression.setLeftOperand(newExpression);
-			Type castType = asCast.getType();
 			Type newType = (Type) rewriter.createCopyTarget(asCast.getType());
 			expression.setRightOperand(newType);
 		
