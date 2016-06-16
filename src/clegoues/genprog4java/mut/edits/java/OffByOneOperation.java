@@ -6,7 +6,10 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
@@ -20,18 +23,18 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
-import clegoues.genprog4java.mut.holes.java.SimpleJavaHole;
+import clegoues.genprog4java.mut.holes.java.StatementHole;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
-public class JavaOffByOneOperation extends JavaEditOperation {
+public class OffByOneOperation extends JavaEditOperation {
 	private enum mutationType { ADD, SUBTRACT};
 
 	// used to randomly add or subtract 1 while mutating array index
 	private mutationType mutType;
 
-	public JavaOffByOneOperation(JavaLocation location, HashMap<String, EditHole> sources) {
+	public OffByOneOperation(JavaLocation location, HashMap<String, EditHole> sources) {
 		super(Mutation.OFFBYONE, location, sources);
-		this.holeNames.add("arrayCheck");
+		this.holeNames.add("offByOne");
 		int randomNum = Configuration.randomizer.nextInt(11);
 
 		if(randomNum%2==0){
@@ -40,17 +43,20 @@ public class JavaOffByOneOperation extends JavaEditOperation {
 			mutType = mutationType.ADD;
 		}
 	}
-	
+
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode(); // not used, but being completist
-		SimpleJavaHole thisHole = (SimpleJavaHole) this.getHoleCode("arrayCheck");
-		ArrayAccess arrayAccess  = (ArrayAccess) thisHole.getCode();
-		Expression arrayindex = arrayAccess.getIndex(); // original index
-		Expression mutatedindex = mutateIndex(arrayindex, true); // method call to get mutated index
-		rewriter.replace(arrayindex, mutatedindex, null);	// replacing original index with mutated index
+		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("offByOne");
+		ASTNode parent = thisHole.getHoleParent();
+		List<ASTNode> arrays = thisHole.getSubExps();
+		for(ASTNode array : arrays) {
+			ArrayAccess arrayAccess  = (ArrayAccess) array; 
+			Expression arrayindex = arrayAccess.getIndex(); // original index
+			Expression mutatedindex = mutateIndex(arrayindex, true); // method call to get mutated index
+			rewriter.replace(arrayindex, mutatedindex, null);	// replacing original index with mutated index
+		}
 	}
-
 
 	// recursive method to mutate array index. (increase or decrease the index by one)
 	private Expression mutateIndex(Expression arrayindex, Boolean mutateflag) { // arrayindex is the index to be mutated, mutateflag is used to check if mutation is to be performed.

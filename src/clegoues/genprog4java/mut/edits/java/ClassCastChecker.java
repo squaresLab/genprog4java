@@ -5,17 +5,20 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
@@ -24,47 +27,34 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
-public class JavaNullCheckOperation extends JavaEditOperation {
-
-	public JavaNullCheckOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
-		super(Mutation.NULLCHECK, location, sources);
-		this.holeNames.add("checkForNull");
+public class ClassCastChecker extends JavaEditOperation {
+	
+	public ClassCastChecker(JavaLocation location,  HashMap<String, EditHole> sources) {
+		super(Mutation.CASTCHECK, location, sources);
+		this.holeNames.add("classCast");
 	}
 
 	@Override
-	public void edit(final ASTRewrite rewriter) {
+	public void edit(ASTRewrite rewriter) {
 		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode();
-		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("checkForNull");
+		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("classCast");
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> expressionsFromThisParent = thisHole.getSubExps();
 
 		Collections.reverse(expressionsFromThisParent);
 		//Create if before the error
 		IfStatement ifstmt = locationNode.getAST().newIfStatement();
-		InfixExpression everythingInTheCondition = null; 
+		Expression everythingInTheCondition = null; 
 
 		// for each of the expressions that can be null
-		for(ASTNode expressionToCheckIfNull : expressionsFromThisParent){
-			InfixExpression expression = ifstmt.getAST().newInfixExpression();
-			if(expressionToCheckIfNull instanceof MethodInvocation) {
-				Expression newExpression = (Expression) rewriter.createCopyTarget(((MethodInvocation) expressionToCheckIfNull).getExpression());
-				expression.setLeftOperand(newExpression);
-			}
-			if(expressionToCheckIfNull instanceof SimpleName) {
-				String name = ((SimpleName) expressionToCheckIfNull).getIdentifier();
-				Expression newSimpleName = ifstmt.getAST().newSimpleName(name);
-				expression.setLeftOperand(newSimpleName);
-			}
-			if(expressionToCheckIfNull instanceof FieldAccess) {
-				Expression newExpression = (Expression) rewriter.createCopyTarget(((FieldAccess) expressionToCheckIfNull).getExpression());
-
-				expression.setLeftOperand(newExpression);
-			}
-			if(expressionToCheckIfNull instanceof QualifiedName)
-				expression.setLeftOperand(((QualifiedName) expressionToCheckIfNull).getName());
-
-			expression.setOperator(Operator.NOT_EQUALS);
-			expression.setRightOperand(expressionToCheckIfNull.getAST().newNullLiteral());
+		for(ASTNode castToCheck : expressionsFromThisParent){
+			CastExpression asCast = (CastExpression) castToCheck;
+			InstanceofExpression expression = ifstmt.getAST().newInstanceofExpression();
+			Expression newExpression = (Expression) rewriter.createCopyTarget(asCast.getExpression());
+			expression.setLeftOperand(newExpression);
+			Type newType = (Type) rewriter.createCopyTarget(asCast.getType());
+			expression.setRightOperand(newType);
+		
 			if(everythingInTheCondition == null)
 				everythingInTheCondition = expression;
 			else {
@@ -76,7 +66,7 @@ public class JavaNullCheckOperation extends JavaEditOperation {
 			}
 		}
 		if(parent instanceof ReturnStatement) {
-			// CLG says: this is not tested!  FIXME: test before deploy.
+			// CLG says: this is not tested/was taken from null check template so is probably wrong!  FIXME: test before deploy.
 			PrefixExpression prefix = ifstmt.getAST().newPrefixExpression();
 			prefix.setOperator(PrefixExpression.Operator.NOT);
 			prefix.setOperand(everythingInTheCondition);
@@ -95,6 +85,5 @@ public class JavaNullCheckOperation extends JavaEditOperation {
 			ifstmt.setThenStatement((Statement) thenStmt);
 		}
 		rewriter.replace(parent, ifstmt, null);
-
 	}
 }
