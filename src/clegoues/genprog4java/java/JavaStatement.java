@@ -158,7 +158,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		return this.stmtId - other.getStmtId();
 	}
 
-	// FIXME: does it make sense to put this in the edits themselves?
 	// maybe not for cached info...
 
 	/******* Cached information for applicability of various mutations/templates ******/
@@ -241,6 +240,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 
 	private Map<ASTNode, List<ASTNode>> casts = null;
+	
 	private void saveCastInfo(CastExpression node) {
 		ASTNode parent = this.getParent(node); 
 		List<ASTNode> thisParentsCasts;
@@ -272,19 +272,75 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	
 	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> expressionReplacements = null;
 
-	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> replacableExpressions() {
+	private class ExpReplacementVisitor extends ASTVisitor {
+		private JavaSemanticInfo semanticInfo;
+		private String methodName;
+		private MethodDeclaration md;
+		private Map<ASTNode, List<ASTNode>> replacementMap;
+		
+		ExpReplacementVisitor(JavaSemanticInfo semanticInfo, String methodName, MethodDeclaration md) 
+		{ 
+			this.semanticInfo = semanticInfo;
+			this.methodName = methodName;
+			this.md = md;
+		} 
+		
+		public void setReplacementMap(Map<ASTNode, List<ASTNode>> newMap) {
+			this.replacementMap = newMap;
+		}
+		@SuppressWarnings("unused")
+		public Map<ASTNode, List<ASTNode>> getReplacementMap(Map<ASTNode, List<ASTNode>> newMap) {
+			return this.replacementMap;
+		}
+		
+		@SuppressWarnings("unused")
+		public boolean visit(Expression exp) {
+				ITypeBinding expType = exp.resolveTypeBinding();
+				if(expType != null) { // null if we can't resolve the type binding; maybe we don't want to just give up??
+					List<ASTNode> replacements = semanticInfo.getInScopeReplacementExpressions(methodName, md, expType.getName());
+					List<ASTNode> thisList = null;
+					if(replacementMap.containsKey(exp)) {
+						thisList = replacementMap.get(exp);
+					} else {
+						thisList = new ArrayList<ASTNode>();
+						replacementMap.put(exp, thisList);
+					}
+					thisList.addAll(replacements);
+				}
+			return true;
+		}
+	};
+	
+	private void saveConditionalExpInfo(ConditionalExpression node, ExpReplacementVisitor expVisit) {
+		ASTNode parent = this.getParent(node);
+		Map<ASTNode,List<ASTNode>> expRepsThisCond = new HashMap<ASTNode,List<ASTNode>>();
+		expVisit.setReplacementMap(expRepsThisCond);
+		node.getExpression().accept(expVisit);
+		expressionReplacements.put(parent, expRepsThisCond);
+	}
+	
+	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> replacableConditionalExpressions(JavaSemanticInfo semanticInfo) {
 		if(expressionReplacements != null) {
 			return expressionReplacements;
 		} else {
 			expressionReplacements = new HashMap<ASTNode, Map<ASTNode, List<ASTNode>>>();
 		}
+		MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
+		String methodName = md.getName().getIdentifier();
+
+		final ExpReplacementVisitor expVisit = new ExpReplacementVisitor(semanticInfo, methodName, md);
 		this.getASTNode().accept(new ASTVisitor() {
 			
 			public boolean visit(IfStatement node) {
+				Map<ASTNode,List<ASTNode>> expRepsThisIf = new HashMap<ASTNode,List<ASTNode>>();
+				expVisit.setReplacementMap(expRepsThisIf);
+				node.getExpression().accept(expVisit);
+				expressionReplacements.put(node, expRepsThisIf);
 				return true;
 			}
 			
 			public boolean visit(ConditionalExpression node) {
+				saveConditionalExpInfo(node, expVisit);
 				return true;
 			}
 		});
@@ -293,7 +349,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> methodParamReplacements = null;
 
-	// possibly want a better cache on param replacements to save recomputing on parent blocks.
 	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> getReplacableMethodParameters(final JavaSemanticInfo semanticInfo) {
 		if(methodParamReplacements != null) {
 			return methodParamReplacements;
@@ -320,7 +375,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				List<Expression> args = node.arguments();
 				for(Expression arg : args) {
 					ITypeBinding paramType = arg.resolveTypeBinding();
-					if(paramType != null) { // possible FIXME: null if we can't resolve the type binding, so maybe we don't want to just give up??
+					if(paramType != null) { // possible FIXME: null if we can't resolve the type binding; maybe we don't want to just give up??
 						String typName = paramType.getName();
 						List<ASTNode> replacements = semanticInfo.getInScopeReplacementExpressions(methodName, md, typName);
 						List<ASTNode> thisList = null;
@@ -356,6 +411,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		}
 		return paramTypes;
 	}
+	
 	// FIXME: replacement methods should apparently be in the same scope; can we safely assume
 	// that everything in the methoddecls field qualifies?
 	public Map<ASTNode, List<ASTNode>> getReplacableMethods(final List<MethodInfo> methodDecls) {
