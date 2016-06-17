@@ -276,44 +276,60 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	
 	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> extendableExpressions = null;
 
-	public Map<ASTNode, Map<ASTNode, List<ASTNode>>> extendableConditionalExpressions(JavaSemanticInfo semanticInfo) {
-		if(extendableExpressions == null) {
-			extendableExpressions = new HashMap<ASTNode, Map<ASTNode, List<ASTNode>>>();
+	// FIXME: find a way to sort options by distance where sorting by distance is specified
+	// in PAR paper
+	
+	public Map<ASTNode, Map<ASTNode, List<ASTNode>>> extendableConditionalExpressions(final JavaSemanticInfo semanticInfo) {
+		if(extendableExpressions != null) {
+			return extendableExpressions;
 		}
+		extendableExpressions = new HashMap<ASTNode, Map<ASTNode, List<ASTNode>>>();
+
+		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
+		final String methodName = md.getName().getIdentifier();
+
 		this.getASTNode().accept(new ASTVisitor() {
 
-//			public boolean visit(IfStatement node) {
-//				Expression exp = node.getExpression();
-//				List<ASTNode> replacements = semanticInfo.getConditionalReplacementExpressions(methodName, md);
-//				if(replacements != null) {
-//					List<ASTNode> thisList = null;
-//					if(replacementMap.containsKey(exp)) {
-//						thisList = replacementMap.get(exp);
-//					} else {
-//						thisList = new ArrayList<ASTNode>();
-//						replacementMap.put(exp, thisList);
-//					}
-//					thisList.addAll(replacements);
-//				}
-//				return true;
-//			}
-//
-//			// FIXME: test this.
-//			public boolean visit(ConditionalExpression node) {
-//				Expression exp = node.getExpression();
-//				List<ASTNode> replacements = semanticInfo.getConditionalReplacementExpressions(methodName, md);
-//				if(replacements != null) {
-//					List<ASTNode> thisList = null;
-//					if(replacementMap.containsKey(exp)) {
-//						thisList = replacementMap.get(exp);
-//					} else {
-//						thisList = new ArrayList<ASTNode>();
-//						replacementMap.put(exp, thisList);
-//					}
-//					thisList.addAll(replacements);
-//				}
-//				return true;
-//				}
+			public boolean visit(IfStatement node) {
+				Expression exp = node.getExpression();
+				// FIXME: exclude those that are already in the condition?
+				List<ASTNode> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
+				Map<ASTNode, List<ASTNode>> replacementMap = new HashMap<ASTNode, List<ASTNode>>();
+				expressionReplacements.put(node, replacementMap);
+
+				if(replacements != null) {
+					List<ASTNode> thisList = null;
+					if(replacementMap.containsKey(exp)) {
+						thisList = replacementMap.get(exp);
+					} else {
+						thisList = new ArrayList<ASTNode>();
+						replacementMap.put(exp, thisList);
+					}
+					thisList.addAll(replacements);
+				}
+				return true;
+			}
+
+			// FIXME: test this.
+			public boolean visit(ConditionalExpression node) {
+				Expression exp = node.getExpression();
+				ASTNode parent = getParent(node);
+				List<ASTNode> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
+				Map<ASTNode, List<ASTNode>> replacementMap = new HashMap<ASTNode, List<ASTNode>>();
+				expressionReplacements.put(parent, replacementMap);
+				
+				if(replacements != null) {
+					List<ASTNode> thisList = null;
+					if(replacementMap.containsKey(exp)) {
+						thisList = replacementMap.get(exp);
+					} else {
+						thisList = new ArrayList<ASTNode>();
+						replacementMap.put(exp, thisList);
+					}
+					thisList.addAll(replacements);
+				}
+				return true;
+				}
 		});
 		return null;
 	}
@@ -321,14 +337,10 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> expressionReplacements = null;
 	
-	// FIXME: retest this.
 	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> replacableConditionalExpressions(final JavaSemanticInfo semanticInfo) {
-
 		if(expressionReplacements == null) {
 			expressionReplacements = new HashMap<ASTNode, Map<ASTNode, List<ASTNode>>>();
 		}
-		if(!expressionReplacements.containsKey(this.getASTNode())) {
-
 		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
 		final String methodName = md.getName().getIdentifier();
 
@@ -372,7 +384,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				return true;
 				}
 		});
-		}
 		return expressionReplacements;
 	}
 
