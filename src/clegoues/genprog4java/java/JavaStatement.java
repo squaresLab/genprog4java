@@ -384,6 +384,15 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		});
 		return methodParamReplacements;
 	}
+	
+	private Map<ASTNode, List<ASTNode>> variableMethods = null;
+
+	public Map<ASTNode, List<ASTNode>> getVariableMethods() {
+		// I actually don't know how to do this.  Hm.
+		return null;
+		}
+
+
 
 	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
 	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
@@ -402,8 +411,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		return paramTypes;
 	}
 
-	// FIXME: replacement methods should apparently be in the same scope; can we safely assume
-	// that everything in the methoddecls field qualifies?
 	public Map<ASTNode, List<ASTNode>> getReplacableMethods(final List<MethodInfo> methodDecls) {
 		if(methodReplacements == null) {
 			methodReplacements = new HashMap<ASTNode, List<ASTNode>>();

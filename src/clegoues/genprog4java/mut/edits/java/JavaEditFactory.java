@@ -67,6 +67,8 @@ public class JavaEditFactory {
 			return new ClassCastChecker((JavaLocation) dst, sources);
 		case EXPREP:
 			return new ExpressionReplacer((JavaLocation) dst, sources);
+		case PARADD:
+			return new MethodParameterAdder((JavaLocation) dst, sources);
 		default: logger.fatal("unhandled edit template type in JavaEditFactory; this should be impossible (famous last words...)");
 		}		return null;
 	}
@@ -315,6 +317,8 @@ public class JavaEditFactory {
 			return locationStmt.getCasts().size() > 0;
 		case EXPREP:
 			return locationStmt.replacableConditionalExpressions(variant.semanticInfo).size() > 0;
+		case PARADD:
+			return locationStmt.getVariableMethods().size() > 0;
 		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;
@@ -360,6 +364,8 @@ public class JavaEditFactory {
 			retVal.add("classCast");
 			return retVal;
 		case PARADD:
+			retVal.add("addParameter");
+			return retVal;
 		case PARREM:
 		case EXPADD:
 		case EXPREM: 
