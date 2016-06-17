@@ -69,6 +69,10 @@ public class JavaEditFactory {
 			return new ExpressionReplacer((JavaLocation) dst, sources);
 		case PARADD:
 			return new MethodParameterAdder((JavaLocation) dst, sources);
+		case EXPADD: 
+			return new ExpressionModAdd((JavaLocation) dst, sources);
+		case EXPREM: 
+			return new ExpressionModRem((JavaLocation) dst, sources);
 		default: logger.fatal("unhandled edit template type in JavaEditFactory; this should be impossible (famous last words...)");
 		}		return null;
 	}
@@ -270,10 +274,11 @@ public class JavaEditFactory {
 			return makeSubExpsHoles(holeName, locationStmt.getCasts());
 		case EXPREP:
 			return makeExpHole(holeName, locationStmt.replacableConditionalExpressions(variant.semanticInfo), locationStmt);
+		case EXPADD:
+			return makeExpHole(holeName, locationStmt.extendableConditionalExpressions(variant.semanticInfo), locationStmt);
+		case EXPREM:
 		case PARADD:
 		case PARREM:
-		case EXPADD:
-		case EXPREM:
 		case OBJINIT:
 		case SIZECHECK:
 		default:
@@ -366,9 +371,13 @@ public class JavaEditFactory {
 		case PARADD:
 			retVal.add("addParameter");
 			return retVal;
-		case PARREM:
 		case EXPADD:
-		case EXPREM: 
+			retVal.add("condExpAdd");
+			return retVal;
+		case EXPREM:
+			retVal.add("condExpRem");
+			return retVal;
+		case PARREM:
 		case OBJINIT:
 		case SIZECHECK:
 			logger.fatal("Unhandled edit type in holesForMutation.  Handle it in JavaEditFactory and try again.");

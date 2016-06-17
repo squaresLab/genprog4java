@@ -153,8 +153,8 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		else
 			return "null";
 	}
-	// method to get the parent of an ASTnode. We traverse the ast upwards until the parent node is an instance of statement
-	// if statement is(are) added to this parent node
+	
+	// method to get the statemetn parent of an ASTnode. We traverse the ast upwards until the parent node is an instance of statement
 	private ASTNode getParent(ASTNode node) {
 		ASTNode parent = node.getParent();
 		while(!(parent instanceof Statement)){
@@ -168,7 +168,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		return this.stmtId - other.getStmtId();
 	}
 
-	// maybe not for cached info...
 
 	/******* Cached information for applicability of various mutations/templates ******/
 	private Map<ASTNode, List<ASTNode>> arrayAccesses = null; // to track the parent nodes of array access nodes
@@ -251,58 +250,94 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	private Map<ASTNode, List<ASTNode>> casts = null;
 
-	private void saveCastInfo(CastExpression node) {
-		ASTNode parent = this.getParent(node); 
-		List<ASTNode> thisParentsCasts;
-		if(casts.containsKey(parent)) {
-			thisParentsCasts = casts.get(parent);
-		} else {
-			thisParentsCasts = new ArrayList<ASTNode>();
-			casts.put(parent, thisParentsCasts);
-		}
-		thisParentsCasts.add(node);
-	}
-
 	public Map<ASTNode, List<ASTNode>> getCasts() {
 		if(casts != null) {
 			return casts;
 		}
 		casts = new HashMap<ASTNode, List<ASTNode>>();
 		this.getASTNode().accept(new ASTVisitor() {
-			// method to visit all Expressions relevant for this in locationNode and
-			// store their parents
+			
 			public boolean visit(CastExpression node) {
-				saveCastInfo(node);
+				ASTNode parent = getParent(node); 
+				List<ASTNode> thisParentsCasts;
+				if(casts.containsKey(parent)) {
+					thisParentsCasts = casts.get(parent);
+				} else {
+					thisParentsCasts = new ArrayList<ASTNode>();
+					casts.put(parent, thisParentsCasts);
+				}
+				thisParentsCasts.add(node);
 				return true;
 			}
 		});
 
 		return casts;
 	}
+	
+	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> extendableExpressions = null;
+
+	public Map<ASTNode, Map<ASTNode, List<ASTNode>>> extendableConditionalExpressions(JavaSemanticInfo semanticInfo) {
+		if(extendableExpressions == null) {
+			extendableExpressions = new HashMap<ASTNode, Map<ASTNode, List<ASTNode>>>();
+		}
+		this.getASTNode().accept(new ASTVisitor() {
+
+//			public boolean visit(IfStatement node) {
+//				Expression exp = node.getExpression();
+//				List<ASTNode> replacements = semanticInfo.getConditionalReplacementExpressions(methodName, md);
+//				if(replacements != null) {
+//					List<ASTNode> thisList = null;
+//					if(replacementMap.containsKey(exp)) {
+//						thisList = replacementMap.get(exp);
+//					} else {
+//						thisList = new ArrayList<ASTNode>();
+//						replacementMap.put(exp, thisList);
+//					}
+//					thisList.addAll(replacements);
+//				}
+//				return true;
+//			}
+//
+//			// FIXME: test this.
+//			public boolean visit(ConditionalExpression node) {
+//				Expression exp = node.getExpression();
+//				List<ASTNode> replacements = semanticInfo.getConditionalReplacementExpressions(methodName, md);
+//				if(replacements != null) {
+//					List<ASTNode> thisList = null;
+//					if(replacementMap.containsKey(exp)) {
+//						thisList = replacementMap.get(exp);
+//					} else {
+//						thisList = new ArrayList<ASTNode>();
+//						replacementMap.put(exp, thisList);
+//					}
+//					thisList.addAll(replacements);
+//				}
+//				return true;
+//				}
+		});
+		return null;
+	}
+
 
 	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> expressionReplacements = null;
 	
+	// FIXME: retest this.
 	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> replacableConditionalExpressions(final JavaSemanticInfo semanticInfo) {
-		if(expressionReplacements != null) {
-			return expressionReplacements;
-		} else {
+
+		if(expressionReplacements == null) {
 			expressionReplacements = new HashMap<ASTNode, Map<ASTNode, List<ASTNode>>>();
 		}
+		if(!expressionReplacements.containsKey(this.getASTNode())) {
+
 		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
 		final String methodName = md.getName().getIdentifier();
-
-		final Map<ASTNode, List<ASTNode>> replacementMap;
-		if(expressionReplacements.containsKey(this.getASTNode())) {
-			replacementMap = expressionReplacements.get(this.getASTNode());
-		} else {
-			replacementMap = new HashMap<ASTNode, List<ASTNode>>();
-			expressionReplacements.put(this.getASTNode(), replacementMap);
-		}
 
 		this.getASTNode().accept(new ASTVisitor() {
 
 			public boolean visit(IfStatement node) {
 				Expression exp = node.getExpression();
+				Map<ASTNode, List<ASTNode>> replacementMap = new HashMap<ASTNode, List<ASTNode>>();
+				expressionReplacements.put(node, replacementMap);
 				List<ASTNode> replacements = semanticInfo.getConditionalReplacementExpressions(methodName, md);
 				if(replacements != null) {
 					List<ASTNode> thisList = null;
@@ -320,6 +355,9 @@ public class JavaStatement implements Comparable<JavaStatement>{
 			// FIXME: test this.
 			public boolean visit(ConditionalExpression node) {
 				Expression exp = node.getExpression();
+				ASTNode parent = getParent(node);
+				Map<ASTNode, List<ASTNode>> replacementMap = new HashMap<ASTNode, List<ASTNode>>();
+				expressionReplacements.put(parent, replacementMap);
 				List<ASTNode> replacements = semanticInfo.getConditionalReplacementExpressions(methodName, md);
 				if(replacements != null) {
 					List<ASTNode> thisList = null;
@@ -334,18 +372,16 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				return true;
 				}
 		});
+		}
 		return expressionReplacements;
 	}
 
 	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> methodParamReplacements = null;
 
 	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> getReplacableMethodParameters(final JavaSemanticInfo semanticInfo) {
-		if(methodParamReplacements != null) {
-			return methodParamReplacements;
-		} else {
+		if(methodParamReplacements == null) {
 			methodParamReplacements = new HashMap<ASTNode, Map<ASTNode,List<ASTNode>>>();
 		}
-
 		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
 		final String methodName = md.getName().getIdentifier();
 
@@ -385,10 +421,13 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		return methodParamReplacements;
 	}
 	
+	// FIXME: make sure we generate entries for ASTNodes past the first one any of these are called on.
+	
+	// FIXME: if the fix set is expanded, clear many of these caches?? 
 	private Map<ASTNode, List<ASTNode>> variableMethods = null;
 
 	public Map<ASTNode, List<ASTNode>> getVariableMethods() {
-		// I actually don't know how to do this.  Hm.
+		// FIXME: I actually don't know how to do this.  Hm.
 		return null;
 		}
 

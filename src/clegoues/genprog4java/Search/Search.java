@@ -279,20 +279,6 @@ public abstract class Search<G extends EditOperation> {
 						filledHoles.put(hole, selected.getHole());
 					}
 				}
-				
-		/*	
-		 * FIXME: CLG commented the handling of replace out for the purposes of merging things in
-		 * will have to think about how to do this properly, but want to fix this awful merge, first.
-		 * case REPLACE: 
-				
-			
-				}else if(Search.model.equalsIgnoreCase("probabilistic")){
-					
-					afterR = (WeightedAtom)rm.chooseReplacementBasedOnPredictingModel(new ArrayList(allowedR),variant,stmtid);
-				}
-				
-				variant.performEdit(mut, stmtid,  afterR.getAtom()); 
-				break;*/
 				variant.performEdit(mut, location, filledHoles);
 			}
 		}
