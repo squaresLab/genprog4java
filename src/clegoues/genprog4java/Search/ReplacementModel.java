@@ -11,11 +11,8 @@ import java.util.TreeSet;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import clegoues.genprog4java.java.JavaStatement;
-<<<<<<< local
-=======
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
->>>>>>> other
 import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
@@ -46,7 +43,7 @@ public class ReplacementModel {
 	final int VariableDeclarationStatement = 20;
 	final int WhileStatement = 21;
 
-	int replacementModel[][] = {
+	double replacementModel[][] = {
 			{0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0}, 
 			{0,0,1,0,0,0,0,0,10,0,27,0,16,0,0,0,0,0,0,0,7,0}, 
 			{0,1,0,0,0,0,0,0,15,0,0,0,0,0,2,0,0,0,0,0,0,0}, 
@@ -113,9 +110,11 @@ public class ReplacementModel {
 
 			int row = 0;
 			while((line = bufferedReader.readLine()) != null) {
-				//FIXME: separate the values between the spaces and assign them to the array 
 				++row;
-				replacementModel[row]=divideLineToAnArray(line);
+				String[] tmp =line.split(" ");
+				for (int i = 0; i < tmp.length; i++) {
+					replacementModel[row][i]=Double.valueOf(tmp[i]);
+				}
 			}   
 
 			// Always close files.
