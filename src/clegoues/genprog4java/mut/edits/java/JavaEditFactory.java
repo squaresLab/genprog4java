@@ -223,6 +223,7 @@ public class JavaEditFactory {
 		case REPLACE:
 				TreeSet<WeightedAtom> fixStmts = this.scopeHelper(location, variant);
 				for(WeightedAtom fixStmt : fixStmts) {
+					
 					JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
 					ASTNode fixAST = potentialFixStmt.getASTNode();
 					retVal.add(new StatementHole(holeName, (Statement) fixAST, potentialFixStmt.getStmtId()));
@@ -298,7 +299,7 @@ public class JavaEditFactory {
 		case OFFBYONE:  
 		case UBOUNDSET:
 		case LBOUNDSET:
-		case RANGECHECK:
+		case RANGECHECK: 
 			return locationStmt.getArrayAccesses().size() > 0;
 		case FUNREP: 
 			return locationStmt.getReplacableMethods(JavaSemanticInfo.getMethodDecls()).size() > 0; // possible FIXME: make get MethodDecls not static

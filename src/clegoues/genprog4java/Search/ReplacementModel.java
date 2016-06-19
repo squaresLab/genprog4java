@@ -1,5 +1,9 @@
 package clegoues.genprog4java.Search;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
@@ -7,12 +11,14 @@ import java.util.TreeSet;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import clegoues.genprog4java.java.JavaStatement;
+<<<<<<< local
+=======
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
+>>>>>>> other
 import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
-import clegoues.util.GlobalUtils;
 import clegoues.util.Pair;
 
 public class ReplacementModel {
@@ -94,6 +100,42 @@ public class ReplacementModel {
 	};
 
 	 */
+
+	public void populateModel(String path){
+
+		// This will reference one line at a time
+		String line = null;
+
+		try {
+			// FileReader reads text files in the default encoding.
+			FileReader fileReader = new FileReader(path);
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+			int row = 0;
+			while((line = bufferedReader.readLine()) != null) {
+				//FIXME: separate the values between the spaces and assign them to the array 
+				++row;
+				replacementModel[row]=divideLineToAnArray(line);
+			}   
+
+			// Always close files.
+			bufferedReader.close();         
+		}
+		catch(FileNotFoundException ex) {
+			System.out.println(
+					"Unable to open file '" + 
+							path + "'");                
+		}
+		catch(IOException ex) {
+			System.out.println(
+					"Error reading file '" 
+							+ path + "'");                  
+			// Or we could just do this: 
+			// ex.printStackTrace();
+		}
+
+	}
+
 	@SuppressWarnings("rawtypes")
 	public TreeSet<Pair<?,Double>> rescaleBasedOnModel(ArrayList<Pair<?,Double>> atoms, Representation<?> variant, int stmtIdBuggy) {
 		assert(atoms.size() > 0);
@@ -110,7 +152,7 @@ public class ReplacementModel {
 			int column = stmtKindOfJavaStmt(fixStmt);
 			atom.setSecond(Double.valueOf(replacementModel[row][column]+1));
 			retVal.add(atom);
-//		
+
 		}
 		return retVal;
 	}

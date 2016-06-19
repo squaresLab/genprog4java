@@ -24,8 +24,6 @@ public class TemplatePlaygroundTestsPos {
     assertEquals("", 1, tester1.get(0));
     assertEquals("", "size: 3, elements: [1, 2, 3]", tester1.toString());
     assertEquals("", "size: 3, elements: [1, 2, 3]", tester1.toStringUsingStringBuffer());
-    System.out.println("Retulst so far: " + tester1.size());
-    System.out.println("Retulst so far: " + tester2.size());
     assertEquals("", false, tester1.equals(tester2));
     tester2.add(1);
     assertEquals("", false, tester1.equals(tester2));
@@ -33,6 +31,7 @@ public class TemplatePlaygroundTestsPos {
     assertEquals("", false, tester1.equals(tester2));
     tester2.add(3);
     assertEquals("", true, tester1.equals(tester2));
+    assertEquals("",false, tester1.equals("string"));
    
   }
 

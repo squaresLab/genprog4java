@@ -280,10 +280,10 @@ FaultLocRepresentation<JavaEditOperation> {
 		this.fromSource(pair, path, new File(path));
 	}
 
+
 	public static boolean canRepair(ASTNode node) { // FIXME: methodinvocation and, frankly, variable declarations that have bodies.
 		return node instanceof AssertStatement 
 				|| node instanceof Block
-				//|| node instanceof MethodInvocation
 				|| node instanceof BreakStatement
 				|| node instanceof ConstructorInvocation
 				|| node instanceof ContinueStatement
@@ -302,6 +302,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				|| node instanceof ThrowStatement
 				|| node instanceof TryStatement
 				|| node instanceof TypeDeclarationStatement
+				|| node instanceof VariableDeclarationStatement
 				|| node instanceof WhileStatement;
 	}
 
