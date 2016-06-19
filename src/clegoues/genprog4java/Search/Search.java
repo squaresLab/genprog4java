@@ -281,7 +281,6 @@ public abstract class Search<G extends EditOperation> {
 					for(String hole : holes) {
 						TreeSet<WeightedHole> allowed = variant.editSources(location, mut, hole);
 						allowed = rescaleAllowed(mut,allowed, variant,location.getId());
-						ArrayList al = new ArrayList(allowed);
 						WeightedHole selected = (WeightedHole) GlobalUtils
 								.chooseOneWeighted(new ArrayList(allowed));
 						filledHoles.put(hole, selected.getHole());
