@@ -13,6 +13,7 @@ public class TemplatePlaygroundTest {
     // may have extra capacity
     private Object[] iValues;
     private int iSize;
+    private int dummy = 0;
     
     /**
      * Default add method. Add x to the end of this IntList.
@@ -133,24 +134,23 @@ public class TemplatePlaygroundTest {
     * same elements in the same order, false otherwise.
     */
     public boolean equals(Object other){
-        boolean result = false;
-        if(other == null)
+        boolean result = true;
+        if(other == null){
             // we know this is not null so can't be equal
             result = true; // BUG: it should be result = false;
-        else if(this == other)
+        }else if(this == other){
             // quick check if this and other refer to same IntList object
             result = true;
-        else if( this.getClass() != other.getClass() ){
+        }else if( this.getClass() != other.getClass() ){
             // other is not an IntList they can't be equal
-	    if(true){
+	    if(dummy==0){
               result = false;
 	    }
         }else{
             // other is not null and refers to an IntList
             TemplatePlaygroundTest otherList = (TemplatePlaygroundTest)other;
             result = this.size() == otherList.size();
-	    System.out.println("Retulst so far: " + result);
-            int i = 0;
+	    int i = 0;
             while(i < iSize && result){
                 result = this.iValues[i].equals( otherList.iValues[i] );
                 i++;

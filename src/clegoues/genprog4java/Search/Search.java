@@ -74,6 +74,12 @@ public abstract class Search<G extends EditOperation> {
 			.withHelp( "model chosen to pick the fix atom from the pool of possible fix atoms with respect to the buggy atom" )
 			.inGroup( "Search Parameters" )
 			.build();
+	protected static String modelPath = ConfigurationBuilder.of( STRING )
+			.withVarName( "model" )
+			.withDefault( "OVERALLModel.txt" )
+			.withHelp( "path of the model" )
+			.inGroup( "Search Parameters" )
+			.build();
 	//private static int generations = 10;
 	protected static int generations = ConfigurationBuilder.of( INT )
 		.withVarName( "generations" )
@@ -134,6 +140,7 @@ public abstract class Search<G extends EditOperation> {
 		this.fitnessEngine = engine;
 		if(Search.model.equalsIgnoreCase("probabilistic")){
 			rm = new ReplacementModel();
+			rm.populateModel(modelPath);
 		}
 	}
 
@@ -274,6 +281,7 @@ public abstract class Search<G extends EditOperation> {
 					for(String hole : holes) {
 						TreeSet<WeightedHole> allowed = variant.editSources(location, mut, hole);
 						allowed = rescaleAllowed(mut,allowed, variant,location.getId());
+						ArrayList al = new ArrayList(allowed);
 						WeightedHole selected = (WeightedHole) GlobalUtils
 								.chooseOneWeighted(new ArrayList(allowed));
 						filledHoles.put(hole, selected.getHole());
