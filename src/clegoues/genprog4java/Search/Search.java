@@ -75,7 +75,7 @@ public abstract class Search<G extends EditOperation> {
 			.inGroup( "Search Parameters" )
 			.build();
 	protected static String modelPath = ConfigurationBuilder.of( STRING )
-			.withVarName( "model" )
+			.withVarName( "modelPath" )
 			.withDefault( "OVERALLModel.txt" )
 			.withHelp( "path of the model" )
 			.inGroup( "Search Parameters" )
