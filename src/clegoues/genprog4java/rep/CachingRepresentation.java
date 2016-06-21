@@ -78,6 +78,12 @@ Representation<G> {
 		.withHelp( "do not include positive tests if they fail sanity" )
 		.inGroup( "CachingRepresentation Parameters" )
 		.build();
+	public static boolean justTestingFaultLoc = ConfigurationBuilder.of( BOOL_ARG )
+			.withVarName( "justTestingFaultLoc" )
+			.withDefault( "false" )
+			.withHelp( "boolean to be turned true if the purpose is to test that fault loc is performed correctly" )
+			.inGroup( "CachingRepresentation Parameters" )
+			.build();
 	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
 
@@ -257,6 +263,10 @@ Representation<G> {
 			String newName = CachingRepresentation.newVariantFolder();
 			this.variantFolder = newName;
 			logger.info("History of variant " + getVariantFolder() + " is: " + getHistory());
+			if(justTestingFaultLoc == true){
+				logger.info("Fault localization was peprformed successfully");
+				System.exit(0);
+			}
 			if (!this.compile(newName, newName)) {
 				this.setFitness(0.0);
 				logger.info(this.getName() + " at " + newName + " fails to compile\n");
