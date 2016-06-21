@@ -49,13 +49,16 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			boolean itIsTheSame = false;
 
 			this.mutate(newItem);
-			itIsTheSame = populationIsTheSameAsAPreviousOne(initialPopulation, newItem);
+			itIsTheSame = representationIsTheSameAsAPreviousOne(initialPopulation, newItem);
 			if(itIsTheSame){
-				//if it is making repeated representattions in the same population change the possible faulty stmts to all the possible ones and re make it
-				//newItem = original.copy();
 				((JavaRepresentation)newItem).setAllPossibleStmtsToFaultyLocalization();
 				((JavaRepresentation)newItem).setAllPossibleStmtsToFixLocalization();
-				this.mutate(newItem);
+				//while(itIsTheSame){
+					newItem.getGenome().remove(newItem.getGenome().size()-1);
+					this.mutate(newItem);
+					//itIsTheSame = representationIsTheSameAsAPreviousOne(initialPopulation, newItem);
+					
+				//}
 			}
 
 			initialPopulation.add(newItem);
@@ -72,14 +75,16 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		return initialPopulation;
 	}
 
-	private boolean populationIsTheSameAsAPreviousOne(Population<G> pop, Representation<G> newItem){
+	private boolean representationIsTheSameAsAPreviousOne(Population<G> pop, Representation<G> newItem){
 		for (Representation<G> representation : pop) {
 			for(int i = 0; i< representation.getGenome().size() && i < newItem.getGenome().size(); ++i){
-				boolean locIsTheSame = representation.getGenome().get(i).getLocation().getId() == newItem.getGenome().get(i).getLocation().getId();
-				boolean mutIsTheSame = representation.getGenome().get(i).getType().equals(newItem.getGenome().get(i).getType());
-				boolean holesIsTheSame = representation.getGenome().get(i).getHoles().toString().equalsIgnoreCase(newItem.getGenome().get(i).getHoles().toString());
-				if(locIsTheSame && mutIsTheSame && holesIsTheSame){
-					return true;
+				for (int j = 0; j < newItem.getGenome().size(); j++) {
+					boolean locIsTheSame = representation.getGenome().get(i).getLocation().getId() == newItem.getGenome().get(j).getLocation().getId();
+					boolean mutIsTheSame = representation.getGenome().get(i).getType().equals(newItem.getGenome().get(j).getType());
+					boolean holesIsTheSame = representation.getGenome().get(i).getHoles().toString().equalsIgnoreCase(newItem.getGenome().get(j).getHoles().toString());
+					if(locIsTheSame && mutIsTheSame && holesIsTheSame){
+						return true;
+					}
 				}
 			}
 		}
@@ -131,7 +136,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 				Representation<G> newItem = original.copy();
 				boolean itIsTheSame = false;
 				this.mutate(item);
-				itIsTheSame = populationIsTheSameAsAPreviousOne(initialPopulation, newItem);
+				itIsTheSame = representationIsTheSameAsAPreviousOne(initialPopulation, newItem);
 				if(itIsTheSame){
 					//if it is making repeated representattions in the same population change the possible faulty stmts to all the possible ones and re make it
 					newItem = original.copy();
