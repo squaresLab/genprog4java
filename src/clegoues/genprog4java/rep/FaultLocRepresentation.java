@@ -126,7 +126,7 @@ CachingRepresentation<G> {
 			.build();
 
 	protected boolean doingCoverage = false;
-	private ArrayList<Location> faultLocalization = new ArrayList<Location>();
+	protected ArrayList<Location> faultLocalization = new ArrayList<Location>();
 	protected ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
 	public FaultLocRepresentation(ArrayList<HistoryEle> history,

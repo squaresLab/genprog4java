@@ -248,8 +248,10 @@ public abstract class Search<G extends EditOperation> {
 				//chooses a random location
 				Pair<?, Double> wa = null;
 				boolean alreadyOnList = false;
+				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
 				if(proMutList.size()>=faultyAtoms.size()){ 
 					variant.setAllPossibleStmtsToFixLocalization();
+					variant.setAllPossibleStmtsToFaultyLocalization();
 					//alreadyOnList=false;
 				}
 				//only adds the random atom if it is different from the others already added
@@ -260,8 +262,7 @@ public abstract class Search<G extends EditOperation> {
 				}while(alreadyOnList);
 				proMutList.add((Location)wa);
 
-				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
-
+				
 			}
 			for (Location location : proMutList) {
 				// FIXME: deal with the case where there are no edits that apply ever, because infinite loop

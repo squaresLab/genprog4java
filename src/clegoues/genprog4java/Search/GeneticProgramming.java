@@ -2,6 +2,7 @@ package clegoues.genprog4java.Search;
 
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.EditOperation;
+import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
 
 public class GeneticProgramming<G extends EditOperation> extends Search<G>{
@@ -10,7 +11,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 	public GeneticProgramming(Fitness<G> engine) {
 		super(engine);
 	}
-	
+
 
 	/*
 	 * prepares for GA by registering available mutations (including templates
@@ -45,7 +46,18 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		}
 		for (int i = 0; i < stillNeed; i++) {
 			Representation<G> newItem = original.copy();
+			boolean itIsTheSame = false;
+
 			this.mutate(newItem);
+			itIsTheSame = populationIsTheSameAsAPreviousOne(initialPopulation, newItem);
+			if(itIsTheSame){
+				//if it is making repeated representattions in the same population change the possible faulty stmts to all the possible ones and re make it
+				//newItem = original.copy();
+				((JavaRepresentation)newItem).setAllPossibleStmtsToFaultyLocalization();
+				((JavaRepresentation)newItem).setAllPossibleStmtsToFixLocalization();
+				this.mutate(newItem);
+			}
+
 			initialPopulation.add(newItem);
 		}
 
@@ -59,7 +71,21 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		}
 		return initialPopulation;
 	}
-	
+
+	private boolean populationIsTheSameAsAPreviousOne(Population<G> pop, Representation<G> newItem){
+		for (Representation<G> representation : pop) {
+			for(int i = 0; i< representation.getGenome().size() && i < newItem.getGenome().size(); ++i){
+				boolean locIsTheSame = representation.getGenome().get(i).getLocation().getId() == newItem.getGenome().get(i).getLocation().getId();
+				boolean mutIsTheSame = representation.getGenome().get(i).getType().equals(newItem.getGenome().get(i).getType());
+				boolean holesIsTheSame = representation.getGenome().get(i).getHoles().toString().equalsIgnoreCase(newItem.getGenome().get(i).getHoles().toString());
+				if(locIsTheSame && mutIsTheSame && holesIsTheSame){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	/*
 	 * runs the genetic algorithm for a certain number of iterations, given the
 	 * most recent/previous generation as input. Returns the last generation,
@@ -102,7 +128,17 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 
 			// step 3: mutation
 			for (Representation<G> item : incomingPopulation) {
+				Representation<G> newItem = original.copy();
+				boolean itIsTheSame = false;
 				this.mutate(item);
+				itIsTheSame = populationIsTheSameAsAPreviousOne(initialPopulation, newItem);
+				if(itIsTheSame){
+					//if it is making repeated representattions in the same population change the possible faulty stmts to all the possible ones and re make it
+					newItem = original.copy();
+					((JavaRepresentation)newItem).setAllPossibleStmtsToFaultyLocalization();
+					((JavaRepresentation)newItem).setAllPossibleStmtsToFixLocalization();
+					this.mutate(newItem);
+				}
 			}
 
 			// step 4: fitness

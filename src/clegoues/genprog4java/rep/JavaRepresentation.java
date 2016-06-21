@@ -440,6 +440,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		for (Map.Entry<ClassInfo, String> pair : sourceInfo.getOriginalSource().entrySet()) {
 			ClassInfo ci = pair.getKey();
 			String filename = ci.getClassName();
+			String path = ci.getPackage();
 			String source = pair.getValue();
 			Document original = new Document(source);
 			CompilationUnit cu = sourceInfo.getBaseCompilationUnits().get(ci);
@@ -449,7 +450,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			try {
 				for (JavaEditOperation edit : genome) {
 					JavaLocation locationStatement = (JavaLocation) edit.getLocation();
-					if(locationStatement.getClassInfo().getClassName().equalsIgnoreCase(filename)){
+					if(locationStatement.getClassInfo()!=null && locationStatement.getClassInfo().getClassName().equalsIgnoreCase(filename) && locationStatement.getClassInfo().getPackage().equalsIgnoreCase(path)){
 						edit.edit(rewriter);
 					}
 				}
@@ -810,6 +811,16 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 	}
 
+	public void setAllPossibleStmtsToFaultyLocalization(){
+		super.faultLocalization.clear();
+		/*for(int i = 0; i < JavaRepresentation.stmtCounter; i++) {
+			super.faultLocalization.add(new WeightedAtom(i,1.0));
+		}*/
+		for(JavaStatement js : getCodeBank().values()) {	
+			super.faultLocalization.add(new JavaLocation(js,0.1));
+		}
+	}
+	
 	public HashMap<Integer, JavaStatement> getCodeBank() {
 		return sourceInfo.getCodeBank(); // FIXME: this is for the replacement model, there should be a better way to do this based on
 		// hole fill-in information, but I just want this thing to compile for now.
