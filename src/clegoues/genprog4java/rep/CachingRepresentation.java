@@ -242,7 +242,6 @@ Representation<G> {
 			printer.println(s);
 		}
 		printer.close();
-
 	}
 
 	public boolean testCase(TestCase test) {

@@ -813,11 +813,8 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	public void setAllPossibleStmtsToFaultyLocalization(){
 		super.faultLocalization.clear();
-		/*for(int i = 0; i < JavaRepresentation.stmtCounter; i++) {
-			super.faultLocalization.add(new WeightedAtom(i,1.0));
-		}*/
 		for(JavaStatement js : getCodeBank().values()) {	
-			super.faultLocalization.add(new JavaLocation(js,0.1));
+			super.faultLocalization.add(this.instantiateLocation(js.getStmtId(), 0.1));
 		}
 	}
 	
