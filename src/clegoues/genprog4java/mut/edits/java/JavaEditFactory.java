@@ -209,6 +209,7 @@ public class JavaEditFactory {
 		for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> funsite : replacableExps.entrySet()) {
 			for(Map.Entry<ASTNode, List<ASTNode>> exps : funsite.getValue().entrySet()) {
 				for(ASTNode replacementExp : exps.getValue()) { 
+					// for expadd I think the first ASTNode is a statement?
 					retVal.add(new ExpHole(holeName, exps.getKey(), (Expression) replacementExp, parentStmt.getStmtId()));
 				}
 			}
@@ -324,6 +325,8 @@ public class JavaEditFactory {
 			return locationStmt.replacableConditionalExpressions(variant.semanticInfo).size() > 0;
 		case PARADD:
 			return locationStmt.getVariableMethods().size() > 0;
+		case EXPADD:
+			return locationStmt.extendableConditionalExpressions(variant.semanticInfo).size() > 0;
 		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;
