@@ -49,17 +49,17 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			boolean itIsTheSame = false;
 
 			this.mutate(newItem);
-			itIsTheSame = representationIsTheSameAsAPreviousOne(initialPopulation, newItem);
+			/*itIsTheSame = representationIsTheSameAsAPreviousOne(initialPopulation, newItem);
 			if(itIsTheSame){
 				((JavaRepresentation)newItem).setAllPossibleStmtsToFaultyLocalization();
 				((JavaRepresentation)newItem).setAllPossibleStmtsToFixLocalization();
-				//while(itIsTheSame){
+				while(itIsTheSame){
 					newItem.getGenome().remove(newItem.getGenome().size()-1);
 					this.mutate(newItem);
-					//itIsTheSame = representationIsTheSameAsAPreviousOne(initialPopulation, newItem);
+					itIsTheSame = representationIsTheSameAsAPreviousOne(initialPopulation, newItem);
 					
-				//}
-			}
+				}
+			}*/
 
 			initialPopulation.add(newItem);
 		}
@@ -74,7 +74,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		}
 		return initialPopulation;
 	}
-
+/*
 	private boolean representationIsTheSameAsAPreviousOne(Population<G> pop, Representation<G> newItem){
 		for (Representation<G> representation : pop) {
 			for(int i = 0; i< representation.getGenome().size() && i < newItem.getGenome().size(); ++i){
@@ -90,7 +90,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		}
 		return false;
 	}
-
+*/
 	/*
 	 * runs the genetic algorithm for a certain number of iterations, given the
 	 * most recent/previous generation as input. Returns the last generation,

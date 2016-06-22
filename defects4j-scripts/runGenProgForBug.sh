@@ -61,27 +61,30 @@ if [ -d "$GENPROGDIR" ]; then
       #Go to the working directory
       cd $BUGWD/$WD
 
-      #CHANGE TO THE WORKING DIRECTORY
-      #cd $BUGWD/$WD
-
       for (( seed=$STARTSEED; seed<=$UNTILSEED; seed++ ))
-      #for seed in {0..20..2} #0 to 20, increments of 2
       do	
 	echo "RUNNING THE BUG: $PROJECT $BUGNUMBER, WITH THE SEED: $seed"
 
-	echo $JUSTTESTINGFAULTLOC
+	#Running until fault loc only
 	if [ $JUSTTESTINGFAULTLOC == "true" ]; then
 	  echo "justTestingFaultLoc = true" >> $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/defects4j.config
 	fi
+
+	#Changing the seed
 	CHANGESEEDCOMMAND="sed -i '2s/.*/seed = $seed/' "$BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/defects4j.config
 
 	eval $CHANGESEEDCOMMAND
     
-	$JAVALOCATION -ea -Dlog4j.configurationFile=file:"$GENPROGDIR"/src/log4j.properties -Dfile.encoding=UTF-8 -classpath "$GENPROGDIR"/target/uber-GenProg4Java-0.0.1-SNAPSHOT.jar clegoues.genprog4java.main.Main $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/defects4j.config | tee $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/logBug"$BUGNUMBER"Seed$seed.txt
+	$JAVALOCATION -ea -Dlog4j.configurationFile=file:"$GENPROGDIR"/src/log4j.properties -Dfile.encoding=UTF-8 -classpath "$GENPROGDIR"/target/uber-GenProg4Java-0.0.1-SNAPSHOT.jar clegoues.genprog4java.main.Main $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/defects4j.config | tee $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/log"$PROJECT""$BUGNUMBER"Seed$seed.txt
 
 
 	#Save the variants in a tar file
 	tar -cvf $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/variants"$PROJECT""$BUGNUMBER"Seed$seed.tar $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/tmp/
+	mv $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/tmp/original/ $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/
+	rm -r $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/tmp/
+	mkdir $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/tmp/
+	mv $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/original/ $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/tmp/
+	
       done
     fi
   fi

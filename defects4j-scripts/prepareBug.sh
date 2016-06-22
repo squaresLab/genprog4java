@@ -94,7 +94,6 @@ outputDir = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/tmp
 classSourceFolder = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/$SRCFOLDER
 libs = $CONFIGLIBS
 sanity = yes
-regenPaths
 sourceDir = $WD
 positiveTests = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/pos.tests
 negativeTests = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/neg.tests
