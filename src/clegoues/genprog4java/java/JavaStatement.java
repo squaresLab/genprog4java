@@ -335,7 +335,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	// FIXME: find a way to sort options by distance where sorting by distance is specified
 	// in PAR paper
-	public Map<ASTNode, Map<ASTNode, List<ASTNode>>> getExtendableConditionalExpressions(final JavaSemanticInfo semanticInfo) {
+	public Map<ASTNode, Map<ASTNode, List<ASTNode>>> getConditionalExpressions(final JavaSemanticInfo semanticInfo) {
 		if(extendableExpressions != null) {
 			return extendableExpressions;
 		}
