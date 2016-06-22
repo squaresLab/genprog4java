@@ -4,14 +4,25 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.ExpChoiceHole;
+import clegoues.genprog4java.mut.holes.java.ExpChoiceHole.Which;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
 
@@ -26,21 +37,34 @@ public class ExpressionModRem extends JavaEditOperation {
 		@Override
 		public void edit(final ASTRewrite rewriter) {
 			JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
+			// possible FIXME: perhaps I'm not using the locationStmt properly?  Or maybe I am, hm.
 			ASTNode locationNode = locationStmt.getASTNode();
-			MethodInfoHole thisHole = (MethodInfoHole) this.getHoleCode("condExpRem");
-			ASTNode toReplace = thisHole.getCode();
-			MethodInfo replaceWith = thisHole.getMethodInfo();
-
-			MethodInvocation newNode = locationNode.getAST().newMethodInvocation();
-			SimpleName newMethodName = locationNode.getAST().newSimpleName(replaceWith.getName());
-			newNode.setName(newMethodName);
-			
-			List<ASTNode> paramNodes = ((MethodInvocation) toReplace).arguments();
-			for(ASTNode param : paramNodes) {
-				ASTNode newParam = rewriter.createCopyTarget(param);
-				newNode.arguments().add(newParam);
-			}		
-			rewriter.replace(toReplace, newNode, null);
+			ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("condExpRem");
+			IfStatement parentIf = (IfStatement) thisHole.getHoleParent();
+			IfStatement newIfStmt = parentIf.getAST().newIfStatement();
+			Expression oldExp = (Expression) thisHole.getCode();
+			Which whichSide = thisHole.getWhich();
+			while(oldExp instanceof ParenthesizedExpression) {
+				oldExp = ((ParenthesizedExpression) oldExp).getExpression();	
+			}
+			InfixExpression realOldExp = (InfixExpression) oldExp;
+			Expression newCondition;
+			switch(whichSide) {
+			case LEFT: newCondition = (Expression) rewriter.createCopyTarget(realOldExp.getLeftOperand());
+			break;
+			case RIGHT:
+			default:
+				newCondition = (Expression) rewriter.createCopyTarget(realOldExp.getRightOperand());
+			break;
+			}
+			newIfStmt.setExpression(newCondition);
+			Statement thenStatement = (Statement) rewriter.createCopyTarget(parentIf.getThenStatement());
+			newIfStmt.setThenStatement(thenStatement);
+			if(parentIf.getElseStatement() != null) {
+				Statement elseStatement = (Statement) rewriter.createCopyTarget(parentIf.getElseStatement());
+				newIfStmt.setElseStatement(elseStatement);
+			}
+			rewriter.replace(parentIf, newIfStmt, null);
 		}
 	}
 
