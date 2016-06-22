@@ -13,4 +13,11 @@ public class ExpressionModRep extends MethodParameterReplacer {
 	public ExpressionModRep(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.EXPREP, location, sources);
 	}
+	
+	@Override
+	public String toString() {
+		// FIXME: this is lazy
+		return "er(" + this.getLocation().getId() + ")";
+	}
+	
 }

@@ -49,4 +49,12 @@ public class MethodReplacer extends JavaEditOperation {
 		}		
 		rewriter.replace(toReplace, newNode, null);
 	}
+	
+	@Override
+	public String toString() {
+		// FIXME: this is lazy
+		return "fr(" + this.getLocation().getId() + ")";
+	}
+	
 }
+

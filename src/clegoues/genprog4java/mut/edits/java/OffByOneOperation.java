@@ -189,4 +189,11 @@ public class OffByOneOperation extends JavaEditOperation {
 		}
 		return arrayindex;
 	}
+	
+	@Override
+	public String toString() {
+		// FIXME: this is lazy
+		return "obo(" + this.getLocation().getId() + ")";
+	}
+	
 }
