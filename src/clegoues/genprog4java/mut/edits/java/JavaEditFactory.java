@@ -67,7 +67,7 @@ public class JavaEditFactory {
 		case CASTCHECK:
 			return new ClassCastChecker((JavaLocation) dst, sources);
 		case EXPREP:
-			return new ExpressionReplacer((JavaLocation) dst, sources);
+			return new ExpressionModRep((JavaLocation) dst, sources);
 		case PARADD:
 			return new MethodParameterAdder((JavaLocation) dst, sources);
 		case EXPADD: 

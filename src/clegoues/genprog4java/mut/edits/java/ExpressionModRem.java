@@ -37,64 +37,27 @@ public class ExpressionModRem extends JavaEditOperation {
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
+		// possibly I can just rewrite the expression, no?
 		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
 		// possible FIXME: perhaps I'm not using the locationStmt properly?  Or maybe I am, hm.
 		ASTNode locationNode = locationStmt.getASTNode();
 		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("condExpRem");
-		ASTNode parent = thisHole.getHoleParent();
-		if(parent instanceof IfStatement) {
-			IfStatement parentIf = (IfStatement) parent;
-			IfStatement newIfStmt = parentIf.getAST().newIfStatement();
-			Expression oldExp = (Expression) thisHole.getCode();
-			Which whichSide = thisHole.getWhich();
-			while(oldExp instanceof ParenthesizedExpression) {
-				oldExp = ((ParenthesizedExpression) oldExp).getExpression();	
-			}
-			InfixExpression realOldExp = (InfixExpression) oldExp;
-			Expression newCondition;
-			switch(whichSide) {
-			case LEFT: newCondition = (Expression) rewriter.createCopyTarget(realOldExp.getLeftOperand());
-			break;
-			case RIGHT:
-			default:
-				newCondition = (Expression) rewriter.createCopyTarget(realOldExp.getRightOperand());
-				break;
-			}
-			newIfStmt.setExpression(newCondition);
-			Statement thenStatement = (Statement) rewriter.createCopyTarget(parentIf.getThenStatement());
-			newIfStmt.setThenStatement(thenStatement);
-			if(parentIf.getElseStatement() != null) {
-				Statement elseStatement = (Statement) rewriter.createCopyTarget(parentIf.getElseStatement());
-				newIfStmt.setElseStatement(elseStatement);
-			}
-			rewriter.replace(parentIf, newIfStmt, null);
-		} else { // instance of conditional expression; FIXME: test this
-			ConditionalExpression parentExp = (ConditionalExpression) parent;
-			ConditionalExpression newCondExp = parentExp.getAST().newConditionalExpression();
-			Expression oldExp = (Expression) thisHole.getCode();
-			Which whichSide = thisHole.getWhich();
-			while(oldExp instanceof ParenthesizedExpression) {
-				oldExp = ((ParenthesizedExpression) oldExp).getExpression();	
-			}
-			InfixExpression realOldExp = (InfixExpression) oldExp;
-			Expression newCondition;
-			switch(whichSide) {
-			case LEFT: newCondition = (Expression) rewriter.createCopyTarget(realOldExp.getLeftOperand());
-			break;
-			case RIGHT:
-			default:
-				newCondition = (Expression) rewriter.createCopyTarget(realOldExp.getRightOperand());
-				break;
-			}
-			newCondExp.setExpression(newCondition);
-			Expression thenExp = (Expression) rewriter.createCopyTarget(parentExp.getThenExpression());
-			newCondExp.setThenExpression(thenExp);
-			if(parentExp.getElseExpression() != null) {
-				Expression elseExp = (Expression) rewriter.createCopyTarget(parentExp.getElseExpression());
-				newCondExp.setElseExpression(elseExp);
-			}
-			rewriter.replace(parentExp, newCondExp, null);
+		Expression oldExp = (Expression) thisHole.getCode();
+		Which whichSide = thisHole.getWhich();
+		while(oldExp instanceof ParenthesizedExpression) {
+			oldExp = ((ParenthesizedExpression) oldExp).getExpression();	
 		}
+		InfixExpression realOldExp = (InfixExpression) oldExp;
+		Expression newCondition;
+		switch(whichSide) {
+		case LEFT: newCondition = (Expression) rewriter.createCopyTarget(realOldExp.getLeftOperand());
+		break;
+		case RIGHT:
+		default:
+			newCondition = (Expression) rewriter.createCopyTarget(realOldExp.getRightOperand());
+			break;
+		}
+		rewriter.replace(oldExp, newCondition, null);
 	}
 }
 
