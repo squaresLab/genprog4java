@@ -534,7 +534,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		command.addArgument("clegoues.genprog4java.fitness.JUnitTestRunner");
 
 		command.addArgument(test.toString());
-		logger.info("Command: " + command.toString());
+	//	logger.info("Command: " + command.toString());
 		return command;
 
 	}

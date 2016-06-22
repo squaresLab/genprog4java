@@ -335,8 +335,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	// FIXME: find a way to sort options by distance where sorting by distance is specified
 	// in PAR paper
-	
-	public Map<ASTNode, Map<ASTNode, List<ASTNode>>> extendableConditionalExpressions(final JavaSemanticInfo semanticInfo) {
+	public Map<ASTNode, Map<ASTNode, List<ASTNode>>> getExtendableConditionalExpressions(final JavaSemanticInfo semanticInfo) {
 		if(extendableExpressions != null) {
 			return extendableExpressions;
 		}
@@ -349,10 +348,10 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 			public boolean visit(IfStatement node) {
 				Expression exp = node.getExpression();
-				// FIXME: exclude those that are already in the condition?
+				// possible FIXME: exclude those that are already in the condition?
 				List<ASTNode> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
 				Map<ASTNode, List<ASTNode>> replacementMap = new HashMap<ASTNode, List<ASTNode>>();
-				expressionReplacements.put(node, replacementMap);
+				extendableExpressions.put(node, replacementMap);
 
 				if(replacements != null) {
 					List<ASTNode> thisList = null;
@@ -367,13 +366,12 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				return true;
 			}
 
-			// FIXME: test this.
 			public boolean visit(ConditionalExpression node) {
 				Expression exp = node.getExpression();
 				ASTNode parent = getParent(node);
 				List<ASTNode> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
 				Map<ASTNode, List<ASTNode>> replacementMap = new HashMap<ASTNode, List<ASTNode>>();
-				expressionReplacements.put(parent, replacementMap);
+				extendableExpressions.put(parent, replacementMap);
 				
 				if(replacements != null) {
 					List<ASTNode> thisList = null;
@@ -388,61 +386,10 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				return true;
 				}
 		});
-		return null;
+		return extendableExpressions;
 	}
 
 
-	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> expressionReplacements = null;
-	
-	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> replacableConditionalExpressions(final JavaSemanticInfo semanticInfo) {
-		if(expressionReplacements == null) {
-			expressionReplacements = new HashMap<ASTNode, Map<ASTNode, List<ASTNode>>>();
-		}
-		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
-		final String methodName = md.getName().getIdentifier();
-
-		this.getASTNode().accept(new ASTVisitor() {
-
-			public boolean visit(IfStatement node) {
-				Expression exp = node.getExpression();
-				Map<ASTNode, List<ASTNode>> replacementMap = new HashMap<ASTNode, List<ASTNode>>();
-				expressionReplacements.put(node, replacementMap);
-				List<ASTNode> replacements = semanticInfo.getConditionalReplacementExpressions(methodName, md);
-				if(replacements != null) {
-					List<ASTNode> thisList = null;
-					if(replacementMap.containsKey(exp)) {
-						thisList = replacementMap.get(exp);
-					} else {
-						thisList = new ArrayList<ASTNode>();
-						replacementMap.put(exp, thisList);
-					}
-					thisList.addAll(replacements);
-				}
-				return true;
-			}
-
-			// FIXME: test this.
-			public boolean visit(ConditionalExpression node) {
-				Expression exp = node.getExpression();
-				ASTNode parent = getParent(node);
-				Map<ASTNode, List<ASTNode>> replacementMap = new HashMap<ASTNode, List<ASTNode>>();
-				expressionReplacements.put(parent, replacementMap);
-				List<ASTNode> replacements = semanticInfo.getConditionalReplacementExpressions(methodName, md);
-				if(replacements != null) {
-					List<ASTNode> thisList = null;
-					if(replacementMap.containsKey(exp)) {
-						thisList = replacementMap.get(exp);
-					} else {
-						thisList = new ArrayList<ASTNode>();
-						replacementMap.put(exp, thisList);
-					}
-					thisList.addAll(replacements);
-				}
-				return true;
-				}
-		});
-		return expressionReplacements;
-	}
 
 	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> methodParamReplacements = null;
 

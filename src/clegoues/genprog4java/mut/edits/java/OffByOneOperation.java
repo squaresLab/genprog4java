@@ -32,6 +32,7 @@ public class OffByOneOperation extends JavaEditOperation {
 	// used to randomly add or subtract 1 while mutating array index
 	private mutationType mutType;
 
+	// FIXME: remove the randomness from the operation if possible.
 	public OffByOneOperation(JavaLocation location, HashMap<String, EditHole> sources) {
 		super(Mutation.OFFBYONE, location, sources);
 		this.holeNames.add("offByOne");

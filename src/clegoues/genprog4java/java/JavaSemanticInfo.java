@@ -79,27 +79,51 @@ public class JavaSemanticInfo {
 	}
 
 	public List<ASTNode> getConditionalExtensionExpressions(String methodName, MethodDeclaration md) {
-		if(conditionExtensionsInScope != null) {
+		if(conditionExtensionsInScope == null) {
 			conditionExtensionsInScope = new HashMap<String, List<ASTNode>>();
 		}
 		if(conditionExtensionsInScope.containsKey(methodName)) {
 			return conditionExtensionsInScope.get(methodName);
 		} 
-		List<ASTNode> fullConditionsInScope = this.getConditionalExtensionExpressions(methodName, md);
+		List<ASTNode> fullConditionsInScope = this.getConditionalReplacementExpressions(methodName, md);
 		final List<ASTNode> expressionsInScope = new ArrayList<ASTNode>(); // possible FIXME: do I start with the list above?  I think it will auto-populate, right?
 		conditionExtensionsInScope.put(methodName, expressionsInScope);
 		for(ASTNode cond : fullConditionsInScope) {
 			cond.accept(new ASTVisitor() {
+				private void tryAdd(Expression node) {
+					ITypeBinding tb = node.resolveTypeBinding();
+					if(tb != null) {
+						if(tb.getName().equals("boolean")) {
+							expressionsInScope.add(node);
+						}
+					}
+				}
+				public boolean visit(PrefixExpression node) {
+					if(node.getOperator() == PrefixExpression.Operator.NOT) {
+						expressionsInScope.add(node);
+					}
+					return true;
+				}
 				public boolean visit(ConditionalExpression node) {
 					expressionsInScope.add(node);
 					return true;
 				}
 				public boolean visit(FieldAccess node) {
-					expressionsInScope.add(node);
+					tryAdd(node);
 					return true;
 				}
 				public boolean visit(InfixExpression node) {
-					expressionsInScope.add(node);
+					InfixExpression.Operator op = node.getOperator();
+					if(op ==  InfixExpression.Operator.LESS ||   
+							op == InfixExpression.Operator.GREATER ||
+							op == InfixExpression.Operator.LESS_EQUALS ||
+							op == InfixExpression.Operator.GREATER_EQUALS ||
+							op == InfixExpression.Operator.EQUALS || 
+							op == InfixExpression.Operator.NOT_EQUALS ||
+							op == InfixExpression.Operator.CONDITIONAL_AND ||
+							op == InfixExpression.Operator.CONDITIONAL_OR) {
+						expressionsInScope.add(node);
+					}
 					return true;
 				} 
 				public boolean visit(InstanceofExpression node) {
@@ -107,35 +131,23 @@ public class JavaSemanticInfo {
 					return true;
 				} 
 				public boolean visit(MethodInvocation node) {
-					expressionsInScope.add(node);
+					tryAdd(node);
 					return true;
 				} 
 				public boolean visit(SimpleName node) {
-					expressionsInScope.add(node);
+					tryAdd(node);
 					return true;
 				} 
 				public boolean visit(QualifiedName node) {
-					expressionsInScope.add(node);
-					return true;
-				}
-				public boolean visit(ParenthesizedExpression node) {
-					expressionsInScope.add(node);
-					return true;
-				}
-				public boolean visit(PostfixExpression node) {
-					expressionsInScope.add(node);
-					return true;
-				} 
-				public boolean visit(PrefixExpression node) {
-					expressionsInScope.add(node);
+					tryAdd(node);
 					return true;
 				}
 				public boolean visit(SuperFieldAccess node) {
-					expressionsInScope.add(node);
+					tryAdd(node);
 					return true;
 				}
 				public boolean visit(SuperMethodInvocation node) {
-					expressionsInScope.add(node);
+					tryAdd(node);
 					return true;
 				}
 

@@ -37,10 +37,6 @@ public class ExpressionModRem extends JavaEditOperation {
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		// possibly I can just rewrite the expression, no?
-		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
-		// possible FIXME: perhaps I'm not using the locationStmt properly?  Or maybe I am, hm.
-		ASTNode locationNode = locationStmt.getASTNode();
 		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("condExpRem");
 		Expression oldExp = (Expression) thisHole.getCode();
 		Which whichSide = thisHole.getWhich();

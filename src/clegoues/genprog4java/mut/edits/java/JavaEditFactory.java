@@ -275,9 +275,20 @@ public class JavaEditFactory {
 		case CASTCHECK:
 			return makeSubExpsHoles(holeName, locationStmt.getCasts());
 		case EXPREP:
-			return makeExpHole(holeName, locationStmt.replacableConditionalExpressions(variant.semanticInfo), locationStmt);
+			return makeExpHole(holeName, locationStmt.getExtendableConditionalExpressions(variant.semanticInfo), locationStmt);
 		case EXPADD:
-			return makeExpHole(holeName, locationStmt.extendableConditionalExpressions(variant.semanticInfo), locationStmt);
+			Map<ASTNode, Map<ASTNode,List<ASTNode>>> extendableExpressions = locationStmt.getExtendableConditionalExpressions(variant.semanticInfo);
+			for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> parents : extendableExpressions.entrySet()) {
+				for(Map.Entry<ASTNode,List<ASTNode>> entries : parents.getValue().entrySet()) { 
+					for(ASTNode exp : entries.getValue()) {
+					EditHole shrinkableExpHole1 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 0);
+					EditHole shrinkableExpHole2 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 1);
+					retVal.add(shrinkableExpHole1);
+					retVal.add(shrinkableExpHole2);
+					}
+				}
+			}
+			return retVal;
 		case EXPREM:
 			Map<ASTNode, List<ASTNode>> shrinkableExpressions = locationStmt.getShrinkableConditionalExpressions();
 			for(Map.Entry<ASTNode, List<ASTNode>> entries : shrinkableExpressions.entrySet()) {
@@ -286,7 +297,6 @@ public class JavaEditFactory {
 					EditHole shrinkableExpHole2 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 1);
 					retVal.add(shrinkableExpHole1);
 					retVal.add(shrinkableExpHole2);
-
 				}
 			}
 			return retVal;
@@ -333,12 +343,11 @@ public class JavaEditFactory {
 			return locationStmt.getNullCheckables().size() > 0;
 		case CASTCHECK:
 			return locationStmt.getCasts().size() > 0;
-		case EXPREP:
-			return locationStmt.replacableConditionalExpressions(variant.semanticInfo).size() > 0;
 		case PARADD:
 			return locationStmt.getVariableMethods().size() > 0;
+		case EXPREP:
 		case EXPADD:
-			return locationStmt.extendableConditionalExpressions(variant.semanticInfo).size() > 0;
+			return locationStmt.getExtendableConditionalExpressions(variant.semanticInfo).size() > 0;
 		case EXPREM:
 			return locationStmt.getShrinkableConditionalExpressions().size() > 0;
 		default:
