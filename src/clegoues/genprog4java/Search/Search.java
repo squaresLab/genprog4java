@@ -252,7 +252,7 @@ public abstract class Search<G extends EditOperation> {
 				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
 				if(proMutList.size()>=faultyAtoms.size()){ 
 					variant.setAllPossibleStmtsToFixLocalization();
-					variant.setAllPossibleStmtsToFaultyLocalization();
+					//variant.setAllPossibleStmtsToFaultyLocalization();
 					//alreadyOnList=false;
 				}
 				//only adds the random atom if it is different from the others already added
