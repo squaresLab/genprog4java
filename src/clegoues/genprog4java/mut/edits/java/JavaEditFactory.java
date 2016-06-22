@@ -275,9 +275,9 @@ public class JavaEditFactory {
 		case CASTCHECK:
 			return makeSubExpsHoles(holeName, locationStmt.getCasts());
 		case EXPREP:
-			return makeExpHole(holeName, locationStmt.getExtendableConditionalExpressions(variant.semanticInfo), locationStmt);
+			return makeExpHole(holeName, locationStmt.getConditionalExpressions(variant.semanticInfo), locationStmt);
 		case EXPADD:
-			Map<ASTNode, Map<ASTNode,List<ASTNode>>> extendableExpressions = locationStmt.getExtendableConditionalExpressions(variant.semanticInfo);
+			Map<ASTNode, Map<ASTNode,List<ASTNode>>> extendableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
 			for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> parents : extendableExpressions.entrySet()) {
 				for(Map.Entry<ASTNode,List<ASTNode>> entries : parents.getValue().entrySet()) { 
 					for(ASTNode exp : entries.getValue()) {
@@ -347,7 +347,7 @@ public class JavaEditFactory {
 			return locationStmt.getVariableMethods().size() > 0;
 		case EXPREP:
 		case EXPADD:
-			return locationStmt.getExtendableConditionalExpressions(variant.semanticInfo).size() > 0;
+			return locationStmt.getConditionalExpressions(variant.semanticInfo).size() > 0;
 		case EXPREM:
 			return locationStmt.getShrinkableConditionalExpressions().size() > 0;
 		default:
