@@ -43,6 +43,13 @@ public class MethodParameterReplacer extends JavaEditOperation {
 		ExpHole thisHole = (ExpHole) this.getHoleCode("replaceParameter");
 		rewriter.replace(thisHole.getHoleParent(), thisHole.getCode(), null); 
 	}
+	
+	@Override
+	public String toString() {
+		// FIXME: this is lazy
+		return "prm(" + this.getLocation().getId() + ")";
+	}
+	
 }
 /*
  * [Parameter Replacer]

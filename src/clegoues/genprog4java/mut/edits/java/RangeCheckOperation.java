@@ -213,4 +213,10 @@ public class RangeCheckOperation extends JavaEditOperation {
 		}
 	}
 
+	@Override
+	public String toString() {
+		// FIXME: this is lazy
+		return "rc(" + this.getLocation().getId() + ")";
+	}
+	
 	}

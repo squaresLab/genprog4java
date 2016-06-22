@@ -1,9 +1,11 @@
 package clegoues.genprog4java.mut.edits.java;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -24,6 +26,7 @@ import clegoues.genprog4java.mut.holes.java.ExpChoiceHole;
 import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
+import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 import clegoues.genprog4java.mut.holes.java.ExpChoiceHole.Which;
 
 public class ExpressionModAdd extends JavaEditOperation {
@@ -33,7 +36,6 @@ public class ExpressionModAdd extends JavaEditOperation {
 		this.holeNames.add("condExpAdd");
 	}
 	
-	// FIXME: I really need a better mechanism for printing edit templates than the statement ID approach
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
@@ -60,6 +62,18 @@ public class ExpressionModAdd extends JavaEditOperation {
 		newExpression.setRightOperand((Expression) rewriter.createCopyTarget(newExpCode));
 
 		rewriter.replace(parentExp, newExpression, null);
+	}
+	
+	@Override
+	public String toString() {
+		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("condExpAdd");
+		Expression parentExp = (Expression) thisHole.getHoleParent();
+		Expression newExpCode = (Expression) thisHole.getCode();
 
+		
+		String retval = "ea(@" + this.getLocation().getId(); 
+		retval += parentExp.toString() + "-->";
+		retval += newExpCode.toString() + ")";
+		return retval;
 	}
 }

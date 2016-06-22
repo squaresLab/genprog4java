@@ -55,5 +55,12 @@ public class ExpressionModRem extends JavaEditOperation {
 		}
 		rewriter.replace(oldExp, newCondition, null);
 	}
+	
+	@Override
+	public String toString() {
+		// FIXME: this is lazy
+		return "erm(" + this.getLocation().getId() + ")";
+	}
+	
 }
 

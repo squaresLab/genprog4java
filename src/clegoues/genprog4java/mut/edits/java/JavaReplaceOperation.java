@@ -24,6 +24,11 @@ public class JavaReplaceOperation extends JavaEditOperation {
 		ASTNode fixCodeNode =
 				 ASTNode.copySubtree(locationNode.getAST(), fixHole.getCode());
 		rewriter.replace(locationNode, fixCodeNode, null);
-
+	}
+	
+	@Override
+	public String toString() {
+		StatementHole fixHole = (StatementHole) this.getHoleCode("singleHole");
+		return "r(" + this.getLocation().getId() + "," + fixHole.getCodeBankId() + ")";
 	}
 }

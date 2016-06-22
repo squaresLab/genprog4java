@@ -99,4 +99,11 @@ public class UpperBoundSetOperation extends JavaEditOperation {
 			rewriter.replace(parent, newnode, null);
 		}
 	}	
+	
+	@Override
+	public String toString() {
+		// FIXME: this is lazy
+		return "ubs(" + this.getLocation().getId() + ")";
+	}
+	
 }
