@@ -13,6 +13,7 @@ import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
 
@@ -28,19 +29,8 @@ public class ExpressionModAdd extends JavaEditOperation {
 	public void edit(final ASTRewrite rewriter) {
 		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
 		ASTNode locationNode = locationStmt.getASTNode();
-		MethodInfoHole thisHole = (MethodInfoHole) this.getHoleCode("condExpAdd");
+		ExpHole thisHole = (ExpHole) this.getHoleCode("condExpAdd");
 		ASTNode toReplace = thisHole.getCode();
-		MethodInfo replaceWith = thisHole.getMethodInfo();
-
-		MethodInvocation newNode = locationNode.getAST().newMethodInvocation();
-		SimpleName newMethodName = locationNode.getAST().newSimpleName(replaceWith.getName());
-		newNode.setName(newMethodName);
 		
-		List<ASTNode> paramNodes = ((MethodInvocation) toReplace).arguments();
-		for(ASTNode param : paramNodes) {
-			ASTNode newParam = rewriter.createCopyTarget(param);
-			newNode.arguments().add(newParam);
-		}		
-		rewriter.replace(toReplace, newNode, null);
 	}
 }
