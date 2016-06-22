@@ -46,10 +46,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Scanner;
 import java.util.TreeSet;
 
@@ -58,16 +58,14 @@ import org.apache.log4j.Logger;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.TestCase;
-import clegoues.genprog4java.fitness.TestType;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.mut.holes.java.StatementHole;
 import clegoues.util.ConfigurationBuilder;
+import clegoues.util.GlobalUtils;
 import clegoues.util.Pair;
 
 @SuppressWarnings("rawtypes")
@@ -126,7 +124,7 @@ CachingRepresentation<G> {
 			.build();
 
 	protected boolean doingCoverage = false;
-	private ArrayList<Location> faultLocalization = new ArrayList<Location>();
+	protected ArrayList<Location> faultLocalization = new ArrayList<Location>();
 	protected ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
 	public FaultLocRepresentation(ArrayList<HistoryEle> history,
@@ -408,6 +406,13 @@ CachingRepresentation<G> {
 
 		computeFixSpace(negativePath, positivePath);
 		computeFaultSpace(negativePath,positivePath); 
+		
+		//printout fault space with their weights
+		PrintWriter writer = new PrintWriter("FaultyStmtsAndWeights.txt", "UTF-8");
+		for (int i = 0; i < faultLocalization.size(); i++) {
+			writer.println("Location:\n" + faultLocalization.get(i).getFirst() + "Weight:\n" + faultLocalization.get(i).getWeight() + "\n");
+		}
+		writer.close();
 
 		assert (faultLocalization.size() > 0);
 		assert (fixLocalization.size() > 0);
