@@ -35,7 +35,7 @@ public class ExpressionModAdd extends JavaEditOperation {
 		super(Mutation.EXPADD, location, sources);
 		this.holeNames.add("condExpAdd");
 	}
-	
+
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
@@ -63,17 +63,21 @@ public class ExpressionModAdd extends JavaEditOperation {
 
 		rewriter.replace(parentExp, newExpression, null);
 	}
-	
+
 	@Override
 	public String toString() {
 		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("condExpAdd");
 		Expression parentExp = (Expression) thisHole.getHoleParent();
 		Expression newExpCode = (Expression) thisHole.getCode();
 
-		
-		String retval = "ea(@" + this.getLocation().getId(); 
-		retval += parentExp.toString() + "-->";
-		retval += newExpCode.toString() + ")";
+
+		String retval = "ea(" + this.getLocation().getId() + ": ";
+		retval += "(" + parentExp.toString() + ")";
+		if(thisHole.getWhich() == Which.LEFT) 
+			retval += " && ";
+		else 
+			retval += " || ";
+		retval +=  "(" + newExpCode.toString() + "))";
 		return retval;
 	}
 }

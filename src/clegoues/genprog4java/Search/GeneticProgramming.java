@@ -46,20 +46,20 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		}
 		for (int i = 0; i < stillNeed; i++) {
 			Representation<G> newItem = original.copy();
-			boolean itIsTheSame = false;
+			//boolean itIsTheSame = false;
 
 			this.mutate(newItem);
-			itIsTheSame = representationIsTheSameAsAPreviousOne(initialPopulation, newItem);
-			if(itIsTheSame){
-				((JavaRepresentation)newItem).setAllPossibleStmtsToFaultyLocalization();
-				((JavaRepresentation)newItem).setAllPossibleStmtsToFixLocalization();
-				//while(itIsTheSame){
-					newItem.getGenome().remove(newItem.getGenome().size()-1);
-					this.mutate(newItem);
-					//itIsTheSame = representationIsTheSameAsAPreviousOne(initialPopulation, newItem);
-					
-				//}
-			}
+//			itIsTheSame = representationIsTheSameAsAPreviousOne(initialPopulation, newItem);
+//			if(itIsTheSame){
+//				((JavaRepresentation)newItem).setAllPossibleStmtsToFaultyLocalization();
+//				((JavaRepresentation)newItem).setAllPossibleStmtsToFixLocalization();
+//				//while(itIsTheSame){
+//					newItem.getGenome().remove(newItem.getGenome().size()-1);
+//					this.mutate(newItem);
+//					//itIsTheSame = representationIsTheSameAsAPreviousOne(initialPopulation, newItem);
+//					
+//				//}
+//			}
 
 			initialPopulation.add(newItem);
 		}

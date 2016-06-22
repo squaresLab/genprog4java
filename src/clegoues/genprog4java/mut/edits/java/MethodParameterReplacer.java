@@ -47,7 +47,7 @@ public class MethodParameterReplacer extends JavaEditOperation {
 	@Override
 	public String toString() {
 		// FIXME: this is lazy
-		return "prm(" + this.getLocation().getId() + ")";
+		return "prp(" + this.getLocation().getId() + ")";
 	}
 	
 }
