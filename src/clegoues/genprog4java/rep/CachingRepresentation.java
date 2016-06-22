@@ -59,7 +59,6 @@ import clegoues.genprog4java.fitness.TestType;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
-import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.Pair;
 
@@ -100,9 +99,8 @@ Representation<G> {
 
 	public static int sequence = 0;
 
-	public CachingRepresentation(ArrayList<HistoryEle> history,
-			ArrayList<G> genome2) {
-		super(history, genome2);
+	public CachingRepresentation(ArrayList<G> genome2) {
+		super(genome2);
 	}
 
 	public CachingRepresentation() {
