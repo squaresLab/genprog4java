@@ -11,7 +11,7 @@ public class TemplatePlaygroundTest {
 		ret = y;
 	   }else if(x<z){
 		//ret = y; // bug, it should be ret = x;
-		   if(z > x) {
+		   if(z > x && y > z) {
 		   retOne(5);
 		   }
 	   }

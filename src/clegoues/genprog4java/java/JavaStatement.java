@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -274,6 +275,50 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		return casts;
 	}
 	
+	private Map<ASTNode, List<ASTNode>> shrinkableExpressions = null;
+
+	public Map<ASTNode, List<ASTNode>> getShrinkableConditionalExpressions() {
+		if(shrinkableExpressions != null) {
+			return shrinkableExpressions;
+		}
+		shrinkableExpressions = new HashMap<ASTNode, List<ASTNode>>();
+		// FIXME: conditional expressions?
+		this.getASTNode().accept(new ASTVisitor() {
+			Expression getExp(Expression e) {
+				if(e instanceof ParenthesizedExpression) {
+					return getExp(((ParenthesizedExpression) e).getExpression());
+				}
+				return e;
+			}
+			
+			boolean isShrinkable(InfixExpression.Operator op) {
+				return (op == InfixExpression.Operator.CONDITIONAL_AND) ||
+						(op == InfixExpression.Operator.CONDITIONAL_OR);
+			}
+			public boolean visit(IfStatement node) {
+				Expression ifExp = node.getExpression();
+				if(ifExp instanceof ParenthesizedExpression) {
+					ifExp = getExp(ifExp);
+				}
+				if(ifExp instanceof InfixExpression) {
+					 if(isShrinkable(((InfixExpression) ifExp).getOperator())) {
+						 List<ASTNode> shrinkable;
+						 if(shrinkableExpressions.containsKey(node)) {
+							 shrinkable = shrinkableExpressions.get(node);
+						 } else { // FIXME problem: don't want to leave randomness to the edit operator on which exp to kill
+							 shrinkable = new ArrayList<ASTNode>();
+							 shrinkableExpressions.put(node, shrinkable);
+						 }
+						 shrinkable.add(node.getExpression());
+					 }
+				}
+				return true;
+			}
+
+		});
+		return shrinkableExpressions;
+	}
+
 	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> extendableExpressions = null;
 
 	// FIXME: find a way to sort options by distance where sorting by distance is specified
@@ -646,6 +691,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		this.setASTNode(node);
 
 	}
+
 
 
 }

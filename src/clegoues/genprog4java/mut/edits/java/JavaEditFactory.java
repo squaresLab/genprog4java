@@ -27,6 +27,7 @@ import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.ExpChoiceHole;
 import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
@@ -209,7 +210,6 @@ public class JavaEditFactory {
 		for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> funsite : replacableExps.entrySet()) {
 			for(Map.Entry<ASTNode, List<ASTNode>> exps : funsite.getValue().entrySet()) {
 				for(ASTNode replacementExp : exps.getValue()) { 
-					// for expadd I think the first ASTNode is a statement?
 					retVal.add(new ExpHole(holeName, exps.getKey(), (Expression) replacementExp, parentStmt.getStmtId()));
 				}
 			}
@@ -279,6 +279,17 @@ public class JavaEditFactory {
 		case EXPADD:
 			return makeExpHole(holeName, locationStmt.extendableConditionalExpressions(variant.semanticInfo), locationStmt);
 		case EXPREM:
+			Map<ASTNode, List<ASTNode>> shrinkableExpressions = locationStmt.getShrinkableConditionalExpressions();
+			for(Map.Entry<ASTNode, List<ASTNode>> entries : shrinkableExpressions.entrySet()) {
+				for(ASTNode exp : entries.getValue()) {
+					EditHole shrinkableExpHole1 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 0);
+					EditHole shrinkableExpHole2 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 1);
+					retVal.add(shrinkableExpHole1);
+					retVal.add(shrinkableExpHole2);
+
+				}
+			}
+			return retVal;
 		case PARADD:
 		case PARREM:
 		case OBJINIT:
@@ -328,6 +339,8 @@ public class JavaEditFactory {
 			return locationStmt.getVariableMethods().size() > 0;
 		case EXPADD:
 			return locationStmt.extendableConditionalExpressions(variant.semanticInfo).size() > 0;
+		case EXPREM:
+			return locationStmt.getShrinkableConditionalExpressions().size() > 0;
 		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;

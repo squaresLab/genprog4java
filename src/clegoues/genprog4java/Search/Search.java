@@ -33,6 +33,7 @@
 
 package clegoues.genprog4java.Search;
 
+// oneday FIXME: lowercase the package name because it annoys me...
 import static clegoues.util.ConfigurationBuilder.BOOLEAN;
 import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.INT;
