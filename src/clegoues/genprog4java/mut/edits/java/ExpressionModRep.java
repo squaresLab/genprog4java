@@ -14,7 +14,6 @@ public class ExpressionModRep extends MethodParameterReplacer {
 	
 	public ExpressionModRep(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.EXPREP, location, sources);
-		this.holeNames.add("replaceParameter");	
 	}
 	
 	@Override

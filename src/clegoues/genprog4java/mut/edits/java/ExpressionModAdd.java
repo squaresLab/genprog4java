@@ -1,33 +1,17 @@
 package clegoues.genprog4java.mut.edits.java;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CastExpression;
-import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.java.MethodInfo;
-import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.ExpChoiceHole;
-import clegoues.genprog4java.mut.holes.java.ExpHole;
-import clegoues.genprog4java.mut.holes.java.JavaLocation;
-import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
-import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 import clegoues.genprog4java.mut.holes.java.ExpChoiceHole.Which;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class ExpressionModAdd extends JavaEditOperation {
 
