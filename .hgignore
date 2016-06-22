@@ -1,0 +1,9 @@
+syntax:glob
+*.class
+bin/*
+tmp/
+*~
+.*\.orig$
+*.log
+syntax: regexp
+^target$
