@@ -8,17 +8,18 @@
 # 7th param is the folder where the bug files will be cloned to
 # 8th param is the initial seed. It will then increase the seeds by adding 1 until it gets to the number in the 9th param.
 # 9th param is the final seed.
+#10th param is on if the purpose is to test only fault loc and not really trying to find a patch
 
 #cp runGenProgForBug.bash ./genprog4java/defects4jStuff/
 
 #Mau runs it like this:
-#./runGenProgForBug.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ allHuman 100 /home/mau/Research/defects4j/ExamplesCheckedOut/ 1 5
+#./runGenProgForBug.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ allHuman 100 /home/mau/Research/defects4j/ExamplesCheckedOut/ 1 5 false
 
 #VM:
-#./runGenProgForBug.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/ allHuman 100 /home/ubuntu/defects4j/ExamplesCheckedOut/ 1 5
+#./runGenProgForBug.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/ allHuman 100 /home/ubuntu/defects4j/ExamplesCheckedOut/ 1 5 false
 
-if [ "$#" -ne 9 ]; then
-    echo "This script should be run with 9 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size, bugs folder, initial seed, final seed"
+if [ "$#" -ne 10 ]; then
+    echo "This script should be run with 10 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size, bugs folder, initial seed, final seed, just testing fault localization"
 
 else
 
@@ -31,6 +32,7 @@ TESTSUITEPERCENTAGE="$6"
 BUGSFOLDER="$7"
 STARTSEED="$8"
 UNTILSEED="$9"
+JUSTTESTINGFAULTLOC="${10}"
 
 #This transforms the first parameter to lower case. Ex: lang, chart, closure, math or time
 LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
@@ -66,7 +68,11 @@ if [ -d "$GENPROGDIR" ]; then
       #for seed in {0..20..2} #0 to 20, increments of 2
       do	
 	echo "RUNNING THE BUG: $PROJECT $BUGNUMBER, WITH THE SEED: $seed"
-	
+
+	echo $JUSTTESTINGFAULTLOC
+	if [ $JUSTTESTINGFAULTLOC == "true" ]; then
+	  echo "justTestingFaultLoc = true" >> $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/defects4j.config
+	fi
 	CHANGESEEDCOMMAND="sed -i '2s/.*/seed = $seed/' "$BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/defects4j.config
 
 	eval $CHANGESEEDCOMMAND
@@ -77,7 +83,6 @@ if [ -d "$GENPROGDIR" ]; then
 	#Save the variants in a tar file
 	tar -cvf $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/variants"$PROJECT""$BUGNUMBER"Seed$seed.tar $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/tmp/
       done
-
     fi
   fi
 fi

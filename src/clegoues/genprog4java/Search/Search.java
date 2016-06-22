@@ -74,6 +74,12 @@ public abstract class Search<G extends EditOperation> {
 			.withHelp( "model chosen to pick the fix atom from the pool of possible fix atoms with respect to the buggy atom" )
 			.inGroup( "Search Parameters" )
 			.build();
+	protected static String modelPath = ConfigurationBuilder.of( STRING )
+			.withVarName( "modelPath" )
+			.withDefault( "OVERALLModel.txt" )
+			.withHelp( "path of the model" )
+			.inGroup( "Search Parameters" )
+			.build();
 	//private static int generations = 10;
 	protected static int generations = ConfigurationBuilder.of( INT )
 		.withVarName( "generations" )
@@ -134,6 +140,7 @@ public abstract class Search<G extends EditOperation> {
 		this.fitnessEngine = engine;
 		if(Search.model.equalsIgnoreCase("probabilistic")){
 			rm = new ReplacementModel();
+			rm.populateModel(modelPath);
 		}
 	}
 
@@ -241,8 +248,10 @@ public abstract class Search<G extends EditOperation> {
 				//chooses a random location
 				Pair<?, Double> wa = null;
 				boolean alreadyOnList = false;
+				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
 				if(proMutList.size()>=faultyAtoms.size()){ 
 					variant.setAllPossibleStmtsToFixLocalization();
+					variant.setAllPossibleStmtsToFaultyLocalization();
 					//alreadyOnList=false;
 				}
 				//only adds the random atom if it is different from the others already added
@@ -253,8 +262,7 @@ public abstract class Search<G extends EditOperation> {
 				}while(alreadyOnList);
 				proMutList.add((Location)wa);
 
-				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
-
+				
 			}
 			for (Location location : proMutList) {
 				// FIXME: deal with the case where there are no edits that apply ever, because infinite loop
