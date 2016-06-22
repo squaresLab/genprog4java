@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -27,20 +28,22 @@ import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
 
 public class ExpressionModRem extends JavaEditOperation {
-		
-		public ExpressionModRem(JavaLocation location,  HashMap<String, EditHole> sources) {
-			super(Mutation.EXPREM, location, sources);
-			this.holeNames.add("condExpRem");
 
-		}
+	public ExpressionModRem(JavaLocation location,  HashMap<String, EditHole> sources) {
+		super(Mutation.EXPREM, location, sources);
+		this.holeNames.add("condExpRem");
 
-		@Override
-		public void edit(final ASTRewrite rewriter) {
-			JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
-			// possible FIXME: perhaps I'm not using the locationStmt properly?  Or maybe I am, hm.
-			ASTNode locationNode = locationStmt.getASTNode();
-			ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("condExpRem");
-			IfStatement parentIf = (IfStatement) thisHole.getHoleParent();
+	}
+
+	@Override
+	public void edit(final ASTRewrite rewriter) {
+		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
+		// possible FIXME: perhaps I'm not using the locationStmt properly?  Or maybe I am, hm.
+		ASTNode locationNode = locationStmt.getASTNode();
+		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("condExpRem");
+		ASTNode parent = thisHole.getHoleParent();
+		if(parent instanceof IfStatement) {
+			IfStatement parentIf = (IfStatement) parent;
 			IfStatement newIfStmt = parentIf.getAST().newIfStatement();
 			Expression oldExp = (Expression) thisHole.getCode();
 			Which whichSide = thisHole.getWhich();
@@ -55,7 +58,7 @@ public class ExpressionModRem extends JavaEditOperation {
 			case RIGHT:
 			default:
 				newCondition = (Expression) rewriter.createCopyTarget(realOldExp.getRightOperand());
-			break;
+				break;
 			}
 			newIfStmt.setExpression(newCondition);
 			Statement thenStatement = (Statement) rewriter.createCopyTarget(parentIf.getThenStatement());
@@ -65,6 +68,33 @@ public class ExpressionModRem extends JavaEditOperation {
 				newIfStmt.setElseStatement(elseStatement);
 			}
 			rewriter.replace(parentIf, newIfStmt, null);
+		} else { // instance of conditional expression; FIXME: test this
+			ConditionalExpression parentExp = (ConditionalExpression) parent;
+			ConditionalExpression newCondExp = parentExp.getAST().newConditionalExpression();
+			Expression oldExp = (Expression) thisHole.getCode();
+			Which whichSide = thisHole.getWhich();
+			while(oldExp instanceof ParenthesizedExpression) {
+				oldExp = ((ParenthesizedExpression) oldExp).getExpression();	
+			}
+			InfixExpression realOldExp = (InfixExpression) oldExp;
+			Expression newCondition;
+			switch(whichSide) {
+			case LEFT: newCondition = (Expression) rewriter.createCopyTarget(realOldExp.getLeftOperand());
+			break;
+			case RIGHT:
+			default:
+				newCondition = (Expression) rewriter.createCopyTarget(realOldExp.getRightOperand());
+				break;
+			}
+			newCondExp.setExpression(newCondition);
+			Expression thenExp = (Expression) rewriter.createCopyTarget(parentExp.getThenExpression());
+			newCondExp.setThenExpression(thenExp);
+			if(parentExp.getElseExpression() != null) {
+				Expression elseExp = (Expression) rewriter.createCopyTarget(parentExp.getElseExpression());
+				newCondExp.setElseExpression(elseExp);
+			}
+			rewriter.replace(parentExp, newCondExp, null);
 		}
 	}
+}
 
