@@ -261,7 +261,7 @@ Representation<G> {
 		if (this.alreadyCompiled == null) {
 			String newName = CachingRepresentation.newVariantFolder();
 			this.variantFolder = newName;
-			logger.info("History of variant " + getVariantFolder() + " is: " + getHistory());
+		//	logger.info("History of variant " + getVariantFolder() + " is: " + getHistory());
 			if(justTestingFaultLoc == true){
 				logger.info("Fault localization was peprformed successfully");
 				System.exit(0);

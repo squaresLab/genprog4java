@@ -9,9 +9,9 @@ public class TemplatePlaygroundTest {
 	if(y<z){
 	   if(x<y){
 		ret = y;
-	   }else if(x<z){
+	   }else if(x<z  && y > z){
 		//ret = y; // bug, it should be ret = x;
-		   if(z > x && y > z) {
+		   if(z > x) {
 		   retOne(5);
 		   }
 	   }

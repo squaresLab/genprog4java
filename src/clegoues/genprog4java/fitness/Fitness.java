@@ -349,7 +349,7 @@ public class Fitness<G extends EditOperation> {
 		} else {
 			fitnessPair = this.testFitnessFull(rep, fac);
 		}
-		logger.info("\t gen: " + generation + " " + fitnessPair.getFirst() + " " + rep.getName());
+		logger.info("\t gen: " + generation + " " + fitnessPair.getFirst() + " " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 		rep.setFitness(fitnessPair.getSecond());
 		rep.cleanup();
 		return !(fitnessPair.getSecond() < maxFitness);
