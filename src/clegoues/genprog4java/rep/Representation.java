@@ -53,7 +53,6 @@ import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
-import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
@@ -72,22 +71,19 @@ Comparable<Representation<G>> {
 	
 	protected String variantFolder = "";
 
-	private ArrayList<HistoryEle> history = new ArrayList<HistoryEle>();
-
 	public Representation() {
 	}
 
-	public Representation(ArrayList<HistoryEle> history, ArrayList<G> genome2) {
+	public Representation(ArrayList<G> genome2) {
 		this.setGenome(new ArrayList<G>(((List<G>) genome2)));
-		this.setHistory(new ArrayList<HistoryEle>(history));
 	}
 
 	public String getName() {
 		String result = "";
-		if (history.size() == 0) {
+		if (this.getGenome().size() == 0) {
 			return "original";
 		}
-		for (HistoryEle h : history) {
+		for (G h : this.getGenome()) {
 			if (result.length() > 0) {
 				result += " ";
 			}
@@ -97,14 +93,6 @@ Comparable<Representation<G>> {
 		return result;
 	}
 
-	public ArrayList<HistoryEle> getHistory() {
-		return history;
-	}
-
-	public void setHistory(ArrayList<HistoryEle> history) {
-		this.history = history;
-	}
-	
 	public String getVariantFolder() {
 		return this.variantFolder;
 	}
@@ -134,7 +122,7 @@ Comparable<Representation<G>> {
 			} else {
 				out = fout;
 			}
-			out.writeObject(this.history);
+			out.writeObject(this.getGenome());
 		} catch (IOException e) {
 			System.err
 			.println("Representation: largely unexpected failure in serialization.");
@@ -168,7 +156,7 @@ Comparable<Representation<G>> {
 			} else {
 				in = fin;
 			}
-			this.history = (ArrayList<HistoryEle>) in.readObject();
+			this.setGenome((ArrayList<G>) in.readObject());
 		} catch (IOException e) {
 			logger.error("Representation: IOException in deserialize "
 					+ filename + " which is probably OK");
@@ -224,9 +212,7 @@ Comparable<Representation<G>> {
 	public static void configure(Properties prop) {
 	}
 	
-	public void performEdit(Mutation edit, Location dst, HashMap<String,EditHole> sources) {
-		history.add(new HistoryEle(edit, dst, sources));
-	}
+	public abstract void performEdit(Mutation edit, Location dst, HashMap<String,EditHole> sources);
 
 	public abstract void setFitness(double fitness);
 
