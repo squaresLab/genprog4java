@@ -282,23 +282,36 @@ public class JavaStatement implements Comparable<JavaStatement>{
 			return shrinkableExpressions;
 		}
 		shrinkableExpressions = new HashMap<ASTNode, List<ASTNode>>();
-		// FIXME: conditional expressions?
 		this.getASTNode().accept(new ASTVisitor() {
-			Expression getExp(Expression e) {
-				if(e instanceof ParenthesizedExpression) {
-					return getExp(((ParenthesizedExpression) e).getExpression());
-				}
-				return e;
-			}
-			
+	
 			boolean isShrinkable(InfixExpression.Operator op) {
 				return (op == InfixExpression.Operator.CONDITIONAL_AND) ||
 						(op == InfixExpression.Operator.CONDITIONAL_OR);
 			}
+			public boolean visit(ConditionalExpression node) {
+				Expression condExp = node.getExpression();
+				while(condExp instanceof ParenthesizedExpression) {
+					condExp = ((ParenthesizedExpression) condExp).getExpression();
+				}
+				if(condExp instanceof InfixExpression) {
+					 if(isShrinkable(((InfixExpression) condExp).getOperator())) {
+						 List<ASTNode> shrinkable;
+						 if(shrinkableExpressions.containsKey(node)) {
+							 shrinkable = shrinkableExpressions.get(node);
+						 } else {
+							 shrinkable = new ArrayList<ASTNode>();
+							 shrinkableExpressions.put(node, shrinkable);
+						 }
+						 shrinkable.add(node.getExpression());
+					 }
+				}
+				return true;
+				
+			}
 			public boolean visit(IfStatement node) {
 				Expression ifExp = node.getExpression();
-				if(ifExp instanceof ParenthesizedExpression) {
-					ifExp = getExp(ifExp);
+				while(ifExp instanceof ParenthesizedExpression) {
+					ifExp = ((ParenthesizedExpression) ifExp).getExpression();
 				}
 				if(ifExp instanceof InfixExpression) {
 					 if(isShrinkable(((InfixExpression) ifExp).getOperator())) {
@@ -314,7 +327,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				}
 				return true;
 			}
-
 		});
 		return shrinkableExpressions;
 	}
