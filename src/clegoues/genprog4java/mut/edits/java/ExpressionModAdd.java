@@ -10,7 +10,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.ExpChoiceHole;
-import clegoues.genprog4java.mut.holes.java.ExpChoiceHole.Which;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class ExpressionModAdd extends JavaEditOperation {
@@ -27,15 +26,15 @@ public class ExpressionModAdd extends JavaEditOperation {
 		Expression parentExp = (Expression) thisHole.getHoleParent();
 		Expression newExpCode = (Expression) thisHole.getCode();
 
-		Which whichSide = thisHole.getWhich();
+		int whichSide = thisHole.getChoice();
 		while(parentExp instanceof ParenthesizedExpression) {
 			parentExp = ((ParenthesizedExpression) parentExp).getExpression();	
 		}
 		InfixExpression.Operator newOperator;
 		switch(whichSide) {
-		case LEFT: newOperator = InfixExpression.Operator.CONDITIONAL_AND;
+		case 0: newOperator = InfixExpression.Operator.CONDITIONAL_AND;
 		break;
-		case RIGHT:
+		case 1:
 		default:
 			newOperator = InfixExpression.Operator.CONDITIONAL_OR;
 			break;
@@ -57,7 +56,7 @@ public class ExpressionModAdd extends JavaEditOperation {
 
 		String retval = "ea(" + this.getLocation().getId() + ": ";
 		retval += "(" + parentExp.toString() + ")";
-		if(thisHole.getWhich() == Which.LEFT) 
+		if(thisHole.getChoice() == 0) 
 			retval += " && ";
 		else 
 			retval += " || ";

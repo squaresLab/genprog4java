@@ -74,6 +74,8 @@ public class JavaEditFactory {
 			return new ExpressionModAdd((JavaLocation) dst, sources);
 		case EXPREM: 
 			return new ExpressionModRem((JavaLocation) dst, sources);
+		case PARREM:
+			return new MethodParameterRemover((JavaLocation) dst, sources);
 		default: logger.fatal("unhandled edit template type in JavaEditFactory; this should be impossible (famous last words...)");
 		}		return null;
 	}
@@ -300,8 +302,16 @@ public class JavaEditFactory {
 				}
 			}
 			return retVal;
-		case PARADD:
 		case PARREM:
+			Map<ASTNode,List<Integer>> options = locationStmt.getShrinkableParameterMethods();
+			for(Map.Entry<ASTNode, List<Integer>> nodeOption : options.entrySet()) {
+				for(Integer option : nodeOption.getValue()) {
+				EditHole shrinkableParamHole = new ExpChoiceHole(holeName, nodeOption.getKey(), (Expression) nodeOption.getKey(), locationStmt.getStmtId(), option);
+				retVal.add(shrinkableParamHole);
+				}
+			}
+			return retVal;
+		case PARADD:
 		case OBJINIT:
 		case SIZECHECK:
 		default:
@@ -343,8 +353,8 @@ public class JavaEditFactory {
 			return locationStmt.getNullCheckables().size() > 0;
 		case CASTCHECK:
 			return locationStmt.getCasts().size() > 0;
-		case PARADD:
-			return locationStmt.getVariableMethods().size() > 0;
+		case PARREM:
+			return locationStmt.getShrinkableParameterMethods().size() > 0;
 		case EXPREP:
 		case EXPADD:
 			return locationStmt.getConditionalExpressions(variant.semanticInfo).size() > 0;
@@ -404,6 +414,8 @@ public class JavaEditFactory {
 			retVal.add("condExpRem");
 			return retVal;
 		case PARREM:
+			retVal.add("remParameter");
+			return retVal;
 		case OBJINIT:
 		case SIZECHECK:
 			logger.fatal("Unhandled edit type in holesForMutation.  Handle it in JavaEditFactory and try again.");

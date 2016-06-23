@@ -33,6 +33,7 @@
 
 package clegoues.genprog4java.java;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -154,7 +155,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		else
 			return "null";
 	}
-	
+
 	// method to get the statemetn parent of an ASTnode. We traverse the ast upwards until the parent node is an instance of statement
 	private ASTNode getParent(ASTNode node) {
 		ASTNode parent = node.getParent();
@@ -257,7 +258,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		}
 		casts = new HashMap<ASTNode, List<ASTNode>>();
 		this.getASTNode().accept(new ASTVisitor() {
-			
+
 			public boolean visit(CastExpression node) {
 				ASTNode parent = getParent(node); 
 				List<ASTNode> thisParentsCasts;
@@ -274,7 +275,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 		return casts;
 	}
-	
+
 	private Map<ASTNode, List<ASTNode>> shrinkableExpressions = null;
 
 	public Map<ASTNode, List<ASTNode>> getShrinkableConditionalExpressions() {
@@ -283,7 +284,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		}
 		shrinkableExpressions = new HashMap<ASTNode, List<ASTNode>>();
 		this.getASTNode().accept(new ASTVisitor() {
-	
+
 			boolean isShrinkable(InfixExpression.Operator op) {
 				return (op == InfixExpression.Operator.CONDITIONAL_AND) ||
 						(op == InfixExpression.Operator.CONDITIONAL_OR);
@@ -294,19 +295,19 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					condExp = ((ParenthesizedExpression) condExp).getExpression();
 				}
 				if(condExp instanceof InfixExpression) {
-					 if(isShrinkable(((InfixExpression) condExp).getOperator())) {
-						 List<ASTNode> shrinkable;
-						 if(shrinkableExpressions.containsKey(node)) {
-							 shrinkable = shrinkableExpressions.get(node);
-						 } else {
-							 shrinkable = new ArrayList<ASTNode>();
-							 shrinkableExpressions.put(node, shrinkable);
-						 }
-						 shrinkable.add(node.getExpression());
-					 }
+					if(isShrinkable(((InfixExpression) condExp).getOperator())) {
+						List<ASTNode> shrinkable;
+						if(shrinkableExpressions.containsKey(node)) {
+							shrinkable = shrinkableExpressions.get(node);
+						} else {
+							shrinkable = new ArrayList<ASTNode>();
+							shrinkableExpressions.put(node, shrinkable);
+						}
+						shrinkable.add(node.getExpression());
+					}
 				}
 				return true;
-				
+
 			}
 			public boolean visit(IfStatement node) {
 				Expression ifExp = node.getExpression();
@@ -314,16 +315,16 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					ifExp = ((ParenthesizedExpression) ifExp).getExpression();
 				}
 				if(ifExp instanceof InfixExpression) {
-					 if(isShrinkable(((InfixExpression) ifExp).getOperator())) {
-						 List<ASTNode> shrinkable;
-						 if(shrinkableExpressions.containsKey(node)) {
-							 shrinkable = shrinkableExpressions.get(node);
-						 } else { // FIXME problem: don't want to leave randomness to the edit operator on which exp to kill
-							 shrinkable = new ArrayList<ASTNode>();
-							 shrinkableExpressions.put(node, shrinkable);
-						 }
-						 shrinkable.add(node.getExpression());
-					 }
+					if(isShrinkable(((InfixExpression) ifExp).getOperator())) {
+						List<ASTNode> shrinkable;
+						if(shrinkableExpressions.containsKey(node)) {
+							shrinkable = shrinkableExpressions.get(node);
+						} else { // FIXME problem: don't want to leave randomness to the edit operator on which exp to kill
+							shrinkable = new ArrayList<ASTNode>();
+							shrinkableExpressions.put(node, shrinkable);
+						}
+						shrinkable.add(node.getExpression());
+					}
 				}
 				return true;
 			}
@@ -372,7 +373,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				List<ASTNode> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
 				Map<ASTNode, List<ASTNode>> replacementMap = new HashMap<ASTNode, List<ASTNode>>();
 				extendableExpressions.put(parent, replacementMap);
-				
+
 				if(replacements != null) {
 					List<ASTNode> thisList = null;
 					if(replacementMap.containsKey(exp)) {
@@ -384,7 +385,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					thisList.addAll(replacements);
 				}
 				return true;
-				}
+			}
 		});
 		return extendableExpressions;
 	}
@@ -435,25 +436,85 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		});
 		return methodParamReplacements;
 	}
-	
-	// FIXME: make sure we generate entries for ASTNodes past the first one any of these are called on.
-	
-	// FIXME: if the fix set is expanded, clear many of these caches?? 
-	private Map<ASTNode, List<ASTNode>> variableMethods = null;
 
-	public Map<ASTNode, List<ASTNode>> getVariableMethods() {
-		// FIXME: I actually don't know how to do this.  Hm.
-		return null;
+
+	// FIXME: if the fix set is expanded, clear any of these caches?? 
+
+	private Map<ASTNode,List<Integer>> shrinkableParameterMethods = null;
+
+	public Map<ASTNode,List<Integer>> getShrinkableParameterMethods() {
+		if(shrinkableParameterMethods == null) {
+			shrinkableParameterMethods = new HashMap<ASTNode,List<Integer>>();
+			this.getASTNode().accept(new ASTVisitor() {
+				// FIXME: also supermethodinvocations
+
+				public boolean visit(MethodInvocation node) {
+					IMethodBinding myMethodBinding = node.resolveMethodBinding().getMethodDeclaration();
+					ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
+					ArrayList<IMethodBinding> compatibleMethods = new ArrayList<IMethodBinding>();
+					ArrayList<ITypeBinding> myParamTypes = new ArrayList<ITypeBinding>(Arrays.asList(myMethodBinding.getParameterTypes()));
+					for(IMethodBinding thisClassMethod : classBinding.getDeclaredMethods()) {
+						if(thisClassMethod.getName().equals(myMethodBinding.getName())) {
+							ArrayList<ITypeBinding> candParamTypes = new ArrayList<ITypeBinding>(Arrays.asList(thisClassMethod.getParameterTypes()));
+							if(candParamTypes.size() < myParamTypes.size()) {
+								boolean isCompatible = true;
+								for(int i = 0; i < candParamTypes.size(); i++) {
+									ITypeBinding candParam = candParamTypes.get(i);
+									ITypeBinding myParam = myParamTypes.get(i);
+									if(!myParam.isAssignmentCompatible(candParam)) {
+										isCompatible = false;
+										break;
+									}
+								}
+								if(isCompatible) {
+									compatibleMethods.add(thisClassMethod);
+								}
+							}
+						}
+					}
+					ITypeBinding superClass = classBinding.getSuperclass();
+					while(superClass != null) {
+						IMethodBinding[] superMethods = superClass.getDeclaredMethods();
+						for(IMethodBinding superMethod : superMethods) {
+							int modifiers = superMethod.getModifiers();
+							if(!Modifier.isAbstract(modifiers) &&
+									(Modifier.isProtected(modifiers) || Modifier.isPublic(modifiers)) &&
+									superMethod.isSubsignature(myMethodBinding)) {
+								compatibleMethods.add(superMethod);
+							}
+						}
+						superClass = superClass.getSuperclass();
+					}
+					ITypeBinding[] thisMethodsTypes = myMethodBinding.getParameterTypes();
+					if(compatibleMethods.size() > 0) {
+						List<Integer> thisNodesOptions;
+						if(shrinkableParameterMethods.containsKey(node)) {
+							thisNodesOptions = shrinkableParameterMethods.get(node);
+						} else {
+							thisNodesOptions = new ArrayList<Integer>();
+							shrinkableParameterMethods.put(node,thisNodesOptions);
+						}
+						for(IMethodBinding compatibleMethod : compatibleMethods) {
+							ITypeBinding[] parameterTypes = compatibleMethod.getParameterTypes();
+							int numReduce = thisMethodsTypes.length - parameterTypes.length;
+							thisNodesOptions.add(numReduce);
+						}
+					}
+
+					return true;
+				}
+
+			});
 		}
-
-
-
+		return shrinkableParameterMethods;
+	}
 	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
 	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
 
 	public List<MethodInfo> getCandidateMethodReplacements(ASTNode methodToReplace ) 
 	{ return candidateMethodReplacements.get(methodToReplace); }
 
+	// FIXME: I don't think I need this because you can just get the parameter types.  Refactor me!
 	private ArrayList<ITypeBinding> paramsToTypes(List<SingleVariableDeclaration> params) {
 		int i = 0; 
 		ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>();
@@ -473,6 +534,8 @@ public class JavaStatement implements Comparable<JavaStatement>{
 			this.getASTNode().accept(new ASTVisitor() {
 				// method to visit all Expressions relevant for this in locationNode and
 				// store their parents
+				//  FIXME: supermethodinvocations?
+
 				public boolean visit(MethodInvocation node) {
 					// if there exists another invocation that this works for...
 					ArrayList<MethodInfo> possibleReps = new ArrayList<MethodInfo> ();
