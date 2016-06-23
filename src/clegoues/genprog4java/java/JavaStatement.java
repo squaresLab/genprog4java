@@ -440,81 +440,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	// FIXME: if the fix set is expanded, clear any of these caches?? 
 
-	private Map<ASTNode,List<Integer>> shrinkableParameterMethods = null;
-
-	public Map<ASTNode,List<Integer>> getShrinkableParameterMethods() {
-		if(shrinkableParameterMethods == null) {
-			shrinkableParameterMethods = new HashMap<ASTNode,List<Integer>>();
-			this.getASTNode().accept(new ASTVisitor() {
-				// FIXME: also supermethodinvocations
-
-				public boolean visit(MethodInvocation node) {
-					IMethodBinding myMethodBinding = node.resolveMethodBinding().getMethodDeclaration();
-					ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
-					ArrayList<IMethodBinding> compatibleMethods = new ArrayList<IMethodBinding>();
-					ArrayList<ITypeBinding> myParamTypes = new ArrayList<ITypeBinding>(Arrays.asList(myMethodBinding.getParameterTypes()));
-					for(IMethodBinding thisClassMethod : classBinding.getDeclaredMethods()) {
-						if(thisClassMethod.getName().equals(myMethodBinding.getName())) {
-							ArrayList<ITypeBinding> candParamTypes = new ArrayList<ITypeBinding>(Arrays.asList(thisClassMethod.getParameterTypes()));
-							if(candParamTypes.size() < myParamTypes.size()) {
-								boolean isCompatible = true;
-								for(int i = 0; i < candParamTypes.size(); i++) {
-									ITypeBinding candParam = candParamTypes.get(i);
-									ITypeBinding myParam = myParamTypes.get(i);
-									if(!myParam.isAssignmentCompatible(candParam)) {
-										isCompatible = false;
-										break;
-									}
-								}
-								if(isCompatible) {
-									compatibleMethods.add(thisClassMethod);
-								}
-							}
-						}
-					}
-					ITypeBinding superClass = classBinding.getSuperclass();
-					while(superClass != null) {
-						IMethodBinding[] superMethods = superClass.getDeclaredMethods();
-						for(IMethodBinding superMethod : superMethods) {
-							int modifiers = superMethod.getModifiers();
-							if(!Modifier.isAbstract(modifiers) &&
-									(Modifier.isProtected(modifiers) || Modifier.isPublic(modifiers)) &&
-									superMethod.isSubsignature(myMethodBinding)) {
-								compatibleMethods.add(superMethod);
-							}
-						}
-						superClass = superClass.getSuperclass();
-					}
-					ITypeBinding[] thisMethodsTypes = myMethodBinding.getParameterTypes();
-					if(compatibleMethods.size() > 0) {
-						List<Integer> thisNodesOptions;
-						if(shrinkableParameterMethods.containsKey(node)) {
-							thisNodesOptions = shrinkableParameterMethods.get(node);
-						} else {
-							thisNodesOptions = new ArrayList<Integer>();
-							shrinkableParameterMethods.put(node,thisNodesOptions);
-						}
-						for(IMethodBinding compatibleMethod : compatibleMethods) {
-							ITypeBinding[] parameterTypes = compatibleMethod.getParameterTypes();
-							int numReduce = thisMethodsTypes.length - parameterTypes.length;
-							thisNodesOptions.add(numReduce);
-						}
-					}
-
-					return true;
-				}
-
-			});
-		}
-		return shrinkableParameterMethods;
-	}
-	private Map<ASTNode, List<IMethodBinding>> candidateMethodReplacements= null;
-
-	
-	private ArrayList<ITypeBinding> getParamTypes(IMethodBinding mb) {
-		return new ArrayList<ITypeBinding>(Arrays.asList(mb.getParameterTypes()));
-	}
-	
 	private boolean paramTypesMatch(ArrayList<ITypeBinding> firstList, ArrayList<ITypeBinding> secondList) {
 		for(int i = 0; i < firstList.size(); i++) {
 			ITypeBinding candParam = firstList.get(i);
@@ -525,6 +450,138 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		}
 		return true;
 	}
+
+	private ArrayList<ITypeBinding> getParamTypes(IMethodBinding mb) {
+		return new ArrayList<ITypeBinding>(Arrays.asList(mb.getParameterTypes()));
+	}
+
+	private boolean compatibleMethodMatch(IMethodBinding method1, IMethodBinding method2, boolean checkShrinkable) {
+		if(method2.equals(method1) || (checkShrinkable && !method2.getName().equals(method1.getName()))) 
+			return false;
+		ArrayList<ITypeBinding> paramTypes1 = getParamTypes(method1); 
+		ArrayList<ITypeBinding> paramTypes2 = getParamTypes(method2); 
+		if(checkShrinkable && (paramTypes2.size() < paramTypes1.size()) ||
+				(!checkShrinkable && (paramTypes2.size() == paramTypes1.size() )))
+		{
+			return paramTypesMatch(paramTypes2,paramTypes1);
+		}
+		return false;
+	}
+	
+
+	private Map<ASTNode,List<Integer>> extendableParameterMethods = null;
+
+	public Map<ASTNode, List<Integer>> getExtendableParameterMethods() {
+		if(extendableParameterMethods == null) {
+			extendableParameterMethods = new HashMap<ASTNode,List<Integer>>();
+			this.getASTNode().accept(new ASTVisitor() {
+				// FIXME: also supermethodinvocations?
+
+				public boolean visit(MethodInvocation node) {
+					IMethodBinding myMethodBinding = node.resolveMethodBinding().getMethodDeclaration();
+
+					ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
+					ArrayList<IMethodBinding> compatibleMethods = new ArrayList<IMethodBinding>();
+
+					for(IMethodBinding otherMethod : classBinding.getDeclaredMethods()) {
+						if(compatibleMethodMatch(otherMethod,myMethodBinding, true)) {
+							// FIXME find compatible expressions
+							compatibleMethods.add(otherMethod);
+						}
+					}
+
+					ITypeBinding superClass = classBinding.getSuperclass();
+					while(superClass != null) {
+						IMethodBinding[] superMethods = superClass.getDeclaredMethods();
+						for(IMethodBinding superMethod : superMethods) {
+							int modifiers = superMethod.getModifiers();
+							if(!Modifier.isAbstract(modifiers) &&
+									(Modifier.isProtected(modifiers) || Modifier.isPublic(modifiers)) &&
+									compatibleMethodMatch(superMethod,myMethodBinding, true)) {
+								compatibleMethods.add(superMethod);
+							}
+						}
+						superClass = superClass.getSuperclass();
+					}
+					if(compatibleMethods.size() > 0) {
+						List<Integer> thisNodesOptions;
+						if(extendableParameterMethods.containsKey(node)) {
+							thisNodesOptions = extendableParameterMethods.get(node);
+						} else {
+							thisNodesOptions = new ArrayList<Integer>();
+							extendableParameterMethods.put(node,thisNodesOptions);
+						}
+						for(IMethodBinding compatibleMethod : compatibleMethods) {
+							ITypeBinding[] parameterTypes = compatibleMethod.getParameterTypes();
+							int numReduce = myMethodBinding.getParameterTypes().length - parameterTypes.length;
+							thisNodesOptions.add(numReduce);
+						}
+					}
+					return true;
+				}
+
+			});
+		}
+		return extendableParameterMethods;	
+	}
+
+
+	private Map<ASTNode,List<Integer>> shrinkableParameterMethods = null;
+
+	public Map<ASTNode,List<Integer>> getShrinkableParameterMethods() {
+		if(shrinkableParameterMethods == null) {
+			shrinkableParameterMethods = new HashMap<ASTNode,List<Integer>>();
+			this.getASTNode().accept(new ASTVisitor() {
+				// FIXME: also supermethodinvocations
+
+				public boolean visit(MethodInvocation node) {
+					IMethodBinding myMethodBinding = node.resolveMethodBinding().getMethodDeclaration();
+
+					ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
+					ArrayList<IMethodBinding> compatibleMethods = new ArrayList<IMethodBinding>();
+
+					for(IMethodBinding otherMethod : classBinding.getDeclaredMethods()) {
+						if(compatibleMethodMatch(myMethodBinding, otherMethod, true)) {
+							compatibleMethods.add(otherMethod);
+						}
+					}
+
+					ITypeBinding superClass = classBinding.getSuperclass();
+					while(superClass != null) {
+						IMethodBinding[] superMethods = superClass.getDeclaredMethods();
+						for(IMethodBinding superMethod : superMethods) {
+							int modifiers = superMethod.getModifiers();
+							if(!Modifier.isAbstract(modifiers) &&
+									(Modifier.isProtected(modifiers) || Modifier.isPublic(modifiers)) &&
+									compatibleMethodMatch(myMethodBinding, superMethod, true)) {
+								compatibleMethods.add(superMethod);
+							}
+						}
+						superClass = superClass.getSuperclass();
+					}
+					if(compatibleMethods.size() > 0) {
+						List<Integer> thisNodesOptions;
+						if(shrinkableParameterMethods.containsKey(node)) {
+							thisNodesOptions = shrinkableParameterMethods.get(node);
+						} else {
+							thisNodesOptions = new ArrayList<Integer>();
+							shrinkableParameterMethods.put(node,thisNodesOptions);
+						}
+						for(IMethodBinding compatibleMethod : compatibleMethods) {
+							ITypeBinding[] parameterTypes = compatibleMethod.getParameterTypes();
+							int numReduce = myMethodBinding.getParameterTypes().length - parameterTypes.length;
+							thisNodesOptions.add(numReduce);
+						}
+					}
+					return true;
+				}
+
+			});
+		}
+		return shrinkableParameterMethods;
+	}
+	
+	private Map<ASTNode, List<IMethodBinding>> candidateMethodReplacements= null;
 
 	public Map<ASTNode, List<IMethodBinding>> getCandidateMethodReplacements() {
 		if(candidateMethodReplacements == null) {
@@ -546,23 +603,17 @@ public class JavaStatement implements Comparable<JavaStatement>{
 							candidateMethodReplacements.put(node,possibleReps);
 						}
 						ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
-						ArrayList<ITypeBinding> myParamTypes = getParamTypes(myMethodBinding); 
 						ITypeBinding thisReturnType = myMethodBinding.getReturnType();
 
 						for(IMethodBinding otherMethod : classBinding.getDeclaredMethods()) {
-							if(otherMethod.equals(myMethodBinding)) // don't include self as valid replacement
-								continue;
 							ITypeBinding candReturnType = otherMethod.getReturnType();
-							if(!candReturnType.isAssignmentCompatible(thisReturnType)) 
-								continue;
-							ArrayList<ITypeBinding> otherParamTypes = getParamTypes(otherMethod); 
-							if(otherParamTypes.size() == myParamTypes.size()) {
-								if(paramTypesMatch(myParamTypes,otherParamTypes))
-										possibleReps.add(otherMethod);
-									}
-								}
 
-							} 
+							if(candReturnType.isAssignmentCompatible(thisReturnType) &&
+									compatibleMethodMatch(myMethodBinding, otherMethod, false)) {
+								possibleReps.add(otherMethod);
+							}
+						}
+					}
 					return true;
 				}
 
@@ -649,7 +700,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				((MethodDeclaration) enclosingMethod).isConstructor();
 	}
 
-	public boolean parentMethodReturnsVoid() {
+	public boolean parentMethodReturnsVoid() { // FIXME fix this.
 		ASTNode enclosingMethod = this.getEnclosingMethod();
 		if (enclosingMethod != null & enclosingMethod instanceof MethodDeclaration) {
 			MethodDeclaration asMd = (MethodDeclaration) enclosingMethod;
