@@ -30,19 +30,17 @@ import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
 public class RangeCheckOperation extends JavaEditOperation {
-
-	public RangeCheckOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
-		super(Mutation.RANGECHECK, location, sources);
-		this.holeNames.add("rangeCheck");
-
-	}
 	
+
+	public RangeCheckOperation(JavaLocation location, EditHole source) {
+		super(location, source);
+	}
 	// FIXME: make this nicer.
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode(); // not used, but being completist
-		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("rangeCheck");
+		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> arrays = thisHole.getSubExps();
 		

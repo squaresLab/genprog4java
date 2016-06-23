@@ -8,12 +8,17 @@ public class ExpHole  extends JavaHole {
 	private Expression holeCode;
 	private Expression locationExp;
 	
-	public ExpHole(String name, Expression holeParent, Expression holeCode, int codeBankId) {
-		super(name, codeBankId);
+	public ExpHole(Expression holeParent, Expression holeCode, int codeBankId) {
+		super("ExpHole", codeBankId);
 		this.holeCode = holeCode;
 		this.locationExp = holeParent;
 	}
 
+	protected ExpHole(String name, Expression holeParent, Expression holeCode, int codeBankId) {
+		super(name, codeBankId);
+		this.holeCode = holeCode;
+		this.locationExp = holeParent;
+	}
 	@Override
 	public ASTNode getCode() {
 		return this.holeCode;

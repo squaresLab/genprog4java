@@ -14,15 +14,12 @@ import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class ExpressionModRem extends ExpressionReplacer {
 
-	public ExpressionModRem(JavaLocation location,  HashMap<String, EditHole> sources) {
-		super(Mutation.EXPREM, location, sources);
-		this.holeNames.add("replaceExp");
-
+	public ExpressionModRem(JavaLocation location, EditHole source) {
+		super(location, source);
 	}
-
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("replaceExp");
+		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode();
 		InfixExpression oldExp = (InfixExpression) thisHole.getCode();
 		int whichSide = thisHole.getChoice();
 		Expression newCondition;

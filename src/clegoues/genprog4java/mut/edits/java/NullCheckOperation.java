@@ -26,15 +26,14 @@ import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
 public class NullCheckOperation extends JavaEditOperation {
 
-	public NullCheckOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
-		super(Mutation.NULLCHECK, location, sources);
-		this.holeNames.add("checkForNull");
+	public NullCheckOperation(JavaLocation location, EditHole source) {
+		super(location, source);
 	}
-
+	
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode();
-		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("checkForNull");
+		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> expressionsFromThisParent = thisHole.getSubExps();
 

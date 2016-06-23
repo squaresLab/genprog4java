@@ -212,7 +212,7 @@ Comparable<Representation<G>> {
 	public static void configure(Properties prop) {
 	}
 	
-	public abstract void performEdit(Mutation edit, Location dst, HashMap<String,EditHole> sources);
+	public abstract void performEdit(Mutation edit, Location dst, EditHole source); 
 
 	public abstract void setFitness(double fitness);
 
@@ -239,13 +239,9 @@ Comparable<Representation<G>> {
 		return allLines;
 	}
 
-	public abstract TreeSet<WeightedHole> editSources(Location stmtId, Mutation editType, String hole);
+	public abstract TreeSet<WeightedHole> editSources(Location stmtId, Mutation editType);
 
 	public abstract Boolean doesEditApply(Location location, Mutation editType);
 
-	public abstract List<String> holesForMutation(Mutation mut);
-
-	// FIXME: this is a temporary hack to get around a merge with the template refactor
-	public abstract void setAllPossibleStmtsToFaultyLocalization();
 	public abstract void setAllPossibleStmtsToFixLocalization();
 }

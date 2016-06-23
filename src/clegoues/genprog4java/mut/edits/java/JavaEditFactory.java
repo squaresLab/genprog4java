@@ -44,7 +44,7 @@ public class JavaEditFactory {
 
 	protected Logger logger = Logger.getLogger(JavaEditOperation.class);
 
-	public JavaEditOperation makeEdit(Mutation edit, Location dst, HashMap<String,EditHole> sources) {
+	public JavaEditOperation makeEdit(Mutation edit, Location dst, EditHole sources) {
 		switch(edit) {
 		case DELETE: 
 			return new JavaDeleteOperation((JavaLocation) dst);
@@ -198,8 +198,7 @@ public class JavaEditFactory {
 
 
 
-	public TreeSet<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType,
-			String holeName) { // I notice that I'm really not using hole name, here, hm...maybe I can get rid of it?
+	public TreeSet<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType) {
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 		TreeSet<EditHole> retVal = new TreeSet<EditHole>();
 
@@ -212,7 +211,7 @@ public class JavaEditFactory {
 				for(WeightedAtom fixStmt : fixStmts) {
 					JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
 					ASTNode fixAST = potentialFixStmt.getASTNode();
-					retVal.add(new StatementHole(holeName, (Statement) fixAST, potentialFixStmt.getStmtId()));
+					retVal.add(new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId()));
 				}
 			break;
 		case SWAP:
@@ -223,7 +222,7 @@ public class JavaEditFactory {
 					if (there.getAtom() == location.getId()) { // FIXME: this check looks weird to me.  Test swap.
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
 						ASTNode fixAST = potentialFixStmt.getASTNode();
-						retVal.add(new StatementHole(holeName, (Statement) fixAST, potentialFixStmt.getStmtId()));
+						retVal.add(new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId()));
 						break;
 					}
 				}
@@ -233,28 +232,28 @@ public class JavaEditFactory {
 		case UBOUNDSET:
 		case RANGECHECK:
 		case OFFBYONE:  
-			return JavaHole.makeSubExpsHoles(holeName, locationStmt.getArrayAccesses()); 
+			return JavaHole.makeSubExpsHoles(locationStmt.getArrayAccesses()); 
 		case NULLCHECK:
-			return JavaHole.makeSubExpsHoles(holeName, locationStmt.getNullCheckables());
+			return JavaHole.makeSubExpsHoles(locationStmt.getNullCheckables());
 		case CASTCHECK:
-			return JavaHole.makeSubExpsHoles(holeName, locationStmt.getCasts());
+			return JavaHole.makeSubExpsHoles(locationStmt.getCasts());
 		case FUNREP:
 			Map<ASTNode, List<IMethodBinding>> methodReplacements = locationStmt.getCandidateMethodReplacements();
 			for(Map.Entry<ASTNode,List<IMethodBinding>> entry : methodReplacements.entrySet()) {
 				ASTNode replacableMethod = entry.getKey();
 				List<IMethodBinding> possibleReplacements = entry.getValue();
 					for(IMethodBinding possibleReplacement : possibleReplacements) {
-						retVal.add(new MethodInfoHole(holeName,replacableMethod, locationStmt.getStmtId(), possibleReplacement));
+						retVal.add(new MethodInfoHole(replacableMethod, locationStmt.getStmtId(), possibleReplacement));
 					}
 				}
 			break;
 		case PARREP:
-			return JavaHole.makeExpHole(holeName, locationStmt.getReplacableMethodParameters(variant.semanticInfo), locationStmt);
+			return JavaHole.makeExpHole(locationStmt.getReplacableMethodParameters(variant.semanticInfo), locationStmt);
 		case EXPREP:
 			Map<ASTNode, List<Expression>> replaceableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
 			for(Entry<ASTNode, List<Expression>> entries : replaceableExpressions.entrySet()) { 
 				for(ASTNode exp : entries.getValue()) {
-					EditHole replaceHole = new ExpHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId());
+					EditHole replaceHole = new ExpHole((Expression) entries.getKey(), (Expression) exp, locationStmt.getStmtId());
 					retVal.add(replaceHole);
 				}
 			}
@@ -263,8 +262,8 @@ public class JavaEditFactory {
 			Map<ASTNode, List<Expression>> shrinkableExpressions = locationStmt.getShrinkableConditionalExpressions();
 			for(Entry<ASTNode, List<Expression>> entries : shrinkableExpressions.entrySet()) {
 				for(ASTNode exp : entries.getValue()) {
-					EditHole shrinkableExpHole1 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 0);
-					EditHole shrinkableExpHole2 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 1);
+					EditHole shrinkableExpHole1 = new ExpChoiceHole((Expression) entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 0);
+					EditHole shrinkableExpHole2 = new ExpChoiceHole((Expression) entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 1);
 					retVal.add(shrinkableExpHole1);
 					retVal.add(shrinkableExpHole2);
 				}
@@ -273,8 +272,8 @@ public class JavaEditFactory {
 		case PARREM:
 			Map<ASTNode,List<Integer>> options = locationStmt.getShrinkableParameterMethods();
 			for(Map.Entry<ASTNode, List<Integer>> nodeOption : options.entrySet()) {
-				for(Integer option : nodeOption.getValue()) {
-				EditHole shrinkableParamHole = new ExpChoiceHole(holeName, nodeOption.getKey(), (Expression) nodeOption.getKey(), locationStmt.getStmtId(), option);
+				for(Integer option : nodeOption.getValue()) { // probably wrong
+				EditHole shrinkableParamHole = new ExpChoiceHole((Expression) nodeOption.getKey(), (Expression) nodeOption.getKey(), locationStmt.getStmtId(), option);
 				retVal.add(shrinkableParamHole);
 				}
 			}
@@ -283,8 +282,8 @@ public class JavaEditFactory {
 			Map<ASTNode, List<Expression>> extendableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
 				for(Entry<ASTNode, List<Expression>> entries : extendableExpressions.entrySet()) { 
 					for(ASTNode exp : entries.getValue()) {
-					EditHole shrinkableExpHole1 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 0);
-					EditHole shrinkableExpHole2 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 1);
+					EditHole shrinkableExpHole1 = new ExpChoiceHole((Expression) entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 0);
+					EditHole shrinkableExpHole2 = new ExpChoiceHole((Expression) entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 1);
 					retVal.add(shrinkableExpHole1);
 					retVal.add(shrinkableExpHole2);
 				}
@@ -317,11 +316,11 @@ public class JavaEditFactory {
 		case REPLACE:
 			//If it is a return statement, nothing should be appended after it, since it would be dead code
 			if(!(locationStmt.getASTNode() instanceof ReturnStatement || locationStmt.getASTNode() instanceof ThrowStatement )){
-				return this.editSources(variant, location,  editType, "singleHole").size() > 0;
+				return this.editSources(variant, location,  editType).size() > 0;
 			}
 			return false;
 		case SWAP: 
-			return this.editSources(variant, location,  editType, "singleHole").size() > 0;
+			return this.editSources(variant, location,  editType).size() > 0;
 		case DELETE: 			
 			return locationStmt.canBeDeleted();
 		case OFFBYONE:  
@@ -357,51 +356,4 @@ public class JavaEditFactory {
 		return false;
 	}
 
-
-	public List<String> holesForMutation(Mutation mut) { // this info should probably be static, and it's weird
-		// to have it split between this factory and the individual edits (FIXME)
-		ArrayList<String> retVal = new ArrayList<String>();
-		switch(mut) {
-		case APPEND:
-		case REPLACE: 
-		case SWAP: 
-			retVal.add("singleHole"); 
-			return retVal;
-		case DELETE: return null;
-		case NULLCHECK: 
-			retVal.add("checkForNull");
-			return retVal;
-		case UBOUNDSET:
-			retVal.add("upperBoundCheck");
-			return retVal;
-		case LBOUNDSET:
-			retVal.add("lowerBoundCheck");
-			return retVal;
-		case OFFBYONE:
-			retVal.add("offByOne");
-			return retVal;
-		case RANGECHECK: 
-			retVal.add("rangeCheck");
-			return retVal;
-		case FUNREP:
-		case PARREP:	
-		case PARREM:
-		case EXPREP:
-		case EXPADD:
-		case EXPREM:
-			retVal.add("replaceExp");
-			return retVal;
-		case CASTCHECK:
-			retVal.add("classCast");
-			return retVal;
-		case PARADD:
-			retVal.add("addParameter");
-			return retVal;
-		case OBJINIT:
-		case SIZECHECK:
-			logger.fatal("Unhandled edit type in holesForMutation.  Handle it in JavaEditFactory and try again.");
-			return null;
-		}
-		return null;
-	}
 }

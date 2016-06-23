@@ -37,21 +37,13 @@ import java.util.HashMap;
 import java.util.List;
 
 public interface EditOperation<R> {
-
-	public Mutation getType();
-
-	public void setType(Mutation type);
 	
-	public List<String> getHoles();
-
-	public EditHole getHoleCode(String holeName);
+	public EditHole getHoleCode();
 	
 	public Location getLocation();
 
-	public void setHoleCode(String holeName, EditHole target);
+	public void setHoleCode(EditHole target);
 
 	public void edit(R rewriter);
 	
-	public void setAllHoles(HashMap<String,EditHole> holes);
-
 }

@@ -12,15 +12,14 @@ import clegoues.genprog4java.mut.EditHole;
 
 public class JavaReplaceOperation extends JavaEditOperation {
 	
-	public JavaReplaceOperation(JavaLocation location,
-			HashMap<String,EditHole> fixCode) {
-		super(Mutation.REPLACE, location, fixCode);
-		holeNames.add("singleHole");
+	public JavaReplaceOperation(JavaLocation location, EditHole source) {
+		super(location, source);
 	}
+	
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = this.getLocationNode(); 
-		StatementHole fixHole = (StatementHole) this.getHoleCode("singleHole");
+		StatementHole fixHole = (StatementHole) this.getHoleCode();
 		ASTNode fixCodeNode =
 				 ASTNode.copySubtree(locationNode.getAST(), fixHole.getCode());
 		rewriter.replace(locationNode, fixCodeNode, null);
@@ -28,7 +27,7 @@ public class JavaReplaceOperation extends JavaEditOperation {
 	
 	@Override
 	public String toString() {
-		StatementHole fixHole = (StatementHole) this.getHoleCode("singleHole");
+		StatementHole fixHole = (StatementHole) this.getHoleCode();
 		return "r(" + this.getLocation().getId() + "," + fixHole.getCodeBankId() + ")";
 	}
 }
