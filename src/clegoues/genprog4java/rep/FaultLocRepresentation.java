@@ -61,7 +61,6 @@ import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
-import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.util.ConfigurationBuilder;
@@ -127,10 +126,9 @@ CachingRepresentation<G> {
 	protected ArrayList<Location> faultLocalization = new ArrayList<Location>();
 	protected ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
-	public FaultLocRepresentation(ArrayList<HistoryEle> history,
-			ArrayList<G> genome2, ArrayList<Location> arrayList,
+	public FaultLocRepresentation(ArrayList<G> genome2, ArrayList<Location> arrayList,
 			ArrayList<WeightedAtom> arrayList2) {
-		super(history, genome2);
+		super(genome2);
 		this.faultLocalization = new ArrayList<Location>(arrayList);
 		this.fixLocalization = new ArrayList<WeightedAtom>(arrayList2);
 	}

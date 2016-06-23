@@ -9,10 +9,10 @@ public class TemplatePlaygroundTest {
 	if(y<z){
 	   if(x<y){
 		ret = y;
-	   }else if(x<z){
+	   }else if(x<z  && y > z){
 		//ret = y; // bug, it should be ret = x;
 		   if(z > x) {
-		   retOne(5);
+		   retOne(5, 6);
 		   }
 	   }
 	}else{
@@ -34,6 +34,10 @@ public class TemplatePlaygroundTest {
 	double r = 5;
 	String w = "Ello";
  	TemplatePlaygroundTest ww = new TemplatePlaygroundTest();
+    }
+    
+    public void retOne(int foo, int bar) {
+     	TemplatePlaygroundTest ww = new TemplatePlaygroundTest();
     }
     public void retTwo(int foo){
     	int i = 0;

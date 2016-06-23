@@ -86,4 +86,21 @@ public class ClassCastChecker extends JavaEditOperation {
 		}
 		rewriter.replace(parent, ifstmt, null);
 	}
+	
+	@Override
+	public String toString() {
+		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("classCast");
+		List<ASTNode> expressionsFromThisParent = thisHole.getSubExps();
+		Collections.reverse(expressionsFromThisParent);
+		String retval = "cc(@" + this.getLocation().getId() + ": [ ";
+		String castString = null;
+		for(ASTNode castToCheck : expressionsFromThisParent){
+			CastExpression asCast = (CastExpression) castToCheck;
+			if(castString != null) {
+				retval += ", ";
+			} 
+			retval += asCast.toString();
+		}
+		return retval + " ])";
+	}
 }

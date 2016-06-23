@@ -28,4 +28,10 @@ public class JavaSwapOperation extends JavaEditOperation {
 		rewriter.replace(fixCode.getCode(), ASTNode
 				.copySubtree(locationNode.getAST(), this.getLocationNode()), null); 
 	}
+	
+	@Override
+	public String toString() {
+		StatementHole fixHole = (StatementHole) this.getHoleCode("singleHole");
+		return "s(" + this.getLocation().getId() + "," + fixHole.getCodeBankId() + ")";
+	}
 }
