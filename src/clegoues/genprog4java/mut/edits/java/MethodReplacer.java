@@ -15,18 +15,18 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
 
-public class MethodReplacer extends JavaEditOperation {
+public class MethodReplacer extends ExpressionReplacer {
 
 	public MethodReplacer(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.FUNREP, location, sources);
-		this.holeNames.add("replaceMethod");
+		this.holeNames.add("replaceExp");
 	}
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
 		ASTNode locationNode = locationStmt.getASTNode();
-		MethodInfoHole thisHole = (MethodInfoHole) this.getHoleCode("replaceMethod");
+		MethodInfoHole thisHole = (MethodInfoHole) this.getHoleCode("replaceExp");
 		ASTNode toReplace = thisHole.getCode();
 		IMethodBinding replaceWith = thisHole.getMethodInfo();
 
@@ -39,7 +39,7 @@ public class MethodReplacer extends JavaEditOperation {
 			ASTNode newParam = rewriter.createCopyTarget(param);
 			newNode.arguments().add(newParam);
 		}		
-		rewriter.replace(toReplace, newNode, null);
+		this.replaceExp(rewriter, newNode);
 	}
 	
 	@Override

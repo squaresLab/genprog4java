@@ -12,33 +12,29 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.ExpChoiceHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
-public class ExpressionModRem extends JavaEditOperation {
+public class ExpressionModRem extends ExpressionReplacer {
 
 	public ExpressionModRem(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.EXPREM, location, sources);
-		this.holeNames.add("condExpRem");
+		this.holeNames.add("replaceExp");
 
 	}
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("condExpRem");
-		Expression oldExp = (Expression) thisHole.getCode();
+		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("replaceExp");
+		InfixExpression oldExp = (InfixExpression) thisHole.getCode();
 		int whichSide = thisHole.getChoice();
-		while(oldExp instanceof ParenthesizedExpression) {
-			oldExp = ((ParenthesizedExpression) oldExp).getExpression();	
-		}
-		InfixExpression realOldExp = (InfixExpression) oldExp;
 		Expression newCondition;
 		switch(whichSide) {
-		case 0: newCondition = (Expression) rewriter.createCopyTarget(realOldExp.getLeftOperand());
+		case 0: newCondition = (Expression) rewriter.createCopyTarget(oldExp.getLeftOperand());
 		break;
 		case 1:
 		default:
-			newCondition = (Expression) rewriter.createCopyTarget(realOldExp.getRightOperand());
+			newCondition = (Expression) rewriter.createCopyTarget(oldExp.getRightOperand());
 			break;
 		}
-		rewriter.replace(oldExp, newCondition, null);
+		this.replaceExp(rewriter, newCondition);
 	}
 	
 	@Override

@@ -16,18 +16,20 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.ExpChoiceHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
-public class MethodParameterRemover extends JavaEditOperation {
+public class MethodParameterRemover extends ExpressionReplacer {
+	
+	// FIXME: should you extend expression replacer?
 
 	protected MethodParameterRemover(JavaLocation location, HashMap<String, EditHole> sources) {
 		super(Mutation.PARREM, location, sources);
-		this.holeNames.add("remParameter");
+		this.holeNames.add("replaceExp");
 	}
 
 	@Override
 
 	public void edit(ASTRewrite rewriter) {
 		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
-		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("remParameter");
+		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("replaceExp");
 		Statement parentExp = (Statement) locationStmt.getASTNode();
 		int numRemove = thisHole.getChoice();
 		MethodInvocation methodInvocation = (MethodInvocation) thisHole.getCode();
@@ -43,7 +45,7 @@ public class MethodParameterRemover extends JavaEditOperation {
 			ASTNode newParam = rewriter.createCopyTarget(oldArgs.get(i));
 			newMethodInvocation.arguments().add(newParam);
 		}
-		rewriter.replace(thisHole.getHoleParent(), newMethodInvocation, null); 
+		this.replaceExp(rewriter, newMethodInvocation);
 	}
 
 	@Override

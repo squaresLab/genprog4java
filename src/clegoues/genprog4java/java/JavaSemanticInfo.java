@@ -38,8 +38,8 @@ public class JavaSemanticInfo {
 	private static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
 	private static TreeSet<String> finalVariables = new TreeSet<String>();
 	private static Map<String, Map<String,List<ASTNode>>> methodParamExpressionsInScope = null;
-	private static Map<String, List<ASTNode>> conditionalExpressionsInScope = null;
-	private static Map<String, List<ASTNode>> conditionExtensionsInScope = null;
+	private static Map<String, List<Expression>> conditionalExpressionsInScope = null;
+	private static Map<String, List<Expression>> conditionExtensionsInScope = null;
 
 	public List<ASTNode> getMethodParamReplacementExpressions(final String methodName, MethodDeclaration md, String desiredType) {
 		Map<String,List<ASTNode>> typeToExpressions = null;
@@ -77,15 +77,15 @@ public class JavaSemanticInfo {
 		return typeToExpressions.get(desiredType);
 	}
 
-	public List<ASTNode> getConditionalExtensionExpressions(String methodName, MethodDeclaration md) {
+	public List<Expression> getConditionalExtensionExpressions(String methodName, MethodDeclaration md) {
 		if(conditionExtensionsInScope == null) {
-			conditionExtensionsInScope = new HashMap<String, List<ASTNode>>();
+			conditionExtensionsInScope = new HashMap<String, List<Expression>>();
 		}
 		if(conditionExtensionsInScope.containsKey(methodName)) {
 			return conditionExtensionsInScope.get(methodName);
 		} 
-		List<ASTNode> fullConditionsInScope = this.getConditionalReplacementExpressions(methodName, md);
-		final List<ASTNode> expressionsInScope = new ArrayList<ASTNode>(); // possible FIXME: do I start with the list above?  I think it will auto-populate, right?
+		List<Expression> fullConditionsInScope = this.getConditionalReplacementExpressions(methodName, md);
+		final List<Expression> expressionsInScope = new ArrayList<Expression>(); // possible FIXME: do I start with the list above?  I think it will auto-populate, right?
 		conditionExtensionsInScope.put(methodName, expressionsInScope);
 		for(ASTNode cond : fullConditionsInScope) {
 			cond.accept(new ASTVisitor() {
@@ -155,14 +155,14 @@ public class JavaSemanticInfo {
 		return expressionsInScope;
 	}
 
-	public List<ASTNode> getConditionalReplacementExpressions(final String methodName, MethodDeclaration md) {
+	public List<Expression> getConditionalReplacementExpressions(final String methodName, MethodDeclaration md) {
 		if(conditionalExpressionsInScope == null) {
-			conditionalExpressionsInScope = new HashMap<String,List<ASTNode>>();
+			conditionalExpressionsInScope = new HashMap<String,List<Expression>>();
 		}
 		if(conditionalExpressionsInScope.containsKey(methodName)) {
 			return conditionalExpressionsInScope.get(methodName);
 		} else {		
-			final List<ASTNode> expressionsInScope = new ArrayList<ASTNode>();
+			final List<Expression> expressionsInScope = new ArrayList<Expression>();
 			conditionalExpressionsInScope.put(methodName, expressionsInScope);
 			md.accept(new ASTVisitor() {
 				public boolean visit(ConditionalExpression node) {

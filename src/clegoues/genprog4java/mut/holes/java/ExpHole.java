@@ -6,19 +6,12 @@ import org.eclipse.jdt.core.dom.Expression;
 public class ExpHole  extends JavaHole {
 
 	private Expression holeCode;
-	private ASTNode holeParent;
+	private Expression locationExp;
 	
-	public ExpHole () { }
-	
-	public ExpHole(String name, Expression holeCode, int codeBankId) {
+	public ExpHole(String name, Expression holeParent, Expression holeCode, int codeBankId) {
 		super(name, codeBankId);
 		this.holeCode = holeCode;
-	}
-
-	public ExpHole(String name, ASTNode holeParent, Expression holeCode, int codeBankId) {
-		super(name, codeBankId);
-		this.holeCode = holeCode;
-		this.holeParent = holeParent;
+		this.locationExp = holeParent;
 	}
 
 	@Override
@@ -31,12 +24,12 @@ public class ExpHole  extends JavaHole {
 		this.holeCode = (Expression) code;		
 	}
 
-	public ASTNode getHoleParent() {
-		return holeParent;
+	public Expression getLocationExp() {
+		return locationExp;
 	}
 
-	public void setHoleParent(ASTNode holeSite) {
-		this.holeParent = holeSite;
+	public void setLocationExp(Expression holeSite) {
+		this.locationExp = holeSite;
 	}
 
 
