@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -39,6 +40,9 @@ public class ClassCastChecker extends JavaEditOperation {
 		IfStatement ifstmt = locationNode.getAST().newIfStatement();
 		Expression everythingInTheCondition = null; 
 
+		if(everythingInTheCondition instanceof Object) {
+			Object casted = (Object) everythingInTheCondition;
+		}
 		// for each of the expressions that can be null
 		for(ASTNode castToCheck : expressionsFromThisParent){
 			CastExpression asCast = (CastExpression) castToCheck;
@@ -73,9 +77,9 @@ public class ClassCastChecker extends JavaEditOperation {
 			ifstmt.setThenStatement((Statement) newReturn);
 		} else {
 			ifstmt.setExpression(everythingInTheCondition);
-			ASTNode thenStmt = (Statement) parent;
-			thenStmt = ASTNode.copySubtree(parent.getAST(), thenStmt);
-			ifstmt.setThenStatement((Statement) thenStmt);
+			Block thenBlock = parent.getAST().newBlock();
+			thenBlock.statements().add(ASTNode.copySubtree(parent.getAST(), parent));
+			ifstmt.setThenStatement(thenBlock);
 		}
 		rewriter.replace(parent, ifstmt, null);
 	}

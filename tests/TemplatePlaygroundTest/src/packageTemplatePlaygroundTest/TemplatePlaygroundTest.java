@@ -5,15 +5,14 @@ public class TemplatePlaygroundTest {
     public int mid(int x, int y, int z){
     	int ret = z;
     	int[] foo = new int[5];
+     	TemplatePlaygroundTest ww = new TemplatePlaygroundTest();
 
 	if(y<z){
 	   if(x<y){
 		ret = y;
 	   }else if(x<z  && y > z){
 		//ret = y; // bug, it should be ret = x;
-		   if(z > x) {
-		   retOne(5);
-		   }
+		   Object www = (Object) ww;
 	   }
 	}else{
 	   if(x>y){

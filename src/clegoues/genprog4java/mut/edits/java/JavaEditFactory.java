@@ -250,20 +250,15 @@ public class JavaEditFactory {
 		case PARREP:
 			return JavaHole.makeExpHole(locationStmt.getReplacableMethodParameters(variant.semanticInfo), locationStmt);
 		case EXPREP:
-			Map<ASTNode, List<Expression>> replaceableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
-			for(Entry<ASTNode, List<Expression>> entries : replaceableExpressions.entrySet()) { 
-				for(ASTNode exp : entries.getValue()) {
-					EditHole replaceHole = new ExpHole((Expression) entries.getKey(), (Expression) exp, locationStmt.getStmtId());
-					retVal.add(replaceHole);
-				}
-			}
-			return retVal; // FIXME to unify with makeExpHole? Or: one with parent, and one without?
-		case EXPREM:
-			Map<ASTNode, List<Expression>> shrinkableExpressions = locationStmt.getShrinkableConditionalExpressions();
-			for(Entry<ASTNode, List<Expression>> entries : shrinkableExpressions.entrySet()) {
-				for(ASTNode exp : entries.getValue()) {
-					EditHole shrinkableExpHole1 = new ExpChoiceHole((Expression) entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 0);
-					EditHole shrinkableExpHole2 = new ExpChoiceHole((Expression) entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 1);
+			return JavaHole.makeExpHole(locationStmt.getConditionalExpressions(variant.semanticInfo), locationStmt);
+	
+
+		case EXPADD:
+			Map<Expression, List<Expression>> extendableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
+				for(Entry<Expression, List<Expression>> entries : extendableExpressions.entrySet()) { 
+					for(Expression exp : entries.getValue()) {
+					EditHole shrinkableExpHole1 = new ExpChoiceHole(entries.getKey(), exp, locationStmt.getStmtId(), 0);
+					EditHole shrinkableExpHole2 = new ExpChoiceHole( entries.getKey(), exp, locationStmt.getStmtId(), 1);
 					retVal.add(shrinkableExpHole1);
 					retVal.add(shrinkableExpHole2);
 				}
@@ -278,21 +273,29 @@ public class JavaEditFactory {
 				}
 			}
 			return retVal;
-		case EXPADD:
-			Map<ASTNode, List<Expression>> extendableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
-				for(Entry<ASTNode, List<Expression>> entries : extendableExpressions.entrySet()) { 
-					for(ASTNode exp : entries.getValue()) {
-					EditHole shrinkableExpHole1 = new ExpChoiceHole((Expression) entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 0);
-					EditHole shrinkableExpHole2 = new ExpChoiceHole((Expression) entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 1);
+		case EXPREM:
+			Map<Expression, List<Expression>> shrinkableExpressions = locationStmt.getShrinkableConditionalExpressions();
+			for(Entry<Expression, List<Expression>> entries : shrinkableExpressions.entrySet()) {
+				for(Expression exp : entries.getValue()) { 
+					EditHole shrinkableExpHole1 = new ExpChoiceHole(exp, exp, locationStmt.getStmtId(), 0);
+					EditHole shrinkableExpHole2 = new ExpChoiceHole(exp, exp, locationStmt.getStmtId(), 1);
 					retVal.add(shrinkableExpHole1);
 					retVal.add(shrinkableExpHole2);
 				}
 			}
 			return retVal;
 		case PARADD:
-			Map<ASTNode, List<Map<Integer, List<ASTNode>>>> extensionOptions = locationStmt.getExtendableParameterMethods(variant.semanticInfo);
-			for(Entry<ASTNode, List<Map<Integer, List<ASTNode>>>> nodeOption : extensionOptions.entrySet()) {
-				for(Map<Integer, List<ASTNode>> option : nodeOption.getValue()) {
+			Map<ASTNode, List<Map<Integer, List<Expression>>>> extensionOptions = locationStmt.getExtendableParameterMethods(variant.semanticInfo);
+			for(Entry<ASTNode, List<Map<Integer, List<Expression>>>> nodeOption : extensionOptions.entrySet()) {
+				for(Map<Integer, List<Expression>> option : nodeOption.getValue()) {
+					
+					int numKeys = option.size();
+					Map<Integer,List<ASTNode>> args = new HashMap<Integer,List<ASTNode>>();
+					
+					for(int i = 0; i < numKeys; i++) {
+						List<Expression> optionsForThisParam = option.get(i);
+						
+					}
 			//	EditHole shrinkableParamHole = new ExpChoiceHole(holeName, nodeOption.getKey(), (Expression) nodeOption.getKey(), locationStmt.getStmtId(), option);
 				//retVal.add(shrinkableParamHole);
 					
@@ -331,8 +334,8 @@ public class JavaEditFactory {
 		case FUNREP: 
 			return locationStmt.getCandidateMethodReplacements().size() > 0; 
 		case PARREP:
-			Map<ASTNode, Map<ASTNode, List<ASTNode>>> methodParams = locationStmt.getReplacableMethodParameters(variant.semanticInfo);
-			for(Map.Entry<ASTNode, Map<ASTNode, List<ASTNode>>> entry : methodParams.entrySet()) {
+			Map<Expression, List<Expression>> methodParams = locationStmt.getReplacableMethodParameters(variant.semanticInfo);
+			for(Entry<Expression, List<Expression>> entry : methodParams.entrySet()) {
 				if(!entry.getValue().isEmpty())
 					return true;
 			}

@@ -276,13 +276,13 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		return casts;
 	}
 
-	private Map<ASTNode, List<Expression>> shrinkableExpressions = null;
+	private Map<Expression, List<Expression>> shrinkableExpressions = null;
 
-	public Map<ASTNode, List<Expression>> getShrinkableConditionalExpressions() {
+	public Map<Expression, List<Expression>> getShrinkableConditionalExpressions() {
 		if(shrinkableExpressions != null) {
 			return shrinkableExpressions;
 		}
-		shrinkableExpressions = new HashMap<ASTNode, List<Expression>>();
+		shrinkableExpressions = new HashMap<Expression, List<Expression>>();
 		this.getASTNode().accept(new ASTVisitor() {
 
 			private boolean isShrinkable(InfixExpression.Operator op) {
@@ -290,7 +290,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						(op == InfixExpression.Operator.CONDITIONAL_OR);
 			}
 			
-			private void handleExp(ASTNode node, Expression condExp) {
+			private void handleExp(Expression node, Expression condExp) {
 				if(condExp instanceof InfixExpression) {
 					if(isShrinkable(((InfixExpression) condExp).getOperator())) {
 						List<Expression> shrinkable;
@@ -310,22 +310,22 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 			}
 			public boolean visit(IfStatement node) {
-				handleExp(node, node.getExpression());
+				handleExp(node.getExpression(), node.getExpression());
 				return true;
 			}
 		});
 		return shrinkableExpressions;
 	}
 
-	private Map<ASTNode,List<Expression>> extendableExpressions = null;
+	private Map<Expression,List<Expression>> extendableExpressions = null;
 
 	// FIXME: find a way to sort options by distance where sorting by distance is specified
 	// in PAR paper
-	public Map<ASTNode, List<Expression>> getConditionalExpressions(final JavaSemanticInfo semanticInfo) {
+	public Map<Expression, List<Expression>> getConditionalExpressions(final JavaSemanticInfo semanticInfo) {
 		if(extendableExpressions != null) {
 			return extendableExpressions;
 		}
-		extendableExpressions = new HashMap<ASTNode, List<Expression>>();
+		extendableExpressions = new HashMap<Expression, List<Expression>>();
 
 		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
 		final String methodName = md.getName().getIdentifier();
@@ -361,11 +361,11 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	// FIXME: fix Search for when we don't have enough options or edit list is empty.
 	
-	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> methodParamReplacements = null;
+	private Map<Expression,List<Expression>> methodParamReplacements = null;
 
-	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> getReplacableMethodParameters(final JavaSemanticInfo semanticInfo) {
+	public Map<Expression,List<Expression>> getReplacableMethodParameters(final JavaSemanticInfo semanticInfo) {
 		if(methodParamReplacements == null) {
-			methodParamReplacements = new HashMap<ASTNode, Map<ASTNode,List<ASTNode>>>();
+			methodParamReplacements = new HashMap<Expression,List<Expression>>();
 		}
 		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
 		final String methodName = md.getName().getIdentifier();
@@ -373,28 +373,19 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		this.getASTNode().accept(new ASTVisitor() {
 			// method to visit all Expressions relevant for this in locationNode and
 			// store their parents
-			public boolean visit(MethodInvocation node) {
-				// if there exists another invocation that this works for...
-				Map<ASTNode,List<ASTNode>> thisMethodCall;
-				if(methodParamReplacements.containsKey(node)) {
-					thisMethodCall = methodParamReplacements.get(node);
-				} else {
-					thisMethodCall = new HashMap<ASTNode, List<ASTNode>>();
-					methodParamReplacements.put(node, thisMethodCall);
-				}
-
+			public boolean visit(MethodInvocation node) {		
 				List<Expression> args = node.arguments();
 				for(Expression arg : args) {
 					ITypeBinding paramType = arg.resolveTypeBinding();
 					if(paramType != null) { 
 						String typName = paramType.getName();
-						List<ASTNode> replacements = semanticInfo.getMethodParamReplacementExpressions(methodName, md, typName);
-						List<ASTNode> thisList = null;
-						if(thisMethodCall.containsKey(arg)) {
-							thisList = thisMethodCall.get(arg);
+						List<Expression> replacements = semanticInfo.getMethodParamReplacementExpressions(methodName, md, typName);
+						List<Expression> thisList = null;
+						if(methodParamReplacements.containsKey(arg)) {
+							thisList = methodParamReplacements.get(arg);
 						} else {
-							thisList = new ArrayList<ASTNode>();
-							thisMethodCall.put(arg, thisList);
+							thisList = new ArrayList<Expression>();
+							methodParamReplacements.put(arg, thisList);
 						}
 						thisList.addAll(replacements);
 					}
@@ -438,11 +429,11 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	}
 	
 
-	private Map<ASTNode,List<Map<Integer,List<ASTNode>>>> extendableParameterMethods = null;
+	private Map<ASTNode,List<Map<Integer,List<Expression>>>> extendableParameterMethods = null;
 
-	public Map<ASTNode, List<Map<Integer, List<ASTNode>>>> getExtendableParameterMethods(final JavaSemanticInfo semanticInfo) {
+	public Map<ASTNode, List<Map<Integer, List<Expression>>>> getExtendableParameterMethods(final JavaSemanticInfo semanticInfo) {
 		if(extendableParameterMethods == null) {
-			extendableParameterMethods = new HashMap<ASTNode,List<Map<Integer,List<ASTNode>>>>();
+			extendableParameterMethods = new HashMap<ASTNode,List<Map<Integer,List<Expression>>>>();
 
 			final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
 			final String methodName = md.getName().getIdentifier();
@@ -477,22 +468,22 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					}
 					if(compatibleMethods.size() > 0) {
 						ArrayList<ITypeBinding> myTypes = getParamTypes(myMethodBinding);
-						List<Map<Integer,List<ASTNode>>> thisNodesOptions;
+						List<Map<Integer,List<Expression>>> thisNodesOptions;
 						if(extendableParameterMethods.containsKey(node)) {
 							thisNodesOptions = extendableParameterMethods.get(node);
 						} else {
-							thisNodesOptions = new ArrayList<Map<Integer,List<ASTNode>>>();
+							thisNodesOptions = new ArrayList<Map<Integer,List<Expression>>>();
 							extendableParameterMethods.put(node,thisNodesOptions);
 						}
 						for(IMethodBinding compatibleMethod : compatibleMethods) {
 							ArrayList<ITypeBinding> compatibleParamTypes = getParamTypes(compatibleMethod);
 							List<ITypeBinding> toExtend = compatibleParamTypes.subList(myTypes.size()-1, compatibleParamTypes.size());
 							
-							Map<Integer, List<ASTNode>> thisExtension = new HashMap<Integer, List<ASTNode>>();
+							Map<Integer, List<Expression>> thisExtension = new HashMap<Integer, List<Expression>>();
 							boolean extensionDoable = true;
 							int i = 0;
 							for(ITypeBinding necessaryExp : toExtend) {
-								List<ASTNode> replacements = semanticInfo.getMethodParamReplacementExpressions(methodName, md, necessaryExp.getName());
+								List<Expression> replacements = semanticInfo.getMethodParamReplacementExpressions(methodName, md, necessaryExp.getName());
 								if(replacements.isEmpty()) {
 									extensionDoable = false;
 									break;
