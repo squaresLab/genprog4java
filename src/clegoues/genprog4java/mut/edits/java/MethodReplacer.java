@@ -1,28 +1,19 @@
 package clegoues.genprog4java.mut.edits.java;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.java.MethodInfo;
-import clegoues.genprog4java.main.ClassInfo;
-import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
-import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
 public class MethodReplacer extends JavaEditOperation {
 
