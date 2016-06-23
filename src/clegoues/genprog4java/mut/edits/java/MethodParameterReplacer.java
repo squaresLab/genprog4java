@@ -11,25 +11,13 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
-public class MethodParameterReplacer extends JavaEditOperation {
+public class MethodParameterReplacer extends ExpressionReplacer {
 
 	public MethodParameterReplacer(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.PARREP, location, sources);
 		this.holeNames.add("replaceParameter");
 	}
 
-	public MethodParameterReplacer(Mutation mut, JavaLocation location,  HashMap<String, EditHole> sources) {
-		super(mut, location, sources);
-		this.holeNames.add("replaceParameter");
-	}
-
-	@Override
-	public void edit(ASTRewrite rewriter) {
-		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
-		ExpHole thisHole = (ExpHole) this.getHoleCode("replaceParameter");
-		rewriter.replace(thisHole.getHoleParent(), thisHole.getCode(), null); 
-	}
-	
 	@Override
 	public String toString() {		
 		ExpHole thisHole = (ExpHole) this.getHoleCode("replaceParameter");

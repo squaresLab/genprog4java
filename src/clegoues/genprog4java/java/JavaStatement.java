@@ -332,66 +332,50 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		return shrinkableExpressions;
 	}
 
-	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> extendableExpressions = null;
+	private Map<ASTNode,List<ASTNode>> extendableExpressions = null;
 
 	// FIXME: find a way to sort options by distance where sorting by distance is specified
 	// in PAR paper
-	public Map<ASTNode, Map<ASTNode, List<ASTNode>>> getConditionalExpressions(final JavaSemanticInfo semanticInfo) {
+	public Map<ASTNode, List<ASTNode>> getConditionalExpressions(final JavaSemanticInfo semanticInfo) {
 		if(extendableExpressions != null) {
 			return extendableExpressions;
 		}
-		extendableExpressions = new HashMap<ASTNode, Map<ASTNode, List<ASTNode>>>();
+		extendableExpressions = new HashMap<ASTNode, List<ASTNode>>();
 
 		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
 		final String methodName = md.getName().getIdentifier();
+		final List<ASTNode> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
 
 		this.getASTNode().accept(new ASTVisitor() {
 
-			public boolean visit(IfStatement node) {
-				Expression exp = node.getExpression();
+			private void handleCondition(Expression exp) {
 				// possible FIXME: exclude those that are already in the condition?
-				List<ASTNode> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
-				Map<ASTNode, List<ASTNode>> replacementMap = new HashMap<ASTNode, List<ASTNode>>();
-				extendableExpressions.put(node, replacementMap);
-
 				if(replacements != null) {
 					List<ASTNode> thisList = null;
-					if(replacementMap.containsKey(exp)) {
-						thisList = replacementMap.get(exp);
+					if(extendableExpressions.containsKey(exp)) {
+						thisList = extendableExpressions.get(exp);
 					} else {
 						thisList = new ArrayList<ASTNode>();
-						replacementMap.put(exp, thisList);
+						extendableExpressions.put(exp, thisList);
 					}
 					thisList.addAll(replacements);
 				}
+			}
+			public boolean visit(IfStatement node) {
+				handleCondition(node.getExpression());				
 				return true;
 			}
 
 			public boolean visit(ConditionalExpression node) {
-				Expression exp = node.getExpression();
-				ASTNode parent = getParent(node);
-				List<ASTNode> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
-				Map<ASTNode, List<ASTNode>> replacementMap = new HashMap<ASTNode, List<ASTNode>>();
-				extendableExpressions.put(parent, replacementMap);
-
-				if(replacements != null) {
-					List<ASTNode> thisList = null;
-					if(replacementMap.containsKey(exp)) {
-						thisList = replacementMap.get(exp);
-					} else {
-						thisList = new ArrayList<ASTNode>();
-						replacementMap.put(exp, thisList);
-					}
-					thisList.addAll(replacements);
-				}
+				handleCondition(node.getExpression());
 				return true;
 			}
 		});
 		return extendableExpressions;
 	}
 
-
-
+	// FIXME: fix Search for when we don't have enough options or edit list is empty.
+	
 	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> methodParamReplacements = null;
 
 	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> getReplacableMethodParameters(final JavaSemanticInfo semanticInfo) {
@@ -417,7 +401,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				List<Expression> args = node.arguments();
 				for(Expression arg : args) {
 					ITypeBinding paramType = arg.resolveTypeBinding();
-					if(paramType != null) { // possible FIXME: null if we can't resolve the type binding; maybe we don't want to just give up??
+					if(paramType != null) { 
 						String typName = paramType.getName();
 						List<ASTNode> replacements = semanticInfo.getMethodParamReplacementExpressions(methodName, md, typName);
 						List<ASTNode> thisList = null;
@@ -469,11 +453,15 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	}
 	
 
-	private Map<ASTNode,List<Integer>> extendableParameterMethods = null;
+	private Map<ASTNode,List<Map<Integer,List<ASTNode>>>> extendableParameterMethods = null;
 
-	public Map<ASTNode, List<Integer>> getExtendableParameterMethods() {
+	public Map<ASTNode, List<Map<Integer, List<ASTNode>>>> getExtendableParameterMethods(final JavaSemanticInfo semanticInfo) {
 		if(extendableParameterMethods == null) {
-			extendableParameterMethods = new HashMap<ASTNode,List<Integer>>();
+			extendableParameterMethods = new HashMap<ASTNode,List<Map<Integer,List<ASTNode>>>>();
+
+			final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
+			final String methodName = md.getName().getIdentifier();
+
 			this.getASTNode().accept(new ASTVisitor() {
 				// FIXME: also supermethodinvocations?
 
@@ -485,7 +473,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 					for(IMethodBinding otherMethod : classBinding.getDeclaredMethods()) {
 						if(compatibleMethodMatch(otherMethod,myMethodBinding, true)) {
-							// FIXME find compatible expressions
 							compatibleMethods.add(otherMethod);
 						}
 					}
@@ -504,17 +491,33 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						superClass = superClass.getSuperclass();
 					}
 					if(compatibleMethods.size() > 0) {
-						List<Integer> thisNodesOptions;
+						ArrayList<ITypeBinding> myTypes = getParamTypes(myMethodBinding);
+						List<Map<Integer,List<ASTNode>>> thisNodesOptions;
 						if(extendableParameterMethods.containsKey(node)) {
 							thisNodesOptions = extendableParameterMethods.get(node);
 						} else {
-							thisNodesOptions = new ArrayList<Integer>();
+							thisNodesOptions = new ArrayList<Map<Integer,List<ASTNode>>>();
 							extendableParameterMethods.put(node,thisNodesOptions);
 						}
 						for(IMethodBinding compatibleMethod : compatibleMethods) {
-							ITypeBinding[] parameterTypes = compatibleMethod.getParameterTypes();
-							int numReduce = myMethodBinding.getParameterTypes().length - parameterTypes.length;
-							thisNodesOptions.add(numReduce);
+							ArrayList<ITypeBinding> compatibleParamTypes = getParamTypes(compatibleMethod);
+							List<ITypeBinding> toExtend = compatibleParamTypes.subList(myTypes.size()-1, compatibleParamTypes.size());
+							
+							Map<Integer, List<ASTNode>> thisExtension = new HashMap<Integer, List<ASTNode>>();
+							boolean extensionDoable = true;
+							int i = 0;
+							for(ITypeBinding necessaryExp : toExtend) {
+								List<ASTNode> replacements = semanticInfo.getMethodParamReplacementExpressions(methodName, md, necessaryExp.getName());
+								if(replacements.isEmpty()) {
+									extensionDoable = false;
+									break;
+								}
+								thisExtension.put(i, replacements);
+								i++;
+							}
+							if(extensionDoable) {
+								thisNodesOptions.add(thisExtension);
+							}
 						}
 					}
 					return true;

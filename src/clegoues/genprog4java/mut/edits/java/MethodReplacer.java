@@ -48,5 +48,6 @@ public class MethodReplacer extends JavaEditOperation {
 		return "fr(" + this.getLocation().getId() + ")";
 	}
 	
+	
 }
 

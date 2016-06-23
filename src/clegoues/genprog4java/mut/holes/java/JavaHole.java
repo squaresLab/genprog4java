@@ -1,7 +1,13 @@
 package clegoues.genprog4java.mut.holes.java;
 
-import org.eclipse.jdt.core.dom.ASTNode;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
 
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Expression;
+
+import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.mut.EditHole;
 
 public abstract class JavaHole implements EditHole<ASTNode> {
@@ -42,4 +48,32 @@ public abstract class JavaHole implements EditHole<ASTNode> {
 		return ((Integer) this.getCodeBankId()).toString();
 	}
 
+	public static TreeSet<EditHole> makeSubExpsHoles(String holeName, Map<ASTNode, List<ASTNode>> entryMap) {
+		if(entryMap != null && entryMap.size() > 0) {
+			TreeSet<EditHole> retVal = new TreeSet<EditHole>();
+			for(Map.Entry<ASTNode, List<ASTNode>> entry : entryMap.entrySet()) {
+				retVal.add(new SubExpsHole(holeName, entry.getKey(), entry.getValue()));
+			} 
+			return retVal;
+		} 
+		return null;
+	}
+	
+	// fixme: this is with parent, and one is without
+	
+	public static TreeSet<EditHole> makeExpHole(String holeName, Map<ASTNode, Map<ASTNode, List<ASTNode>>> replacableExps, JavaStatement parentStmt) {
+		if(replacableExps != null && replacableExps.size() > 0) {
+			TreeSet<EditHole> retVal = new TreeSet<EditHole>();
+		for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> funsite : replacableExps.entrySet()) {
+			for(Map.Entry<ASTNode, List<ASTNode>> exps : funsite.getValue().entrySet()) {
+				for(ASTNode replacementExp : exps.getValue()) { 
+					retVal.add(new ExpHole(holeName, exps.getKey(), (Expression) replacementExp, parentStmt.getStmtId()));
+				}
+			}
+		}
+		return retVal;
+		}
+		return null;
+	}
+	
 }
