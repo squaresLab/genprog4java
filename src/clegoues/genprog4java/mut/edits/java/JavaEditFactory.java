@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -28,6 +29,7 @@ import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.ExpChoiceHole;
 import clegoues.genprog4java.mut.holes.java.ExpHole;
+import clegoues.genprog4java.mut.holes.java.JavaHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
 import clegoues.genprog4java.mut.holes.java.StatementHole;
@@ -194,31 +196,8 @@ public class JavaEditFactory {
 		return retVal;
 	}
 
-	private TreeSet<EditHole> makeSubExpsHoles(String holeName, Map<ASTNode, List<ASTNode>> entryMap) {
-		if(entryMap != null && entryMap.size() > 0) {
-			TreeSet<EditHole> retVal = new TreeSet<EditHole>();
-			for(Map.Entry<ASTNode, List<ASTNode>> entry : entryMap.entrySet()) {
-				retVal.add(new SubExpsHole(holeName, entry.getKey(), entry.getValue()));
-			} 
-			return retVal;
-		} 
-		return null;
-	}
-	
-	private TreeSet<EditHole> makeExpHole(String holeName, Map<ASTNode, Map<ASTNode, List<ASTNode>>> replacableExps, JavaStatement parentStmt) {
-		if(replacableExps != null && replacableExps.size() > 0) {
-			TreeSet<EditHole> retVal = new TreeSet<EditHole>();
-		for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> funsite : replacableExps.entrySet()) {
-			for(Map.Entry<ASTNode, List<ASTNode>> exps : funsite.getValue().entrySet()) {
-				for(ASTNode replacementExp : exps.getValue()) { 
-					retVal.add(new ExpHole(holeName, exps.getKey(), (Expression) replacementExp, parentStmt.getStmtId()));
-				}
-			}
-		}
-		return retVal;
-		}
-		return null;
-	}
+
+
 	public TreeSet<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType,
 			String holeName) { // I notice that I'm really not using hole name, here, hm...maybe I can get rid of it?
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
@@ -241,7 +220,7 @@ public class JavaEditFactory {
 				int atom = item.getAtom();
 				TreeSet<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getSecond()), variant);
 				for (WeightedAtom there : inScopeThere) {
-					if (there.getAtom() == location.getId()) {
+					if (there.getAtom() == location.getId()) { // FIXME: this check looks weird to me.  Test swap.
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
 						ASTNode fixAST = potentialFixStmt.getASTNode();
 						retVal.add(new StatementHole(holeName, (Statement) fixAST, potentialFixStmt.getStmtId()));
@@ -254,9 +233,11 @@ public class JavaEditFactory {
 		case UBOUNDSET:
 		case RANGECHECK:
 		case OFFBYONE:  
-			return makeSubExpsHoles(holeName, locationStmt.getArrayAccesses()); 
+			return JavaHole.makeSubExpsHoles(holeName, locationStmt.getArrayAccesses()); 
 		case NULLCHECK:
-			return makeSubExpsHoles(holeName, locationStmt.getNullCheckables());
+			return JavaHole.makeSubExpsHoles(holeName, locationStmt.getNullCheckables());
+		case CASTCHECK:
+			return JavaHole.makeSubExpsHoles(holeName, locationStmt.getCasts());
 		case FUNREP:
 			Map<ASTNode, List<IMethodBinding>> methodReplacements = locationStmt.getCandidateMethodReplacements();
 			for(Map.Entry<ASTNode,List<IMethodBinding>> entry : methodReplacements.entrySet()) {
@@ -268,24 +249,16 @@ public class JavaEditFactory {
 				}
 			break;
 		case PARREP:
-			return makeExpHole(holeName, locationStmt.getReplacableMethodParameters(variant.semanticInfo), locationStmt);
-		case CASTCHECK:
-			return makeSubExpsHoles(holeName, locationStmt.getCasts());
+			return JavaHole.makeExpHole(holeName, locationStmt.getReplacableMethodParameters(variant.semanticInfo), locationStmt);
 		case EXPREP:
-			return makeExpHole(holeName, locationStmt.getConditionalExpressions(variant.semanticInfo), locationStmt);
-		case EXPADD:
-			Map<ASTNode, Map<ASTNode,List<ASTNode>>> extendableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
-			for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> parents : extendableExpressions.entrySet()) {
-				for(Map.Entry<ASTNode,List<ASTNode>> entries : parents.getValue().entrySet()) { 
-					for(ASTNode exp : entries.getValue()) {
-					EditHole shrinkableExpHole1 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 0);
-					EditHole shrinkableExpHole2 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 1);
-					retVal.add(shrinkableExpHole1);
-					retVal.add(shrinkableExpHole2);
-					}
+			Map<ASTNode,List<ASTNode>> replaceableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
+			for(Map.Entry<ASTNode,List<ASTNode>> entries : replaceableExpressions.entrySet()) { 
+				for(ASTNode exp : entries.getValue()) {
+					EditHole replaceHole = new ExpHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId());
+					retVal.add(replaceHole);
 				}
 			}
-			return retVal;
+			return retVal; // FIXME to unify with makeExpHole? Or: one with parent, and one without?
 		case EXPREM:
 			Map<ASTNode, List<ASTNode>> shrinkableExpressions = locationStmt.getShrinkableConditionalExpressions();
 			for(Map.Entry<ASTNode, List<ASTNode>> entries : shrinkableExpressions.entrySet()) {
@@ -306,18 +279,31 @@ public class JavaEditFactory {
 				}
 			}
 			return retVal;
+		case EXPADD:
+			Map<ASTNode,List<ASTNode>> extendableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
+				for(Map.Entry<ASTNode,List<ASTNode>> entries : extendableExpressions.entrySet()) { 
+					for(ASTNode exp : entries.getValue()) {
+					EditHole shrinkableExpHole1 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 0);
+					EditHole shrinkableExpHole2 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 1);
+					retVal.add(shrinkableExpHole1);
+					retVal.add(shrinkableExpHole2);
+				}
+			}
+			return retVal;
 		case PARADD:
-			Map<ASTNode,List<Integer>> extensionOptions = locationStmt.getExtendableParameterMethods();
-			for(Map.Entry<ASTNode, List<Integer>> nodeOption : extensionOptions.entrySet()) {
-				for(Integer option : nodeOption.getValue()) {
-				EditHole shrinkableParamHole = new ExpChoiceHole(holeName, nodeOption.getKey(), (Expression) nodeOption.getKey(), locationStmt.getStmtId(), option);
-				retVal.add(shrinkableParamHole);
+			Map<ASTNode, List<Map<Integer, List<ASTNode>>>> extensionOptions = locationStmt.getExtendableParameterMethods(variant.semanticInfo);
+			for(Entry<ASTNode, List<Map<Integer, List<ASTNode>>>> nodeOption : extensionOptions.entrySet()) {
+				for(Map<Integer, List<ASTNode>> option : nodeOption.getValue()) {
+			//	EditHole shrinkableParamHole = new ExpChoiceHole(holeName, nodeOption.getKey(), (Expression) nodeOption.getKey(), locationStmt.getStmtId(), option);
+				//retVal.add(shrinkableParamHole);
+					
+					// FIXME: this is hard b/c the number of holes is variable and defined by the method 
+					// selected.
 				}
 			}
 			return retVal;
 		case OBJINIT:
 		case SIZECHECK:
-		default:
 			logger.fatal("Unhandled template type in editSources!  Fix code in JavaEditFactory to do this properly.");
 			return null;
 		}
