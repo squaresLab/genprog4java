@@ -37,7 +37,6 @@ public class JavaSemanticInfo {
 	private static TreeSet<Pair<String,String>> methodReturnType = new TreeSet<Pair<String,String>>();
 	private static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
 	private static TreeSet<String> finalVariables = new TreeSet<String>();
-	private static List<MethodInfo> methodDecls = new ArrayList<MethodInfo>();
 	private static Map<String, Map<String,List<ASTNode>>> methodParamExpressionsInScope = null;
 	private static Map<String, List<ASTNode>> conditionalExpressionsInScope = null;
 	private static Map<String, List<ASTNode>> conditionExtensionsInScope = null;
@@ -180,19 +179,10 @@ public class JavaSemanticInfo {
 		}
 	}
 
-	public static List<MethodInfo> getMethodDecls() {
-		return methodDecls;
-	}
-
-	public static void setMethodDecls(List<MethodInfo> methodDecls) {
-		JavaSemanticInfo.methodDecls = methodDecls;
-	}
-
 	public void addAllSemanticInfo(JavaParser myParser) {
 		JavaSemanticInfo.methodReturnType.addAll(myParser.getMethodReturnTypeSet());
 		JavaSemanticInfo.getVariableDataTypes().putAll(myParser.getVariableDataTypes());
 		JavaSemanticInfo.finalVariables.addAll(myParser.getFinalVariableSet());
-		JavaSemanticInfo.methodDecls.addAll(myParser.getMethodDeclarations());		
 	}
 
 	public void addToScopeMap(JavaStatement s, Set<String> scope) {

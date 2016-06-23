@@ -24,7 +24,6 @@ import org.eclipse.jdt.core.dom.ThrowStatement;
 
 import clegoues.genprog4java.java.JavaSemanticInfo;
 import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
