@@ -48,11 +48,11 @@ public abstract class JavaHole implements EditHole<ASTNode> {
 		return ((Integer) this.getCodeBankId()).toString();
 	}
 
-	public static TreeSet<EditHole> makeSubExpsHoles(String holeName, Map<ASTNode, List<ASTNode>> entryMap) {
+	public static TreeSet<EditHole> makeSubExpsHoles(Map<ASTNode, List<ASTNode>> entryMap) {
 		if(entryMap != null && entryMap.size() > 0) {
 			TreeSet<EditHole> retVal = new TreeSet<EditHole>();
 			for(Map.Entry<ASTNode, List<ASTNode>> entry : entryMap.entrySet()) {
-				retVal.add(new SubExpsHole(holeName, entry.getKey(), entry.getValue()));
+				retVal.add(new SubExpsHole(entry.getKey(), entry.getValue()));
 			} 
 			return retVal;
 		} 
@@ -61,13 +61,13 @@ public abstract class JavaHole implements EditHole<ASTNode> {
 	
 	// fixme: this is with parent, and one is without
 	
-	public static TreeSet<EditHole> makeExpHole(String holeName, Map<ASTNode, Map<ASTNode, List<ASTNode>>> replacableExps, JavaStatement parentStmt) {
+	public static TreeSet<EditHole> makeExpHole(Map<ASTNode, Map<ASTNode, List<ASTNode>>> replacableExps, JavaStatement parentStmt) {
 		if(replacableExps != null && replacableExps.size() > 0) {
 			TreeSet<EditHole> retVal = new TreeSet<EditHole>();
 		for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> funsite : replacableExps.entrySet()) {
 			for(Map.Entry<ASTNode, List<ASTNode>> exps : funsite.getValue().entrySet()) {
 				for(ASTNode replacementExp : exps.getValue()) { 
-					retVal.add(new ExpHole(holeName, (Expression) exps.getKey(), (Expression) replacementExp, parentStmt.getStmtId()));
+					retVal.add(new ExpHole((Expression) exps.getKey(), (Expression) replacementExp, parentStmt.getStmtId()));
 				}
 			}
 		}

@@ -29,16 +29,14 @@ import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
 public class LowerBoundSetOperation extends JavaEditOperation {
 
-	public LowerBoundSetOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
-		super(Mutation.LBOUNDSET, location, sources);
-		this.holeNames.add("lowerBoundCheck");
-
+	public LowerBoundSetOperation(JavaLocation location, EditHole source) {
+		super(location, source);
 	}
 	
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode(); // not used, but being completist
-		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("lowerBoundCheck");
+		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> arrays = thisHole.getSubExps();
 		Block newnode = parent.getAST().newBlock();

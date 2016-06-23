@@ -543,8 +543,8 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public void performEdit(Mutation edit, Location dst, HashMap<String,EditHole> sources) {
-		JavaEditOperation thisEdit = this.editFactory.makeEdit(edit, dst, sources);
+	public void performEdit(Mutation edit, Location dst, EditHole source) {
+		JavaEditOperation thisEdit = this.editFactory.makeEdit(edit, dst, source);
 		this.genome.add(thisEdit);
 	}
 
@@ -745,8 +745,8 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public TreeSet<WeightedHole> editSources(Location location, Mutation editType, String holeName) {
-		TreeSet<EditHole> holes = editFactory.editSources(this,location,editType,holeName);
+	public TreeSet<WeightedHole> editSources(Location location, Mutation editType) {
+		TreeSet<EditHole> holes = editFactory.editSources(this,location,editType);
 		TreeSet<WeightedHole> retVal = new TreeSet<WeightedHole>();
 		for(EditHole hole : holes) {
 			// possible FIXME for later: weighting options equally for the time being.  One day
@@ -794,11 +794,6 @@ FaultLocRepresentation<JavaEditOperation> {
 		location.setClassInfo(stmt.getClassInfo());
 		this.sourceInfo.getLocationInformation().put(i, location);
 		return location;
-	}
-
-	@Override
-	public List<String> holesForMutation(Mutation mut) {
-		return editFactory.holesForMutation(mut);
 	}
 
 	public void setAllPossibleStmtsToFixLocalization(){

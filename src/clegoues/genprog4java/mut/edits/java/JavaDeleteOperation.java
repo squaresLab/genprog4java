@@ -8,10 +8,11 @@ import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.StatementHole;
 
 public class JavaDeleteOperation extends JavaEditOperation {
-	public JavaDeleteOperation(JavaLocation location) {
-		super(Mutation.DELETE, location);
-	}
 	
+
+	public JavaDeleteOperation(JavaLocation location) {
+		super(location);
+	}
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = this.getLocationNode(); 

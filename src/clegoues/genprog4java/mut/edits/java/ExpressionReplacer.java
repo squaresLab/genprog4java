@@ -12,17 +12,17 @@ import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public abstract class ExpressionReplacer extends JavaEditOperation {
 
-	protected ExpressionReplacer(Mutation mutType, JavaLocation location, HashMap<String, EditHole> sources) {
-		super(mutType, location, sources);
+	public ExpressionReplacer(JavaLocation location, EditHole source) {
+		super(location, source);
 	}
 	
 	protected void replaceExp(ASTRewrite rewriter, Expression replaceWith) {
-		rewriter.replace(((ExpHole) this.getHoleCode("replaceExp")).getLocationExp(), replaceWith, null); 
+		rewriter.replace(((ExpHole) this.getHoleCode()).getLocationExp(), replaceWith, null); 
 
 	}
 	@Override
 	public void edit(ASTRewrite rewriter) {
-		ExpHole thisHole = (ExpHole) this.getHoleCode("replaceExp");
+		ExpHole thisHole = (ExpHole) this.getHoleCode();
 		replaceExp(rewriter, (Expression) thisHole.getCode()); 
 	}
 	

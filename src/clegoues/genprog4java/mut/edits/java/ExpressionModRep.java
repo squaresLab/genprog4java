@@ -10,14 +10,13 @@ import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class ExpressionModRep extends ExpressionReplacer {
-
-	public ExpressionModRep(JavaLocation location,  HashMap<String, EditHole> sources) {
-		super(Mutation.EXPREP, location, sources);
-	}
 	
+	public ExpressionModRep(JavaLocation location, EditHole source) {
+		super(location, source);
+	}
 	@Override
 	public String toString() {
-		ExpHole thisHole = (ExpHole) this.getHoleCode("replaceExp");
+		ExpHole thisHole = (ExpHole) this.getHoleCode();
 		Expression locationExp = (Expression) thisHole.getLocationExp();
 		Expression newExpCode = (Expression) thisHole.getCode();
 

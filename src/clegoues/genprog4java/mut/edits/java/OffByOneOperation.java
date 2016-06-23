@@ -33,9 +33,8 @@ public class OffByOneOperation extends JavaEditOperation {
 	private mutationType mutType;
 
 	// FIXME: remove the randomness from the operation if possible.
-	public OffByOneOperation(JavaLocation location, HashMap<String, EditHole> sources) {
-		super(Mutation.OFFBYONE, location, sources);
-		this.holeNames.add("offByOne");
+	public OffByOneOperation(JavaLocation location, EditHole sources) {
+		super(location, sources);
 		int randomNum = Configuration.randomizer.nextInt(11);
 
 		if(randomNum%2==0){
@@ -48,7 +47,7 @@ public class OffByOneOperation extends JavaEditOperation {
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode(); // not used, but being completist
-		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("offByOne");
+		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> arrays = thisHole.getSubExps();
 		for(ASTNode array : arrays) {

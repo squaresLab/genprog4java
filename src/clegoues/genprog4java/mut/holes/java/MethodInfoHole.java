@@ -9,8 +9,8 @@ public class MethodInfoHole extends JavaHole  {
 	private ASTNode holeParent;
 	
 	public MethodInfoHole() { } 
-	public MethodInfoHole(String name, ASTNode holeParent, int codeBankId, IMethodBinding holeInfo) {
-		super(name, codeBankId);
+	public MethodInfoHole(ASTNode holeParent, int codeBankId, IMethodBinding holeInfo) {
+		super("MethodInfoHole", codeBankId);
 		this.replacerInfo = holeInfo;
 		this.holeParent = holeParent;
 	}

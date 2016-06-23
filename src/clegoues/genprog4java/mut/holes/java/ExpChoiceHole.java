@@ -7,8 +7,8 @@ public class ExpChoiceHole extends ExpHole {
 
 
 	int choice;
-	public ExpChoiceHole(String name, Expression holeParent, Expression holeCode, int codeBankId, int choice) {
-		super(name,holeParent,holeCode,codeBankId);
+	public ExpChoiceHole(Expression holeParent, Expression holeCode, int codeBankId, int choice) {
+		super("expChoiceHole", holeParent,holeCode,codeBankId);
 		this.choice = choice;
 
 	}

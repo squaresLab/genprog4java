@@ -23,7 +23,7 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 		super(engine);
 	}
 	private boolean doWork(Representation<G> rep, Representation<G> original,
-			Mutation mut, Location first, HashMap<String,EditHole> fixCode) {
+			Mutation mut, Location first, EditHole fixCode) {
 		rep.performEdit(mut, first, fixCode);
 		if (fitnessEngine.testToFirstFailure(rep, false)) {
 			this.noteSuccess(rep, original, 1);
@@ -88,11 +88,10 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 			for(Map.Entry mutation : availableMutations.entrySet()) {
 				Mutation key = (Mutation) mutation.getKey();
 				Double prob = (Double) mutation.getValue();
-				List<String> holes = original.holesForMutation(key);
+				
 				if(prob > 0.0) {
-					for(String hole : holes) { // FIXME: this math is wrong for multi-holed edits
-					count += original.editSources(faultyLocation, key, hole).size();
-					}
+					count += original.editSources(faultyLocation, key).size();
+
 				}
 			}
 
@@ -146,7 +145,6 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 				double prob = mutation.getSecond();
 				logger.info(faultyLocation.getWeight() + " " + prob);
 				
-				List<String> holes = original.holesForMutation(mut);
 				switch(mut) {
 				case DELETE:
 					Representation<G> delRep = original.copy();
@@ -160,15 +158,13 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 					TreeSet<EditHole> sources1 = new TreeSet<EditHole>();
 					// FIXME: HACK: fix this hard-coding of the hole name, and below, too
 					for(WeightedHole hole : this.rescaleAtomPairs(original
-							.editSources(faultyLocation, mut, "singleHole"))) {
+							.editSources(faultyLocation, mut))) {
 						sources1.add(hole.getHole());
 					}
 					for (EditHole append : sources1) {
 						Representation<G> rep = original.copy();
-						HashMap<String,EditHole> sources = new HashMap<String,EditHole>();
-						sources.put("singleHole", append); 
 						if (this.doWork(rep, original, mut, faultyLocation,
-								sources)) {
+								append)) {
 							wins++;
 							repairFound = true;
 						}
@@ -177,22 +173,18 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 				case SWAP:
 					TreeSet<EditHole> sources = new TreeSet<EditHole>();
 					for(WeightedHole hole : this.rescaleAtomPairs(original
-							.editSources(faultyLocation, mut, "singleHole"))) {
+							.editSources(faultyLocation, mut))) {
 						sources.add(hole.getHole());
 					}
 					for (EditHole append : sources) {
 						Representation<G> rep = original.copy();
-						HashMap<String,EditHole> swapSources = new HashMap<String,EditHole>();
-						swapSources.put("singleHole", append); 
-						if (this.doWork(rep, original, mut, faultyLocation, swapSources)) {
+						if (this.doWork(rep, original, mut, faultyLocation, append)) {
 							wins++;
 							repairFound = true;
 						}
 					}
 					break;
-				case OFFBYONE: // Manish, FIXME: this can't go up with Append/replace; that code tries to append
-					// or replace the current location with every available fix statement, a concept that doesn't make sense
-					// with OffByOne
+				case OFFBYONE: 
 				default:
 					logger.fatal("FATAL: unhandled template type in bruteForceOne.  Add handling (probably by adding a case either to the DELETE case or the other one); and try again");
 					break;

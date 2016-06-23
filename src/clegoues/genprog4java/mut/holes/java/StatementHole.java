@@ -12,13 +12,13 @@ public class StatementHole extends JavaHole {
 	
 	public StatementHole () { }
 	
-	public StatementHole(String name, Statement holeCode, int codeBankId) {
-		super(name, codeBankId);
+	public StatementHole(Statement holeCode, int codeBankId) {
+		super("statementHole", codeBankId);
 		this.holeCode = holeCode;
 	}
 	
-	public StatementHole(String name,Statement holeSite, Statement holeCode, int codeBankId) {
-		super(name, codeBankId);
+	public StatementHole(Statement holeSite, Statement holeCode, int codeBankId) {
+		super("statementHole", codeBankId);
 		this.holeCode = holeCode;
 		this.holeSite = holeSite;
 	}

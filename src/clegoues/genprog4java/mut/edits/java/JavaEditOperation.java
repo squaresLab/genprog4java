@@ -51,14 +51,12 @@ import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public abstract class JavaEditOperation implements EditOperation<ASTRewrite> {
 
-	private Mutation mutType;
 	private Location<JavaStatement> location = null;
-	protected ArrayList<String> holeNames = new ArrayList<String>(); 
-	private HashMap<String,EditHole> holeCode = new HashMap<String,EditHole>();
+	private EditHole holeCode = null;
 	
+	protected JavaEditOperation() { } 
 	
-	public JavaEditOperation(Mutation mutType, JavaLocation location) {
-		this.mutType = mutType;
+	public JavaEditOperation(JavaLocation location) {
 		this.location = location;
 	}
 	
@@ -66,41 +64,21 @@ public abstract class JavaEditOperation implements EditOperation<ASTRewrite> {
 		return this.location;
 	}
 
-	protected JavaEditOperation(Mutation mutType, JavaLocation location, HashMap<String,EditHole> sources) {
-		this.mutType = mutType;
+	protected JavaEditOperation(JavaLocation location, EditHole source) {
 		this.location = location;
-		this.holeCode = new HashMap<String,EditHole>(sources);
+		this.holeCode = source;
 	}
 	
-	@Override
-	public List<String> getHoles() {
-		return this.holeNames;
-	}
-	
-	@Override
-	public Mutation getType() {
-		return this.mutType;
-	}
-
-	@Override
-	public void setType(Mutation type) {
-		this.mutType = type;
-	}
-
 	protected ASTNode getLocationNode() {
 		JavaStatement actualLocation = this.location.getLocation();
 		return actualLocation.getASTNode();
 	}
 
-	public void setHoleCode(String name, EditHole fixCode) {
-		this.holeCode.put(name, fixCode);
+	public EditHole getHoleCode() {
+		return this.holeCode;
 	}
-
-	public EditHole getHoleCode(String name) {
-		return this.holeCode.get(name);
-	}
-	public void setAllHoles(HashMap<String,EditHole> holes) {
-		holeCode = new HashMap<String,EditHole>(holes);
+	public void setHoleCode(EditHole hole) {
+		holeCode = hole; 
 	}
 
 }

@@ -29,15 +29,13 @@ import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
 public class UpperBoundSetOperation extends JavaEditOperation {
 
-	public UpperBoundSetOperation(JavaLocation location,  HashMap<String, EditHole> sources) {
-		super(Mutation.UBOUNDSET, location, sources);
-		this.holeNames.add("upperBoundCheck");
+	public UpperBoundSetOperation(JavaLocation location, EditHole source) {
+		super(location, source);
 	}
-
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode(); // not used, but being completist
-		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode("upperBoundCheck");
+		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> arrays = thisHole.getSubExps();
 		// possible FIXME: all array accesses in this location, or just the one? 

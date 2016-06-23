@@ -11,8 +11,8 @@ public class SubExpsHole extends JavaHole {
 	private ASTNode holeParent;
 	private List<ASTNode> subExps;
 	
-	public SubExpsHole(String name, ASTNode holeParent, List<ASTNode> subExps) {
-		super(name, -1);
+	public SubExpsHole(ASTNode holeParent, List<ASTNode> subExps) {
+		super("subExpsHole", -1);
 		this.setHoleParent(holeParent);
 		this.setSubExps(subExps);
 	}

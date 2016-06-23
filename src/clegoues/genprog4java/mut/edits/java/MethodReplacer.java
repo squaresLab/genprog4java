@@ -17,16 +17,16 @@ import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
 
 public class MethodReplacer extends ExpressionReplacer {
 
-	public MethodReplacer(JavaLocation location,  HashMap<String, EditHole> sources) {
-		super(Mutation.FUNREP, location, sources);
-		this.holeNames.add("replaceExp");
+	public MethodReplacer(JavaLocation location, EditHole source) {
+		super(location, source);
 	}
+	
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
 		ASTNode locationNode = locationStmt.getASTNode();
-		MethodInfoHole thisHole = (MethodInfoHole) this.getHoleCode("replaceExp");
+		MethodInfoHole thisHole = (MethodInfoHole) this.getHoleCode();
 		ASTNode toReplace = thisHole.getCode();
 		IMethodBinding replaceWith = thisHole.getMethodInfo();
 
