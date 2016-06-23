@@ -508,86 +508,67 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		}
 		return shrinkableParameterMethods;
 	}
-	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
-	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
+	private Map<ASTNode, List<IMethodBinding>> candidateMethodReplacements= null;
 
-	public List<MethodInfo> getCandidateMethodReplacements(ASTNode methodToReplace ) 
-	{ return candidateMethodReplacements.get(methodToReplace); }
-
-	// FIXME: I don't think I need this because you can just get the parameter types.  Refactor me!
-	private ArrayList<ITypeBinding> paramsToTypes(List<SingleVariableDeclaration> params) {
-		int i = 0; 
-		ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>();
-		for(SingleVariableDeclaration param : params) {
-			ITypeBinding paramType = param.getType().resolveBinding();
-			paramTypes.add(i,paramType);
-			i++;
+	
+	private ArrayList<ITypeBinding> getParamTypes(IMethodBinding mb) {
+		return new ArrayList<ITypeBinding>(Arrays.asList(mb.getParameterTypes()));
+	}
+	
+	private boolean paramTypesMatch(ArrayList<ITypeBinding> firstList, ArrayList<ITypeBinding> secondList) {
+		for(int i = 0; i < firstList.size(); i++) {
+			ITypeBinding candParam = firstList.get(i);
+			ITypeBinding myParam = secondList.get(i);
+			if(!myParam.isAssignmentCompatible(candParam)) {
+				return false;
+			}
 		}
-		return paramTypes;
+		return true;
 	}
 
-	public Map<ASTNode, List<ASTNode>> getReplacableMethods(final List<MethodInfo> methodDecls) {
-		if(methodReplacements == null) {
-			methodReplacements = new HashMap<ASTNode, List<ASTNode>>();
-			candidateMethodReplacements = new HashMap<ASTNode, List<MethodInfo>>();
+	public Map<ASTNode, List<IMethodBinding>> getCandidateMethodReplacements() {
+		if(candidateMethodReplacements == null) {
+			candidateMethodReplacements = new HashMap<ASTNode, List<IMethodBinding>>();
 
 			this.getASTNode().accept(new ASTVisitor() {
-				// method to visit all Expressions relevant for this in locationNode and
-				// store their parents
-				//  FIXME: supermethodinvocations?
+				// FIXME: supermethodinvocations?
+				// FIXME: should I try stuff in superclasses too?  I'm not convinced this is the spec, double-check!
 
 				public boolean visit(MethodInvocation node) {
-					// if there exists another invocation that this works for...
-					ArrayList<MethodInfo> possibleReps = new ArrayList<MethodInfo> ();
-					ASTNode parent = getParent(node);
-					IMethodBinding binding = node.resolveMethodBinding();
-					if(binding != null) {
-						IMethodBinding invokedMethod = binding.getMethodDeclaration();
-						ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>(Arrays.asList(invokedMethod.getParameterTypes()));
-						ITypeBinding thisReturnType = invokedMethod.getReturnType();
+					IMethodBinding myMethodBinding = node.resolveMethodBinding();
 
-						for(MethodInfo mi : methodDecls) {
-							IMethodBinding optionMethodBinding = mi.getNode().resolveBinding();
-							if(optionMethodBinding.equals(invokedMethod)) // don't include self as valid replacement
+					if(myMethodBinding != null) {
+						List<IMethodBinding> possibleReps;
+						if(candidateMethodReplacements.containsKey(node)) {
+							possibleReps = candidateMethodReplacements.get(node);
+						} else {
+							possibleReps = new ArrayList<IMethodBinding> ();
+							candidateMethodReplacements.put(node,possibleReps);
+						}
+						ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
+						ArrayList<ITypeBinding> myParamTypes = getParamTypes(myMethodBinding); 
+						ITypeBinding thisReturnType = myMethodBinding.getReturnType();
+
+						for(IMethodBinding otherMethod : classBinding.getDeclaredMethods()) {
+							if(otherMethod.equals(myMethodBinding)) // don't include self as valid replacement
 								continue;
-							if((mi.getNumArgs() == paramTypes.size())) {
-								ITypeBinding candReturnType = mi.getReturnType().resolveBinding();
-								if(candReturnType.isAssignmentCompatible(thisReturnType)) {
-									ArrayList<ITypeBinding> candParamTypes = paramsToTypes(mi.getParameters());
-									boolean isCompatible = true;
-									for(int i = 0; i < mi.getNumArgs(); i++) {
-										ITypeBinding candParam = candParamTypes.get(i);
-										ITypeBinding myParam = paramTypes.get(i);
-										if(!myParam.isAssignmentCompatible(candParam)) {
-											isCompatible = false;
-											break;
-										}
-									}
-									if(isCompatible) {
-										possibleReps.add(mi);
+							ITypeBinding candReturnType = otherMethod.getReturnType();
+							if(!candReturnType.isAssignmentCompatible(thisReturnType)) 
+								continue;
+							ArrayList<ITypeBinding> otherParamTypes = getParamTypes(otherMethod); 
+							if(otherParamTypes.size() == myParamTypes.size()) {
+								if(paramTypesMatch(myParamTypes,otherParamTypes))
+										possibleReps.add(otherMethod);
 									}
 								}
 
-							}
-						}
-						if(!methodReplacements.containsKey(parent)){
-							List<ASTNode> methodNodes = new ArrayList<ASTNode>();
-							methodNodes.add(node);
-							methodReplacements.put(parent, methodNodes);		
-						}else{
-							List<ASTNode> methodNodes = (List<ASTNode>) methodReplacements.get(parent);
-							if(!methodNodes.contains(node))
-								methodNodes.add(node);
-							methodReplacements.put(parent, methodNodes);	
-						}
-						candidateMethodReplacements.put(node, possibleReps);
-					} 
+							} 
 					return true;
 				}
 
 			});
 		}
-		return methodReplacements;
+		return candidateMethodReplacements;
 	}
 
 

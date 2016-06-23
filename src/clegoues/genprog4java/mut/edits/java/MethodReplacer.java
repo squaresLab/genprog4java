@@ -10,6 +10,7 @@ import java.util.Set;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -36,7 +37,7 @@ public class MethodReplacer extends JavaEditOperation {
 		ASTNode locationNode = locationStmt.getASTNode();
 		MethodInfoHole thisHole = (MethodInfoHole) this.getHoleCode("replaceMethod");
 		ASTNode toReplace = thisHole.getCode();
-		MethodInfo replaceWith = thisHole.getMethodInfo();
+		IMethodBinding replaceWith = thisHole.getMethodInfo();
 
 		MethodInvocation newNode = locationNode.getAST().newMethodInvocation();
 		SimpleName newMethodName = locationNode.getAST().newSimpleName(replaceWith.getName());

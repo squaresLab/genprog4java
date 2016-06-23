@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -260,17 +261,14 @@ public class JavaEditFactory {
 		case NULLCHECK:
 			return makeSubExpsHoles(holeName, locationStmt.getNullCheckables());
 		case FUNREP:
-			Map<ASTNode, List<ASTNode>> methodReplacements = locationStmt.getReplacableMethods(variant.semanticInfo.getMethodDecls());
-			for(Map.Entry<ASTNode,List<ASTNode>> entry : methodReplacements.entrySet()) {
-				List<ASTNode> replacableMethods = entry.getValue();
-				for(ASTNode replacableMethod : replacableMethods) {
-					List<MethodInfo> possibleReplacements = 
-							locationStmt.getCandidateMethodReplacements(replacableMethod);
-					for(MethodInfo possibleReplacement : possibleReplacements) {
+			Map<ASTNode, List<IMethodBinding>> methodReplacements = locationStmt.getCandidateMethodReplacements();
+			for(Map.Entry<ASTNode,List<IMethodBinding>> entry : methodReplacements.entrySet()) {
+				ASTNode replacableMethod = entry.getKey();
+				List<IMethodBinding> possibleReplacements = entry.getValue();
+					for(IMethodBinding possibleReplacement : possibleReplacements) {
 						retVal.add(new MethodInfoHole(holeName,replacableMethod, locationStmt.getStmtId(), possibleReplacement));
 					}
 				}
-			}
 			break;
 		case PARREP:
 			return makeExpHole(holeName, locationStmt.getReplacableMethodParameters(variant.semanticInfo), locationStmt);
@@ -341,7 +339,7 @@ public class JavaEditFactory {
 		case RANGECHECK: 
 			return locationStmt.getArrayAccesses().size() > 0;
 		case FUNREP: 
-			return locationStmt.getReplacableMethods(JavaSemanticInfo.getMethodDecls()).size() > 0; // possible FIXME: make get MethodDecls not static
+			return locationStmt.getCandidateMethodReplacements().size() > 0; 
 		case PARREP:
 			Map<ASTNode, Map<ASTNode, List<ASTNode>>> methodParams = locationStmt.getReplacableMethodParameters(variant.semanticInfo);
 			for(Map.Entry<ASTNode, Map<ASTNode, List<ASTNode>>> entry : methodParams.entrySet()) {

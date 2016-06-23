@@ -1,22 +1,21 @@
 package clegoues.genprog4java.mut.holes.java;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-
-import clegoues.genprog4java.java.MethodInfo;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 
 public class MethodInfoHole extends JavaHole  {
 
-	private MethodInfo replacerInfo;
+	private IMethodBinding replacerInfo;
 	private ASTNode holeParent;
 	
 	public MethodInfoHole() { } 
-	public MethodInfoHole(String name, ASTNode holeParent, int codeBankId, MethodInfo holeInfo) {
+	public MethodInfoHole(String name, ASTNode holeParent, int codeBankId, IMethodBinding holeInfo) {
 		super(name, codeBankId);
 		this.replacerInfo = holeInfo;
 		this.holeParent = holeParent;
 	}
 
-	public MethodInfo getMethodInfo() {
+	public IMethodBinding getMethodInfo() {
 		return this.replacerInfo;
 	}
 	
