@@ -97,4 +97,11 @@ public class NullCheckOperation extends JavaEditOperation {
 		rewriter.replace(parent, ifstmt, null);
 
 	}
+	
+	@Override
+	public String toString() {
+		// FIXME: this is lazy
+		return "nc(" + this.getLocation().getId() + ")";
+	}
+	
 }

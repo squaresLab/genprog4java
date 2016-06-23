@@ -115,7 +115,6 @@ import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.main.Utils;
 import clegoues.genprog4java.mut.EditHole;
-import clegoues.genprog4java.mut.HistoryEle;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
@@ -141,11 +140,10 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
 
-	public JavaRepresentation(ArrayList<HistoryEle> history,
-			ArrayList<JavaEditOperation> genome2,
+	public JavaRepresentation(ArrayList<JavaEditOperation> genome2,
 			ArrayList<Location> arrayList,
 			ArrayList<WeightedAtom> arrayList2) {
-		super(history, genome2, arrayList, arrayList2);
+		super(genome2, arrayList, arrayList2);
 	}
 
 	public JavaRepresentation() {
@@ -534,7 +532,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		command.addArgument("clegoues.genprog4java.fitness.JUnitTestRunner");
 
 		command.addArgument(test.toString());
-		logger.info("Command: " + command.toString());
+	//	logger.info("Command: " + command.toString());
 		return command;
 
 	}
@@ -546,7 +544,6 @@ FaultLocRepresentation<JavaEditOperation> {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void performEdit(Mutation edit, Location dst, HashMap<String,EditHole> sources) {
-		super.performEdit(edit, dst, sources);
 		JavaEditOperation thisEdit = this.editFactory.makeEdit(edit, dst, sources);
 		this.genome.add(thisEdit);
 	}
@@ -655,7 +652,7 @@ FaultLocRepresentation<JavaEditOperation> {
 
 
 	public JavaRepresentation copy() {
-		JavaRepresentation copy = new JavaRepresentation(this.getHistory(),
+		JavaRepresentation copy = new JavaRepresentation(
 				this.getGenome(), this.getFaultyLocations(),
 				this.getFixSourceAtoms());
 		return copy;

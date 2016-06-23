@@ -38,7 +38,12 @@ public class JavaAppendOperation extends JavaEditOperation {
 			stm2 = ASTNode.copySubtree(fixCodeNode.getAST(), stm2);
 			newNode.statements().add(stm2);
 		}
-
 		rewriter.replace(locationNode, newNode, null);
+	}
+	
+	@Override
+	public String toString() {
+		StatementHole fixHole = (StatementHole) this.getHoleCode("singleHole");
+		return "a(" + this.getLocation().getId() + "," + fixHole.getCodeBankId() + ")";
 	}
 }

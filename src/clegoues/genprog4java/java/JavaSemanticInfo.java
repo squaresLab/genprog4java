@@ -13,11 +13,20 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -31,6 +40,7 @@ public class JavaSemanticInfo {
 	private static List<MethodInfo> methodDecls = new ArrayList<MethodInfo>();
 	private static Map<String, Map<String,List<ASTNode>>> methodParamExpressionsInScope = null;
 	private static Map<String, List<ASTNode>> conditionalExpressionsInScope = null;
+	private static Map<String, List<ASTNode>> conditionExtensionsInScope = null;
 
 	public List<ASTNode> getMethodParamReplacementExpressions(final String methodName, MethodDeclaration md, String desiredType) {
 		Map<String,List<ASTNode>> typeToExpressions = null;
@@ -68,6 +78,84 @@ public class JavaSemanticInfo {
 		return typeToExpressions.get(desiredType);
 	}
 
+	public List<ASTNode> getConditionalExtensionExpressions(String methodName, MethodDeclaration md) {
+		if(conditionExtensionsInScope == null) {
+			conditionExtensionsInScope = new HashMap<String, List<ASTNode>>();
+		}
+		if(conditionExtensionsInScope.containsKey(methodName)) {
+			return conditionExtensionsInScope.get(methodName);
+		} 
+		List<ASTNode> fullConditionsInScope = this.getConditionalReplacementExpressions(methodName, md);
+		final List<ASTNode> expressionsInScope = new ArrayList<ASTNode>(); // possible FIXME: do I start with the list above?  I think it will auto-populate, right?
+		conditionExtensionsInScope.put(methodName, expressionsInScope);
+		for(ASTNode cond : fullConditionsInScope) {
+			cond.accept(new ASTVisitor() {
+				private void tryAdd(Expression node) {
+					ITypeBinding tb = node.resolveTypeBinding();
+					if(tb != null) {
+						if(tb.getName().equals("boolean")) {
+							expressionsInScope.add(node);
+						}
+					}
+				}
+				public boolean visit(PrefixExpression node) {
+					if(node.getOperator() == PrefixExpression.Operator.NOT) {
+						expressionsInScope.add(node);
+					}
+					return true;
+				}
+				public boolean visit(ConditionalExpression node) {
+					expressionsInScope.add(node);
+					return true;
+				}
+				public boolean visit(FieldAccess node) {
+					tryAdd(node);
+					return true;
+				}
+				public boolean visit(InfixExpression node) {
+					InfixExpression.Operator op = node.getOperator();
+					if(op ==  InfixExpression.Operator.LESS ||   
+							op == InfixExpression.Operator.GREATER ||
+							op == InfixExpression.Operator.LESS_EQUALS ||
+							op == InfixExpression.Operator.GREATER_EQUALS ||
+							op == InfixExpression.Operator.EQUALS || 
+							op == InfixExpression.Operator.NOT_EQUALS ||
+							op == InfixExpression.Operator.CONDITIONAL_AND ||
+							op == InfixExpression.Operator.CONDITIONAL_OR) {
+						expressionsInScope.add(node);
+					}
+					return true;
+				} 
+				public boolean visit(InstanceofExpression node) {
+					expressionsInScope.add(node);
+					return true;
+				} 
+				public boolean visit(MethodInvocation node) {
+					tryAdd(node);
+					return true;
+				} 
+				public boolean visit(SimpleName node) {
+					tryAdd(node);
+					return true;
+				} 
+				public boolean visit(QualifiedName node) {
+					tryAdd(node);
+					return true;
+				}
+				public boolean visit(SuperFieldAccess node) {
+					tryAdd(node);
+					return true;
+				}
+				public boolean visit(SuperMethodInvocation node) {
+					tryAdd(node);
+					return true;
+				}
+
+			});
+		}
+		return expressionsInScope;
+	}
+
 	public List<ASTNode> getConditionalReplacementExpressions(final String methodName, MethodDeclaration md) {
 		if(conditionalExpressionsInScope == null) {
 			conditionalExpressionsInScope = new HashMap<String,List<ASTNode>>();
@@ -91,7 +179,7 @@ public class JavaSemanticInfo {
 			return expressionsInScope;
 		}
 	}
-	
+
 	public static List<MethodInfo> getMethodDecls() {
 		return methodDecls;
 	}
@@ -154,5 +242,7 @@ public class JavaSemanticInfo {
 	public static void setVariableDataTypes(HashMap<String, String> variableDataTypes) {
 		JavaSemanticInfo.variableDataTypes = variableDataTypes;
 	}
+
+
 
 }
