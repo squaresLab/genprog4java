@@ -34,6 +34,7 @@ public class LowerBoundSetOperation extends JavaEditOperation {
 		this.holeNames.add("lowerBoundCheck");
 
 	}
+	
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode(); // not used, but being completist
@@ -82,4 +83,11 @@ public class LowerBoundSetOperation extends JavaEditOperation {
 			rewriter.replace(parent, newnode, null);
 		}
 	}
+
+	@Override
+	public String toString() {
+		// FIXME: this is lazy
+		return "lbs(" + this.getLocation().getId() + ")";
+	}
+	
 }
