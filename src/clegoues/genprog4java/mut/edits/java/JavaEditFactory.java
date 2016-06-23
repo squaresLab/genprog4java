@@ -251,8 +251,8 @@ public class JavaEditFactory {
 		case PARREP:
 			return JavaHole.makeExpHole(holeName, locationStmt.getReplacableMethodParameters(variant.semanticInfo), locationStmt);
 		case EXPREP:
-			Map<ASTNode,List<ASTNode>> replaceableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
-			for(Map.Entry<ASTNode,List<ASTNode>> entries : replaceableExpressions.entrySet()) { 
+			Map<ASTNode, List<Expression>> replaceableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
+			for(Entry<ASTNode, List<Expression>> entries : replaceableExpressions.entrySet()) { 
 				for(ASTNode exp : entries.getValue()) {
 					EditHole replaceHole = new ExpHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId());
 					retVal.add(replaceHole);
@@ -260,8 +260,8 @@ public class JavaEditFactory {
 			}
 			return retVal; // FIXME to unify with makeExpHole? Or: one with parent, and one without?
 		case EXPREM:
-			Map<ASTNode, List<ASTNode>> shrinkableExpressions = locationStmt.getShrinkableConditionalExpressions();
-			for(Map.Entry<ASTNode, List<ASTNode>> entries : shrinkableExpressions.entrySet()) {
+			Map<ASTNode, List<Expression>> shrinkableExpressions = locationStmt.getShrinkableConditionalExpressions();
+			for(Entry<ASTNode, List<Expression>> entries : shrinkableExpressions.entrySet()) {
 				for(ASTNode exp : entries.getValue()) {
 					EditHole shrinkableExpHole1 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 0);
 					EditHole shrinkableExpHole2 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 1);
@@ -280,8 +280,8 @@ public class JavaEditFactory {
 			}
 			return retVal;
 		case EXPADD:
-			Map<ASTNode,List<ASTNode>> extendableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
-				for(Map.Entry<ASTNode,List<ASTNode>> entries : extendableExpressions.entrySet()) { 
+			Map<ASTNode, List<Expression>> extendableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
+				for(Entry<ASTNode, List<Expression>> entries : extendableExpressions.entrySet()) { 
 					for(ASTNode exp : entries.getValue()) {
 					EditHole shrinkableExpHole1 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 0);
 					EditHole shrinkableExpHole2 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 1);
@@ -384,26 +384,18 @@ public class JavaEditFactory {
 			retVal.add("rangeCheck");
 			return retVal;
 		case FUNREP:
-			retVal.add("replaceMethod");
-			return retVal;
-		case PARREP:
+		case PARREP:	
+		case PARREM:
 		case EXPREP:
-			retVal.add("replaceParameter");
+		case EXPADD:
+		case EXPREM:
+			retVal.add("replaceExp");
 			return retVal;
 		case CASTCHECK:
 			retVal.add("classCast");
 			return retVal;
 		case PARADD:
 			retVal.add("addParameter");
-			return retVal;
-		case EXPADD:
-			retVal.add("condExpAdd");
-			return retVal;
-		case EXPREM:
-			retVal.add("condExpRem");
-			return retVal;
-		case PARREM:
-			retVal.add("remParameter");
 			return retVal;
 		case OBJINIT:
 		case SIZECHECK:

@@ -276,86 +276,71 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		return casts;
 	}
 
-	private Map<ASTNode, List<ASTNode>> shrinkableExpressions = null;
+	private Map<ASTNode, List<Expression>> shrinkableExpressions = null;
 
-	public Map<ASTNode, List<ASTNode>> getShrinkableConditionalExpressions() {
+	public Map<ASTNode, List<Expression>> getShrinkableConditionalExpressions() {
 		if(shrinkableExpressions != null) {
 			return shrinkableExpressions;
 		}
-		shrinkableExpressions = new HashMap<ASTNode, List<ASTNode>>();
+		shrinkableExpressions = new HashMap<ASTNode, List<Expression>>();
 		this.getASTNode().accept(new ASTVisitor() {
 
-			boolean isShrinkable(InfixExpression.Operator op) {
+			private boolean isShrinkable(InfixExpression.Operator op) {
 				return (op == InfixExpression.Operator.CONDITIONAL_AND) ||
 						(op == InfixExpression.Operator.CONDITIONAL_OR);
 			}
-			public boolean visit(ConditionalExpression node) {
-				Expression condExp = node.getExpression();
-				while(condExp instanceof ParenthesizedExpression) {
-					condExp = ((ParenthesizedExpression) condExp).getExpression();
-				}
+			
+			private void handleExp(ASTNode node, Expression condExp) {
 				if(condExp instanceof InfixExpression) {
 					if(isShrinkable(((InfixExpression) condExp).getOperator())) {
-						List<ASTNode> shrinkable;
+						List<Expression> shrinkable;
 						if(shrinkableExpressions.containsKey(node)) {
 							shrinkable = shrinkableExpressions.get(node);
 						} else {
-							shrinkable = new ArrayList<ASTNode>();
+							shrinkable = new ArrayList<Expression>();
 							shrinkableExpressions.put(node, shrinkable);
 						}
-						shrinkable.add(node.getExpression());
+						shrinkable.add(condExp);
 					}
 				}
+			}
+			public boolean visit(ConditionalExpression node) {
+				handleExp(node, node.getExpression());
 				return true;
 
 			}
 			public boolean visit(IfStatement node) {
-				Expression ifExp = node.getExpression();
-				while(ifExp instanceof ParenthesizedExpression) {
-					ifExp = ((ParenthesizedExpression) ifExp).getExpression();
-				}
-				if(ifExp instanceof InfixExpression) {
-					if(isShrinkable(((InfixExpression) ifExp).getOperator())) {
-						List<ASTNode> shrinkable;
-						if(shrinkableExpressions.containsKey(node)) {
-							shrinkable = shrinkableExpressions.get(node);
-						} else { // FIXME problem: don't want to leave randomness to the edit operator on which exp to kill
-							shrinkable = new ArrayList<ASTNode>();
-							shrinkableExpressions.put(node, shrinkable);
-						}
-						shrinkable.add(node.getExpression());
-					}
-				}
+				handleExp(node, node.getExpression());
 				return true;
 			}
 		});
 		return shrinkableExpressions;
 	}
 
-	private Map<ASTNode,List<ASTNode>> extendableExpressions = null;
+	private Map<ASTNode,List<Expression>> extendableExpressions = null;
 
 	// FIXME: find a way to sort options by distance where sorting by distance is specified
 	// in PAR paper
-	public Map<ASTNode, List<ASTNode>> getConditionalExpressions(final JavaSemanticInfo semanticInfo) {
+	public Map<ASTNode, List<Expression>> getConditionalExpressions(final JavaSemanticInfo semanticInfo) {
 		if(extendableExpressions != null) {
 			return extendableExpressions;
 		}
-		extendableExpressions = new HashMap<ASTNode, List<ASTNode>>();
+		extendableExpressions = new HashMap<ASTNode, List<Expression>>();
 
 		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
 		final String methodName = md.getName().getIdentifier();
-		final List<ASTNode> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
+		final List<Expression> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
 
 		this.getASTNode().accept(new ASTVisitor() {
 
 			private void handleCondition(Expression exp) {
 				// possible FIXME: exclude those that are already in the condition?
 				if(replacements != null) {
-					List<ASTNode> thisList = null;
+					List<Expression> thisList = null;
 					if(extendableExpressions.containsKey(exp)) {
 						thisList = extendableExpressions.get(exp);
 					} else {
-						thisList = new ArrayList<ASTNode>();
+						thisList = new ArrayList<Expression>();
 						extendableExpressions.put(exp, thisList);
 					}
 					thisList.addAll(replacements);

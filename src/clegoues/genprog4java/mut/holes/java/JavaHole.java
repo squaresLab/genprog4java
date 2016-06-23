@@ -67,7 +67,7 @@ public abstract class JavaHole implements EditHole<ASTNode> {
 		for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> funsite : replacableExps.entrySet()) {
 			for(Map.Entry<ASTNode, List<ASTNode>> exps : funsite.getValue().entrySet()) {
 				for(ASTNode replacementExp : exps.getValue()) { 
-					retVal.add(new ExpHole(holeName, exps.getKey(), (Expression) replacementExp, parentStmt.getStmtId()));
+					retVal.add(new ExpHole(holeName, (Expression) exps.getKey(), (Expression) replacementExp, parentStmt.getStmtId()));
 				}
 			}
 		}

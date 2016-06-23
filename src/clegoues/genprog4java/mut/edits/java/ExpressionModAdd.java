@@ -12,24 +12,21 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.ExpChoiceHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
-public class ExpressionModAdd extends JavaEditOperation {
+public class ExpressionModAdd extends ExpressionReplacer {
 
 	public ExpressionModAdd(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.EXPADD, location, sources);
-		this.holeNames.add("condExpAdd");
+		this.holeNames.add("replaceExp");
 	}
 
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("condExpAdd");
-		Expression parentExp = (Expression) thisHole.getHoleParent();
+		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("replaceExp");
+		Expression locationExp = (Expression) thisHole.getLocationExp();
 		Expression newExpCode = (Expression) thisHole.getCode();
 
 		int whichSide = thisHole.getChoice();
-		while(parentExp instanceof ParenthesizedExpression) {
-			parentExp = ((ParenthesizedExpression) parentExp).getExpression();	
-		}
 		InfixExpression.Operator newOperator;
 		switch(whichSide) {
 		case 0: newOperator = InfixExpression.Operator.CONDITIONAL_AND;
@@ -39,23 +36,22 @@ public class ExpressionModAdd extends JavaEditOperation {
 			newOperator = InfixExpression.Operator.CONDITIONAL_OR;
 			break;
 		}
-		InfixExpression newExpression = parentExp.getAST().newInfixExpression();
+		InfixExpression newExpression = locationExp.getAST().newInfixExpression();
 		newExpression.setOperator(newOperator);
-		newExpression.setLeftOperand((Expression) rewriter.createCopyTarget(parentExp));
+		newExpression.setLeftOperand((Expression) rewriter.createCopyTarget(locationExp));
 		newExpression.setRightOperand((Expression) rewriter.createCopyTarget(newExpCode));
-
-		rewriter.replace(parentExp, newExpression, null);
+		this.replaceExp(rewriter, newExpression);
 	}
 
 	@Override
 	public String toString() {
-		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("condExpAdd");
-		Expression parentExp = (Expression) thisHole.getHoleParent();
+		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode("replaceExp");
+		Expression locationExp = (Expression) thisHole.getLocationExp();
 		Expression newExpCode = (Expression) thisHole.getCode();
 
 
 		String retval = "ea(" + this.getLocation().getId() + ": ";
-		retval += "(" + parentExp.toString() + ")";
+		retval += "(" + locationExp.toString() + ")";
 		if(thisHole.getChoice() == 0) 
 			retval += " && ";
 		else 

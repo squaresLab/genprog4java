@@ -15,17 +15,17 @@ public class MethodParameterReplacer extends ExpressionReplacer {
 
 	public MethodParameterReplacer(JavaLocation location,  HashMap<String, EditHole> sources) {
 		super(Mutation.PARREP, location, sources);
-		this.holeNames.add("replaceParameter");
+		this.holeNames.add("replaceExp");
 	}
 
 	@Override
 	public String toString() {		
-		ExpHole thisHole = (ExpHole) this.getHoleCode("replaceParameter");
-		Expression parentExp = (Expression) thisHole.getHoleParent();
+		ExpHole thisHole = (ExpHole) this.getHoleCode("replaceExp");
+		Expression locationExp = (Expression) thisHole.getLocationExp();
 		Expression newExpCode = (Expression) thisHole.getCode();
 		// FIXME: is it possible to get the method call for this?  Would be nice for debug
 		String retval = "mpr(" + this.getLocation().getId() + ": ";
-		retval += "(" + parentExp.toString() + ") -->";
+		retval += "(" + locationExp.toString() + ") -->";
 		retval +=  "(" + newExpCode.toString() + "))";
 		return retval;
 	}
