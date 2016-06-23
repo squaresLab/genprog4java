@@ -12,10 +12,11 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
 
-public class MethodReplacer extends ExpressionReplacer {
+public class MethodReplacer extends JavaEditOperation {
 
 	public MethodReplacer(JavaLocation location, EditHole source) {
 		super(location, source);
@@ -39,7 +40,8 @@ public class MethodReplacer extends ExpressionReplacer {
 			ASTNode newParam = rewriter.createCopyTarget(param);
 			newNode.arguments().add(newParam);
 		}		
-		this.replaceExp(rewriter, newNode);
+		
+		rewriter.replace(toReplace, newNode, null); 
 	}
 	
 	@Override

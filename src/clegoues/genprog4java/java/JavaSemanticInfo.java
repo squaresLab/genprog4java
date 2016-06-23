@@ -37,22 +37,22 @@ public class JavaSemanticInfo {
 	private static TreeSet<Pair<String,String>> methodReturnType = new TreeSet<Pair<String,String>>();
 	private static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
 	private static TreeSet<String> finalVariables = new TreeSet<String>();
-	private static Map<String, Map<String,List<ASTNode>>> methodParamExpressionsInScope = null;
+	private static Map<String, Map<String,List<Expression>>> methodParamExpressionsInScope = null;
 	private static Map<String, List<Expression>> conditionalExpressionsInScope = null;
 	private static Map<String, List<Expression>> conditionExtensionsInScope = null;
 
-	public List<ASTNode> getMethodParamReplacementExpressions(final String methodName, MethodDeclaration md, String desiredType) {
-		Map<String,List<ASTNode>> typeToExpressions = null;
+	public List<Expression> getMethodParamReplacementExpressions(final String methodName, MethodDeclaration md, String desiredType) {
+		Map<String,List<Expression>> typeToExpressions = null;
 		if(methodParamExpressionsInScope == null) {
-			methodParamExpressionsInScope = new HashMap<String, Map<String,List<ASTNode>>>();
+			methodParamExpressionsInScope = new HashMap<String, Map<String,List<Expression>>>();
 		}
 		if(methodParamExpressionsInScope.containsKey(methodName)) {
 			typeToExpressions = methodParamExpressionsInScope.get(methodName);
 		} else {
-			typeToExpressions = new HashMap<String,List<ASTNode>>();
+			typeToExpressions = new HashMap<String,List<Expression>>();
 			methodParamExpressionsInScope.put(methodName, typeToExpressions);
 		}
-		final Map<String,List<ASTNode>> forVisitor = methodParamExpressionsInScope.get(methodName);
+		final Map<String,List<Expression>> forVisitor = methodParamExpressionsInScope.get(methodName);
 		md.accept(new ASTVisitor() {
 			public boolean visit(MethodInvocation node) {
 				List<Expression> args = node.arguments();
@@ -60,11 +60,11 @@ public class JavaSemanticInfo {
 					ITypeBinding typeBinding = 	arg.resolveTypeBinding();
 					if(typeBinding != null) {
 						String typeName = typeBinding.getName();
-						List<ASTNode> ofType = null;
+						List<Expression> ofType = null;
 						if(forVisitor.containsKey(typeName)) {
 							ofType = forVisitor.get(typeName);
 						} else {
-							ofType = new ArrayList<ASTNode>();
+							ofType = new ArrayList<Expression>();
 							forVisitor.put(typeName, ofType);
 						}
 						ofType.add(arg);			

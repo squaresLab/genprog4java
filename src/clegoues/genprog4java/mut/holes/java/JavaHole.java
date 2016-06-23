@@ -15,12 +15,12 @@ public abstract class JavaHole implements EditHole<ASTNode> {
 	private int codeBankId; // for debugging/ease of output, really
 
 	public JavaHole() { } 
-	
+
 	public JavaHole(String name, int id) {
 		this.name = name;
 		this.codeBankId = id;
 	}
-	
+
 	@Override
 	public void setName(String name) {
 		this.name = name;
@@ -29,7 +29,7 @@ public abstract class JavaHole implements EditHole<ASTNode> {
 	public String getName() {
 		return this.name;
 	}
-	
+
 	public int getCodeBankId() {
 		return codeBankId;
 	}
@@ -37,12 +37,12 @@ public abstract class JavaHole implements EditHole<ASTNode> {
 	public void setCodeBankId(int codeBankId) {
 		this.codeBankId = codeBankId;
 	}
-	
+
 	@Override
 	public int compareTo(EditHole<ASTNode> o) {
 		return 1; //I think this doesn't matter?
 	}
-	
+
 	@Override
 	public String toString() {
 		return ((Integer) this.getCodeBankId()).toString();
@@ -58,22 +58,20 @@ public abstract class JavaHole implements EditHole<ASTNode> {
 		} 
 		return null;
 	}
-	
-	// fixme: this is with parent, and one is without
-	
-	public static TreeSet<EditHole> makeExpHole(Map<ASTNode, Map<ASTNode, List<ASTNode>>> replacableExps, JavaStatement parentStmt) {
+
+
+	public static TreeSet<EditHole> makeExpHole( Map<Expression, List<Expression>> replacableExps, JavaStatement parentStmt) {
 		if(replacableExps != null && replacableExps.size() > 0) {
 			TreeSet<EditHole> retVal = new TreeSet<EditHole>();
-		for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> funsite : replacableExps.entrySet()) {
-			for(Map.Entry<ASTNode, List<ASTNode>> exps : funsite.getValue().entrySet()) {
-				for(ASTNode replacementExp : exps.getValue()) { 
-					retVal.add(new ExpHole((Expression) exps.getKey(), (Expression) replacementExp, parentStmt.getStmtId()));
+			for(Map.Entry<Expression, List<Expression>> exps : replacableExps.entrySet()) {
+				for(Expression replacementExp : exps.getValue()) { 
+					retVal.add(new ExpHole(exps.getKey(), replacementExp, parentStmt.getStmtId()));
+
 				}
 			}
-		}
-		return retVal;
+			return retVal;
 		}
 		return null;
 	}
-	
+
 }
