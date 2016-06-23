@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
-import clegoues.genprog4java.java.JavaSemanticInfo;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
@@ -232,7 +231,6 @@ public class JavaEditFactory {
 		case REPLACE:
 				TreeSet<WeightedAtom> fixStmts = this.scopeHelper(location, variant);
 				for(WeightedAtom fixStmt : fixStmts) {
-					
 					JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
 					ASTNode fixAST = potentialFixStmt.getASTNode();
 					retVal.add(new StatementHole(holeName, (Statement) fixAST, potentialFixStmt.getStmtId()));
@@ -309,6 +307,14 @@ public class JavaEditFactory {
 			}
 			return retVal;
 		case PARADD:
+			Map<ASTNode,List<Integer>> extensionOptions = locationStmt.getExtendableParameterMethods();
+			for(Map.Entry<ASTNode, List<Integer>> nodeOption : extensionOptions.entrySet()) {
+				for(Integer option : nodeOption.getValue()) {
+				EditHole shrinkableParamHole = new ExpChoiceHole(holeName, nodeOption.getKey(), (Expression) nodeOption.getKey(), locationStmt.getStmtId(), option);
+				retVal.add(shrinkableParamHole);
+				}
+			}
+			return retVal;
 		case OBJINIT:
 		case SIZECHECK:
 		default:
