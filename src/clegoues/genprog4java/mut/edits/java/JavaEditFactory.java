@@ -27,6 +27,7 @@ import clegoues.genprog4java.java.MethodInfo;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.ExpChoiceHole;
 import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
@@ -66,7 +67,15 @@ public class JavaEditFactory {
 		case CASTCHECK:
 			return new ClassCastChecker((JavaLocation) dst, sources);
 		case EXPREP:
-			return new ExpressionReplacer((JavaLocation) dst, sources);
+			return new ExpressionModRep((JavaLocation) dst, sources);
+		case PARADD:
+			return new MethodParameterAdder((JavaLocation) dst, sources);
+		case EXPADD: 
+			return new ExpressionModAdd((JavaLocation) dst, sources);
+		case EXPREM: 
+			return new ExpressionModRem((JavaLocation) dst, sources);
+		case PARREM:
+			return new MethodParameterRemover((JavaLocation) dst, sources);
 		default: logger.fatal("unhandled edit template type in JavaEditFactory; this should be impossible (famous last words...)");
 		}		return null;
 	}
@@ -268,11 +277,41 @@ public class JavaEditFactory {
 		case CASTCHECK:
 			return makeSubExpsHoles(holeName, locationStmt.getCasts());
 		case EXPREP:
-			return makeExpHole(holeName, locationStmt.replacableConditionalExpressions(variant.semanticInfo), locationStmt);
-		case PARADD:
-		case PARREM:
+			return makeExpHole(holeName, locationStmt.getConditionalExpressions(variant.semanticInfo), locationStmt);
 		case EXPADD:
+			Map<ASTNode, Map<ASTNode,List<ASTNode>>> extendableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
+			for(Map.Entry<ASTNode, Map<ASTNode,List<ASTNode>>> parents : extendableExpressions.entrySet()) {
+				for(Map.Entry<ASTNode,List<ASTNode>> entries : parents.getValue().entrySet()) { 
+					for(ASTNode exp : entries.getValue()) {
+					EditHole shrinkableExpHole1 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 0);
+					EditHole shrinkableExpHole2 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 1);
+					retVal.add(shrinkableExpHole1);
+					retVal.add(shrinkableExpHole2);
+					}
+				}
+			}
+			return retVal;
 		case EXPREM:
+			Map<ASTNode, List<ASTNode>> shrinkableExpressions = locationStmt.getShrinkableConditionalExpressions();
+			for(Map.Entry<ASTNode, List<ASTNode>> entries : shrinkableExpressions.entrySet()) {
+				for(ASTNode exp : entries.getValue()) {
+					EditHole shrinkableExpHole1 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 0);
+					EditHole shrinkableExpHole2 = new ExpChoiceHole(holeName, entries.getKey(), (Expression) exp, locationStmt.getStmtId(), 1);
+					retVal.add(shrinkableExpHole1);
+					retVal.add(shrinkableExpHole2);
+				}
+			}
+			return retVal;
+		case PARREM:
+			Map<ASTNode,List<Integer>> options = locationStmt.getShrinkableParameterMethods();
+			for(Map.Entry<ASTNode, List<Integer>> nodeOption : options.entrySet()) {
+				for(Integer option : nodeOption.getValue()) {
+				EditHole shrinkableParamHole = new ExpChoiceHole(holeName, nodeOption.getKey(), (Expression) nodeOption.getKey(), locationStmt.getStmtId(), option);
+				retVal.add(shrinkableParamHole);
+				}
+			}
+			return retVal;
+		case PARADD:
 		case OBJINIT:
 		case SIZECHECK:
 		default:
@@ -314,8 +353,13 @@ public class JavaEditFactory {
 			return locationStmt.getNullCheckables().size() > 0;
 		case CASTCHECK:
 			return locationStmt.getCasts().size() > 0;
+		case PARREM:
+			return locationStmt.getShrinkableParameterMethods().size() > 0;
 		case EXPREP:
-			return locationStmt.replacableConditionalExpressions(variant.semanticInfo).size() > 0;
+		case EXPADD:
+			return locationStmt.getConditionalExpressions(variant.semanticInfo).size() > 0;
+		case EXPREM:
+			return locationStmt.getShrinkableConditionalExpressions().size() > 0;
 		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;
@@ -361,9 +405,17 @@ public class JavaEditFactory {
 			retVal.add("classCast");
 			return retVal;
 		case PARADD:
-		case PARREM:
+			retVal.add("addParameter");
+			return retVal;
 		case EXPADD:
-		case EXPREM: 
+			retVal.add("condExpAdd");
+			return retVal;
+		case EXPREM:
+			retVal.add("condExpRem");
+			return retVal;
+		case PARREM:
+			retVal.add("remParameter");
+			return retVal;
 		case OBJINIT:
 		case SIZECHECK:
 			logger.fatal("Unhandled edit type in holesForMutation.  Handle it in JavaEditFactory and try again.");

@@ -33,6 +33,7 @@
 
 package clegoues.genprog4java.java;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -63,6 +64,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -153,8 +155,8 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		else
 			return "null";
 	}
-	// method to get the parent of an ASTnode. We traverse the ast upwards until the parent node is an instance of statement
-	// if statement is(are) added to this parent node
+
+	// method to get the statemetn parent of an ASTnode. We traverse the ast upwards until the parent node is an instance of statement
 	private ASTNode getParent(ASTNode node) {
 		ASTNode parent = node.getParent();
 		while(!(parent instanceof Statement)){
@@ -168,7 +170,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		return this.stmtId - other.getStmtId();
 	}
 
-	// maybe not for cached info...
 
 	/******* Cached information for applicability of various mutations/templates ******/
 	private Map<ASTNode, List<ASTNode>> arrayAccesses = null; // to track the parent nodes of array access nodes
@@ -251,28 +252,23 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	private Map<ASTNode, List<ASTNode>> casts = null;
 
-	private void saveCastInfo(CastExpression node) {
-		ASTNode parent = this.getParent(node); 
-		List<ASTNode> thisParentsCasts;
-		if(casts.containsKey(parent)) {
-			thisParentsCasts = casts.get(parent);
-		} else {
-			thisParentsCasts = new ArrayList<ASTNode>();
-			casts.put(parent, thisParentsCasts);
-		}
-		thisParentsCasts.add(node);
-	}
-
 	public Map<ASTNode, List<ASTNode>> getCasts() {
 		if(casts != null) {
 			return casts;
 		}
 		casts = new HashMap<ASTNode, List<ASTNode>>();
 		this.getASTNode().accept(new ASTVisitor() {
-			// method to visit all Expressions relevant for this in locationNode and
-			// store their parents
+
 			public boolean visit(CastExpression node) {
-				saveCastInfo(node);
+				ASTNode parent = getParent(node); 
+				List<ASTNode> thisParentsCasts;
+				if(casts.containsKey(parent)) {
+					thisParentsCasts = casts.get(parent);
+				} else {
+					thisParentsCasts = new ArrayList<ASTNode>();
+					casts.put(parent, thisParentsCasts);
+				}
+				thisParentsCasts.add(node);
 				return true;
 			}
 		});
@@ -280,30 +276,84 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		return casts;
 	}
 
-	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> expressionReplacements = null;
-	
-	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> replacableConditionalExpressions(final JavaSemanticInfo semanticInfo) {
-		if(expressionReplacements != null) {
-			return expressionReplacements;
-		} else {
-			expressionReplacements = new HashMap<ASTNode, Map<ASTNode, List<ASTNode>>>();
+	private Map<ASTNode, List<ASTNode>> shrinkableExpressions = null;
+
+	public Map<ASTNode, List<ASTNode>> getShrinkableConditionalExpressions() {
+		if(shrinkableExpressions != null) {
+			return shrinkableExpressions;
 		}
+		shrinkableExpressions = new HashMap<ASTNode, List<ASTNode>>();
+		this.getASTNode().accept(new ASTVisitor() {
+
+			boolean isShrinkable(InfixExpression.Operator op) {
+				return (op == InfixExpression.Operator.CONDITIONAL_AND) ||
+						(op == InfixExpression.Operator.CONDITIONAL_OR);
+			}
+			public boolean visit(ConditionalExpression node) {
+				Expression condExp = node.getExpression();
+				while(condExp instanceof ParenthesizedExpression) {
+					condExp = ((ParenthesizedExpression) condExp).getExpression();
+				}
+				if(condExp instanceof InfixExpression) {
+					if(isShrinkable(((InfixExpression) condExp).getOperator())) {
+						List<ASTNode> shrinkable;
+						if(shrinkableExpressions.containsKey(node)) {
+							shrinkable = shrinkableExpressions.get(node);
+						} else {
+							shrinkable = new ArrayList<ASTNode>();
+							shrinkableExpressions.put(node, shrinkable);
+						}
+						shrinkable.add(node.getExpression());
+					}
+				}
+				return true;
+
+			}
+			public boolean visit(IfStatement node) {
+				Expression ifExp = node.getExpression();
+				while(ifExp instanceof ParenthesizedExpression) {
+					ifExp = ((ParenthesizedExpression) ifExp).getExpression();
+				}
+				if(ifExp instanceof InfixExpression) {
+					if(isShrinkable(((InfixExpression) ifExp).getOperator())) {
+						List<ASTNode> shrinkable;
+						if(shrinkableExpressions.containsKey(node)) {
+							shrinkable = shrinkableExpressions.get(node);
+						} else { // FIXME problem: don't want to leave randomness to the edit operator on which exp to kill
+							shrinkable = new ArrayList<ASTNode>();
+							shrinkableExpressions.put(node, shrinkable);
+						}
+						shrinkable.add(node.getExpression());
+					}
+				}
+				return true;
+			}
+		});
+		return shrinkableExpressions;
+	}
+
+	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> extendableExpressions = null;
+
+	// FIXME: find a way to sort options by distance where sorting by distance is specified
+	// in PAR paper
+	public Map<ASTNode, Map<ASTNode, List<ASTNode>>> getConditionalExpressions(final JavaSemanticInfo semanticInfo) {
+		if(extendableExpressions != null) {
+			return extendableExpressions;
+		}
+		extendableExpressions = new HashMap<ASTNode, Map<ASTNode, List<ASTNode>>>();
+
 		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
 		final String methodName = md.getName().getIdentifier();
-
-		final Map<ASTNode, List<ASTNode>> replacementMap;
-		if(expressionReplacements.containsKey(this.getASTNode())) {
-			replacementMap = expressionReplacements.get(this.getASTNode());
-		} else {
-			replacementMap = new HashMap<ASTNode, List<ASTNode>>();
-			expressionReplacements.put(this.getASTNode(), replacementMap);
-		}
 
 		this.getASTNode().accept(new ASTVisitor() {
 
 			public boolean visit(IfStatement node) {
 				Expression exp = node.getExpression();
-				List<ASTNode> replacements = semanticInfo.getConditionalReplacementExpressions(methodName, md);
+				// possible FIXME: exclude those that are already in the condition?
+				List<ASTNode> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
+				Map<ASTNode, List<ASTNode>> replacementMap = new HashMap<ASTNode, List<ASTNode>>();
+				extendableExpressions.put(node, replacementMap);
+
 				if(replacements != null) {
 					List<ASTNode> thisList = null;
 					if(replacementMap.containsKey(exp)) {
@@ -317,10 +367,13 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				return true;
 			}
 
-			// FIXME: test this.
 			public boolean visit(ConditionalExpression node) {
 				Expression exp = node.getExpression();
-				List<ASTNode> replacements = semanticInfo.getConditionalReplacementExpressions(methodName, md);
+				ASTNode parent = getParent(node);
+				List<ASTNode> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
+				Map<ASTNode, List<ASTNode>> replacementMap = new HashMap<ASTNode, List<ASTNode>>();
+				extendableExpressions.put(parent, replacementMap);
+
 				if(replacements != null) {
 					List<ASTNode> thisList = null;
 					if(replacementMap.containsKey(exp)) {
@@ -332,20 +385,19 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					thisList.addAll(replacements);
 				}
 				return true;
-				}
+			}
 		});
-		return expressionReplacements;
+		return extendableExpressions;
 	}
+
+
 
 	private Map<ASTNode, Map<ASTNode,List<ASTNode>>> methodParamReplacements = null;
 
 	public Map<ASTNode, Map<ASTNode,List<ASTNode>>> getReplacableMethodParameters(final JavaSemanticInfo semanticInfo) {
-		if(methodParamReplacements != null) {
-			return methodParamReplacements;
-		} else {
+		if(methodParamReplacements == null) {
 			methodParamReplacements = new HashMap<ASTNode, Map<ASTNode,List<ASTNode>>>();
 		}
-
 		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
 		final String methodName = md.getName().getIdentifier();
 
@@ -385,12 +437,84 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		return methodParamReplacements;
 	}
 
+
+	// FIXME: if the fix set is expanded, clear any of these caches?? 
+
+	private Map<ASTNode,List<Integer>> shrinkableParameterMethods = null;
+
+	public Map<ASTNode,List<Integer>> getShrinkableParameterMethods() {
+		if(shrinkableParameterMethods == null) {
+			shrinkableParameterMethods = new HashMap<ASTNode,List<Integer>>();
+			this.getASTNode().accept(new ASTVisitor() {
+				// FIXME: also supermethodinvocations
+
+				public boolean visit(MethodInvocation node) {
+					IMethodBinding myMethodBinding = node.resolveMethodBinding().getMethodDeclaration();
+					ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
+					ArrayList<IMethodBinding> compatibleMethods = new ArrayList<IMethodBinding>();
+					ArrayList<ITypeBinding> myParamTypes = new ArrayList<ITypeBinding>(Arrays.asList(myMethodBinding.getParameterTypes()));
+					for(IMethodBinding thisClassMethod : classBinding.getDeclaredMethods()) {
+						if(thisClassMethod.getName().equals(myMethodBinding.getName())) {
+							ArrayList<ITypeBinding> candParamTypes = new ArrayList<ITypeBinding>(Arrays.asList(thisClassMethod.getParameterTypes()));
+							if(candParamTypes.size() < myParamTypes.size()) {
+								boolean isCompatible = true;
+								for(int i = 0; i < candParamTypes.size(); i++) {
+									ITypeBinding candParam = candParamTypes.get(i);
+									ITypeBinding myParam = myParamTypes.get(i);
+									if(!myParam.isAssignmentCompatible(candParam)) {
+										isCompatible = false;
+										break;
+									}
+								}
+								if(isCompatible) {
+									compatibleMethods.add(thisClassMethod);
+								}
+							}
+						}
+					}
+					ITypeBinding superClass = classBinding.getSuperclass();
+					while(superClass != null) {
+						IMethodBinding[] superMethods = superClass.getDeclaredMethods();
+						for(IMethodBinding superMethod : superMethods) {
+							int modifiers = superMethod.getModifiers();
+							if(!Modifier.isAbstract(modifiers) &&
+									(Modifier.isProtected(modifiers) || Modifier.isPublic(modifiers)) &&
+									superMethod.isSubsignature(myMethodBinding)) {
+								compatibleMethods.add(superMethod);
+							}
+						}
+						superClass = superClass.getSuperclass();
+					}
+					ITypeBinding[] thisMethodsTypes = myMethodBinding.getParameterTypes();
+					if(compatibleMethods.size() > 0) {
+						List<Integer> thisNodesOptions;
+						if(shrinkableParameterMethods.containsKey(node)) {
+							thisNodesOptions = shrinkableParameterMethods.get(node);
+						} else {
+							thisNodesOptions = new ArrayList<Integer>();
+							shrinkableParameterMethods.put(node,thisNodesOptions);
+						}
+						for(IMethodBinding compatibleMethod : compatibleMethods) {
+							ITypeBinding[] parameterTypes = compatibleMethod.getParameterTypes();
+							int numReduce = thisMethodsTypes.length - parameterTypes.length;
+							thisNodesOptions.add(numReduce);
+						}
+					}
+
+					return true;
+				}
+
+			});
+		}
+		return shrinkableParameterMethods;
+	}
 	private Map<ASTNode, List<ASTNode>> methodReplacements = null;
 	private Map<ASTNode, List<MethodInfo>> candidateMethodReplacements= null;
 
 	public List<MethodInfo> getCandidateMethodReplacements(ASTNode methodToReplace ) 
 	{ return candidateMethodReplacements.get(methodToReplace); }
 
+	// FIXME: I don't think I need this because you can just get the parameter types.  Refactor me!
 	private ArrayList<ITypeBinding> paramsToTypes(List<SingleVariableDeclaration> params) {
 		int i = 0; 
 		ArrayList<ITypeBinding> paramTypes = new ArrayList<ITypeBinding>();
@@ -402,8 +526,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		return paramTypes;
 	}
 
-	// FIXME: replacement methods should apparently be in the same scope; can we safely assume
-	// that everything in the methoddecls field qualifies?
 	public Map<ASTNode, List<ASTNode>> getReplacableMethods(final List<MethodInfo> methodDecls) {
 		if(methodReplacements == null) {
 			methodReplacements = new HashMap<ASTNode, List<ASTNode>>();
@@ -412,6 +534,8 @@ public class JavaStatement implements Comparable<JavaStatement>{
 			this.getASTNode().accept(new ASTVisitor() {
 				// method to visit all Expressions relevant for this in locationNode and
 				// store their parents
+				//  FIXME: supermethodinvocations?
+
 				public boolean visit(MethodInvocation node) {
 					// if there exists another invocation that this works for...
 					ArrayList<MethodInfo> possibleReps = new ArrayList<MethodInfo> ();
@@ -589,6 +713,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		this.setASTNode(node);
 
 	}
+
 
 
 }

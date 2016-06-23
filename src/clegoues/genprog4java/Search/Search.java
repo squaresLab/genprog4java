@@ -33,6 +33,7 @@
 
 package clegoues.genprog4java.Search;
 
+// oneday FIXME: lowercase the package name because it annoys me...
 import static clegoues.util.ConfigurationBuilder.BOOLEAN;
 import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.INT;
@@ -251,7 +252,7 @@ public abstract class Search<G extends EditOperation> {
 				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
 				if(proMutList.size()>=faultyAtoms.size()){ 
 					variant.setAllPossibleStmtsToFixLocalization();
-					variant.setAllPossibleStmtsToFaultyLocalization();
+					//variant.setAllPossibleStmtsToFaultyLocalization();
 					//alreadyOnList=false;
 				}
 				//only adds the random atom if it is different from the others already added
@@ -287,20 +288,6 @@ public abstract class Search<G extends EditOperation> {
 						filledHoles.put(hole, selected.getHole());
 					}
 				}
-				
-		/*	
-		 * FIXME: CLG commented the handling of replace out for the purposes of merging things in
-		 * will have to think about how to do this properly, but want to fix this awful merge, first.
-		 * case REPLACE: 
-				
-			
-				}else if(Search.model.equalsIgnoreCase("probabilistic")){
-					
-					afterR = (WeightedAtom)rm.chooseReplacementBasedOnPredictingModel(new ArrayList(allowedR),variant,stmtid);
-				}
-				
-				variant.performEdit(mut, stmtid,  afterR.getAtom()); 
-				break;*/
 				variant.performEdit(mut, location, filledHoles);
 			}
 		}
