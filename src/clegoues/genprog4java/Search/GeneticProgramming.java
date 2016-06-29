@@ -133,16 +133,13 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			}
 
 			// step 4: fitness
-			int count = 0;
 			for (Representation<G> item : incomingPopulation) {
-				count++;
 				if (fitnessEngine.testFitness(gen, item)) {
 					this.noteSuccess(item, original, gen);
 					if(!continueSearch) 
 						return;
 				}
 			}
-			logger.info("Generation: " + gen + " I think I tested " + count + " variants.");
 			gen++;
 		}
 	}
