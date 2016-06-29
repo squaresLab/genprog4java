@@ -60,7 +60,6 @@ import javax.tools.ToolProvider;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AssertStatement;
@@ -76,7 +75,6 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -104,6 +102,7 @@ import org.jacoco.core.data.IExecutionDataVisitor;
 import org.jacoco.core.data.ISessionInfoVisitor;
 import org.jacoco.core.data.SessionInfo;
 
+import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaParser;
@@ -668,7 +667,31 @@ FaultLocRepresentation<JavaEditOperation> {
 	}
 
 	@Override
-	public void reduceSearchSpace() {
+	public void reduceSearchSpace() throws GiveUpException {
+		//Reduce Fault space
+		boolean thereIsAtLeastOneMutThatApplies;
+		ArrayList<Location> locsToRemove = new ArrayList<Location>();
+		for (Location potentiallyBuggyLoc : faultLocalization) {
+			thereIsAtLeastOneMutThatApplies = false;
+			TreeSet<Pair<Mutation, Double>> availableMutations = availableMutations(potentiallyBuggyLoc);
+			if(availableMutations.isEmpty()){
+				locsToRemove.add(potentiallyBuggyLoc);
+			}else{
+				for (Pair<Mutation, Double> mutation : availableMutations) {
+					thereIsAtLeastOneMutThatApplies = thereIsAtLeastOneMutThatApplies || this.editFactory.doesEditApply(this, potentiallyBuggyLoc, mutation.getFirst());
+				}
+				if(!thereIsAtLeastOneMutThatApplies){
+					locsToRemove.add(potentiallyBuggyLoc);
+				}
+			}
+		}
+		faultLocalization.removeAll(locsToRemove);
+		if(faultLocalization.isEmpty()){
+			logger.info("\nThere is no valid mutation to perform in the fault space. Exiting program\n");
+			throw new GiveUpException();
+		}
+		
+		//Redcue Fix space
 		ArrayList<WeightedAtom> toRemove = new ArrayList<WeightedAtom>();
 		//potentialFix is a potential fix statement
 		for (WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {

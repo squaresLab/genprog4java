@@ -52,6 +52,7 @@ import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.log4j.Logger;
 
+import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.FitnessValue;
 import clegoues.genprog4java.fitness.TestCase;
@@ -454,7 +455,7 @@ Representation<G> {
 		astHashCode = null;
 	}
 
-	public void reduceSearchSpace() {
+	public void reduceSearchSpace() throws GiveUpException {
 	} // subclasses can override as desired
 
 	public void reduceFixSpace() {

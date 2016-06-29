@@ -76,7 +76,7 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 	// FIXME: this thing is such a mess.
 	@Override
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
-			throws RepairFoundException {
+			throws RepairFoundException, GiveUpException {
 		original.reduceSearchSpace();
 
 		int count = 0;
