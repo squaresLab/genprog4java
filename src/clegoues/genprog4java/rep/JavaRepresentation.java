@@ -735,6 +735,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		for(WeightedAtom atom : toRemove) {
 			fixLocalization.remove(atom);
 		}
+
 	}
 
 

@@ -2,6 +2,7 @@ package clegoues.genprog4java.mut.edits.java;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -285,22 +286,14 @@ public class JavaEditFactory {
 			}
 			return retVal;
 		case PARADD:
-			Map<ASTNode, List<Map<Integer, List<Expression>>>> extensionOptions = locationStmt.getExtendableParameterMethods(variant.semanticInfo);
-			for(Entry<ASTNode, List<Map<Integer, List<Expression>>>> nodeOption : extensionOptions.entrySet()) {
-				for(Map<Integer, List<Expression>> option : nodeOption.getValue()) {
-					
-					int numKeys = option.size();
-					Map<Integer,List<ASTNode>> args = new HashMap<Integer,List<ASTNode>>();
-					
-					for(int i = 0; i < numKeys; i++) {
-						List<Expression> optionsForThisParam = option.get(i);
-						
-					}
-			//	EditHole shrinkableParamHole = new ExpChoiceHole(holeName, nodeOption.getKey(), (Expression) nodeOption.getKey(), locationStmt.getStmtId(), option);
-				//retVal.add(shrinkableParamHole);
-					
-					// FIXME: this is hard b/c the number of holes is variable and defined by the method 
-					// selected.
+			Map<ASTNode, List<List<ASTNode>>> extensionOptions = locationStmt.getExtendableParameterMethods(variant.semanticInfo);
+			for(Entry<ASTNode, List<List<ASTNode>>> nodeOption : extensionOptions.entrySet()) {
+				List<List<ASTNode>> paramOptions =  nodeOption.getValue();
+				LinkedList<List<ASTNode>> res = new LinkedList<List<ASTNode>>();
+				permutations(paramOptions, res, 0, new LinkedList<ASTNode>());
+				for(List<ASTNode> oneList : res) {
+					EditHole fillIn = new SubExpsHole(nodeOption.getKey(), oneList);
+					retVal.add(fillIn);
 				}
 			}
 			return retVal;
@@ -312,7 +305,23 @@ public class JavaEditFactory {
 		return retVal;
 	}
 
-	public Boolean doesEditApply(JavaRepresentation variant, Location location, Mutation editType) {
+	void permutations(List<List<ASTNode>> original, List<List<ASTNode>> result, int d, List<ASTNode> current) {
+		  // if depth equals number of original collections, final reached, add and return
+		  if (d == original.size()) {
+		    result.add(current);
+		    return;
+		  }
+
+		  // iterate from current collection and copy 'current' element N times, one for each element
+		  List<ASTNode> currentCollection = original.get(d);
+		  for (ASTNode element : currentCollection) {
+		    List<ASTNode> copy = new ArrayList<ASTNode>(current);
+		    copy.add(element);
+		    permutations(original, result, d + 1, copy);
+		  }
+		}
+
+	public boolean doesEditApply(JavaRepresentation variant, Location location, Mutation editType) {
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 		switch(editType) {
 		case APPEND: 

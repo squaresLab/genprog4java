@@ -12,7 +12,9 @@ public class TemplatePlaygroundTest {
 		ret = y;
 	   }else if(x<z  && y > z){
 		//ret = y; // bug, it should be ret = x;
-		   Object www = (Object) ww;
+		   if(x < z) {
+			   ret = 5;
+		   }
 	   }
 	}else{
 	   if(x>y){
