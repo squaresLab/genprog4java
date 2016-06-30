@@ -12,9 +12,8 @@ public class TemplatePlaygroundTest {
 		ret = y;
 	   }else if(x<z  && y > z){
 		//ret = y; // bug, it should be ret = x;
-		   if(x < z) {
-			   ret = 5;
-		   }
+		   retOne(5);
+		   ret = 5;
 	   }
 	}else{
 	   if(x>y){
@@ -37,7 +36,7 @@ public class TemplatePlaygroundTest {
  	TemplatePlaygroundTest ww = new TemplatePlaygroundTest();
     }
     
-    public void retTwo(int foo){
+    public void retOne(int foo, int bar){
     	int i = 0;
     	
     	int e = 3;	
