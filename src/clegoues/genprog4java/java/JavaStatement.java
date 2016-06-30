@@ -429,11 +429,11 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	}
 	
 
-	private Map<ASTNode,List<Map<Integer,List<Expression>>>> extendableParameterMethods = null;
+	private Map<ASTNode,List<List<ASTNode>>> extendableParameterMethods = null;
 
-	public Map<ASTNode, List<Map<Integer, List<Expression>>>> getExtendableParameterMethods(final JavaSemanticInfo semanticInfo) {
+	public Map<ASTNode, List<List<ASTNode>>> getExtendableParameterMethods(final JavaSemanticInfo semanticInfo) {
 		if(extendableParameterMethods == null) {
-			extendableParameterMethods = new HashMap<ASTNode,List<Map<Integer,List<Expression>>>>();
+			extendableParameterMethods = new HashMap<ASTNode,List<List<ASTNode>>>();
 
 			final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
 			final String methodName = md.getName().getIdentifier();
@@ -468,18 +468,18 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					}
 					if(compatibleMethods.size() > 0) {
 						ArrayList<ITypeBinding> myTypes = getParamTypes(myMethodBinding);
-						List<Map<Integer,List<Expression>>> thisNodesOptions;
+						List<List<ASTNode>> thisNodesOptions;
 						if(extendableParameterMethods.containsKey(node)) {
 							thisNodesOptions = extendableParameterMethods.get(node);
 						} else {
-							thisNodesOptions = new ArrayList<Map<Integer,List<Expression>>>();
+							thisNodesOptions = new ArrayList<List<ASTNode>>();
 							extendableParameterMethods.put(node,thisNodesOptions);
 						}
 						for(IMethodBinding compatibleMethod : compatibleMethods) {
 							ArrayList<ITypeBinding> compatibleParamTypes = getParamTypes(compatibleMethod);
 							List<ITypeBinding> toExtend = compatibleParamTypes.subList(myTypes.size()-1, compatibleParamTypes.size());
 							
-							Map<Integer, List<Expression>> thisExtension = new HashMap<Integer, List<Expression>>();
+							List<ASTNode> thisExtension = new ArrayList<ASTNode>();
 							boolean extensionDoable = true;
 							int i = 0;
 							for(ITypeBinding necessaryExp : toExtend) {
@@ -488,7 +488,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 									extensionDoable = false;
 									break;
 								}
-								thisExtension.put(i, replacements);
+								thisExtension.addAll(replacements);
 								i++;
 							}
 							if(extensionDoable) {

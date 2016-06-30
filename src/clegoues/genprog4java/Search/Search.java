@@ -253,14 +253,14 @@ public abstract class Search<G extends EditOperation> {
 				if(proMutList.size()>=faultyAtoms.size()){ 
 					variant.setAllPossibleStmtsToFixLocalization();				}
 				//only adds the random atom if it is different from the others already added
-				do{
+				do {
 					//chooses a random faulty atom from the subset of faulty atoms
 					wa = GlobalUtils.chooseOneWeighted(new ArrayList(faultyAtoms));
+					// insert a check to see if this location has any valid mutations?  If not, look again
+					// if not, somehow tell the variant to remove that location from the list of faulty atoms
 					alreadyOnList = proMutList.contains(wa);
-				}while(alreadyOnList);
+				} while(alreadyOnList);
 				proMutList.add((Location)wa);
-
-
 			}
 			for (Location location : proMutList) {
 				// FIXME: deal with the case where there are no edits that apply ever, because infinite loop
@@ -280,7 +280,6 @@ public abstract class Search<G extends EditOperation> {
 						.chooseOneWeighted(new ArrayList(allowed));
 				variant.performEdit(mut, location, selected.getHole());
 
-
 			}
 		}
 	}
@@ -291,7 +290,6 @@ public abstract class Search<G extends EditOperation> {
 		}else if(Search.model.equalsIgnoreCase("probabilistic")){
 			return rm.rescaleBasedOnModel(new ArrayList(allowed), variant, stmtid);
 		}
-
 		return null;
 	}
 

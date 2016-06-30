@@ -94,10 +94,9 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 
 				}
 			}
-
 		}
-		logger.info("search: bruteForce: " + count
-				+ " mutants in search space\n");
+		
+		logger.info("search: bruteForce: " + count + " mutants in search space\n");
 
 		int wins = 0;
 		int sofar = 1;
