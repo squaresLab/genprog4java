@@ -17,7 +17,6 @@ public class MethodParameterAdder extends JavaEditOperation {
 	
 	@Override
 	public void edit(ASTRewrite rewriter) {
-		// TODO Auto-generated method stub
 		
 	}
 

@@ -355,6 +355,8 @@ public class JavaEditFactory {
 			return locationStmt.getCasts().size() > 0;
 		case PARREM:
 			return locationStmt.getShrinkableParameterMethods().size() > 0;
+		case PARADD:
+			return locationStmt.getExtendableParameterMethods(variant.semanticInfo).size() > 0;
 		case EXPREP:
 		case EXPADD:
 			return locationStmt.getConditionalExpressions(variant.semanticInfo).size() > 0;
