@@ -297,8 +297,11 @@ public class JavaEditFactory {
 				}
 			}
 			return retVal;
-		case OBJINIT:
 		case SIZECHECK:
+			EditHole hole = new SubExpsHole(locationStmt.getASTNode(), locationStmt.getIndexedCollectionObjects());
+			retVal.add(hole);
+			return retVal;
+		case OBJINIT:
 			logger.fatal("Unhandled template type in editSources!  Fix code in JavaEditFactory to do this properly.");
 			return null;
 		}
@@ -362,6 +365,8 @@ public class JavaEditFactory {
 			return locationStmt.getConditionalExpressions(variant.semanticInfo).size() > 0;
 		case EXPREM:
 			return locationStmt.getShrinkableConditionalExpressions().size() > 0;
+		case SIZECHECK:
+			return locationStmt.getIndexedCollectionObjects().size() > 0;
 		default:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;
