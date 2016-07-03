@@ -86,14 +86,14 @@ cd $BUGWD
 #Create config file 
 FILE=$BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/defects4j.config
 /bin/cat <<EOM >$FILE
-popsize = 20
 seed = 0
+sanity = yes
+popsize = 20
 javaVM = /usr/bin/java
 workingDir = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
 outputDir = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/tmp
 classSourceFolder = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/$SRCFOLDER
 libs = $CONFIGLIBS
-sanity = yes
 sourceDir = $WD
 positiveTests = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/pos.tests
 negativeTests = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/neg.tests
