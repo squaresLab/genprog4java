@@ -1,18 +1,19 @@
 package packageTemplatePlaygroundTest;
+import java.util.ArrayList;
 
 public class TemplatePlaygroundTest {
 
     public int mid(int x, int y, int z){
     	int ret = z;
     	int[] foo = new int[5];
-     	TemplatePlaygroundTest ww = new TemplatePlaygroundTest();
+     	ArrayList<Integer> ww = new ArrayList<Integer>();
 
 	if(y<z){
 	   if(x<y){
 		ret = y;
 	   }else if(x<z  && y > z){
 		//ret = y; // bug, it should be ret = x;
-		   retOne(5);
+		   ww.add(5);
 		   ret = 5;
 	   }
 	}else{

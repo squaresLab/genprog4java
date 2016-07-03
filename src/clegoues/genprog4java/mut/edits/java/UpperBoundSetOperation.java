@@ -38,8 +38,6 @@ public class UpperBoundSetOperation extends JavaEditOperation {
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> arrays = thisHole.getSubExps();
-		// possible FIXME: all array accesses in this location, or just the one? 
-		// check against the spec
 
 		Block newnode = parent.getAST().newBlock();
 

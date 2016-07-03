@@ -503,6 +503,84 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		}
 		return extendableParameterMethods;	
 	}
+	
+	private List<ASTNode> indexedCollectionObjects = null;
+	
+	public  List<ASTNode> getIndexedCollectionObjects() {
+		if(indexedCollectionObjects == null) {
+			indexedCollectionObjects = new ArrayList<ASTNode>();
+
+			this.getASTNode().accept(new ASTVisitor() {
+
+				public boolean visit(MethodInvocation node) {
+					Expression methodCall = node.getExpression();
+					SimpleName methodName = node.getName();
+					switch(methodName.getIdentifier()) {
+					case "removeRange":
+					case "subList":
+						break;
+					case "add":
+					case "addAll": 
+						if(node.arguments().size() > 1) {
+							break;
+						}
+						else
+							return true;
+					case "get":
+					case "remove":
+					case "set":
+						break;
+					default: return true;
+					}
+					
+					ITypeBinding methodCallTypeBinding = methodCall.resolveTypeBinding();
+					String name = methodCallTypeBinding.getTypeDeclaration().getName();
+					ITypeBinding decl = methodCallTypeBinding.getTypeDeclaration();
+					while(decl != null && !name.equals("AbstractList")) {
+						decl = decl.getSuperclass().getTypeDeclaration();
+						name = decl.getName();
+					}
+					if(decl == null) {
+						return true;
+					}
+					indexedCollectionObjects.add(node);
+					return true;
+				}
+				/*	void	add(int index, E element)
+					boolean	addAll(int index, Collection<? extends E> c)
+					abstract E	get(int index)
+					E	remove(int index)
+					protected void	removeRange(int fromIndex, int toIndex)
+					E	set(int index, E element)
+					List<E>	subList(int fromIndex, int toIndex) */
+				});
+		}
+		return indexedCollectionObjects;
+	}
+	
+	/*
+	 * B = buggy statements
+collect method invocations of (@\textbf{[collection objects]}@) in B and put them into collection C
+insert a if statement before B
+
+loop for all method invocation in C
+{
+ if a method invocation has an index parameter
+ {
+ insert a conditional expression that checks whether the index parameter is smaller than the size of its collection object
+ }
+}
+concatenate conditions using AND 
+
+if B include return statement
+{
+ negate the concatenated the conditional expression
+ insert a return statement that returns a default value into THEN section of the if statement
+ insert B after the if statement
+} else {
+ insert B into THEN section of the if statement
+}
+	 */
 
 
 	private Map<ASTNode,List<Integer>> shrinkableParameterMethods = null;
@@ -724,6 +802,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		this.setASTNode(node);
 
 	}
+
 
 
 
