@@ -49,6 +49,7 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
+import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.EditHole;
@@ -203,7 +204,7 @@ Comparable<Representation<G>> {
 
 	public abstract boolean testCase(TestCase test);
 
-	public abstract void reduceSearchSpace(); 
+	public abstract void reduceSearchSpace() throws GiveUpException; 
 
 	public abstract TreeSet<Pair<Mutation, Double>> availableMutations(
 			Location faultyLocation);
