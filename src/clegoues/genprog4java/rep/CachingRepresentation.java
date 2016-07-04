@@ -280,7 +280,7 @@ Representation<G> {
 			return false;
 		}
 		FitnessValue fitness = this.internalTestCase(this.variantFolder,
-				this.variantFolder + Configuration.globalExtension, test);
+				this.variantFolder + ".java", test);
 		thisVariantsFitness.put(test.toString(), fitness);
 		return fitness.isAllPassed();
 	}
@@ -359,7 +359,6 @@ Representation<G> {
 
 	protected FitnessValue internalTestCase(String sanityExename,
 			String sanityFilename, TestCase thisTest) {
-		// FIXME: the filename is wrong, here; it's looking based on the name of the edits incorporated, not the variant folder name, as it should be
 		
 		CommandLine command = this.internalTestCaseCommand(sanityExename,
 				sanityFilename, thisTest);
@@ -371,7 +370,6 @@ Representation<G> {
 		executor.setWatchdog(watchdog);
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		// FIXME: the problem is it's not finding the jacocagent because it's at ./lib, not at /path/to/lib
 		executor.setExitValue(0);
 
 		executor.setStreamHandler(new PumpStreamHandler(out));
@@ -417,7 +415,6 @@ Representation<G> {
 	// time being and just doing the caching, which makes sense anyway
 
 	public boolean compile(String sourceName, String exeName) {
-
 		if (this.alreadyCompiled != null) {
 			return alreadyCompiled.getFirst();
 		} else {
@@ -462,7 +459,5 @@ Representation<G> {
 
 	}
 
-	protected abstract CommandLine internalTestCaseCommand(String exeName,
-			String fileName, TestCase test);
 
 }

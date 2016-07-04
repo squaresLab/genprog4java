@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
 import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
@@ -87,11 +88,13 @@ public class JavaEditFactory {
 			return JavaEditFactory.scopeSafeAtomMap.get(stmtId);
 		}
 
+		Localization localization = variant.getLocalization();
+		
 		JavaStatement potentiallyBuggyStmt = (JavaStatement) stmtId.getLocation();
 		ASTNode faultAST = potentiallyBuggyStmt.getASTNode();
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
 
-		for (WeightedAtom potentialFixAtom : variant.getFixSourceAtoms()) {
+		for (WeightedAtom potentialFixAtom : localization.getFixSourceAtoms()) {
 			int index = potentialFixAtom.getAtom();
 			JavaStatement potentialFixStmt = variant.getFromCodeBank(index);
 			ASTNode fixAST = potentialFixStmt.getASTNode();
