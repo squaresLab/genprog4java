@@ -41,7 +41,7 @@ import clegoues.genprog4java.rep.WeightedAtom;
 @SuppressWarnings("rawtypes")
 public class JavaEditFactory {
 
-	private static HashMap<Location, Set<WeightedAtom>> scopeSafeAtomMap = new HashMap<Location, Set<WeightedAtom>>();
+	private static HashMap<Integer, Set<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, Set<WeightedAtom>>();
 
 	protected Logger logger = Logger.getLogger(JavaEditOperation.class);
 
@@ -83,8 +83,8 @@ public class JavaEditFactory {
 	}
 
 	private Set<WeightedAtom> scopeHelper(Location stmtId, JavaRepresentation variant) {
-		if (JavaEditFactory.scopeSafeAtomMap.containsKey(stmtId)) {
-			return JavaEditFactory.scopeSafeAtomMap.get(stmtId);
+		if (JavaEditFactory.scopeSafeAtomMap.containsKey(stmtId.getId())) {
+			return JavaEditFactory.scopeSafeAtomMap.get(stmtId.getId());
 		}
 
 		JavaStatement potentiallyBuggyStmt = (JavaStatement) stmtId.getLocation();
@@ -193,7 +193,7 @@ public class JavaEditFactory {
 
 			retVal.add(potentialFixAtom);
 		}
-		JavaEditFactory.scopeSafeAtomMap.put(stmtId, retVal);
+		JavaEditFactory.scopeSafeAtomMap.put(stmtId.getId(), retVal);
 		return retVal;
 	}
 
