@@ -33,12 +33,24 @@
 
 package clegoues.genprog4java.fitness;
 
-
+/** 
+ * Tracks basic information about a test case; primarily useful
+ * for when we're using a test model, otherwise we could probably
+ * get away with just using strings to track test class names
+ * (but since it makes clegoues crazy when strings are used as 
+ * generic data, we probably wouldn't).
+ * @author clegoues
+ *
+ */
 public class TestCase implements Comparable<TestCase> {
 	private TestType posOrNeg;
 	private String testName = null;
 	private int numPatchesKilled = 0;
 
+	public enum TestType {
+		POSITIVE, NEGATIVE
+	}
+	
 	public TestCase(TestType t, String name) {
 		this.setPosOrNeg(t);
 		this.testName = name; 
