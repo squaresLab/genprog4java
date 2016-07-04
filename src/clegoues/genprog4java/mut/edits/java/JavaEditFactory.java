@@ -221,8 +221,17 @@ public class JavaEditFactory {
 
 
 	public List<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType) {
-		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 		ArrayList<EditHole> retVal = new ArrayList<EditHole>();
+
+		if(editType == Mutation.BABBLED) {
+			retVal.add( new ASTNodeHole( // FIXME: this whole static babbler thing is not gonna fly in the long run
+					// but let's deal with it for now
+				EntropyLocalization.babbler.babbleFrom(( (JavaLocation) location).getCodeElement() )
+			) );
+			return retVal;
+		}
+		
+		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 
 		switch(editType) {
 		case DELETE: retVal.add(new StatementHole((Statement) locationStmt.getASTNode(), locationStmt.getStmtId()));
@@ -326,11 +335,7 @@ public class JavaEditFactory {
 			logger.fatal("Unhandled template type in editSources!  Fix code in JavaEditFactory to do this properly.");
 			return null;
 		case BABBLED:
-			retVal.add( new ASTNodeHole( // FIXME: this whole static babbler thing is not gonna fly in the long run
-					// but let's deal with it for now
-				EntropyLocalization.babbler.babbleFrom( locationStmt.getASTNode() )
-			) );
-			break;
+			return null;
 		}
 		return retVal;
 	}
@@ -350,8 +355,11 @@ public class JavaEditFactory {
 			permutations(original, result, d + 1, copy);
 		}
 	}
-
+	
 	public boolean doesEditApply(JavaRepresentation variant, Location location, Mutation editType) {
+		if(editType == Mutation.BABBLED) {
+			return true;
+		}
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 		switch(editType) {
 		case APPEND: 
