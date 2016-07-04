@@ -1,5 +1,6 @@
 package clegoues.genprog4java.mut.holes.java;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -39,18 +40,13 @@ public abstract class JavaHole implements EditHole<ASTNode> {
 	}
 
 	@Override
-	public int compareTo(EditHole<ASTNode> o) {
-		return 1; //I think this doesn't matter?
-	}
-
-	@Override
 	public String toString() {
 		return ((Integer) this.getCodeBankId()).toString();
 	}
 
-	public static TreeSet<EditHole> makeSubExpsHoles(Map<ASTNode, List<ASTNode>> entryMap) {
+	public static List<EditHole> makeSubExpsHoles(Map<ASTNode, List<ASTNode>> entryMap) {
 		if(entryMap != null && entryMap.size() > 0) {
-			TreeSet<EditHole> retVal = new TreeSet<EditHole>();
+			List<EditHole> retVal = new LinkedList<EditHole>();
 			for(Map.Entry<ASTNode, List<ASTNode>> entry : entryMap.entrySet()) {
 				retVal.add(new SubExpsHole(entry.getKey(), entry.getValue()));
 			} 
@@ -60,9 +56,9 @@ public abstract class JavaHole implements EditHole<ASTNode> {
 	}
 
 
-	public static TreeSet<EditHole> makeExpHole( Map<Expression, List<Expression>> replacableExps, JavaStatement parentStmt) {
+	public static List<EditHole> makeExpHole( Map<Expression, List<Expression>> replacableExps, JavaStatement parentStmt) {
 		if(replacableExps != null && replacableExps.size() > 0) {
-			TreeSet<EditHole> retVal = new TreeSet<EditHole>();
+			List<EditHole> retVal = new LinkedList<EditHole>();
 			for(Map.Entry<Expression, List<Expression>> exps : replacableExps.entrySet()) {
 				for(Expression replacementExp : exps.getValue()) { 
 					retVal.add(new ExpHole(exps.getKey(), replacementExp, parentStmt.getStmtId()));

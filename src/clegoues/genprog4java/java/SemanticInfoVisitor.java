@@ -34,6 +34,7 @@
 package clegoues.genprog4java.java;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -60,10 +61,10 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private List<ASTNode> nodeSet;
 	private ScopeInfo scopes;
 
-	private TreeSet<String> fieldName;
-	private TreeSet<String> currentMethodScope;
-	private TreeSet<Pair<String,String>> methodReturnType;
-	private TreeSet<String> finalVariables;
+	private HashSet<String> fieldName;
+	private HashSet<String> currentMethodScope;
+	private HashSet<Pair<String,String>> methodReturnType;
+	private HashSet<String> finalVariables;
 	private HashMap<String,String> variableType;
 
 	// unlike in the OCaml implementation, this only collects the statements and
@@ -75,7 +76,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	}
 
 	public SemanticInfoVisitor() {
-		this.fieldName = new TreeSet<String>();
+		this.fieldName = new HashSet<String>();
 		this.fieldName.add("this");
 	}
 
@@ -86,11 +87,11 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.nodeSet = o;
 	}
 
-	public TreeSet<Pair<String,String>> getMethodReturnType() {
+	public Set<Pair<String,String>> getMethodReturnType() {
 		return this.methodReturnType;
 	}
 
-	public void setMethodReturnType(TreeSet<Pair<String,String>> methodReturnTypeSet) {
+	public void setMethodReturnType(HashSet<Pair<String,String>> methodReturnTypeSet) {
 		this.methodReturnType = methodReturnTypeSet;
 	}
 	
@@ -102,11 +103,11 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.variableType = variableTypeSet;
 	}
 	
-	public TreeSet<String> getFinalVariables() {
+	public Set<String> getFinalVariables() {
 		return this.finalVariables;
 	}
 	
-	public void setFinalVariables(TreeSet<String> finalVariables) {
+	public void setFinalVariables(HashSet<String> finalVariables) {
 		this.finalVariables = finalVariables;
 	}
 	
@@ -131,7 +132,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(MethodDeclaration node) {
-		this.currentMethodScope = new TreeSet<String>();
+		this.currentMethodScope = new HashSet<String>();
 
 		if(node.isConstructor() || node.isVarargs()) return true; // ain't nobody got time for that
 		for (Object o : node.parameters()) {
@@ -153,7 +154,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		for (Object o : mods) {
 			if (o instanceof Modifier) {
 				if (((Modifier) o).isStatic()) {
-					this.currentMethodScope = new TreeSet<String>();
+					this.currentMethodScope = new HashSet<String>();
 				}
 			}
 		}

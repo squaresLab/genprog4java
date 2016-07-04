@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.TreeSet;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -84,10 +86,10 @@ public class ReplacementModel {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public TreeSet<Pair<?,Double>> rescaleBasedOnModel(ArrayList<Pair<?,Double>> atoms, Representation<?> variant, int stmtIdBuggy) {
+	public List<Pair<?,Double>> rescaleBasedOnModel(ArrayList<Pair<?,Double>> atoms, Representation<?> variant, int stmtIdBuggy) {
 		assert(atoms.size() > 0);
 
-		TreeSet retVal = new TreeSet();
+		List retVal = new LinkedList();
 		HashMap<Integer, JavaStatement> codeBank = ((JavaRepresentation)variant).getCodeBank();
 
 		JavaStatement buggyStmt = codeBank.get(stmtIdBuggy);

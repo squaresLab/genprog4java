@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,8 +47,11 @@ import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.util.ConfigurationBuilder;
+import clegoues.util.GlobalUtils;
 import clegoues.util.Pair;
 
+// this class implements boring, default path-file-style localization.
+@SuppressWarnings("rawtypes")
 public class DefaultLocalization extends Localization {
 	protected Logger logger = Logger.getLogger(DefaultLocalization.class);
 
@@ -102,9 +106,11 @@ public class DefaultLocalization extends Localization {
 			.inGroup( "DefaultLocalization Parameters" )
 			.build();
 
-	private Representation original = null;
+	protected Representation original = null;
 
 	protected ArrayList<Location> faultLocalization = new ArrayList<Location>();
+	private ArrayList<Location> faultSortedByWeight = null;
+	int index = 0;
 	protected ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
 	public DefaultLocalization(Representation orig) throws IOException, UnexpectedCoverageResultException {
@@ -137,7 +143,7 @@ public class DefaultLocalization extends Localization {
 		ArrayList<Location> locsToRemove = new ArrayList<Location>();
 		for (Location potentiallyBuggyLoc : faultLocalization) {
 			thereIsAtLeastOneMutThatApplies = false;
-			TreeSet<Pair<Mutation, Double>> availableMutations = original.availableMutations(potentiallyBuggyLoc);
+			Set<Pair<Mutation, Double>> availableMutations = original.availableMutations(potentiallyBuggyLoc);
 			if(availableMutations.isEmpty()){
 				locsToRemove.add(potentiallyBuggyLoc);
 			}else{
@@ -330,48 +336,37 @@ public class DefaultLocalization extends Localization {
 		return retVal;
 
 	}
+	
+	protected TreeSet<Integer> getPathInfo(String path, ArrayList<TestCase> tests, boolean shouldPass) throws UnexpectedCoverageResultException, IOException {
+		File pathFile = new File(path);
+		if(pathFile.exists() && !DefaultLocalization.regenPaths) {
+			return readPathFile(path);
+		} else {
+			String covPath = Configuration.outputDir + "/coverage/";
+			File covDir = new File(covPath);
+			if (!covDir.exists())
+				covDir.mkdir();
+			if (!original.compile("coverage", "coverage/coverage.out")) {
+				logger.error("faultLocRep: Coverage failed to compile");
+				throw new UnexpectedCoverageResultException("compilation failure");
+			}
+			return runTestsCoverage(path, tests, shouldPass, covPath);
+		}
+		
+	}
 
+	@Override
 	protected void computeLocalization() throws IOException,
 	UnexpectedCoverageResultException {
-		// FIXME: THIS ONLY DOES STANDARD PATH FILE localization
 		/*
 		 * Default "ICSE'09"-style fault and fix localization from path files.
 		 * The weighted path fault localization is a list of <atom,weight>
 		 * pairs. The fix weights are a hash table mapping atom_ids to weights.
 		 */
 		logger.info("Start Fault Localization");
-		TreeSet<Integer> positivePath = null;
-		TreeSet<Integer> negativePath = null;
-		File positivePathFile = new File(DefaultLocalization.posCoverageFile);
-		// OK, we don't instrument Java programs, rather, use java library that
-		// computes coverage for us.
-		// which means either instrumentFaultLocalization should still exist and
-		// change the commands used for test case execution
-		// or we don't pretend this is trying to match OCaml exactly?
-		File covDir = new File(Configuration.outputDir + "/coverage/");
-		if (!covDir.exists())
-			covDir.mkdir();
-		if (!original.compile("coverage", "coverage/coverage.out")) {
-			logger.error("faultLocRep: Coverage failed to compile");
-			throw new UnexpectedCoverageResultException("compilation failure");
-		}
-		if (positivePathFile.exists() && !DefaultLocalization.regenPaths) {
-			positivePath = readPathFile(DefaultLocalization.posCoverageFile);
-		} else {
-			positivePath = runTestsCoverage(
-					DefaultLocalization.posCoverageFile,
-					Fitness.positiveTests, true, Configuration.outputDir + "/coverage/");
-		}
-		File negativePathFile = new File(DefaultLocalization.negCoverageFile);
-
-		if (negativePathFile.exists() && !DefaultLocalization.regenPaths) {
-			negativePath = readPathFile(DefaultLocalization.negCoverageFile);
-		} else {
-			negativePath = runTestsCoverage(
-					DefaultLocalization.negCoverageFile,
-					Fitness.negativeTests, false, Configuration.outputDir + "/coverage/");
-		}
-
+		TreeSet<Integer> positivePath = getPathInfo(DefaultLocalization.posCoverageFile, Fitness.positiveTests, true);
+		TreeSet<Integer> negativePath = getPathInfo(DefaultLocalization.negCoverageFile, Fitness.negativeTests, false);
+		
 		computeFixSpace(negativePath, positivePath);
 		computeFaultSpace(negativePath,positivePath); 
 
@@ -413,7 +408,7 @@ public class DefaultLocalization extends Localization {
 		}		
 	}
 
-	public void computeFixSpace(TreeSet<Integer> negativePath, TreeSet<Integer> positivePath) {
+	protected void computeFixSpace(TreeSet<Integer> negativePath, TreeSet<Integer> positivePath) {
 		if(DefaultLocalization.fixStrategy.equalsIgnoreCase("packageScope")) {
 			Map<ClassInfo,String> originalSource = original.getOriginalSource();
 			Set<String> packages = new TreeSet<String>();
@@ -451,7 +446,6 @@ public class DefaultLocalization extends Localization {
 			}
 			for (Integer i : negativePath) {
 				fixLocalization.add(new WeightedAtom(i, 0.5));
-
 			}	
 		}
 	}
@@ -461,5 +455,20 @@ public class DefaultLocalization extends Localization {
 		return this.faultLocalization;
 	}
 
+	@Override
+	public Location getRandomLocation(double weight) {
+		return (Location) GlobalUtils.chooseOneWeighted(new ArrayList(this.getFaultLocalization()), weight);
+	}
+
+	@Override
+	public Location getNextLocation() {
+		if(faultSortedByWeight == null) {
+			faultSortedByWeight = new ArrayList(this.getFaultLocalization());
+		//	Collections.sort(faultSortedByWeight);
+		}
+		Location ele = faultSortedByWeight.get(index);
+		index++;
+		return ele;
+	}
 
 }

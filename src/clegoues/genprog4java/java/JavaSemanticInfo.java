@@ -2,6 +2,7 @@ package clegoues.genprog4java.java;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,9 +35,9 @@ import clegoues.util.Pair;
 
 public class JavaSemanticInfo {
 	private static HashMap<Integer, Set<String>> inScopeMap = new HashMap<Integer, Set<String>>();
-	private static TreeSet<Pair<String,String>> methodReturnType = new TreeSet<Pair<String,String>>();
+	private static Set<Pair<String,String>> methodReturnType = new HashSet<Pair<String,String>>();
 	private static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
-	private static TreeSet<String> finalVariables = new TreeSet<String>();
+	private static Set<String> finalVariables = new HashSet<String>();
 	private static Map<String, Map<String,List<Expression>>> methodParamExpressionsInScope = null;
 	private static Map<String, List<Expression>> conditionalExpressionsInScope = null;
 	private static Map<String, List<Expression>> conditionExtensionsInScope = null;
@@ -221,7 +222,7 @@ public class JavaSemanticInfo {
 		return true;
 	}
 
-	public TreeSet<Pair<String,String>> getMethodReturnTypes() {
+	public Set<Pair<String,String>> getMethodReturnTypes() {
 		return JavaSemanticInfo.methodReturnType;
 	}
 
