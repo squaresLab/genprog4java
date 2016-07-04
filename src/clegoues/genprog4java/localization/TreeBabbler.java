@@ -51,5 +51,5 @@ public class TreeBabbler {
 	}
 
 	private final AbstractJavaTreeExtractor extractor;
-	private final TSGrammar< TSGNode > grammar;
+	public final TSGrammar< TSGNode > grammar;
 }

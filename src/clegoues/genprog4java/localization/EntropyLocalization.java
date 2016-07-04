@@ -4,6 +4,7 @@ import static clegoues.util.ConfigurationBuilder.STRING;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
@@ -11,7 +12,9 @@ import org.eclipse.jdt.core.dom.ASTNode;
 
 import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.mut.Location;
+import clegoues.genprog4java.mut.holes.java.JavaASTNodeLocation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
@@ -79,8 +82,28 @@ public class EntropyLocalization extends DefaultLocalization {
 	public Location getRandomLocation(double weight) {
 		JavaLocation startingStmt = (JavaLocation) GlobalUtils.chooseOneWeighted(new ArrayList(this.getFaultLocalization()), weight);
 		ASTNode actualCode = startingStmt.getCodeElement();
-		TreeNode< TSGNode > asTlm = babbler.eclipseToTreeLm(actualCode);
-		return startingStmt;
+		List<ASTNode> decomposed = ASTUtils.decomposeASTNode(actualCode);
+		double maxProb = Double.NEGATIVE_INFINITY;
+		ASTNode biggestSoFar = actualCode;
+		for(ASTNode node : decomposed) {
+			TreeNode< TSGNode > asTlm = babbler.eclipseToTreeLm(node);
+			double prob = babbler.grammar.computeRulePosteriorLog2Probability(asTlm);
+			double entropy = -prob * Math.exp(prob);
+			System.err.println(node);
+			System.err.println(prob);
+			System.err.println("entropy:" + entropy);
+			System.err.println();
+			
+			if(prob > maxProb) {
+				maxProb = prob;
+				biggestSoFar = node;
+			}
+		}
+		
+		System.err.println("biggest found:");
+		System.err.println(biggestSoFar);
+		System.err.println(maxProb);
+		return new JavaASTNodeLocation(biggestSoFar);
 	}
 	
 	@Override
