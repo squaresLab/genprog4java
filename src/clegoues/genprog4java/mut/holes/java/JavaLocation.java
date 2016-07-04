@@ -9,6 +9,7 @@ public abstract class JavaLocation<G> extends Location<G> {
 
 	public JavaLocation(G location, Double weight) {
 		super(location, weight);
+		
 	}
 
 	private ClassInfo classInfo = null; 
