@@ -563,7 +563,7 @@ public class ConfigurationBuilder< T > {
 			showHelp();
 			System.exit( 1 );
 		}
-		if ( cl.hasOption( "help" ) ) {
+		if ( cl.hasOption( 'h' ) ) {
 			showHelp();
 			System.exit( 0 );
 		}
@@ -597,8 +597,10 @@ public class ConfigurationBuilder< T > {
 				missing += 1;
 			}
 		}
-		if ( missing > 0 )
+		if ( missing > 0 ) {
+			showHelp();
 			System.exit( 1 );
+		}
 	}
 
 	/**
