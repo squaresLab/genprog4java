@@ -46,6 +46,7 @@ import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.util.ConfigurationBuilder;
+import clegoues.util.GlobalUtils;
 import clegoues.util.Pair;
 
 // this class implements boring, default path-file-style localization.
@@ -449,6 +450,11 @@ public class DefaultLocalization extends Localization {
 	@Override
 	public ArrayList<Location> getFaultLocalization() {
 		return this.faultLocalization;
+	}
+
+	@Override
+	public Location getNextLocation() {
+		return (Location) GlobalUtils.chooseOneWeighted(new ArrayList(this.getFaultLocalization()));
 	}
 
 }
