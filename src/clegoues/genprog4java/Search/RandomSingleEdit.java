@@ -20,7 +20,7 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 			.inGroup( "Search Parameters" )
 			.build();
 	
-	public RandomSingleEdit(Fitness<G> engine) {
+	public RandomSingleEdit(Fitness engine) {
 		super(engine);
 		engine.initializeModel();
 	}

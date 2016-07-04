@@ -38,7 +38,9 @@ import static clegoues.util.ConfigurationBuilder.STRING;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -59,19 +61,22 @@ import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
 import clegoues.util.Pair;
 
-public class Fitness<G extends EditOperation> {
+/**
+ * This class manages fitness evaluation for a variant of an arbitrary {@link clegoues.genprog4java.rep.Representation}.
+ * Its duties consist of loading/tracking the test cases to be run and managing the sampling strategy, if applicable. 
+ * @author clegoues
+ *
+ */
+@SuppressWarnings("rawtypes")
+public class Fitness {
 	protected static Logger logger = Logger.getLogger(Fitness.class);
 
 	public static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
-	
-	private static int generation = -1;
 
-	
-	private static List<TestCase> testSample = null;
-	private static List<TestCase> restSample = null;
-
-	//private static double negativeTestWeight = 2.0;
+	/** weight to give to negative test cases; note that this is <i>relative to the total number of positive tests</i>, 
+	 * not <i>absolute weight</i>.
+	 */
 	private static double negativeTestWeight = ConfigurationBuilder.of( DOUBLE )
 		.withVarName( "negativeTestWeight" )
 		.withDefault( "2.0" )
@@ -79,21 +84,24 @@ public class Fitness<G extends EditOperation> {
 		.inGroup( "Fitness Parameters" )
 		.build();
 
+	/** how much to sample the positive tests.  Negative tests are never sampled */
 	private static double sample = ConfigurationBuilder.of( DOUBLE )
 		.withVarName( "sample" )
 		.withDefault( "1.0" )
 		.withHelp( "fraction of the positive tests to sample" )
 		.inGroup( "Fitness Parameters" )
 		.build();
-	//private static String sampleStrategy = "variant"; // options: all,
+
+	/** controls when we regenerate a test sample (per variant or per generation) */
 	private static String sampleStrategy = ConfigurationBuilder.of( STRING )
 		.withVarName( "sampleStrategy" )
 		.withDefault( "variant" )
 		.withHelp( "strategy to use for resampling tests" )
 		.inGroup( "Fitness Parameters" )
 		.build();
-	// generation, variant
-	public static String posTestFile = ConfigurationBuilder.of( STRING )
+
+	/** files listing the positive and negative tests */
+	private static String posTestFile = ConfigurationBuilder.of( STRING )
 		.withVarName( "posTestFile" )
 		.withFlag( "positiveTests" )
 		.withDefault( "pos.tests" )
@@ -101,7 +109,7 @@ public class Fitness<G extends EditOperation> {
 		.inGroup( "Fitness Parameters" )
 		.build();
 
-	public static String negTestFile = ConfigurationBuilder.of( STRING )
+	private static String negTestFile = ConfigurationBuilder.of( STRING )
 		.withVarName( "negTestFile" )
 		.withFlag( "negativeTests" )
 		.withDefault( "neg.tests" )
@@ -109,21 +117,33 @@ public class Fitness<G extends EditOperation> {
 		.inGroup( "Fitness Parameters" )
 		.build();
 	
+	
+	/** this is necessary because of the generational sample strategy, which 
+	 *  resamples at generational boundaries. 
+	 */
+	private static int generation = -1;
+	
+	/** store the sample and the unsampled portion of the test suite */
+	private static List<TestCase> testSample = null;
+	private static List<TestCase> restSample = null;
+
+	/** public because {@link clegoues.genprog4java.rep.CachingRepresentation} gets at them
+	 * for sanity checking.  There's probably a better way to do that, I suppose, but whatever.
+	 */
 	public static ArrayList<TestCase> positiveTests = new ArrayList<TestCase>();
 	public static ArrayList<TestCase> negativeTests = new ArrayList<TestCase>();
-	public static int numPositiveTests = 5;
-	public static int numNegativeTests = 1;
+	
+	private static int numPositiveTests;
+	private static int numNegativeTests;
 
+
+	/** 
+	 * Loads the tests from specified files, initializes the sample vars to not be null.
+	 * Samples properly when the search actually begins.
+	 * Note that this <i>must</i> be called before the initial representation is
+	 * constructed, otherwise the rep will not be able to test itself via sanity checking.
+	 */
 	public Fitness() {
-		Fitness.configureTests();
-		Fitness.numPositiveTests = Fitness.positiveTests.size();
-		Fitness.numNegativeTests = Fitness.negativeTests.size();
-		testSample = new ArrayList<TestCase>(Fitness.positiveTests);
-		restSample = new ArrayList<TestCase>();
-	}
-
-
-	public static void configureTests() {
 		ArrayList<String> intermedPosTests = null, intermedNegTests = null;
 
 		intermedPosTests = getTests(posTestFile);
@@ -133,16 +153,34 @@ public class Fitness<G extends EditOperation> {
 		filterTests(intermedNegTests, intermedPosTests);
 		
 		for(String posTest : intermedPosTests) {
-			positiveTests.add(new TestCase(TestType.POSITIVE, posTest));
+			positiveTests.add(new TestCase(TestCase.TestType.POSITIVE, posTest));
 		}
 		
 		for(String negTest : intermedNegTests) {
-			negativeTests.add(new TestCase(TestType.NEGATIVE, negTest));
+			negativeTests.add(new TestCase(TestCase.TestType.NEGATIVE, negTest));
 		}
+		
+		Fitness.numPositiveTests = Fitness.positiveTests.size();
+		Fitness.numNegativeTests = Fitness.negativeTests.size();
+		testSample = new ArrayList<TestCase>(Fitness.positiveTests);
+		restSample = new ArrayList<TestCase>();
 	}
-	
-	
-	public static void filterTests(ArrayList<String> toFilter, ArrayList<String> filterBy) {
+
+	/**
+	 * JUnit is annoying.  Basically, a junit test within a larger test class can be failing.
+	 * This method figures out if that's the way these tests are specified and, if so
+	 * determines their class and then filters those classes out of the 
+	 * this method filters those classes out of the positive tests and adds them to the negative test list.
+	 * Note that CLG considered just filtering out the individual methods and allowing the junittestrunner to run
+	 * classes by method in addition to just by class.
+	 * I didn't do it because the max test count is presently still the number of 
+	 * test classes specified in the test files and so we'd either need to actually count
+	 * how many tests are being run in total or have the counts/weights be skewed by the one
+	 * class file where we call the methods one at a time.
+	 * @param toFilter list to filter
+	 * @param filterBy stuff to filter out of toFilter
+	 */
+	private void filterTests(ArrayList<String> toFilter, ArrayList<String> filterBy) {
 		HashSet<String> clazzesInFilterSet = new HashSet<String>();
 		HashSet<String> removeFromFilterSet = new HashSet<String>();
 
@@ -179,7 +217,12 @@ public class Fitness<G extends EditOperation> {
 		}
 	}
 
-	private static ArrayList<String> getTests(String filename) {
+	/** load tests from a file.  Does not check that the tests are valid, just that the file exists.
+	 * If the file doesn't exist, kills the runtime to exit, because that means that things have gone VERY
+	 * weird.
+	 * @param filename file listing test classes or test class::methods, one per line.
+	 */
+	private ArrayList<String> getTests(String filename) {
 		ArrayList<String> allLines = new ArrayList<String>();
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(filename));
@@ -196,17 +239,11 @@ public class Fitness<G extends EditOperation> {
 		return allLines;
 	}
 
-
-	/*
-	 * {b test_to_first_failure} variant returns true if the variant passes all
-	 * test cases and false otherwise; unlike other search strategies and as an
-	 * optimization for brute_force search, gives up on a variant as soon as it
-	 * fails a test case. This makes less sense for single_fitness, but
-	 * single_fitness being true won't break it. Does not currently sample, but does  
-	 * do the model thing (like for RSRepair and AE, I think, though the latter isn't
-	 * implemented in this codebase yet) if specified. 
+	/** testModel is used for certain kinds of search, namely RSRepair; it tracks
+	 *  how "useful" tests have been in the past in terms of number of patches "killed" 
+	 *  and thus governs the order in which tests are run (when the feature is being used).
+	 *  initializeModel needs to be called before it's used.  
 	 */
-
 	private ArrayList<TestCase> testModel = null;
 	
 	public void initializeModel() { 
@@ -220,8 +257,55 @@ public class Fitness<G extends EditOperation> {
 		}
 		Collections.sort(testModel,Collections.reverseOrder());
 	}
+	
+	/** generates a new random sample of the positive tests. */
+	private static void resample() {
+		Long L = Math.round(sample * Fitness.numPositiveTests);
+		int sampleSize = Integer.valueOf(L.intValue());
+		Collections.shuffle(Fitness.positiveTests, Configuration.randomizer);
+		List<TestCase> intSample = Fitness.positiveTests.subList(0,sampleSize-1); 
+		List<TestCase> intRestSample = Fitness.positiveTests.subList(sampleSize, positiveTests.size()-1);
+		Fitness.testSample.clear(); 
+		Fitness.restSample.clear();
+		for(TestCase test : intSample) {
+			Fitness.testSample.add(test);
+		}
+		for(TestCase test : intRestSample) {
+			Fitness.restSample.add(test);
+		}
+	}
 
-	public boolean testToFirstFailure(Representation<G> rep, boolean withModel) {
+	/** try all tests
+	 *  
+	 * @param rep variant to test
+	 * @param shortCircuit whether to quit when first failure is reached
+	 * @param tests tests to run
+	 * @return number of tests in the input test list that the variant passed
+	 */
+	private int testPassCount(Representation rep, boolean shortCircuit, List<TestCase> tests) {
+		int numPassed = 0;
+		for (TestCase thisTest : tests) {
+			if (!rep.testCase(thisTest)) {
+				rep.cleanup();
+				if(shortCircuit) {
+					return numPassed;
+				}
+			} else {
+				numPassed++;
+			}
+		}
+		return numPassed;
+	}
+
+	/**
+	 * Test a variant sequentially on all tests, starting with the negative tests. 
+	 * Quits as soon as a failed test is found.  Uses the test model @see {@link clegoues.genprog4java.Search.RSRepair} 
+	 * if specified. Does not sample. 
+	 * @param rep variant to be tested
+	 * @param withModel whether to use the testModel
+	 * @returns boolean, whether the rep passed all tests.  
+	 */
+	public boolean testToFirstFailure(Representation rep, boolean withModel) {
 		if(withModel) {
 			boolean foundFail = false;
 			for(TestCase thisTest : testModel) {
@@ -250,23 +334,15 @@ public class Fitness<G extends EditOperation> {
 		}
 	}
 
-	private static void resample() {
-		Long L = Math.round(sample * Fitness.numPositiveTests);
-		int sampleSize = Integer.valueOf(L.intValue());
-		Collections.shuffle(Fitness.positiveTests, Configuration.randomizer);
-		List<TestCase> intSample = Fitness.positiveTests.subList(0,sampleSize-1); 
-		List<TestCase> intRestSample = Fitness.positiveTests.subList(sampleSize, positiveTests.size()-1);
-		Fitness.testSample.clear(); 
-		Fitness.restSample.clear();
-		for(TestCase test : intSample) {
-			Fitness.testSample.add(test);
-		}
-		for(TestCase test : intRestSample) {
-			Fitness.restSample.add(test);
-		}
-	}
 
-	private Pair<Double,Double> testFitnessSample(Representation<G> rep, double fac) {
+	/** performs sampled fitness.  If variant passes everything in the sample,
+	 * tests on the rest as well.   
+	 * @param rep variant to test
+	 * @param fac weight to give to negative tests passed for fitness
+	 * @return Pair<sample fitness, total fitness>; returns both mostly so we can track fitness 
+	 * behavior if desired.
+	 */
+	private Pair<Double,Double> testFitnessSample(Representation rep, double fac) {
 		int numNegPassed = this.testPassCount(rep,false, Fitness.negativeTests);
 		int numPosPassed = this.testPassCount(rep,false, Fitness.testSample);
 		int numRestPassed = 0;
@@ -281,22 +357,13 @@ public class Fitness<G extends EditOperation> {
 		return new Pair<Double,Double>(totalFitness,sampleFitness);
 	}
 
-	private int testPassCount(Representation<G> rep, boolean shortCircuit, List<TestCase> tests) {
-		int numPassed = 0;
-		for (TestCase thisTest : tests) {
-			if (!rep.testCase(thisTest)) {
-				rep.cleanup();
-				if(shortCircuit) {
-					return numPassed;
-				}
-			} else {
-				numPassed++;
-			}
-		}
-		return numPassed;
-	}
-
-	private Pair<Double, Double> testFitnessFull(Representation<G> rep,
+	/** unsampled fitness.  Just test everything 
+	 * 
+	 * @param rep variant to test
+	 * @param fac weight to give the negative tests
+	 * @return Pair, where both elements of the pair are the same (full fitness)
+	 */
+	private Pair<Double, Double> testFitnessFull(Representation rep,
 			double fac) {
 		double fitness = 0.0;
 		for (TestCase thisTest : Fitness.positiveTests) {
@@ -312,13 +379,16 @@ public class Fitness<G extends EditOperation> {
 		return new Pair<Double, Double>(fitness, fitness);
 	}
 
-	/*
-	 * {b test_fitness} generation variant returns true if the variant passes
-	 * all test cases and false otherwise. Only tests fitness if the rep has not
-	 * cached it. Postcondition: records fitness in rep, calls rep#cleanup().
-	 * May implement sampling strategies if specified by the command line.
+	/** computes fitness on a variant; only does so if the variant does not already
+	 * know its fitness (will have been saved/returned by getFitness().  May implement sampling
+	 * if specified.  Must always call rep.cleanup()
+	 * 
+	 * @param generation what generation we're on.  Necessary in case we're doing
+	 * generational fitness resampling.
+	 * @param rep variant to test
+	 * @return true if variant passes all test cases, false otherwise. 
 	 */
-	public boolean testFitness(int generation, Representation<G> rep) {
+	public boolean testFitness(int generation, Representation rep) {
 
 		/*
 		 * Find the relative weight of positive and negative tests If
@@ -355,4 +425,28 @@ public class Fitness<G extends EditOperation> {
 		return !(fitnessPair.getSecond() < maxFitness);
 
 	}
+	
+	/** debug/convenience functionality; saves the tests that should be considered in scope.
+	 * called from {@link clegoues.genprog4java.rep.CachingRepresentation} 
+	 * @param passingTests
+	 */
+	public static void printTestsInScope(ArrayList<TestCase> passingTests){
+		String path = Fitness.posTestFile;
+		//Set up to write to txt file
+		FileWriter write = null;
+		try {
+			write = new FileWriter(path, false);
+		} catch (IOException e) {
+			logger.error("Error creating the file" + path);
+			return;
+		}
+		PrintWriter printer = new PrintWriter(write);
+
+		//Now write data to the file
+		for(TestCase s : passingTests){
+			printer.println(s);
+		}
+		printer.close();
+	}
+
 }

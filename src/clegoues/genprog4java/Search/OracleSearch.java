@@ -10,7 +10,7 @@ import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 
 public class OracleSearch<G extends EditOperation> extends Search<G> {
-	public OracleSearch(Fitness<G> engine) {
+	public OracleSearch(Fitness engine) {
 		super(engine);
 	}
 	

@@ -94,7 +94,7 @@ public class Main {
 			} else {
 				baseRep = (Representation) new JavaRepresentation();
 			}
-			fitnessEngine = new Fitness<JavaEditOperation>();
+			fitnessEngine = new Fitness();
 			switch(Search.searchStrategy.trim()) {
 
 			case "brute": searchEngine = new BruteForce<JavaEditOperation>(fitnessEngine);
