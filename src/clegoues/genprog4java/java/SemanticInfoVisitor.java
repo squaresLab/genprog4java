@@ -64,7 +64,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private HashSet<String> fieldName;
 	private HashSet<String> currentMethodScope;
 	private HashSet<Pair<String,String>> methodReturnType;
-	private HashSet<String> finalVariables;
 	private HashMap<String,String> variableType;
 
 	// unlike in the OCaml implementation, this only collects the statements and
@@ -101,14 +100,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	public void setVariableType(HashMap<String,String> variableTypeSet) {
 		this.variableType = variableTypeSet;
-	}
-	
-	public Set<String> getFinalVariables() {
-		return this.finalVariables;
-	}
-	
-	public void setFinalVariables(HashSet<String> finalVariables) {
-		this.finalVariables = finalVariables;
 	}
 	
 	public List<ASTNode> getNodeSet() {
@@ -190,15 +181,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
 				this.currentMethodScope.add(v.getName().getIdentifier());
 				variableType.put(v.getName().toString(), node.getType().toString());
-			}
-		}
-		
-		//if it is a final variable 
-		List modifiersOfTheVariableBeingDeclared = node.modifiers();
-		for(Object m : modifiersOfTheVariableBeingDeclared){
-			if(m instanceof Modifier && ((Modifier)m).getKeyword().toString().equals("final")){
-				VariableDeclarationFragment df = (VariableDeclarationFragment) node.fragments().get(0);
-				finalVariables.add(df.getName().getIdentifier());
 			}
 		}
 		
