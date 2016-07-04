@@ -103,7 +103,7 @@ public class JavaParser
 	
 	public void parse(String file, String[] libs)
 	{
-		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setEnvironment(libs, new String[] {}, null, true);
 		
 		Map options = JavaCore.getOptions();

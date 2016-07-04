@@ -24,11 +24,17 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
+import codemining.lm.tsg.FormattedTSGrammar;
+import codemining.lm.tsg.TSGNode;
+import codemining.lm.tsg.TSGrammar;
+import codemining.util.serialization.ISerializationStrategy.SerializationException;
+import codemining.util.serialization.Serializer;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.ASTNodeHole;
 import clegoues.genprog4java.mut.holes.java.ExpChoiceHole;
 import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaHole;
@@ -38,13 +44,44 @@ import clegoues.genprog4java.mut.holes.java.StatementHole;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.WeightedAtom;
+import clegoues.javaASTProcessor.main.TreeBabbler;
+import clegoues.util.ConfigurationBuilder;
+import clegoues.util.ConfigurationBuilder.LexicalCast;
+
+import static clegoues.util.ConfigurationBuilder.STRING;
 
 @SuppressWarnings("rawtypes")
 public class JavaEditFactory {
 
 	private static HashMap<Location, Set<WeightedAtom>> scopeSafeAtomMap = new HashMap<Location, Set<WeightedAtom>>();
 
-	protected Logger logger = Logger.getLogger(JavaEditOperation.class);
+	protected static Logger logger = Logger.getLogger(JavaEditOperation.class);
+
+	public static final ConfigurationBuilder.RegistryToken token =
+		ConfigurationBuilder.getToken();
+	
+	private static TreeBabbler babbler = ConfigurationBuilder.of(
+		new LexicalCast< TreeBabbler >() {
+			public TreeBabbler parse(String value) {
+				if ( value.equals( "" ) )
+					return null;
+				try {
+					FormattedTSGrammar grammar =
+						(FormattedTSGrammar) Serializer.getSerializer().deserializeFrom( value );
+					return new TreeBabbler( grammar );
+				} catch (SerializationException e) {
+					logger.error( e.getMessage() );
+					return null;
+				}
+			}
+		}
+	)
+		.inGroup( "Search Parameters" )
+		.withFlag( "grammar" )
+		.withVarName( "babbler" )
+		.withDefault( "" )
+		.withHelp( "grammar to use for babbling repairs" )
+		.build();
 
 	public JavaEditOperation makeEdit(Mutation edit, Location dst, EditHole sources) {
 		switch(edit) {
@@ -79,6 +116,8 @@ public class JavaEditFactory {
 			return new ExpressionModRem((JavaLocation) dst, sources);
 		case PARREM:
 			return new MethodParameterRemover((JavaLocation) dst, sources);
+		case BABBLED:
+			return new JavaReplaceASTOperation((JavaLocation) dst, sources);
 		default: logger.fatal("unhandled edit template type in JavaEditFactory; this should be impossible (famous last words...)");
 		}		return null;
 	}
@@ -208,7 +247,7 @@ public class JavaEditFactory {
 
 		switch(editType) {
 		case DELETE: retVal.add(new StatementHole((Statement) locationStmt.getASTNode(), locationStmt.getStmtId()));
-		return retVal;
+			break;
 		case APPEND: 	
 		case REPLACE:
 			Set<WeightedAtom> fixStmts = this.scopeHelper(location, variant);
@@ -307,6 +346,11 @@ public class JavaEditFactory {
 		case OBJINIT:
 			logger.fatal("Unhandled template type in editSources!  Fix code in JavaEditFactory to do this properly.");
 			return null;
+		case BABBLED:
+			retVal.add( new ASTNodeHole(
+				babbler.babbleFrom( locationStmt.getASTNode() )
+			) );
+			break;
 		}
 		return retVal;
 	}
@@ -370,6 +414,8 @@ public class JavaEditFactory {
 			return locationStmt.getShrinkableConditionalExpressions().size() > 0;
 		case SIZECHECK:
 			return locationStmt.getIndexedCollectionObjects().size() > 0;
+		case BABBLED:
+			return true;
 		case OBJINIT:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;
