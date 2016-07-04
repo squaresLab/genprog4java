@@ -109,6 +109,7 @@ import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.mut.edits.java.JavaEditFactory;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
+import clegoues.genprog4java.mut.holes.java.JavaStatementLocation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
 import clegoues.util.Pair;
@@ -647,7 +648,7 @@ CachingRepresentation<JavaEditOperation> {
 			return this.sourceInfo.getLocationInformation().get(i);
 		}
 		JavaStatement stmt = sourceInfo.getBase().get(i);
-		JavaLocation location = new JavaLocation(stmt, negWeight);
+		JavaStatementLocation location = new JavaStatementLocation(stmt, negWeight);
 		location.setClassInfo(stmt.getClassInfo());
 		this.sourceInfo.getLocationInformation().put(i, location);
 		return location;
