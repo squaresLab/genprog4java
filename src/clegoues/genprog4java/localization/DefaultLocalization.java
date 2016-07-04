@@ -103,7 +103,7 @@ public class DefaultLocalization extends Localization {
 			.inGroup( "DefaultLocalization Parameters" )
 			.build();
 
-	private Representation original = null;
+	protected Representation original = null;
 
 	protected ArrayList<Location> faultLocalization = new ArrayList<Location>();
 	protected ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
@@ -403,7 +403,7 @@ public class DefaultLocalization extends Localization {
 		}		
 	}
 
-	public void computeFixSpace(TreeSet<Integer> negativePath, TreeSet<Integer> positivePath) {
+	protected void computeFixSpace(TreeSet<Integer> negativePath, TreeSet<Integer> positivePath) {
 		if(DefaultLocalization.fixStrategy.equalsIgnoreCase("packageScope")) {
 			Map<ClassInfo,String> originalSource = original.getOriginalSource();
 			Set<String> packages = new TreeSet<String>();
@@ -450,6 +450,5 @@ public class DefaultLocalization extends Localization {
 	public ArrayList<Location> getFaultLocalization() {
 		return this.faultLocalization;
 	}
-
 
 }
