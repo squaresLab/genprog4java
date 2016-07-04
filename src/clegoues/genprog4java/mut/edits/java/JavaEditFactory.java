@@ -367,7 +367,7 @@ public class JavaEditFactory {
 			return locationStmt.getShrinkableConditionalExpressions().size() > 0;
 		case SIZECHECK:
 			return locationStmt.getIndexedCollectionObjects().size() > 0;
-		default:
+		case OBJINIT:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;
 
