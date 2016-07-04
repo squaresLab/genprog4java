@@ -143,7 +143,7 @@ public class DefaultLocalization extends Localization {
 		ArrayList<Location> locsToRemove = new ArrayList<Location>();
 		for (Location potentiallyBuggyLoc : faultLocalization) {
 			thereIsAtLeastOneMutThatApplies = false;
-			TreeSet<Pair<Mutation, Double>> availableMutations = original.availableMutations(potentiallyBuggyLoc);
+			Set<Pair<Mutation, Double>> availableMutations = original.availableMutations(potentiallyBuggyLoc);
 			if(availableMutations.isEmpty()){
 				locsToRemove.add(potentiallyBuggyLoc);
 			}else{
@@ -464,7 +464,7 @@ public class DefaultLocalization extends Localization {
 	public Location getNextLocation() {
 		if(faultSortedByWeight == null) {
 			faultSortedByWeight = new ArrayList(this.getFaultLocalization());
-			Collections.sort(faultSortedByWeight);
+		//	Collections.sort(faultSortedByWeight);
 		}
 		Location ele = faultSortedByWeight.get(index);
 		index++;

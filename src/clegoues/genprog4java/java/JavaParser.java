@@ -35,6 +35,7 @@ package clegoues.genprog4java.java;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -57,15 +58,15 @@ public class JavaParser
 	private SemanticInfoVisitor visitor;
 	private CompilationUnit compilationUnit;
 	private Set<String> fields;
-	private TreeSet<Pair<String,String>> methodReturnType;
+	private HashSet<Pair<String,String>> methodReturnType;
 	private HashMap<String,String> variableTypes;
-	private TreeSet<String> finalVariables;
+	private HashSet<String> finalVariables;
 
 	public JavaParser(ScopeInfo scopeList)
 	{
 		this.stmts = new LinkedList<ASTNode>();
-		this.methodReturnType = new TreeSet<Pair<String,String>>();
-		this.finalVariables =  new TreeSet<String>();
+		this.methodReturnType = new HashSet<Pair<String,String>>();
+		this.finalVariables =  new HashSet<String>();
 		this.variableTypes = new HashMap<String,String>();
 		this.visitor = new SemanticInfoVisitor();
 		this.visitor.setNodeSet(this.stmts);		
@@ -75,7 +76,7 @@ public class JavaParser
 		this.visitor.setVariableType(variableTypes);
 	}
 
-	public TreeSet<Pair<String,String>> getMethodReturnTypeSet(){
+	public HashSet<Pair<String,String>> getMethodReturnTypeSet(){
 		return this.methodReturnType;
 	}
 	
@@ -85,7 +86,7 @@ public class JavaParser
 	}
 	
 	
-	public TreeSet<String> getFinalVariableSet(){
+	public Set<String> getFinalVariableSet(){
 		return this.finalVariables;
 	}
 	

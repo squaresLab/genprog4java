@@ -42,7 +42,7 @@ import clegoues.genprog4java.rep.WeightedAtom;
 @SuppressWarnings("rawtypes")
 public class JavaEditFactory {
 
-	private static HashMap<Location, TreeSet<WeightedAtom>> scopeSafeAtomMap = new HashMap<Location, TreeSet<WeightedAtom>>();
+	private static HashMap<Location, Set<WeightedAtom>> scopeSafeAtomMap = new HashMap<Location, Set<WeightedAtom>>();
 
 	protected Logger logger = Logger.getLogger(JavaEditOperation.class);
 
@@ -83,7 +83,7 @@ public class JavaEditFactory {
 		}		return null;
 	}
 
-	private TreeSet<WeightedAtom> scopeHelper(Location stmtId, JavaRepresentation variant) {
+	private Set<WeightedAtom> scopeHelper(Location stmtId, JavaRepresentation variant) {
 		if (JavaEditFactory.scopeSafeAtomMap.containsKey(stmtId)) {
 			return JavaEditFactory.scopeSafeAtomMap.get(stmtId);
 		}
@@ -92,7 +92,7 @@ public class JavaEditFactory {
 		
 		JavaStatement potentiallyBuggyStmt = (JavaStatement) stmtId.getLocation();
 		ASTNode faultAST = potentiallyBuggyStmt.getASTNode();
-		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+		Set<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
 
 		for (WeightedAtom potentialFixAtom : localization.getFixSourceAtoms()) {
 			int index = potentialFixAtom.getAtom();
@@ -202,16 +202,16 @@ public class JavaEditFactory {
 
 
 
-	public TreeSet<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType) {
+	public List<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType) {
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
-		TreeSet<EditHole> retVal = new TreeSet<EditHole>();
+		ArrayList<EditHole> retVal = new ArrayList<EditHole>();
 
 		switch(editType) {
 		case DELETE: retVal.add(new StatementHole((Statement) locationStmt.getASTNode(), locationStmt.getStmtId()));
 		return retVal;
 		case APPEND: 	
 		case REPLACE:
-			TreeSet<WeightedAtom> fixStmts = this.scopeHelper(location, variant);
+			Set<WeightedAtom> fixStmts = this.scopeHelper(location, variant);
 			for(WeightedAtom fixStmt : fixStmts) {
 				JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
 				ASTNode fixAST = potentialFixStmt.getASTNode();
@@ -221,7 +221,7 @@ public class JavaEditFactory {
 		case SWAP:
 			for (WeightedAtom item : this.scopeHelper(location, variant)) {
 				int atom = item.getAtom();
-				TreeSet<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getSecond()), variant);
+				Set<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getSecond()), variant);
 				for (WeightedAtom there : inScopeThere) {
 					if (there.getAtom() == location.getId()) { // FIXME: this check looks weird to me.  Test swap.
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
@@ -370,7 +370,7 @@ public class JavaEditFactory {
 			return locationStmt.getShrinkableConditionalExpressions().size() > 0;
 		case SIZECHECK:
 			return locationStmt.getIndexedCollectionObjects().size() > 0;
-		default:
+		case OBJINIT:
 			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
 			break;
 

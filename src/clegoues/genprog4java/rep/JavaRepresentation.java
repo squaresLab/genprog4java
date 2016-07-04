@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import javax.tools.JavaCompiler;
@@ -105,6 +106,7 @@ import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
+import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.mut.edits.java.JavaEditFactory;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
@@ -137,11 +139,12 @@ CachingRepresentation<JavaEditOperation> {
 		super();
 	}
 
-	public TreeSet<Pair<Mutation, Double>> availableMutations(Location atomId) {
-		TreeSet<Pair<Mutation, Double>> retVal = new TreeSet<Pair<Mutation, Double>>();
+	@Override
+	public Set<WeightedMutation> availableMutations(Location atomId) {
+		Set<WeightedMutation> retVal = new TreeSet<WeightedMutation>();
 		for (Map.Entry mutation : Search.availableMutations.entrySet()) {
 			if(this.doesEditApply(atomId, (Mutation) mutation.getKey())) {
-				retVal.add(new Pair<Mutation,Double>((Mutation) mutation.getKey(), (Double) mutation.getValue()));
+				retVal.add(new WeightedMutation((Mutation) mutation.getKey(), (Double) mutation.getValue()));
 			}
 		}
 		return retVal;
@@ -599,9 +602,9 @@ CachingRepresentation<JavaEditOperation> {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public TreeSet<WeightedHole> editSources(Location location, Mutation editType) {
-		TreeSet<EditHole> holes = editFactory.editSources(this,location,editType);
-		TreeSet<WeightedHole> retVal = new TreeSet<WeightedHole>();
+	public List<WeightedHole> editSources(Location location, Mutation editType) {
+		List<EditHole> holes = editFactory.editSources(this,location,editType);
+		List<WeightedHole> retVal = new ArrayList<WeightedHole>();
 		for(EditHole hole : holes) {
 			// possible FIXME for later: weighting options equally for the time being.  One day
 			// maybe we'll do something smarter...

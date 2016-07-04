@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
@@ -56,6 +57,7 @@ import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
+import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
@@ -157,6 +159,8 @@ public abstract class Search<G extends EditOperation> {
 			} else {
 				edit = oneItem;
 			}
+			
+			//;parrep;paradd;parrem;exprep;expadd;exprem;nullcheck;rangecheck;sizecheck;castcheck;lbset;offbyone;ubset
 			switch(edit.toLowerCase()) {
 			case "append": mutations.put(Mutation.APPEND, weight); break;
 			case "swap":  mutations.put(Mutation.SWAP, weight); break;
@@ -264,7 +268,7 @@ public abstract class Search<G extends EditOperation> {
 				proMutList.add(wa);
 			}
 			for (Location location : proMutList) {
-				TreeSet<Pair<Mutation, Double>> availableMutations = variant.availableMutations(location);
+				Set<WeightedMutation> availableMutations = variant.availableMutations(location);
 				if(availableMutations.isEmpty()){
 					continue; 
 				}else{
@@ -273,7 +277,7 @@ public abstract class Search<G extends EditOperation> {
 				//choose a mutation at random
 				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(new ArrayList(availableMutations));
 				Mutation mut = chosenMutation.getFirst();
-				TreeSet<WeightedHole> allowed = variant.editSources(location, mut);
+				List<WeightedHole> allowed = variant.editSources(location, mut);
 				allowed = rescaleAllowed(mut,allowed, variant,location.getId());
 				WeightedHole selected = (WeightedHole) GlobalUtils
 						.chooseOneWeighted(new ArrayList(allowed));
@@ -282,7 +286,7 @@ public abstract class Search<G extends EditOperation> {
 		}
 	}
 
-	private TreeSet rescaleAllowed(Mutation mut, TreeSet<WeightedHole> allowed, Representation variant, int stmtid) {
+	private List rescaleAllowed(Mutation mut, List<WeightedHole> allowed, Representation variant, int stmtid) {
 		if(mut != Mutation.REPLACE || Search.model.equalsIgnoreCase("default")){
 			return allowed;
 		}else if(Search.model.equalsIgnoreCase("probabilistic")){
