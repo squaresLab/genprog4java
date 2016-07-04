@@ -6,11 +6,12 @@ public class JavaASTNodeLocation extends JavaLocation<ASTNode> {
 
 	public JavaASTNodeLocation(ASTNode location, Double weight) {
 		super(location, weight);
+		this.setCodeElement(location);
 	}
-
 
 	public JavaASTNodeLocation(ASTNode location) {
 		super(location, 1.0);
+		this.setCodeElement(location);
 	}
 	@Override
 	public int getId() {
