@@ -50,6 +50,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 
 import clegoues.util.ConfigurationBuilder;
+import clegoues.util.GlobalUtils;
 
 public class Configuration {
 	protected static Logger logger = Logger.getLogger(Configuration.class);
@@ -199,7 +200,7 @@ public class Configuration {
 			
 			for( ClassInfo s : Configuration.targetClassNames ){
 				//overwrite the targetClass with the one saved before
-				Utils.runCommand("cp " + safeFolder + s.pathToJavaFile() + " " + Configuration.workingDir + Configuration.sourceDir + File.separatorChar + s.getPackage());
+				GlobalUtils.runCommand("cp " + safeFolder + s.pathToJavaFile() + " " + Configuration.workingDir + Configuration.sourceDir + File.separatorChar + s.getPackage());
 			}
 			
 		//else 	it is the first run
@@ -264,7 +265,7 @@ public class Configuration {
 			File packagePathFile = new File(original + packagePath);
 			packagePathFile.mkdirs();
 			String cmd = "cp " + pathToFile + " " + original + packagePath + File.separatorChar;
-			Utils.runCommand(cmd);
+			GlobalUtils.runCommand(cmd);
 		}	
 	}
 }
