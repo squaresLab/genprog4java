@@ -260,7 +260,7 @@ public abstract class Search<G extends EditOperation> {
 				//only adds the random atom if it is different from the others already added
 				do {
 					//chooses a random faulty atom from the subset of faulty atoms
-					wa = localization.getNextLocation(); 
+					wa = localization.getRandomLocation(Configuration.randomizer.nextDouble()); 
 					// insert a check to see if this location has any valid mutations?  If not, look again
 					// if not, somehow tell the variant to remove that location from the list of faulty atoms
 					alreadyOnList = proMutList.contains(wa);
