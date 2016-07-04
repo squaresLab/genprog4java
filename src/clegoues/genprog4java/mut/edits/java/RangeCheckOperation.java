@@ -39,7 +39,7 @@ public class RangeCheckOperation extends JavaEditOperation {
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode(); // not used, but being completist
+		ASTNode locationNode = ((JavaLocation) this.getLocation()).getCodeElement(); 
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> arrays = thisHole.getSubExps();

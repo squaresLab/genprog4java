@@ -32,7 +32,7 @@ public class NullCheckOperation extends JavaEditOperation {
 	
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode();
+		ASTNode locationNode =  ((JavaLocation) this.getLocation()).getCodeElement();
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> expressionsFromThisParent = thisHole.getSubExps();
@@ -46,6 +46,7 @@ public class NullCheckOperation extends JavaEditOperation {
 		for(ASTNode expressionToCheckIfNull : expressionsFromThisParent){
 			InfixExpression expression = ifstmt.getAST().newInfixExpression();
 			if(expressionToCheckIfNull instanceof MethodInvocation) {
+				ASTNode exp = ((MethodInvocation) expressionToCheckIfNull).getExpression();
 				Expression newExpression = (Expression) rewriter.createCopyTarget(((MethodInvocation) expressionToCheckIfNull).getExpression());
 				expression.setLeftOperand(newExpression);
 			}

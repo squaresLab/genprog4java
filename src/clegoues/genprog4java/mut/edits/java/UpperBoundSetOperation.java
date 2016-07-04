@@ -34,7 +34,6 @@ public class UpperBoundSetOperation extends JavaEditOperation {
 	}
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode(); // not used, but being completist
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> arrays = thisHole.getSubExps();

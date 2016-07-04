@@ -25,14 +25,14 @@ public class MethodParameterRemover extends ExpressionReplacer {
 	
 	@Override
 	public void edit(ASTRewrite rewriter) {
-		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
+		ASTNode locationNode = ((JavaLocation) this.getLocation()).getCodeElement(); 
 		ExpChoiceHole thisHole = (ExpChoiceHole) this.getHoleCode();
-		Statement parentExp = (Statement) locationStmt.getASTNode();
+		Statement parentExp = (Statement) locationNode;
 		int numRemove = thisHole.getChoice();
 		MethodInvocation methodInvocation = (MethodInvocation) thisHole.getCode();
 		MethodInvocation newMethodInvocation = parentExp.getAST().newMethodInvocation();
 		SimpleName name = methodInvocation.getName();
-		SimpleName newMethodName = locationStmt.getASTNode().getAST().newSimpleName(name.getIdentifier());
+		SimpleName newMethodName = locationNode.getAST().newSimpleName(name.getIdentifier());
 
 		newMethodInvocation.setName(newMethodName);
 		newMethodInvocation.setExpression(methodInvocation.getExpression());
@@ -47,11 +47,10 @@ public class MethodParameterRemover extends ExpressionReplacer {
 
 	@Override
 	public String toString() {	
-		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
-
 		// FIXME: is it possible to get the method call for this?  Would be nice for debug
 		String retval = "prm(" + this.getLocation().getId() + ": ";
-		Statement parentExp = (Statement) locationStmt.getASTNode();
+		Statement parentExp = (Statement) ((JavaLocation) this.getLocation()).getCodeElement(); 
+;
 		retval += "(" + parentExp.toString() + "))";
 		return retval;
 	}

@@ -27,13 +27,12 @@ public class MethodParameterAdder extends JavaEditOperation {
 	
 	@Override
 	public void edit(ASTRewrite rewriter) {
-		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
-		Statement parentExp = (Statement) locationStmt.getASTNode();
+		ASTNode parentExp = ((JavaLocation) this.getLocation()).getCodeElement(); 
 		MethodInvocation methodInvocation = (MethodInvocation) thisHole.getCode();
 		MethodInvocation newMethodInvocation = parentExp.getAST().newMethodInvocation();
 		SimpleName name = methodInvocation.getName();
-		SimpleName newMethodName = locationStmt.getASTNode().getAST().newSimpleName(name.getIdentifier());
+		SimpleName newMethodName = parentExp.getAST().newSimpleName(name.getIdentifier());
 
 		newMethodInvocation.setName(newMethodName);
 		newMethodInvocation.setExpression(methodInvocation.getExpression());

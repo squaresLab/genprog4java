@@ -69,11 +69,6 @@ public abstract class JavaEditOperation implements EditOperation<ASTRewrite> {
 		this.holeCode = source;
 	}
 	
-	protected ASTNode getLocationNode() {
-		JavaStatement actualLocation = this.location.getLocation();
-		return actualLocation.getASTNode();
-	}
-
 	public EditHole getHoleCode() {
 		return this.holeCode;
 	}

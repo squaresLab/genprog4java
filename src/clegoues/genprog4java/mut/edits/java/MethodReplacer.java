@@ -25,8 +25,7 @@ public class MethodReplacer extends JavaEditOperation {
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		JavaStatement locationStmt = (JavaStatement) (this.getLocation().getLocation());
-		ASTNode locationNode = locationStmt.getASTNode();
+		ASTNode locationNode = ((JavaLocation) this.getLocation()).getCodeElement(); 
 		MethodInfoHole thisHole = (MethodInfoHole) this.getHoleCode();
 		ASTNode toReplace = thisHole.getCode();
 		IMethodBinding replaceWith = thisHole.getMethodInfo();
