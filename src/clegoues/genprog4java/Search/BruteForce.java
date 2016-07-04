@@ -23,7 +23,7 @@ import clegoues.util.Pair;
 @SuppressWarnings("rawtypes")
 public class BruteForce<G extends EditOperation> extends Search<G> {
 
-	public BruteForce(Fitness<G> engine) {
+	public BruteForce(Fitness engine) {
 		super(engine);
 	}
 	private boolean doWork(Representation<G> rep, Representation<G> original,

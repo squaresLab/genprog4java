@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.TestCase;
-import clegoues.genprog4java.fitness.TestType;
 
 public class LocalizationRepresentation extends JavaRepresentation {
 	protected Logger logger = Logger

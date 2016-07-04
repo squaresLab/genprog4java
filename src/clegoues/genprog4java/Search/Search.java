@@ -137,9 +137,9 @@ public abstract class Search<G extends EditOperation> {
 			.withHelp( "the search strategy to employ" )
 			.inGroup( "Search Parameters" )
 			.build();
-	protected Fitness<G> fitnessEngine = null;
+	protected Fitness fitnessEngine = null;
 
-	public Search(Fitness<G> engine) {
+	public Search(Fitness engine) {
 		this.fitnessEngine = engine;
 		if(Search.model.equalsIgnoreCase("probabilistic")){
 			rm = new ReplacementModel();

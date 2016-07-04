@@ -56,7 +56,6 @@ import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.FitnessValue;
 import clegoues.genprog4java.fitness.TestCase;
-import clegoues.genprog4java.fitness.TestType;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
@@ -192,7 +191,7 @@ Representation<G> {
 		}
 
 		//print to a file only the tests in scope
-		printTestsInScope(passingTests);
+		Fitness.printTestsInScope(passingTests);
 
 		testNum = 1;
 		for (TestCase negTest : Fitness.negativeTests) {
@@ -215,27 +214,6 @@ Representation<G> {
 		logger.info("sanity checking completed (time taken = "
 				+ (System.currentTimeMillis() - startTime) + ")");
 		return true;
-	}
-
-	// FIXME: why?
-	private void printTestsInScope(ArrayList<TestCase> passingTests){
-
-		String path = Fitness.posTestFile;
-		//Set up to write to txt file
-		FileWriter write = null;
-		try {
-			write = new FileWriter(path, false);
-		} catch (IOException e) {
-			logger.error("Error creating the file" + path);
-			return;
-		}
-		PrintWriter printer = new PrintWriter(write);
-
-		//Now write data to the file
-		for(TestCase s : passingTests){
-			printer.println(s);
-		}
-		printer.close();
 	}
 
 	public boolean testCase(TestCase test) {
