@@ -198,7 +198,11 @@ Comparable<Representation<G>> {
 
 	public abstract boolean compile(String sourceName, String exeName);
 
+	// I don't love this solution (test case knowing about coverage), but
+	// it's the easiest way to get the necessary info to internalTestCaseCommand
+	// without making coverage computation a state variable on rep.
 	public abstract boolean testCase(TestCase test);
+	public abstract boolean testCase(TestCase test, boolean doingCoverage);
 
 	public abstract TreeSet<Pair<Mutation, Double>> availableMutations(
 			Location faultyLocation);

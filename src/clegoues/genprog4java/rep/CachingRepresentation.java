@@ -172,7 +172,7 @@ Representation<G> {
 			logger.info("Checking test number " + testNumber + " out of " + Fitness.positiveTests.size());
 			FitnessValue res = this.internalTestCase(
 					CachingRepresentation.sanityExename,
-					CachingRepresentation.sanityFilename, posTest);
+					CachingRepresentation.sanityFilename, posTest, false);
 			if (!res.isAllPassed()) {
 				testsOutOfScope++;
 				logger.info(testsOutOfScope + " tests out of scope so far, out of " + Fitness.positiveTests.size());
@@ -204,7 +204,7 @@ Representation<G> {
 			logger.info("\tn" + testNum + ": ");
 			FitnessValue res = this.internalTestCase(
 					CachingRepresentation.sanityExename,
-					CachingRepresentation.sanityFilename, negTest);
+					CachingRepresentation.sanityFilename, negTest, false);
 			if (res.isAllPassed()) {
 				logger.info("true (1)\n");
 				logger.error("cacheRep: sanity: "
@@ -242,8 +242,9 @@ Representation<G> {
 		}
 		printer.close();
 	}
-
-	public boolean testCase(TestCase test) {
+	
+	@Override
+	public boolean testCase(TestCase test, boolean doingCoverage) {
 		List<Integer> hash = astHash();
 		HashMap<String, FitnessValue> thisVariantsFitness = null;
 		if (fitnessCache.containsKey(hash)) {
@@ -274,9 +275,14 @@ Representation<G> {
 			return false;
 		}
 		FitnessValue fitness = this.internalTestCase(this.variantFolder,
-				this.variantFolder + ".java", test);
+				this.variantFolder + ".java", test, doingCoverage);
 		thisVariantsFitness.put(test.toString(), fitness);
-		return fitness.isAllPassed();
+		return fitness.isAllPassed();	
+		}
+
+	public boolean testCase(TestCase test) {
+		return this.testCase(test,false);
+		
 	}
 
 	// kind of think internal test case should return here to save in
@@ -352,10 +358,10 @@ Representation<G> {
 	protected abstract ArrayList<Pair<ClassInfo, String>> internalComputeSourceBuffers();
 
 	protected FitnessValue internalTestCase(String sanityExename,
-			String sanityFilename, TestCase thisTest) {
+			String sanityFilename, TestCase thisTest, boolean doingCoverage) {
 		
 		CommandLine command = this.internalTestCaseCommand(sanityExename,
-				sanityFilename, thisTest);
+				sanityFilename, thisTest, doingCoverage);
 		// System.out.println("command: " + command.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);
 		DefaultExecutor executor = new DefaultExecutor();
