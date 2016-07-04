@@ -44,32 +44,32 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
 
+import org.apache.commons.exec.CommandLine;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.TestCase;
+import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
-import clegoues.genprog4java.mut.holes.java.StatementHole;
 import clegoues.util.Pair;
 
-// it's not clear that this EditOperation thing is a good choice because 
-// it basically forces the patch representation.  Possibly it's flexible and the naming scheme is 
-// just bad.  I'll have to think about it.
 
 @SuppressWarnings("rawtypes")
 public abstract class Representation<G extends EditOperation> implements
 Comparable<Representation<G>> {
 
 	protected Logger logger = Logger.getLogger(Representation.class);
-	
+	protected Localization localization = null;
+
 	protected String variantFolder = "";
 
 	public Representation() {
@@ -185,11 +185,7 @@ Comparable<Representation<G>> {
 		}
 		return succeeded;
 	}
-
-	public abstract ArrayList<Location> getFaultyLocations();
-
-	public abstract ArrayList<WeightedAtom> getFixSourceAtoms();
-
+	
 	public abstract boolean sanityCheck();
 
 	public abstract void fromSource(ClassInfo base) throws IOException;
@@ -202,9 +198,11 @@ Comparable<Representation<G>> {
 
 	public abstract boolean compile(String sourceName, String exeName);
 
+	// I don't love this solution (test case knowing about coverage), but
+	// it's the easiest way to get the necessary info to internalTestCaseCommand
+	// without making coverage computation a state variable on rep.
 	public abstract boolean testCase(TestCase test);
-
-	public abstract void reduceSearchSpace() throws GiveUpException; 
+	public abstract boolean testCase(TestCase test, boolean doingCoverage);
 
 	public abstract TreeSet<Pair<Mutation, Double>> availableMutations(
 			Location faultyLocation);
@@ -242,7 +240,29 @@ Comparable<Representation<G>> {
 
 	public abstract TreeSet<WeightedHole> editSources(Location stmtId, Mutation editType);
 
+	public abstract Boolean shouldBeRemovedFromFix(WeightedAtom atom);
+	
 	public abstract Boolean doesEditApply(Location location, Mutation editType);
 
-	public abstract void setAllPossibleStmtsToFixLocalization();
+	public abstract ArrayList<Integer> atomIDofSourceLine(int line);
+
+	public abstract Location instantiateLocation(Integer i, double negWeight);
+	
+	public abstract CommandLine internalTestCaseCommand(String exeName, String fileName, TestCase test, boolean doingCoverage);
+
+	protected abstract CommandLine internalTestCaseCommand(String exeName,
+			String fileName, TestCase test);
+
+	protected abstract void printDebugInfo();
+
+	public abstract Map<ClassInfo, String> getOriginalSource();
+
+	public void setLocalization(Localization l) {
+		this.localization = l;
+	}
+	
+	public Localization getLocalization() {
+		return this.localization ;
+	}
+	
 }

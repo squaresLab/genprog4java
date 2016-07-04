@@ -49,6 +49,7 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
@@ -201,8 +202,7 @@ public abstract class Search<G extends EditOperation> {
 		File repairDir = new File("repair/");
 		if (!repairDir.exists())
 			repairDir.mkdir();
-		String repairFilename = "repair/repair."
-				+ Configuration.globalExtension;
+		String repairFilename = "repair/repair.java";
 		rep.outputSource(repairFilename);
 	}
 
@@ -240,7 +240,8 @@ public abstract class Search<G extends EditOperation> {
 	 * @return variant' modified/potentially mutated variant
 	 */
 	public void mutate(Representation<G> variant) {
-		ArrayList<Location> faultyAtoms = variant.getFaultyLocations();
+		Localization localization = variant.getLocalization();
+		ArrayList<Location> faultyAtoms = localization.getFaultLocalization();
 		ArrayList<Location> proMutList = new ArrayList<Location>();
 		boolean foundMutationThatCanApplyToAtom = false;
 		while(!foundMutationThatCanApplyToAtom){
@@ -251,7 +252,7 @@ public abstract class Search<G extends EditOperation> {
 				boolean alreadyOnList = false;
 				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
 				if(proMutList.size()>=faultyAtoms.size()){ 
-					variant.setAllPossibleStmtsToFixLocalization();				}
+					localization.setAllPossibleStmtsToFixLocalization();				}
 				//only adds the random atom if it is different from the others already added
 				do {
 					//chooses a random faulty atom from the subset of faulty atoms
@@ -263,8 +264,6 @@ public abstract class Search<G extends EditOperation> {
 				proMutList.add((Location)wa);
 			}
 			for (Location location : proMutList) {
-				// FIXME: deal with the case where there are no edits that apply ever, because infinite loop
-				//the available mutations for this stmt
 				TreeSet<Pair<Mutation, Double>> availableMutations = variant.availableMutations(location);
 				if(availableMutations.isEmpty()){
 					continue; 

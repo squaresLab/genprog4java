@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
 import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
@@ -87,11 +88,13 @@ public class JavaEditFactory {
 			return JavaEditFactory.scopeSafeAtomMap.get(stmtId);
 		}
 
+		Localization localization = variant.getLocalization();
+		
 		JavaStatement potentiallyBuggyStmt = (JavaStatement) stmtId.getLocation();
 		ASTNode faultAST = potentiallyBuggyStmt.getASTNode();
 		TreeSet<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
 
-		for (WeightedAtom potentialFixAtom : variant.getFixSourceAtoms()) {
+		for (WeightedAtom potentialFixAtom : localization.getFixSourceAtoms()) {
 			int index = potentialFixAtom.getAtom();
 			JavaStatement potentialFixStmt = variant.getFromCodeBank(index);
 			ASTNode fixAST = potentialFixStmt.getASTNode();
@@ -204,16 +207,16 @@ public class JavaEditFactory {
 		TreeSet<EditHole> retVal = new TreeSet<EditHole>();
 
 		switch(editType) {
-		case DELETE: 
-			break;
+		case DELETE: retVal.add(new StatementHole((Statement) locationStmt.getASTNode(), locationStmt.getStmtId()));
+		return retVal;
 		case APPEND: 	
 		case REPLACE:
-				TreeSet<WeightedAtom> fixStmts = this.scopeHelper(location, variant);
-				for(WeightedAtom fixStmt : fixStmts) {
-					JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
-					ASTNode fixAST = potentialFixStmt.getASTNode();
-					retVal.add(new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId()));
-				}
+			TreeSet<WeightedAtom> fixStmts = this.scopeHelper(location, variant);
+			for(WeightedAtom fixStmt : fixStmts) {
+				JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
+				ASTNode fixAST = potentialFixStmt.getASTNode();
+				retVal.add(new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId()));
+			}
 			break;
 		case SWAP:
 			for (WeightedAtom item : this.scopeHelper(location, variant)) {
@@ -243,21 +246,21 @@ public class JavaEditFactory {
 			for(Map.Entry<ASTNode,List<IMethodBinding>> entry : methodReplacements.entrySet()) {
 				ASTNode replacableMethod = entry.getKey();
 				List<IMethodBinding> possibleReplacements = entry.getValue();
-					for(IMethodBinding possibleReplacement : possibleReplacements) {
-						retVal.add(new MethodInfoHole(replacableMethod, locationStmt.getStmtId(), possibleReplacement));
-					}
+				for(IMethodBinding possibleReplacement : possibleReplacements) {
+					retVal.add(new MethodInfoHole(replacableMethod, locationStmt.getStmtId(), possibleReplacement));
 				}
+			}
 			break;
 		case PARREP:
 			return JavaHole.makeExpHole(locationStmt.getReplacableMethodParameters(variant.semanticInfo), locationStmt);
 		case EXPREP:
 			return JavaHole.makeExpHole(locationStmt.getConditionalExpressions(variant.semanticInfo), locationStmt);
-	
+
 
 		case EXPADD:
 			Map<Expression, List<Expression>> extendableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
-				for(Entry<Expression, List<Expression>> entries : extendableExpressions.entrySet()) { 
-					for(Expression exp : entries.getValue()) {
+			for(Entry<Expression, List<Expression>> entries : extendableExpressions.entrySet()) { 
+				for(Expression exp : entries.getValue()) {
 					EditHole shrinkableExpHole1 = new ExpChoiceHole(entries.getKey(), exp, locationStmt.getStmtId(), 0);
 					EditHole shrinkableExpHole2 = new ExpChoiceHole( entries.getKey(), exp, locationStmt.getStmtId(), 1);
 					retVal.add(shrinkableExpHole1);
@@ -269,8 +272,8 @@ public class JavaEditFactory {
 			Map<ASTNode,List<Integer>> options = locationStmt.getShrinkableParameterMethods();
 			for(Map.Entry<ASTNode, List<Integer>> nodeOption : options.entrySet()) {
 				for(Integer option : nodeOption.getValue()) { // probably wrong
-				EditHole shrinkableParamHole = new ExpChoiceHole((Expression) nodeOption.getKey(), (Expression) nodeOption.getKey(), locationStmt.getStmtId(), option);
-				retVal.add(shrinkableParamHole);
+					EditHole shrinkableParamHole = new ExpChoiceHole((Expression) nodeOption.getKey(), (Expression) nodeOption.getKey(), locationStmt.getStmtId(), option);
+					retVal.add(shrinkableParamHole);
 				}
 			}
 			return retVal;
@@ -309,20 +312,20 @@ public class JavaEditFactory {
 	}
 
 	void permutations(List<List<ASTNode>> original, List<List<ASTNode>> result, int d, List<ASTNode> current) {
-		  // if depth equals number of original collections, final reached, add and return
-		  if (d == original.size()) {
-		    result.add(current);
-		    return;
-		  }
-
-		  // iterate from current collection and copy 'current' element N times, one for each element
-		  List<ASTNode> currentCollection = original.get(d);
-		  for (ASTNode element : currentCollection) {
-		    List<ASTNode> copy = new ArrayList<ASTNode>(current);
-		    copy.add(element);
-		    permutations(original, result, d + 1, copy);
-		  }
+		// if depth equals number of original collections, final reached, add and return
+		if (d == original.size()) {
+			result.add(current);
+			return;
 		}
+
+		// iterate from current collection and copy 'current' element N times, one for each element
+		List<ASTNode> currentCollection = original.get(d);
+		for (ASTNode element : currentCollection) {
+			List<ASTNode> copy = new ArrayList<ASTNode>(current);
+			copy.add(element);
+			permutations(original, result, d + 1, copy);
+		}
+	}
 
 	public boolean doesEditApply(JavaRepresentation variant, Location location, Mutation editType) {
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
