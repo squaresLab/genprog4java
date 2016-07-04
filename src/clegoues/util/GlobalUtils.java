@@ -33,10 +33,15 @@
 
 package clegoues.util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.TreeSet;
+
+import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.Location;
@@ -95,5 +100,45 @@ public class GlobalUtils {
 		if(p < 0.0) return false;
 		if(p > 1.0) return true;
 		return Configuration.randomizer.nextDouble() <= p;
+	}
+	
+	public static boolean runCommand(String commandToRun){
+		Logger logger = Logger.getLogger(GlobalUtils.class);
+	
+        try {
+        	
+            Process p = Runtime.getRuntime().exec(commandToRun);
+             
+            int retValue = 0;
+            try {
+            	retValue = p.waitFor();
+            	
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+            
+            if(retValue != 0)
+            {
+            	logger.error("Command " + commandToRun + " exited abnormally with status " + retValue);
+            	 String line;
+            	 logger.error("Stdout of command:");
+            	  BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            	  while ((line = input.readLine()) != null) {
+            	    System.out.println(line);
+            	  }
+            	  logger.error("Stderr of command:");
+            	  input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            	  while ((line = input.readLine()) != null) {
+              	    System.out.println(line);
+              	  }
+              	  return false;
+            }
+         }
+        catch (IOException e) {
+            logger.error("Exception occurred executing command: " + commandToRun); 
+            logger.error(e.getStackTrace());
+            return false;
+        }	
+        return true;
 	}
 }
