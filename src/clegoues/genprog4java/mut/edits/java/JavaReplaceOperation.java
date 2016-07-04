@@ -18,7 +18,7 @@ public class JavaReplaceOperation extends JavaEditOperation {
 	
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = this.getLocationNode(); 
+		ASTNode locationNode = ((JavaLocation) this.getLocation()).getCodeElement(); 
 		StatementHole fixHole = (StatementHole) this.getHoleCode();
 		ASTNode fixCodeNode =
 				 ASTNode.copySubtree(locationNode.getAST(), fixHole.getCode());

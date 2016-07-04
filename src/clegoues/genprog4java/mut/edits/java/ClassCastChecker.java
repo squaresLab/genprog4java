@@ -30,7 +30,7 @@ public class ClassCastChecker extends JavaEditOperation {
 	
 	@Override
 	public void edit(ASTRewrite rewriter) {
-		ASTNode locationNode = ((JavaStatement) (this.getLocation().getLocation())).getASTNode();
+		ASTNode locationNode = ((JavaLocation) this.getLocation()).getCodeElement();
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> expressionsFromThisParent = thisHole.getSubExps();

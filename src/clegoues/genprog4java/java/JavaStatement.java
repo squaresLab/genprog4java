@@ -216,8 +216,9 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					// method to visit all Expressions relevant for this in locationNode and
 					// store their parents
 					public boolean visit(MethodInvocation node) {
-						saveDataOfTheExpression(node);
-
+						if(node.getExpression() != null) {
+							saveDataOfTheExpression(node);
+						}
 						return true;
 					}
 					public boolean visit(FieldAccess node) {
@@ -291,7 +292,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				return (op == InfixExpression.Operator.CONDITIONAL_AND) ||
 						(op == InfixExpression.Operator.CONDITIONAL_OR);
 			}
-			
+
 			private void handleExp(Expression node, Expression condExp) {
 				if(condExp instanceof InfixExpression) {
 					if(isShrinkable(((InfixExpression) condExp).getOperator())) {
@@ -362,7 +363,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	}
 
 	// FIXME: fix Search for when we don't have enough options or edit list is empty.
-	
+
 	private Map<Expression,List<Expression>> methodParamReplacements = null;
 
 	public Map<Expression,List<Expression>> getReplacableMethodParameters(final JavaSemanticInfo semanticInfo) {
@@ -429,7 +430,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		}
 		return false;
 	}
-	
+
 
 	private Map<ASTNode,List<List<ASTNode>>> extendableParameterMethods = null;
 
@@ -480,7 +481,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						for(IMethodBinding compatibleMethod : compatibleMethods) {
 							ArrayList<ITypeBinding> compatibleParamTypes = getParamTypes(compatibleMethod);
 							List<ITypeBinding> toExtend = compatibleParamTypes.subList(myTypes.size()-1, compatibleParamTypes.size());
-							
+
 							List<ASTNode> thisExtension = new ArrayList<ASTNode>();
 							boolean extensionDoable = true;
 							int i = 0;
@@ -505,9 +506,9 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		}
 		return extendableParameterMethods;	
 	}
-	
+
 	private List<ASTNode> indexedCollectionObjects = null;
-	
+
 	public  List<ASTNode> getIndexedCollectionObjects() {
 		if(indexedCollectionObjects == null) {
 			indexedCollectionObjects = new ArrayList<ASTNode>();
@@ -534,7 +535,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						break;
 					default: return true;
 					}
-					
+
 					ITypeBinding methodCallTypeBinding = methodCall.resolveTypeBinding();
 					String name = methodCallTypeBinding.getTypeDeclaration().getName();
 					ITypeBinding decl = methodCallTypeBinding.getTypeDeclaration();
@@ -555,11 +556,11 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					protected void	removeRange(int fromIndex, int toIndex)
 					E	set(int index, E element)
 					List<E>	subList(int fromIndex, int toIndex) */
-				});
+			});
 		}
 		return indexedCollectionObjects;
 	}
-	
+
 	/*
 	 * B = buggy statements
 collect method invocations of (@\textbf{[collection objects]}@) in B and put them into collection C
@@ -639,7 +640,7 @@ if B include return statement
 		}
 		return shrinkableParameterMethods;
 	}
-	
+
 	private Map<ASTNode, List<IMethodBinding>> candidateMethodReplacements= null;
 
 	public Map<ASTNode, List<IMethodBinding>> getCandidateMethodReplacements() {
@@ -711,7 +712,7 @@ if B include return statement
 		ASTNode faultyNode = this.getASTNode();
 		ASTNode parent = faultyNode.getParent();
 		//Heuristic: If it is the body of an if, while, or for, it should not be removed
-	
+
 		if(faultyNode instanceof Block){
 			//this boolean states if the faultyNode is the body of an IfStatement
 			if (parent instanceof IfStatement

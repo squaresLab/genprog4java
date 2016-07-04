@@ -130,7 +130,7 @@ public class JavaEditFactory {
 		Localization localization = variant.getLocalization();
 		
 		JavaStatement potentiallyBuggyStmt = (JavaStatement) stmtId.getLocation();
-		ASTNode faultAST = potentiallyBuggyStmt.getASTNode();
+		ASTNode faultAST = ((JavaLocation) stmtId).getCodeElement();
 		Set<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
 
 		for (WeightedAtom potentialFixAtom : localization.getFixSourceAtoms()) {
