@@ -71,6 +71,26 @@ public class GlobalUtils {
 		return null;
 	}
 
+	public static Pair<?,Double> chooseOneWeighted(ArrayList<Pair<?,Double>> atoms, double weight) {
+		assert(atoms.size() > 0);
+		double totalWeight = 0.0;
+		for(Pair<?,Double> atom : atoms) {
+			totalWeight += atom.getSecond();
+		}
+		assert(totalWeight > 0.0) ;
+
+		double wanted = weight * totalWeight;
+		double sofar = 0.0;
+		for(Pair<?,Double> atom : atoms) {
+			double here = sofar + atom.getSecond();
+			if(here >= wanted) {
+				return atom;
+			}
+			sofar = here;
+		}
+		return null;
+	}
+		
 	public static boolean probability(double p) {
 		if(p < 0.0) return false;
 		if(p > 1.0) return true;

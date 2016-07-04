@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
@@ -56,6 +57,7 @@ import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
+import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
@@ -157,6 +159,8 @@ public abstract class Search<G extends EditOperation> {
 			} else {
 				edit = oneItem;
 			}
+			
+			//;parrep;paradd;parrem;exprep;expadd;exprem;nullcheck;rangecheck;sizecheck;castcheck;lbset;offbyone;ubset
 			switch(edit.toLowerCase()) {
 			case "append": mutations.put(Mutation.APPEND, weight); break;
 			case "swap":  mutations.put(Mutation.SWAP, weight); break;
@@ -248,7 +252,7 @@ public abstract class Search<G extends EditOperation> {
 			//promut default is 1 // promut stands for proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
 			for (int i = 0; i < Search.promut; i++) {
 				//chooses a random location
-				Pair<?, Double> wa = null;
+				Location wa = null;
 				boolean alreadyOnList = false;
 				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
 				if(proMutList.size()>=faultyAtoms.size()){ 
@@ -256,15 +260,15 @@ public abstract class Search<G extends EditOperation> {
 				//only adds the random atom if it is different from the others already added
 				do {
 					//chooses a random faulty atom from the subset of faulty atoms
-					wa = GlobalUtils.chooseOneWeighted(new ArrayList(faultyAtoms));
+					wa = localization.getRandomLocation(Configuration.randomizer.nextDouble()); 
 					// insert a check to see if this location has any valid mutations?  If not, look again
 					// if not, somehow tell the variant to remove that location from the list of faulty atoms
 					alreadyOnList = proMutList.contains(wa);
 				} while(alreadyOnList);
-				proMutList.add((Location)wa);
+				proMutList.add(wa);
 			}
 			for (Location location : proMutList) {
-				TreeSet<Pair<Mutation, Double>> availableMutations = variant.availableMutations(location);
+				Set<WeightedMutation> availableMutations = variant.availableMutations(location);
 				if(availableMutations.isEmpty()){
 					continue; 
 				}else{
@@ -273,17 +277,16 @@ public abstract class Search<G extends EditOperation> {
 				//choose a mutation at random
 				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(new ArrayList(availableMutations));
 				Mutation mut = chosenMutation.getFirst();
-				TreeSet<WeightedHole> allowed = variant.editSources(location, mut);
+				List<WeightedHole> allowed = variant.editSources(location, mut);
 				allowed = rescaleAllowed(mut,allowed, variant,location.getId());
 				WeightedHole selected = (WeightedHole) GlobalUtils
 						.chooseOneWeighted(new ArrayList(allowed));
 				variant.performEdit(mut, location, selected.getHole());
-
 			}
 		}
 	}
 
-	private TreeSet rescaleAllowed(Mutation mut, TreeSet<WeightedHole> allowed, Representation variant, int stmtid) {
+	private List rescaleAllowed(Mutation mut, List<WeightedHole> allowed, Representation variant, int stmtid) {
 		if(mut != Mutation.REPLACE || Search.model.equalsIgnoreCase("default")){
 			return allowed;
 		}else if(Search.model.equalsIgnoreCase("probabilistic")){

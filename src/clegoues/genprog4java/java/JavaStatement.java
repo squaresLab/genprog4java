@@ -652,14 +652,13 @@ if B include return statement
 
 				public boolean visit(MethodInvocation node) {
 					IMethodBinding myMethodBinding = node.resolveMethodBinding();
-
+					boolean addToMap = false;
 					if(myMethodBinding != null) {
 						List<IMethodBinding> possibleReps;
 						if(candidateMethodReplacements.containsKey(node)) {
 							possibleReps = candidateMethodReplacements.get(node);
 						} else {
 							possibleReps = new ArrayList<IMethodBinding> ();
-							candidateMethodReplacements.put(node,possibleReps);
 						}
 						ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
 						ITypeBinding thisReturnType = myMethodBinding.getReturnType();
@@ -670,9 +669,14 @@ if B include return statement
 							if(candReturnType.isAssignmentCompatible(thisReturnType) &&
 									compatibleMethodMatch(myMethodBinding, otherMethod, false)) {
 								possibleReps.add(otherMethod);
+								addToMap = true;
 							}
 						}
+						if(addToMap) {
+							candidateMethodReplacements.put(node,possibleReps);
+						}
 					}
+
 					return true;
 				}
 
