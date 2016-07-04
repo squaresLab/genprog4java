@@ -7,9 +7,12 @@ import java.util.ArrayList;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
+import org.eclipse.jdt.core.dom.ASTNode;
 
+import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.Location;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 import clegoues.util.ConfigurationBuilder;
@@ -44,7 +47,6 @@ public class EntropyLocalization extends DefaultLocalization {
 
 		for (Integer i : negativePath) {
 			faultLocalization.add(original.instantiateLocation(i, 1.0));
-			// FIXME: better weighting scheme for entropy?
 		}
 		try {
 			sampler = (CollapsedGibbsSampler) Serializer.getSerializer()
@@ -61,8 +63,15 @@ public class EntropyLocalization extends DefaultLocalization {
 	
 	@Override
 	public Location getRandomLocation(double weight) {
-		Location startingStmt = (Location) GlobalUtils.chooseOneWeighted(new ArrayList(this.getFaultLocalization()));
-		
+		JavaLocation startingStmt = (JavaLocation) GlobalUtils.chooseOneWeighted(new ArrayList(this.getFaultLocalization()), weight);
+		ASTNode actualCode = startingStmt.getCodeElement();
 		return startingStmt;
+	}
+	
+	@Override
+	public Location getNextLocation() throws GiveUpException {
+		Location ele = super.getNextLocation();
+		// FIXME
+		return ele;
 	}
 }

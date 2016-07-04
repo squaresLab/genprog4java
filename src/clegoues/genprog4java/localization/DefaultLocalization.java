@@ -336,7 +336,7 @@ public class DefaultLocalization extends Localization {
 		return retVal;
 
 	}
-	
+
 	protected TreeSet<Integer> getPathInfo(String path, ArrayList<TestCase> tests, boolean shouldPass) throws UnexpectedCoverageResultException, IOException {
 		File pathFile = new File(path);
 		if(pathFile.exists() && !DefaultLocalization.regenPaths) {
@@ -352,7 +352,7 @@ public class DefaultLocalization extends Localization {
 			}
 			return runTestsCoverage(path, tests, shouldPass, covPath);
 		}
-		
+
 	}
 
 	@Override
@@ -366,7 +366,7 @@ public class DefaultLocalization extends Localization {
 		logger.info("Start Fault Localization");
 		TreeSet<Integer> positivePath = getPathInfo(DefaultLocalization.posCoverageFile, Fitness.positiveTests, true);
 		TreeSet<Integer> negativePath = getPathInfo(DefaultLocalization.negCoverageFile, Fitness.negativeTests, false);
-		
+
 		computeFixSpace(negativePath, positivePath);
 		computeFaultSpace(negativePath,positivePath); 
 
@@ -461,14 +461,17 @@ public class DefaultLocalization extends Localization {
 	}
 
 	@Override
-	public Location getNextLocation() {
+	public Location getNextLocation() throws GiveUpException {
 		if(faultSortedByWeight == null) {
 			faultSortedByWeight = new ArrayList(this.getFaultLocalization());
-		//	Collections.sort(faultSortedByWeight);
+			//	Collections.sort(faultSortedByWeight);
 		}
-		Location ele = faultSortedByWeight.get(index);
-		index++;
-		return ele;
+		if(faultSortedByWeight.size() < index) {
+			Location ele = faultSortedByWeight.get(index);
+			index++;
+			return ele;
+		} 
+		throw new GiveUpException();
 	}
 
 }
