@@ -83,7 +83,7 @@ public class GlobalUtils {
 	}
 	
 	public static boolean runCommand(String commandToRun){
-		Logger logger = Logger.getLogger(Utils.class);
+		Logger logger = Logger.getLogger(GlobalUtils.class);
 	
         try {
         	
