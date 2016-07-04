@@ -34,7 +34,7 @@
 package clegoues.genprog4java.rep;
 import clegoues.util.*;
 
-public class WeightedAtom extends Pair<Integer,Double> {
+public class WeightedAtom extends Pair<Integer,Double> implements Comparable<Object> {
 
 	public WeightedAtom(Integer atomid) {
 		super(atomid, 1.0);
@@ -45,7 +45,13 @@ public class WeightedAtom extends Pair<Integer,Double> {
 	public int getAtom() { return super.getFirst(); }
 	public double getWeight() { return super.getSecond(); }
 
-	public int compareTo(WeightedAtom otherAtomPair) {
-		return new Double(this.getSecond()).compareTo(new Double(otherAtomPair.getSecond()));
+	@Override
+	public int compareTo(Object o) {
+		WeightedAtom otherAtomPair = (WeightedAtom) o;
+		if(otherAtomPair.getSecond().equals(this.getSecond())) {
+			return new Double(this.getFirst()).compareTo(new Double(otherAtomPair.getFirst()));
+		} 
+		return this.getSecond().compareTo(otherAtomPair.getSecond());
 	}
+
 }
