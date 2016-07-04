@@ -112,7 +112,6 @@ import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.java.ScopeInfo;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.main.Utils;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
@@ -122,7 +121,9 @@ import clegoues.genprog4java.mut.edits.java.JavaEditFactory;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.util.ConfigurationBuilder;
+import clegoues.util.GlobalUtils;
 import clegoues.util.Pair;
+import clegoues.util.Utils;
 
 public class JavaRepresentation extends
 FaultLocRepresentation<JavaEditOperation> {
@@ -633,7 +634,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				return true;
 			}
 		} else {
-			return Utils.runCommand(Configuration.compileCommand);
+			return GlobalUtils.runCommand(Configuration.compileCommand);
 		}
 	}
 
