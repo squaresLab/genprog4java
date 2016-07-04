@@ -41,25 +41,16 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Properties;
 import java.util.Random;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 
-import clegoues.genprog4java.Search.Population;
-import clegoues.genprog4java.Search.Search;
-import clegoues.genprog4java.fitness.Fitness;
-import clegoues.genprog4java.rep.CachingRepresentation;
-import clegoues.genprog4java.rep.FaultLocRepresentation;
-import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
-import clegoues.util.Utils;
 
 public class Configuration {
 	protected static Logger logger = Logger.getLogger(Configuration.class);

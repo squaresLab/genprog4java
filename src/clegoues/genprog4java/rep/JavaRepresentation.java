@@ -123,7 +123,6 @@ import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
 import clegoues.util.Pair;
-import clegoues.util.Utils;
 
 public class JavaRepresentation extends
 FaultLocRepresentation<JavaEditOperation> {
