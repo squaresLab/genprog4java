@@ -218,8 +218,6 @@ public class JavaEditFactory {
 		return retVal;
 	}
 
-
-
 	public List<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType) {
 		ArrayList<EditHole> retVal = new ArrayList<EditHole>();
 
