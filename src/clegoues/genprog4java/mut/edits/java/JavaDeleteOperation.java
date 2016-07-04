@@ -15,7 +15,7 @@ public class JavaDeleteOperation extends JavaEditOperation {
 	}
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = this.getLocationNode(); 
+		ASTNode locationNode = ((JavaLocation) this.getLocation()).getCodeElement(); 
 		rewriter.remove(locationNode, null);
 	}
 	

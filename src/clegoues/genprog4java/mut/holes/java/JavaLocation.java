@@ -17,6 +17,7 @@ public class JavaLocation extends Location<JavaStatement> {
 	public JavaLocation(JavaStatement location, Double weight) {
 		super(location,weight);
 		this.id = location.getStmtId();
+		this.setCodeElement(location.getASTNode());
 	}
 	
 	public ClassInfo getClassInfo() {

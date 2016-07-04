@@ -18,13 +18,13 @@ public class JavaSwapOperation extends JavaEditOperation {
 	}
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = this.getLocationNode();
+		ASTNode locationNode = ((JavaLocation) this.getLocation()).getCodeElement(); 
 		StatementHole fixCode = (StatementHole) this.getHoleCode(); 
 		ASTNode fixCodeNode =
 			 ASTNode.copySubtree(locationNode.getAST(), fixCode.getCode()); 
 		rewriter.replace(locationNode, fixCodeNode, null);
 		rewriter.replace(fixCode.getCode(), ASTNode
-				.copySubtree(locationNode.getAST(), this.getLocationNode()), null); 
+				.copySubtree(locationNode.getAST(), locationNode), null); 
 	}
 	
 	@Override
