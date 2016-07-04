@@ -49,6 +49,7 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.localization.DefaultLocalization;
 import clegoues.genprog4java.localization.EntropyLocalization;
 import clegoues.genprog4java.localization.Localization;
+import clegoues.genprog4java.mut.edits.java.JavaEditFactory;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
@@ -78,6 +79,7 @@ public class Main {
 		ConfigurationBuilder.register( DefaultLocalization.token );
 		ConfigurationBuilder.register( EntropyLocalization.token );
 		ConfigurationBuilder.register( JavaRepresentation.token );
+		ConfigurationBuilder.register( JavaEditFactory.token );
 		ConfigurationBuilder.register( Population.token );
 		ConfigurationBuilder.register( Search.token );
 		ConfigurationBuilder.register( OracleSearch.token );

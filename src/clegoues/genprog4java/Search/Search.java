@@ -181,6 +181,7 @@ public abstract class Search<G extends EditOperation> {
 			case "lbset":  mutations.put(Mutation.LBOUNDSET, weight); break;
 			case "ubset":  mutations.put(Mutation.UBOUNDSET, weight); break;
 			case "offbyone":  mutations.put(Mutation.OFFBYONE, weight); break;
+			case "babbled":  mutations.put(Mutation.BABBLED, weight); break;
 			}
 		}
 		return mutations;
