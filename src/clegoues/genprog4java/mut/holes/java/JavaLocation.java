@@ -6,19 +6,18 @@ import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.Location;
 
-public class JavaLocation extends Location<JavaStatement> {
+public abstract class JavaLocation<G> extends Location<G> {
+
+	public JavaLocation(G location, Double weight) {
+		super(location, weight);
+	}
 
 	private ClassInfo classInfo = null; 
-	private int id;
 	// this is a bit tricky, because I may want to use *either* the id or this node depending and that
 	// feels like a bad idea.  But let's try it.
 	private ASTNode codeElement = null;
 	
-	public JavaLocation(JavaStatement location, Double weight) {
-		super(location,weight);
-		this.id = location.getStmtId();
-	}
-	
+
 	public ClassInfo getClassInfo() {
 		return this.classInfo;
 	}
@@ -38,11 +37,6 @@ public class JavaLocation extends Location<JavaStatement> {
 		clone.setLocation(this.getLocation());
 		clone.setWeight(this.getWeight());
 		return (Object) clone;
-	}
-
-	@Override
-	public int getId() {
-		return this.id;
 	}
 
 	public ASTNode getCodeElement() {
