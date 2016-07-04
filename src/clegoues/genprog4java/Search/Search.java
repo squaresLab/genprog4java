@@ -158,6 +158,8 @@ public abstract class Search<G extends EditOperation> {
 			} else {
 				edit = oneItem;
 			}
+			
+			//;parrep;paradd;parrem;exprep;expadd;exprem;nullcheck;rangecheck;sizecheck;castcheck;lbset;offbyone;ubset
 			switch(edit.toLowerCase()) {
 			case "append": mutations.put(Mutation.APPEND, weight); break;
 			case "swap":  mutations.put(Mutation.SWAP, weight); break;
