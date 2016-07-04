@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,7 @@ import clegoues.util.GlobalUtils;
 import clegoues.util.Pair;
 
 // this class implements boring, default path-file-style localization.
+@SuppressWarnings("rawtypes")
 public class DefaultLocalization extends Localization {
 	protected Logger logger = Logger.getLogger(DefaultLocalization.class);
 
@@ -107,6 +109,8 @@ public class DefaultLocalization extends Localization {
 	protected Representation original = null;
 
 	protected ArrayList<Location> faultLocalization = new ArrayList<Location>();
+	private ArrayList<Location> faultSortedByWeight = null;
+	int index = 0;
 	protected ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
 	public DefaultLocalization(Representation orig) throws IOException, UnexpectedCoverageResultException {
@@ -442,7 +446,6 @@ public class DefaultLocalization extends Localization {
 			}
 			for (Integer i : negativePath) {
 				fixLocalization.add(new WeightedAtom(i, 0.5));
-
 			}	
 		}
 	}
@@ -453,8 +456,19 @@ public class DefaultLocalization extends Localization {
 	}
 
 	@Override
+	public Location getRandomLocation(double weight) {
+		return (Location) GlobalUtils.chooseOneWeighted(new ArrayList(this.getFaultLocalization()), weight);
+	}
+
+	@Override
 	public Location getNextLocation() {
-		return (Location) GlobalUtils.chooseOneWeighted(new ArrayList(this.getFaultLocalization()));
+		if(faultSortedByWeight == null) {
+			faultSortedByWeight = new ArrayList(this.getFaultLocalization());
+			Collections.sort(faultSortedByWeight);
+		}
+		Location ele = faultSortedByWeight.get(index);
+		index++;
+		return ele;
 	}
 
 }
