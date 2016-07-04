@@ -37,7 +37,6 @@ public class JavaSemanticInfo {
 	private static HashMap<Integer, Set<String>> inScopeMap = new HashMap<Integer, Set<String>>();
 	private static Set<Pair<String,String>> methodReturnType = new HashSet<Pair<String,String>>();
 	private static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
-	private static Set<String> finalVariables = new HashSet<String>();
 	private static Map<String, Map<String,List<Expression>>> methodParamExpressionsInScope = null;
 	private static Map<String, List<Expression>> conditionalExpressionsInScope = null;
 	private static Map<String, List<Expression>> conditionExtensionsInScope = null;
@@ -183,29 +182,11 @@ public class JavaSemanticInfo {
 	public void addAllSemanticInfo(JavaParser myParser) {
 		JavaSemanticInfo.methodReturnType.addAll(myParser.getMethodReturnTypeSet());
 		JavaSemanticInfo.getVariableDataTypes().putAll(myParser.getVariableDataTypes());
-		JavaSemanticInfo.finalVariables.addAll(myParser.getFinalVariableSet());
 	}
 
 	public void addToScopeMap(JavaStatement s, Set<String> scope) {
 		JavaSemanticInfo.inScopeMap.put(s.getStmtId(),scope);
 	}
-
-	public boolean vdPossibleFinalVariable(VariableDeclarationStatement ds) {
-		VariableDeclarationFragment df = (VariableDeclarationFragment) ds.fragments().get(0);
-		return finalVariables.contains(df.getName().getIdentifier());
-	}
-
-	public boolean expPossibleFinalAssignment(ExpressionStatement exstat) {
-		if (exstat.getExpression() instanceof Assignment) {
-			Assignment assignment= (Assignment) exstat.getExpression();
-			if(assignment.getLeftHandSide() instanceof SimpleName){
-				SimpleName leftHand = (SimpleName) assignment.getLeftHandSide();
-				return finalVariables.contains(leftHand.toString());
-			}
-		}
-		return false;
-	}
-
 
 	public boolean scopeCheckOK(JavaStatement potentiallyBuggyStmt, JavaStatement potentialFixStmt) {
 		// I *believe* this is just variable names and doesn't check required

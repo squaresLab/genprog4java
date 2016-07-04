@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StringWriter;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -60,9 +61,12 @@ import javax.tools.ToolProvider;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AssertStatement;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -71,12 +75,14 @@ import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
@@ -84,6 +90,7 @@ import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -691,10 +698,10 @@ FaultLocRepresentation<JavaEditOperation> {
 			throw new GiveUpException();
 		}
 		
-		//Redcue Fix space
-		ArrayList<WeightedAtom> toRemove = new ArrayList<WeightedAtom>();
-		//potentialFix is a potential fix statement
-		for (WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {
+		//Reduce Fix space
+		final ArrayList<WeightedAtom> toRemove = new ArrayList<WeightedAtom>();
+
+		for (final WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {
 			int index = potentialFixAtom.getAtom();
 			JavaStatement potentialFixStmt = this.getFromCodeBank(index); 
 			ASTNode fixASTNode = potentialFixStmt.getASTNode();
@@ -710,51 +717,76 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			}
 
-			//Heuristic: No need to insert a declaration of a final variable
-			if(fixASTNode instanceof VariableDeclarationStatement){
-				if(semanticInfo.vdPossibleFinalVariable((VariableDeclarationStatement) fixASTNode)) {
-					toRemove.add(potentialFixAtom);
-					continue;
-				}
-			}
-
+			//Heuristic: No need to insert a declaration of or assignment to a final variable
+//			if(fixASTNode instanceof VariableDeclarationStatement){
+//				if(semanticInfo.vdPossibleFinalVariable((VariableDeclarationStatement) fixASTNode)) {
+//					toRemove.add(potentialFixAtom);
+//					continue;
+//				}
+//			}
+			
 			//Heuristic: Don't assign a value to a final variable
-			// FIXME: this isn't quite working presently, fix?
-			if (fixASTNode instanceof ExpressionStatement) {
-				if(semanticInfo.expPossibleFinalAssignment((ExpressionStatement) fixASTNode)) {
-					toRemove.add(potentialFixAtom);
-					continue;
-				}
-			}
-
+//			if (fixASTNode instanceof ExpressionStatement) {
+//				if(semanticInfo.expPossibleFinalAssignment((ExpressionStatement) fixASTNode)) {
+//					toRemove.add(potentialFixAtom);
+//					continue;
+//				}
+//			}
 			//If it moves a block, this block should not have an assignment of final variables, or a declaration of already existing final variables
-			if (fixASTNode instanceof Block) {
-				List<ASTNode> statementsInBlock = ((Block)potentialFixStmt.getASTNode()).statements();
-				boolean ok = true;
-				for (int i = 0; i < statementsInBlock.size(); i++) {
-					//Heuristic: Don't assign a value to a final variable
-					ASTNode stmtInBlock = statementsInBlock.get(i);
-					if (stmtInBlock instanceof ExpressionStatement) {
-						if(semanticInfo.expPossibleFinalAssignment((ExpressionStatement) stmtInBlock)) {
-							ok = false;
-							break;
-						}
+//			if (fixASTNode instanceof Block) {
+//				List<ASTNode> statementsInBlock = ((Block)potentialFixStmt.getASTNode()).statements();
+//				boolean ok = true;
+//				for (int i = 0; i < statementsInBlock.size(); i++) {
+//					//Heuristic: Don't assign a value to a final variable
+//					ASTNode stmtInBlock = statementsInBlock.get(i);
+//					if (stmtInBlock instanceof ExpressionStatement) {
+//						if(semanticInfo.expPossibleFinalAssignment((ExpressionStatement) stmtInBlock)) {
+//							ok = false;
+//							break;
+//						}
+//					}
+//
+//					//Heuristic: No need to insert a declaration of a final variable
+//					if(stmtInBlock instanceof VariableDeclarationStatement){
+//						if(semanticInfo.vdPossibleFinalVariable((VariableDeclarationStatement) stmtInBlock)) {
+//							ok = false;
+//							break;
+//						}
+//					}
+//				}
+//				if(!ok) {
+//					toRemove.add(potentialFixAtom);
+//					continue;
+//				}
+//			}
+//		}
+			// Heuristic: should not move or copy declarations of or assignments to final variables
+			fixASTNode.accept(new ASTVisitor() {
+				@Override
+			public boolean visit(Assignment node) {
+					Expression left = node.getLeftHandSide();
+					int flags = left.getFlags();
+					if(Flags.isFinal(flags)) {
+						toRemove.add(potentialFixAtom);
+						return false;
 					}
-
-					//Heuristic: No need to insert a declaration of a final variable
-					if(stmtInBlock instanceof VariableDeclarationStatement){
-						if(semanticInfo.vdPossibleFinalVariable((VariableDeclarationStatement) stmtInBlock)) {
-							ok = false;
-							break;
-						}
+					return true;
+				}
+				
+				@Override
+				public boolean visit(VariableDeclarationStatement node) {
+					int modifiers = node.getModifiers();
+					if(Modifier.isFinal(modifiers)) {
+						toRemove.add(potentialFixAtom);
+						return false;
 					}
+					return true;
 				}
-				if(!ok) {
-					toRemove.add(potentialFixAtom);
-					continue;
-				}
-			}
+			});
+			
+		
 		}
+			
 
 		for(WeightedAtom atom : toRemove) {
 			fixLocalization.remove(atom);

@@ -60,19 +60,16 @@ public class JavaParser
 	private Set<String> fields;
 	private HashSet<Pair<String,String>> methodReturnType;
 	private HashMap<String,String> variableTypes;
-	private HashSet<String> finalVariables;
 
 	public JavaParser(ScopeInfo scopeList)
 	{
 		this.stmts = new LinkedList<ASTNode>();
 		this.methodReturnType = new HashSet<Pair<String,String>>();
-		this.finalVariables =  new HashSet<String>();
 		this.variableTypes = new HashMap<String,String>();
 		this.visitor = new SemanticInfoVisitor();
 		this.visitor.setNodeSet(this.stmts);		
 		this.visitor.setScopeList(scopeList);
 		this.visitor.setMethodReturnType(methodReturnType);
-		this.visitor.setFinalVariables(finalVariables);
 		this.visitor.setVariableType(variableTypes);
 	}
 
@@ -83,11 +80,6 @@ public class JavaParser
 	
 	public HashMap<String,String> getVariableDataTypes(){
 		return variableTypes;
-	}
-	
-	
-	public Set<String> getFinalVariableSet(){
-		return this.finalVariables;
 	}
 	
 	public LinkedList<ASTNode> getStatements()
