@@ -1,4 +1,4 @@
-package clegoues.javaASTProcessor.main;
+package clegoues.genprog4java.localization;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTNode;

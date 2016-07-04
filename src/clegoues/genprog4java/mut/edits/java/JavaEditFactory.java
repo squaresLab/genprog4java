@@ -31,6 +31,7 @@ import codemining.util.serialization.ISerializationStrategy.SerializationExcepti
 import codemining.util.serialization.Serializer;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.localization.Localization;
+import clegoues.genprog4java.localization.TreeBabbler;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
@@ -44,7 +45,6 @@ import clegoues.genprog4java.mut.holes.java.StatementHole;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.WeightedAtom;
-import clegoues.javaASTProcessor.main.TreeBabbler;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.ConfigurationBuilder.LexicalCast;
 
