@@ -49,6 +49,7 @@ import java.util.Random;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 
+import clegoues.genprog4java.java.ClassInfo;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
 

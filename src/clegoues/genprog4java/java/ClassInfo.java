@@ -1,7 +1,6 @@
-package clegoues.genprog4java.main;
+package clegoues.genprog4java.java;
 
 import java.io.File;
-
 
 public class ClassInfo implements Comparable<ClassInfo> {
 	private String className;
