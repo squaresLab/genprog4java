@@ -3,14 +3,17 @@ package clegoues.genprog4java.localization;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 import clegoues.util.ConfigurationBuilder;
+import clegoues.util.GlobalUtils;
 import codemining.lm.tsg.samplers.CollapsedGibbsSampler;
 import codemining.util.serialization.ISerializationStrategy.SerializationException;
 import codemining.util.serialization.Serializer;
@@ -54,5 +57,12 @@ public class EntropyLocalization extends DefaultLocalization {
 	@Override
 	public void reduceSearchSpace() {
 		// Does nothing, at least for now.
+	}
+	
+	@Override
+	public Location getRandomLocation(double weight) {
+		Location startingStmt = (Location) GlobalUtils.chooseOneWeighted(new ArrayList(this.getFaultLocalization()));
+		
+		return startingStmt;
 	}
 }
