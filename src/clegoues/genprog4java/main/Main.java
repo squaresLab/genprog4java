@@ -94,7 +94,7 @@ public class Main {
 			workDir.mkdir();
 		logger.info("Configuration file loaded");
 
-		fitnessEngine = new Fitness<JavaEditOperation>(); // Fitness must be created before rep!
+		fitnessEngine = new Fitness(); // Fitness must be created before rep!
 		baseRep = (Representation) new JavaRepresentation();
 		baseRep.load(Configuration.targetClassNames);
 

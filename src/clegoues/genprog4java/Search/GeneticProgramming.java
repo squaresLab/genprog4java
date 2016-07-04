@@ -9,7 +9,7 @@ import clegoues.genprog4java.rep.Representation;
 public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 	private int generationsRun = 0;
 
-	public GeneticProgramming(Fitness<G> engine) {
+	public GeneticProgramming(Fitness engine) {
 		super(engine);
 	}
 
