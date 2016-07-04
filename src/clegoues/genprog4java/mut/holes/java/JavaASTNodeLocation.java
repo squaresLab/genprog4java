@@ -8,6 +8,10 @@ public class JavaASTNodeLocation extends JavaLocation<ASTNode> {
 		super(location, weight);
 	}
 
+
+	public JavaASTNodeLocation(ASTNode location) {
+		super(location, 1.0);
+	}
 	@Override
 	public int getId() {
 		return 0; // FIXME halp
