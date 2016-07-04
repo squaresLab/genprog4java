@@ -759,6 +759,7 @@ if B include return statement
 		}
 		return parent;
 	}
+	
 	public boolean isLikelyAConstructor() {
 		ASTNode enclosingMethod = this.getEnclosingMethod();
 		return (enclosingMethod != null) && (enclosingMethod instanceof MethodDeclaration) && 
