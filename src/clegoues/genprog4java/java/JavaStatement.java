@@ -76,6 +76,8 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import clegoues.genprog4java.main.ClassInfo;
@@ -705,6 +707,7 @@ if B include return statement
 		ASTNode faultyNode = this.getASTNode();
 		ASTNode parent = faultyNode.getParent();
 		//Heuristic: If it is the body of an if, while, or for, it should not be removed
+	
 		if(faultyNode instanceof Block){
 			//this boolean states if the faultyNode is the body of an IfStatement
 			if (parent instanceof IfStatement
@@ -741,6 +744,7 @@ if B include return statement
 				return false;
 			}
 		}
+
 		return true;
 	}
 

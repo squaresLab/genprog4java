@@ -78,13 +78,8 @@ Representation<G> {
 		.withHelp( "do not include positive tests if they fail sanity" )
 		.inGroup( "CachingRepresentation Parameters" )
 		.build();
-	public static boolean justTestingFaultLoc = ConfigurationBuilder.of( BOOL_ARG )
-			.withVarName( "justTestingFaultLoc" )
-			.withDefault( "false" )
-			.withHelp( "boolean to be turned true if the purpose is to test that fault loc is performed correctly" )
-			.inGroup( "CachingRepresentation Parameters" )
-			.build();
-	public static String sanityFilename = "repair.sanity";
+
+	static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
 
 	// persistent test cache
