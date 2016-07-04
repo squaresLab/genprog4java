@@ -248,7 +248,7 @@ public abstract class Search<G extends EditOperation> {
 			//promut default is 1 // promut stands for proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
 			for (int i = 0; i < Search.promut; i++) {
 				//chooses a random location
-				Pair<?, Double> wa = null;
+				Location wa = null;
 				boolean alreadyOnList = false;
 				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
 				if(proMutList.size()>=faultyAtoms.size()){ 
@@ -256,12 +256,12 @@ public abstract class Search<G extends EditOperation> {
 				//only adds the random atom if it is different from the others already added
 				do {
 					//chooses a random faulty atom from the subset of faulty atoms
-					wa = GlobalUtils.chooseOneWeighted(new ArrayList(faultyAtoms));
+					wa = localization.getNextLocation(); 
 					// insert a check to see if this location has any valid mutations?  If not, look again
 					// if not, somehow tell the variant to remove that location from the list of faulty atoms
 					alreadyOnList = proMutList.contains(wa);
 				} while(alreadyOnList);
-				proMutList.add((Location)wa);
+				proMutList.add(wa);
 			}
 			for (Location location : proMutList) {
 				TreeSet<Pair<Mutation, Double>> availableMutations = variant.availableMutations(location);
@@ -278,7 +278,6 @@ public abstract class Search<G extends EditOperation> {
 				WeightedHole selected = (WeightedHole) GlobalUtils
 						.chooseOneWeighted(new ArrayList(allowed));
 				variant.performEdit(mut, location, selected.getHole());
-
 			}
 		}
 	}

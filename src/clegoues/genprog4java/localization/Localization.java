@@ -33,6 +33,8 @@ public abstract class Localization {
 	
 	public abstract ArrayList<Location> getFaultLocalization();
 	public abstract void reduceSearchSpace() throws GiveUpException;
+	public abstract Location getNextLocation();
+	
 	public abstract ArrayList<WeightedAtom> getFixSourceAtoms();
 	public abstract void setAllPossibleStmtsToFixLocalization();
 
