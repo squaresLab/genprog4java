@@ -44,16 +44,11 @@ import javax.tools.SimpleJavaFileObject;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import clegoues.genprog4java.main.ClassInfo;
 import clegoues.util.Pair;
 
 public class ASTUtils {
 
-	public static int getLineNumber(ASTNode node) { // FIXME: I think we should
-													// be able to just get this
-													// from the CU saved in
-													// javarepresentation,
-													// right?
+	public static int getLineNumber(ASTNode node) { 
 		ASTNode root = node.getRoot();
 		int lineno = -1;
 		if (root instanceof CompilationUnit) {

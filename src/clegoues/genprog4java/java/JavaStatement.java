@@ -80,7 +80,6 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.rep.WeightedAtom;
 
@@ -809,7 +808,6 @@ if B include return statement
 		this.setTypes(ASTUtils.getTypes(node));
 		this.setRequiredNames(ASTUtils.getScope(node));
 		this.setASTNode(node);
-
 	}
 
 

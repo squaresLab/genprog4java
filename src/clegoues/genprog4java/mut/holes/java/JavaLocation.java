@@ -2,8 +2,8 @@ package clegoues.genprog4java.mut.holes.java;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import clegoues.genprog4java.java.ClassInfo;
 import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.Location;
 
 public class JavaLocation extends Location<JavaStatement> {
