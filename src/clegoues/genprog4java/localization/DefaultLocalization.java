@@ -1,6 +1,7 @@
 package clegoues.genprog4java.localization;
 
 import static clegoues.util.ConfigurationBuilder.BOOLEAN;
+import static clegoues.util.ConfigurationBuilder.BOOL_ARG;
 import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
@@ -54,45 +55,51 @@ public class DefaultLocalization extends Localization {
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
 
+	public static boolean justTestingFaultLoc = ConfigurationBuilder.of( BOOL_ARG )
+			.withVarName( "justTestingFaultLoc" )
+			.withDefault( "false" )
+			.withHelp( "boolean to be turned true if the purpose is to test that fault loc is performed correctly" )
+			.inGroup( "DefaultLocalization Parameters" )
+			.build();
 	//private static double positivePathWeight = 0.1;
 	private static double positivePathWeight = ConfigurationBuilder.of( DOUBLE )
 			.withVarName( "positivePathWeight" )
 			.withDefault( "0.1" )
 			.withHelp( "weighting for statements on the positive path" )
-			.inGroup( "FaultLocRepresentation Parameters" )
+			.inGroup( "DefaultLocalization Parameters" )
 			.build();
 	//private static double negativePathWeight = 1.0;
 	private static double negativePathWeight = ConfigurationBuilder.of( DOUBLE )
 			.withVarName( "negativePathWeight" )
 			.withDefault( "1.0" )
 			.withHelp( "weighting for statements on the negative path" )
-			.inGroup( "FaultLocRepresentation Parameters" )
+			.inGroup( "DefaultLocalization Parameters" )
 			.build();
 	//protected static boolean allowCoverageFail = false;
 	protected static boolean allowCoverageFail = ConfigurationBuilder.of( BOOLEAN )
 			.withVarName( "allowCoverageFail" )
 			.withHelp( "ignore unexpected test results in coverage" )
-			.inGroup( "FaultLocRepresentation Parameters" )
+			.inGroup( "DefaultLocalization Parameters" )
 			.build();
 	//protected static String posCoverageFile = "coverage.path.pos";
 	protected static String posCoverageFile = ConfigurationBuilder.of( STRING )
 			.withVarName( "posCoverageFile" )
 			.withDefault( "coverage.path.pos" )
 			.withHelp( "file containing the statements covered by positive tests" )
-			.inGroup( "FaultLocRepresentation Parameters" )
+			.inGroup( "DefaultLocalization Parameters" )
 			.build();
 	//protected static String negCoverageFile = "coverage.path.neg";
 	protected static String negCoverageFile = ConfigurationBuilder.of( STRING )
 			.withVarName( "negCoverageFile" )
 			.withDefault( "coverage.path.neg" )
 			.withHelp( "file containing the statements covered by negative tests" )
-			.inGroup( "FaultLocRepresentation Parameters" )
+			.inGroup( "DefaultLocalization Parameters" )
 			.build();
 	//protected static boolean regenPaths = false;
 	protected static boolean regenPaths = ConfigurationBuilder.of( BOOLEAN )
 			.withVarName( "regenPaths" )
 			.withHelp( "regenerate coverage information" )
-			.inGroup( "FaultLocRepresentation Parameters" )
+			.inGroup( "DefaultLocalization Parameters" )
 			.build();
 
 	private Representation original = null;
@@ -100,8 +107,14 @@ public class DefaultLocalization extends Localization {
 	protected ArrayList<Location> faultLocalization = new ArrayList<Location>();
 	protected ArrayList<WeightedAtom> fixLocalization = new ArrayList<WeightedAtom>();
 
-	public DefaultLocalization(Representation orig) {
+	public DefaultLocalization(Representation orig) throws IOException, UnexpectedCoverageResultException {
 		this.original = orig;
+		this.computeLocalization();
+
+		if(justTestingFaultLoc == true){
+			logger.info("Fault localization was peprformed successfully");
+			System.exit(0);
+		}
 	}
 
 
