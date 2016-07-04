@@ -17,24 +17,44 @@ import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
+import clegoues.util.ConfigurationBuilder.LexicalCast;
+import codemining.ast.TreeNode;
+import codemining.lm.tsg.FormattedTSGrammar;
+import codemining.lm.tsg.TSGNode;
 import codemining.lm.tsg.samplers.CollapsedGibbsSampler;
 import codemining.util.serialization.ISerializationStrategy.SerializationException;
 import codemining.util.serialization.Serializer;
 
 public class EntropyLocalization extends DefaultLocalization {
-	protected Logger logger = Logger.getLogger(EntropyLocalization.class);
+	protected static Logger logger = Logger.getLogger(EntropyLocalization.class);
 
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
 
-	public static String languageModel = ConfigurationBuilder.of ( STRING )
-			.withVarName("languageModel")
-			.withDefault("/Users/clegoues/research/lm-repair/tsg.ser")
-			.withHelp("File with serialized language model")
-			.inGroup( "EntropyLocalization Parameters" )
+	public static TreeBabbler babbler = ConfigurationBuilder.of(
+			new LexicalCast< TreeBabbler >() {
+				public TreeBabbler parse(String value) {
+					if ( value.equals( "" ) )
+						return null;
+					try {
+						FormattedTSGrammar grammar =
+							(FormattedTSGrammar) Serializer.getSerializer().deserializeFrom( value );
+						return new TreeBabbler( grammar );
+					} catch (SerializationException e) {
+						logger.error( e.getMessage() );
+						return null;
+					}
+				}
+			}
+		)
+			.inGroup( "Entropy Parameters" )
+			.withFlag( "grammar" )
+			.withVarName( "babbler" )
+			.withDefault( "" )
+			.withHelp( "grammar to use for babbling repairs" )
 			.build();
 
-	private CollapsedGibbsSampler sampler;
+
 
 	public EntropyLocalization(Representation orig) throws IOException, UnexpectedCoverageResultException {
 		super(orig);
@@ -48,12 +68,6 @@ public class EntropyLocalization extends DefaultLocalization {
 		for (Integer i : negativePath) {
 			faultLocalization.add(original.instantiateLocation(i, 1.0));
 		}
-		try {
-			sampler = (CollapsedGibbsSampler) Serializer.getSerializer()
-					.deserializeFrom(EntropyLocalization.languageModel);
-		} catch (SerializationException e) {
-			throw new UnexpectedCoverageResultException("Failure in deserialization in EntropyLocalization, giving up.");
-		}
 	}
 
 	@Override
@@ -65,6 +79,7 @@ public class EntropyLocalization extends DefaultLocalization {
 	public Location getRandomLocation(double weight) {
 		JavaLocation startingStmt = (JavaLocation) GlobalUtils.chooseOneWeighted(new ArrayList(this.getFaultLocalization()), weight);
 		ASTNode actualCode = startingStmt.getCodeElement();
+		TreeNode< TSGNode > asTlm = babbler.eclipseToTreeLm(actualCode);
 		return startingStmt;
 	}
 	

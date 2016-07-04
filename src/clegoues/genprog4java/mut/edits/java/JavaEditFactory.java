@@ -30,6 +30,7 @@ import codemining.lm.tsg.TSGrammar;
 import codemining.util.serialization.ISerializationStrategy.SerializationException;
 import codemining.util.serialization.Serializer;
 import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.localization.EntropyLocalization;
 import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.localization.TreeBabbler;
 import clegoues.genprog4java.mut.EditHole;
@@ -60,28 +61,6 @@ public class JavaEditFactory {
 	public static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
 	
-	private static TreeBabbler babbler = ConfigurationBuilder.of(
-		new LexicalCast< TreeBabbler >() {
-			public TreeBabbler parse(String value) {
-				if ( value.equals( "" ) )
-					return null;
-				try {
-					FormattedTSGrammar grammar =
-						(FormattedTSGrammar) Serializer.getSerializer().deserializeFrom( value );
-					return new TreeBabbler( grammar );
-				} catch (SerializationException e) {
-					logger.error( e.getMessage() );
-					return null;
-				}
-			}
-		}
-	)
-		.inGroup( "Search Parameters" )
-		.withFlag( "grammar" )
-		.withVarName( "babbler" )
-		.withDefault( "" )
-		.withHelp( "grammar to use for babbling repairs" )
-		.build();
 
 	public JavaEditOperation makeEdit(Mutation edit, Location dst, EditHole sources) {
 		switch(edit) {
@@ -347,8 +326,9 @@ public class JavaEditFactory {
 			logger.fatal("Unhandled template type in editSources!  Fix code in JavaEditFactory to do this properly.");
 			return null;
 		case BABBLED:
-			retVal.add( new ASTNodeHole(
-				babbler.babbleFrom( locationStmt.getASTNode() )
+			retVal.add( new ASTNodeHole( // FIXME: this whole static babbler thing is not gonna fly in the long run
+					// but let's deal with it for now
+				EntropyLocalization.babbler.babbleFrom( locationStmt.getASTNode() )
 			) );
 			break;
 		}

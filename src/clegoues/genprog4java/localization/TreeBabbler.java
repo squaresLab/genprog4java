@@ -35,7 +35,7 @@ public class TreeBabbler {
 		return result;
 	}
 	
-	private TreeNode< TSGNode > eclipseToTreeLm( ASTNode node ) {
+	public TreeNode< TSGNode > eclipseToTreeLm( ASTNode node ) {
 		TreeNode< Integer > intTree = extractor.getTree( node );
 		return TreeNode.create(
 			new TSGNode( intTree.getData() ), intTree.nProperties()
