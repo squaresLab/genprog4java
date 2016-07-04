@@ -117,6 +117,7 @@ import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
+import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.mut.edits.java.JavaEditFactory;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
@@ -668,12 +669,11 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	@Override
 	public void reduceSearchSpace() throws GiveUpException {
-		//Reduce Fault space
 		boolean thereIsAtLeastOneMutThatApplies;
 		ArrayList<Location> locsToRemove = new ArrayList<Location>();
 		for (Location potentiallyBuggyLoc : faultLocalization) {
 			thereIsAtLeastOneMutThatApplies = false;
-			TreeSet<Pair<Mutation, Double>> availableMutations = availableMutations(potentiallyBuggyLoc);
+			Set<WeightedMutation> availableMutations = availableMutations(potentiallyBuggyLoc);
 			if(availableMutations.isEmpty()){
 				locsToRemove.add(potentiallyBuggyLoc);
 			}else{
@@ -719,6 +719,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			}
 
 			//Heuristic: Don't assign a value to a final variable
+			// FIXME: this isn't quite working presently, fix?
 			if (fixASTNode instanceof ExpressionStatement) {
 				if(semanticInfo.expPossibleFinalAssignment((ExpressionStatement) fixASTNode)) {
 					toRemove.add(potentialFixAtom);
@@ -769,9 +770,9 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public TreeSet<WeightedHole> editSources(Location location, Mutation editType) {
-		TreeSet<EditHole> holes = editFactory.editSources(this,location,editType);
-		TreeSet<WeightedHole> retVal = new TreeSet<WeightedHole>();
+	public List<WeightedHole> editSources(Location location, Mutation editType) {
+		List<EditHole> holes = editFactory.editSources(this,location,editType);
+		List<WeightedHole> retVal = new ArrayList<WeightedHole>();
 		for(EditHole hole : holes) {
 			// possible FIXME for later: weighting options equally for the time being.  One day
 			// maybe we'll do something smarter...

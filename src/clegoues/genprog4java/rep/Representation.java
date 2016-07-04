@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
@@ -57,6 +58,7 @@ import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
+import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.mut.holes.java.StatementHole;
 import clegoues.util.Pair;
 
@@ -206,7 +208,7 @@ Comparable<Representation<G>> {
 
 	public abstract void reduceSearchSpace() throws GiveUpException; 
 
-	public abstract TreeSet<Pair<Mutation, Double>> availableMutations(
+	public abstract Set<WeightedMutation> availableMutations(
 			Location faultyLocation);
 
 
@@ -240,7 +242,7 @@ Comparable<Representation<G>> {
 		return allLines;
 	}
 
-	public abstract TreeSet<WeightedHole> editSources(Location stmtId, Mutation editType);
+	public abstract List<WeightedHole> editSources(Location stmtId, Mutation editType);
 
 	public abstract Boolean doesEditApply(Location location, Mutation editType);
 

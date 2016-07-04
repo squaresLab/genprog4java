@@ -34,7 +34,7 @@
 package clegoues.util;
 
 
-public class Pair<A extends Comparable<A>,B extends Comparable<B>> implements Comparable<Pair<A,B>> {
+public class Pair<A,B> {
 	private A one;
 	private B two;
 	public Pair() {
@@ -50,10 +50,12 @@ public class Pair<A extends Comparable<A>,B extends Comparable<B>> implements Co
 	public void setSecond(B second) { this.two = second; }
 	
 	@Override
-	public int compareTo(Pair<A, B> o) {
-		if(this.getFirst().compareTo(o.getFirst()) != 0) {
-			return this.getFirst().compareTo(o.getFirst());
+	public boolean equals(Object other) {
+		if(other instanceof Pair) {
+			Pair casted = (Pair) other;
+			return casted.getFirst().equals(this.getFirst()) &&
+					casted.getSecond().equals(this.getSecond());
 		}
-		return this.getSecond().compareTo(o.getSecond());
+		return false;
 	}
 }

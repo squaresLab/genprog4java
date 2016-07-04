@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
@@ -64,6 +65,7 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
 import clegoues.util.Pair;
@@ -263,11 +265,12 @@ CachingRepresentation<G> {
 		return this.fixLocalization;
 	}
 
-	public TreeSet<Pair<Mutation, Double>> availableMutations(Location atomId) {
-		TreeSet<Pair<Mutation, Double>> retVal = new TreeSet<Pair<Mutation, Double>>();
+	@Override
+	public Set<WeightedMutation> availableMutations(Location atomId) {
+		Set<WeightedMutation> retVal = new TreeSet<WeightedMutation>();
 		for (Map.Entry mutation : Search.availableMutations.entrySet()) {
 			if(this.doesEditApply(atomId, (Mutation) mutation.getKey())) {
-				retVal.add(new Pair<Mutation,Double>((Mutation) mutation.getKey(), (Double) mutation.getValue()));
+				retVal.add(new WeightedMutation((Mutation) mutation.getKey(), (Double) mutation.getValue()));
 			}
 		}
 		return retVal;

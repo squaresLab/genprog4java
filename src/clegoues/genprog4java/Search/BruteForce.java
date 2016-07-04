@@ -1,9 +1,12 @@
 package clegoues.genprog4java.Search;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import clegoues.genprog4java.fitness.Fitness;
@@ -12,6 +15,7 @@ import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
+import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.util.Pair;
@@ -50,9 +54,9 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 		}
 		return retVal;
 	}
-	private TreeSet<WeightedHole> rescaleAtomPairs(TreeSet<WeightedHole> items) {
+	private List<WeightedHole> rescaleAtomPairs(List<WeightedHole> items) {
 		double fullSum = 0.0;
-		TreeSet<WeightedHole> retVal = new TreeSet<WeightedHole>();
+		List<WeightedHole> retVal = new ArrayList<WeightedHole>();
 		for (WeightedHole item : items) {
 			fullSum += item.getWeight();
 		}
@@ -115,9 +119,9 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 			};
 			// wouldn't real polymorphism be the actual legitimate best right
 			// here?
-			TreeSet<Pair<Mutation, Double>> availableMutations = original
+			Set<WeightedMutation> availableMutations = original
 					.availableMutations(faultyLocation);
-			TreeSet<Pair<Mutation, Double>> rescaledMutations = new TreeSet<Pair<Mutation, Double>>(
+			TreeSet<WeightedMutation> rescaledMutations = new TreeSet<WeightedMutation>(
 					descendingMutations);
 			double sumMutScale = 0.0;
 			for (Pair<Mutation, Double> item : availableMutations) {
@@ -125,7 +129,7 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 			}
 			double mutScale = 1 / sumMutScale;
 			for (Pair<Mutation, Double> item : availableMutations) {
-				rescaledMutations.add(new Pair<Mutation, Double>(item
+				rescaledMutations.add(new WeightedMutation(item
 						.getFirst(), item.getSecond() * mutScale));
 			}
 
@@ -154,8 +158,7 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 					break;
 				case APPEND:
 				case REPLACE:
-					TreeSet<EditHole> sources1 = new TreeSet<EditHole>();
-					// FIXME: HACK: fix this hard-coding of the hole name, and below, too
+					List<EditHole> sources1 = new ArrayList<EditHole>();
 					for(WeightedHole hole : this.rescaleAtomPairs(original
 							.editSources(faultyLocation, mut))) {
 						sources1.add(hole.getHole());
