@@ -5,6 +5,7 @@ import static clegoues.util.ConfigurationBuilder.STRING;
 import java.util.Properties;
 
 import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;

@@ -3,6 +3,7 @@ package clegoues.genprog4java.Search;
 import static clegoues.util.ConfigurationBuilder.INT;
 
 import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
@@ -28,7 +29,7 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 	@Override
 	protected Population<G> initialize(Representation<G> original, Population<G> incomingPopulation)
 			throws RepairFoundException, GiveUpException {
-		original.reduceSearchSpace();
+		original.getLocalization().reduceSearchSpace();
 		return null;
 	}
 

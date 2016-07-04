@@ -86,12 +86,7 @@ public class Configuration {
 		.withDefault( "1.6" )
 		.withHelp( "Java version of the generated classes" )
 		.build();
-	//public static String globalExtension = ".java";
-	public static String globalExtension = ConfigurationBuilder.of( STRING )
-		.withVarName( "globalExtension" )
-		.withDefault( ".java" )
-		.withHelp( "source file extension" )
-		.build();
+
 	//public static ArrayList<ClassInfo> targetClassNames = new ArrayList<ClassInfo>();
 	public static ArrayList<ClassInfo> targetClassNames =
 		new ConfigurationBuilder< ArrayList< ClassInfo > >()

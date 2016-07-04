@@ -1,6 +1,7 @@
 package clegoues.genprog4java.Search;
 
 import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
@@ -29,7 +30,8 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 	 */
 	protected Population<G> initialize(Representation<G> original,
 			Population<G> incomingPopulation) throws RepairFoundException, GiveUpException {
-		original.reduceSearchSpace();
+		Localization localization = original.getLocalization();
+		localization.reduceSearchSpace();
 
 		Population<G> initialPopulation = incomingPopulation;
 
@@ -88,6 +90,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		 */
 		logger.info("search: genetic algorithm begins\n");
 
+		Localization localization = original.getLocalization();
 		assert (Search.generations >= 0);
 		Population<G> incomingPopulation = this.initialize(original,
 				initialPopulation);
