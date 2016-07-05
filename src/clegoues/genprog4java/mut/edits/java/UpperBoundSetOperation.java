@@ -38,7 +38,7 @@ public class UpperBoundSetOperation extends JavaEditOperation {
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> arrays = thisHole.getSubExps();
 
-		Block newnode = parent.getAST().newBlock();
+		Block newnode = rewriter.getAST().newBlock();
 
 
 		// for each of the array access instances
@@ -52,36 +52,36 @@ public class UpperBoundSetOperation extends JavaEditOperation {
 				arrayindex = arrayindex.replace("--", "");
 
 				// create if statement 
-				IfStatement stmt = parent.getAST().newIfStatement();
+				IfStatement stmt = rewriter.getAST().newIfStatement();
 
 				// with expression "index > arrayname.length" 
 				InfixExpression expression = null;
-				expression = parent.getAST().newInfixExpression();
-				expression.setLeftOperand(parent.getAST().newSimpleName(arrayindex));
+				expression = rewriter.getAST().newInfixExpression();
+				expression.setLeftOperand(rewriter.getAST().newSimpleName(arrayindex));
 				expression.setOperator(Operator.GREATER_EQUALS);
 
 				// and then part as "index = arrayname.length - 1"
-				SimpleName qualifier = parent.getAST().newSimpleName(((ArrayAccess)array).getArray().toString());
-				SimpleName name = parent.getAST().newSimpleName("length");
-				expression.setRightOperand(parent.getAST().newQualifiedName(qualifier, name));
+				SimpleName qualifier = rewriter.getAST().newSimpleName(((ArrayAccess)array).getArray().toString());
+				SimpleName name = rewriter.getAST().newSimpleName("length");
+				expression.setRightOperand(rewriter.getAST().newQualifiedName(qualifier, name));
 				stmt.setExpression(expression);
 
 				Assignment thenexpression = null;
-				thenexpression = parent.getAST().newAssignment();
-				thenexpression.setLeftHandSide(parent.getAST().newSimpleName(arrayindex));
+				thenexpression = rewriter.getAST().newAssignment();
+				thenexpression.setLeftHandSide(rewriter.getAST().newSimpleName(arrayindex));
 				thenexpression.setOperator(Assignment.Operator.ASSIGN);
 
 				InfixExpression setupperboundexpression = null;
-				setupperboundexpression = parent.getAST().newInfixExpression();
-				SimpleName qualifier1 = parent.getAST().newSimpleName(((ArrayAccess)array).getArray().toString());
-				SimpleName name1 = parent.getAST().newSimpleName("length");
-				setupperboundexpression.setLeftOperand(parent.getAST().newQualifiedName(qualifier1, name1));
+				setupperboundexpression = rewriter.getAST().newInfixExpression();
+				SimpleName qualifier1 = rewriter.getAST().newSimpleName(((ArrayAccess)array).getArray().toString());
+				SimpleName name1 = rewriter.getAST().newSimpleName("length");
+				setupperboundexpression.setLeftOperand(rewriter.getAST().newQualifiedName(qualifier1, name1));
 				setupperboundexpression.setOperator(Operator.MINUS);
-				setupperboundexpression.setRightOperand(parent.getAST().newNumberLiteral("1"));
+				setupperboundexpression.setRightOperand(rewriter.getAST().newNumberLiteral("1"));
 
 				thenexpression.setRightHandSide(setupperboundexpression);
 
-				ExpressionStatement thenstmt = parent.getAST().newExpressionStatement(thenexpression);
+				ExpressionStatement thenstmt = rewriter.getAST().newExpressionStatement(thenexpression);
 				stmt.setThenStatement(thenstmt);
 
 				// add if statement to newnode
@@ -89,7 +89,7 @@ public class UpperBoundSetOperation extends JavaEditOperation {
 			}
 			// append the existing content of parent node to newnode
 			ASTNode stmt = (Statement)parent;
-			stmt = ASTNode.copySubtree(parent.getAST(), stmt);
+			stmt = ASTNode.copySubtree(rewriter.getAST(), stmt);
 			newnode.statements().add(stmt);
 			rewriter.replace(parent, newnode, null);
 		}

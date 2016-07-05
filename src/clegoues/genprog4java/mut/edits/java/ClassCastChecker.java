@@ -37,7 +37,7 @@ public class ClassCastChecker extends JavaEditOperation {
 
 		Collections.reverse(expressionsFromThisParent);
 		//Create if before the error
-		IfStatement ifstmt = locationNode.getAST().newIfStatement();
+		IfStatement ifstmt = rewriter.getAST().newIfStatement();
 		Expression everythingInTheCondition = null; 
 
 		if(everythingInTheCondition instanceof Object) {
