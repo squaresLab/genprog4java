@@ -49,7 +49,6 @@ public class ParserRequestor extends FileASTRequestor
 	public void acceptAST(String sourceFilePath, CompilationUnit ast)
 	{
 		this.visitor.setCompilationUnit(ast);
-		this.visitor.init(sourceFilePath);
 		ast.accept(this.visitor);
 		super.acceptAST(sourceFilePath, ast);
 	}
