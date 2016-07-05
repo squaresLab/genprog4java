@@ -57,25 +57,32 @@ public class JavaParser
 	private LinkedList<ASTNode> stmts;
 	private SemanticInfoVisitor visitor;
 	private CompilationUnit compilationUnit;
-	private Set<String> fields;
 	private HashSet<Pair<String,String>> methodReturnType;
 	private HashMap<String,String> variableTypes;
-	private HashSet<String> finalVariables;
+	
+	private HashSet<String> availableTypes;
 
 	public JavaParser(ScopeInfo scopeList)
 	{
 		this.stmts = new LinkedList<ASTNode>();
 		this.methodReturnType = new HashSet<Pair<String,String>>();
-		this.finalVariables =  new HashSet<String>();
 		this.variableTypes = new HashMap<String,String>();
+		this.availableTypes = new HashSet<String>();
+		
 		this.visitor = new SemanticInfoVisitor();
+		
 		this.visitor.setNodeSet(this.stmts);		
 		this.visitor.setScopeList(scopeList);
 		this.visitor.setMethodReturnType(methodReturnType);
-		this.visitor.setFinalVariables(finalVariables);
 		this.visitor.setVariableType(variableTypes);
+		
+		this.visitor.setAvailableTypes(availableTypes);
 	}
 
+	public HashSet<String> getAvailableTypes() {
+		return this.availableTypes;
+	}
+	
 	public HashSet<Pair<String,String>> getMethodReturnTypeSet(){
 		return this.methodReturnType;
 	}
@@ -83,11 +90,6 @@ public class JavaParser
 	
 	public HashMap<String,String> getVariableDataTypes(){
 		return variableTypes;
-	}
-	
-	
-	public Set<String> getFinalVariableSet(){
-		return this.finalVariables;
 	}
 	
 	public LinkedList<ASTNode> getStatements()
@@ -99,7 +101,6 @@ public class JavaParser
 	{
 		return this.compilationUnit;
 	}
-
 	
 	public void parse(String file, String[] libs)
 	{
@@ -119,16 +120,8 @@ public class JavaParser
 		parser.createASTs(new String[]{file}, null, new String[0], req, null);
 		
 		this.compilationUnit = visitor.getCompilationUnit();
-		this.setFields(visitor.getFieldSet());
 		
 
 	}
 
-	public Set<String> getFields() {
-		return fields;
-	}
-
-	public void setFields(Set<String> fields) {
-		this.fields = fields;
-	}
 }

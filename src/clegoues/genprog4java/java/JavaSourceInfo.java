@@ -6,7 +6,6 @@ import java.util.HashMap;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import clegoues.genprog4java.main.ClassInfo;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class JavaSourceInfo {

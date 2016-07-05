@@ -34,19 +34,26 @@
 package clegoues.genprog4java.java;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
-// FIXME: grabbed from PAR
 public class ScopeInfo
 {
 	
 	private HashMap<ASTNode,Set<String>> stmtScope; // stuff that's IN SCOPE at the statement, not used at the statement
-	
+	private HashMap<ASTNode,Set<String>> requiredNames; 
+	private HashMap<ASTNode, Boolean> containsFinalVarAssignment;
 	public ScopeInfo()
 	{
 		this.stmtScope = new HashMap<ASTNode,Set<String>>();
+		this.requiredNames = new HashMap<ASTNode,Set<String>>();
+		this.containsFinalVarAssignment = new HashMap<ASTNode, Boolean>();
+	}
+	
+	public void addRequiredNames(ASTNode buggy, Set<String> names) {
+		this.requiredNames.put(buggy,names);
 	}
 	
 	public void addScope4Stmt(ASTNode buggy, Set<String> shown)
@@ -61,6 +68,12 @@ public class ScopeInfo
 		}
 	}
 	
+	public boolean getFinalVarInfo(ASTNode node) {
+		return containsFinalVarAssignment.get(node);
+	}
+	public void setContainsFinalVarDecl(ASTNode node, boolean status) {
+		containsFinalVarAssignment.put(node, status);
+	}
 	public boolean isScopeSafe(ASTNode buggy, Set<String> necessary)
 	{
 		boolean isSafe = true;
@@ -81,5 +94,10 @@ public class ScopeInfo
 	public Set<String> getScope(ASTNode buggy)
 	{
 		return this.stmtScope.get(buggy);
+	}
+	
+	public Set<String> getRequiredNames(ASTNode buggy)
+	{
+		return this.requiredNames.get(buggy);
 	}
 }

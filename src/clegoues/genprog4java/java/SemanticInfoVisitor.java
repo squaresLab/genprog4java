@@ -37,17 +37,33 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeSet;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -56,33 +72,277 @@ import clegoues.util.Pair;
 
 public class SemanticInfoVisitor extends ASTVisitor {
 
-	private String sourcePath;
-
 	private List<ASTNode> nodeSet;
 	private ScopeInfo scopes;
 
-	private HashSet<String> fieldName;
-	private HashSet<String> currentMethodScope;
+	private boolean containsFinalVar = false;
+	private Stack<Boolean> finalVarStack = new Stack<Boolean>();
+
+	private HashSet<String> requiredNames = new HashSet<String>();
+	private Stack<HashSet<String>> requiredNamesStack = new Stack<HashSet<String>>();
+
+	// it might make sense to store these separately, but for now, this will do
+	private HashSet<String> availableMethodsAndFields;
+
+	// FIXME: types on variables in different scopes? Types in general, really
+
+	private HashSet<String> currentMethodScope = new HashSet<String>();
+	private Stack<HashSet<String>> methodScopeStack = new Stack<HashSet<String>>();
+
 	private HashSet<Pair<String,String>> methodReturnType;
-	private HashSet<String> finalVariables;
 	private HashMap<String,String> variableType;
 
-	// unlike in the OCaml implementation, this only collects the statements and
-	// the semantic information. It doesn't number.
+	private HashSet<String> currentLoopScope = new HashSet<String>();
+	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>();
+
+	// declared or imported; primitive types are always available;
+	private HashSet<String> availableTypes; 
+
 	private CompilationUnit cu;
 
-	public void init(String p) {
-		this.sourcePath = p;
-	}
-
 	public SemanticInfoVisitor() {
-		this.fieldName = new HashSet<String>();
-		this.fieldName.add("this");
+		this.availableMethodsAndFields = new HashSet<String>();
+		this.availableMethodsAndFields.add("this");
 	}
 
-	public Set<String> getFieldSet() {
-		return this.fieldName;
+	public void setAvailableTypes(HashSet<String> typs) {
+		this.availableTypes = typs;
 	}
+
+	@Override
+	public void preVisit(ASTNode node) {
+		requiredNamesStack.push(requiredNames);
+		requiredNames = new HashSet<String>();
+
+		finalVarStack.push(containsFinalVar);
+		containsFinalVar = false;
+
+		if (JavaRepresentation.canRepair(node)) 
+		{
+			// add scope information
+			TreeSet<String> newScope = new TreeSet<String>();
+			newScope.addAll(this.currentMethodScope);
+			newScope.addAll(this.currentLoopScope);
+			newScope.addAll(this.availableMethodsAndFields);
+			newScope.addAll(this.availableTypes);
+			this.scopes.addScope4Stmt(node, newScope);
+			this.nodeSet.add(node);
+
+		}
+
+		if(node instanceof EnhancedForStatement || 
+				node instanceof ForStatement) {
+			loopScopeStack.push(currentLoopScope);
+			currentLoopScope = new HashSet<String>(currentLoopScope);
+		}
+
+		if(node instanceof Block || node instanceof MethodDeclaration) {
+			this.methodScopeStack.push(currentMethodScope);
+			currentMethodScope = new HashSet<String>(currentMethodScope);
+		}
+		super.preVisit(node);
+	}
+
+
+	@Override
+	public void postVisit(ASTNode node) {
+
+		// required names are known only after the node has been processed
+		HashSet<String> oldRequired = requiredNamesStack.pop();
+		if(node instanceof EnhancedForStatement || 
+				node instanceof ForStatement) {
+			requiredNames.removeAll(currentLoopScope);
+			currentLoopScope = loopScopeStack.pop(); 
+		}
+
+		if(node instanceof Block || node instanceof MethodDeclaration) {
+			HashSet<String> newLocalVariables = this.methodScopeStack.pop();
+			Set<String> toRemove =new HashSet<String>(this.currentMethodScope);
+			toRemove.removeAll(newLocalVariables);
+
+			requiredNames.removeAll(toRemove);
+
+			currentMethodScope = newLocalVariables;
+		}
+
+		if(JavaRepresentation.canRepair(node)) {
+			this.scopes.addRequiredNames(node,new HashSet<String>(this.requiredNames));
+			this.scopes.setContainsFinalVarDecl(node, containsFinalVar);
+		}
+
+
+		if (node instanceof Block) {
+			containsFinalVar = finalVarStack.pop();
+		} else {
+			containsFinalVar = containsFinalVar || finalVarStack.pop();
+		}
+		
+		requiredNames.addAll(oldRequired);
+
+		super.postVisit(node);
+	}
+
+	private IBinding getVarBinding(FieldAccess node) {
+		return node.resolveFieldBinding();
+	}
+
+	private IBinding getVarBinding(Name node) {
+		return node.resolveBinding();
+	}
+	private IBinding getVarBinding(SuperFieldAccess node) {
+		return node.resolveFieldBinding();
+	}
+
+	@Override
+	public boolean visit(Assignment node) {
+		Expression lhs = node.getLeftHandSide();
+		IBinding binding = null;
+		if(lhs instanceof FieldAccess) {
+			binding = getVarBinding((FieldAccess) lhs);
+		} else if (lhs instanceof Name) {
+			binding = getVarBinding((Name) lhs);
+		} else if (lhs instanceof SuperFieldAccess) {
+			binding = getVarBinding((SuperFieldAccess) lhs);
+		}
+		if(binding != null && binding instanceof IVariableBinding) {
+			IVariableBinding vb = (IVariableBinding) binding;
+			int modifiers = vb.getModifiers();
+			if(Modifier.isFinal(modifiers)) {
+				containsFinalVar = true;
+			}
+		}
+		return true;
+	}
+
+	private boolean anywhereInScope(String lookingFor) {
+		return (availableMethodsAndFields != null && availableMethodsAndFields.contains(lookingFor)) || 
+				(availableTypes != null && availableTypes.contains(lookingFor)) ||
+				(currentMethodScope != null && currentMethodScope.contains(lookingFor)) ||
+				(currentLoopScope != null && currentLoopScope.contains(lookingFor));
+	}
+
+	@Override
+	public boolean visit(SimpleName node) {
+
+		// if I were doing something smart with types, I'd probably want to do something
+		// to track in-scope method names at method invocations
+		// but I'm not yet so we'll make do
+		String name = node.getIdentifier();
+		this.requiredNames.add(name);
+		if(!anywhereInScope(name)) {
+			// because we're parsing, *if this CU parses*, we can assume it doesn't reference
+			// anything that's not in scope
+			// this means that if we haven't seen a name before, it's almost certainly the name of a method
+			// being invoked on an expression of a type that we *have* seen
+			// because it's annoying to actually figure out everything available to us by walking the loaded
+			// imports, we just add the SimpleName to the list of available names
+			// kind of a cheap trick, but whatever
+			// the one thing I'm not sure about is if I should add this to available types or...something else
+			this.availableTypes.add(name);
+		}
+		return true;
+	}
+
+	@Override
+	public boolean visit(EnhancedForStatement node) {
+		SingleVariableDeclaration vd = node.getParameter();
+		this.currentLoopScope.add(vd.getName().getIdentifier());
+		return true;
+	}
+
+	@Override
+	public boolean visit(ForStatement node) {
+		for(Object o : node.initializers()) {
+			List fragments = null;
+			if(o instanceof VariableDeclarationExpression) {
+				VariableDeclarationExpression vd = (VariableDeclarationExpression) o;
+				fragments = vd.fragments();
+			}
+			if(o instanceof VariableDeclarationStatement) {
+				VariableDeclarationStatement vd = (VariableDeclarationStatement) o;
+				fragments = vd.fragments();
+			}
+			for(Object f : fragments) {
+				VariableDeclarationFragment frag = (VariableDeclarationFragment) f;
+				this.currentLoopScope.add(frag.getName().getIdentifier());
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean visit(ImportDeclaration node) {
+		if(!node.isOnDemand() && !node.isStatic()) { // possible FIXME: handle all static stuff separately?
+			String name = node.getName().getFullyQualifiedName();
+			String[] split = name.split("\\.");
+			availableTypes.add(split[split.length - 1]);
+		}
+		return false;
+	}
+
+	@Override
+	public boolean visit(TypeDeclaration node) {
+		if(!node.isInterface()) {
+			availableTypes.add(node.getName().getIdentifier());
+			for(FieldDeclaration fd : node.getFields()) {
+				for (Object o : fd.fragments()) {
+					if (o instanceof VariableDeclarationFragment) {
+						VariableDeclarationFragment v = (VariableDeclarationFragment) o;
+						this.availableMethodsAndFields.add(v.getName().getIdentifier());
+					}
+				}
+			}
+
+			for(MethodDeclaration md : node.getMethods()) {
+				this.availableMethodsAndFields.add(md.getName().getIdentifier());
+			}
+			if(node.getSuperclassType() != null) {
+				this.availableMethodsAndFields.add("super");
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean visit(MethodDeclaration node) {
+
+		// FIXME: what happens if var args?
+		for (Object o : node.parameters()) {
+			if (o instanceof SingleVariableDeclaration) {
+				SingleVariableDeclaration v = (SingleVariableDeclaration) o;
+				this.currentMethodScope.add(v.getName().getIdentifier());
+			}
+		}
+		String returnType = node.getReturnType2()==null?"null":node.getReturnType2().toString();
+		this.methodReturnType.add(new Pair<String, String>(node.getName().toString(),returnType));
+
+		return true;
+	}
+
+	@Override
+	public boolean visit(VariableDeclarationStatement node) {
+		for (Object o : node.fragments()) {
+			if (o instanceof VariableDeclarationFragment) {
+				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
+				String name = v.getName().getIdentifier();
+				if(!currentLoopScope.contains(name)) {
+					this.currentMethodScope.add(v.getName().getIdentifier());
+					variableType.put(v.getName().toString(), node.getType().toString());
+				}
+			}
+		}
+		return true;
+	}
+
+	public CompilationUnit getCompilationUnit() {
+		return cu;
+	}
+
+	public void setCompilationUnit(CompilationUnit cu) {
+		this.cu = cu;
+	}
+
+
 	public void setNodeSet(List<ASTNode> o) {
 		this.nodeSet = o;
 	}
@@ -94,7 +354,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	public void setMethodReturnType(HashSet<Pair<String,String>> methodReturnTypeSet) {
 		this.methodReturnType = methodReturnTypeSet;
 	}
-	
+
 	public HashMap<String,String> getVariableType() {
 		return this.variableType;
 	}
@@ -102,15 +362,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	public void setVariableType(HashMap<String,String> variableTypeSet) {
 		this.variableType = variableTypeSet;
 	}
-	
-	public Set<String> getFinalVariables() {
-		return this.finalVariables;
-	}
-	
-	public void setFinalVariables(HashSet<String> finalVariables) {
-		this.finalVariables = finalVariables;
-	}
-	
+
 	public List<ASTNode> getNodeSet() {
 		return this.nodeSet;
 	}
@@ -119,111 +371,17 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.scopes = scopeList;
 	}
 
-	@Override
-	public boolean visit(FieldDeclaration node) {
-		for (Object o : node.fragments()) {
-			if (o instanceof VariableDeclarationFragment) {
-				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
-				this.fieldName.add(v.getName().getIdentifier());
-			}
-		}
-		return super.visit(node);
-	}
-
-	@Override
-	public boolean visit(MethodDeclaration node) {
-		this.currentMethodScope = new HashSet<String>();
-
-		if(node.isConstructor() || node.isVarargs()) return true; // ain't nobody got time for that
-		for (Object o : node.parameters()) {
-			if (o instanceof SingleVariableDeclaration) {
-				SingleVariableDeclaration v = (SingleVariableDeclaration) o;
-				this.currentMethodScope.add(v.getName().getIdentifier());
-			}
-		}
-		String returnType = node.getReturnType2()==null?"null":node.getReturnType2().toString();
-		this.methodReturnType.add(new Pair<String, String>(node.getName().toString(),returnType));
-		
-		return super.visit(node);
-	}
-
-	@Override
-	public boolean visit(Initializer node) {
-		List mods = node.modifiers();
-
-		for (Object o : mods) {
-			if (o instanceof Modifier) {
-				if (((Modifier) o).isStatic()) {
-					this.currentMethodScope = new HashSet<String>();
-				}
-			}
-		}
-
-		return super.visit(node);
-	}
-
-	
-	public boolean visit(SingleVariableDeclaration node){
-		
-		return super.visit(node);
-	}
-	
-	public boolean visit(Assignment node){
-		
-		return super.visit(node);
-	}
-
-	@Override
-	public void endVisit(Initializer node) {
-		super.endVisit(node);
-	}
-
-	@Override
-	public void endVisit(MethodDeclaration node) {
-		super.endVisit(node);
-	}
-
-	@Override
-	public boolean visit(VariableDeclarationStatement node) {
-		for (Object o : node.fragments()) {
-			if (o instanceof VariableDeclarationFragment) {
-				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
-				this.currentMethodScope.add(v.getName().getIdentifier());
-				variableType.put(v.getName().toString(), node.getType().toString());
-			}
-		}
-		
-		//if it is a final variable 
-		List modifiersOfTheVariableBeingDeclared = node.modifiers();
-		for(Object m : modifiersOfTheVariableBeingDeclared){
-			if(m instanceof Modifier && ((Modifier)m).getKeyword().toString().equals("final")){
-				VariableDeclarationFragment df = (VariableDeclarationFragment) node.fragments().get(0);
-				finalVariables.add(df.getName().getIdentifier());
-			}
-		}
-		
-		return super.visit(node);
-	}
-
-	public void preVisit(ASTNode node) {
-		if (JavaRepresentation.canRepair(node)) // FIXME: why is this necessary
-												// to not crash and die?
-		{
-			// add scope information
-			TreeSet<String> newScope = new TreeSet<String>();
-			newScope.addAll(this.currentMethodScope);
-			this.scopes.addScope4Stmt(node, newScope);
-			this.nodeSet.add(node);
-		}
-
-		super.preVisit(node);
-	}
-
-	public void setCompilationUnit(CompilationUnit ast) {
-		this.cu = ast;
-	}
-
-	public CompilationUnit getCompilationUnit() {
-		return this.cu;
-	}
+//	@Override
+//	public boolean visit(Initializer node) {
+//		List mods = node.modifiers(); // FIXME need to deal with static.
+//
+//		for (Object o : mods) {
+//			if (o instanceof Modifier) {
+//				if (((Modifier) o).isStatic()) {
+//					this.currentMethodScope = new HashSet<String>();
+//				}
+//			}
+//		}
+//		return super.visit(node);
+//	}
 }

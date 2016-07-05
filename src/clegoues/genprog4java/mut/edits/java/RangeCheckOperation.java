@@ -44,7 +44,7 @@ public class RangeCheckOperation extends JavaEditOperation {
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> arrays = thisHole.getSubExps();
 		
-		Block newNode = locationNode.getAST().newBlock(); 
+		Block newNode = rewriter.getAST().newBlock(); 
 
 		// if the parent is for statement then create a new for
 		// statement. this is special case
@@ -65,10 +65,10 @@ public class RangeCheckOperation extends JavaEditOperation {
 
 		// new if statement that will contain the range check
 		// expressions concatenated using AND
-		IfStatement rangechkstmt = parent.getAST().newIfStatement();
+		IfStatement rangechkstmt = rewriter.getAST().newIfStatement();
 
 		InfixExpression finalandexpression = null;
-		finalandexpression = parent.getAST().newInfixExpression();
+		finalandexpression = rewriter.getAST().newInfixExpression();
 		finalandexpression.setOperator(Operator.CONDITIONAL_AND);
 
 		// for each of the array access instances
@@ -84,33 +84,33 @@ public class RangeCheckOperation extends JavaEditOperation {
 				// create infix expression to check lowerbound and
 				// upperbound of array index
 				InfixExpression andexpression = null;
-				andexpression = parent.getAST().newInfixExpression();
+				andexpression = rewriter.getAST().newInfixExpression();
 				andexpression.setOperator(Operator.CONDITIONAL_AND);
 
 				// create infix expression to check lowerbound
 				InfixExpression checklboundexpression = null;
-				checklboundexpression = parent.getAST()
+				checklboundexpression = rewriter.getAST()
 						.newInfixExpression();
-				checklboundexpression.setLeftOperand(parent.getAST()
+				checklboundexpression.setLeftOperand(rewriter.getAST()
 						.newSimpleName(arrayindex));
 				checklboundexpression
 				.setOperator(Operator.GREATER_EQUALS);
-				checklboundexpression.setRightOperand(parent.getAST()
+				checklboundexpression.setRightOperand(rewriter.getAST()
 						.newNumberLiteral("0"));
 
 				// create infix expression to check upper bound
 				InfixExpression checkuboundexpression = null;
-				checkuboundexpression = parent.getAST()
+				checkuboundexpression = rewriter.getAST()
 						.newInfixExpression();
-				checkuboundexpression.setLeftOperand(parent.getAST()
+				checkuboundexpression.setLeftOperand(rewriter.getAST()
 						.newSimpleName(arrayindex));
 				checkuboundexpression.setOperator(Operator.LESS);
 
-				SimpleName uqualifier = parent.getAST().newSimpleName(
+				SimpleName uqualifier = rewriter.getAST().newSimpleName(
 						((ArrayAccess) array).getArray().toString());
-				SimpleName uname = parent.getAST().newSimpleName(
+				SimpleName uname = rewriter.getAST().newSimpleName(
 						"length");
-				checkuboundexpression.setRightOperand(parent.getAST()
+				checkuboundexpression.setRightOperand(rewriter.getAST()
 						.newQualifiedName(uqualifier, uname));
 
 				andexpression.setLeftOperand(checklboundexpression);
@@ -125,7 +125,7 @@ public class RangeCheckOperation extends JavaEditOperation {
 					// expressions
 					// into "finalandexpression"
 					InfixExpression tmpandexpression = null;
-					tmpandexpression = parent.getAST()
+					tmpandexpression = rewriter.getAST()
 							.newInfixExpression();
 					tmpandexpression
 					.setOperator(Operator.CONDITIONAL_AND);
@@ -143,14 +143,14 @@ public class RangeCheckOperation extends JavaEditOperation {
 				// contain return statement
 				rangechkstmt.setExpression(finalandexpression);
 				ASTNode stmt = (Statement) parent;
-				stmt = ASTNode.copySubtree(parent.getAST(), stmt);
+				stmt = ASTNode.copySubtree(rewriter.getAST(), stmt);
 				rangechkstmt.setThenStatement((Statement) stmt);
 				newNode.statements().add(rangechkstmt);
 			} else { // if parent node contains return statement
 
 				// create a prefix expression = NOT(finalandconditions)
 				PrefixExpression notfinalandexpression = null;
-				notfinalandexpression = parent.getAST()
+				notfinalandexpression = rewriter.getAST()
 						.newPrefixExpression();
 
 				ParenthesizedExpression parexp = null;
@@ -166,9 +166,9 @@ public class RangeCheckOperation extends JavaEditOperation {
 				// set the then part as return default. We shall have to
 				// declare RETURN_DEFAULT constant in the target
 				// program.
-				ReturnStatement rstmt = parent.getAST()
+				ReturnStatement rstmt = rewriter.getAST()
 						.newReturnStatement();
-				SimpleName defaultreturnvalue = parent.getAST()
+				SimpleName defaultreturnvalue = rewriter.getAST()
 						.newSimpleName("RETURN_DEFAULT");
 				rstmt.setExpression(defaultreturnvalue);
 				rangechkstmt.setThenStatement(rstmt);
@@ -177,7 +177,7 @@ public class RangeCheckOperation extends JavaEditOperation {
 				// the parent node to new node
 				newNode.statements().add(rangechkstmt);
 				ASTNode stmt = (Statement) parent;
-				stmt = ASTNode.copySubtree(parent.getAST(), stmt);
+				stmt = ASTNode.copySubtree(rewriter.getAST(), stmt);
 				newNode.statements().add(stmt);
 			}
 		} else { // if the parent node is of type ForStatement.
@@ -192,14 +192,14 @@ public class RangeCheckOperation extends JavaEditOperation {
 			// create infix expression to AND the range check
 			// expressions and for statement expressions
 			InfixExpression forexpression = null;
-			forexpression = parent.getAST().newInfixExpression();
+			forexpression = rewriter.getAST().newInfixExpression();
 			forexpression.setOperator(Operator.CONDITIONAL_AND);
 			forexpression.setLeftOperand(finalandexpression);
 			forexpression.setRightOperand(forexp);
 
 			// update the for statement expressions
 			newForStmt = (ForStatement) ASTNode.copySubtree(
-					parent.getAST(), newForStmt);
+					rewriter.getAST(), newForStmt);
 			newForStmt.setExpression(forexpression);
 		}
 
