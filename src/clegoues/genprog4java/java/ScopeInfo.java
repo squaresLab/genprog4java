@@ -53,7 +53,7 @@ public class ScopeInfo
 	}
 	
 	public void addRequiredNames(ASTNode buggy, Set<String> names) {
-		this.requiredNames.put(buggy, new HashSet<String>(names));
+		this.requiredNames.put(buggy,names);
 	}
 	
 	public void addScope4Stmt(ASTNode buggy, Set<String> shown)

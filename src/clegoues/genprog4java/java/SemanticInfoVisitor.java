@@ -73,13 +73,16 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	// it might make sense to store these separately, but for now, this will do
 	private HashSet<String> availableMethodsAndFields;
 
-	// FIXME: types on variables in different scopes?
+	// FIXME: types on variables in different scopes? Types in general, really
 
 	private HashSet<String> currentMethodScope;
 	private Stack<HashSet<String>> methodScopeStack;
 
 	private HashSet<Pair<String,String>> methodReturnType;
 	private HashMap<String,String> variableType;
+	
+	private HashSet<String> localVariables  = new HashSet<String>();
+	private Stack<HashSet<String>> localVariableStack  = new Stack<HashSet<String>>();
 
 	private HashSet<String> currentLoopScope = new HashSet<String>();
 	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>();
@@ -110,6 +113,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			newScope.addAll(this.currentMethodScope);
 			newScope.addAll(this.currentLoopScope);
 			newScope.addAll(this.availableMethodsAndFields);
+			newScope.addAll(this.availableTypes);
 			this.scopes.addScope4Stmt(node, newScope);
 			this.nodeSet.add(node);
 		}
@@ -123,6 +127,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		if(node instanceof Block) {
 			this.methodScopeStack.push(currentMethodScope);
 			currentMethodScope = new HashSet<String>(currentMethodScope);
+			this.localVariableStack.push(this.localVariables);
+			this.localVariables = new HashSet<String>(this.localVariables);
 		}
 		super.preVisit(node);
 	}
@@ -137,14 +143,18 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			requiredNames.removeAll(currentLoopScope);
 			currentLoopScope = loopScopeStack.pop(); 
 		}
-		if(JavaRepresentation.canRepair(node)) {
-			this.scopes.addRequiredNames(node,this.requiredNames);
-		}
-		requiredNames.addAll(oldRequired);
 
 		if(node instanceof Block) {
+			requiredNames.removeAll(localVariables);
+			localVariables = this.localVariableStack.pop(); 
 			currentMethodScope = this.methodScopeStack.pop();
 		}
+		if(JavaRepresentation.canRepair(node)) {
+			this.scopes.addRequiredNames(node,new HashSet<String>(this.requiredNames));
+		}
+		
+		requiredNames.addAll(oldRequired);
+
 		super.postVisit(node);
 	}
 
@@ -219,7 +229,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.currentMethodScope = new HashSet<String>();
 		this.methodScopeStack = new Stack<HashSet<String>>();
 
-		if(node.isConstructor() || node.isVarargs()) return true; // ain't nobody got time for that
+		// FIXME: what happens if var args?
 		for (Object o : node.parameters()) {
 			if (o instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration v = (SingleVariableDeclaration) o;
@@ -229,7 +239,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		String returnType = node.getReturnType2()==null?"null":node.getReturnType2().toString();
 		this.methodReturnType.add(new Pair<String, String>(node.getName().toString(),returnType));
 
-		return super.visit(node);
+		return true;
 	}
 
 	@Override
@@ -242,8 +252,10 @@ public class SemanticInfoVisitor extends ASTVisitor {
 					this.currentMethodScope.add(v.getName().getIdentifier());
 					variableType.put(v.getName().toString(), node.getType().toString());
 				}
+				this.localVariables.add(v.getName().toString());
 			}
 		}
+		
 		return true;
 	}
 
