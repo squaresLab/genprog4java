@@ -268,14 +268,30 @@ FaultLocRepresentation<JavaEditOperation> {
 				sourceInfo.storeStmtInfo(s, pair);
 
 				semanticInfo.addToScopeMap(s, scopeInfo.getScope(s.getASTNode()));
+				s.setRequiredNames(scopeInfo.getRequiredNames(s.getASTNode()));
+
+				Set<String> inScope = scopeInfo.getScope(s.getASTNode());
+				Set<String> required = scopeInfo.getRequiredNames(s.getASTNode());
 				System.err.println("Stmt id: " + stmtCounter + " node: " + node.toString());
 				System.err.println("in scope here:");
 				System.err.println("[[" + scopeInfo.getScope(s.getASTNode()) + "]]");
 				System.err.println("required:");
 				System.err.println(scopeInfo.getRequiredNames(s.getASTNode())); // FIXME: storing these in two places is silly, but one thing at a time.
-				s.setRequiredNames(scopeInfo.getRequiredNames(s.getASTNode()));
 				System.err.println("available types:");
 				System.err.println("[[" + myParser.getAvailableTypes() + "]]");
+				if (!inScope.containsAll(required)) {
+					for(String name : required) {
+						if(!inScope.contains(name)) {
+							System.err.println("Missing: " + name);
+						}
+					}
+			//		System.exit(0);
+				}
+//					System.err.println("UNEXPECTED:");
+//					System.err.println("REQUIRED: " + required);
+//					System.err.println("INSCOPE: " + inScope);
+//		
+
 			}
 		}				
 		//System.exit(0);
