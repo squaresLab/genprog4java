@@ -34,6 +34,7 @@
 package clegoues.genprog4java.java;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -42,10 +43,17 @@ public class ScopeInfo
 {
 	
 	private HashMap<ASTNode,Set<String>> stmtScope; // stuff that's IN SCOPE at the statement, not used at the statement
-	
+	private HashMap<ASTNode,Set<String>> requiredNames; 
+
 	public ScopeInfo()
 	{
 		this.stmtScope = new HashMap<ASTNode,Set<String>>();
+		this.requiredNames = new HashMap<ASTNode,Set<String>>();
+
+	}
+	
+	public void addRequiredNames(ASTNode buggy, Set<String> names) {
+		this.requiredNames.put(buggy, new HashSet<String>(names));
 	}
 	
 	public void addScope4Stmt(ASTNode buggy, Set<String> shown)
@@ -80,5 +88,10 @@ public class ScopeInfo
 	public Set<String> getScope(ASTNode buggy)
 	{
 		return this.stmtScope.get(buggy);
+	}
+	
+	public Set<String> getRequiredNames(ASTNode buggy)
+	{
+		return this.requiredNames.get(buggy);
 	}
 }
