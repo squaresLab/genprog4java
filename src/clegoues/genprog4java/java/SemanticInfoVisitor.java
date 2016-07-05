@@ -37,19 +37,23 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeSet;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -65,11 +69,16 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	// declared or imported; primitive types are always available;
 	
-	private HashSet<String> availableTypes = new HashSet<String>(); 
 	private HashSet<String> fieldName;
+	
 	private HashSet<String> currentMethodScope;
 	private HashSet<Pair<String,String>> methodReturnType;
 	private HashMap<String,String> variableType;
+
+	private HashSet<String> currentLoopScope = new HashSet<String>();
+	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>();
+	
+	private HashSet<String> availableTypes; 
 
 	// unlike in the OCaml implementation, this only collects the statements and
 	// the semantic information. It doesn't number.
@@ -88,6 +97,64 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.availableTypes = typs;
 	}
 
+	@Override
+	public void preVisit(ASTNode node) {
+		if (JavaRepresentation.canRepair(node)) 
+		{
+			// add scope information
+			TreeSet<String> newScope = new TreeSet<String>();
+			newScope.addAll(this.currentMethodScope);
+			newScope.addAll(this.currentLoopScope);
+			this.scopes.addScope4Stmt(node, newScope);
+			this.nodeSet.add(node);
+		}
+		
+		if(node instanceof EnhancedForStatement || 
+				node instanceof ForStatement) {
+			loopScopeStack.push(currentLoopScope);
+			currentLoopScope = new HashSet<String>(currentLoopScope);
+		}
+
+		super.preVisit(node);
+	}
+
+	@Override
+	public void postVisit(ASTNode node) {
+		
+		if(node instanceof EnhancedForStatement || 
+				node instanceof ForStatement) {
+			currentLoopScope = loopScopeStack.pop();
+		}
+
+		super.postVisit(node);
+	}
+	
+	@Override
+	public boolean visit(EnhancedForStatement node) {
+		SingleVariableDeclaration vd = node.getParameter();
+		this.currentLoopScope.add(vd.getName().getIdentifier());
+		return true;
+	}
+	
+	@Override
+	public boolean visit(ForStatement node) {
+		for(Object o : node.initializers()) {
+			List fragments = null;
+			if(o instanceof VariableDeclarationExpression) {
+				VariableDeclarationExpression vd = (VariableDeclarationExpression) o;
+				fragments = vd.fragments();
+			}
+			if(o instanceof VariableDeclarationStatement) {
+				VariableDeclarationStatement vd = (VariableDeclarationStatement) o;
+				fragments = vd.fragments();
+			}
+			for(Object f : fragments) {
+				VariableDeclarationFragment frag = (VariableDeclarationFragment) f;
+				this.currentLoopScope.add(frag.getName().getIdentifier());
+			}
+		}
+		return true;
+	}
 	@Override
 	public boolean visit(ImportDeclaration node) {
 		if(!node.isOnDemand() && !node.isStatic()) { // possible FIXME: handle all static stuff separately?
@@ -114,6 +181,22 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		return true;
 	}
 	
+	@Override
+	public boolean visit(MethodDeclaration node) {
+		this.currentMethodScope = new HashSet<String>();
+
+		if(node.isConstructor() || node.isVarargs()) return true; // ain't nobody got time for that
+		for (Object o : node.parameters()) {
+			if (o instanceof SingleVariableDeclaration) {
+				SingleVariableDeclaration v = (SingleVariableDeclaration) o;
+				this.currentMethodScope.add(v.getName().getIdentifier());
+			}
+		}
+		String returnType = node.getReturnType2()==null?"null":node.getReturnType2().toString();
+		this.methodReturnType.add(new Pair<String, String>(node.getName().toString(),returnType));
+		
+		return super.visit(node);
+	}
 
 	
 	public Set<String> getFieldSet() {
@@ -148,23 +231,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	}
 
 
-	@Override
-	public boolean visit(MethodDeclaration node) {
-		this.currentMethodScope = new HashSet<String>();
-
-		if(node.isConstructor() || node.isVarargs()) return true; // ain't nobody got time for that
-		for (Object o : node.parameters()) {
-			if (o instanceof SingleVariableDeclaration) {
-				SingleVariableDeclaration v = (SingleVariableDeclaration) o;
-				this.currentMethodScope.add(v.getName().getIdentifier());
-			}
-		}
-		String returnType = node.getReturnType2()==null?"null":node.getReturnType2().toString();
-		this.methodReturnType.add(new Pair<String, String>(node.getName().toString(),returnType));
-		
-		return super.visit(node);
-	}
-
+	
 	@Override
 	public boolean visit(Initializer node) {
 		List mods = node.modifiers();
@@ -214,19 +281,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		return super.visit(node);
 	}
 
-	public void preVisit(ASTNode node) {
-		if (JavaRepresentation.canRepair(node)) // FIXME: why is this necessary
-												// to not crash and die?
-		{
-			// add scope information
-			TreeSet<String> newScope = new TreeSet<String>();
-			newScope.addAll(this.currentMethodScope);
-			this.scopes.addScope4Stmt(node, newScope);
-			this.nodeSet.add(node);
-		}
-
-		super.preVisit(node);
-	}
 
 	public void setCompilationUnit(CompilationUnit ast) {
 		this.cu = ast;
