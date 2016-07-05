@@ -41,7 +41,7 @@ public class EntropyLocalization extends DefaultLocalization {
 						return null;
 					try {
 						FormattedTSGrammar grammar =
-							(FormattedTSGrammar) Serializer.getSerializer().deserializeFrom( value );
+								(FormattedTSGrammar) Serializer.getSerializer().deserializeFrom( value );
 						return new TreeBabbler( grammar );
 					} catch (SerializationException e) {
 						logger.error( e.getMessage() );
@@ -49,7 +49,7 @@ public class EntropyLocalization extends DefaultLocalization {
 					}
 				}
 			}
-		)
+			)
 			.inGroup( "Entropy Parameters" )
 			.withFlag( "grammar" )
 			.withVarName( "babbler" )
@@ -77,7 +77,7 @@ public class EntropyLocalization extends DefaultLocalization {
 	public void reduceSearchSpace() {
 		// Does nothing, at least for now.
 	}
-	
+
 	@Override
 	public Location getRandomLocation(double weight) {
 		JavaLocation startingStmt = (JavaLocation) GlobalUtils.chooseOneWeighted(new ArrayList(this.getFaultLocalization()), weight);
@@ -93,20 +93,20 @@ public class EntropyLocalization extends DefaultLocalization {
 			System.err.println(prob);
 			System.err.println("entropy:" + entropy);
 			System.err.println();
-			
+
 			if(prob > maxProb) {
 				maxProb = prob;
 				biggestSoFar = node;
 			}
 		}
-		
+
 		System.err.println("biggest found:");
 		System.err.println(biggestSoFar);
 		System.err.println(maxProb);
 
-		return new JavaASTNodeLocation(biggestSoFar);
+		return new JavaASTNodeLocation(biggestSoFar.getParent());
 	}
-	
+
 	@Override
 	public Location getNextLocation() throws GiveUpException {
 		Location ele = super.getNextLocation();
