@@ -46,14 +46,11 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -78,15 +75,12 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	// FIXME: types on variables in different scopes? Types in general, really
 
-	private HashSet<String> currentMethodScope;
-	private Stack<HashSet<String>> methodScopeStack;
+	private HashSet<String> currentMethodScope = new HashSet<String>();
+	private Stack<HashSet<String>> methodScopeStack = new Stack<HashSet<String>>();
 
 	private HashSet<Pair<String,String>> methodReturnType;
 	private HashMap<String,String> variableType;
 	
-	private HashSet<String> localVariables  = new HashSet<String>();
-	private Stack<HashSet<String>> localVariableStack  = new Stack<HashSet<String>>();
-
 	private HashSet<String> currentLoopScope = new HashSet<String>();
 	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>();
 
@@ -127,14 +121,18 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			currentLoopScope = new HashSet<String>(currentLoopScope);
 		}
 
-		if(node instanceof Block) {
+		if(node instanceof Block || node instanceof MethodDeclaration) {
 			this.methodScopeStack.push(currentMethodScope);
 			currentMethodScope = new HashSet<String>(currentMethodScope);
-			this.localVariableStack.push(this.localVariables);
-			this.localVariables = new HashSet<String>(this.localVariables);
 		}
 		super.preVisit(node);
 	}
+	
+	@Override
+	public boolean visit(Assignment node) {
+		return true;
+	}
+	
 
 	@Override
 	public void postVisit(ASTNode node) {
@@ -147,14 +145,14 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			currentLoopScope = loopScopeStack.pop(); 
 		}
 
-		if(node instanceof Block) {
-			Set<String> newLocalVariables = this.localVariableStack.pop();
-			Set<String> toRemove =new HashSet<String>(this.localVariables);
+		if(node instanceof Block || node instanceof MethodDeclaration) {
+			HashSet<String> newLocalVariables = this.methodScopeStack.pop();
+			Set<String> toRemove =new HashSet<String>(this.currentMethodScope);
 			toRemove.removeAll(newLocalVariables);
 
 			requiredNames.removeAll(toRemove);
 
-			currentMethodScope = this.methodScopeStack.pop();
+			currentMethodScope = newLocalVariables;
 		}
 		if(JavaRepresentation.canRepair(node)) {
 			this.scopes.addRequiredNames(node,new HashSet<String>(this.requiredNames));
@@ -169,8 +167,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		return (availableMethodsAndFields != null && availableMethodsAndFields.contains(lookingFor)) || 
 				(availableTypes != null && availableTypes.contains(lookingFor)) ||
 				(currentMethodScope != null && currentMethodScope.contains(lookingFor)) ||
-				(localVariables != null && localVariables.contains(lookingFor) ||
-				(currentLoopScope != null && currentLoopScope.contains(lookingFor)));
+				(currentLoopScope != null && currentLoopScope.contains(lookingFor));
 	}
 	
 	@Override
@@ -257,8 +254,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(MethodDeclaration node) {
-		this.currentMethodScope = new HashSet<String>();
-		this.methodScopeStack = new Stack<HashSet<String>>();
 
 		// FIXME: what happens if var args?
 		for (Object o : node.parameters()) {
@@ -283,7 +278,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 					this.currentMethodScope.add(v.getName().getIdentifier());
 					variableType.put(v.getName().toString(), node.getType().toString());
 				}
-				this.localVariables.add(v.getName().toString());
 			}
 		}
 		return true;
