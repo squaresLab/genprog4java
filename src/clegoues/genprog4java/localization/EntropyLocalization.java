@@ -103,6 +103,7 @@ public class EntropyLocalization extends DefaultLocalization {
 		System.err.println("biggest found:");
 		System.err.println(biggestSoFar);
 		System.err.println(maxProb);
+
 		return new JavaASTNodeLocation(biggestSoFar);
 	}
 	
