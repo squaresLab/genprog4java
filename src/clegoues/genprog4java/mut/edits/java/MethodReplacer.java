@@ -30,8 +30,8 @@ public class MethodReplacer extends JavaEditOperation {
 		ASTNode toReplace = thisHole.getCode();
 		IMethodBinding replaceWith = thisHole.getMethodInfo();
 
-		MethodInvocation newNode = locationNode.getAST().newMethodInvocation();
-		SimpleName newMethodName = locationNode.getAST().newSimpleName(replaceWith.getName());
+		MethodInvocation newNode = rewriter.getAST().newMethodInvocation();
+		SimpleName newMethodName = rewriter.getAST().newSimpleName(replaceWith.getName());
 		newNode.setName(newMethodName);
 		
 		List<ASTNode> paramNodes = ((MethodInvocation) toReplace).arguments();

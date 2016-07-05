@@ -99,7 +99,7 @@ import clegoues.genprog4java.java.JavaSourceInfo;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.java.ScopeInfo;
 import clegoues.genprog4java.localization.Localization;
-import clegoues.genprog4java.main.ClassInfo;
+import clegoues.genprog4java.java.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
@@ -159,6 +159,44 @@ CachingRepresentation<JavaEditOperation> {
 	}
 
 
+	static int dumpCount = 0;
+	private void dumpStmts() {
+		BufferedWriter bw;
+		try {
+			bw = new BufferedWriter(new FileWriter("/Users/clegoues/Desktop/stmtinfo" + dumpCount + ".txt"));
+	
+		dumpCount++;
+		HashMap<Integer,JavaStatement> base = sourceInfo.getBase();
+		HashMap<Integer, JavaStatement> codeBank = sourceInfo.getCodeBank();
+		
+		bw.write("::BASE::\n");
+		for(Map.Entry<Integer,JavaStatement> s : base.entrySet()) {
+			JavaStatement node = s.getValue();
+			bw.write("\n\nStmt id: " + s.getKey() + " node: " + node.getASTNode());
+			bw.write("in scope here: [[");
+			bw.write((JavaSemanticInfo.inScopeMap.get(node.getStmtId())).toString());
+			bw.write(" ]]\n");
+			bw.write("required names: [[");
+			bw.write((node.getRequiredNames()).toString()); 
+			bw.write("]] \n\n");
+		
+		}
+		bw.write("::CODEBANK::");
+		
+		for(Map.Entry<Integer,JavaStatement> s : codeBank.entrySet()) {
+			JavaStatement node = s.getValue();
+			bw.write("\n\nStmt id: " + s.getKey() + " node: " + node.getASTNode());
+		}
+	
+		bw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+	}
+	
 	private void fromSource(ClassInfo pair, String path, File sourceFile) throws IOException {
 
 		ScopeInfo scopeInfo = new ScopeInfo();
@@ -171,24 +209,28 @@ CachingRepresentation<JavaEditOperation> {
 		List<ASTNode> stmts = myParser.getStatements();
 		sourceInfo.addToBaseCompilationUnits(pair, myParser.getCompilationUnit());
 		semanticInfo.addAllSemanticInfo(myParser);
+		
+		Set<String> knownTypesInScope = myParser.getAvailableTypes();
+		
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
 				JavaStatement s = new JavaStatement();
 				s.setStmtId(stmtCounter);
 				s.setClassInfo(pair);
-
-				logger.info("Stmt id: " + stmtCounter + " node: " + node.toString());
 				s.setInfo(stmtCounter, node);
 				stmtCounter++;
 
 				sourceInfo.augmentLineInfo(s.getStmtId(), node);
 				sourceInfo.storeStmtInfo(s, pair);
-
-				scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
-				semanticInfo.addToScopeMap(s, scopeInfo.getScope(s.getASTNode()));
+				scopeInfo.addScope4Stmt(node, knownTypesInScope);
+				s.setRequiredNames(scopeInfo.getRequiredNames(node));
+				semanticInfo.addToScopeMap(s, scopeInfo.getScope(node));
+				semanticInfo.collectFinalVarInfo(s, scopeInfo.getFinalVarInfo(node));
 			}
-		}
+		}	
 
+
+		dumpStmts();
 	}
 
 	public void fromSource(ClassInfo pair) throws IOException {
@@ -626,17 +668,10 @@ CachingRepresentation<JavaEditOperation> {
 			String stmtStr = actualStmt.toString();
 			logger.debug("statement " + atomid + " at line " + stmt.getLineno()
 			+ ": " + stmtStr);
-			logger.debug("\t Names:");
-			for (String name : stmt.getNames()) {
-				logger.debug("\t\t" + name);
-			}
-			logger.debug("\t Scopes:");
+		
+			logger.debug("\t Required Names:");
 			for (String scope : stmt.getRequiredNames()) {
 				logger.debug("\t\t" + scope);
-			}
-			logger.debug("\t Types:");
-			for (String t : stmt.getTypes()) {
-				logger.debug("\t\t" + t);
 			}
 		}
 	}
@@ -682,41 +717,13 @@ CachingRepresentation<JavaEditOperation> {
 			}
 		}
 
-		//Heuristic: No need to insert a declaration of a final variable
-		if(fixASTNode instanceof VariableDeclarationStatement){
-			if(semanticInfo.vdPossibleFinalVariable((VariableDeclarationStatement) fixASTNode)) {
-				return true;
-			}
-		}
-
-		//Heuristic: Don't assign a value to a final variable
-		if (fixASTNode instanceof ExpressionStatement) {
-			if(semanticInfo.expPossibleFinalAssignment((ExpressionStatement) fixASTNode)) {
-				return true;
-			}
-		}
-
-		//If it moves a block, this block should not have an assignment of final variables, or a declaration of already existing final variables
-		if (fixASTNode instanceof Block) {
-			List<ASTNode> statementsInBlock = ((Block)potentialFixStmt.getASTNode()).statements();
-			for (int i = 0; i < statementsInBlock.size(); i++) {
-				//Heuristic: Don't assign a value to a final variable
-				ASTNode stmtInBlock = statementsInBlock.get(i);
-				if (stmtInBlock instanceof ExpressionStatement) {
-					if(semanticInfo.expPossibleFinalAssignment((ExpressionStatement) stmtInBlock)) {
-						return true;
-					}
+				// we collected this info on parse.  If the block contains any type of assignment to
+				// or declaration of a final variable, this should be true.
+				if(semanticInfo.getFinalVarStatus(index)) {
+					return true;
 				}
+				
 
-				//Heuristic: No need to insert a declaration of a final variable
-				if(stmtInBlock instanceof VariableDeclarationStatement){
-					if(semanticInfo.vdPossibleFinalVariable((VariableDeclarationStatement) stmtInBlock)) {
-						return true;
-					}
-				}
-			}
-
-		}
 		return false;
 	}
 

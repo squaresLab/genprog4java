@@ -55,7 +55,7 @@ import org.apache.log4j.Logger;
 import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.localization.Localization;
-import clegoues.genprog4java.main.ClassInfo;
+import clegoues.genprog4java.java.ClassInfo;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Location;

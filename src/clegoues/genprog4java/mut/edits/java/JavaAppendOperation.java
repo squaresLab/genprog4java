@@ -25,20 +25,21 @@ public class JavaAppendOperation extends JavaEditOperation {
 		ASTNode locationNode = ((JavaLocation) this.getLocation()).getCodeElement(); 
 		StatementHole fixHole = (StatementHole) this.getHoleCode();
 		ASTNode fixCodeNode =
-			 ASTNode.copySubtree(locationNode.getAST(), fixHole.getCode()); 
+			 ASTNode.copySubtree(rewriter.getAST(), fixHole.getCode()); 
 
 		Block newNode = locationNode.getAST().newBlock(); 
-		ASTNode stm1 = (Statement)locationNode;
-		if(locationNode instanceof Statement){
+		if(locationNode instanceof Statement && fixCodeNode instanceof Statement){
+			ASTNode stm1 = (Statement)locationNode;
+			ASTNode stm2 = (Statement)fixCodeNode;
+
 			stm1 = ASTNode.copySubtree(locationNode.getAST(), stm1);
-			newNode.statements().add(stm1);
-		}
-		ASTNode stm2 = (Statement)fixCodeNode;
-		if(fixCodeNode instanceof Statement){
 			stm2 = ASTNode.copySubtree(fixCodeNode.getAST(), stm2);
+
+			newNode.statements().add(stm1);
 			newNode.statements().add(stm2);
+			rewriter.replace(locationNode, newNode, null);
 		}
-		rewriter.replace(locationNode, newNode, null);
+
 	}
 	
 	@Override

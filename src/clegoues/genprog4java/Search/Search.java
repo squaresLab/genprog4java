@@ -72,6 +72,13 @@ public abstract class Search<G extends EditOperation> {
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
 
+	public static Boolean checkSpace = ConfigurationBuilder.of(BOOLEAN ) 
+			.withVarName("checkSpace")
+			.withDefault("true")
+			.withHelp("whether to do search space size check")
+			.inGroup("Search Parameters")
+			.build();
+
 	protected static String model = ConfigurationBuilder.of( STRING )
 			.withVarName( "model" )
 			.withDefault( "default" )

@@ -38,7 +38,7 @@ public class LowerBoundSetOperation extends JavaEditOperation {
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> arrays = thisHole.getSubExps();
-		Block newnode = parent.getAST().newBlock();
+		Block newnode = rewriter.getAST().newBlock();
 
 		// for each of the array access instances
 		for( ASTNode  array : arrays){
@@ -51,7 +51,7 @@ public class LowerBoundSetOperation extends JavaEditOperation {
 				arrayindex = arrayindex.replace("--", "");
 
 				// create if statement 
-				IfStatement stmt = parent.getAST().newIfStatement();
+				IfStatement stmt = rewriter.getAST().newIfStatement();
 
 				// with expression "index < 0" 
 				InfixExpression expression = null;

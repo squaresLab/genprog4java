@@ -40,15 +40,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CastExpression;
-import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -62,27 +59,13 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.NumberLiteral;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.StringLiteral;
-import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-
-import clegoues.genprog4java.main.ClassInfo;
-import clegoues.genprog4java.mut.Location;
-import clegoues.genprog4java.rep.WeightedAtom;
 
 public class JavaStatement implements Comparable<JavaStatement>{
 
@@ -91,8 +74,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	private int lineno;
 	private int stmtId; // unique
-	private Set<String> names;
-	private Set<String> types;
 	private Set<String> mustBeInScope;
 
 	public void setClassInfo(ClassInfo ci) {
@@ -125,22 +106,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	public void setLineno(int lineno) {
 		this.lineno = lineno;
-	}
-
-	public Set<String> getNames() {
-		return names;
-	}
-
-	public void setNames(Set<String> names) {
-		this.names = names;
-	}
-
-	public Set<String> getTypes() {
-		return types;
-	}
-
-	public void setTypes(Set<String> types) {
-		this.types = types;
 	}
 
 	public Set<String> getRequiredNames() {
@@ -698,6 +663,7 @@ if B include return statement
 	private static int howManyReturns = 0;
 
 	public static boolean hasMoreThanOneReturn(MethodDeclaration method){
+		howManyReturns = 0;
 		method.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(ReturnStatement node) {
@@ -711,6 +677,20 @@ if B include return statement
 	public boolean canBeDeleted() {
 		ASTNode faultyNode = this.getASTNode();
 		ASTNode parent = faultyNode.getParent();
+		//Heuristic: Don't remove returns from functions that have only one return statement.
+				if(faultyNode instanceof ReturnStatement){
+					parent = this.getEnclosingMethod();
+					if(parent != null && parent instanceof MethodDeclaration) {
+						if(!hasMoreThanOneReturn((MethodDeclaration)parent))
+							return false;
+					}
+				}
+
+		return true;
+		 /* FIXME: CLG believes that these are all now unnecessary in light of making delete "replace with empty
+		  * block", which is what it should always have been.  However, am leaving this in for the 
+		  * time being just to be safe, will remove later */
+	/*
 		//Heuristic: If it is the body of an if, while, or for, it should not be removed
 
 		if(faultyNode instanceof Block){
@@ -733,15 +713,7 @@ if B include return statement
 				return false;
 		}
 
-		//Heuristic: Don't remove returns from functions that have only one return statement.
-		if(faultyNode instanceof ReturnStatement){
-			parent = this.getEnclosingMethod();
-			if(parent != null && parent instanceof MethodDeclaration) {
-				if(hasMoreThanOneReturn((MethodDeclaration)parent))
-					return false;
-			}
-		}
-
+		
 		//Heuristic: If an stmt is the only stmt in a block, don´t delete it
 		parent = blockThatContainsThisStatement();
 		if(parent instanceof Block){
@@ -750,7 +722,7 @@ if B include return statement
 			}
 		}
 
-		return true;
+		return true;*/
 	}
 
 	public ASTNode getEnclosingMethod() {
@@ -760,6 +732,7 @@ if B include return statement
 		}
 		return parent;
 	}
+	
 	public boolean isLikelyAConstructor() {
 		ASTNode enclosingMethod = this.getEnclosingMethod();
 		return (enclosingMethod != null) && (enclosingMethod instanceof MethodDeclaration) && 
@@ -805,14 +778,8 @@ if B include return statement
 	public void setInfo(int stmtCounter, ASTNode node) {
 		this.setStmtId(stmtCounter);
 		this.setLineno(ASTUtils.getLineNumber(node));
-		this.setNames(ASTUtils.getNames(node));
-		this.setTypes(ASTUtils.getTypes(node));
-		this.setRequiredNames(ASTUtils.getScope(node));
 		this.setASTNode(node);
-
 	}
-
-
 
 
 }

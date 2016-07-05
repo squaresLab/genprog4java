@@ -100,16 +100,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import clegoues.genprog4java.main.ClassInfo;
+import clegoues.genprog4java.java.ClassInfo;
 import clegoues.util.Pair;
 
 public class ASTUtils {
 
-	public static int getLineNumber(ASTNode node) { // FIXME: I think we should
-		// be able to just get this
-		// from the CU saved in
-		// javarepresentation,
-		// right?
+	public static int getLineNumber(ASTNode node) { 
 		ASTNode root = node.getRoot();
 		int lineno = -1;
 		if (root instanceof CompilationUnit) {
@@ -120,36 +116,6 @@ public class ASTUtils {
 		return lineno;
 	}
 
-	public static Set<String> getNames(ASTNode node) // it does not count.
-	{
-		TreeSet<String> names = new TreeSet<String>();
-		NameCollector visitor = new NameCollector(names);
-		node.accept(visitor);
-		return names;
-	}
-
-	// FIXME this feels wicked inefficient to me, but possibly that's a
-	// low-order bit
-
-	public static Set<String> getTypes(ASTNode node) {
-		TreeSet<String> types = new TreeSet<String>();
-
-		TypeCollector visitor = new TypeCollector(types);
-
-		node.accept(visitor);
-
-		return types;
-	}
-
-	public static Set<String> getScope(ASTNode node) {
-		TreeSet<String> scope = new TreeSet<String>();
-
-		ScopeCollector visitor = new ScopeCollector(scope);
-
-		node.accept(visitor);
-
-		return scope;
-	}
 
 	public static Iterable<JavaSourceFromString> getJavaSourceFromString(
 			String progName, List<Pair<ClassInfo, String>> code) {

@@ -105,7 +105,6 @@ public class ConfigurationBuilder< T > {
 	protected static Logger logger =
 		Logger.getLogger( ConfigurationBuilder.class );
 
-	// FIXME: char?
 	/**
 	 * Generates an option that takes no arguments and sets the field to
 	 * {@code true} when it is used. Similarly, any appearance of the option
