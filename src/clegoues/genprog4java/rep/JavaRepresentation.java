@@ -312,6 +312,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				scopeInfo.addScope4Stmt(node, knownTypesInScope);
 				s.setRequiredNames(scopeInfo.getRequiredNames(node));
 				semanticInfo.addToScopeMap(s, scopeInfo.getScope(node));
+				semanticInfo.collectFinalVarInfo(s, scopeInfo.getFinalVarInfo(node));
 			}
 		}	
 
@@ -762,81 +763,17 @@ FaultLocRepresentation<JavaEditOperation> {
 					continue;
 				}
 			}
-
-			//Heuristic: No need to insert a declaration of or assignment to a final variable
-//			if(fixASTNode instanceof VariableDeclarationStatement){
-//				if(semanticInfo.vdPossibleFinalVariable((VariableDeclarationStatement) fixASTNode)) {
-//					toRemove.add(potentialFixAtom);
-//					continue;
-//				}
-//			}
 			
-			//Heuristic: Don't assign a value to a final variable
-//			if (fixASTNode instanceof ExpressionStatement) {
-//				if(semanticInfo.expPossibleFinalAssignment((ExpressionStatement) fixASTNode)) {
-//					toRemove.add(potentialFixAtom);
-//					continue;
-//				}
-//			}
-			//If it moves a block, this block should not have an assignment of final variables, or a declaration of already existing final variables
-//			if (fixASTNode instanceof Block) {
-//				List<ASTNode> statementsInBlock = ((Block)potentialFixStmt.getASTNode()).statements();
-//				boolean ok = true;
-//				for (int i = 0; i < statementsInBlock.size(); i++) {
-//					//Heuristic: Don't assign a value to a final variable
-//					ASTNode stmtInBlock = statementsInBlock.get(i);
-//					if (stmtInBlock instanceof ExpressionStatement) {
-//						if(semanticInfo.expPossibleFinalAssignment((ExpressionStatement) stmtInBlock)) {
-//							ok = false;
-//							break;
-//						}
-//					}
-//
-//					//Heuristic: No need to insert a declaration of a final variable
-//					if(stmtInBlock instanceof VariableDeclarationStatement){
-//						if(semanticInfo.vdPossibleFinalVariable((VariableDeclarationStatement) stmtInBlock)) {
-//							ok = false;
-//							break;
-//						}
-//					}
-//				}
-//				if(!ok) {
-//					toRemove.add(potentialFixAtom);
-//					continue;
-//				}
-//			}
-//		}
-			// Heuristic: should not move or copy declarations of or assignments to final variables
-			fixASTNode.accept(new ASTVisitor() {
-				@Override
-			public boolean visit(Assignment node) {
-					Expression left = node.getLeftHandSide();
-					int flags = left.getFlags();
-					if(Flags.isFinal(flags)) {
-						toRemove.add(potentialFixAtom);
-						return false;
-					}
-					return true;
-				}
-				
-				@Override
-				public boolean visit(VariableDeclarationStatement node) {
-					int modifiers = node.getModifiers();
-					if(Modifier.isFinal(modifiers)) {
-						toRemove.add(potentialFixAtom);
-						return false;
-					}
-					return true;
-				}
-			});
+			// we collected this info on parse.  If the block contains any type of assignment to
+			// or declaration of a final variable, this should be true.
+			if(semanticInfo.getFinalVarStatus(index)) {
+				toRemove.add(potentialFixAtom);
+			}
 			
 		}
-			
-
 		for(WeightedAtom atom : toRemove) {
 			fixLocalization.remove(atom);
 		}
-
 	}
 
 

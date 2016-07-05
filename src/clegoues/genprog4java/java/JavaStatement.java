@@ -663,6 +663,7 @@ if B include return statement
 	private static int howManyReturns = 0;
 
 	public static boolean hasMoreThanOneReturn(MethodDeclaration method){
+		howManyReturns = 0;
 		method.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(ReturnStatement node) {

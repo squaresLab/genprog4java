@@ -44,12 +44,12 @@ public class ScopeInfo
 	
 	private HashMap<ASTNode,Set<String>> stmtScope; // stuff that's IN SCOPE at the statement, not used at the statement
 	private HashMap<ASTNode,Set<String>> requiredNames; 
-
+	private HashMap<ASTNode, Boolean> containsFinalVarAssignment;
 	public ScopeInfo()
 	{
 		this.stmtScope = new HashMap<ASTNode,Set<String>>();
 		this.requiredNames = new HashMap<ASTNode,Set<String>>();
-
+		this.containsFinalVarAssignment = new HashMap<ASTNode, Boolean>();
 	}
 	
 	public void addRequiredNames(ASTNode buggy, Set<String> names) {
@@ -68,6 +68,12 @@ public class ScopeInfo
 		}
 	}
 	
+	public boolean getFinalVarInfo(ASTNode node) {
+		return containsFinalVarAssignment.get(node);
+	}
+	public void setContainsFinalVarDecl(ASTNode node, boolean status) {
+		containsFinalVarAssignment.put(node, status);
+	}
 	public boolean isScopeSafe(ASTNode buggy, Set<String> necessary)
 	{
 		boolean isSafe = true;
