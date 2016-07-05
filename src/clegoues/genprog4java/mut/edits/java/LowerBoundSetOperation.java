@@ -51,7 +51,7 @@ public class LowerBoundSetOperation extends JavaEditOperation {
 				arrayindex = arrayindex.replace("--", "");
 
 				// create if statement 
-				IfStatement stmt = parent.getAST().newIfStatement();
+				IfStatement stmt = rewriter.getAST().newIfStatement();
 
 				// with expression "index < 0" 
 				InfixExpression expression = null;
