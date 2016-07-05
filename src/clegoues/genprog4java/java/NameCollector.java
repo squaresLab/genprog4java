@@ -33,20 +33,44 @@
 
 package clegoues.genprog4java.java;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 public class NameCollector extends ASTVisitor
 {
 	private Set<String> nameSet;
 	
+	private Set<String> declaredSet;
+	
 	public NameCollector(Set<String> o)
 	{
 		nameSet = o;
+		declaredSet = new HashSet<String>();
 	}
 	
+	@Override
+	public void preVisit(ASTNode node) {
+		if(node instanceof ForStatement ||
+				node instanceof EnhancedForStatement) 
+		{
+			
+		}
+	}
+	
+	@Override
+	public void postVisit(ASTNode node) {
+		if(node instanceof ForStatement ||
+				node instanceof EnhancedForStatement) 
+		{
+			
+		}
+	}
 	@Override
 	public boolean visit(SimpleName node)
 	{
