@@ -266,7 +266,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				sourceInfo.augmentLineInfo(s.getStmtId(), node);
 				sourceInfo.storeStmtInfo(s, pair);
 
-				scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
+				// seems like this is a little silly the way it's set up, oh well.
 				semanticInfo.addToScopeMap(s, scopeInfo.getScope(s.getASTNode()));
 				
 				System.err.println("Stmt id: " + stmtCounter + " node: " + node.toString());

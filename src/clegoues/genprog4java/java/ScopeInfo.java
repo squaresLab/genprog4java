@@ -38,7 +38,6 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
-// FIXME: grabbed from PAR
 public class ScopeInfo
 {
 	
