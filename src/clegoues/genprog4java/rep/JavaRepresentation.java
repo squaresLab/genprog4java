@@ -259,6 +259,13 @@ FaultLocRepresentation<JavaEditOperation> {
 		for(Map.Entry<Integer,JavaStatement> s : base.entrySet()) {
 			JavaStatement node = s.getValue();
 			bw.write("\n\nStmt id: " + s.getKey() + " node: " + node.getASTNode());
+			bw.write("in scope here: [[");
+			bw.write((JavaSemanticInfo.inScopeMap.get(node.getStmtId())).toString());
+			bw.write(" ]]\n");
+			bw.write("required names: [[");
+			bw.write((node.getRequiredNames()).toString()); 
+			bw.write("]] \n\n");
+		
 		}
 		bw.write("::CODEBANK::");
 		
@@ -312,14 +319,14 @@ FaultLocRepresentation<JavaEditOperation> {
 
 				Set<String> required = scopeInfo.getRequiredNames(s.getASTNode());
 			
-				if (!allThingsInScope.containsAll(required)) {
-					for(String name : required) {
-						if(!allThingsInScope.contains(name)) {
-							System.err.println("Missing: " + name);
-						}
-					}
+//				if (!allThingsInScope.containsAll(required)) {
+//					for(String name : required) {
+//						if(!allThingsInScope.contains(name)) {
+//							System.err.println("Missing: " + name);
+//						}
+//					}
 			//		System.exit(0);
-				}
+			//	}
 //					System.err.println("UNEXPECTED:");
 //					System.err.println("REQUIRED: " + required);
 //					System.err.println("INSCOPE: " + inScope);
@@ -539,7 +546,6 @@ FaultLocRepresentation<JavaEditOperation> {
 
 			retVal.add(new Pair<ClassInfo, String>(ci, original.get()));
 		}
-		dumpStmts();
 		return retVal;
 	}
 

@@ -22,9 +22,6 @@ public class JavaReplaceOperation extends JavaEditOperation {
 		StatementHole fixHole = (StatementHole) this.getHoleCode();
 		ASTNode fixCodeNode =
 				 ASTNode.copySubtree(rewriter.getAST(), fixHole.getCode());
-		System.err.println("REPLACEMENT of:" + this.toString());
-		System.err.println(locationNode);
-		System.err.println("FIXHOLECODE: " + fixHole.getCode());
 		rewriter.replace(locationNode, fixCodeNode, null);
 	}
 	

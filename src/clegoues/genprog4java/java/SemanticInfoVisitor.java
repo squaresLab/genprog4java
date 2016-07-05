@@ -148,8 +148,12 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		}
 
 		if(node instanceof Block) {
-			requiredNames.removeAll(localVariables);
-			localVariables = this.localVariableStack.pop(); 
+			Set<String> newLocalVariables = this.localVariableStack.pop();
+			Set<String> toRemove =new HashSet<String>(this.localVariables);
+			toRemove.removeAll(newLocalVariables);
+
+			requiredNames.removeAll(toRemove);
+
 			currentMethodScope = this.methodScopeStack.pop();
 		}
 		if(JavaRepresentation.canRepair(node)) {
@@ -171,8 +175,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	
 	@Override
 	public boolean visit(SimpleName node) {
-		// a likely FIXME will be that we added in scope type info in the previsit and this will add info 
-		// after the fact.
 		
 		// if I were doing something smart with types, I'd probably want to do something
 		// to track in-scope method names at method invocations

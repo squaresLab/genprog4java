@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import clegoues.util.Pair;
 
 public class JavaSemanticInfo {
-	private static HashMap<Integer, Set<String>> inScopeMap = new HashMap<Integer, Set<String>>();
+	public static HashMap<Integer, Set<String>> inScopeMap = new HashMap<Integer, Set<String>>();
 	private static Set<Pair<String,String>> methodReturnType = new HashSet<Pair<String,String>>();
 	private static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
 	private static Map<String, Map<String,List<Expression>>> methodParamExpressionsInScope = null;
