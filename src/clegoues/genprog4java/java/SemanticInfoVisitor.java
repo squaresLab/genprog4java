@@ -66,7 +66,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private List<ASTNode> nodeSet;
 	private ScopeInfo scopes;
 
-	// declared or imported; primitive types are always available;
 	
 	private HashSet<String> fieldName;
 	
@@ -81,6 +80,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private HashSet<String> currentLoopScope = new HashSet<String>();
 	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>();
 	
+	// declared or imported; primitive types are always available;
 	private HashSet<String> availableTypes; 
 
 	private CompilationUnit cu;
@@ -102,6 +102,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			TreeSet<String> newScope = new TreeSet<String>();
 			newScope.addAll(this.currentMethodScope);
 			newScope.addAll(this.currentLoopScope);
+			newScope.addAll(this.fieldName);
 			this.scopes.addScope4Stmt(node, newScope);
 			this.nodeSet.add(node);
 		}
@@ -182,6 +183,9 @@ public class SemanticInfoVisitor extends ASTVisitor {
 					}
 				}
 			}
+			if(node.getSuperclassType() != null) {
+				this.fieldName.add("super");
+			}
 		}
 		return true;
 	}
@@ -204,7 +208,29 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		return super.visit(node);
 	}
 
-	
+	@Override
+	public boolean visit(VariableDeclarationStatement node) {
+		for (Object o : node.fragments()) {
+			if (o instanceof VariableDeclarationFragment) {
+				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
+				String name = v.getName().getIdentifier();
+				if(!currentLoopScope.contains(name)) {
+				this.currentMethodScope.add(v.getName().getIdentifier());
+				variableType.put(v.getName().toString(), node.getType().toString());
+				}
+			}
+		}
+		return true;
+	}
+
+	public CompilationUnit getCompilationUnit() {
+		return cu;
+	}
+
+	public void setCompilationUnit(CompilationUnit cu) {
+		this.cu = cu;
+	}
+
 	public Set<String> getFieldSet() {
 		return this.fieldName;
 	}
@@ -236,8 +262,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.scopes = scopeList;
 	}
 
-
-	
 	@Override
 	public boolean visit(Initializer node) {
 		List mods = node.modifiers(); // FIXME need to deal with static.
@@ -249,31 +273,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				}
 			}
 		}
-
 		return super.visit(node);
 	}
-
-	@Override
-	public boolean visit(VariableDeclarationStatement node) {
-		for (Object o : node.fragments()) {
-			if (o instanceof VariableDeclarationFragment) {
-				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
-				String name = v.getName().getIdentifier();
-				if(!currentLoopScope.contains(name)) {
-				this.currentMethodScope.add(v.getName().getIdentifier());
-				variableType.put(v.getName().toString(), node.getType().toString());
-				}
-			}
-		}
-		return true;
-	}
-
-	public CompilationUnit getCompilationUnit() {
-		return cu;
-	}
-
-	public void setCompilationUnit(CompilationUnit cu) {
-		this.cu = cu;
-	}
-
 }
