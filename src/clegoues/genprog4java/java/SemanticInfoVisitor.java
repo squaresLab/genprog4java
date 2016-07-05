@@ -118,8 +118,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			newScope.addAll(this.availableMethodsAndFields);
 			newScope.addAll(this.availableTypes);
 			this.scopes.addScope4Stmt(node, newScope);
-			System.err.println("node:" + node.toString());
-			System.err.println("scope: " + newScope);
 			this.nodeSet.add(node);
 		}
 

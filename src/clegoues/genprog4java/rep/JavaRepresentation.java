@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -97,6 +98,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 import org.jacoco.core.analysis.Analyzer;
@@ -243,6 +245,37 @@ FaultLocRepresentation<JavaEditOperation> {
 		return atoms;
 	}
 	
+	static int dumpCount = 0;
+	private void dumpStmts() {
+		BufferedWriter bw;
+		try {
+			bw = new BufferedWriter(new FileWriter("/Users/clegoues/Desktop/stmtinfo" + dumpCount + ".txt"));
+	
+		dumpCount++;
+		HashMap<Integer,JavaStatement> base = sourceInfo.getBase();
+		HashMap<Integer, JavaStatement> codeBank = sourceInfo.getCodeBank();
+		
+		bw.write("::BASE::\n");
+		for(Map.Entry<Integer,JavaStatement> s : base.entrySet()) {
+			JavaStatement node = s.getValue();
+			bw.write("\n\nStmt id: " + s.getKey() + " node: " + node.getASTNode());
+		}
+		bw.write("::CODEBANK::");
+		
+		for(Map.Entry<Integer,JavaStatement> s : codeBank.entrySet()) {
+			JavaStatement node = s.getValue();
+			bw.write("\n\nStmt id: " + s.getKey() + " node: " + node.getASTNode());
+		}
+	
+		bw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+	}
+	
 	private void fromSource(ClassInfo pair, String path, File sourceFile) throws IOException {
 
 		ScopeInfo scopeInfo = new ScopeInfo();
@@ -257,7 +290,6 @@ FaultLocRepresentation<JavaEditOperation> {
 		semanticInfo.addAllSemanticInfo(myParser);
 		
 		Set<String> knownTypesInScope = myParser.getAvailableTypes();
-		BufferedWriter bw = new BufferedWriter(new FileWriter("/Users/clegoues/Desktop/stmtinfo.txt"));
 		
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
@@ -279,14 +311,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				s.setRequiredNames(scopeInfo.getRequiredNames(s.getASTNode()));
 
 				Set<String> required = scopeInfo.getRequiredNames(s.getASTNode());
-				bw.write("Stmt id: " + stmtCounter + " node: " + node.toString());
-				bw.write("in scope here:\n");
-				bw.write("\t[[" +allThingsInScope + "]]");
-				bw.write("\nrequired:");
-				bw.write("\t" + scopeInfo.getRequiredNames(s.getASTNode())); // FIXME: storing these in two places is silly, but one thing at a time.
-				bw.write("\navailable types:\n");
-				bw.write("[[" + myParser.getAvailableTypes() + "]]");
-
+			
 				if (!allThingsInScope.containsAll(required)) {
 					for(String name : required) {
 						if(!allThingsInScope.contains(name)) {
@@ -302,7 +327,7 @@ FaultLocRepresentation<JavaEditOperation> {
 
 			}
 		}	
-		bw.close();
+		dumpStmts();
 	}
 
 	public void fromSource(ClassInfo pair) throws IOException {
@@ -478,7 +503,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			String filename = ci.getClassName();
 			String path = ci.getPackage();
 			String source = pair.getValue();
-			Document original = new Document(source);
+			IDocument original = new Document(source);
 			CompilationUnit cu = sourceInfo.getBaseCompilationUnits().get(ci);
 			AST ast = cu.getAST();
 			ASTRewrite rewriter = ASTRewrite.create(ast);
@@ -514,6 +539,7 @@ FaultLocRepresentation<JavaEditOperation> {
 
 			retVal.add(new Pair<ClassInfo, String>(ci, original.get()));
 		}
+		dumpStmts();
 		return retVal;
 	}
 

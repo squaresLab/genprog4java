@@ -21,7 +21,10 @@ public class JavaReplaceOperation extends JavaEditOperation {
 		ASTNode locationNode = ((JavaLocation) this.getLocation()).getCodeElement(); 
 		StatementHole fixHole = (StatementHole) this.getHoleCode();
 		ASTNode fixCodeNode =
-				 ASTNode.copySubtree(locationNode.getAST(), fixHole.getCode());
+				 ASTNode.copySubtree(rewriter.getAST(), fixHole.getCode());
+		System.err.println("REPLACEMENT of:" + this.toString());
+		System.err.println(locationNode);
+		System.err.println("FIXHOLECODE: " + fixHole.getCode());
 		rewriter.replace(locationNode, fixCodeNode, null);
 	}
 	
