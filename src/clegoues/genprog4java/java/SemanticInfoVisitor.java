@@ -66,8 +66,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private List<ASTNode> nodeSet;
 	private ScopeInfo scopes;
 
-	
-	private HashSet<String> fieldName;
+	// it might make sense to store these separately, but for now, this will do
+	private HashSet<String> availableMethodsAndFields;
 	
 	// FIXME: types on variables in different scopes?
 	
@@ -86,8 +86,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private CompilationUnit cu;
 	
 	public SemanticInfoVisitor() {
-		this.fieldName = new HashSet<String>();
-		this.fieldName.add("this");
+		this.availableMethodsAndFields = new HashSet<String>();
+		this.availableMethodsAndFields.add("this");
 	}
 	
 	public void setAvailableTypes(HashSet<String> typs) {
@@ -102,7 +102,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			TreeSet<String> newScope = new TreeSet<String>();
 			newScope.addAll(this.currentMethodScope);
 			newScope.addAll(this.currentLoopScope);
-			newScope.addAll(this.fieldName);
+			newScope.addAll(this.availableMethodsAndFields);
 			this.scopes.addScope4Stmt(node, newScope);
 			this.nodeSet.add(node);
 		}
@@ -179,12 +179,16 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				for (Object o : fd.fragments()) {
 					if (o instanceof VariableDeclarationFragment) {
 						VariableDeclarationFragment v = (VariableDeclarationFragment) o;
-						this.fieldName.add(v.getName().getIdentifier());
+						this.availableMethodsAndFields.add(v.getName().getIdentifier());
 					}
 				}
 			}
+			
+			for(MethodDeclaration md : node.getMethods()) {
+				this.availableMethodsAndFields.add(md.getName().getIdentifier());
+			}
 			if(node.getSuperclassType() != null) {
-				this.fieldName.add("super");
+				this.availableMethodsAndFields.add("super");
 			}
 		}
 		return true;
@@ -232,7 +236,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	}
 
 	public Set<String> getFieldSet() {
-		return this.fieldName;
+		return this.availableMethodsAndFields;
 	}
 	public void setNodeSet(List<ASTNode> o) {
 		this.nodeSet = o;
