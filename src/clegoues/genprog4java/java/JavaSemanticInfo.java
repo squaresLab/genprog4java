@@ -197,6 +197,11 @@ public class JavaSemanticInfo {
 		Set<String> requiredScopes = potentialFixStmt.getRequiredNames();
 		for (String req : requiredScopes) {
 			if (!inScopeAt.contains(req)) {
+				System.err.print("buggy Statement: " + potentiallyBuggyStmt.getStmtId());
+				System.err.println(" has the following in scope: { " + inScopeAt + "}");
+				System.err.print("potential fix statement: " + potentialFixStmt.getStmtId() );
+				System.err.println(" needs " + req + ", we don't have it.");
+				System.exit(0);
 				return false;
 			}
 		}

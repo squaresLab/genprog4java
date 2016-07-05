@@ -118,6 +118,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			newScope.addAll(this.availableMethodsAndFields);
 			newScope.addAll(this.availableTypes);
 			this.scopes.addScope4Stmt(node, newScope);
+			System.err.println("node:" + node.toString());
+			System.err.println("scope: " + newScope);
 			this.nodeSet.add(node);
 		}
 
@@ -165,7 +167,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		return (availableMethodsAndFields != null && availableMethodsAndFields.contains(lookingFor)) || 
 				(availableTypes != null && availableTypes.contains(lookingFor)) ||
 				(currentMethodScope != null && currentMethodScope.contains(lookingFor)) ||
-				(localVariables != null && localVariables.contains(lookingFor));
+				(localVariables != null && localVariables.contains(lookingFor) ||
+				(currentLoopScope != null && currentLoopScope.contains(lookingFor)));
 	}
 	
 	@Override
@@ -226,7 +229,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			String[] split = name.split("\\.");
 			availableTypes.add(split[split.length - 1]);
 		}
-		return true;
+		return false;
 	}
 
 	@Override
@@ -283,7 +286,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				this.localVariables.add(v.getName().toString());
 			}
 		}
-		
 		return true;
 	}
 
