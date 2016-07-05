@@ -113,6 +113,7 @@ import org.jacoco.core.data.ISessionInfoVisitor;
 import org.jacoco.core.data.SessionInfo;
 
 import clegoues.genprog4java.Search.GiveUpException;
+import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.ClassInfo;
@@ -303,7 +304,6 @@ FaultLocRepresentation<JavaEditOperation> {
 				JavaStatement s = new JavaStatement();
 				s.setStmtId(stmtCounter);
 				s.setClassInfo(pair);
-
 				s.setInfo(stmtCounter, node);
 				stmtCounter++;
 
@@ -721,6 +721,7 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	@Override
 	public void reduceSearchSpace() throws GiveUpException {
+		if(Search.checkSpace) {
 		boolean thereIsAtLeastOneMutThatApplies;
 		ArrayList<Location> locsToRemove = new ArrayList<Location>();
 		for (Location potentiallyBuggyLoc : faultLocalization) {
@@ -742,7 +743,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			logger.info("\nThere is no valid mutation to perform in the fault space. Exiting program\n");
 			throw new GiveUpException();
 		}
-		
+	}
 		//Reduce Fix space
 		final ArrayList<WeightedAtom> toRemove = new ArrayList<WeightedAtom>();
 
@@ -829,7 +830,6 @@ FaultLocRepresentation<JavaEditOperation> {
 				}
 			});
 			
-		
 		}
 			
 
