@@ -412,7 +412,7 @@ public class Fitness {
 		if (Fitness.sample < 1.0) {
 			if (((Fitness.sampleStrategy == "generation") && (Fitness.generation != generation)) ||
 					(Fitness.sampleStrategy == "variant")) {
-				generation = Fitness.generation;
+				Fitness.generation = generation;
 				Fitness.resample();
 			} 	
 			fitnessPair = this.testFitnessSample(rep, fac);
