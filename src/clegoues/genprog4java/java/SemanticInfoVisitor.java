@@ -46,11 +46,14 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -158,9 +161,34 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		super.postVisit(node);
 	}
 
+	private boolean anywhereInScope(String lookingFor) {
+		return (availableMethodsAndFields != null && availableMethodsAndFields.contains(lookingFor)) || 
+				(availableTypes != null && availableTypes.contains(lookingFor)) ||
+				(currentMethodScope != null && currentMethodScope.contains(lookingFor)) ||
+				(localVariables != null && localVariables.contains(lookingFor));
+	}
+	
 	@Override
 	public boolean visit(SimpleName node) {
-		this.requiredNames.add(node.getIdentifier());
+		// a likely FIXME will be that we added in scope type info in the previsit and this will add info 
+		// after the fact.
+		
+		// if I were doing something smart with types, I'd probably want to do something
+		// to track in-scope method names at method invocations
+		// but I'm not yet so we'll make do
+		String name = node.getIdentifier();
+		this.requiredNames.add(name);
+		if(!anywhereInScope(name)) {
+			// because we're parsing, *if this CU parses*, we can assume it doesn't reference
+			// anything that's not in scope
+			// this means that if we haven't seen a name before, it's almost certainly the name of a method
+			// being invoked on an expression of a type that we *have* seen
+			// because it's annoying to actually figure out everything available to us by walking the loaded
+			// imports, we just add the SimpleName to the list of available names
+			// kind of a cheap trick, but whatever
+			// the one thing I'm not sure about is if I should add this to available types or...something else
+			this.availableTypes.add(name);
+		}
 		return true;
 	}
 
