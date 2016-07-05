@@ -269,11 +269,14 @@ FaultLocRepresentation<JavaEditOperation> {
 				scopeInfo.addScope4Stmt(s.getASTNode(), myParser.getFields());
 				semanticInfo.addToScopeMap(s, scopeInfo.getScope(s.getASTNode()));
 				
-//				System.err.println("Stmt id: " + stmtCounter + " node: " + node.toString());
-//				System.err.println("in scope here:");
-//				System.err.println("[[" + scopeInfo.getScope(s.getASTNode()) + "]]");
-//				System.err.println("required:");
-//				System.err.println(s.getNames());
+				System.err.println("Stmt id: " + stmtCounter + " node: " + node.toString());
+				System.err.println("in scope here:");
+				System.err.println("[[" + scopeInfo.getScope(s.getASTNode()) + "]]");
+				System.err.println("required:");
+				System.err.println(s.getNames());
+				System.err.println("available types:");
+				System.err.println("[[" + myParser.getAvailableTypes() + "]]");
+				System.exit(0);
 			}
 		}
 	}

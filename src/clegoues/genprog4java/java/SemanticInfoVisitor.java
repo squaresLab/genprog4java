@@ -44,10 +44,12 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -61,6 +63,9 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private List<ASTNode> nodeSet;
 	private ScopeInfo scopes;
 
+	// declared or imported; primitive types are always available;
+	
+	private HashSet<String> availableTypes = new HashSet<String>(); 
 	private HashSet<String> fieldName;
 	private HashSet<String> currentMethodScope;
 	private HashSet<Pair<String,String>> methodReturnType;
@@ -78,7 +83,42 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.fieldName = new HashSet<String>();
 		this.fieldName.add("this");
 	}
+	
+	public void setAvailableTypes(HashSet<String> typs) {
+		this.availableTypes = typs;
+	}
 
+	@Override
+	public boolean visit(ImportDeclaration node) {
+		if(!node.isOnDemand() && !node.isStatic()) { // possible FIXME: handle all static stuff separately?
+			String name = node.getName().getFullyQualifiedName();
+			String[] split = name.split("\\.");
+			availableTypes.add(split[split.length - 1]);
+		}
+		return true;
+	}
+	
+	@Override
+	public boolean visit(TypeDeclaration node) {
+		if(!node.isInterface()) {
+			availableTypes.add(node.getName().getIdentifier());
+		}
+		return true;
+	}
+	
+	
+	@Override
+	public boolean visit(FieldDeclaration node) {
+		for (Object o : node.fragments()) {
+			if (o instanceof VariableDeclarationFragment) {
+				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
+				this.fieldName.add(v.getName().getIdentifier());
+			}
+		}
+		return super.visit(node);
+	}
+
+	
 	public Set<String> getFieldSet() {
 		return this.fieldName;
 	}
@@ -110,16 +150,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.scopes = scopeList;
 	}
 
-	@Override
-	public boolean visit(FieldDeclaration node) {
-		for (Object o : node.fragments()) {
-			if (o instanceof VariableDeclarationFragment) {
-				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
-				this.fieldName.add(v.getName().getIdentifier());
-			}
-		}
-		return super.visit(node);
-	}
 
 	@Override
 	public boolean visit(MethodDeclaration node) {
