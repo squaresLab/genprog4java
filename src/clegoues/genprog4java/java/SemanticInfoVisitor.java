@@ -43,6 +43,7 @@ import java.util.TreeSet;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -62,8 +63,6 @@ import clegoues.util.Pair;
 
 public class SemanticInfoVisitor extends ASTVisitor {
 
-	private String sourcePath;
-
 	private List<ASTNode> nodeSet;
 	private ScopeInfo scopes;
 
@@ -71,7 +70,11 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	
 	private HashSet<String> fieldName;
 	
+	// FIXME: types on variables in different scopes?
+	
 	private HashSet<String> currentMethodScope;
+	private Stack<HashSet<String>> methodScopeStack;
+	
 	private HashSet<Pair<String,String>> methodReturnType;
 	private HashMap<String,String> variableType;
 
@@ -80,14 +83,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	
 	private HashSet<String> availableTypes; 
 
-	// unlike in the OCaml implementation, this only collects the statements and
-	// the semantic information. It doesn't number.
 	private CompilationUnit cu;
-
-	public void init(String p) {
-		this.sourcePath = p;
-	}
-
+	
 	public SemanticInfoVisitor() {
 		this.fieldName = new HashSet<String>();
 		this.fieldName.add("this");
@@ -115,6 +112,10 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			currentLoopScope = new HashSet<String>(currentLoopScope);
 		}
 
+		if(node instanceof Block) {
+			this.methodScopeStack.push(currentMethodScope);
+			currentMethodScope = new HashSet<String>(currentMethodScope);
+		}
 		super.preVisit(node);
 	}
 
@@ -126,6 +127,9 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			currentLoopScope = loopScopeStack.pop();
 		}
 
+		if(node instanceof Block) {
+			currentMethodScope = this.methodScopeStack.pop();
+		}
 		super.postVisit(node);
 	}
 	
@@ -155,6 +159,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		}
 		return true;
 	}
+	
 	@Override
 	public boolean visit(ImportDeclaration node) {
 		if(!node.isOnDemand() && !node.isStatic()) { // possible FIXME: handle all static stuff separately?
@@ -184,6 +189,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(MethodDeclaration node) {
 		this.currentMethodScope = new HashSet<String>();
+		this.methodScopeStack = new Stack<HashSet<String>>();
 
 		if(node.isConstructor() || node.isVarargs()) return true; // ain't nobody got time for that
 		for (Object o : node.parameters()) {
@@ -234,7 +240,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	
 	@Override
 	public boolean visit(Initializer node) {
-		List mods = node.modifiers();
+		List mods = node.modifiers(); // FIXME need to deal with static.
 
 		for (Object o : mods) {
 			if (o instanceof Modifier) {
@@ -247,46 +253,27 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		return super.visit(node);
 	}
 
-	
-	public boolean visit(SingleVariableDeclaration node){
-		
-		return super.visit(node);
-	}
-	
-	public boolean visit(Assignment node){
-		
-		return super.visit(node);
-	}
-
-	@Override
-	public void endVisit(Initializer node) {
-		super.endVisit(node);
-	}
-
-	@Override
-	public void endVisit(MethodDeclaration node) {
-		super.endVisit(node);
-	}
-
 	@Override
 	public boolean visit(VariableDeclarationStatement node) {
 		for (Object o : node.fragments()) {
 			if (o instanceof VariableDeclarationFragment) {
 				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
+				String name = v.getName().getIdentifier();
+				if(!currentLoopScope.contains(name)) {
 				this.currentMethodScope.add(v.getName().getIdentifier());
 				variableType.put(v.getName().toString(), node.getType().toString());
+				}
 			}
 		}
-		
-		return super.visit(node);
-	}
-
-
-	public void setCompilationUnit(CompilationUnit ast) {
-		this.cu = ast;
+		return true;
 	}
 
 	public CompilationUnit getCompilationUnit() {
-		return this.cu;
+		return cu;
 	}
+
+	public void setCompilationUnit(CompilationUnit cu) {
+		this.cu = cu;
+	}
+
 }
