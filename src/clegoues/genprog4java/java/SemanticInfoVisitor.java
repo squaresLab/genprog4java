@@ -102,21 +102,18 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	public boolean visit(TypeDeclaration node) {
 		if(!node.isInterface()) {
 			availableTypes.add(node.getName().getIdentifier());
+			for(FieldDeclaration fd : node.getFields()) {
+				for (Object o : fd.fragments()) {
+					if (o instanceof VariableDeclarationFragment) {
+						VariableDeclarationFragment v = (VariableDeclarationFragment) o;
+						this.fieldName.add(v.getName().getIdentifier());
+					}
+				}
+			}
 		}
 		return true;
 	}
 	
-	
-	@Override
-	public boolean visit(FieldDeclaration node) {
-		for (Object o : node.fragments()) {
-			if (o instanceof VariableDeclarationFragment) {
-				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
-				this.fieldName.add(v.getName().getIdentifier());
-			}
-		}
-		return super.visit(node);
-	}
 
 	
 	public Set<String> getFieldSet() {
