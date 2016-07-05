@@ -681,7 +681,7 @@ if B include return statement
 				if(faultyNode instanceof ReturnStatement){
 					parent = this.getEnclosingMethod();
 					if(parent != null && parent instanceof MethodDeclaration) {
-						if(hasMoreThanOneReturn((MethodDeclaration)parent))
+						if(!hasMoreThanOneReturn((MethodDeclaration)parent))
 							return false;
 					}
 				}
