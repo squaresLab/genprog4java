@@ -40,15 +40,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CastExpression;
-import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -62,26 +59,13 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.NumberLiteral;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.StringLiteral;
-import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-
-import clegoues.genprog4java.mut.Location;
-import clegoues.genprog4java.rep.WeightedAtom;
 
 public class JavaStatement implements Comparable<JavaStatement>{
 
@@ -90,8 +74,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	private int lineno;
 	private int stmtId; // unique
-	private Set<String> names;
-	private Set<String> types;
 	private Set<String> mustBeInScope;
 
 	public void setClassInfo(ClassInfo ci) {
@@ -124,22 +106,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	public void setLineno(int lineno) {
 		this.lineno = lineno;
-	}
-
-	public Set<String> getNames() {
-		return names;
-	}
-
-	public void setNames(Set<String> names) {
-		this.names = names;
-	}
-
-	public Set<String> getTypes() {
-		return types;
-	}
-
-	public void setTypes(Set<String> types) {
-		this.types = types;
 	}
 
 	public Set<String> getRequiredNames() {
@@ -805,7 +771,6 @@ if B include return statement
 	public void setInfo(int stmtCounter, ASTNode node) {
 		this.setStmtId(stmtCounter);
 		this.setLineno(ASTUtils.getLineNumber(node));
-		this.setTypes(ASTUtils.getTypes(node));
 		this.setASTNode(node);
 	}
 
