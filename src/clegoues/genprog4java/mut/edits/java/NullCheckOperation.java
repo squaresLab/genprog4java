@@ -39,7 +39,7 @@ public class NullCheckOperation extends JavaEditOperation {
 
 		Collections.reverse(expressionsFromThisParent);
 		//Create if before the error
-		IfStatement ifstmt = locationNode.getAST().newIfStatement();
+		IfStatement ifstmt = rewriter.getAST().newIfStatement();
 		InfixExpression everythingInTheCondition = null; 
 
 		// for each of the expressions that can be null
@@ -91,7 +91,7 @@ public class NullCheckOperation extends JavaEditOperation {
 		} else {
 			ifstmt.setExpression(everythingInTheCondition);
 			ASTNode thenStmt = (Statement) parent;
-			thenStmt = ASTNode.copySubtree(parent.getAST(), thenStmt);
+			thenStmt = ASTNode.copySubtree(rewriter.getAST(), thenStmt);
 			ifstmt.setThenStatement((Statement) thenStmt);
 		}
 		rewriter.replace(parent, ifstmt, null);

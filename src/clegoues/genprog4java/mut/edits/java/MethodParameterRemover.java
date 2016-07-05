@@ -32,7 +32,7 @@ public class MethodParameterRemover extends ExpressionReplacer {
 		MethodInvocation methodInvocation = (MethodInvocation) thisHole.getCode();
 		MethodInvocation newMethodInvocation = parentExp.getAST().newMethodInvocation();
 		SimpleName name = methodInvocation.getName();
-		SimpleName newMethodName = locationNode.getAST().newSimpleName(name.getIdentifier());
+		SimpleName newMethodName = rewriter.getAST().newSimpleName(name.getIdentifier());
 
 		newMethodInvocation.setName(newMethodName);
 		newMethodInvocation.setExpression(methodInvocation.getExpression());

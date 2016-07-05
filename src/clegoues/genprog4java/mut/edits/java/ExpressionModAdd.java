@@ -35,7 +35,7 @@ public class ExpressionModAdd extends ExpressionReplacer {
 			newOperator = InfixExpression.Operator.CONDITIONAL_OR;
 			break;
 		}
-		InfixExpression newExpression = locationExp.getAST().newInfixExpression();
+		InfixExpression newExpression = rewriter.getAST().newInfixExpression();
 		newExpression.setOperator(newOperator);
 		newExpression.setLeftOperand((Expression) rewriter.createCopyTarget(locationExp));
 		newExpression.setRightOperand((Expression) rewriter.createCopyTarget(newExpCode));
