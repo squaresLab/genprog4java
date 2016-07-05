@@ -46,14 +46,22 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -66,6 +74,9 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	private List<ASTNode> nodeSet;
 	private ScopeInfo scopes;
+
+	private boolean containsFinalVar = false;
+	private Stack<Boolean> finalVarStack = new Stack<Boolean>();
 
 	private HashSet<String> requiredNames = new HashSet<String>();
 	private Stack<HashSet<String>> requiredNamesStack = new Stack<HashSet<String>>();
@@ -80,7 +91,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	private HashSet<Pair<String,String>> methodReturnType;
 	private HashMap<String,String> variableType;
-	
+
 	private HashSet<String> currentLoopScope = new HashSet<String>();
 	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>();
 
@@ -103,6 +114,9 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		requiredNamesStack.push(requiredNames);
 		requiredNames = new HashSet<String>();
 
+		finalVarStack.push(containsFinalVar);
+		containsFinalVar = false;
+
 		if (JavaRepresentation.canRepair(node)) 
 		{
 			// add scope information
@@ -113,6 +127,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			newScope.addAll(this.availableTypes);
 			this.scopes.addScope4Stmt(node, newScope);
 			this.nodeSet.add(node);
+
 		}
 
 		if(node instanceof EnhancedForStatement || 
@@ -127,12 +142,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		}
 		super.preVisit(node);
 	}
-	
-	@Override
-	public boolean visit(Assignment node) {
-		return true;
-	}
-	
+
 
 	@Override
 	public void postVisit(ASTNode node) {
@@ -154,13 +164,54 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 			currentMethodScope = newLocalVariables;
 		}
+
 		if(JavaRepresentation.canRepair(node)) {
 			this.scopes.addRequiredNames(node,new HashSet<String>(this.requiredNames));
+			this.scopes.setContainsFinalVarDecl(node, containsFinalVar);
+		}
+
+
+		if (node instanceof Block) {
+			containsFinalVar = finalVarStack.pop();
+		} else {
+			containsFinalVar = containsFinalVar || finalVarStack.pop();
 		}
 		
 		requiredNames.addAll(oldRequired);
 
 		super.postVisit(node);
+	}
+
+	private IBinding getVarBinding(FieldAccess node) {
+		return node.resolveFieldBinding();
+	}
+
+	private IBinding getVarBinding(Name node) {
+		return node.resolveBinding();
+	}
+	private IBinding getVarBinding(SuperFieldAccess node) {
+		return node.resolveFieldBinding();
+	}
+
+	@Override
+	public boolean visit(Assignment node) {
+		Expression lhs = node.getLeftHandSide();
+		IBinding binding = null;
+		if(lhs instanceof FieldAccess) {
+			binding = getVarBinding((FieldAccess) lhs);
+		} else if (lhs instanceof Name) {
+			binding = getVarBinding((Name) lhs);
+		} else if (lhs instanceof SuperFieldAccess) {
+			binding = getVarBinding((SuperFieldAccess) lhs);
+		}
+		if(binding != null && binding instanceof IVariableBinding) {
+			IVariableBinding vb = (IVariableBinding) binding;
+			int modifiers = vb.getModifiers();
+			if(Modifier.isFinal(modifiers)) {
+				containsFinalVar = true;
+			}
+		}
+		return true;
 	}
 
 	private boolean anywhereInScope(String lookingFor) {
@@ -169,10 +220,10 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				(currentMethodScope != null && currentMethodScope.contains(lookingFor)) ||
 				(currentLoopScope != null && currentLoopScope.contains(lookingFor));
 	}
-	
+
 	@Override
 	public boolean visit(SimpleName node) {
-		
+
 		// if I were doing something smart with types, I'd probably want to do something
 		// to track in-scope method names at method invocations
 		// but I'm not yet so we'll make do

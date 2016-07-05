@@ -41,6 +41,16 @@ public class JavaSemanticInfo {
 	private static Map<String, List<Expression>> conditionalExpressionsInScope = null;
 	private static Map<String, List<Expression>> conditionExtensionsInScope = null;
 
+	private static Map<Integer, Boolean> containsFinalVarRef = new HashMap<Integer,Boolean> ();
+	
+	public void collectFinalVarInfo(JavaStatement s, boolean fvi) {
+		containsFinalVarRef.put(s.getStmtId(), fvi);
+	}
+	
+	public boolean getFinalVarStatus(int id) {
+		return containsFinalVarRef.get(id);
+	}
+	
 	public List<Expression> getMethodParamReplacementExpressions(final String methodName, MethodDeclaration md, String desiredType) {
 		Map<String,List<Expression>> typeToExpressions = null;
 		if(methodParamExpressionsInScope == null) {
