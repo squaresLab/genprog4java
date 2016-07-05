@@ -48,6 +48,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -255,6 +256,8 @@ FaultLocRepresentation<JavaEditOperation> {
 		sourceInfo.addToBaseCompilationUnits(pair, myParser.getCompilationUnit());
 		semanticInfo.addAllSemanticInfo(myParser);
 		
+		Set<String> knownTypesInScope = myParser.getAvailableTypes();
+
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
 				JavaStatement s = new JavaStatement();
@@ -266,11 +269,15 @@ FaultLocRepresentation<JavaEditOperation> {
 
 				sourceInfo.augmentLineInfo(s.getStmtId(), node);
 				sourceInfo.storeStmtInfo(s, pair);
-
-				semanticInfo.addToScopeMap(s, scopeInfo.getScope(s.getASTNode()));
+				
+				Set<String> knownNamesInScope = scopeInfo.getScope(s.getASTNode());
+				Set<String> allThingsInScope = new HashSet<String>(knownNamesInScope);
+				allThingsInScope.addAll(knownTypesInScope);
+				semanticInfo.addToScopeMap(s,allThingsInScope);
+				
+					semanticInfo.addToScopeMap(s,  myParser.getAvailableTypes());
 				s.setRequiredNames(scopeInfo.getRequiredNames(s.getASTNode()));
 
-				Set<String> inScope = scopeInfo.getScope(s.getASTNode());
 				Set<String> required = scopeInfo.getRequiredNames(s.getASTNode());
 				System.err.println("Stmt id: " + stmtCounter + " node: " + node.toString());
 				System.err.println("in scope here:");
@@ -279,9 +286,10 @@ FaultLocRepresentation<JavaEditOperation> {
 				System.err.println(scopeInfo.getRequiredNames(s.getASTNode())); // FIXME: storing these in two places is silly, but one thing at a time.
 				System.err.println("available types:");
 				System.err.println("[[" + myParser.getAvailableTypes() + "]]");
-				if (!inScope.containsAll(required)) {
+
+				if (!allThingsInScope.containsAll(required)) {
 					for(String name : required) {
-						if(!inScope.contains(name)) {
+						if(!allThingsInScope.contains(name)) {
 							System.err.println("Missing: " + name);
 						}
 					}
