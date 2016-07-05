@@ -257,7 +257,8 @@ FaultLocRepresentation<JavaEditOperation> {
 		semanticInfo.addAllSemanticInfo(myParser);
 		
 		Set<String> knownTypesInScope = myParser.getAvailableTypes();
-
+		BufferedWriter bw = new BufferedWriter(new FileWriter("/Users/clegoues/Desktop/stmtinfo.txt"));
+		
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
 				JavaStatement s = new JavaStatement();
@@ -275,17 +276,16 @@ FaultLocRepresentation<JavaEditOperation> {
 				allThingsInScope.addAll(knownTypesInScope);
 				semanticInfo.addToScopeMap(s,allThingsInScope);
 				
-					semanticInfo.addToScopeMap(s,  myParser.getAvailableTypes());
 				s.setRequiredNames(scopeInfo.getRequiredNames(s.getASTNode()));
 
 				Set<String> required = scopeInfo.getRequiredNames(s.getASTNode());
-				System.err.println("Stmt id: " + stmtCounter + " node: " + node.toString());
-				System.err.println("in scope here:");
-				System.err.println("[[" + scopeInfo.getScope(s.getASTNode()) + "]]");
-				System.err.println("required:");
-				System.err.println(scopeInfo.getRequiredNames(s.getASTNode())); // FIXME: storing these in two places is silly, but one thing at a time.
-				System.err.println("available types:");
-				System.err.println("[[" + myParser.getAvailableTypes() + "]]");
+				bw.write("Stmt id: " + stmtCounter + " node: " + node.toString());
+				bw.write("in scope here:\n");
+				bw.write("\t[[" +allThingsInScope + "]]");
+				bw.write("\nrequired:");
+				bw.write("\t" + scopeInfo.getRequiredNames(s.getASTNode())); // FIXME: storing these in two places is silly, but one thing at a time.
+				bw.write("\navailable types:\n");
+				bw.write("[[" + myParser.getAvailableTypes() + "]]");
 
 				if (!allThingsInScope.containsAll(required)) {
 					for(String name : required) {
@@ -301,8 +301,8 @@ FaultLocRepresentation<JavaEditOperation> {
 //		
 
 			}
-		}				
-		//System.exit(0);
+		}	
+		bw.close();
 	}
 
 	public void fromSource(ClassInfo pair) throws IOException {
