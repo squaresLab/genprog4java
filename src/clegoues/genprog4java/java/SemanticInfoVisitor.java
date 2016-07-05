@@ -134,7 +134,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		HashSet<String> oldRequired = requiredNamesStack.pop();
 		if(node instanceof EnhancedForStatement || 
 				node instanceof ForStatement) {
-			System.err.println(node);
 			requiredNames.removeAll(currentLoopScope);
 			currentLoopScope = loopScopeStack.pop(); 
 		}
