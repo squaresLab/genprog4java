@@ -59,19 +59,6 @@ public class ASTUtils {
 		return lineno;
 	}
 
-	// FIXME this feels wicked inefficient to me, but possibly that's a
-	// low-order bit
-
-	public static Set<String> getTypes(ASTNode node) {
-		TreeSet<String> types = new TreeSet<String>();
-
-		TypeCollector visitor = new TypeCollector(types);
-
-		node.accept(visitor);
-
-		return types;
-	}
-
 	public static Iterable<JavaSourceFromString> getJavaSourceFromString(
 			String progName, List<Pair<ClassInfo, String>> code) {
 

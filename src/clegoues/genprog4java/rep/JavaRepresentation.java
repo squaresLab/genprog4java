@@ -848,17 +848,10 @@ FaultLocRepresentation<JavaEditOperation> {
 			String stmtStr = actualStmt.toString();
 			logger.debug("statement " + atomid + " at line " + stmt.getLineno()
 			+ ": " + stmtStr);
-			logger.debug("\t Names:");
-			for (String name : stmt.getNames()) {
-				logger.debug("\t\t" + name);
-			}
-			logger.debug("\t Scopes:");
+		
+			logger.debug("\t Required Names:");
 			for (String scope : stmt.getRequiredNames()) {
 				logger.debug("\t\t" + scope);
-			}
-			logger.debug("\t Types:");
-			for (String t : stmt.getTypes()) {
-				logger.debug("\t\t" + t);
 			}
 		}
 	}
