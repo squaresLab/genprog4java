@@ -276,9 +276,9 @@ FaultLocRepresentation<JavaEditOperation> {
 				System.err.println(s.getNames());
 				System.err.println("available types:");
 				System.err.println("[[" + myParser.getAvailableTypes() + "]]");
-				System.exit(0);
 			}
-		}
+		}				
+		System.exit(0);
 	}
 
 	public void fromSource(ClassInfo pair) throws IOException {

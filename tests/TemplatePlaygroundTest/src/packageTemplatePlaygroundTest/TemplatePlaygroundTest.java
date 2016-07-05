@@ -14,7 +14,9 @@ public class TemplatePlaygroundTest {
 	   }else if(x<z  && y > z){
 		//ret = y; // bug, it should be ret = x;
 		   ww.add(5);
+		   for(int i = 0; i < 5; i++) {
 		   ret = 5;
+		   }
 	   }
 	}else{
 	   if(x>y){
