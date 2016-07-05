@@ -317,7 +317,6 @@ FaultLocRepresentation<JavaEditOperation> {
 		}	
 
 
-		dumpStmts();
 	}
 
 	public void fromSource(ClassInfo pair) throws IOException {
