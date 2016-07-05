@@ -309,31 +309,13 @@ FaultLocRepresentation<JavaEditOperation> {
 
 				sourceInfo.augmentLineInfo(s.getStmtId(), node);
 				sourceInfo.storeStmtInfo(s, pair);
-				
-				Set<String> knownNamesInScope = scopeInfo.getScope(s.getASTNode());
-				Set<String> allThingsInScope = new HashSet<String>(knownNamesInScope);
-				allThingsInScope.addAll(knownTypesInScope);
-				semanticInfo.addToScopeMap(s,allThingsInScope);
-				
-				s.setRequiredNames(scopeInfo.getRequiredNames(s.getASTNode()));
-
-				Set<String> required = scopeInfo.getRequiredNames(s.getASTNode());
-			
-//				if (!allThingsInScope.containsAll(required)) {
-//					for(String name : required) {
-//						if(!allThingsInScope.contains(name)) {
-//							System.err.println("Missing: " + name);
-//						}
-//					}
-			//		System.exit(0);
-			//	}
-//					System.err.println("UNEXPECTED:");
-//					System.err.println("REQUIRED: " + required);
-//					System.err.println("INSCOPE: " + inScope);
-//		
-
+				scopeInfo.addScope4Stmt(node, knownTypesInScope);
+				s.setRequiredNames(scopeInfo.getRequiredNames(node));
+				semanticInfo.addToScopeMap(s, scopeInfo.getScope(node));
 			}
 		}	
+
+
 		dumpStmts();
 	}
 
