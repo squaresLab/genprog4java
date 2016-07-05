@@ -342,9 +342,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.cu = cu;
 	}
 
-	public Set<String> getFieldSet() {
-		return this.availableMethodsAndFields;
-	}
+
 	public void setNodeSet(List<ASTNode> o) {
 		this.nodeSet = o;
 	}
@@ -373,17 +371,17 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.scopes = scopeList;
 	}
 
-	@Override
-	public boolean visit(Initializer node) {
-		List mods = node.modifiers(); // FIXME need to deal with static.
-
-		for (Object o : mods) {
-			if (o instanceof Modifier) {
-				if (((Modifier) o).isStatic()) {
-					this.currentMethodScope = new HashSet<String>();
-				}
-			}
-		}
-		return super.visit(node);
-	}
+//	@Override
+//	public boolean visit(Initializer node) {
+//		List mods = node.modifiers(); // FIXME need to deal with static.
+//
+//		for (Object o : mods) {
+//			if (o instanceof Modifier) {
+//				if (((Modifier) o).isStatic()) {
+//					this.currentMethodScope = new HashSet<String>();
+//				}
+//			}
+//		}
+//		return super.visit(node);
+//	}
 }

@@ -57,7 +57,6 @@ public class JavaParser
 	private LinkedList<ASTNode> stmts;
 	private SemanticInfoVisitor visitor;
 	private CompilationUnit compilationUnit;
-	private Set<String> fields;
 	private HashSet<Pair<String,String>> methodReturnType;
 	private HashMap<String,String> variableTypes;
 	
@@ -105,7 +104,7 @@ public class JavaParser
 	
 	public void parse(String file, String[] libs)
 	{
-		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		ASTParser parser = ASTParser.newParser(AST.JLS4);
 		parser.setEnvironment(libs, new String[] {}, null, true);
 		
 		Map options = JavaCore.getOptions();
@@ -121,16 +120,8 @@ public class JavaParser
 		parser.createASTs(new String[]{file}, null, new String[0], req, null);
 		
 		this.compilationUnit = visitor.getCompilationUnit();
-		this.setFields(visitor.getFieldSet());
 		
 
 	}
 
-	public Set<String> getFields() {
-		return fields;
-	}
-
-	public void setFields(Set<String> fields) {
-		this.fields = fields;
-	}
 }
