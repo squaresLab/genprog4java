@@ -676,6 +676,20 @@ if B include return statement
 	public boolean canBeDeleted() {
 		ASTNode faultyNode = this.getASTNode();
 		ASTNode parent = faultyNode.getParent();
+		//Heuristic: Don't remove returns from functions that have only one return statement.
+				if(faultyNode instanceof ReturnStatement){
+					parent = this.getEnclosingMethod();
+					if(parent != null && parent instanceof MethodDeclaration) {
+						if(hasMoreThanOneReturn((MethodDeclaration)parent))
+							return false;
+					}
+				}
+
+		return true;
+		 /* FIXME: CLG believes that these are all unnecessary in light of making delete "replace with empty
+		  * block", which is what it should always have been.  However, am leaving this in for the 
+		  * time being just to be safe, will remove later */
+	/*
 		//Heuristic: If it is the body of an if, while, or for, it should not be removed
 
 		if(faultyNode instanceof Block){
@@ -698,15 +712,7 @@ if B include return statement
 				return false;
 		}
 
-		//Heuristic: Don't remove returns from functions that have only one return statement.
-		if(faultyNode instanceof ReturnStatement){
-			parent = this.getEnclosingMethod();
-			if(parent != null && parent instanceof MethodDeclaration) {
-				if(hasMoreThanOneReturn((MethodDeclaration)parent))
-					return false;
-			}
-		}
-
+		
 		//Heuristic: If an stmt is the only stmt in a block, don´t delete it
 		parent = blockThatContainsThisStatement();
 		if(parent instanceof Block){
@@ -715,7 +721,7 @@ if B include return statement
 			}
 		}
 
-		return true;
+		return true;*/
 	}
 
 	public ASTNode getEnclosingMethod() {
