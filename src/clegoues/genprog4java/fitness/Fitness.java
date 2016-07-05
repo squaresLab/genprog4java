@@ -263,7 +263,7 @@ public class Fitness {
 		Long L = Math.round(sample * Fitness.numPositiveTests);
 		int sampleSize = Integer.valueOf(L.intValue());
 		Collections.shuffle(Fitness.positiveTests, Configuration.randomizer);
-		List<TestCase> intSample = Fitness.positiveTests.subList(0,sampleSize-1); 
+		List<TestCase> intSample = Fitness.positiveTests.subList(0,sampleSize); 
 		List<TestCase> intRestSample = Fitness.positiveTests.subList(sampleSize, positiveTests.size()-1);
 		Fitness.testSample.clear(); 
 		Fitness.restSample.clear();

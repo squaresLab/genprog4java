@@ -687,7 +687,7 @@ if B include return statement
 				}
 
 		return true;
-		 /* FIXME: CLG believes that these are all unnecessary in light of making delete "replace with empty
+		 /* FIXME: CLG believes that these are all now unnecessary in light of making delete "replace with empty
 		  * block", which is what it should always have been.  However, am leaving this in for the 
 		  * time being just to be safe, will remove later */
 	/*
