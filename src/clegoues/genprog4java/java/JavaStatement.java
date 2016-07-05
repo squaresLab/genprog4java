@@ -805,13 +805,9 @@ if B include return statement
 	public void setInfo(int stmtCounter, ASTNode node) {
 		this.setStmtId(stmtCounter);
 		this.setLineno(ASTUtils.getLineNumber(node));
-		this.setNames(ASTUtils.getNames(node));
 		this.setTypes(ASTUtils.getTypes(node));
-		this.setRequiredNames(ASTUtils.getScope(node));
 		this.setASTNode(node);
 	}
-
-
 
 
 }

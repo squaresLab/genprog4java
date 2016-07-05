@@ -59,14 +59,6 @@ public class ASTUtils {
 		return lineno;
 	}
 
-	public static Set<String> getNames(ASTNode node) // it does not count.
-	{
-		TreeSet<String> names = new TreeSet<String>();
-		NameCollector visitor = new NameCollector(names);
-		node.accept(visitor);
-		return names;
-	}
-
 	// FIXME this feels wicked inefficient to me, but possibly that's a
 	// low-order bit
 
@@ -78,16 +70,6 @@ public class ASTUtils {
 		node.accept(visitor);
 
 		return types;
-	}
-
-	public static Set<String> getScope(ASTNode node) {
-		TreeSet<String> scope = new TreeSet<String>();
-
-		ScopeCollector visitor = new ScopeCollector(scope);
-
-		node.accept(visitor);
-
-		return scope;
 	}
 
 	public static Iterable<JavaSourceFromString> getJavaSourceFromString(

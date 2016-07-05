@@ -46,14 +46,14 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-// FIXME: direct steal from PAR
+// saving this for now just for brief referenc,e doin't think I need it ultimately
 
-public class ScopeCollector extends ASTVisitor
+public class DEPRECATEDScopeCollector extends ASTVisitor
 {
 	
 	private Set<String> nameSet;
 	
-	public ScopeCollector(Set<String> o)
+	public DEPRECATEDScopeCollector(Set<String> o)
 	{
 		nameSet = o;
 	}

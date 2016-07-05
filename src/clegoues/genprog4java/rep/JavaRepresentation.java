@@ -268,17 +268,17 @@ FaultLocRepresentation<JavaEditOperation> {
 				sourceInfo.storeStmtInfo(s, pair);
 
 				semanticInfo.addToScopeMap(s, scopeInfo.getScope(s.getASTNode()));
-				
 				System.err.println("Stmt id: " + stmtCounter + " node: " + node.toString());
 				System.err.println("in scope here:");
 				System.err.println("[[" + scopeInfo.getScope(s.getASTNode()) + "]]");
 				System.err.println("required:");
-				System.err.println(scopeInfo.getRequiredNames(s.getASTNode()));
+				System.err.println(scopeInfo.getRequiredNames(s.getASTNode())); // FIXME: storing these in two places is silly, but one thing at a time.
+				s.setRequiredNames(scopeInfo.getRequiredNames(s.getASTNode()));
 				System.err.println("available types:");
 				System.err.println("[[" + myParser.getAvailableTypes() + "]]");
 			}
 		}				
-		System.exit(0);
+		//System.exit(0);
 	}
 
 	public void fromSource(ClassInfo pair) throws IOException {
