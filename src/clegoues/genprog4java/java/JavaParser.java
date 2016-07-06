@@ -61,6 +61,7 @@ public class JavaParser
 	private HashMap<String,String> variableTypes;
 	
 	private HashSet<String> availableTypes;
+	private HashSet<String> availableMethodsAndFields;
 
 	public JavaParser(ScopeInfo scopeList)
 	{
@@ -68,7 +69,8 @@ public class JavaParser
 		this.methodReturnType = new HashSet<Pair<String,String>>();
 		this.variableTypes = new HashMap<String,String>();
 		this.availableTypes = new HashSet<String>();
-		
+		this.availableMethodsAndFields = new HashSet<String>();
+
 		this.visitor = new SemanticInfoVisitor();
 		
 		this.visitor.setNodeSet(this.stmts);		
@@ -77,10 +79,17 @@ public class JavaParser
 		this.visitor.setVariableType(variableTypes);
 		
 		this.visitor.setAvailableTypes(availableTypes);
+		this.visitor.setAvailableMethodsAndFields(availableMethodsAndFields);
+
 	}
 
 	public HashSet<String> getAvailableTypes() {
 		return this.availableTypes;
+	}
+	
+
+	public HashSet<String> getAvailableMethodsAndFields() {
+		return this.availableMethodsAndFields;
 	}
 	
 	public HashSet<Pair<String,String>> getMethodReturnTypeSet(){

@@ -75,11 +75,20 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	private int lineno;
 	private int stmtId; // unique
 	private Set<String> mustBeInScope;
-
+	private Set<String> namesDeclared;
+	
 	public void setClassInfo(ClassInfo ci) {
 		this.classInfo = ci;
 	}
+	
+	public Set<String> getNamesDeclared() {
+		return this.namesDeclared;
+	}
 
+	public void setNamesDeclared(Set<String> names) {
+		this.namesDeclared = names;
+	}
+	
 	public ClassInfo getClassInfo() {
 		return this.classInfo;
 	}

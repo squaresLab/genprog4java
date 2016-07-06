@@ -227,9 +227,7 @@ Representation<G> {
 			thisVariantsFitness = new HashMap<String, FitnessValue>();
 			fitnessCache.put(hash, thisVariantsFitness);
 		}
-		 
-		//HashMap<String, FitnessValue> thisVariantsFitness = new HashMap<String, FitnessValue>();
-		
+		 		
 		if (this.alreadyCompiled == null) {
 			String newName = CachingRepresentation.newVariantFolder();
 			this.variantFolder = newName;
