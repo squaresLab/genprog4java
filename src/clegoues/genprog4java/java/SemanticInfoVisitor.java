@@ -81,8 +81,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private HashSet<String> requiredNames = new HashSet<String>();
 	private Stack<HashSet<String>> requiredNamesStack = new Stack<HashSet<String>>();
 
-	// it might make sense to store these separately, but for now, this will do
-	private HashSet<String> availableMethodsAndFields;
 
 	// FIXME: types on variables in different scopes? Types in general, really
 
@@ -97,18 +95,28 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	// declared or imported; primitive types are always available;
 	private HashSet<String> availableTypes; 
+	// it might make sense to store these separately, but for now, this will do
+	// upon reflection, it makes more sense to do add these after the whole thing has been parsed
+	private HashSet<String> availableMethodsAndFields; 
+	
+	private HashSet<String> namesDeclared = new HashSet<String>();
+	private Stack<HashSet<String>> namesDeclaredStack = new Stack<HashSet<String>>();
 
 	private CompilationUnit cu;
 
 	public SemanticInfoVisitor() {
-		this.availableMethodsAndFields = new HashSet<String>();
+		
+	}
+	public void setAvailableMethodsAndFields(HashSet<String> mandf) {
+		this.availableMethodsAndFields = mandf;
 		this.availableMethodsAndFields.add("this");
 	}
-
 	public void setAvailableTypes(HashSet<String> typs) {
 		this.availableTypes = typs;
 	}
 
+	// FIXME figure out what a node declares
+	
 	@Override
 	public void preVisit(ASTNode node) {
 		requiredNamesStack.push(requiredNames);
@@ -123,9 +131,9 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			TreeSet<String> newScope = new TreeSet<String>();
 			newScope.addAll(this.currentMethodScope);
 			newScope.addAll(this.currentLoopScope);
-			newScope.addAll(this.availableMethodsAndFields);
 			newScope.addAll(this.availableTypes);
-			this.scopes.addScope4Stmt(node, newScope);
+			this.scopes.addToMethodScope(node, newScope);
+			this.scopes.addToClassScope(this.availableMethodsAndFields);
 			this.nodeSet.add(node);
 
 		}
@@ -140,6 +148,9 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			this.methodScopeStack.push(currentMethodScope);
 			currentMethodScope = new HashSet<String>(currentMethodScope);
 		}
+		
+		this.namesDeclaredStack.push(namesDeclared);
+		namesDeclared = new HashSet<String>();
 		super.preVisit(node);
 	}
 
@@ -165,11 +176,13 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			currentMethodScope = newLocalVariables;
 		}
 
+		namesDeclared.addAll(namesDeclaredStack.pop());
+
 		if(JavaRepresentation.canRepair(node)) {
 			this.scopes.addRequiredNames(node,new HashSet<String>(this.requiredNames));
 			this.scopes.setContainsFinalVarDecl(node, containsFinalVar);
+			this.scopes.setNamesDeclared(node, new HashSet<String>(this.namesDeclared));
 		}
-
 
 		if (node instanceof Block) {
 			containsFinalVar = finalVarStack.pop();
@@ -178,7 +191,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		}
 		
 		requiredNames.addAll(oldRequired);
-
+		
 		super.postVisit(node);
 	}
 
@@ -247,6 +260,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	public boolean visit(EnhancedForStatement node) {
 		SingleVariableDeclaration vd = node.getParameter();
 		this.currentLoopScope.add(vd.getName().getIdentifier());
+		this.namesDeclared.add(vd.getName().getIdentifier());
 		return true;
 	}
 
@@ -265,6 +279,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			for(Object f : fragments) {
 				VariableDeclarationFragment frag = (VariableDeclarationFragment) f;
 				this.currentLoopScope.add(frag.getName().getIdentifier());
+				this.namesDeclared.add(frag.getName().getIdentifier());
 			}
 		}
 		return true;
@@ -325,6 +340,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			if (o instanceof VariableDeclarationFragment) {
 				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
 				String name = v.getName().getIdentifier();
+				namesDeclared.add(name);
 				if(!currentLoopScope.contains(name)) {
 					this.currentMethodScope.add(v.getName().getIdentifier());
 					variableType.put(v.getName().toString(), node.getType().toString());
@@ -334,6 +350,22 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		return true;
 	}
 
+	@Override
+	public boolean visit(VariableDeclarationExpression node) {
+		for (Object o : node.fragments()) {
+			if (o instanceof VariableDeclarationFragment) {
+				VariableDeclarationFragment v = (VariableDeclarationFragment) o;
+				String name = v.getName().getIdentifier();
+				namesDeclared.add(name);
+				if(!currentLoopScope.contains(name)) {
+					this.currentMethodScope.add(v.getName().getIdentifier());
+					variableType.put(v.getName().toString(), node.getType().toString());
+				}
+			}
+		}
+		return true;
+	}
+	
 	public CompilationUnit getCompilationUnit() {
 		return cu;
 	}
