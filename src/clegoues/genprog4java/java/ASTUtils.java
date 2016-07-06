@@ -70,10 +70,6 @@ public class ASTUtils {
 			jsfs.add(oneSource);
 
 		}
-		// this originally turned off remove with an unsupported
-		// operation exception;
-		// do we really need that behavior?
-
 		return jsfs;
 
 	}

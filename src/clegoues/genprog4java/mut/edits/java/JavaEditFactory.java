@@ -82,7 +82,7 @@ public class JavaEditFactory {
 		}		return null;
 	}
 
-	private Set<WeightedAtom> scopeHelper(Location stmtId, JavaRepresentation variant) {
+	private Set<WeightedAtom> scopeHelper(Location stmtId, JavaRepresentation variant, Mutation mut) {
 		if (JavaEditFactory.scopeSafeAtomMap.containsKey(stmtId.getId())) {
 			return JavaEditFactory.scopeSafeAtomMap.get(stmtId.getId());
 		}
@@ -109,7 +109,7 @@ public class JavaEditFactory {
 			// different from what is now at that location.
 			// this comes down to our having overloaded statement IDs to mean both location and statement ID
 			// which is a problem I keep meaning to solve.
-			if(faultAST.equals(fixAST)) {
+			if(mut != Mutation.APPEND && faultAST.equals(fixAST)) {
 				continue;
 			}
 
@@ -208,7 +208,7 @@ public class JavaEditFactory {
 		return retVal;
 		case APPEND: 	
 		case REPLACE:
-			Set<WeightedAtom> fixStmts = this.scopeHelper(location, variant);
+			Set<WeightedAtom> fixStmts = this.scopeHelper(location, variant, editType);
 			for(WeightedAtom fixStmt : fixStmts) {
 				JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
 				ASTNode fixAST = potentialFixStmt.getASTNode();
@@ -216,9 +216,9 @@ public class JavaEditFactory {
 			}
 			break;
 		case SWAP:
-			for (WeightedAtom item : this.scopeHelper(location, variant)) {
+			for (WeightedAtom item : this.scopeHelper(location, variant, editType)) {
 				int atom = item.getAtom();
-				Set<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getSecond()), variant);
+				Set<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getSecond()), variant, editType);
 				for (WeightedAtom there : inScopeThere) {
 					if (there.getAtom() == location.getId()) { // FIXME: this check looks weird to me.  Test swap.
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
