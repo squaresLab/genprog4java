@@ -410,7 +410,11 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				// FIXME: also supermethodinvocations?
 
 				public boolean visit(MethodInvocation node) {
-					IMethodBinding myMethodBinding = node.resolveMethodBinding().getMethodDeclaration();
+					IMethodBinding mb = node.resolveMethodBinding();
+					if(mb == null) {
+						return true;
+					}
+					IMethodBinding myMethodBinding = mb.getMethodDeclaration();
 
 					ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
 					ArrayList<IMethodBinding> compatibleMethods = new ArrayList<IMethodBinding>();
@@ -560,7 +564,11 @@ if B include return statement
 				// FIXME: also supermethodinvocations
 
 				public boolean visit(MethodInvocation node) {
-					IMethodBinding myMethodBinding = node.resolveMethodBinding().getMethodDeclaration();
+					IMethodBinding mb = node.resolveMethodBinding();
+					if(mb == null) {
+						return true;
+					}
+					IMethodBinding myMethodBinding = mb.getMethodDeclaration();
 
 					ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
 					ArrayList<IMethodBinding> compatibleMethods = new ArrayList<IMethodBinding>();
