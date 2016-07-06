@@ -13,12 +13,14 @@ import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimplePropertyDescriptor;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -149,7 +151,7 @@ public class JavaEditFactory {
 				}
 			}
 
-			//Heuristic: Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is wrong
+			//Heuristic: Inserting methods like this() or super() somewhere that is not the First (or second, if super?) Stmt in the constructor, is wrong
 			if(fixAST instanceof ConstructorInvocation || 
 					fixAST instanceof SuperConstructorInvocation){
 				if(mut == Mutation.APPEND) continue;
@@ -158,12 +160,9 @@ public class JavaEditFactory {
 				if (enclosingMethod != null && 
 						enclosingMethod instanceof MethodDeclaration && 
 						((MethodDeclaration) enclosingMethod).isConstructor()) {
-					StructuralPropertyDescriptor locationPotBuggy = faultAST.getLocationInParent();
 					List<ASTNode> statementsInBlock = ((MethodDeclaration) enclosingMethod).getBody().statements();
 					ASTNode firstStmtInTheBlock = statementsInBlock.get(0);
-					StructuralPropertyDescriptor locationFirstInBlock = firstStmtInTheBlock.getLocationInParent();
-					//This will catch replacements and swaps, but it will append after the first stmt, so append will still create a non compiling variant
-					if(!locationFirstInBlock.equals(locationPotBuggy)){
+					if(!faultAST.equals(firstStmtInTheBlock)) {
 						continue;
 					}
 				} else {

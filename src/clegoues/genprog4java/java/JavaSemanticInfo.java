@@ -215,7 +215,7 @@ public class JavaSemanticInfo {
 		Set<String> classScope = classScopeMap.get(potentiallyBuggyStmt.getStmtId());
 		Set<String> methodScope = methodScopeMap.get(potentiallyBuggyStmt.getStmtId());
 		
-		Set<String> inScopeAt = new HashSet(classScope);
+		Set<String> inScopeAt = new HashSet<String>(classScope);
 		inScopeAt.addAll(methodScope);
 		
 		Set<String> requiredScopes = potentialFixStmt.getRequiredNames();
