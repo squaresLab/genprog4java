@@ -152,6 +152,7 @@ public class JavaEditFactory {
 			//Heuristic: Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is wrong
 			if(fixAST instanceof ConstructorInvocation || 
 					fixAST instanceof SuperConstructorInvocation){
+				if(mut == Mutation.APPEND) continue;
 				ASTNode enclosingMethod = potentiallyBuggyStmt.getEnclosingMethod();
 
 				if (enclosingMethod != null && 
@@ -177,7 +178,7 @@ public class JavaEditFactory {
 					!potentiallyBuggyStmt.isWithinLoopOrCase()){
 				continue;
 			}
-
+			// FIXME: don't insert returns/throws into the middle of blocks, perhaps?
 			//Heuristic: Don't replace/swap returns within functions that have only one return statement
 			// (unless the replacer is also a return statement); could also check if it's a block or
 			// other sequence of statements with a return within it, but I'm lazy
