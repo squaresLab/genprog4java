@@ -40,12 +40,12 @@ do
   for (( bug=1 ; bug<=$NUMBEROFBUGS ; bug++ ))
   do
   
-    $GENPROGDIR/defects4j-scripts/prepareBug.sh $PROJECT $bug /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ generated 100 /home/mau/Research/defects4j/ExamplesCheckedOut/
+    $GENPROGDIR/defects4j-scripts/prepareBug.sh $PROJECT $bug $GENPROGDIR $DEFECTS4JDIR generated 100 $DEFECTS4JDIR/ExamplesCheckedOut/
 
     echo ""
     echo "prepareBug.sh finished executing"
 
-    $GENPROGDIR/defects4j-scripts/runTestSuite.sh $PROJECT $bug  /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ > $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites/resultsFromRunningGenereatedTestSuites"$PROJECT""$bug".txt
+    $GENPROGDIR/defects4j-scripts/runTestSuite.sh $PROJECT $bug  $GENPROGDIR $DEFECTS4JDIR > $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites/resultsFromRunningGenereatedTestSuites"$PROJECT""$bug".txt
 
     echo ""
     echo "Generated test suite has been ran on the buggy code."
