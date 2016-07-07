@@ -132,7 +132,7 @@ case "$OPTION" in
 #IT IS ADVISED TO RUN IT WITH 180 SEGS NOT 10 THIS IS FOR TESTING
 
 
-  perl run_randoop.pl -p "$PROJECT" -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfRandoop/ -b 10
+  perl run_randoop.pl -p "$PROJECT" -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfRandoop/ -b 180
  
   #Untar the generated test into the tests folder
   cd $BUGWD/"$TESTWD"/
