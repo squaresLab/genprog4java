@@ -9,10 +9,10 @@
 # 7th param is the folder where the bug files will be cloned to
 
 # Example usage, local for Mau
-#./prepareBug.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ humanMade 100
+#./prepareBug.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ humanMade 100 /home/mau/Research/defects4j/ExamplesCheckedOut/
 
 # Example usage, VM:
-#./prepareBug.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/ allHuman 100
+#./prepareBug.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/ allHuman 100 /home/mau/Research/defects4j/ExamplesCheckedOut/
 
 # OS X note, mostly for CLG: 
 # javac has to be version 1.7, and JAVA_HOME must be set accordingly,
@@ -48,10 +48,10 @@ BUGWD=$BUGSFOLDER"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
 
 #Checkout the buggy and fixed versions of the code (latter to make second testsuite
 defects4j checkout -p $1 -v "$BUGNUMBER"b -w $BUGWD
-defects4j checkout -p $1 -v "$BUGNUMBER"f -w $BUGSFOLDER/$LOWERCASEPACKAGE"$2"Fixed
+#defects4j checkout -p $1 -v "$BUGNUMBER"f -w $BUGSFOLDER/$LOWERCASEPACKAGE"$2"Fixed
 
 #Compile the both buggy and fixed code
-for dir in Buggy Fixed
+for dir in Buggy
 do
     pushd $BUGSFOLDER"/"$LOWERCASEPACKAGE$BUGNUMBER$dir
     defects4j compile
@@ -123,15 +123,32 @@ case "$OPTION" in
         ;;
 
 "generated" )
-#Create the new test suite
-echo Creating new test suite...
-"$DEFECTS4JDIR"/framework/bin/run_evosuite.pl -p $PROJECT -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfEvoSuite/ -c branch -b 100 -A
 
-#Untar the generated test into the tests folder
-cd $BUGWD/"$TESTWD"/
-tar xvjf outputOfEvoSuite/$PROJECT/evosuite-branch/1/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch.1.tar.bz2
+  #Create the new test suite
+  echo Creating new test suite...
+  cd "$DEFECTS4JDIR"/framework/bin/
+
+
+#IT IS ADVISED TO RUN IT WITH 180 SEGS NOT 10 THIS IS FOR TESTING
+
+
+  perl run_randoop.pl -p "$PROJECT" -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfRandoop/ -b 10
+ 
+  #Untar the generated test into the tests folder
+  cd $BUGWD/"$TESTWD"/
+  tar xvjf outputOfRandoop/$PROJECT/randoop/1/"$PROJECT"-"$BUGNUMBER"f-randoop.1.tar.bz2
+
+  cd $BUGWD/
+  defects4j compile
+
+  cd $BUGWD/"$TESTWD"/
+  find . -maxdepth 1 -name "*.java" -exec basename \{} .java \; > $BUGWD/pos.tests
+
 ;;
 esac
+
+
+
 
 #Remove a percentage of the positive tests in the test suite
 cd $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
