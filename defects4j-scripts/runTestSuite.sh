@@ -53,12 +53,15 @@ esac
 classSourceFolder=$DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$SRCFOLDER
 classTestFolder=$DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$TESTFOLDER
 
+echo $classSourceFolder
+echo $classTestFolder
+
 JAVALOCATION=$(which java)
 
 
 TESTCOUNT=$(cat $POSTESTS | wc -l)
 
-echo This test suite has $TESTCOUNT tests
+echo "This test suite has $TESTCOUNT tests"
 
 COUNTER=0
 
@@ -66,32 +69,41 @@ while read p; do
 
 COUNTER=$(($COUNTER + 1))
 
-  echo Running test $COUNTER out of $TESTCOUNT: $p
+echo ""
+echo "Running test $COUNTER out of $TESTCOUNT: $p:"
 command=($DEFECTS4JDIR/framework/projects/lib/junit-4.10.jar org.junit.runner.JUnitCore $p)
-echo Command: $command
+#echo Command: $command
+
 
 OUTPUT=$($JAVALOCATION -cp .:$classSourceFolder:$classTestFolder:$DEFECTS4JDIR/framework/projects/lib/junit-4.11.jar org.junit.runner.JUnitCore $p)
 
-echo $OUTPUT
+#echo $OUTPUT
+echo "Last 100 characters of the output:"
+echo "${OUTPUT:(-100)}"
+
 
 if [[ $OUTPUT == *"OK (0 tests)"* ]]
 then
-  echo "ERROR! IN THE CLASS: " $p
-  break
+  echo ""
+  #echo "ERROR! IN THE CLASS: " $p
+  #break
 fi
 
 if [[ $OUTPUT == *"Could not find class"* ]]
 then
-  echo "ERROR! IN THE CLASS: " $p
-  break
+  echo ""
+  #echo "ERROR! IN THE CLASS: " $p
+  #break
 fi
 
 if [[ $OUTPUT == *"OK ("* ]]
 then
-  echo "OK"
+  echo ""
+  #echo "OK"
 else
-  echo "ERROR! IN THE CLASS: " $p
-  break
+  echo ""
+  #echo "ERROR! IN THE CLASS: " $p
+  #break
 fi
 
 
@@ -99,7 +111,8 @@ done <$POSTESTS
 
 if [[ $TESTCOUNT == $COUNTER ]]
 then
-   echo "Yey! All tests were executed successfully :D :D :D"
+  echo ""
+   #echo "Yey! All tests were executed successfully :D :D :D"
 fi
 
 
