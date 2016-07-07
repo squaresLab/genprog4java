@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -78,6 +79,11 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private boolean containsFinalVar = false;
 	private Stack<Boolean> finalVarStack = new Stack<Boolean>();
 
+
+	private boolean inConditionalScope = false;
+	private Stack<Boolean> conditionalScopeStack = new Stack<Boolean>();
+	
+	
 	private HashSet<String> requiredNames = new HashSet<String>();
 	private Stack<HashSet<String>> requiredNamesStack = new Stack<HashSet<String>>();
 
@@ -149,6 +155,17 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			currentMethodScope = new HashSet<String>(currentMethodScope);
 		}
 		
+//		if(node instanceof EnhancedForStatement ||
+//				node instanceof ForStatement ||
+//				node instanceof DoStatement || 
+//				node instanceof IfStatement ||
+//				node instanceof SwitchStatement ||
+//				node instanceof TryStatement ||
+//				    node instanceof WhileStatement) {
+//			
+//		}
+//				   
+//				 
 		this.namesDeclaredStack.push(namesDeclared);
 		namesDeclared = new HashSet<String>();
 		super.preVisit(node);
