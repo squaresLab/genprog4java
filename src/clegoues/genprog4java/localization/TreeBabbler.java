@@ -3,6 +3,7 @@ package clegoues.genprog4java.localization;
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import clegoues.genprog4java.treelm.CompleteLM;
 import codemining.ast.TreeNode;
 import codemining.ast.java.AbstractJavaTreeExtractor;
 import codemining.lm.tsg.TSGNode;
@@ -12,7 +13,7 @@ public class TreeBabbler {
 	private static Logger logger = Logger.getLogger( TreeBabbler.class );
 
 	public TreeBabbler( TSGrammar< TSGNode > grammar ) {
-		this.grammar = grammar;
+		this.grammar = new CompleteLM( grammar );
 		try {
 			this.extractor = (AbstractJavaTreeExtractor) grammar.getTreeExtractor();
 		} catch ( ClassCastException e ) {
@@ -26,9 +27,6 @@ public class TreeBabbler {
 		logger.debug( "Babbling to replace code:\n" + root.toString() );
 		
 		TreeNode< TSGNode > tsgTree = eclipseToTreeLm( root );
-		assert tsgTree != null;
-		assert tsgTree.getData() != null;
-		assert grammar.getInternalGrammar().get( tsgTree.getData() ) != null;
 		ASTNode result = treeLmToEclipse( grammar.generateRandom( tsgTree ) );
 
 		logger.debug( "Replacement :\n" + result.toString() );
@@ -51,5 +49,5 @@ public class TreeBabbler {
 	}
 
 	private final AbstractJavaTreeExtractor extractor;
-	public final TSGrammar< TSGNode > grammar;
+	public final CompleteLM grammar;
 }
