@@ -82,29 +82,30 @@ public class EntropyLocalization extends DefaultLocalization {
 	public Location getRandomLocation(double weight) {
 		JavaLocation startingStmt = (JavaLocation) GlobalUtils.chooseOneWeighted(new ArrayList(this.getFaultLocalization()), weight);
 		ASTNode actualCode = startingStmt.getCodeElement();
-		List<ASTNode> decomposed = ASTUtils.decomposeASTNode(actualCode);
-		double maxProb = Double.NEGATIVE_INFINITY;
-		ASTNode biggestSoFar = actualCode;
-		for(ASTNode node : decomposed) {
-			TreeNode< TSGNode > asTlm = babbler.eclipseToTreeLm(node);
-			double prob = babbler.grammar.computeRulePosteriorLog2Probability(asTlm);
-			double entropy = -prob * Math.exp(prob);
-			System.err.println(node);
-			System.err.println(prob);
-			System.err.println("entropy:" + entropy);
-			System.err.println();
-
-			if(prob > maxProb) {
-				maxProb = prob;
-				biggestSoFar = node;
-			}
-		}
-
-		System.err.println("biggest found:");
-		System.err.println(biggestSoFar);
-		System.err.println(maxProb);
-
-		return new JavaASTNodeLocation(biggestSoFar.getParent());
+		return new JavaASTNodeLocation(startingStmt, actualCode); 
+//		List<ASTNode> decomposed = ASTUtils.decomposeASTNode(actualCode);
+//		double maxProb = Double.NEGATIVE_INFINITY;
+//		ASTNode biggestSoFar = actualCode;
+//		for(ASTNode node : decomposed) {
+//			TreeNode< TSGNode > asTlm = babbler.eclipseToTreeLm(node);
+//			double prob = babbler.grammar.computeRulePosteriorLog2Probability(asTlm);
+//			double entropy = -prob * Math.exp(prob);
+//			System.err.println(node);
+//			System.err.println(prob);
+//			System.err.println("entropy:" + entropy);
+//			System.err.println();
+//
+//			if(prob > maxProb) {
+//				maxProb = prob;
+//				biggestSoFar = node;
+//			}
+//		}
+//
+//		System.err.println("biggest found:");
+//		System.err.println(biggestSoFar);
+//		System.err.println(maxProb);
+//
+//		return new JavaASTNodeLocation(biggestSoFar.getParent());
 	}
 
 	@Override

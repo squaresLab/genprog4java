@@ -13,6 +13,13 @@ public class JavaASTNodeLocation extends JavaLocation<ASTNode> {
 		super(location, 1.0);
 		this.setCodeElement(location);
 	}
+	
+
+	public JavaASTNodeLocation(JavaLocation origLocInfo, ASTNode location) {
+		super(location, 1.0);
+		this.setCodeElement(location);
+		this.setClassInfo(origLocInfo.getClassInfo());
+	}
 	@Override
 	public int getId() {
 		return 0; // FIXME halp
