@@ -12,8 +12,13 @@ import java.util.logging.Logger;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimplePropertyDescriptor;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -55,7 +60,8 @@ public class PRVariableTypeExtractor extends VariableTypeJavaTreeExtractor {
 	 * @param tree
 	 * @return
 	 */
-	public TreeNode<Integer> detempletize(final TreeNode<Integer> fromTree) {
+	// this one is from the variable only grammar
+	/*public TreeNode<Integer> detempletize(final TreeNode<Integer> fromTree) {
 		if (getSymbol(fromTree.getData()).nodeType == AstNodeSymbol.TEMPLATE_NODE) {
 			return detempletize(fromTree.getChild(0, 0));
 		}
@@ -98,6 +104,62 @@ public class PRVariableTypeExtractor extends VariableTypeJavaTreeExtractor {
 						final TreeNode<Integer> untempletizedCopyChild = TreeNode
 								.create(templateChild.getData(),
 										templateChild.nProperties());
+						currentTo.addChildNode(untempletizedCopyChild, i);
+
+					} else {
+						final TreeNode<Integer> toChild = TreeNode.create(
+								fromChild.getData(), fromChild.nProperties());
+						currentTo.addChildNode(toChild, i);
+						toStack.push(toChild);
+						fromStack.push(fromChild);
+					}
+				}
+			}
+		}
+
+		return toTree;
+	}*/
+	
+	// question/understanding TODO: why is detempletize different between metavariable and variable-based grammars?
+	// this one is from the TempletizedJavaTreeExtractor
+	public TreeNode<Integer> detempletize(final TreeNode<Integer> fromTree) {
+		if (getSymbol(fromTree.getData()).nodeType == AstNodeSymbol.TEMPLATE_NODE) {
+			return detempletize(fromTree.getChild(0, 0));
+		}
+		final TreeNode<Integer> toTree = TreeNode.create(fromTree.getData(),
+				fromTree.nProperties());
+		final ArrayDeque<TreeNode<Integer>> toStack = new ArrayDeque<TreeNode<Integer>>();
+		final ArrayDeque<TreeNode<Integer>> fromStack = new ArrayDeque<TreeNode<Integer>>();
+
+		toStack.push(toTree);
+		fromStack.push(fromTree);
+
+		while (!toStack.isEmpty()) {
+			final TreeNode<Integer> currentTo = toStack.pop();
+			final TreeNode<Integer> currentFrom = fromStack.pop();
+
+			final List<List<TreeNode<Integer>>> children = currentFrom
+					.getChildrenByProperty();
+
+			for (int i = 0; i < children.size(); i++) {
+				final List<TreeNode<Integer>> childrenForProperty = children
+						.get(i);
+
+				for (final TreeNode<Integer> fromChild : childrenForProperty) {
+					final AstNodeSymbol symbol = getSymbol(fromChild.getData());
+
+					if (symbol.nodeType == AstNodeSymbol.TEMPLATE_NODE) {
+
+						checkArgument(fromChild.nProperties() == 1);
+
+						if (fromChild.isLeaf()) {
+							continue;
+						}
+						final TreeNode<Integer> untempletizedChild = fromChild
+								.getChild(0, 0);
+						final TreeNode<Integer> untempletizedCopyChild = TreeNode
+								.create(untempletizedChild.getData(),
+										untempletizedChild.nProperties());
 						currentTo.addChildNode(untempletizedCopyChild, i);
 
 					} else {
@@ -324,6 +386,61 @@ public class PRVariableTypeExtractor extends VariableTypeJavaTreeExtractor {
 			throw new Exception("Unkown type of ASTNode");
 		}
 	}
+	protected static void addSimplePropertyToASTNode(final ASTNode node,
+			final SimplePropertyDescriptor sp, final Object spValue)
+					throws Exception {
+		checkNotNull(sp, "sp should not be null");
+		checkNotNull(spValue);
+		if (node instanceof Modifier) {
+			final Modifier.ModifierKeyword mod = Modifier.ModifierKeyword
+					.toKeyword((String) spValue);
+			node.setStructuralProperty(sp, mod);
+		} else if (node instanceof PrimitiveType) {
+			final String type = (String) spValue;
+			final PrimitiveType.Code typeCode;
+			if (spValue.equals("boolean")) {
+				typeCode = PrimitiveType.BOOLEAN;
+			} else if (spValue.equals("byte")) {
+				typeCode = PrimitiveType.BYTE;
+			} else if (spValue.equals("char")) {
+				typeCode = PrimitiveType.CHAR;
+			} else if (spValue.equals("double")) {
+				typeCode = PrimitiveType.DOUBLE;
+			} else if (spValue.equals("float")) {
+				typeCode = PrimitiveType.FLOAT;
+			} else if (spValue.equals("int")) {
+				typeCode = PrimitiveType.INT;
+			} else if (spValue.equals("long")) {
+				typeCode = PrimitiveType.LONG;
+			} else if (spValue.equals("short")) {
+				typeCode = PrimitiveType.SHORT;
+			} else if (spValue.equals("void")) {
+				typeCode = PrimitiveType.VOID;
+			} else {
+				logger.severe("could not find primitive type " + type);
+				throw new Exception("could not find primitive type " + type);
+			}
+			node.setStructuralProperty(sp, typeCode);
+		} else if (node instanceof Assignment) {
+			final Assignment.Operator op = Assignment.Operator
+					.toOperator((String) spValue);
+			node.setStructuralProperty(sp, op);
+		} else if (node instanceof InfixExpression) {
+			final InfixExpression.Operator op = InfixExpression.Operator
+					.toOperator((String) spValue);
+			node.setStructuralProperty(sp, op);
+		} else if (node instanceof PrefixExpression) {
+			final PrefixExpression.Operator op = PrefixExpression.Operator
+					.toOperator((String) spValue);
+			node.setStructuralProperty(sp, op);
+		} else if (node instanceof PostfixExpression) {
+			final PostfixExpression.Operator op = PostfixExpression.Operator
+					.toOperator((String) spValue);
+			node.setStructuralProperty(sp, op);
+		} else {
+			node.setStructuralProperty(sp, spValue);
+		}
+	}
 
 	
 
@@ -341,6 +458,9 @@ public class PRVariableTypeExtractor extends VariableTypeJavaTreeExtractor {
 			final Map<TreeNode<Integer>, ASTNode> createdASTNodes)
 					throws Exception {
 		final AstNodeSymbol symbol = getSymbol(treeNode.getData());
+		if(symbol.nodeType == AstNodeSymbol.TEMPLATE_NODE) {
+			System.err.println("converting a symbol.");
+		}
 		final ASTNode node = createASTNodeObject(treeNode, ast, symbol);
 
 		// Set children properties
@@ -383,6 +503,8 @@ public class PRVariableTypeExtractor extends VariableTypeJavaTreeExtractor {
 		}
 
 		createdASTNodes.put(treeNode, checkNotNull(node));
+		System.err.println("Symbol is: " + node.toString());
+
 		return node;
 	}
 
@@ -393,7 +515,7 @@ public class PRVariableTypeExtractor extends VariableTypeJavaTreeExtractor {
 	@Override
 	public ASTNode getASTFromTree(final TreeNode<Integer> tree) {
 		final TreeNode<Integer> detempletized = detempletize(tree);
-
+//		return super.getASTFromTree(detempletized);
 		final Map<TreeNode<Integer>, ASTNode> extractedNodes = Maps
 				.newIdentityHashMap();
 
