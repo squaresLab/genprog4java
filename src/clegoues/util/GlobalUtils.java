@@ -33,14 +33,18 @@
 
 package clegoues.util;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.main.Configuration;
@@ -141,4 +145,26 @@ public class GlobalUtils {
         }	
         return true;
 	}
+	
+	/**
+	 * Get a uniformly random element from a Collection.
+	 * 
+	 * @param collection
+	 * @return
+	 */
+	public static <T> T getRandomElement(final Collection<T> collection) {
+		final int randPos = Configuration.randomizer.nextInt(collection.size());
+
+		T selected = null;
+		int index = 0;
+		for (final T element : collection) {
+			if (index == randPos) {
+				selected = element;
+				break;
+			}
+			index++;
+		}
+		return selected;
+	}
+
 }

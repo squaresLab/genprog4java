@@ -1,9 +1,8 @@
-package clegoues.genprog4java.localization;
+package clegoues.genprog4java.treelm;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTNode;
 
-import clegoues.genprog4java.treelm.CompleteLM;
 import codemining.ast.TreeNode;
 import codemining.ast.java.AbstractJavaTreeExtractor;
 import codemining.lm.tsg.TSGNode;
