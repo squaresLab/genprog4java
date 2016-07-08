@@ -5,6 +5,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
 
 import codemining.ast.TreeNode;
 import codemining.ast.java.AbstractJavaTreeExtractor;
+import codemining.ast.java.JavaAstTreeExtractor;
+import codemining.ast.java.VariableTypeJavaTreeExtractor;
 import codemining.lm.tsg.TSGNode;
 import codemining.lm.tsg.TSGrammar;
 
@@ -14,7 +16,12 @@ public class TreeBabbler {
 	public TreeBabbler( TSGrammar< TSGNode > grammar ) {
 		this.grammar = new CompleteLM( grammar );
 		try {
-			this.extractor = (AbstractJavaTreeExtractor) grammar.getTreeExtractor();
+			AbstractJavaTreeExtractor extractor = (AbstractJavaTreeExtractor) grammar.getTreeExtractor();
+			if(extractor instanceof VariableTypeJavaTreeExtractor) {
+				this.extractor = new PRVariableTypeExtractor((AbstractJavaTreeExtractor) grammar.getTreeExtractor());
+			} else {
+				this.extractor = extractor;
+			}
 		} catch ( ClassCastException e ) {
 			throw new IllegalArgumentException(
 				"grammar must have a java tree extractor", e
