@@ -10,11 +10,11 @@ import java.util.logging.Logger;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 
+import clegoues.util.GlobalUtils;
 import codemining.ast.TreeNode;
 import codemining.lm.tsg.FormattedTSGrammar;
 import codemining.lm.tsg.TSGNode;
 import codemining.lm.tsg.TSGrammar;
-import codemining.math.random.SampleUtils;
 
 public class CompleteLM  extends FormattedTSGrammar {
 	private static final long serialVersionUID = 20160707L;
@@ -134,7 +134,7 @@ public class CompleteLM  extends FormattedTSGrammar {
 					if ( productions == null )
 						continue;
 					TreeNode< TSGNode > selected =
-						SampleUtils.getRandomElement( productions );
+						GlobalUtils.getRandomElement( productions );
 					selected = selected.deepCopy();
 					for ( int i = 0; i < selected.nProperties(); ++i ) {
 						for ( TreeNode< TSGNode > child
