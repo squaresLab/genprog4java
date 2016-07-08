@@ -75,6 +75,7 @@ public class Configuration {
 		.withVarName( "libs" )
 		.withHelp( "classpath to compile the project" )
 		.build();
+	// FIXME: we should make these integers, and make them come from the AST version
 	//public static String sourceVersion = "1.6";
 	public static String sourceVersion = ConfigurationBuilder.of( STRING )
 		.withVarName( "sourceVersion" )
