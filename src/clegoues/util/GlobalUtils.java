@@ -33,23 +33,15 @@
 
 package clegoues.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
-import java.util.TreeSet;
 
-import org.apache.commons.lang.math.RandomUtils;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.mut.Location;
-import clegoues.genprog4java.rep.WeightedAtom;
 
 public class GlobalUtils {
 	// range is inclusive!
