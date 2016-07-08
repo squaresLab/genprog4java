@@ -32,6 +32,7 @@ import codemining.ast.TreeNode;
 import codemining.ast.java.AbstractJavaTreeExtractor;
 import codemining.ast.java.JavaAstPropertiesData;
 import codemining.ast.java.JavaAstTreeExtractor;
+import codemining.ast.java.TempletizedJavaTreeExtractor;
 import codemining.ast.java.VariableTypeJavaTreeExtractor;
 
 public class PRVariableTypeExtractor extends VariableTypeJavaTreeExtractor {
@@ -61,8 +62,9 @@ public class PRVariableTypeExtractor extends VariableTypeJavaTreeExtractor {
 	 * @return
 	 */
 	// this one is from the variable only grammar
-	/*public TreeNode<Integer> detempletize(final TreeNode<Integer> fromTree) {
+	public TreeNode<Integer> detempletize(final TreeNode<Integer> fromTree) {
 		if (getSymbol(fromTree.getData()).nodeType == AstNodeSymbol.TEMPLATE_NODE) {
+			System.err.println("found a root template");
 			return detempletize(fromTree.getChild(0, 0));
 		}
 		final TreeNode<Integer> toTree = TreeNode.create(fromTree.getData(),
@@ -90,6 +92,8 @@ public class PRVariableTypeExtractor extends VariableTypeJavaTreeExtractor {
 					if (symbol.nodeType == AstNodeSymbol.TEMPLATE_NODE) {
 						TreeNode<Integer> templateChild = fromChild;
 						while (getSymbol(templateChild.getData()).nodeType == AstNodeSymbol.TEMPLATE_NODE) {
+							System.err.println("found a template child");
+
 							checkArgument(templateChild.nProperties() == 1);
 
 							if (templateChild.isLeaf()) {
@@ -99,6 +103,8 @@ public class PRVariableTypeExtractor extends VariableTypeJavaTreeExtractor {
 						}
 						if (templateChild.isLeaf()
 								&& getSymbol(templateChild.getData()).nodeType == AstNodeSymbol.TEMPLATE_NODE) {
+							System.err.println("found a template child");
+
 							continue;
 						}
 						final TreeNode<Integer> untempletizedCopyChild = TreeNode
@@ -118,11 +124,11 @@ public class PRVariableTypeExtractor extends VariableTypeJavaTreeExtractor {
 		}
 
 		return toTree;
-	}*/
+	}
 	
 	// question/understanding TODO: why is detempletize different between metavariable and variable-based grammars?
 	// this one is from the TempletizedJavaTreeExtractor
-	public TreeNode<Integer> detempletize(final TreeNode<Integer> fromTree) {
+	/*public TreeNode<Integer> detempletize(final TreeNode<Integer> fromTree) {
 		if (getSymbol(fromTree.getData()).nodeType == AstNodeSymbol.TEMPLATE_NODE) {
 			return detempletize(fromTree.getChild(0, 0));
 		}
@@ -149,6 +155,7 @@ public class PRVariableTypeExtractor extends VariableTypeJavaTreeExtractor {
 					final AstNodeSymbol symbol = getSymbol(fromChild.getData());
 
 					if (symbol.nodeType == AstNodeSymbol.TEMPLATE_NODE) {
+						System.err.println("found a template child");
 
 						checkArgument(fromChild.nProperties() == 1);
 
@@ -175,7 +182,7 @@ public class PRVariableTypeExtractor extends VariableTypeJavaTreeExtractor {
 
 		return toTree;
 	}
-
+*/
 
 	// CLG hates having to duplicate this because it's easy/stupid/could even be static,
 	// but she cannot be blamed for the choices of the treelm implementers.
@@ -461,6 +468,10 @@ public class PRVariableTypeExtractor extends VariableTypeJavaTreeExtractor {
 		if(symbol.nodeType == AstNodeSymbol.TEMPLATE_NODE) {
 			System.err.println("converting a symbol.");
 		}
+		
+		if(TempletizedJavaTreeExtractor.isTemplateVariable(symbol)) {
+			System.err.println("Is template variable:" + symbol);
+		}
 		final ASTNode node = createASTNodeObject(treeNode, ast, symbol);
 
 		// Set children properties
@@ -514,7 +525,7 @@ public class PRVariableTypeExtractor extends VariableTypeJavaTreeExtractor {
 	 */
 	@Override
 	public ASTNode getASTFromTree(final TreeNode<Integer> tree) {
-		final TreeNode<Integer> detempletized = detempletize(tree);
+	//	final TreeNode<Integer> detempletized = detempletize(tree);
 //		return super.getASTFromTree(detempletized);
 		final Map<TreeNode<Integer>, ASTNode> extractedNodes = Maps
 				.newIdentityHashMap();
