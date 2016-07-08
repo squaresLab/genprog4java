@@ -4,6 +4,7 @@ import static clegoues.util.ConfigurationBuilder.STRING;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -13,6 +14,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.java.ASTUtils;
+import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.holes.java.JavaASTNodeLocation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
@@ -83,8 +85,12 @@ public class EntropyLocalization extends DefaultLocalization {
 	public Location getRandomLocation(double weight) {
 		JavaLocation startingStmt = (JavaLocation) GlobalUtils.chooseOneWeighted(new ArrayList(this.getFaultLocalization()), weight);
 		ASTNode actualCode = startingStmt.getCodeElement();
-		return new JavaASTNodeLocation(startingStmt, actualCode); 
-//		List<ASTNode> decomposed = ASTUtils.decomposeASTNode(actualCode);
+		List<ASTNode> decomposed = ASTUtils.decomposeASTNode(actualCode);
+		decomposed.add(actualCode);
+		Collections.shuffle(decomposed, Configuration.randomizer);
+		ASTNode selected = decomposed.get(0);
+		System.err.println("SELECTED: " + selected);
+		return new JavaASTNodeLocation(startingStmt, selected.getParent());
 //		double maxProb = Double.NEGATIVE_INFINITY;
 //		ASTNode biggestSoFar = actualCode;
 //		for(ASTNode node : decomposed) {
