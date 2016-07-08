@@ -146,25 +146,4 @@ public class GlobalUtils {
         return true;
 	}
 	
-	/**
-	 * Get a uniformly random element from a Collection.
-	 * 
-	 * @param collection
-	 * @return
-	 */
-	public static <T> T getRandomElement(final Collection<T> collection) {
-		final int randPos = Configuration.randomizer.nextInt(collection.size());
-
-		T selected = null;
-		int index = 0;
-		for (final T element : collection) {
-			if (index == randPos) {
-				selected = element;
-				break;
-			}
-			index++;
-		}
-		return selected;
-	}
-
 }
