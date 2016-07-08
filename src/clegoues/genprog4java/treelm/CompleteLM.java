@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 
-import clegoues.util.GlobalUtils;
+import clegoues.genprog4java.main.Configuration;
 import codemining.ast.TreeNode;
 import codemining.lm.tsg.FormattedTSGrammar;
 import codemining.lm.tsg.TSGNode;
@@ -26,6 +26,7 @@ public class CompleteLM  extends FormattedTSGrammar {
 
 	public CompleteLM( TSGrammar< TSGNode > trained ) {
 		super( trained.getTreeExtractor() );
+		SampleUtils.setRandomizer(Configuration.randomizer);
 		internalMap = new HashMap< TSGNode, Multiset< TreeNode< TSGNode > > >();
 		modified = false;
 		addAll( trained );
