@@ -46,8 +46,19 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import clegoues.util.Pair;
 
+/** provides static utils for manipulating java ASTs.  Used to be much longer
+ * before I refactored semantic check info; it may be possible to refactor this away
+ * at some point.
+ * @author clegoues
+ *
+ */
 public class ASTUtils {
 
+	/** 
+	 * @param node ASTNode of interest
+	 * @return line number corresponding to the first line of the node in its CU. 
+	 * Note that ASTNodes can span multiple lines; this returns the first.
+	 */
 	public static int getLineNumber(ASTNode node) { 
 		ASTNode root = node.getRoot();
 		int lineno = -1;
@@ -59,6 +70,12 @@ public class ASTUtils {
 		return lineno;
 	}
 
+	/**
+	 * parses/creates java code from a string, rather than a file on disk.
+	 * @param progName
+	 * @param code 
+	 * @return collection of objects containing the java code. 
+	 */
 	public static Iterable<JavaSourceFromString> getJavaSourceFromString(
 			String progName, List<Pair<ClassInfo, String>> code) {
 
@@ -75,6 +92,7 @@ public class ASTUtils {
 	}
 }
 
+/** helper class for compiling from string */
 class JavaSourceFromString extends SimpleJavaFileObject {
 	final String code;
 

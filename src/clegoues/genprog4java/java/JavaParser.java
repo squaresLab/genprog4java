@@ -33,25 +33,25 @@
 
 package clegoues.genprog4java.java;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import clegoues.util.Pair;
 
-
+/**
+ * Parses a single java file, and delegates to a semantic info visitor the goal
+ * of collecting various types of semantic info necessary for later mutation checks.
+ * @author clegoues
+ *
+ */
 public class JavaParser
 {
 	private LinkedList<ASTNode> stmts;
