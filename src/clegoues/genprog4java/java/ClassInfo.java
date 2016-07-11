@@ -2,6 +2,13 @@ package clegoues.genprog4java.java;
 
 import java.io.File;
 
+/** 
+ * information about a java file (class, package) and helper utilities for managing
+ * paths.  Comparable because we use them in sets/lists/etc, and also because they're
+ * basically just pairs of strings.
+ * @author clegoues
+ *
+ */
 public class ClassInfo implements Comparable<ClassInfo> {
 	private String className;
 	private String packageName;
