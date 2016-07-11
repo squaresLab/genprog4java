@@ -324,7 +324,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			}
 		}	
 
-
+		dumpStmts();
 	}
 
 	public void fromSource(ClassInfo pair) throws IOException {
@@ -339,7 +339,7 @@ FaultLocRepresentation<JavaEditOperation> {
 	}
 
 
-	public static boolean canRepair(ASTNode node) { // FIXME: methodinvocation and, frankly, variable declarations that have bodies.
+	public static boolean canRepair(ASTNode node) { // FIXME: variable declarations that have bodies?
 		return node instanceof AssertStatement 
 				|| node instanceof Block
 				|| node instanceof BreakStatement

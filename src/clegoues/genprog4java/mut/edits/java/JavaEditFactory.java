@@ -80,6 +80,8 @@ public class JavaEditFactory {
 			return new ExpressionModRem((JavaLocation) dst, sources);
 		case PARREM:
 			return new MethodParameterRemover((JavaLocation) dst, sources);
+		case SIZECHECK:
+			return new CollectionSizeChecker((JavaLocation) dst, sources);
 		default: logger.fatal("unhandled edit template type in JavaEditFactory; this should be impossible (famous last words...)");
 		}		return null;
 	}
