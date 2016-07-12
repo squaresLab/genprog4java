@@ -140,7 +140,7 @@ public class RangeCheckOperation extends JavaEditOperation {
 			stmt = ASTNode.copySubtree(rewriter.getAST(),  parent);
 			((Block) newNode).statements().add(stmt);
 			
-		} else if(parent instanceof ForStatement) { // possible FIXME: enhanced fors?
+		} else if(parent instanceof ForStatement) { 
 			newNode = parent;
 			// get the expressions of for statement
 			Expression forexp = ((ForStatement) parent).getExpression();
