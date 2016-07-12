@@ -160,6 +160,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				// method to visit all ArrayAccess nodes in locationNode and store their parents
 				public boolean visit(ArrayAccess node) {
 					ASTNode parent = getParent(node);
+					if(node.getIndex() instanceof SimpleName) {
 					if(!arrayAccesses.containsKey(parent)){
 						List<ASTNode> arraynodes = new ArrayList<ASTNode>();
 						arraynodes.add(node);
@@ -170,7 +171,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 							arraynodes.add(node);
 						arrayAccesses.put(parent, arraynodes);	
 					}
-
+					}
 					return true;
 				}
 			});

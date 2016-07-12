@@ -32,6 +32,20 @@ public class UpperBoundSetOperation extends JavaEditOperation {
 	public UpperBoundSetOperation(JavaLocation location, EditHole source) {
 		super(location, source);
 	}
+
+	/*
+	[Upper Bound Setter]
+			B = buggy statements
+			collect array accesses of B into collection C
+
+			loop for all index variables in C
+			{
+			 insert a if statement before statements having an index variable
+			 insert a conditional expression that checks whether an index variable is larger than upper bound
+			 insert an assignment statement that gives the upper bound value to the index variable into THEN section of the if statement
+			}
+			insert B after all if statements*/
+
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
@@ -42,63 +56,53 @@ public class UpperBoundSetOperation extends JavaEditOperation {
 
 
 		// for each of the array access instances
+		// we can assume all indices are simplenames
+		
 		for( ASTNode  array : arrays){
+			IfStatement ifStmt = rewriter.getAST().newIfStatement();
+
 			Expression index = ((ArrayAccess) array).getIndex();
-			String arrayindex;
-			if (!(index instanceof NumberLiteral)){
-				// get the array index
-				arrayindex = index.toString();
-				arrayindex = arrayindex.replace("++", "");
-				arrayindex = arrayindex.replace("--", "");
+			InfixExpression check = rewriter.getAST().newInfixExpression();
+			check.setLeftOperand((Expression) rewriter.createCopyTarget(index));
+			check.setOperator(Operator.GREATER_EQUALS);
 
-				// create if statement 
-				IfStatement stmt = rewriter.getAST().newIfStatement();
+			SimpleName qualifier = rewriter.getAST().newSimpleName(((ArrayAccess)array).getArray().toString());
+			SimpleName name = rewriter.getAST().newSimpleName("length");
+			check.setRightOperand(rewriter.getAST().newQualifiedName(qualifier, name));
+			ifStmt.setExpression(check);
 
-				// with expression "index > arrayname.length" 
-				InfixExpression expression = null;
-				expression = rewriter.getAST().newInfixExpression();
-				expression.setLeftOperand(rewriter.getAST().newSimpleName(arrayindex));
-				expression.setOperator(Operator.GREATER_EQUALS);
+			// and then part as "index = arrayname.length - 1"
 
-				// and then part as "index = arrayname.length - 1"
-				SimpleName qualifier = rewriter.getAST().newSimpleName(((ArrayAccess)array).getArray().toString());
-				SimpleName name = rewriter.getAST().newSimpleName("length");
-				expression.setRightOperand(rewriter.getAST().newQualifiedName(qualifier, name));
-				stmt.setExpression(expression);
+			Assignment thenexpression = rewriter.getAST().newAssignment();
+			thenexpression.setLeftHandSide((Expression) rewriter.createCopyTarget(index));
+			thenexpression.setOperator(Assignment.Operator.ASSIGN);
 
-				Assignment thenexpression = null;
-				thenexpression = rewriter.getAST().newAssignment();
-				thenexpression.setLeftHandSide(rewriter.getAST().newSimpleName(arrayindex));
-				thenexpression.setOperator(Assignment.Operator.ASSIGN);
+			InfixExpression setupperboundexpression = rewriter.getAST().newInfixExpression();
+			SimpleName qualifier1 = rewriter.getAST().newSimpleName(((ArrayAccess)array).getArray().toString());
+			SimpleName name1 = rewriter.getAST().newSimpleName("length");
+			setupperboundexpression.setLeftOperand(rewriter.getAST().newQualifiedName(qualifier1, name1));
+			setupperboundexpression.setOperator(Operator.MINUS);
+			setupperboundexpression.setRightOperand(rewriter.getAST().newNumberLiteral("1"));
 
-				InfixExpression setupperboundexpression = null;
-				setupperboundexpression = rewriter.getAST().newInfixExpression();
-				SimpleName qualifier1 = rewriter.getAST().newSimpleName(((ArrayAccess)array).getArray().toString());
-				SimpleName name1 = rewriter.getAST().newSimpleName("length");
-				setupperboundexpression.setLeftOperand(rewriter.getAST().newQualifiedName(qualifier1, name1));
-				setupperboundexpression.setOperator(Operator.MINUS);
-				setupperboundexpression.setRightOperand(rewriter.getAST().newNumberLiteral("1"));
+			thenexpression.setRightHandSide(setupperboundexpression);
 
-				thenexpression.setRightHandSide(setupperboundexpression);
+			ExpressionStatement thenstmt = rewriter.getAST().newExpressionStatement(thenexpression);
+			ifStmt.setThenStatement(thenstmt);
 
-				ExpressionStatement thenstmt = rewriter.getAST().newExpressionStatement(thenexpression);
-				stmt.setThenStatement(thenstmt);
-
-				// add if statement to newnode
-				newnode.statements().add(stmt);
-			}
-			// append the existing content of parent node to newnode
-			ASTNode stmt = (Statement)parent;
-			stmt = ASTNode.copySubtree(rewriter.getAST(), stmt);
-			newnode.statements().add(stmt);
-			rewriter.replace(parent, newnode, null);
+			// add if statement to newnode
+			newnode.statements().add(ifStmt);
 		}
-	}	
-	
-	@Override
-	public String toString() {
-		// FIXME: this is lazy
-		return "ubs(" + this.getLocation().getId() + ")";
-	}
-	
+		// append the existing content of parent node to newnode
+		ASTNode stmt = (Statement)parent;
+		stmt = ASTNode.copySubtree(rewriter.getAST(), stmt);
+		newnode.statements().add(stmt);
+		rewriter.replace(parent, newnode, null);
+}	
+
+@Override
+public String toString() {
+	// FIXME: this is lazy
+	return "ubs(" + this.getLocation().getId() + ")";
+}
+
 }
