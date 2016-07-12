@@ -44,9 +44,16 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -54,18 +61,29 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import clegoues.genprog4java.rep.WeightedAtom;
@@ -194,7 +212,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					// method to visit all Expressions relevant for this in locationNode and
 					// store their parents
 					public boolean visit(MethodInvocation node) {
-						if(node.getExpression() != null) {
+						if(node.getExpression() != null && isNullCheckable(node.getExpression())) {
 							saveDataOfTheExpression(node);
 						}
 						return true;
@@ -203,13 +221,53 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						saveDataOfTheExpression(node);
 						return true;
 					}
-
-					public boolean visit(QualifiedName node) {
-						saveDataOfTheExpression(node);
+					
+					private boolean isNullCheckable(Expression exp) {
+						if(exp instanceof Annotation ||						   
+						   exp instanceof ArrayCreation ||
+						   exp instanceof ArrayInitializer ||
+						   exp instanceof Assignment ||
+						   exp instanceof BooleanLiteral ||
+						   exp instanceof CharacterLiteral ||
+						   exp instanceof ClassInstanceCreation ||
+						   exp instanceof ConditionalExpression ||
+						   exp instanceof InstanceofExpression ||
+						   exp instanceof NullLiteral ||
+						   exp instanceof NumberLiteral ||
+						   exp instanceof StringLiteral ||
+						   exp instanceof TypeLiteral ||
+						   exp instanceof ThisExpression ||
+						   exp instanceof InfixExpression ||
+						   exp instanceof PostfixExpression ||
+						   exp instanceof PrefixExpression ||
+						   exp instanceof VariableDeclarationExpression
+								)
+							return false;
+						if(exp instanceof SimpleName) {
+							SimpleName asSimpleName = (SimpleName) exp;
+							IBinding binding = asSimpleName.resolveTypeBinding();
+							if(binding == null)
+								return false;
+						}
+						   
+						   /* this leaves:
+						    ArrayAccess
+						    CastExpression,
+						    FieldAccess,
+						    MethodInvocation,
+						    Name [SimpleName, QualifiedName]
+						    ParenthesizedExpression,
+						    SuperFieldAccess,
+						    SuperMethodInvocation
+						    ... as the only options
+						    */
 						return true;
+						    
 					}
 
 					public void saveDataOfTheExpression(ASTNode node){
+						if(!isNullCheckable((Expression)node))
+							return;					
 						ASTNode parent = getParent(node);
 						if (!nullCheckable.containsKey(parent)) {
 							List<ASTNode> thisList = new ArrayList<ASTNode>();

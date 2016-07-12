@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -76,10 +77,11 @@ public class NullCheckOperation extends JavaEditOperation {
 			}
 		}
 		if(parent instanceof ReturnStatement) {
-			// CLG says: this is not tested!  FIXME: test before deploy.
 			PrefixExpression prefix = ifstmt.getAST().newPrefixExpression();
 			prefix.setOperator(PrefixExpression.Operator.NOT);
-			prefix.setOperand(everythingInTheCondition);
+			ParenthesizedExpression parenthesized = rewriter.getAST().newParenthesizedExpression();
+			parenthesized.setExpression(everythingInTheCondition);
+			prefix.setOperand(parenthesized);
 			ifstmt.setExpression(prefix);
 			ASTNode elseStmt = (Statement) parent;
 			elseStmt = ASTNode.copySubtree(parent.getAST(), elseStmt); 
