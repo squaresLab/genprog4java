@@ -201,8 +201,8 @@ public class Configuration {
 		String safeFolder = Configuration.outputDir  + File.separatorChar + "original" + File.separatorChar;
 		
 		//If there is a variant already created in the output folder then it is not the first run
-		File variant0Folder = new File(Configuration.outputDir  + File.separatorChar + "variant0"  + File.separatorChar );
-		if (variant0Folder.exists()){
+		File originalFolder = new File(Configuration.outputDir  + File.separatorChar + "original"  + File.separatorChar );
+		if (originalFolder.exists()){
 			
 			for( ClassInfo s : Configuration.targetClassNames ){
 				//overwrite the targetClass with the one saved before
