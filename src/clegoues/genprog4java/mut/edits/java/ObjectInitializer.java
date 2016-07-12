@@ -32,23 +32,18 @@ import clegoues.util.Pair;
 
 public class ObjectInitializer extends JavaEditOperation {
 
+	// world's hugest hack
+	private String varBase = "clgUNIQUEPLZ";
+	private int count = 0;
+
+	// by all rights this should probably be in globalUtils somewhere
+
+
 	public ObjectInitializer(JavaLocation location, EditHole source) {
 		super(location, source);
 	}
 
-	  private static String nextString() {
-	    return new BigInteger(130, Configuration.randomizer).toString(32);
-	  }
 
-	  
-	  private ASTNode findCU(ASTNode node) {
-		  ASTNode parent = node.getParent();
-		  while(parent != null && !(parent instanceof CompilationUnit)) {
-			  parent = parent.getParent();
-		  }
-		  return parent;
-	  }
-	  
 
 
 	@Override
@@ -56,7 +51,6 @@ public class ObjectInitializer extends JavaEditOperation {
 		final AST myAST = rewriter.getAST();
 		ExpHole thisHole = (ExpHole) this.getHoleCode();
 		Expression methodInvocExp = thisHole.getLocationExp();
-		final CompilationUnit cu = (CompilationUnit) findCU(methodInvocExp);
 
 		final List<Pair<Expression,Expression>> argsToInit = new LinkedList<Pair<Expression,Expression>>();
 		final List<Statement> newDeclarations = new LinkedList<Statement>();
@@ -64,27 +58,47 @@ public class ObjectInitializer extends JavaEditOperation {
 		while(parentStmt != null && !(parentStmt instanceof Statement)) {
 			parentStmt = parentStmt.getParent();
 		}
-		assert(parentStmt != null && cu != null);
+		assert(parentStmt != null);
 
 		methodInvocExp.accept(new ASTVisitor() {
+			private String nextString()
+			{
+				String characters = "abcdefghijklmnopqrstuvwxyz";
+
+				if(varBase == null) {
+					char[] text = new char[8];
+					for (int i = 0; i < 8; i++)
+					{
+						text[i] = characters.charAt(Configuration.randomizer.nextInt(8));
+					}
+					varBase = new String(text);
+				}
+				String res = varBase + count;
+				count ++;
+				return res;
+			}
+			
 			public boolean visit(MethodInvocation node) {
 				for(Object arg : node.arguments()) {
 					Expression asExp = (Expression) arg;
 					ITypeBinding binding = asExp.resolveTypeBinding();
 
 					if(binding.isClass()) {
-						String identifier = ObjectInitializer.nextString();
+						String identifier = this.nextString();
 						SimpleName newVarName = myAST.newSimpleName(identifier);
 						VariableDeclarationFragment fragment = myAST.newVariableDeclarationFragment();
-						Type declaringType = ASTUtils.typeFromBinding(myAST, binding);
-						
+
+						Type declaringType1 = ASTUtils.typeFromBinding(myAST, binding);
+						Type declaringType2 = ASTUtils.typeFromBinding(myAST, binding);
+
 						ClassInstanceCreation initializer = myAST.newClassInstanceCreation();
-						initializer.setType(declaringType);
-						
+						initializer.setType(declaringType1);
+
 						fragment.setName(newVarName);
 						fragment.setInitializer(initializer);
-						
 						VariableDeclarationStatement newStmt = myAST.newVariableDeclarationStatement(fragment);
+						newStmt.setType(declaringType2);
+
 						argsToInit.add(new Pair(asExp, newVarName));
 						newDeclarations.add(newStmt);
 						break;
@@ -96,7 +110,7 @@ public class ObjectInitializer extends JavaEditOperation {
 		for(Pair<Expression,Expression> repExp : argsToInit) {
 			rewriter.replace(repExp.getFirst(), repExp.getSecond(), null);
 		}
-		
+
 		Block newBlock = myAST.newBlock();
 		newBlock.statements().addAll(newDeclarations);
 		newBlock.statements().add(rewriter.createCopyTarget(parentStmt));
