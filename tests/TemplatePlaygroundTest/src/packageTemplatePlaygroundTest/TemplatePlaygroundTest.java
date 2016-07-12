@@ -10,8 +10,8 @@ public class TemplatePlaygroundTest {
 			if(x<y){
 				ret = y;
 			}else if(x<z  && y > z){
-				newArrayList.add(0,5);
-					ret = 5;
+				ret = retOne(newArrayList);
+				ret = 5;
 			}
 		}else{
 			if(x>y){
@@ -23,6 +23,13 @@ public class TemplatePlaygroundTest {
 			}	
 		}
 		return ret;
+	}
+	
+	public int retOne(Object someObj) {
+		if(someObj instanceof TemplatePlaygroundTest) {
+			return 5;
+		}
+		return 6;
 	}
 }
 

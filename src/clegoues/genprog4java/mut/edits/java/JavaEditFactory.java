@@ -82,8 +82,10 @@ public class JavaEditFactory {
 			return new MethodParameterRemover((JavaLocation) dst, sources);
 		case SIZECHECK:
 			return new CollectionSizeChecker((JavaLocation) dst, sources);
-		default: logger.fatal("unhandled edit template type in JavaEditFactory; this should be impossible (famous last words...)");
-		}		return null;
+		case OBJINIT:
+			return new ObjectInitializer((JavaLocation) dst, sources);
+		}
+		return null;
 	}
 
 	private Set<WeightedAtom> scopeHelper(Location stmtId, JavaRepresentation variant, Mutation mut) {
@@ -302,7 +304,7 @@ public class JavaEditFactory {
 			retVal.add(hole);
 			return retVal;
 		case OBJINIT:
-			List<ASTNode> initObjects = locationStmt.getIndexedCollectionObjects();
+			List<ASTNode> initObjects = locationStmt.getObjectsAsMethodParams();
 			for(ASTNode initObject : initObjects) {
 				// this is a slight misuse of ExpHold, which sort of "expects" that the second argument
 				// is the "replacement" code.
