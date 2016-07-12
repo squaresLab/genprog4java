@@ -317,14 +317,14 @@ FaultLocRepresentation<JavaEditOperation> {
 				scopeInfo.addToClassScope(knownTypesInScope);
 				scopeInfo.addToClassScope(knownMethodsAndFields);
 				
-				// possible FIXME: more than one class per compilation unit will probably break this.
+				// possible FIXME: more than one class per compilation might break this.
 				semanticInfo.addToClassScopeMap(s, scopeInfo.getClassScope());
 				semanticInfo.addToMethodScopeMap(s, scopeInfo.getMethodScope(node));
 				semanticInfo.collectFinalVarInfo(s, scopeInfo.getFinalVarInfo(node));
 			}
 		}	
 
-		dumpStmts();
+	//	dumpStmts();
 	}
 
 	public void fromSource(ClassInfo pair) throws IOException {
