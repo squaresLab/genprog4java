@@ -61,7 +61,7 @@ public class NullCheckOperation extends JavaEditOperation {
 				expression.setLeftOperand(newExpression);
 			}
 			if(expressionToCheckIfNull instanceof QualifiedName)
-				expression.setLeftOperand(((QualifiedName) expressionToCheckIfNull).getName());
+				expression.setLeftOperand((Expression) rewriter.createCopyTarget(((QualifiedName) expressionToCheckIfNull).getName()));
 
 			expression.setOperator(Operator.NOT_EQUALS);
 			expression.setRightOperand(expressionToCheckIfNull.getAST().newNullLiteral());
