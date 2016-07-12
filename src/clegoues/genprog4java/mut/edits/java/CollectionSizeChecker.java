@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -19,6 +20,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
@@ -118,17 +120,21 @@ if B include return statement
 		}
 		
 		if(parent instanceof ReturnStatement) {
-			// CLG says: this is not tested/was taken from null check template so is probably wrong!  FIXME: test before deploy.
 			PrefixExpression prefix = ifstmt.getAST().newPrefixExpression();
+			ParenthesizedExpression parenthesized = rewriter.getAST().newParenthesizedExpression();
+			parenthesized.setExpression(everythingInTheCondition);
 			prefix.setOperator(PrefixExpression.Operator.NOT);
-			prefix.setOperand(everythingInTheCondition);
+			prefix.setOperand(parenthesized);
 			ifstmt.setExpression(prefix);
 			ASTNode elseStmt = (Statement) parent;
 			elseStmt = ASTNode.copySubtree(parent.getAST(), elseStmt); 
 			ifstmt.setElseStatement((Statement) elseStmt); 
 			ReturnStatement newReturn = ifstmt.getAST().newReturnStatement();
 			// return a default value.
-			newReturn.setExpression(ifstmt.getAST().newNullLiteral());
+			
+			ASTNode newValue = ASTUtils.getDefaultReturn(parent, rewriter.getAST());
+			if(newValue != null) 
+				newReturn.setExpression((Expression) newValue);
 			ifstmt.setThenStatement((Statement) newReturn);
 		} else {
 			ifstmt.setExpression(everythingInTheCondition);
