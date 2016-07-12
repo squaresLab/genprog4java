@@ -520,6 +520,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						}
 						for(IMethodBinding compatibleMethod : compatibleMethods) {
 							ArrayList<ITypeBinding> compatibleParamTypes = getParamTypes(compatibleMethod);
+							int startIndex = myTypes.size() == 0 ? 0 : myTypes.size() - 1;
 							List<ITypeBinding> toExtend = compatibleParamTypes.subList(myTypes.size()-1, compatibleParamTypes.size());
 
 							List<ASTNode> thisExtension = new ArrayList<ASTNode>();
