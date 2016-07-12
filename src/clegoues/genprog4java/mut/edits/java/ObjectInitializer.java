@@ -21,12 +21,16 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.holes.java.ExpHole;
-import clegoues.genprog4java.mut.holes.java.SubExpsHole;
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.util.Pair;
 
 public class ObjectInitializer extends JavaEditOperation {
 
+	public ObjectInitializer(JavaLocation location, EditHole source) {
+		super(location, source);
+	}
 
 	  private static String nextString() {
 	    return new BigInteger(130, Configuration.randomizer).toString(32);
