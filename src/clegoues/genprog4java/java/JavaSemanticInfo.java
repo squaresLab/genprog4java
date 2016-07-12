@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.print.attribute.SetOfIntegerSyntax;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -34,7 +36,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import clegoues.util.Pair;
 
 public class JavaSemanticInfo {
-	public static HashMap<Integer, Set<String>> inScopeMap = new HashMap<Integer, Set<String>>();
+	public static HashMap<Integer, Set<String>> classScopeMap = new HashMap<Integer, Set<String>>();
+	public static HashMap<Integer, Set<String>> methodScopeMap = new HashMap<Integer, Set<String>>();
+
 	private static Set<Pair<String,String>> methodReturnType = new HashSet<Pair<String,String>>();
 	private static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
 	private static Map<String, Map<String,List<Expression>>> methodParamExpressionsInScope = null;
@@ -194,21 +198,40 @@ public class JavaSemanticInfo {
 		JavaSemanticInfo.getVariableDataTypes().putAll(myParser.getVariableDataTypes());
 	}
 
-	public void addToScopeMap(JavaStatement s, Set<String> scope) {
-		JavaSemanticInfo.inScopeMap.put(s.getStmtId(),scope);
+	public void addToClassScopeMap(JavaStatement s, Set<String> scope) {
+		JavaSemanticInfo.classScopeMap.put(s.getStmtId(),scope);
+	}
+
+
+
+	public void addToMethodScopeMap(JavaStatement s, Set<String> scope) {
+		JavaSemanticInfo.methodScopeMap.put(s.getStmtId(),scope);
 	}
 
 	public boolean scopeCheckOK(JavaStatement potentiallyBuggyStmt, JavaStatement potentialFixStmt) {
 		// I *believe* this is just variable names and doesn't check required
 		// types, which are also collected
 		// at parse time and thus could be considered here.
-		Set<String> inScopeAt = inScopeMap.get(potentiallyBuggyStmt.getStmtId());
-
+		Set<String> classScope = classScopeMap.get(potentiallyBuggyStmt.getStmtId());
+		Set<String> methodScope = methodScopeMap.get(potentiallyBuggyStmt.getStmtId());
+		
+		Set<String> inScopeAt = new HashSet<String>(classScope);
+		inScopeAt.addAll(methodScope);
+		
 		Set<String> requiredScopes = potentialFixStmt.getRequiredNames();
 		for (String req : requiredScopes) {
 			if (!inScopeAt.contains(req)) {
 				return false;
 			}
+		}
+		
+		Set<String> declares = potentialFixStmt.getNamesDeclared();
+		if(declares != null) {
+		for(String req : declares) {
+			if(methodScope.contains(req)) {
+				return false;
+			}
+		}
 		}
 		return true;
 	}

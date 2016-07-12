@@ -5,15 +5,13 @@ public class TemplatePlaygroundTest {
 
 	public int mid(int x, int y, int z){
 		int ret = z;
-
+		ArrayList<Integer> newArrayList = new ArrayList<Integer>(5);
 		if(y<z){
 			if(x<y){
 				ret = y;
 			}else if(x<z  && y > z){
-				//ret = y; // bug, it should be ret = x;
-				for(int i = 0; i < 5; i++) {
-					ret = 5;
-				}
+				ret = retOne(newArrayList);
+				ret = 5;
 			}
 		}else{
 			if(x>y){
@@ -25,6 +23,13 @@ public class TemplatePlaygroundTest {
 			}	
 		}
 		return ret;
+	}
+	
+	public int retOne(Object someObj) {
+		if(someObj instanceof TemplatePlaygroundTest) {
+			return 5;
+		}
+		return 6;
 	}
 }
 

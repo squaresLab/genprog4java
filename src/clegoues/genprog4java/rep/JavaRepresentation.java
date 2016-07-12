@@ -173,8 +173,10 @@ CachingRepresentation<JavaEditOperation> {
 		for(Map.Entry<Integer,JavaStatement> s : base.entrySet()) {
 			JavaStatement node = s.getValue();
 			bw.write("\n\nStmt id: " + s.getKey() + " node: " + node.getASTNode());
-			bw.write("in scope here: [[");
-			bw.write((JavaSemanticInfo.inScopeMap.get(node.getStmtId())).toString());
+			bw.write("in class scope here: [[");
+			bw.write((JavaSemanticInfo.classScopeMap.get(node.getStmtId())).toString());
+			bw.write("in method scope here: [[");
+			bw.write((JavaSemanticInfo.methodScopeMap.get(node.getStmtId())).toString());
 			bw.write(" ]]\n");
 			bw.write("required names: [[");
 			bw.write((node.getRequiredNames()).toString()); 
@@ -211,6 +213,7 @@ CachingRepresentation<JavaEditOperation> {
 		semanticInfo.addAllSemanticInfo(myParser);
 		
 		Set<String> knownTypesInScope = myParser.getAvailableTypes();
+		Set<String> knownMethodsAndFields = myParser.getAvailableMethodsAndFields();
 		
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
@@ -222,13 +225,17 @@ CachingRepresentation<JavaEditOperation> {
 
 				sourceInfo.augmentLineInfo(s.getStmtId(), node);
 				sourceInfo.storeStmtInfo(s, pair);
-				scopeInfo.addScope4Stmt(node, knownTypesInScope);
 				s.setRequiredNames(scopeInfo.getRequiredNames(node));
-				semanticInfo.addToScopeMap(s, scopeInfo.getScope(node));
+				s.setNamesDeclared(scopeInfo.getNamesDeclared(node));
+				scopeInfo.addToClassScope(knownTypesInScope);
+				scopeInfo.addToClassScope(knownMethodsAndFields);
+				
+				// possible FIXME: more than one class per compilation might break this.
+				semanticInfo.addToClassScopeMap(s, scopeInfo.getClassScope());
+				semanticInfo.addToMethodScopeMap(s, scopeInfo.getMethodScope(node));
 				semanticInfo.collectFinalVarInfo(s, scopeInfo.getFinalVarInfo(node));
 			}
 		}	
-
 
 		dumpStmts();
 	}
@@ -245,7 +252,7 @@ CachingRepresentation<JavaEditOperation> {
 	}
 
 
-	public static boolean canRepair(ASTNode node) { // FIXME: methodinvocation and, frankly, variable declarations that have bodies.
+	public static boolean canRepair(ASTNode node) { // FIXME: variable declarations that have bodies?
 		return node instanceof AssertStatement 
 				|| node instanceof Block
 				|| node instanceof BreakStatement
@@ -581,7 +588,7 @@ CachingRepresentation<JavaEditOperation> {
 			options.add(Configuration.sourceVersion);
 
 			options.add("-target");
-			options.add(Configuration.targetVersion);
+			options.add(Configuration.sourceVersion);
 
 			options.add("-d");
 

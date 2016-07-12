@@ -48,6 +48,7 @@ import java.util.Random;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
+import org.eclipse.jdt.core.JavaCore;
 
 import clegoues.genprog4java.java.ClassInfo;
 import clegoues.util.ConfigurationBuilder;
@@ -75,18 +76,12 @@ public class Configuration {
 		.withVarName( "libs" )
 		.withHelp( "classpath to compile the project" )
 		.build();
-	// FIXME: we should make these integers, and make them come from the AST version
 	//public static String sourceVersion = "1.6";
 	public static String sourceVersion = ConfigurationBuilder.of( STRING )
 		.withVarName( "sourceVersion" )
-		.withDefault( "1.6" )
+		// note that this is different from default
+		.withDefault(JavaCore.VERSION_1_8)
 		.withHelp( "Java version of the source code" )
-		.build();
-	//public static String targetVersion = "1.6";
-	public static String targetVersion = ConfigurationBuilder.of( STRING )
-		.withVarName( "targetVersion" )
-		.withDefault( "1.6" )
-		.withHelp( "Java version of the generated classes" )
 		.build();
 
 	//public static ArrayList<ClassInfo> targetClassNames = new ArrayList<ClassInfo>();
@@ -197,8 +192,8 @@ public class Configuration {
 		String safeFolder = Configuration.outputDir  + File.separatorChar + "original" + File.separatorChar;
 		
 		//If there is a variant already created in the output folder then it is not the first run
-		File variant0Folder = new File(Configuration.outputDir  + File.separatorChar + "variant0"  + File.separatorChar );
-		if (variant0Folder.exists()){
+		File originalFolder = new File(Configuration.outputDir  + File.separatorChar + "original"  + File.separatorChar );
+		if (originalFolder.exists()){
 			
 			for( ClassInfo s : Configuration.targetClassNames ){
 				//overwrite the targetClass with the one saved before

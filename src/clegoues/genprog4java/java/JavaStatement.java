@@ -37,15 +37,23 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -53,19 +61,32 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.WhileStatement;
+
+import clegoues.genprog4java.rep.WeightedAtom;
 
 public class JavaStatement implements Comparable<JavaStatement>{
 
@@ -75,11 +96,20 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	private int lineno;
 	private int stmtId; // unique
 	private Set<String> mustBeInScope;
-
+	private Set<String> namesDeclared;
+	
 	public void setClassInfo(ClassInfo ci) {
 		this.classInfo = ci;
 	}
+	
+	public Set<String> getNamesDeclared() {
+		return this.namesDeclared;
+	}
 
+	public void setNamesDeclared(Set<String> names) {
+		this.namesDeclared = names;
+	}
+	
 	public ClassInfo getClassInfo() {
 		return this.classInfo;
 	}
@@ -148,6 +178,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				// method to visit all ArrayAccess nodes in locationNode and store their parents
 				public boolean visit(ArrayAccess node) {
 					ASTNode parent = getParent(node);
+					if(node.getIndex() instanceof SimpleName) {
 					if(!arrayAccesses.containsKey(parent)){
 						List<ASTNode> arraynodes = new ArrayList<ASTNode>();
 						arraynodes.add(node);
@@ -158,7 +189,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 							arraynodes.add(node);
 						arrayAccesses.put(parent, arraynodes);	
 					}
-
+					}
 					return true;
 				}
 			});
@@ -181,7 +212,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					// method to visit all Expressions relevant for this in locationNode and
 					// store their parents
 					public boolean visit(MethodInvocation node) {
-						if(node.getExpression() != null) {
+						if(node.getExpression() != null && isNullCheckable(node.getExpression())) {
 							saveDataOfTheExpression(node);
 						}
 						return true;
@@ -190,13 +221,53 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						saveDataOfTheExpression(node);
 						return true;
 					}
-
-					public boolean visit(QualifiedName node) {
-						saveDataOfTheExpression(node);
+					
+					private boolean isNullCheckable(Expression exp) {
+						if(exp instanceof Annotation ||						   
+						   exp instanceof ArrayCreation ||
+						   exp instanceof ArrayInitializer ||
+						   exp instanceof Assignment ||
+						   exp instanceof BooleanLiteral ||
+						   exp instanceof CharacterLiteral ||
+						   exp instanceof ClassInstanceCreation ||
+						   exp instanceof ConditionalExpression ||
+						   exp instanceof InstanceofExpression ||
+						   exp instanceof NullLiteral ||
+						   exp instanceof NumberLiteral ||
+						   exp instanceof StringLiteral ||
+						   exp instanceof TypeLiteral ||
+						   exp instanceof ThisExpression ||
+						   exp instanceof InfixExpression ||
+						   exp instanceof PostfixExpression ||
+						   exp instanceof PrefixExpression ||
+						   exp instanceof VariableDeclarationExpression
+								)
+							return false;
+						if(exp instanceof SimpleName) {
+							SimpleName asSimpleName = (SimpleName) exp;
+							IBinding binding = asSimpleName.resolveTypeBinding();
+							if(binding == null)
+								return false;
+						}
+						   
+						   /* this leaves:
+						    ArrayAccess
+						    CastExpression,
+						    FieldAccess,
+						    MethodInvocation,
+						    Name [SimpleName, QualifiedName]
+						    ParenthesizedExpression,
+						    SuperFieldAccess,
+						    SuperMethodInvocation
+						    ... as the only options
+						    */
 						return true;
+						    
 					}
 
 					public void saveDataOfTheExpression(ASTNode node){
+						if(!isNullCheckable((Expression)node))
+							return;					
 						ASTNode parent = getParent(node);
 						if (!nullCheckable.containsKey(parent)) {
 							List<ASTNode> thisList = new ArrayList<ASTNode>();
@@ -410,7 +481,11 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				// FIXME: also supermethodinvocations?
 
 				public boolean visit(MethodInvocation node) {
-					IMethodBinding myMethodBinding = node.resolveMethodBinding().getMethodDeclaration();
+					IMethodBinding mb = node.resolveMethodBinding();
+					if(mb == null) {
+						return true;
+					}
+					IMethodBinding myMethodBinding = mb.getMethodDeclaration();
 
 					ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
 					ArrayList<IMethodBinding> compatibleMethods = new ArrayList<IMethodBinding>();
@@ -445,11 +520,11 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						}
 						for(IMethodBinding compatibleMethod : compatibleMethods) {
 							ArrayList<ITypeBinding> compatibleParamTypes = getParamTypes(compatibleMethod);
-							List<ITypeBinding> toExtend = compatibleParamTypes.subList(myTypes.size()-1, compatibleParamTypes.size());
+							int startIndex = myTypes.size() == 0 ? 0 : myTypes.size() - 1;
+							List<ITypeBinding> toExtend = compatibleParamTypes.subList(startIndex, compatibleParamTypes.size());
 
 							List<ASTNode> thisExtension = new ArrayList<ASTNode>();
 							boolean extensionDoable = true;
-							int i = 0;
 							for(ITypeBinding necessaryExp : toExtend) {
 								List<Expression> replacements = semanticInfo.getMethodParamReplacementExpressions(methodName, md, necessaryExp.getName());
 								if(replacements.isEmpty()) {
@@ -457,7 +532,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 									break;
 								}
 								thisExtension.addAll(replacements);
-								i++;
 							}
 							if(extensionDoable) {
 								thisNodesOptions.add(thisExtension);
@@ -502,13 +576,18 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					}
 
 					ITypeBinding methodCallTypeBinding = methodCall.resolveTypeBinding();
-					String name = methodCallTypeBinding.getTypeDeclaration().getName();
+					if(methodCallTypeBinding == null) 
+						return true;
+					ITypeBinding td = methodCallTypeBinding.getTypeDeclaration();
+					if(td == null) 
+						return true;
+					String name = td.getName();
 					ITypeBinding decl = methodCallTypeBinding.getTypeDeclaration();
-					while(decl != null && !name.equals("AbstractList")) {
+					while(decl != null && decl.getSuperclass() != null && !name.equals("AbstractList")) {
 						decl = decl.getSuperclass().getTypeDeclaration();
 						name = decl.getName();
 					}
-					if(decl == null) {
+					if(!name.equals("AbstractList")) { 
 						return true;
 					}
 					indexedCollectionObjects.add(node);
@@ -560,7 +639,11 @@ if B include return statement
 				// FIXME: also supermethodinvocations
 
 				public boolean visit(MethodInvocation node) {
-					IMethodBinding myMethodBinding = node.resolveMethodBinding().getMethodDeclaration();
+					IMethodBinding mb = node.resolveMethodBinding();
+					if(mb == null) {
+						return true;
+					}
+					IMethodBinding myMethodBinding = mb.getMethodDeclaration();
 
 					ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
 					ArrayList<IMethodBinding> compatibleMethods = new ArrayList<IMethodBinding>();
@@ -604,6 +687,30 @@ if B include return statement
 			});
 		}
 		return shrinkableParameterMethods;
+	}
+
+	
+	private List<ASTNode> candidateObjectsToInit = null;
+
+	public   List<ASTNode> getObjectsAsMethodParams() {
+		if(candidateObjectsToInit == null) {
+			 candidateObjectsToInit = new LinkedList<ASTNode>();
+			 
+			 this.getASTNode().accept(new ASTVisitor() {
+					public boolean visit(MethodInvocation node) {
+					for(Object arg : node.arguments()) {
+						Expression argNode = (Expression) arg;
+						ITypeBinding binding = argNode.resolveTypeBinding();
+						if(binding != null && binding.isClass()) {
+							candidateObjectsToInit.add(node);
+						}
+					}
+					return true;
+					}
+			 });
+		}
+		
+		return candidateObjectsToInit;
 	}
 
 	private Map<ASTNode, List<IMethodBinding>> candidateMethodReplacements= null;
@@ -780,6 +887,7 @@ if B include return statement
 		this.setLineno(ASTUtils.getLineNumber(node));
 		this.setASTNode(node);
 	}
+
 
 
 }

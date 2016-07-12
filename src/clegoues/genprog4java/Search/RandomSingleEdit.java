@@ -40,7 +40,7 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 		while(numVariantsConsidered < RandomSingleEdit.maxVariants) {
 			Representation<G> variant = original.copy();
 			mutate(variant);
-			if (fitnessEngine.testFitness(0, variant)) {
+			if (fitnessEngine.testToFirstFailure(variant, true)) { 
 				this.noteSuccess(variant, original, 0);
 					if(!continueSearch) 
 						return;

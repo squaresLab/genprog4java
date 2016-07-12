@@ -42,6 +42,7 @@ import java.util.TreeSet;
 
 import javax.tools.SimpleJavaFileObject;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
@@ -67,10 +68,12 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.NullLiteral;
@@ -95,16 +98,29 @@ import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.WildcardType;
 
 import clegoues.genprog4java.java.ClassInfo;
 import clegoues.util.Pair;
 
+/** provides static utils for manipulating java ASTs.  Used to be much longer
+ * before I refactored semantic check info; it may be possible to refactor this away
+ * at some point.
+ * @author clegoues
+ *
+ */
 public class ASTUtils {
 
+	/** 
+	 * @param node ASTNode of interest
+	 * @return line number corresponding to the first line of the node in its CU. 
+	 * Note that ASTNodes can span multiple lines; this returns the first.
+	 */
 	public static int getLineNumber(ASTNode node) { 
 		ASTNode root = node.getRoot();
 		int lineno = -1;
@@ -117,6 +133,12 @@ public class ASTUtils {
 	}
 
 
+	/**
+	 * parses/creates java code from a string, rather than a file on disk.
+	 * @param progName
+	 * @param code 
+	 * @return collection of objects containing the java code. 
+	 */
 	public static Iterable<JavaSourceFromString> getJavaSourceFromString(
 			String progName, List<Pair<ClassInfo, String>> code) {
 
@@ -128,12 +150,89 @@ public class ASTUtils {
 			jsfs.add(oneSource);
 
 		}
-		// this originally turned off remove with an unsupported
-		// operation exception;
-		// do we really need that behavior?
-
 		return jsfs;
 
+	}
+
+	/** create a new Type object from a typeBinding, a hilariously
+	 * difficult thing to do.
+	 * @param ast
+	 * @param typeBinding
+	 * @return
+	 */
+	public static Type typeFromBinding(AST ast, ITypeBinding typeBinding) {
+		if( ast == null ) 
+			throw new NullPointerException("ast is null");
+		if( typeBinding == null )
+			throw new NullPointerException("typeBinding is null");
+
+		if( typeBinding.isPrimitive() ) {
+			return ast.newPrimitiveType(
+					PrimitiveType.toCode(typeBinding.getName()));
+		}
+
+		if( typeBinding.isCapture() ) {
+			ITypeBinding wildCard = typeBinding.getWildcard();
+			WildcardType capType = ast.newWildcardType();
+			ITypeBinding bound = wildCard.getBound();
+			if( bound != null ) {
+				capType.setBound(typeFromBinding(ast, bound),
+						wildCard.isUpperbound());
+			}
+			return capType;
+		}
+
+		if( typeBinding.isArray() ) {
+			Type elType = typeFromBinding(ast, typeBinding.getElementType());
+			return ast.newArrayType(elType, typeBinding.getDimensions());
+		}
+
+		if( typeBinding.isParameterizedType() ) {
+			ParameterizedType type = ast.newParameterizedType(
+					typeFromBinding(ast, typeBinding.getErasure()));
+
+			@SuppressWarnings("unchecked")
+			List<Type> newTypeArgs = type.typeArguments();
+			for( ITypeBinding typeArg : typeBinding.getTypeArguments() ) {
+				newTypeArgs.add(typeFromBinding(ast, typeArg));
+			}
+
+			return type;
+		}
+
+		// simple or raw type
+		String qualName = typeBinding.getQualifiedName();
+		if( "".equals(qualName) ) {
+			throw new IllegalArgumentException("No name for type binding.");
+		}
+		return ast.newSimpleType(ast.newName(qualName));
+	}
+
+
+	private static MethodDeclaration getMethodDeclaration(ASTNode node) {
+		while(node != null && node.getParent() != null && !(node instanceof MethodDeclaration)) {
+			node = node.getParent();
+		}
+		return (MethodDeclaration) node;
+	}
+	
+		public static ASTNode getDefaultReturn(ASTNode node, AST hostAST) {
+		MethodDeclaration md = getMethodDeclaration(node);
+		if(md == null) 
+			return null;
+		Type returnType = md.getReturnType2();
+		if(returnType.isPrimitiveType()) {
+			PrimitiveType casted = (PrimitiveType) returnType;
+			PrimitiveType.Code tc = casted.getPrimitiveTypeCode();
+			if(tc == PrimitiveType.BOOLEAN) {
+				return hostAST.newBooleanLiteral(false);
+			}
+			if(tc == PrimitiveType.CHAR || tc == PrimitiveType.BYTE || tc == PrimitiveType.INT || tc == PrimitiveType.SHORT)
+				return hostAST.newNumberLiteral("0");
+			if(tc == PrimitiveType.DOUBLE || tc == PrimitiveType.FLOAT || tc == PrimitiveType.LONG)
+				return hostAST.newNumberLiteral("0.0");
+		} 
+			return hostAST.newNullLiteral();
 	}
 
 	public static List<ASTNode> decomposeASTNode(ASTNode node) {
@@ -351,6 +450,7 @@ public class ASTUtils {
 	}
 }
 
+/** helper class for compiling from string */
 class JavaSourceFromString extends SimpleJavaFileObject {
 	final String code;
 

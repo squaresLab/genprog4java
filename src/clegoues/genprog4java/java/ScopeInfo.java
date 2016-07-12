@@ -41,30 +41,43 @@ import org.eclipse.jdt.core.dom.ASTNode;
 
 public class ScopeInfo
 {
-	
-	private HashMap<ASTNode,Set<String>> stmtScope; // stuff that's IN SCOPE at the statement, not used at the statement
+	private Set<String> classScope; // stuff that's IN SCOPE at the statement, not used at the statement
+
+	private HashMap<ASTNode,Set<String>> methodScope; // stuff that's IN SCOPE at the statement, not used at the statement
 	private HashMap<ASTNode,Set<String>> requiredNames; 
+	private HashMap<ASTNode,Set<String>> namesDeclared; 
 	private HashMap<ASTNode, Boolean> containsFinalVarAssignment;
+	
 	public ScopeInfo()
 	{
-		this.stmtScope = new HashMap<ASTNode,Set<String>>();
+		this.methodScope = new HashMap<ASTNode,Set<String>>();
+		this.classScope = new HashSet<String>();
 		this.requiredNames = new HashMap<ASTNode,Set<String>>();
+		this.namesDeclared = new HashMap<ASTNode,Set<String>>();
 		this.containsFinalVarAssignment = new HashMap<ASTNode, Boolean>();
+	}
+	
+	public Set<String> getNamesDeclared(ASTNode buggy) {
+		return this.namesDeclared.get(buggy);
+	}
+	
+	public void setNamesDeclared(ASTNode buggy, Set<String> names) {
+		this.namesDeclared.put(buggy, names);
 	}
 	
 	public void addRequiredNames(ASTNode buggy, Set<String> names) {
 		this.requiredNames.put(buggy,names);
 	}
 	
-	public void addScope4Stmt(ASTNode buggy, Set<String> shown)
+	public void addToMethodScope(ASTNode buggy, Set<String> shown)
 	{
-		if(this.stmtScope.containsKey(buggy))
+		if(this.methodScope.containsKey(buggy))
 		{
-			this.stmtScope.get(buggy).addAll(shown);
+			this.methodScope.get(buggy).addAll(shown);
 		}
 		else
 		{
-			this.stmtScope.put(buggy, shown);
+			this.methodScope.put(buggy, shown);
 		}
 	}
 	
@@ -74,26 +87,23 @@ public class ScopeInfo
 	public void setContainsFinalVarDecl(ASTNode node, boolean status) {
 		containsFinalVarAssignment.put(node, status);
 	}
-	public boolean isScopeSafe(ASTNode buggy, Set<String> necessary)
+	
+	public Set<String> getMethodScope(ASTNode buggy)
 	{
-		boolean isSafe = true;
-		
-		Set<String> provided = this.stmtScope.get(buggy);		
-		
-		for(String s : necessary)
-		{
-			if(!provided.contains(s))
-			{
-				isSafe = false;
-				break;
-			}
-		}
-		return isSafe;
+		return this.methodScope.get(buggy);
 	}
 	
-	public Set<String> getScope(ASTNode buggy)
+	
+	public void addToClassScope(String varname) {
+		this.classScope.add(varname);
+	}
+	
+	public void addToClassScope(Set<String> vars) {
+		this.classScope.addAll(vars);
+	}
+	public Set<String> getClassScope()
 	{
-		return this.stmtScope.get(buggy);
+		return this.classScope;
 	}
 	
 	public Set<String> getRequiredNames(ASTNode buggy)

@@ -13,12 +13,14 @@ import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimplePropertyDescriptor;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -97,11 +99,15 @@ public class JavaEditFactory {
 			return new MethodParameterRemover((JavaLocation) dst, sources);
 		case BABBLED:
 			return new JavaReplaceASTOperation((JavaLocation) dst, sources);
-		default: logger.fatal("unhandled edit template type in JavaEditFactory; this should be impossible (famous last words...)");
-		}		return null;
+		case SIZECHECK:
+			return new CollectionSizeChecker((JavaLocation) dst, sources);
+		case OBJINIT:
+			return new ObjectInitializer((JavaLocation) dst, sources);
+		}
+		return null;
 	}
 
-	private Set<WeightedAtom> scopeHelper(Location stmtId, JavaRepresentation variant) {
+	private Set<WeightedAtom> scopeHelper(Location stmtId, JavaRepresentation variant, Mutation mut) {
 		if (JavaEditFactory.scopeSafeAtomMap.containsKey(stmtId.getId())) {
 			return JavaEditFactory.scopeSafeAtomMap.get(stmtId.getId());
 		}
@@ -130,7 +136,7 @@ public class JavaEditFactory {
 			// different from what is now at that location.
 			// this comes down to our having overloaded statement IDs to mean both location and statement ID
 			// which is a problem I keep meaning to solve.
-			if(faultAST.equals(fixAST)) {
+			if(mut != Mutation.APPEND && faultAST.equals(fixAST)) {
 				continue;
 			}
 
@@ -170,20 +176,18 @@ public class JavaEditFactory {
 				}
 			}
 
-			//Heuristic: Inserting methods like this() or super() somewhere that is not the First Stmt in the constructor, is wrong
+			//Heuristic: Inserting methods like this() or super() somewhere that is not the First (or second, if super?) Stmt in the constructor, is wrong
 			if(fixAST instanceof ConstructorInvocation || 
 					fixAST instanceof SuperConstructorInvocation){
+				if(mut == Mutation.APPEND) continue;
 				ASTNode enclosingMethod = potentiallyBuggyStmt.getEnclosingMethod();
 
 				if (enclosingMethod != null && 
 						enclosingMethod instanceof MethodDeclaration && 
 						((MethodDeclaration) enclosingMethod).isConstructor()) {
-					StructuralPropertyDescriptor locationPotBuggy = faultAST.getLocationInParent();
 					List<ASTNode> statementsInBlock = ((MethodDeclaration) enclosingMethod).getBody().statements();
 					ASTNode firstStmtInTheBlock = statementsInBlock.get(0);
-					StructuralPropertyDescriptor locationFirstInBlock = firstStmtInTheBlock.getLocationInParent();
-					//This will catch replacements and swaps, but it will append after the first stmt, so append will still create a non compiling variant
-					if(!locationFirstInBlock.equals(locationPotBuggy)){
+					if(!faultAST.equals(firstStmtInTheBlock)) {
 						continue;
 					}
 				} else {
@@ -198,7 +202,7 @@ public class JavaEditFactory {
 					!potentiallyBuggyStmt.isWithinLoopOrCase()){
 				continue;
 			}
-
+			// FIXME: don't insert returns/throws into the middle of blocks, perhaps?
 			//Heuristic: Don't replace/swap returns within functions that have only one return statement
 			// (unless the replacer is also a return statement); could also check if it's a block or
 			// other sequence of statements with a return within it, but I'm lazy
@@ -236,7 +240,7 @@ public class JavaEditFactory {
 			break;
 		case APPEND: 	
 		case REPLACE:
-			Set<WeightedAtom> fixStmts = this.scopeHelper(location, variant);
+			Set<WeightedAtom> fixStmts = this.scopeHelper(location, variant, editType);
 			for(WeightedAtom fixStmt : fixStmts) {
 				JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
 				ASTNode fixAST = potentialFixStmt.getASTNode();
@@ -244,11 +248,11 @@ public class JavaEditFactory {
 			}
 			break;
 		case SWAP:
-			for (WeightedAtom item : this.scopeHelper(location, variant)) {
+			for (WeightedAtom item : this.scopeHelper(location, variant, editType)) {
 				int atom = item.getAtom();
-				Set<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getSecond()), variant);
+				Set<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getSecond()), variant, editType);
 				for (WeightedAtom there : inScopeThere) {
-					if (there.getAtom() == location.getId()) { // FIXME: this check looks weird to me.  Test swap.
+					if (there.getAtom() != location.getId()) { 
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
 						ASTNode fixAST = potentialFixStmt.getASTNode();
 						retVal.add(new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId()));
@@ -330,8 +334,14 @@ public class JavaEditFactory {
 			retVal.add(hole);
 			return retVal;
 		case OBJINIT:
-			logger.fatal("Unhandled template type in editSources!  Fix code in JavaEditFactory to do this properly.");
-			return null;
+			List<ASTNode> initObjects = locationStmt.getObjectsAsMethodParams();
+			for(ASTNode initObject : initObjects) {
+				// this is a slight misuse of ExpHole, which sort of "expects" that the second argument
+				// is the "replacement" code.
+				EditHole newHole = new ExpHole((Expression) initObject, null, locationStmt.getStmtId());
+				retVal.add(newHole);
+			}
+			return retVal;
 		case BABBLED:
 			return null;
 		}
@@ -403,9 +413,7 @@ public class JavaEditFactory {
 		case BABBLED:
 			return true;
 		case OBJINIT:
-			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
-			break;
-
+			return locationStmt.getObjectsAsMethodParams().size() > 0;
 		}
 		return false;
 	}

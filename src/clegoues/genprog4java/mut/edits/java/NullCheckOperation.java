@@ -10,7 +10,9 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -18,6 +20,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
@@ -29,7 +32,7 @@ public class NullCheckOperation extends JavaEditOperation {
 	public NullCheckOperation(JavaLocation location, EditHole source) {
 		super(location, source);
 	}
-	
+
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode =  ((JavaLocation) this.getLocation()).getCodeElement();
@@ -61,7 +64,7 @@ public class NullCheckOperation extends JavaEditOperation {
 				expression.setLeftOperand(newExpression);
 			}
 			if(expressionToCheckIfNull instanceof QualifiedName)
-				expression.setLeftOperand(((QualifiedName) expressionToCheckIfNull).getName());
+				expression.setLeftOperand((Expression) rewriter.createCopyTarget(((QualifiedName) expressionToCheckIfNull).getName()));
 
 			expression.setOperator(Operator.NOT_EQUALS);
 			expression.setRightOperand(expressionToCheckIfNull.getAST().newNullLiteral());
@@ -76,17 +79,20 @@ public class NullCheckOperation extends JavaEditOperation {
 			}
 		}
 		if(parent instanceof ReturnStatement) {
-			// CLG says: this is not tested!  FIXME: test before deploy.
 			PrefixExpression prefix = ifstmt.getAST().newPrefixExpression();
 			prefix.setOperator(PrefixExpression.Operator.NOT);
-			prefix.setOperand(everythingInTheCondition);
+			ParenthesizedExpression parenthesized = rewriter.getAST().newParenthesizedExpression();
+			parenthesized.setExpression(everythingInTheCondition);
+			prefix.setOperand(parenthesized);
 			ifstmt.setExpression(prefix);
 			ASTNode elseStmt = (Statement) parent;
 			elseStmt = ASTNode.copySubtree(parent.getAST(), elseStmt); 
 			ifstmt.setElseStatement((Statement) elseStmt); 
 			ReturnStatement newReturn = ifstmt.getAST().newReturnStatement();
 			// return a default value.
-			newReturn.setExpression(ifstmt.getAST().newNullLiteral());
+			ASTNode newValue = ASTUtils.getDefaultReturn(locationNode, rewriter.getAST());
+			if(newValue != null) 
+				newReturn.setExpression((Expression) newValue);
 			ifstmt.setThenStatement((Statement) newReturn);
 		} else {
 			ifstmt.setExpression(everythingInTheCondition);
@@ -97,11 +103,11 @@ public class NullCheckOperation extends JavaEditOperation {
 		rewriter.replace(parent, ifstmt, null);
 
 	}
-	
+
 	@Override
 	public String toString() {
 		// FIXME: this is lazy
 		return "nc(" + this.getLocation().getId() + ")";
 	}
-	
+
 }

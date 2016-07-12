@@ -23,6 +23,7 @@ public class JavaDeleteOperation extends JavaEditOperation {
 
 	        /* Replace the faulty statement with the empty Block. */
 	        rewriter.replace(locationNode, emptyBlock, null);
+	        
 			
 	}
 	

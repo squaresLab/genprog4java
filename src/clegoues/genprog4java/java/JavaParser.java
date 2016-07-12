@@ -47,11 +47,16 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 
+import clegoues.genprog4java.main.Configuration;
 import clegoues.util.Pair;
 
-
+/**
+ * Parses a single java file, and delegates to a semantic info visitor the goal
+ * of collecting various types of semantic info necessary for later mutation checks.
+ * @author clegoues
+ *
+ */
 public class JavaParser
 {
 	private LinkedList<ASTNode> stmts;
@@ -61,6 +66,7 @@ public class JavaParser
 	private HashMap<String,String> variableTypes;
 	
 	private HashSet<String> availableTypes;
+	private HashSet<String> availableMethodsAndFields;
 
 	public JavaParser(ScopeInfo scopeList)
 	{
@@ -68,7 +74,8 @@ public class JavaParser
 		this.methodReturnType = new HashSet<Pair<String,String>>();
 		this.variableTypes = new HashMap<String,String>();
 		this.availableTypes = new HashSet<String>();
-		
+		this.availableMethodsAndFields = new HashSet<String>();
+
 		this.visitor = new SemanticInfoVisitor();
 		
 		this.visitor.setNodeSet(this.stmts);		
@@ -77,10 +84,17 @@ public class JavaParser
 		this.visitor.setVariableType(variableTypes);
 		
 		this.visitor.setAvailableTypes(availableTypes);
+		this.visitor.setAvailableMethodsAndFields(availableMethodsAndFields);
+
 	}
 
 	public HashSet<String> getAvailableTypes() {
 		return this.availableTypes;
+	}
+	
+
+	public HashSet<String> getAvailableMethodsAndFields() {
+		return this.availableMethodsAndFields;
 	}
 	
 	public HashSet<Pair<String,String>> getMethodReturnTypeSet(){
@@ -104,11 +118,15 @@ public class JavaParser
 	
 	public void parse(String file, String[] libs)
 	{
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		int parserVersion = AST.JLS8;
+		if(Configuration.sourceVersion != "1.8") {
+			parserVersion = AST.JLS4;
+		}
+		ASTParser parser = ASTParser.newParser(parserVersion);
 		parser.setEnvironment(libs, new String[] {}, null, true);
 		
 		Map options = JavaCore.getOptions();
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_6, options);
+		JavaCore.setComplianceOptions(Configuration.sourceVersion, options);
 		parser.setCompilerOptions(options);
 		
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
