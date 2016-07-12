@@ -74,6 +74,8 @@ cd $BUGWD/$WD
 FILE=$BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 /bin/cat <<EOM >$FILE
 #!/bin/bash
+ export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/
+ export PATH=$JAVA_HOME/bin/:$PATH
 cd $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
 $DEFECTS4JDIR/framework/bin/defects4j compile
 EOM

@@ -254,8 +254,6 @@ public class JavaEditFactory {
 			return JavaHole.makeExpHole(locationStmt.getReplacableMethodParameters(variant.semanticInfo), locationStmt);
 		case EXPREP:
 			return JavaHole.makeExpHole(locationStmt.getConditionalExpressions(variant.semanticInfo), locationStmt);
-
-
 		case EXPADD:
 			Map<Expression, List<Expression>> extendableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
 			for(Entry<Expression, List<Expression>> entries : extendableExpressions.entrySet()) { 
@@ -304,8 +302,14 @@ public class JavaEditFactory {
 			retVal.add(hole);
 			return retVal;
 		case OBJINIT:
-			logger.fatal("Unhandled template type in editSources!  Fix code in JavaEditFactory to do this properly.");
-			return null;
+			List<ASTNode> initObjects = locationStmt.getIndexedCollectionObjects();
+			for(ASTNode initObject : initObjects) {
+				// this is a slight misuse of ExpHold, which sort of "expects" that the second argument
+				// is the "replacement" code.
+				EditHole newHole = new ExpHole((Expression) initObject, null, locationStmt.getStmtId());
+				retVal.add(newHole);
+			}
+			return retVal;
 		}
 		return retVal;
 	}
@@ -370,9 +374,7 @@ public class JavaEditFactory {
 		case SIZECHECK:
 			return locationStmt.getIndexedCollectionObjects().size() > 0;
 		case OBJINIT:
-			logger.fatal("Unhandled edit type in DoesEditApply.  Handle it in JavaRepresentation and try again.");
-			break;
-
+			return locationStmt.getObjectsAsMethodParams().size() > 0;
 		}
 		return false;
 	}

@@ -37,6 +37,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,6 +67,8 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WhileStatement;
+
+import clegoues.genprog4java.rep.WeightedAtom;
 
 public class JavaStatement implements Comparable<JavaStatement>{
 
@@ -623,6 +626,30 @@ if B include return statement
 		return shrinkableParameterMethods;
 	}
 
+	
+	private List<ASTNode> candidateObjectsToInit = null;
+
+	public   List<ASTNode> getObjectsAsMethodParams() {
+		if(candidateObjectsToInit == null) {
+			 candidateObjectsToInit = new LinkedList<ASTNode>();
+			 
+			 this.getASTNode().accept(new ASTVisitor() {
+					public boolean visit(MethodInvocation node) {
+					for(Object arg : node.arguments()) {
+						Expression argNode = (Expression) arg;
+						ITypeBinding binding = argNode.resolveTypeBinding();
+						if(binding.isClass()) {
+							candidateObjectsToInit.add(node);
+						}
+					}
+					return true;
+					}
+			 });
+		}
+		
+		return candidateObjectsToInit;
+	}
+
 	private Map<ASTNode, List<IMethodBinding>> candidateMethodReplacements= null;
 
 	public Map<ASTNode, List<IMethodBinding>> getCandidateMethodReplacements() {
@@ -797,6 +824,7 @@ if B include return statement
 		this.setLineno(ASTUtils.getLineNumber(node));
 		this.setASTNode(node);
 	}
+
 
 
 }

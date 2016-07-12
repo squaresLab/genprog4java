@@ -47,7 +47,6 @@ public class OffByOneOperation extends JavaEditOperation {
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
-		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> arrays = thisHole.getSubExps();
 		for(ASTNode array : arrays) {
 			ArrayAccess arrayAccess  = (ArrayAccess) array; 
