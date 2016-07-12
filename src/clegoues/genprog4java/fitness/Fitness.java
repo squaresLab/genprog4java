@@ -306,30 +306,51 @@ public class Fitness {
 	 * @returns boolean, whether the rep passed all tests.  
 	 */
 	public boolean testToFirstFailure(Representation rep, boolean withModel) {
+		double fac = Fitness.numPositiveTests * Fitness.negativeTestWeight
+				/ Fitness.numNegativeTests;
+
+		double maxFitness = Fitness.numPositiveTests
+				+ ((Fitness.numNegativeTests * fac));
+		double curFit = rep.getFitness();
+		if (curFit > -1.0) {
+			logger.info("\t passed" + curFit + " tests, " + rep.getName() + " (stored at: " + rep.getVariantFolder() + ")");
+			return !(curFit < maxFitness);
+		}
+
 		if(withModel) {
 			boolean foundFail = false;
+			int numPassed = 0;
 			for(TestCase thisTest : testModel) {
 				if (!rep.testCase(thisTest)) {
 					rep.cleanup();
 					thisTest.incrementPatchesKilled();
 					foundFail = true;
 					break;
+			 } else {
+				 numPassed ++;
 			 }
 			}
 			if(foundFail) {
 				Collections.sort(testModel,Collections.reverseOrder());
+				logger.info("\t passed " + numPassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 				return false;
 			}
 			return true;
 		} else {
 		int numNegativePassed = this.testPassCount(rep, true, Fitness.negativeTests);
 		if(numNegativePassed < Fitness.numNegativeTests) {
+			logger.info("\t passed " + numNegativePassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
+
 			return false;
 		}
 		int numPositivePassed = this.testPassCount(rep,  true, Fitness.positiveTests);
 		if(numPositivePassed < Fitness.numPositiveTests) {
+			int totalPassed = numNegativePassed + numPositivePassed;
+			logger.info("\t passed " + totalPassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 			return false;
 		}
+		int totalPassed = numNegativePassed + numPositivePassed;
+		logger.info("\t passed " + totalPassed + " (ALL) tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 		return true;
 		}
 	}

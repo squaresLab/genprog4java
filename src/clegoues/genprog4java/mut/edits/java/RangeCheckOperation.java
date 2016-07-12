@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -21,6 +22,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
+import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.mut.EditHole;
@@ -30,158 +32,116 @@ import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
 public class RangeCheckOperation extends JavaEditOperation {
-	
+
 
 	public RangeCheckOperation(JavaLocation location, EditHole source) {
 		super(location, source);
 	}
-	// FIXME: make this nicer.
+
+	/*[Range Checker]
+			B = buggy statements
+			collect array accesses of B into collection C
+			insert a if statement before B
+
+			loop for all index variables in C
+			{
+			 insert a conditional expression that checks whether an index variable is within upper and lower bound
+			}
+			concatenate conditions using AND
+
+			if B include return statement
+			{
+			 negate the concatenated the conditional expression
+			 insert a return statement that returns a default value into THEN section of the if statement
+			 insert B after the if statement
+			} else {
+			 insert B into THEN section of the if statement
+			}*/
 
 	@Override
 	public void edit(final ASTRewrite rewriter) {
-		ASTNode locationNode = ((JavaLocation) this.getLocation()).getCodeElement(); 
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> arrays = thisHole.getSubExps();
-		
-		Block newNode = rewriter.getAST().newBlock(); 
-
-		// if the parent is for statement then create a new for
-		// statement. this is special case
-		ForStatement newForStmt = null;
-
-		boolean returnflag = false; // to check is parent node has a return statement
-		int counter = 0; // to keep track of the #range check conditions
-		boolean isforstmt = false; // to check if parent is of type ForStatement
-
-		if (parent.toString().contains("return")) {
-			returnflag = true;
-		}
-
-		if (parent instanceof ForStatement) {
-			isforstmt = true;
-			newForStmt = (ForStatement) parent;
-		}
+		ASTNode newNode = null;
 
 		// new if statement that will contain the range check
 		// expressions concatenated using AND
-		IfStatement rangechkstmt = rewriter.getAST().newIfStatement();
-
-		InfixExpression finalandexpression = null;
-		finalandexpression = rewriter.getAST().newInfixExpression();
-		finalandexpression.setOperator(Operator.CONDITIONAL_AND);
-
-		// for each of the array access instances
+		IfStatement newIfStatement = rewriter.getAST().newIfStatement();
+		
+		InfixExpression allAccessesCheck = null; 
 		for (ASTNode array : arrays) {
-			// get the array index
+
 			Expression index = ((ArrayAccess) array).getIndex();
-			String arrayindex;
-			if (!(index instanceof NumberLiteral)) {
-				arrayindex = index.toString();
-				arrayindex = arrayindex.replace("++", "");
-				arrayindex = arrayindex.replace("--", "");
+			
+			InfixExpression thisAccessCheck = rewriter.getAST().newInfixExpression();
+			thisAccessCheck.setOperator(Operator.CONDITIONAL_AND);
 
-				// create infix expression to check lowerbound and
-				// upperbound of array index
-				InfixExpression andexpression = null;
-				andexpression = rewriter.getAST().newInfixExpression();
-				andexpression.setOperator(Operator.CONDITIONAL_AND);
+			InfixExpression upperBoundCheck = rewriter.getAST().newInfixExpression();
+			upperBoundCheck.setLeftOperand((Expression) rewriter.createCopyTarget(index));
+			upperBoundCheck.setOperator(Operator.LESS);
 
-				// create infix expression to check lowerbound
-				InfixExpression checklboundexpression = null;
-				checklboundexpression = rewriter.getAST()
-						.newInfixExpression();
-				checklboundexpression.setLeftOperand(rewriter.getAST()
-						.newSimpleName(arrayindex));
-				checklboundexpression
-				.setOperator(Operator.GREATER_EQUALS);
-				checklboundexpression.setRightOperand(rewriter.getAST()
-						.newNumberLiteral("0"));
+			SimpleName uqualifier = rewriter.getAST().newSimpleName(
+					((ArrayAccess) array).getArray().toString());
+			SimpleName uname = rewriter.getAST().newSimpleName(
+					"length");
+			upperBoundCheck.setRightOperand(rewriter.getAST()
+					.newQualifiedName(uqualifier, uname));			
 
-				// create infix expression to check upper bound
-				InfixExpression checkuboundexpression = null;
-				checkuboundexpression = rewriter.getAST()
-						.newInfixExpression();
-				checkuboundexpression.setLeftOperand(rewriter.getAST()
-						.newSimpleName(arrayindex));
-				checkuboundexpression.setOperator(Operator.LESS);
+			InfixExpression lowerBoundCheck = rewriter.getAST().newInfixExpression();
+			lowerBoundCheck.setLeftOperand((Expression) rewriter.createCopyTarget(index));
+			lowerBoundCheck.setOperator(Operator.GREATER_EQUALS);
+			lowerBoundCheck.setRightOperand(rewriter.getAST().newNumberLiteral("0"));
 
-				SimpleName uqualifier = rewriter.getAST().newSimpleName(
-						((ArrayAccess) array).getArray().toString());
-				SimpleName uname = rewriter.getAST().newSimpleName(
-						"length");
-				checkuboundexpression.setRightOperand(rewriter.getAST()
-						.newQualifiedName(uqualifier, uname));
+			thisAccessCheck.setLeftOperand(lowerBoundCheck);
+			thisAccessCheck.setRightOperand(upperBoundCheck);
 
-				andexpression.setLeftOperand(checklboundexpression);
-				andexpression.setRightOperand(checkuboundexpression);
-
-				if (counter == 0) { // only one array access is there in
-					// parent node
-					finalandexpression = andexpression;
-					counter++;
-				} else { // if more than one array access are there then
-					// keep creating and concatenating
-					// expressions
-					// into "finalandexpression"
-					InfixExpression tmpandexpression = null;
-					tmpandexpression = rewriter.getAST()
-							.newInfixExpression();
-					tmpandexpression
-					.setOperator(Operator.CONDITIONAL_AND);
-					tmpandexpression.setLeftOperand(finalandexpression);
-					tmpandexpression.setRightOperand(andexpression);
-					finalandexpression = tmpandexpression;
-					counter++;
-				}
+			if(allAccessesCheck == null) {
+				allAccessesCheck = thisAccessCheck;
+			} else {
+				Expression tempExpression = allAccessesCheck;
+				allAccessesCheck = rewriter.getAST().newInfixExpression();
+				allAccessesCheck.setOperator(Operator.CONDITIONAL_AND);
+				allAccessesCheck.setLeftOperand(thisAccessCheck);
+				allAccessesCheck.setRightOperand(tempExpression);
 			}
 		}
 
-		if (isforstmt == false) { // if the parent node is NOT
-			// ForStatement
-			if (returnflag == false) { // if parent node DOES NOT
-				// contain return statement
-				rangechkstmt.setExpression(finalandexpression);
-				ASTNode stmt = (Statement) parent;
-				stmt = ASTNode.copySubtree(rewriter.getAST(), stmt);
-				rangechkstmt.setThenStatement((Statement) stmt);
-				newNode.statements().add(rangechkstmt);
-			} else { // if parent node contains return statement
+		
+		if(parent instanceof ReturnStatement) {
+			newNode = rewriter.getAST().newBlock(); 
+			// create a prefix expression = NOT(finalandconditions)
+			
+			PrefixExpression negationExp = rewriter.getAST()
+					.newPrefixExpression();
 
-				// create a prefix expression = NOT(finalandconditions)
-				PrefixExpression notfinalandexpression = null;
-				notfinalandexpression = rewriter.getAST()
-						.newPrefixExpression();
+			ParenthesizedExpression parexp = null;
+			parexp = parent.getAST().newParenthesizedExpression();
+			parexp.setExpression(allAccessesCheck);
 
-				ParenthesizedExpression parexp = null;
-				parexp = parent.getAST().newParenthesizedExpression();
-				parexp.setExpression(finalandexpression);
+			negationExp.setOperand(parexp);
+			negationExp
+			.setOperator(org.eclipse.jdt.core.dom.PrefixExpression.Operator.NOT);
+			// set the ifstatement expression
+			newIfStatement.setExpression(negationExp);
 
-				notfinalandexpression.setOperand(parexp);
-				notfinalandexpression
-				.setOperator(org.eclipse.jdt.core.dom.PrefixExpression.Operator.NOT);
-				// set the ifstatement expression
-				rangechkstmt.setExpression(notfinalandexpression);
+			ReturnStatement rstmt = rewriter.getAST().newReturnStatement();
+			
+			NullLiteral defaultreturnvalue = rewriter.getAST().newNullLiteral();
 
-				// set the then part as return default. We shall have to
-				// declare RETURN_DEFAULT constant in the target
-				// program.
-				ReturnStatement rstmt = rewriter.getAST()
-						.newReturnStatement();
-				SimpleName defaultreturnvalue = rewriter.getAST()
-						.newSimpleName("RETURN_DEFAULT");
-				rstmt.setExpression(defaultreturnvalue);
-				rangechkstmt.setThenStatement(rstmt);
+			rstmt.setExpression(defaultreturnvalue);
+			newIfStatement.setThenStatement(rstmt);
 
-				// add the if statement followed by remaining content of
-				// the parent node to new node
-				newNode.statements().add(rangechkstmt);
-				ASTNode stmt = (Statement) parent;
-				stmt = ASTNode.copySubtree(rewriter.getAST(), stmt);
-				newNode.statements().add(stmt);
-			}
-		} else { // if the parent node is of type ForStatement.
-
+			// add the if statement followed by remaining content of
+			// the parent node to new node
+			
+			((Block) newNode).statements().add(newIfStatement);
+			ASTNode stmt = parent;
+			stmt = ASTNode.copySubtree(rewriter.getAST(),  parent);
+			((Block) newNode).statements().add(stmt);
+			
+		} else if(parent instanceof ForStatement) { // possible FIXME: enhanced fors?
+			newNode = parent;
 			// get the expressions of for statement
 			Expression forexp = ((ForStatement) parent).getExpression();
 			forexp = (Expression) ((ForStatement) parent)
@@ -194,21 +154,27 @@ public class RangeCheckOperation extends JavaEditOperation {
 			InfixExpression forexpression = null;
 			forexpression = rewriter.getAST().newInfixExpression();
 			forexpression.setOperator(Operator.CONDITIONAL_AND);
-			forexpression.setLeftOperand(finalandexpression);
+			forexpression.setLeftOperand(allAccessesCheck);
 			forexpression.setRightOperand(forexp);
 
 			// update the for statement expressions
-			newForStmt = (ForStatement) ASTNode.copySubtree(
-					rewriter.getAST(), newForStmt);
-			newForStmt.setExpression(forexpression);
-		}
-
-		// replace parent node with new node (or new for statement)
-		if (isforstmt == false) {
-			rewriter.replace(parent, newNode, null);
+			newNode = ASTNode.copySubtree(
+					rewriter.getAST(), newNode);
+			((ForStatement) newNode).setExpression(forexpression);
 		} else {
-			rewriter.replace(parent, newForStmt, null);
+			newNode = rewriter.getAST().newBlock(); 
+
+			newIfStatement.setExpression(allAccessesCheck);
+			ASTNode stmt = (Statement) parent;
+			Block thenBlock = rewriter.getAST().newBlock();
+			thenBlock.statements().add((ASTNode) rewriter.createCopyTarget(parent));
+			newIfStatement.setThenStatement(thenBlock);
+			stmt = ASTNode.copySubtree(rewriter.getAST(), stmt);
+			newIfStatement.setThenStatement((Statement) stmt);
 		}
+		((Block) newNode).statements().add(newIfStatement);
+
+		rewriter.replace(parent, newNode, null);
 	}
 
 	@Override
@@ -216,5 +182,5 @@ public class RangeCheckOperation extends JavaEditOperation {
 		// FIXME: this is lazy
 		return "rc(" + this.getLocation().getId() + ")";
 	}
-	
-	}
+
+}

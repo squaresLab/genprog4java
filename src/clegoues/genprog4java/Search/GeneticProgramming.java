@@ -101,7 +101,6 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			// step 2: crossover
 			incomingPopulation.crossover(original);
 
-			// FIXME: deal with "not enough mutation"; expand fix space again!
 			// step 3: mutation
 			for (Representation<G> item : incomingPopulation) {
 				Representation<G> newItem = original.copy();
