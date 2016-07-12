@@ -306,7 +306,7 @@ public class JavaEditFactory {
 		case OBJINIT:
 			List<ASTNode> initObjects = locationStmt.getObjectsAsMethodParams();
 			for(ASTNode initObject : initObjects) {
-				// this is a slight misuse of ExpHold, which sort of "expects" that the second argument
+				// this is a slight misuse of ExpHole, which sort of "expects" that the second argument
 				// is the "replacement" code.
 				EditHole newHole = new ExpHole((Expression) initObject, null, locationStmt.getStmtId());
 				retVal.add(newHole);
