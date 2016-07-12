@@ -671,7 +671,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			options.add(Configuration.sourceVersion);
 
 			options.add("-target");
-			options.add(Configuration.targetVersion);
+			options.add(Configuration.sourceVersion);
 
 			options.add("-d");
 
