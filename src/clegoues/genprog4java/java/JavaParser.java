@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import clegoues.genprog4java.main.Configuration;
 import clegoues.util.Pair;
 
 /**
@@ -113,11 +114,15 @@ public class JavaParser
 	
 	public void parse(String file, String[] libs)
 	{
-		ASTParser parser = ASTParser.newParser(AST.JLS4);
+		int parserVersion = AST.JLS8;
+		if(Configuration.sourceVersion != "1.8") {
+			parserVersion = AST.JLS4;
+		}
+		ASTParser parser = ASTParser.newParser(parserVersion);
 		parser.setEnvironment(libs, new String[] {}, null, true);
 		
 		Map options = JavaCore.getOptions();
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_6, options);
+		JavaCore.setComplianceOptions(Configuration.sourceVersion, options);
 		parser.setCompilerOptions(options);
 		
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);

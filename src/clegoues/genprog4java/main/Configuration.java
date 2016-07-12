@@ -48,6 +48,7 @@ import java.util.Random;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
+import org.eclipse.jdt.core.JavaCore;
 
 import clegoues.genprog4java.java.ClassInfo;
 import clegoues.util.ConfigurationBuilder;
@@ -78,14 +79,8 @@ public class Configuration {
 	//public static String sourceVersion = "1.6";
 	public static String sourceVersion = ConfigurationBuilder.of( STRING )
 		.withVarName( "sourceVersion" )
-		.withDefault( "1.6" )
+		.withDefault(JavaCore.VERSION_1_6)
 		.withHelp( "Java version of the source code" )
-		.build();
-	//public static String targetVersion = "1.6";
-	public static String targetVersion = ConfigurationBuilder.of( STRING )
-		.withVarName( "targetVersion" )
-		.withDefault( "1.6" )
-		.withHelp( "Java version of the generated classes" )
 		.build();
 	//public static String globalExtension = ".java";
 	public static String globalExtension = ConfigurationBuilder.of( STRING )
