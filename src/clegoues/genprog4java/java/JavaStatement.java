@@ -701,7 +701,7 @@ if B include return statement
 					for(Object arg : node.arguments()) {
 						Expression argNode = (Expression) arg;
 						ITypeBinding binding = argNode.resolveTypeBinding();
-						if(binding.isClass()) {
+						if(binding != null && binding.isClass()) {
 							candidateObjectsToInit.add(node);
 						}
 					}
