@@ -518,13 +518,16 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					}
 
 					ITypeBinding methodCallTypeBinding = methodCall.resolveTypeBinding();
-					String name = methodCallTypeBinding.getTypeDeclaration().getName();
+					ITypeBinding td = methodCallTypeBinding.getTypeDeclaration();
+					if(td == null) 
+						return true;
+					String name = td.getName();
 					ITypeBinding decl = methodCallTypeBinding.getTypeDeclaration();
-					while(decl != null && !name.equals("AbstractList")) {
+					while(decl != null && decl.getSuperclass() != null && !name.equals("AbstractList")) {
 						decl = decl.getSuperclass().getTypeDeclaration();
 						name = decl.getName();
 					}
-					if(decl == null) {
+					if(!name.equals("AbstractList")) { 
 						return true;
 					}
 					indexedCollectionObjects.add(node);
