@@ -521,11 +521,10 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						for(IMethodBinding compatibleMethod : compatibleMethods) {
 							ArrayList<ITypeBinding> compatibleParamTypes = getParamTypes(compatibleMethod);
 							int startIndex = myTypes.size() == 0 ? 0 : myTypes.size() - 1;
-							List<ITypeBinding> toExtend = compatibleParamTypes.subList(myTypes.size()-1, compatibleParamTypes.size());
+							List<ITypeBinding> toExtend = compatibleParamTypes.subList(startIndex, compatibleParamTypes.size());
 
 							List<ASTNode> thisExtension = new ArrayList<ASTNode>();
 							boolean extensionDoable = true;
-							int i = 0;
 							for(ITypeBinding necessaryExp : toExtend) {
 								List<Expression> replacements = semanticInfo.getMethodParamReplacementExpressions(methodName, md, necessaryExp.getName());
 								if(replacements.isEmpty()) {
@@ -533,7 +532,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 									break;
 								}
 								thisExtension.addAll(replacements);
-								i++;
 							}
 							if(extensionDoable) {
 								thisNodesOptions.add(thisExtension);

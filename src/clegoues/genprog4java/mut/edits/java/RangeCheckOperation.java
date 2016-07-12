@@ -164,16 +164,13 @@ public class RangeCheckOperation extends JavaEditOperation {
 			((ForStatement) newNode).setExpression(forexpression);
 		} else {
 			newNode = rewriter.getAST().newBlock(); 
-
 			newIfStatement.setExpression(allAccessesCheck);
-			ASTNode stmt = (Statement) parent;
 			Block thenBlock = rewriter.getAST().newBlock();
 			thenBlock.statements().add((ASTNode) rewriter.createCopyTarget(parent));
 			newIfStatement.setThenStatement(thenBlock);
-			stmt = ASTNode.copySubtree(rewriter.getAST(), stmt);
-			newIfStatement.setThenStatement((Statement) stmt);
+			((Block) newNode).statements().add(newIfStatement);
+
 		}
-		((Block) newNode).statements().add(newIfStatement);
 
 		rewriter.replace(parent, newNode, null);
 	}
