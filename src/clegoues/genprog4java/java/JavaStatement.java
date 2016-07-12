@@ -518,6 +518,8 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					}
 
 					ITypeBinding methodCallTypeBinding = methodCall.resolveTypeBinding();
+					if(methodCallTypeBinding == null) 
+						return true;
 					ITypeBinding td = methodCallTypeBinding.getTypeDeclaration();
 					if(td == null) 
 						return true;
