@@ -224,7 +224,7 @@ public class JavaEditFactory {
 				int atom = item.getAtom();
 				Set<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getSecond()), variant, editType);
 				for (WeightedAtom there : inScopeThere) {
-					if (there.getAtom() == location.getId()) { // FIXME: this check looks weird to me.  Test swap.
+					if (there.getAtom() != location.getId()) { 
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
 						ASTNode fixAST = potentialFixStmt.getASTNode();
 						retVal.add(new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId()));

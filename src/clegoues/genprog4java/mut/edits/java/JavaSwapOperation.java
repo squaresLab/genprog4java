@@ -23,7 +23,7 @@ public class JavaSwapOperation extends JavaEditOperation {
 		ASTNode fixCodeNode =
 			 ASTNode.copySubtree(rewriter.getAST(), fixCode.getCode()); 
 		rewriter.replace(locationNode, fixCodeNode, null);
-		rewriter.replace(fixCode.getCode(), ASTNode
+		rewriter.replace(fixCodeNode, ASTNode
 				.copySubtree(locationNode.getAST(), locationNode), null); 
 	}
 	
