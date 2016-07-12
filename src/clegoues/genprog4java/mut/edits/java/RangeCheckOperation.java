@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
@@ -127,9 +128,9 @@ public class RangeCheckOperation extends JavaEditOperation {
 
 			ReturnStatement rstmt = rewriter.getAST().newReturnStatement();
 			
-			NullLiteral defaultreturnvalue = rewriter.getAST().newNullLiteral();
-
-			rstmt.setExpression(defaultreturnvalue);
+			ASTNode returnValue = ASTUtils.getDefaultReturn(parent, rewriter.getAST());
+			if(returnValue != null) 
+				rstmt.setExpression((Expression) returnValue);
 			newIfStatement.setThenStatement(rstmt);
 
 			// add the if statement followed by remaining content of

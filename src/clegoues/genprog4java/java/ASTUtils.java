@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Type;
@@ -120,7 +121,7 @@ public class ASTUtils {
 			ITypeBinding bound = wildCard.getBound();
 			if( bound != null ) {
 				capType.setBound(typeFromBinding(ast, bound),
-				wildCard.isUpperbound());
+						wildCard.isUpperbound());
 			}
 			return capType;
 		}
@@ -149,6 +150,32 @@ public class ASTUtils {
 			throw new IllegalArgumentException("No name for type binding.");
 		}
 		return ast.newSimpleType(ast.newName(qualName));
+	}
+
+
+	private static MethodDeclaration getMethodDeclaration(ASTNode node) {
+		while(node != null && node.getParent() != null && !(node instanceof MethodDeclaration)) {
+			node = node.getParent();
+		}
+		return (MethodDeclaration) node;
+	}
+	public static ASTNode getDefaultReturn(ASTNode node, AST hostAST) {
+		MethodDeclaration md = getMethodDeclaration(node);
+		if(md == null) 
+			return null;
+		Type returnType = md.getReturnType2();
+		if(returnType.isPrimitiveType()) {
+			PrimitiveType casted = (PrimitiveType) returnType;
+			PrimitiveType.Code tc = casted.getPrimitiveTypeCode();
+			if(tc == PrimitiveType.BOOLEAN) {
+				return hostAST.newBooleanLiteral(false);
+			}
+			if(tc == PrimitiveType.CHAR || tc == PrimitiveType.BYTE || tc == PrimitiveType.INT || tc == PrimitiveType.SHORT)
+				return hostAST.newNumberLiteral("0");
+			if(tc == PrimitiveType.DOUBLE || tc == PrimitiveType.FLOAT || tc == PrimitiveType.LONG)
+				return hostAST.newNumberLiteral("0.0");
+		} 
+			return hostAST.newNullLiteral();
 	}
 }
 
