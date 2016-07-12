@@ -13,13 +13,17 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.holes.java.ExpHole;
@@ -44,6 +48,9 @@ public class ObjectInitializer extends JavaEditOperation {
 		  }
 		  return parent;
 	  }
+	  
+
+
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		final AST myAST = rewriter.getAST();
@@ -65,12 +72,11 @@ public class ObjectInitializer extends JavaEditOperation {
 					Expression asExp = (Expression) arg;
 					ITypeBinding binding = asExp.resolveTypeBinding();
 
-
 					if(binding.isClass()) {
 						String identifier = ObjectInitializer.nextString();
 						SimpleName newVarName = myAST.newSimpleName(identifier);
 						VariableDeclarationFragment fragment = myAST.newVariableDeclarationFragment();
-						Type declaringType = (Type) cu.findDeclaringNode(binding);
+						Type declaringType = ASTUtils.typeFromBinding(myAST, binding);
 						
 						ClassInstanceCreation initializer = myAST.newClassInstanceCreation();
 						initializer.setType(declaringType);
