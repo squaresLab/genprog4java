@@ -366,7 +366,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		}
 		extendableExpressions = new HashMap<Expression, List<Expression>>();
 
-		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
+		final MethodDeclaration md = (MethodDeclaration) ASTUtils.getEnclosingMethod(this.getASTNode());
 		final String methodName = md.getName().getIdentifier();
 		final List<Expression> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
 
@@ -406,7 +406,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		if(methodParamReplacements == null) {
 			methodParamReplacements = new HashMap<Expression,List<Expression>>();
 		}
-		final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
+		final MethodDeclaration md = (MethodDeclaration) ASTUtils.getEnclosingMethod(this.getASTNode());
 		final String methodName = md.getName().getIdentifier();
 
 		this.getASTNode().accept(new ASTVisitor() {
@@ -474,7 +474,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		if(extendableParameterMethods == null) {
 			extendableParameterMethods = new HashMap<ASTNode,List<List<ASTNode>>>();
 
-			final MethodDeclaration md = (MethodDeclaration) this.getEnclosingMethod();
+			final MethodDeclaration md = (MethodDeclaration) ASTUtils.getEnclosingMethod(this.getASTNode());
 			final String methodName = md.getName().getIdentifier();
 
 			this.getASTNode().accept(new ASTVisitor() {
@@ -788,7 +788,7 @@ if B include return statement
 		ASTNode parent = faultyNode.getParent();
 		//Heuristic: Don't remove returns from functions that have only one return statement.
 		if(faultyNode instanceof ReturnStatement){
-			parent = this.getEnclosingMethod();
+			parent = ASTUtils.getEnclosingMethod(this.getASTNode());
 			if(parent != null && parent instanceof MethodDeclaration) {
 				if(!hasMoreThanOneReturn((MethodDeclaration)parent))
 					return false;
@@ -834,22 +834,15 @@ if B include return statement
 		return true;*/
 	}
 
-	public ASTNode getEnclosingMethod() {
-		ASTNode parent = this.getASTNode().getParent();
-		while(parent != null && !(parent instanceof MethodDeclaration)){
-			parent = parent.getParent();
-		}
-		return parent;
-	}
 
 	public boolean isLikelyAConstructor() {
-		ASTNode enclosingMethod = this.getEnclosingMethod();
+		ASTNode enclosingMethod = ASTUtils.getEnclosingMethod(this.getASTNode());
 		return (enclosingMethod != null) && (enclosingMethod instanceof MethodDeclaration) && 
 				((MethodDeclaration) enclosingMethod).isConstructor();
 	}
 
 	public boolean parentMethodReturnsVoid() { // FIXME fix this.
-		ASTNode enclosingMethod = this.getEnclosingMethod();
+		ASTNode enclosingMethod = ASTUtils.getEnclosingMethod(this.getASTNode());
 		if (enclosingMethod != null & enclosingMethod instanceof MethodDeclaration) {
 			MethodDeclaration asMd = (MethodDeclaration) enclosingMethod;
 			Type returnType = asMd.getReturnType2();
