@@ -16,13 +16,8 @@ public class TreeBabbler {
 
 	public TreeBabbler( TSGrammar< TSGNode > grammar ) {
 		this.grammar = new CompleteLM( grammar );
-		try {
-			AbstractJavaTreeExtractor extractor = (AbstractJavaTreeExtractor) grammar.getTreeExtractor();
-			if(extractor instanceof TempletizedJavaTreeExtractor || extractor instanceof VariableTypeJavaTreeExtractor) {
-				this.extractor = new PRVariableTypeExtractor((AbstractJavaTreeExtractor) grammar.getTreeExtractor());
-			} else {
-				this.extractor = extractor;
-			}
+		try {	
+				this.extractor =  (AbstractJavaTreeExtractor) grammar.getTreeExtractor();
 		} catch ( ClassCastException e ) {
 			throw new IllegalArgumentException(
 				"grammar must have a java tree extractor", e

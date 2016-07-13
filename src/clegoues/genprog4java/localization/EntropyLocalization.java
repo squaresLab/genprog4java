@@ -9,11 +9,16 @@ import java.util.List;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
+
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.BreakStatement;
+import org.eclipse.jdt.core.dom.ContinueStatement;
 
 import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.java.ASTUtils;
+import clegoues.genprog4java.java.JavaSemanticInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.holes.java.JavaASTNodeLocation;
@@ -91,28 +96,49 @@ public class EntropyLocalization extends DefaultLocalization {
 		ASTNode selected = decomposed.get(0);
 		System.err.println("SELECTED: " + selected);
 		return new JavaASTNodeLocation(startingStmt, selected.getParent());
-//		double maxProb = Double.NEGATIVE_INFINITY;
-//		ASTNode biggestSoFar = actualCode;
-//		for(ASTNode node : decomposed) {
-//			TreeNode< TSGNode > asTlm = babbler.eclipseToTreeLm(node);
-//			double prob = babbler.grammar.computeRulePosteriorLog2Probability(asTlm);
-//			double entropy = -prob * Math.exp(prob);
-//			System.err.println(node);
-//			System.err.println(prob);
-//			System.err.println("entropy:" + entropy);
-//			System.err.println();
-//
-//			if(prob > maxProb) {
-//				maxProb = prob;
-//				biggestSoFar = node;
-//			}
-//		}
-//
-//		System.err.println("biggest found:");
-//		System.err.println(biggestSoFar);
-//		System.err.println(maxProb);
-//
-//		return new JavaASTNodeLocation(biggestSoFar.getParent());
+		//		double maxProb = Double.NEGATIVE_INFINITY;
+		//		ASTNode biggestSoFar = actualCode;
+		//		for(ASTNode node : decomposed) {
+		//			TreeNode< TSGNode > asTlm = babbler.eclipseToTreeLm(node);
+		//			double prob = babbler.grammar.computeRulePosteriorLog2Probability(asTlm);
+		//			double entropy = -prob * Math.exp(prob);
+		//			System.err.println(node);
+		//			System.err.println(prob);
+		//			System.err.println("entropy:" + entropy);
+		//			System.err.println();
+		//
+		//			if(prob > maxProb) {
+		//				maxProb = prob;
+		//				biggestSoFar = node;
+		//			}
+		//		}
+		//
+		//		System.err.println("biggest found:");
+		//		System.err.println(biggestSoFar);
+		//		System.err.println(maxProb);
+		//
+		//		return new JavaASTNodeLocation(biggestSoFar.getParent());
+	}
+
+
+	private class BabbleVisitor extends ASTVisitor {
+		// FIXME: ensure that it's inside a loop or switch
+		public boolean visit(BreakStatement node) {
+			return true;
+		}
+		// FIXME: ensure that it's inside a loop
+		public boolean	visit(ContinueStatement node) {
+			return true;
+		}
+
+
+	}
+	// babbles fix code, manipulates it to reference in-scope variables
+	public ASTNode babbleFixCode(JavaLocation location, JavaSemanticInfo semanticInfo) {
+		ASTNode element = location.getCodeElement();
+		ASTNode babbled = babbler.babbleFrom(element);
+		babbled.accept(new BabbleVisitor());
+		return babbled; 
 	}
 
 	@Override
