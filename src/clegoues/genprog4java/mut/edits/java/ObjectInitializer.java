@@ -7,12 +7,15 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -61,49 +64,32 @@ public class ObjectInitializer extends JavaEditOperation {
 		assert(parentStmt != null);
 
 		methodInvocExp.accept(new ASTVisitor() {
-			private String nextString()
-			{
-				String characters = "abcdefghijklmnopqrstuvwxyz";
-
-				if(varBase == null) {
-					char[] text = new char[8];
-					for (int i = 0; i < 8; i++)
-					{
-						text[i] = characters.charAt(Configuration.randomizer.nextInt(8));
-					}
-					varBase = new String(text);
-				}
-				String res = varBase + count;
-				count ++;
-				return res;
-			}
 			
 			public boolean visit(MethodInvocation node) {
 				for(Object arg : node.arguments()) {
-					Expression asExp = (Expression) arg;
+					if(arg instanceof SimpleName) {
+					SimpleName asExp = (SimpleName) arg;
 					ITypeBinding binding = asExp.resolveTypeBinding();
 
 					if(binding.isClass()) {
-						String identifier = this.nextString();
-						SimpleName newVarName = myAST.newSimpleName(identifier);
-						VariableDeclarationFragment fragment = myAST.newVariableDeclarationFragment();
-
+						SimpleName newVarName = myAST.newSimpleName(((SimpleName) arg).getIdentifier());
+						Assignment newAssignment = myAST.newAssignment();
+						newAssignment.setLeftHandSide(newVarName);
 						Type declaringType1 = ASTUtils.typeFromBinding(myAST, binding);
-						Type declaringType2 = ASTUtils.typeFromBinding(myAST, binding);
 
 						ClassInstanceCreation initializer = myAST.newClassInstanceCreation();
 						initializer.setType(declaringType1);
-
-						fragment.setName(newVarName);
-						fragment.setInitializer(initializer);
-						VariableDeclarationStatement newStmt = myAST.newVariableDeclarationStatement(fragment);
-						newStmt.setType(declaringType2);
-
+						newAssignment.setRightHandSide(initializer);
+						newAssignment.setOperator(Assignment.Operator.ASSIGN);
+					
+						ExpressionStatement es = myAST.newExpressionStatement(newAssignment);
 						argsToInit.add(new Pair(asExp, newVarName));
-						newDeclarations.add(newStmt);
+						newDeclarations.add(es);
 						break;
 					}
 				}
+				}
+					
 				return true;
 			}
 		});
