@@ -79,7 +79,7 @@ Representation<G> {
 		.withHelp( "do not include positive tests if they fail sanity" )
 		.inGroup( "CachingRepresentation Parameters" )
 		.build();
-	
+
 	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
 	
@@ -165,7 +165,7 @@ Representation<G> {
 			logger.info("Checking test number " + testNumber + " out of " + Fitness.positiveTests.size());
 			FitnessValue res = this.internalTestCase(
 					CachingRepresentation.sanityExename,
-					CachingRepresentation.sanityFilename, posTest);
+					CachingRepresentation.sanityFilename, posTest, false);
 			if (!res.isAllPassed()) {
 				testsOutOfScope++;
 				logger.info(testsOutOfScope + " tests out of scope so far, out of " + Fitness.positiveTests.size());
@@ -197,7 +197,7 @@ Representation<G> {
 			logger.info("\tn" + testNum + ": ");
 			FitnessValue res = this.internalTestCase(
 					CachingRepresentation.sanityExename,
-					CachingRepresentation.sanityFilename, negTest);
+					CachingRepresentation.sanityFilename, negTest, false);
 			if (res.isAllPassed()) {
 				logger.info("true (1)\n");
 				logger.error("cacheRep: sanity: "
@@ -215,7 +215,8 @@ Representation<G> {
 		return true;
 	}
 
-	public boolean testCase(TestCase test) {
+	@Override
+	public boolean testCase(TestCase test, boolean doingCoverage) {
 		List<Integer> hash = astHash();
 		HashMap<String, FitnessValue> thisVariantsFitness = null;
 		if(cacheflag == true){ 
@@ -234,7 +235,7 @@ Representation<G> {
 		if (this.alreadyCompiled == null) {
 			String newName = CachingRepresentation.newVariantFolder();
 			this.variantFolder = newName;
-		//	logger.info("History of variant " + getVariantFolder() + " is: " + getHistory());
+
 			if (!this.compile(newName, newName)) {
 				this.setFitness(0.0);
 				logger.info(this.getName() + " at " + newName + " fails to compile\n");
@@ -250,9 +251,14 @@ Representation<G> {
 			return false;
 		}
 		FitnessValue fitness = this.internalTestCase(this.variantFolder,
-				this.variantFolder + Configuration.globalExtension, test);
+				this.variantFolder + ".java", test, doingCoverage);
 		thisVariantsFitness.put(test.toString(), fitness);
-		return fitness.isAllPassed();
+		return fitness.isAllPassed();	
+		}
+
+	public boolean testCase(TestCase test) {
+		return this.testCase(test,false);
+		
 	}
 
 	// kind of think internal test case should return here to save in
@@ -328,11 +334,10 @@ Representation<G> {
 	protected abstract ArrayList<Pair<ClassInfo, String>> internalComputeSourceBuffers();
 
 	protected FitnessValue internalTestCase(String sanityExename,
-			String sanityFilename, TestCase thisTest) {
-		// FIXME: the filename is wrong, here; it's looking based on the name of the edits incorporated, not the variant folder name, as it should be
+			String sanityFilename, TestCase thisTest, boolean doingCoverage) {
 		
 		CommandLine command = this.internalTestCaseCommand(sanityExename,
-				sanityFilename, thisTest);
+				sanityFilename, thisTest, doingCoverage);
 		// System.out.println("command: " + command.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);
 		DefaultExecutor executor = new DefaultExecutor();
@@ -341,7 +346,6 @@ Representation<G> {
 		executor.setWatchdog(watchdog);
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		// FIXME: the problem is it's not finding the jacocagent because it's at ./lib, not at /path/to/lib
 		executor.setExitValue(0);
 
 		executor.setStreamHandler(new PumpStreamHandler(out));
@@ -387,7 +391,6 @@ Representation<G> {
 	// time being and just doing the caching, which makes sense anyway
 
 	public boolean compile(String sourceName, String exeName) {
-
 		if (this.alreadyCompiled != null) {
 			return alreadyCompiled.getFirst();
 		} else {
@@ -432,7 +435,5 @@ Representation<G> {
 
 	}
 
-	protected abstract CommandLine internalTestCaseCommand(String exeName,
-			String fileName, TestCase test);
 
 }

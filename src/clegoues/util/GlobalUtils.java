@@ -33,19 +33,15 @@
 
 package clegoues.util;
 
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.mut.Location;
-import clegoues.genprog4java.rep.WeightedAtom;
 
 public class GlobalUtils {
 	// range is inclusive!
@@ -76,6 +72,26 @@ public class GlobalUtils {
 		return null;
 	}
 
+	public static Pair<?,Double> chooseOneWeighted(ArrayList<Pair<?,Double>> atoms, double weight) {
+		assert(atoms.size() > 0);
+		double totalWeight = 0.0;
+		for(Pair<?,Double> atom : atoms) {
+			totalWeight += atom.getSecond();
+		}
+		assert(totalWeight > 0.0) ;
+
+		double wanted = weight * totalWeight;
+		double sofar = 0.0;
+		for(Pair<?,Double> atom : atoms) {
+			double here = sofar + atom.getSecond();
+			if(here >= wanted) {
+				return atom;
+			}
+			sofar = here;
+		}
+		return null;
+	}
+		
 	public static boolean probability(double p) {
 		if(p < 0.0) return false;
 		if(p > 1.0) return true;
@@ -121,4 +137,5 @@ public class GlobalUtils {
         }	
         return true;
 	}
+	
 }

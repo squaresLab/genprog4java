@@ -27,10 +27,18 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
 import clegoues.genprog4java.java.ASTUtils;
+import codemining.lm.tsg.FormattedTSGrammar;
+import codemining.lm.tsg.TSGNode;
+import codemining.lm.tsg.TSGrammar;
+import codemining.util.serialization.ISerializationStrategy.SerializationException;
+import codemining.util.serialization.Serializer;
 import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.localization.EntropyLocalization;
+import clegoues.genprog4java.localization.Localization;
+import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.mut.EditHole;
-import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.holes.java.ASTNodeHole;
 import clegoues.genprog4java.mut.holes.java.ExpChoiceHole;
 import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaHole;
@@ -40,13 +48,22 @@ import clegoues.genprog4java.mut.holes.java.StatementHole;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.WeightedAtom;
+import clegoues.genprog4java.treelm.TreeBabbler;
+import clegoues.util.ConfigurationBuilder;
+import clegoues.util.ConfigurationBuilder.LexicalCast;
+
+import static clegoues.util.ConfigurationBuilder.STRING;
 
 @SuppressWarnings("rawtypes")
 public class JavaEditFactory {
 
 	private static HashMap<Integer, Set<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, Set<WeightedAtom>>();
 
-	protected Logger logger = Logger.getLogger(JavaEditOperation.class);
+	protected static Logger logger = Logger.getLogger(JavaEditOperation.class);
+
+	public static final ConfigurationBuilder.RegistryToken token =
+		ConfigurationBuilder.getToken();
+	
 
 	public JavaEditOperation makeEdit(Mutation edit, Location dst, EditHole sources) {
 		switch(edit) {
@@ -81,6 +98,8 @@ public class JavaEditFactory {
 			return new ExpressionModRem((JavaLocation) dst, sources);
 		case PARREM:
 			return new MethodParameterRemover((JavaLocation) dst, sources);
+		case BABBLED:
+			return new JavaReplaceASTOperation((JavaLocation) dst, sources);
 		case SIZECHECK:
 			return new CollectionSizeChecker((JavaLocation) dst, sources);
 		case OBJINIT:
@@ -94,11 +113,13 @@ public class JavaEditFactory {
 			return JavaEditFactory.scopeSafeAtomMap.get(stmtId.getId());
 		}
 
+		Localization localization = variant.getLocalization();
+		
 		JavaStatement potentiallyBuggyStmt = (JavaStatement) stmtId.getLocation();
 		ASTNode faultAST = ((JavaLocation) stmtId).getCodeElement();
 		Set<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
 
-		for (WeightedAtom potentialFixAtom : variant.getFixSourceAtoms()) {
+		for (WeightedAtom potentialFixAtom : localization.getFixSourceAtoms()) {
 			int index = potentialFixAtom.getAtom();
 			JavaStatement potentialFixStmt = variant.getFromCodeBank(index);
 			ASTNode fixAST = potentialFixStmt.getASTNode();
@@ -202,15 +223,22 @@ public class JavaEditFactory {
 		return retVal;
 	}
 
-
-
 	public List<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType) {
-		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 		ArrayList<EditHole> retVal = new ArrayList<EditHole>();
+
+		if(editType == Mutation.BABBLED) {
+			retVal.add( new ASTNodeHole( // FIXME: this whole static babbler thing is not gonna fly in the long run
+					// but let's deal with it for now
+				EntropyLocalization.babbler.babbleFrom(( (JavaLocation) location).getCodeElement() )
+			) );
+			return retVal;
+		}
+		
+		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 
 		switch(editType) {
 		case DELETE: retVal.add(new StatementHole((Statement) locationStmt.getASTNode(), locationStmt.getStmtId()));
-		return retVal;
+			break;
 		case APPEND: 	
 		case REPLACE:
 			Set<WeightedAtom> fixStmts = this.scopeHelper(location, variant, editType);
@@ -257,6 +285,8 @@ public class JavaEditFactory {
 			return JavaHole.makeExpHole(locationStmt.getReplacableMethodParameters(variant.semanticInfo), locationStmt);
 		case EXPREP:
 			return JavaHole.makeExpHole(locationStmt.getConditionalExpressions(variant.semanticInfo), locationStmt);
+
+
 		case EXPADD:
 			Map<Expression, List<Expression>> extendableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
 			for(Entry<Expression, List<Expression>> entries : extendableExpressions.entrySet()) { 
@@ -313,6 +343,8 @@ public class JavaEditFactory {
 				retVal.add(newHole);
 			}
 			return retVal;
+		case BABBLED:
+			return null;
 		}
 		return retVal;
 	}
@@ -332,8 +364,11 @@ public class JavaEditFactory {
 			permutations(original, result, d + 1, copy);
 		}
 	}
-
+	
 	public boolean doesEditApply(JavaRepresentation variant, Location location, Mutation editType) {
+		if(editType == Mutation.BABBLED) {
+			return true;
+		}
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 		switch(editType) {
 		case APPEND: 
@@ -376,6 +411,8 @@ public class JavaEditFactory {
 			return locationStmt.getShrinkableConditionalExpressions().size() > 0;
 		case SIZECHECK:
 			return locationStmt.getIndexedCollectionObjects().size() > 0;
+		case BABBLED:
+			return true;
 		case OBJINIT:
 			return locationStmt.getObjectsAsMethodParams().size() > 0;
 		}

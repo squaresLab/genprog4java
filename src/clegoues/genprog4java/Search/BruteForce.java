@@ -10,9 +10,10 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.localization.Localization;
+import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
-import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.mut.WeightedMutation;
@@ -81,11 +82,12 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 	@Override
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
 			throws RepairFoundException, GiveUpException {
-		original.reduceSearchSpace();
+		Localization localization = original.getLocalization();
+		localization.reduceSearchSpace();
 
 		int count = 0;
 		TreeSet<Location> allFaultyLocations = new TreeSet<Location>(
-				original.getFaultyLocations());
+				localization.getFaultLocalization());
 
 		for (Location faultyLocation : allFaultyLocations) {
 
