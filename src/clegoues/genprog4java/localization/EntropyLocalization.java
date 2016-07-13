@@ -23,10 +23,13 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -38,6 +41,7 @@ import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -254,10 +258,25 @@ public class EntropyLocalization extends DefaultLocalization {
 			return true;
 		}
 		
-		// FIXME: ensure the return type is correct
+		/* checks return: if void or null, should return nothing (sets expression
+		 * to null); if not, and expression is null, returns a default expression.
+		 * Does not presently try to fix a return that has an expression but of the incorrect type */
 		public boolean visit(ReturnStatement node) {
-			String methodName = semanticInfo.getDeclaringMethod(this.location);
-			String returnType = semanticInfo.returnTypeOfThisMethod(methodName);
+			ASTNode enclosingMethod = ASTUtils.getEnclosingMethod(this.location.getCodeElement());
+			MethodDeclaration md = (MethodDeclaration) enclosingMethod;
+			Type returnType = md.getReturnType2();
+			boolean shouldReturnNull = returnType == null ||
+					((returnType instanceof PrimitiveType) &&
+							((PrimitiveType)returnType).getPrimitiveTypeCode() == PrimitiveType.VOID); 
+			if(shouldReturnNull) {
+				node.setExpression(null);
+				return true;
+			}
+			if(node.getExpression() == null) {
+				Expression defaultExp = (Expression) ASTUtils.getDefaultReturn(md, location.getCodeElement().getAST());
+				node.setExpression(defaultExp);
+				return false;
+			}
 			return true;
 		}
 		

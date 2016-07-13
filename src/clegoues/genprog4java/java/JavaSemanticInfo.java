@@ -290,9 +290,5 @@ public class JavaSemanticInfo {
 		return null;
 	}
 
-	public String getDeclaringMethod(JavaLocation location) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
 

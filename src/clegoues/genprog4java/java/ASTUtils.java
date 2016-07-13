@@ -223,9 +223,8 @@ public class ASTUtils {
 		}
 		return (MethodDeclaration) node;
 	}
-	
-		public static ASTNode getDefaultReturn(ASTNode node, AST hostAST) {
-		MethodDeclaration md = getMethodDeclaration(node);
+
+	public static ASTNode getDefaultReturn(MethodDeclaration md, AST hostAST) {
 		if(md == null) 
 			return null;
 		Type returnType = md.getReturnType2();
@@ -240,7 +239,11 @@ public class ASTUtils {
 			if(tc == PrimitiveType.DOUBLE || tc == PrimitiveType.FLOAT || tc == PrimitiveType.LONG)
 				return hostAST.newNumberLiteral("0.0");
 		} 
-			return hostAST.newNullLiteral();
+		return hostAST.newNullLiteral();
+	}
+	public static ASTNode getDefaultReturn(ASTNode node, AST hostAST) {
+		MethodDeclaration md = getMethodDeclaration(node);
+		return getDefaultReturn(md, hostAST);
 	}
 
 	public static List<ASTNode> decomposeASTNode(ASTNode node) {
