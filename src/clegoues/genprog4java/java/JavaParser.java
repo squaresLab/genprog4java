@@ -66,13 +66,21 @@ public class JavaParser
 	 */
 	private LinkedList<ASTNode> stmts;
 	
-	/** method names --> type name pairs.  I keep considering changing this --- hate having
+	/** method names --> type name.  I keep considering changing this --- hate having
 	 * types as strings --- but haven't had a good reason to yet.
 	 */
 	private HashMap<String,String> methodReturnType;
+	/** same thing, for variable names.  In theory might not work well b/c of scoping; in practice
+	 * doesn't seem to be a problem. 
+	 */
 	private HashMap<String,String> variableTypes;
 	
+	/** all imported types, or types seen over the course of parsing the CU */
 	private HashSet<String> availableTypes;
+	
+	/** methods and fields available in this CU, which we know either because
+	 * we see their declaration, or because we've seen them used at some point (heuristic);
+	 */
 	private HashSet<String> availableMethodsAndFields;
 
 	public JavaParser(ScopeInfo scopeList)
@@ -136,6 +144,8 @@ public class JavaParser
 		parser.setCompilerOptions(options);
 		
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		// note that this bindings recovery and resolution are important for
+		// checking information about types, down the line.
 		parser.setResolveBindings(true);
 		parser.setBindingsRecovery(true);
 		parser.setStatementsRecovery(true);
@@ -144,8 +154,6 @@ public class JavaParser
 		parser.createASTs(new String[]{file}, null, new String[0], req, null);
 		
 		this.compilationUnit = visitor.getCompilationUnit();
-		
-
 	}
 
 }
