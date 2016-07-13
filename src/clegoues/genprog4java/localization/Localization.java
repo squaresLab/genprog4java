@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import clegoues.genprog4java.Search.GiveUpException;
-import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.util.ConfigurationBuilder;

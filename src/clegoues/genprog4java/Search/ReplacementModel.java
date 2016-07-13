@@ -13,8 +13,8 @@ import java.util.TreeSet;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.mut.EditHole;
-import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;

@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -37,13 +38,15 @@ import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaSemanticInfo;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.holes.java.JavaASTNodeLocation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.rep.Representation;
@@ -170,9 +173,11 @@ public class EntropyLocalization extends DefaultLocalization {
 		// FIXME: will the babbler ever do something completely bizarre, like babble a field
 		// declaration inside a method?
 		private JavaSemanticInfo info = null;
+		private JavaLocation location = null;
 
-		public BabbleVisitor(JavaSemanticInfo info) {
+		public BabbleVisitor(JavaSemanticInfo info, JavaLocation location) {
 			this.info = info;
+			this.location = location;
 		}
 		
 		// FIXME: hm.  Do I need to check that the thing being accessed is in
@@ -204,6 +209,10 @@ public class EntropyLocalization extends DefaultLocalization {
 			return true;
 		}
 		
+		public boolean visit(InstanceofExpression node) {
+			return true;
+		}
+		
 		// FIXME: constructor and super constructors may only be called inside a constructor
 		// and only at the top.
 		public boolean visit(ConstructorInvocation node) {
@@ -214,10 +223,7 @@ public class EntropyLocalization extends DefaultLocalization {
 			return true;
 		}
 		
-		public boolean visit(InstanceofExpression node) {
-			return true;
-		}
-		
+
 		// FIXME: ensure that it's inside a loop
 		public boolean	visit(ContinueStatement node) {
 			return true;
@@ -263,6 +269,25 @@ public class EntropyLocalization extends DefaultLocalization {
 			return true;
 		}
 		
+		// FIXME: variables decled need to be unique, subject to various rules
+		// and may populate a symbol table for later renaming, we'll see.
+		public boolean visit(SingleVariableDeclaration node) { 
+			return true;
+		}
+		
+		public boolean visit(VariableDeclarationExpression node) {
+			return true;
+		}
+		
+		public boolean visit(VariableDeclarationFragment node) {
+			return true;
+		}
+		
+		public boolean visit(VariableDeclarationStatement node) {
+			return true;
+		}
+
+		
 		// FIXME: leaving as reminders, see comment at start of class
 		public boolean visit(ClassInstanceCreation node) { // class exists?
 			return true;
@@ -288,7 +313,7 @@ public class EntropyLocalization extends DefaultLocalization {
 	public ASTNode babbleFixCode(JavaLocation location, JavaSemanticInfo semanticInfo) {
 		ASTNode element = location.getCodeElement();
 		ASTNode babbled = babbler.babbleFrom(element);
-		babbled.accept(new BabbleVisitor(semanticInfo));
+		babbled.accept(new BabbleVisitor(semanticInfo, location));
 		return babbled; 
 	}
 

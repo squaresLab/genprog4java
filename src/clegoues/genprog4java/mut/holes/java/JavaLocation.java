@@ -3,7 +3,7 @@ package clegoues.genprog4java.mut.holes.java;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import clegoues.genprog4java.java.ClassInfo;
-import clegoues.genprog4java.mut.Location;
+import clegoues.genprog4java.localization.Location;
 
 public abstract class JavaLocation<G> extends Location<G> {
 
