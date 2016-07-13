@@ -256,6 +256,8 @@ public class EntropyLocalization extends DefaultLocalization {
 		
 		// FIXME: ensure the return type is correct
 		public boolean visit(ReturnStatement node) {
+			String methodName = semanticInfo.getDeclaringMethod(this.location);
+			String returnType = semanticInfo.returnTypeOfThisMethod(methodName);
 			return true;
 		}
 		
