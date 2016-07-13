@@ -79,10 +79,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private boolean containsFinalVar = false;
 	private Stack<Boolean> finalVarStack = new Stack<Boolean>();
 
-
-	private boolean inConditionalScope = false;
-	private Stack<Boolean> conditionalScopeStack = new Stack<Boolean>();
-	
 	
 	private HashSet<String> requiredNames = new HashSet<String>();
 	private Stack<HashSet<String>> requiredNamesStack = new Stack<HashSet<String>>();
