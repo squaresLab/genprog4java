@@ -33,7 +33,9 @@
 
 package clegoues.genprog4java.fitness;
 
-public class FitnessValue {
+import java.io.Serializable;
+
+public class FitnessValue implements Serializable {
 	private String testClassName = null;
 	private int numberTests = 0;
 	private int numTestsPassed = 0;

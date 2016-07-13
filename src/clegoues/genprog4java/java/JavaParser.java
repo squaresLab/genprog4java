@@ -114,9 +114,9 @@ public class JavaParser
 	
 	public void parse(String file, String[] libs)
 	{
-		int parserVersion = AST.JLS8;
+		int parserVersion = AST.JLS3;
 		if(Configuration.sourceVersion != "1.8") {
-			parserVersion = AST.JLS4;
+			parserVersion = AST.JLS3;
 		}
 		ASTParser parser = ASTParser.newParser(parserVersion);
 		parser.setEnvironment(libs, new String[] {}, null, true);

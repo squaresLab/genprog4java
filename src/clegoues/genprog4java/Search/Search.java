@@ -325,14 +325,21 @@ public abstract class Search<G extends EditOperation> {
 	CloneNotSupportedException {
 
 		try {
+			original.cacheflag = true;
 			this.runAlgorithm(original, incomingPopulation);
+			original.searilizeTestCache(original.getTestCache());
+			original.cacheflag = false;
 		} catch(RepairFoundException e) {
+			original.searilizeTestCache(original.getTestCache());
+			original.cacheflag = false;
 			return;
 		} catch (GiveUpException e) {
+			original.searilizeTestCache(original.getTestCache());
+			original.cacheflag = false;
 			return;
 		}
 	}
-
+	
 	protected abstract void runAlgorithm(Representation<G> original, Population<G> initialPopulation) throws RepairFoundException, GiveUpException;
 
 
