@@ -39,7 +39,7 @@ public class JavaSemanticInfo {
 	public static HashMap<Integer, Set<String>> classScopeMap = new HashMap<Integer, Set<String>>();
 	public static HashMap<Integer, Set<String>> methodScopeMap = new HashMap<Integer, Set<String>>();
 
-	private static Set<Pair<String,String>> methodReturnType = new HashSet<Pair<String,String>>();
+	private static Map<String,String> methodReturnType = new HashMap<String,String>();
 	private static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
 	private static Map<String, Map<String,List<Expression>>> methodParamExpressionsInScope = null;
 	private static Map<String, List<Expression>> conditionalExpressionsInScope = null;
@@ -194,7 +194,7 @@ public class JavaSemanticInfo {
 	}
 
 	public void addAllSemanticInfo(JavaParser myParser) {
-		JavaSemanticInfo.methodReturnType.addAll(myParser.getMethodReturnTypeSet());
+		JavaSemanticInfo.methodReturnType.putAll(myParser.getMethodReturnTypes());
 		JavaSemanticInfo.getVariableDataTypes().putAll(myParser.getVariableDataTypes());
 	}
 
@@ -236,7 +236,7 @@ public class JavaSemanticInfo {
 		return true;
 	}
 
-	public Set<Pair<String,String>> getMethodReturnTypes() {
+	public Map<String,String> getMethodReturnTypes() {
 		return JavaSemanticInfo.methodReturnType;
 	}
 

@@ -93,7 +93,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private HashSet<String> currentMethodScope = new HashSet<String>();
 	private Stack<HashSet<String>> methodScopeStack = new Stack<HashSet<String>>();
 
-	private HashSet<Pair<String,String>> methodReturnType;
+	private HashMap<String,String> methodReturnType;
 	private HashMap<String,String> variableType;
 
 	private HashSet<String> currentLoopScope = new HashSet<String>();
@@ -346,8 +346,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			}
 		}
 		String returnType = node.getReturnType2()==null?"null":node.getReturnType2().toString();
-		this.methodReturnType.add(new Pair<String, String>(node.getName().toString(),returnType));
-
+		this.methodReturnType.put(node.getName().getIdentifier(), returnType);
 		return true;
 	}
 
@@ -376,7 +375,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				namesDeclared.add(name);
 				if(!currentLoopScope.contains(name)) {
 					this.currentMethodScope.add(v.getName().getIdentifier());
-					variableType.put(v.getName().toString(), node.getType().toString());
+					variableType.put(v.getName().toString().toLowerCase(), node.getType().toString());
 				}
 			}
 		}
@@ -396,12 +395,12 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.nodeSet = o;
 	}
 
-	public Set<Pair<String,String>> getMethodReturnType() {
+	public HashMap<String,String> getMethodReturnType() {
 		return this.methodReturnType;
 	}
 
-	public void setMethodReturnType(HashSet<Pair<String,String>> methodReturnTypeSet) {
-		this.methodReturnType = methodReturnTypeSet;
+	public void setMethodReturnType(HashMap<String,String> methodReturnTypeMap) {
+		this.methodReturnType = methodReturnTypeMap;
 	}
 
 	public HashMap<String,String> getVariableType() {
