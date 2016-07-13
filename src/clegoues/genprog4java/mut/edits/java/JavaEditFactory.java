@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
+import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Location;
@@ -139,7 +140,7 @@ public class JavaEditFactory {
 				}
 
 				//If we move a return statement into a function, the parameter in the return must match the function’s return type
-				ASTNode enclosingMethod = potentiallyBuggyStmt.getEnclosingMethod();
+				ASTNode enclosingMethod = ASTUtils.getEnclosingMethod(faultAST);
 
 				if (enclosingMethod instanceof MethodDeclaration) {
 					String returnType = JavaRepresentation.semanticInfo.returnTypeOfThisMethod(((MethodDeclaration)enclosingMethod).getName().toString());
@@ -159,7 +160,7 @@ public class JavaEditFactory {
 			if(fixAST instanceof ConstructorInvocation || 
 					fixAST instanceof SuperConstructorInvocation){
 				if(mut == Mutation.APPEND) continue;
-				ASTNode enclosingMethod = potentiallyBuggyStmt.getEnclosingMethod();
+				ASTNode enclosingMethod = ASTUtils.getEnclosingMethod(faultAST);
 
 				if (enclosingMethod != null && 
 						enclosingMethod instanceof MethodDeclaration && 
@@ -187,7 +188,7 @@ public class JavaEditFactory {
 			// other sequence of statements with a return within it, but I'm lazy
 			if((!(fixAST instanceof ReturnStatement)) && 
 					faultAST instanceof ReturnStatement) {
-				ASTNode parent = potentiallyBuggyStmt.getEnclosingMethod();
+				ASTNode parent = ASTUtils.getEnclosingMethod(faultAST);
 				if(parent instanceof MethodDeclaration && 
 						!JavaStatement.hasMoreThanOneReturn((MethodDeclaration)parent)) {
 					continue;

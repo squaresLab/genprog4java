@@ -61,6 +61,14 @@ import clegoues.util.Pair;
  */
 public class ASTUtils {
 
+	public static ASTNode getEnclosingMethod(ASTNode node) {
+		ASTNode parent = node.getParent();
+		while(parent != null && !(parent instanceof MethodDeclaration)){
+			parent = parent.getParent();
+		}
+		return parent;
+	}
+
 	/** 
 	 * @param node ASTNode of interest
 	 * @return line number corresponding to the first line of the node in its CU. 
