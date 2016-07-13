@@ -145,7 +145,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			ConfigurationBuilder.getToken();
 
 	private JavaSourceInfo sourceInfo = new JavaSourceInfo();
-	public JavaSemanticInfo semanticInfo = new JavaSemanticInfo();
+	public static JavaSemanticInfo semanticInfo = new JavaSemanticInfo();
 
 	private static int stmtCounter = 0;
 
@@ -718,13 +718,6 @@ FaultLocRepresentation<JavaEditOperation> {
 		return copy;
 	}
 
-	public String returnTypeOfThisMethod(String matchString){
-		if(semanticInfo.getMethodReturnTypes().containsKey(matchString.toLowerCase())) {
-			return semanticInfo.getMethodReturnTypes().get(matchString.toLowerCase());
-		}
-		return null;
-	}
-
 	@Override
 	public void reduceSearchSpace() throws GiveUpException {
 		if(Search.checkSpace) {
@@ -762,7 +755,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			if(fixASTNode instanceof MethodRef){
 				MethodRef mr = (MethodRef) potentialFixStmt.getASTNode();
 				// mrt = method return type
-				String returnType = returnTypeOfThisMethod(mr.getName().toString());
+				String returnType = semanticInfo.returnTypeOfThisMethod(mr.getName().toString());
 				if(returnType != null && returnType.equalsIgnoreCase("null")) {
 					toRemove.add(potentialFixAtom);
 					continue;
