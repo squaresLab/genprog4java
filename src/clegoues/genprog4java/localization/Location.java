@@ -1,8 +1,8 @@
-package clegoues.genprog4java.mut;
+package clegoues.genprog4java.localization;
 
 import clegoues.util.Pair;
 
-public abstract class Location<G extends Comparable<G>> extends Pair<G, Double> implements Cloneable {
+public abstract class Location<G> extends Pair<G, Double> implements Cloneable {
 	
 	public abstract int getId();
 
