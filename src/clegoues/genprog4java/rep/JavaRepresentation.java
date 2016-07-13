@@ -719,10 +719,8 @@ FaultLocRepresentation<JavaEditOperation> {
 	}
 
 	public String returnTypeOfThisMethod(String matchString){
-		for (Pair<String,String> p : semanticInfo.getMethodReturnTypes()) {
-			if(p.getFirst().equalsIgnoreCase(matchString)){
-				return p.getSecond();
-			}
+		if(semanticInfo.getMethodReturnTypes().containsKey(matchString.toLowerCase())) {
+			return semanticInfo.getMethodReturnTypes().get(matchString.toLowerCase());
 		}
 		return null;
 	}

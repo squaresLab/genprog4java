@@ -55,10 +55,21 @@ import clegoues.util.Pair;
  */
 public class JavaParser
 {
-	private LinkedList<ASTNode> stmts;
+	/** visits all nodes while file is parsed.  Collects semantic info */
 	private SemanticInfoVisitor visitor;
+	
+	/** compilation unit from parsed file; to be returned/collected by the parser client */
 	private CompilationUnit compilationUnit;
-	private HashSet<Pair<String,String>> methodReturnType;
+	
+	/** all ASTNodes of interest, corresponding to "repairable" Java statement types
+	 * a question (currently a question answered by {@link JavaRepresentation.canRepair})
+	 */
+	private LinkedList<ASTNode> stmts;
+	
+	/** method names --> type name pairs.  I keep considering changing this --- hate having
+	 * types as strings --- but haven't had a good reason to yet.
+	 */
+	private HashMap<String,String> methodReturnType;
 	private HashMap<String,String> variableTypes;
 	
 	private HashSet<String> availableTypes;
@@ -67,7 +78,7 @@ public class JavaParser
 	public JavaParser(ScopeInfo scopeList)
 	{
 		this.stmts = new LinkedList<ASTNode>();
-		this.methodReturnType = new HashSet<Pair<String,String>>();
+		this.methodReturnType = new HashMap<String,String>();
 		this.variableTypes = new HashMap<String,String>();
 		this.availableTypes = new HashSet<String>();
 		this.availableMethodsAndFields = new HashSet<String>();
@@ -88,12 +99,11 @@ public class JavaParser
 		return this.availableTypes;
 	}
 	
-
 	public HashSet<String> getAvailableMethodsAndFields() {
 		return this.availableMethodsAndFields;
 	}
 	
-	public HashSet<Pair<String,String>> getMethodReturnTypeSet(){
+	public HashMap<String,String> getMethodReturnTypes(){
 		return this.methodReturnType;
 	}
 	
