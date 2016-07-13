@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.util.Pair;
 
 /** stores and computes compilation unit- or file-level semantic info. */  
@@ -286,6 +287,11 @@ public class JavaSemanticInfo {
 		if(methodReturnType.containsKey(matchString.toLowerCase())) {
 			return methodReturnType.get(matchString.toLowerCase());
 		}
+		return null;
+	}
+
+	public String getDeclaringMethod(JavaLocation location) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }
