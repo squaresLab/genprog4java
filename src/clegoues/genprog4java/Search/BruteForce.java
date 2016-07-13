@@ -11,9 +11,9 @@ import java.util.TreeSet;
 
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.localization.Localization;
+import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
-import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.mut.WeightedMutation;
