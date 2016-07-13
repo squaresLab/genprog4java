@@ -37,8 +37,10 @@ import static clegoues.util.ConfigurationBuilder.BOOL_ARG;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,10 +82,7 @@ Representation<G> {
 
 	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
-
-	// persistent test cache
-	private static HashMap<List<Integer>, HashMap<String, FitnessValue>> fitnessCache = new HashMap<List<Integer>, HashMap<String, FitnessValue>>();
-
+	
 	private double fitness = -1.0;
 
 	/*
@@ -220,13 +219,17 @@ Representation<G> {
 	public boolean testCase(TestCase test, boolean doingCoverage) {
 		List<Integer> hash = astHash();
 		HashMap<String, FitnessValue> thisVariantsFitness = null;
-		if (fitnessCache.containsKey(hash)) {
-			thisVariantsFitness = fitnessCache.get(hash);
+		if(cacheflag == true){ 
+			getFitnessCache().putAll(desearializeTestCache());
+			cacheflag = false;
+		}
+		if (getFitnessCache().containsKey(hash)) {
+			thisVariantsFitness = getFitnessCache().get(hash);
 			if (thisVariantsFitness.containsKey(test.toString()))
 				return thisVariantsFitness.get(test.toString()).isAllPassed();
 		} else {
 			thisVariantsFitness = new HashMap<String, FitnessValue>();
-			fitnessCache.put(hash, thisVariantsFitness);
+			getFitnessCache().put(hash, thisVariantsFitness);
 		}
 		 		
 		if (this.alreadyCompiled == null) {

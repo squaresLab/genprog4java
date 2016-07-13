@@ -163,11 +163,11 @@ public class JavaEditFactory {
 				ASTNode enclosingMethod = potentiallyBuggyStmt.getEnclosingMethod();
 
 				if (enclosingMethod instanceof MethodDeclaration) {
-					String returnType = variant.returnTypeOfThisMethod(((MethodDeclaration)enclosingMethod).getName().toString());
+					String returnType = JavaRepresentation.semanticInfo.returnTypeOfThisMethod(((MethodDeclaration)enclosingMethod).getName().toString());
 					if(returnType != null){
 						ReturnStatement potFix = (ReturnStatement) fixAST;
 						if(potFix.getExpression() instanceof SimpleName){
-							String variableType = variant.semanticInfo.getVariableDataTypes().get(potFix.getExpression().toString());
+							String variableType = JavaRepresentation.semanticInfo.getVariableDataTypes().get(potFix.getExpression().toString());
 							if( !returnType.equalsIgnoreCase(variableType)){
 								continue;
 							}

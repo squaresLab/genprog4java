@@ -172,11 +172,11 @@ public class EntropyLocalization extends DefaultLocalization {
 		
 		// FIXME: will the babbler ever do something completely bizarre, like babble a field
 		// declaration inside a method?
-		private JavaSemanticInfo info = null;
+		private JavaSemanticInfo semanticInfo = null;
 		private JavaLocation location = null;
 
 		public BabbleVisitor(JavaSemanticInfo info, JavaLocation location) {
-			this.info = info;
+			this.semanticInfo = info;
 			this.location = location;
 		}
 		

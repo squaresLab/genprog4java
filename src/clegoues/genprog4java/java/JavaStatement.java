@@ -97,11 +97,11 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	private int stmtId; // unique
 	private Set<String> mustBeInScope;
 	private Set<String> namesDeclared;
-	
+
 	public void setClassInfo(ClassInfo ci) {
 		this.classInfo = ci;
 	}
-	
+
 	public Set<String> getNamesDeclared() {
 		return this.namesDeclared;
 	}
@@ -109,7 +109,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	public void setNamesDeclared(Set<String> names) {
 		this.namesDeclared = names;
 	}
-	
+
 	public ClassInfo getClassInfo() {
 		return this.classInfo;
 	}
@@ -179,16 +179,16 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				public boolean visit(ArrayAccess node) {
 					ASTNode parent = getParent(node);
 					if(node.getIndex() instanceof SimpleName) {
-					if(!arrayAccesses.containsKey(parent)){
-						List<ASTNode> arraynodes = new ArrayList<ASTNode>();
-						arraynodes.add(node);
-						arrayAccesses.put(parent, arraynodes);		
-					}else{
-						List<ASTNode> arraynodes = (List<ASTNode>) arrayAccesses.get(parent);
-						if(!arraynodes.contains(node))
+						if(!arrayAccesses.containsKey(parent)){
+							List<ASTNode> arraynodes = new ArrayList<ASTNode>();
 							arraynodes.add(node);
-						arrayAccesses.put(parent, arraynodes);	
-					}
+							arrayAccesses.put(parent, arraynodes);		
+						}else{
+							List<ASTNode> arraynodes = (List<ASTNode>) arrayAccesses.get(parent);
+							if(!arraynodes.contains(node))
+								arraynodes.add(node);
+							arrayAccesses.put(parent, arraynodes);	
+						}
 					}
 					return true;
 				}
@@ -221,26 +221,26 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						saveDataOfTheExpression(node);
 						return true;
 					}
-					
+
 					private boolean isNullCheckable(Expression exp) {
 						if(exp instanceof Annotation ||						   
-						   exp instanceof ArrayCreation ||
-						   exp instanceof ArrayInitializer ||
-						   exp instanceof Assignment ||
-						   exp instanceof BooleanLiteral ||
-						   exp instanceof CharacterLiteral ||
-						   exp instanceof ClassInstanceCreation ||
-						   exp instanceof ConditionalExpression ||
-						   exp instanceof InstanceofExpression ||
-						   exp instanceof NullLiteral ||
-						   exp instanceof NumberLiteral ||
-						   exp instanceof StringLiteral ||
-						   exp instanceof TypeLiteral ||
-						   exp instanceof ThisExpression ||
-						   exp instanceof InfixExpression ||
-						   exp instanceof PostfixExpression ||
-						   exp instanceof PrefixExpression ||
-						   exp instanceof VariableDeclarationExpression
+								exp instanceof ArrayCreation ||
+								exp instanceof ArrayInitializer ||
+								exp instanceof Assignment ||
+								exp instanceof BooleanLiteral ||
+								exp instanceof CharacterLiteral ||
+								exp instanceof ClassInstanceCreation ||
+								exp instanceof ConditionalExpression ||
+								exp instanceof InstanceofExpression ||
+								exp instanceof NullLiteral ||
+								exp instanceof NumberLiteral ||
+								exp instanceof StringLiteral ||
+								exp instanceof TypeLiteral ||
+								exp instanceof ThisExpression ||
+								exp instanceof InfixExpression ||
+								exp instanceof PostfixExpression ||
+								exp instanceof PrefixExpression ||
+								exp instanceof VariableDeclarationExpression
 								)
 							return false;
 						if(exp instanceof SimpleName) {
@@ -249,8 +249,8 @@ public class JavaStatement implements Comparable<JavaStatement>{
 							if(binding == null)
 								return false;
 						}
-						   
-						   /* this leaves:
+
+						/* this leaves:
 						    ArrayAccess
 						    CastExpression,
 						    FieldAccess,
@@ -260,9 +260,9 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						    SuperFieldAccess,
 						    SuperMethodInvocation
 						    ... as the only options
-						    */
+						 */
 						return true;
-						    
+
 					}
 
 					public void saveDataOfTheExpression(ASTNode node){
@@ -689,27 +689,29 @@ if B include return statement
 		return shrinkableParameterMethods;
 	}
 
-	
+
 	private List<ASTNode> candidateObjectsToInit = null;
 
 	public   List<ASTNode> getObjectsAsMethodParams() {
 		if(candidateObjectsToInit == null) {
-			 candidateObjectsToInit = new LinkedList<ASTNode>();
-			 
-			 this.getASTNode().accept(new ASTVisitor() {
-					public boolean visit(MethodInvocation node) {
+			candidateObjectsToInit = new LinkedList<ASTNode>();
+
+			this.getASTNode().accept(new ASTVisitor() {
+				public boolean visit(MethodInvocation node) {
 					for(Object arg : node.arguments()) {
-						Expression argNode = (Expression) arg;
-						ITypeBinding binding = argNode.resolveTypeBinding();
-						if(binding != null && binding.isClass()) {
-							candidateObjectsToInit.add(node);
+						if(arg instanceof SimpleName) {
+							Expression argNode = (Expression) arg;
+							ITypeBinding binding = argNode.resolveTypeBinding();
+							if(binding != null && binding.isClass()) {
+								candidateObjectsToInit.add(node);
+							}
 						}
 					}
 					return true;
-					}
-			 });
+				}
+			});
 		}
-		
+
 		return candidateObjectsToInit;
 	}
 
@@ -785,18 +787,19 @@ if B include return statement
 		ASTNode faultyNode = this.getASTNode();
 		ASTNode parent = faultyNode.getParent();
 		//Heuristic: Don't remove returns from functions that have only one return statement.
-				if(faultyNode instanceof ReturnStatement){
-					parent = this.getEnclosingMethod();
-					if(parent != null && parent instanceof MethodDeclaration) {
-						return !hasMoreThanOneReturn((MethodDeclaration)parent);
-					}
-				}
+		if(faultyNode instanceof ReturnStatement){
+			parent = this.getEnclosingMethod();
+			if(parent != null && parent instanceof MethodDeclaration) {
+				if(!hasMoreThanOneReturn((MethodDeclaration)parent))
+					return false;
+			}
+		}
 
 		return true;
-		 /* FIXME: CLG believes that these are all now unnecessary in light of making delete "replace with empty
-		  * block", which is what it should always have been.  However, am leaving this in for the 
-		  * time being just to be safe, will remove later */
-	/*
+		/* FIXME: CLG believes that these are all now unnecessary in light of making delete "replace with empty
+		 * block", which is what it should always have been.  However, am leaving this in for the 
+		 * time being just to be safe, will remove later */
+		/*
 		//Heuristic: If it is the body of an if, while, or for, it should not be removed
 
 		if(faultyNode instanceof Block){
@@ -819,7 +822,7 @@ if B include return statement
 				return false;
 		}
 
-		
+
 		//Heuristic: If an stmt is the only stmt in a block, don´t delete it
 		parent = blockThatContainsThisStatement();
 		if(parent instanceof Block){
@@ -838,7 +841,7 @@ if B include return statement
 		}
 		return parent;
 	}
-	
+
 	public boolean isLikelyAConstructor() {
 		ASTNode enclosingMethod = this.getEnclosingMethod();
 		return (enclosingMethod != null) && (enclosingMethod instanceof MethodDeclaration) && 

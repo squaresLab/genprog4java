@@ -87,6 +87,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
@@ -124,7 +125,7 @@ CachingRepresentation<JavaEditOperation> {
 			ConfigurationBuilder.getToken();
 
 	public JavaSourceInfo sourceInfo = new JavaSourceInfo();
-	public JavaSemanticInfo semanticInfo = new JavaSemanticInfo();
+	public  static JavaSemanticInfo semanticInfo = new JavaSemanticInfo();
 
 	public static int stmtCounter = 0;
 
@@ -413,7 +414,7 @@ CachingRepresentation<JavaEditOperation> {
 			String filename = ci.getClassName();
 			String path = ci.getPackage();
 			String source = pair.getValue();
-			Document original = new Document(source);
+			IDocument original = new Document(source);
 			CompilationUnit cu = sourceInfo.getBaseCompilationUnits().get(ci);
 			AST ast = cu.getAST();
 			ASTRewrite rewriter = ASTRewrite.create(ast);
@@ -634,17 +635,6 @@ CachingRepresentation<JavaEditOperation> {
 		return copy;
 	}
 
-	public String returnTypeOfThisMethod(String matchString){
-		for (Pair<String,String> p : semanticInfo.getMethodReturnTypes()) {
-			if(p.getFirst().equalsIgnoreCase(matchString)){
-				return p.getSecond();
-			}
-		}
-		return null;
-	}
-
-
-
 	@Override
 	public Boolean doesEditApply(Location location, Mutation editType) {
 		return editFactory.doesEditApply(this,location,editType); 
@@ -718,7 +708,7 @@ CachingRepresentation<JavaEditOperation> {
 		if(fixASTNode instanceof MethodRef){
 			MethodRef mr = (MethodRef) potentialFixStmt.getASTNode();
 			// mrt = method return type
-			String returnType = returnTypeOfThisMethod(mr.getName().toString());
+			String returnType = semanticInfo.returnTypeOfThisMethod(mr.getName().toString());
 			if(returnType != null && returnType.equalsIgnoreCase("null")) {
 				return true;
 			}
