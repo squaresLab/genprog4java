@@ -64,6 +64,7 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
@@ -72,6 +73,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -79,11 +81,14 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import clegoues.genprog4java.rep.WeightedAtom;
@@ -204,71 +209,52 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	public  Map<ASTNode, List<ASTNode>> getNullCheckables() {
 		if(nullCheckable == null) {
 			nullCheckable = new HashMap<ASTNode, List<ASTNode>>();
-			if(this.getASTNode() instanceof MethodInvocation 
-					|| this.getASTNode() instanceof ExpressionStatement 
-					|| this.getASTNode() instanceof ReturnStatement ){
+			this.getASTNode().accept(new ASTVisitor() {
 
-				this.getASTNode().accept(new ASTVisitor() {
-					// method to visit all Expressions relevant for this in locationNode and
-					// store their parents
-					public boolean visit(MethodInvocation node) {
-						if(node.getExpression() != null && isNullCheckable(node.getExpression())) {
-							saveDataOfTheExpression(node);
-						}
-						return true;
+				public boolean visit(MethodInvocation node) {
+					ASTNode stmtParent = statementParent(node);
+					saveDataOfTheExpression(stmtParent, node.getExpression());
+					return true;
+				}
+				public boolean visit(FieldAccess node) {
+					ASTNode stmtParent = statementParent(node);
+					saveDataOfTheExpression(stmtParent, node.getExpression());
+					return true;
+				}
+
+				public boolean visit(QualifiedName node) {
+					ASTNode stmtParent = statementParent(node);
+					saveDataOfTheExpression(stmtParent, node.getQualifier());
+					return true;
+				}
+
+				private ASTNode statementParent(ASTNode node) {
+					while(node != null && !(node instanceof Statement)) {
+						node = node.getParent();
 					}
-					public boolean visit(FieldAccess node) {
-						saveDataOfTheExpression(node);
-						return true;
-					}
+					return node;
+				}
 
-					private boolean isNullCheckable(Expression exp) {
-						if(exp instanceof Annotation ||						   
-								exp instanceof ArrayCreation ||
-								exp instanceof ArrayInitializer ||
-								exp instanceof Assignment ||
-								exp instanceof BooleanLiteral ||
-								exp instanceof CharacterLiteral ||
-								exp instanceof ClassInstanceCreation ||
-								exp instanceof ConditionalExpression ||
-								exp instanceof InstanceofExpression ||
-								exp instanceof NullLiteral ||
-								exp instanceof NumberLiteral ||
-								exp instanceof StringLiteral ||
-								exp instanceof TypeLiteral ||
-								exp instanceof ThisExpression ||
-								exp instanceof InfixExpression ||
-								exp instanceof PostfixExpression ||
-								exp instanceof PrefixExpression ||
-								exp instanceof VariableDeclarationExpression
-								)
-							return false;
-						if(exp instanceof SimpleName) {
-							SimpleName asSimpleName = (SimpleName) exp;
-							IBinding binding = asSimpleName.resolveTypeBinding();
-							if(binding == null)
-								return false;
-						}
-
-						/* this leaves:
-						    ArrayAccess
-						    CastExpression,
-						    FieldAccess,
-						    MethodInvocation,
-						    Name [SimpleName, QualifiedName]
-						    ParenthesizedExpression,
-						    SuperFieldAccess,
-						    SuperMethodInvocation
-						    ... as the only options
-						 */
-						return true;
-
+				private boolean isNullCheckable(ASTNode node) {
+					if(node == null) 
+						return false;
+					if(node instanceof SimpleName) {
+						SimpleName asSimpleName = (SimpleName) node;
+						IBinding binding = asSimpleName.resolveBinding();
+						return binding != null && binding instanceof IVariableBinding;
 					}
 
-					public void saveDataOfTheExpression(ASTNode node){
-						if(!isNullCheckable((Expression)node))
-							return;					
-						ASTNode parent = getParent(node);
+					return node instanceof ArrayAccess || node instanceof CastExpression || node instanceof ClassInstanceCreation ||
+							  node instanceof SuperMethodInvocation || node instanceof  ParenthesizedExpression ||
+							  node instanceof SuperFieldAccess || node instanceof SuperMethodInvocation 
+							;
+					/* maybe: ArrayCreation */
+				}
+				
+				private void saveDataOfTheExpression(ASTNode parent, ASTNode node){
+					if(parent == null || parent instanceof VariableDeclarationStatement) // heuristic pseudo-hack to prevent breaking code badly
+						return;
+					if(isNullCheckable(node)) {
 						if (!nullCheckable.containsKey(parent)) {
 							List<ASTNode> thisList = new ArrayList<ASTNode>();
 							thisList.add(node);
@@ -281,9 +267,8 @@ public class JavaStatement implements Comparable<JavaStatement>{
 							nullCheckable.put(parent, thisList);
 						}
 					}
-				});
-
-			}
+				}
+			});
 		}
 		return nullCheckable;
 	}
