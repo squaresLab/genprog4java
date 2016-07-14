@@ -783,14 +783,7 @@ FaultLocRepresentation<JavaEditOperation> {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<WeightedHole> editSources(Location location, Mutation editType) {
-		List<EditHole> holes = editFactory.editSources(this,location,editType);
-		List<WeightedHole> retVal = new ArrayList<WeightedHole>();
-		for(EditHole hole : holes) {
-			// possible FIXME for later: weighting options equally for the time being.  One day
-			// maybe we'll do something smarter...
-			retVal.add(new WeightedHole(hole));
-		}
-		return retVal;
+		return editFactory.editSources(this,location,editType);
 	}
 
 
