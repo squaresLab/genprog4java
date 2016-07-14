@@ -83,7 +83,7 @@ public class JavaSemanticInfo {
 	 *  @return list of expressions, from within this method scope, that can be swapped in for the
 	 *  given desired expression type
 	 */
-	public List<Expression> getMethodParamReplacementExpressions(final String methodName, MethodDeclaration md, String desiredType) {
+	public static List<Expression> getMethodParamReplacementExpressions(final String methodName, MethodDeclaration md, String desiredType) {
 		Map<String,List<Expression>> typeToExpressions = null;
 		if(methodParamExpressionsInScope == null) {
 			methodParamExpressionsInScope = new HashMap<String, Map<String,List<Expression>>>();
@@ -125,14 +125,14 @@ public class JavaSemanticInfo {
 	private static Map<String, List<Expression>> conditionExtensionsInScope = null;
 
 	
-	public List<Expression> getConditionalExtensionExpressions(String methodName, MethodDeclaration md) {
+	public static List<Expression> getConditionalExtensionExpressions(String methodName, MethodDeclaration md) {
 		if(conditionExtensionsInScope == null) {
 			conditionExtensionsInScope = new HashMap<String, List<Expression>>();
 		}
 		if(conditionExtensionsInScope.containsKey(methodName)) {
 			return conditionExtensionsInScope.get(methodName);
 		} 
-		List<Expression> fullConditionsInScope = this.getConditionalReplacementExpressions(methodName, md);
+		List<Expression> fullConditionsInScope = JavaSemanticInfo.getConditionalReplacementExpressions(methodName, md);
 		List<Expression> expressionsInScope = new LinkedList<Expression>();
 		conditionExtensionsInScope.put(methodName, expressionsInScope);
 		CollectBooleanExpressions myVisitor = new CollectBooleanExpressions(expressionsInScope); 
@@ -144,7 +144,7 @@ public class JavaSemanticInfo {
 
 	private static Map<String, List<Expression>> conditionalExpressionsInScope = null;
 
-	public List<Expression> getConditionalReplacementExpressions(final String methodName, MethodDeclaration md) {
+	public static List<Expression> getConditionalReplacementExpressions(final String methodName, MethodDeclaration md) {
 		if(conditionalExpressionsInScope == null) {
 			conditionalExpressionsInScope = new HashMap<String,List<Expression>>();
 		}
@@ -182,6 +182,30 @@ public class JavaSemanticInfo {
 		JavaSemanticInfo.methodScopeMap.put(s.getStmtId(),scope);
 	}
 
+	public static Set<String> inScopeAt(JavaStatement locationStmt) {
+		Set<String> classScope = classScopeMap.get(locationStmt.getStmtId());
+		Set<String> methodScope = methodScopeMap.get(locationStmt.getStmtId());
+		classScope.addAll(methodScope);
+		return classScope;
+	}
+	
+	public boolean areNamesInScope(ASTNode node, Set<String> names) {
+		final Set<String> namesUsed = new HashSet<String>();
+		node.accept(new ASTVisitor() {
+			@Override
+			public boolean visit(SimpleName node) {
+				namesUsed.add(node.getIdentifier());
+				return true;
+			}
+		});
+		for(String used : namesUsed) {
+			if(!names.contains(used)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	public boolean scopeCheckOK(JavaStatement potentiallyBuggyStmt, JavaStatement potentialFixStmt) {
 		// I *believe* this is just variable names and doesn't check required
 		// types, which are also collected

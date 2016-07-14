@@ -274,7 +274,7 @@ public class JavaEditFactory {
 		// parameter replacer, expression replacer, and expression adder and removers
 		// should be selected between by distance from location.
 		case PARREP:
-			return JavaHole.makeExpHole(locationStmt.getReplacableMethodParameters(JavaRepresentation.semanticInfo), locationStmt);
+			return JavaHole.makeExpHole(locationStmt.getReplacableMethodParameters(), locationStmt);
 		case PARREM:
 		{
 			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
@@ -291,7 +291,7 @@ public class JavaEditFactory {
 		case PARADD:
 		{ // selection criteria not specified in Par materials, so I give uniform weight to all options
 			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
-			Map<ASTNode, List<List<ASTNode>>> extensionOptions = locationStmt.getExtendableParameterMethods(variant.semanticInfo);
+			Map<ASTNode, List<List<ASTNode>>> extensionOptions = locationStmt.getExtendableParameterMethods();
 			for(Entry<ASTNode, List<List<ASTNode>>> nodeOption : extensionOptions.entrySet()) {
 				List<List<ASTNode>> paramOptions =  nodeOption.getValue();
 				LinkedList<List<ASTNode>> res = new LinkedList<List<ASTNode>>();
@@ -304,11 +304,11 @@ public class JavaEditFactory {
 			return retVal;
 		}
 		case EXPREP:
-			return JavaHole.makeExpHole(locationStmt.getExtendableConditionalExpressions(JavaRepresentation.semanticInfo), locationStmt);
+			return JavaHole.makeExpHole(locationStmt.getExtendableConditionalExpressions(), locationStmt);
 		case EXPADD:
 		{
 			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
-			Map<Expression, List<Expression>> extendableExpressions = locationStmt.getExtendableConditionalExpressions(JavaRepresentation.semanticInfo);
+			Map<Expression, List<Expression>> extendableExpressions = locationStmt.getExtendableConditionalExpressions();
 			for(Entry<Expression, List<Expression>> entries : extendableExpressions.entrySet()) { 
 				Expression parentExp = entries.getKey();
 				int parentExpLoc = ASTUtils.getLineNumber(parentExp);
@@ -317,7 +317,7 @@ public class JavaEditFactory {
 					EditHole shrinkableExpHole2 = new ExpChoiceHole( entries.getKey(), exp, locationStmt.getStmtId(), 1);
 					int newExpLoc = ASTUtils.getLineNumber(exp);
 					int lineDistance = Math.abs(parentExpLoc - newExpLoc);
-					double weight = lineDistance != 0 ? 1 / lineDistance : 1.0;
+					double weight = lineDistance != 0 ? 1.0 / lineDistance : 1.0;
 					retVal.add(new WeightedHole(shrinkableExpHole1, weight));
 					retVal.add(new WeightedHole(shrinkableExpHole2, weight));
 				}
@@ -400,12 +400,13 @@ public class JavaEditFactory {
 		case FUNREP: 
 			return locationStmt.getCandidateMethodReplacements().size() > 0; 
 		case PARREP:
-			Map<Expression, List<Expression>> methodParams = locationStmt.getReplacableMethodParameters(variant.semanticInfo);
-			for(Entry<Expression, List<Expression>> entry : methodParams.entrySet()) {
-				if(!entry.getValue().isEmpty())
-					return true;
-			}
-			return false;
+			return locationStmt.getReplacableMethodParameters().size() > 0;
+			//Map<Expression, List<Expression>> methodParams = locationStmt.getReplacableMethodParameters();
+			//for(Entry<Expression, List<Expression>> entry : methodParams.entrySet()) {
+			//	if(!entry.getValue().isEmpty())
+			//		return true;
+			//}
+			//return false;
 		case NULLCHECK: 
 			return locationStmt.getNullCheckables().size() > 0;
 		case CASTCHECK:
@@ -413,10 +414,10 @@ public class JavaEditFactory {
 		case PARREM:
 			return locationStmt.getShrinkableParameterMethods().size() > 0;
 		case PARADD:
-			return locationStmt.getExtendableParameterMethods(variant.semanticInfo).size() > 0;
+			return locationStmt.getExtendableParameterMethods().size() > 0;
 		case EXPREP:
 		case EXPADD:
-			return locationStmt.getExtendableConditionalExpressions(variant.semanticInfo).size() > 0;
+			return locationStmt.getExtendableConditionalExpressions().size() > 0;
 		case EXPREM:
 			return locationStmt.getShrinkableConditionalExpressions().size() > 0;
 		case SIZECHECK:

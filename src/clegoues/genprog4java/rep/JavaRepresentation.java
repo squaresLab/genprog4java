@@ -789,25 +789,6 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	protected void printDebugInfo() {
-		ArrayList<Location> buggyLocations = this.getFaultyLocations();
-		for (Location location : buggyLocations) {
-			int atomid = ((JavaStatement) location.getLocation()).getStmtId(); 
-			JavaStatement stmt = sourceInfo.getBase().get(atomid);
-			ASTNode actualStmt = stmt.getASTNode();
-			String stmtStr = actualStmt.toString();
-			logger.debug("statement " + atomid + " at line " + stmt.getLineno()
-			+ ": " + stmtStr);
-		
-			logger.debug("\t Required Names:");
-			for (String scope : stmt.getRequiredNames()) {
-				logger.debug("\t\t" + scope);
-			}
-		}
-	}
-
-	@SuppressWarnings("rawtypes")
-	@Override
 	public Location instantiateLocation(Integer i, double negWeight) {
 		if(this.sourceInfo.getLocationInformation().containsKey(i)) {
 			return this.sourceInfo.getLocationInformation().get(i);

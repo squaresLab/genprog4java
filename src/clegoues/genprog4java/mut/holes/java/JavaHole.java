@@ -84,7 +84,7 @@ public abstract class JavaHole implements EditHole<ASTNode> {
 					ExpHole thisHole = new ExpHole(toBeReplaced, replacementExp, parentStmt.getStmtId());
 					int replacementLineNumber = ASTUtils.getLineNumber(replacementExp);
 					int lineDistance = Math.abs(locationLineNumber - replacementLineNumber);
-					double weight = lineDistance != 0 ? 1 / lineDistance : 1.0;
+					double weight = lineDistance != 0 ? 1.0 / lineDistance : 1.0;
 					retVal.add(new WeightedHole(thisHole, weight));
 				}
 			}

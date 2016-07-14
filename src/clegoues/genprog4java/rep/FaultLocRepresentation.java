@@ -467,8 +467,6 @@ CachingRepresentation<G> {
 
 	protected abstract Location instantiateLocation(Integer i, double negWeight);
 
-	protected abstract void printDebugInfo();
-
 	protected abstract void instrumentForFaultLocalization();
 
 	@Override
