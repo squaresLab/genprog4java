@@ -45,21 +45,14 @@ import java.util.Set;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayAccess;
-import org.eclipse.jdt.core.dom.ArrayCreation;
-import org.eclipse.jdt.core.dom.ArrayInitializer;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CastExpression;
-import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -68,38 +61,27 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.NullLiteral;
-import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
-import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeLiteral;
-import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import clegoues.genprog4java.rep.WeightedAtom;
+import clegoues.genprog4java.rep.JavaRepresentation;
 
 public class JavaStatement implements Comparable<JavaStatement>{
 
 	private ASTNode astNode;
 	private ClassInfo classInfo;
 
-	private int lineno;
 	private int stmtId; // unique
 	private Set<String> mustBeInScope;
 	private Set<String> namesDeclared;
@@ -134,14 +116,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	public void setASTNode(ASTNode node) {
 		this.astNode = node;
-	}
-
-	public int getLineno() {
-		return lineno;
-	}
-
-	public void setLineno(int lineno) {
-		this.lineno = lineno;
 	}
 
 	public Set<String> getRequiredNames() {
@@ -344,12 +318,12 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	private Map<Expression,List<Expression>> extendableExpressions = null;
 
-	public Map<Expression, List<Expression>> getExtendableConditionalExpressions(final JavaSemanticInfo semanticInfo) {
+	public Map<Expression, List<Expression>> getExtendableConditionalExpressions() {
 		if(extendableExpressions == null) {
 			extendableExpressions = new HashMap<Expression, List<Expression>>();
 			final MethodDeclaration md = (MethodDeclaration) ASTUtils.getEnclosingMethod(this.getASTNode());
 			final String methodName = md.getName().getIdentifier();
-			final List<Expression> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
+			final List<Expression> replacements = JavaSemanticInfo.getConditionalExtensionExpressions(methodName, md);
 
 			if(replacements != null && !replacements.isEmpty()) {
 				final ASTMatcher matcher = new ASTMatcher();
@@ -365,7 +339,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						handleCondition(node.getExpression());
 						return true;
 					}
-					
+
 					private void handleCondition(Expression exp) {
 						List<Expression> thisList = new LinkedList<Expression>();
 
@@ -398,37 +372,63 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	private Map<Expression,List<Expression>> methodParamReplacements = null;
 
-	public Map<Expression,List<Expression>> getReplacableMethodParameters(final JavaSemanticInfo semanticInfo) {
+	public Map<Expression,List<Expression>> getReplacableMethodParameters() {
 		if(methodParamReplacements == null) {
 			methodParamReplacements = new HashMap<Expression,List<Expression>>();
-		}
-		final MethodDeclaration md = (MethodDeclaration) ASTUtils.getEnclosingMethod(this.getASTNode());
-		final String methodName = md.getName().getIdentifier();
 
-		this.getASTNode().accept(new ASTVisitor() {
-			// method to visit all Expressions relevant for this in locationNode and
-			// store their parents
-			public boolean visit(MethodInvocation node) {		
-				List<Expression> args = node.arguments();
-				for(Expression arg : args) {
-					ITypeBinding paramType = arg.resolveTypeBinding();
-					if(paramType != null) { 
-						String typName = paramType.getName();
-						List<Expression> replacements = semanticInfo.getMethodParamReplacementExpressions(methodName, md, typName);
-						List<Expression> thisList = null;
-						if(methodParamReplacements.containsKey(arg)) {
-							thisList = methodParamReplacements.get(arg);
-						} else {
-							thisList = new ArrayList<Expression>();
-							methodParamReplacements.put(arg, thisList);
+			final MethodDeclaration md = (MethodDeclaration) ASTUtils.getEnclosingMethod(this.getASTNode());
+			final String methodName = md.getName().getIdentifier();
+			final Set<String> namesInScopeHere = JavaSemanticInfo.inScopeAt(this);
+
+			final ASTMatcher matcher = new ASTMatcher();
+
+			this.getASTNode().accept(new ASTVisitor() {
+
+				private void handleCandidateReplacements(List<Expression> args) {
+					for(Expression arg : args) {
+						ITypeBinding paramType = arg.resolveTypeBinding();
+						if(paramType != null) { 
+							String typName = paramType.getName();
+							List<Expression> replacements = JavaSemanticInfo.getMethodParamReplacementExpressions(methodName, md, typName);
+							
+							if(!replacements.isEmpty()) {
+								List<Expression> thisList = null;
+								List<Expression> filteredReplacements = new LinkedList<Expression>();
+								for(Expression candRep : replacements) {
+									if(JavaRepresentation.semanticInfo.areNamesInScope(candRep, namesInScopeHere) 
+											&& !candRep.subtreeMatch(matcher, arg))  {
+										filteredReplacements.add(candRep);
+									}
+								}
+								if(!filteredReplacements.isEmpty()) {
+									if(methodParamReplacements.containsKey(arg)) {
+										thisList = methodParamReplacements.get(arg);
+									} else {
+										thisList = new ArrayList<Expression>();
+										methodParamReplacements.put(arg, thisList);
+									}
+									thisList.addAll(filteredReplacements);
+								}
+							}
 						}
-						thisList.addAll(replacements);
 					}
 				}
-				return true;
 
-			}
-		});
+				@SuppressWarnings("unchecked")
+				public boolean visit(SuperMethodInvocation node) {
+					List<Expression> args = node.arguments();
+					handleCandidateReplacements(args);
+					return true;
+				}
+
+				@SuppressWarnings("unchecked")
+				public boolean visit(MethodInvocation node) {		
+					List<Expression> args = node.arguments();
+					handleCandidateReplacements(args);
+					return true;
+				}
+			});
+		}
 		return methodParamReplacements;
 	}
 
@@ -466,7 +466,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	private Map<ASTNode,List<List<ASTNode>>> extendableParameterMethods = null;
 
-	public Map<ASTNode, List<List<ASTNode>>> getExtendableParameterMethods(final JavaSemanticInfo semanticInfo) {
+	public Map<ASTNode, List<List<ASTNode>>> getExtendableParameterMethods() {
 		if(extendableParameterMethods == null) {
 			extendableParameterMethods = new HashMap<ASTNode,List<List<ASTNode>>>();
 
@@ -522,7 +522,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 							List<ASTNode> thisExtension = new ArrayList<ASTNode>();
 							boolean extensionDoable = true;
 							for(ITypeBinding necessaryExp : toExtend) {
-								List<Expression> replacements = semanticInfo.getMethodParamReplacementExpressions(methodName, md, necessaryExp.getName());
+								List<Expression> replacements = JavaSemanticInfo.getMethodParamReplacementExpressions(methodName, md, necessaryExp.getName());
 								if(replacements.isEmpty()) {
 									extensionDoable = false;
 									break;
@@ -792,42 +792,6 @@ if B include return statement
 		}
 
 		return true;
-		/* FIXME: CLG believes that these are all now unnecessary in light of making delete "replace with empty
-		 * block", which is what it should always have been.  However, am leaving this in for the 
-		 * time being just to be safe, will remove later */
-		/*
-		//Heuristic: If it is the body of an if, while, or for, it should not be removed
-
-		if(faultyNode instanceof Block){
-			//this boolean states if the faultyNode is the body of an IfStatement
-			if (parent instanceof IfStatement
-					&& ((IfStatement)parent).getThenStatement().equals(faultyNode))
-				return false;
-			//same for all these booleans
-			if(parent instanceof WhileStatement
-					&& ((WhileStatement)parent).getBody().equals(faultyNode))
-				return false;
-			if(parent instanceof ForStatement
-					&& ((ForStatement)parent).getBody().equals(faultyNode))
-				return false;
-			if(parent instanceof EnhancedForStatement
-					&& ((EnhancedForStatement)parent).getBody().equals(faultyNode))
-				return false;
-			if(parent instanceof IfStatement && (((IfStatement)parent).getElseStatement() != null) &&
-					((IfStatement)parent).getElseStatement().equals(faultyNode))
-				return false;
-		}
-
-
-		//Heuristic: If an stmt is the only stmt in a block, don´t delete it
-		parent = blockThatContainsThisStatement();
-		if(parent instanceof Block){
-			if(((Block)parent).statements().size()==1){
-				return false;
-			}
-		}
-
-		return true;*/
 	}
 
 
@@ -875,7 +839,6 @@ if B include return statement
 
 	public void setInfo(int stmtCounter, ASTNode node) {
 		this.setStmtId(stmtCounter);
-		this.setLineno(ASTUtils.getLineNumber(node));
 		this.setASTNode(node);
 	}
 
