@@ -79,7 +79,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private boolean containsFinalVar = false;
 	private Stack<Boolean> finalVarStack = new Stack<Boolean>();
 
-	
+
 	private HashSet<String> requiredNames = new HashSet<String>();
 	private Stack<HashSet<String>> requiredNamesStack = new Stack<HashSet<String>>();
 
@@ -100,14 +100,14 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	// it might make sense to store these separately, but for now, this will do
 	// upon reflection, it makes more sense to do add these after the whole thing has been parsed
 	private HashSet<String> availableMethodsAndFields; 
-	
+
 	private HashSet<String> namesDeclared = new HashSet<String>();
 	private Stack<HashSet<String>> namesDeclaredStack = new Stack<HashSet<String>>();
 
 	private CompilationUnit cu;
 
 	public SemanticInfoVisitor() {
-		
+
 	}
 	public void setAvailableMethodsAndFields(HashSet<String> mandf) {
 		this.availableMethodsAndFields = mandf;
@@ -118,7 +118,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	}
 
 	// FIXME figure out what a node declares
-	
+
 	@Override
 	public void preVisit(ASTNode node) {
 		requiredNamesStack.push(requiredNames);
@@ -150,18 +150,18 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			this.methodScopeStack.push(currentMethodScope);
 			currentMethodScope = new HashSet<String>(currentMethodScope);
 		}
-		
-//		if(node instanceof EnhancedForStatement ||
-//				node instanceof ForStatement ||
-//				node instanceof DoStatement || 
-//				node instanceof IfStatement ||
-//				node instanceof SwitchStatement ||
-//				node instanceof TryStatement ||
-//				    node instanceof WhileStatement) {
-//			
-//		}
-//				   
-//				 
+
+		//		if(node instanceof EnhancedForStatement ||
+		//				node instanceof ForStatement ||
+		//				node instanceof DoStatement || 
+		//				node instanceof IfStatement ||
+		//				node instanceof SwitchStatement ||
+		//				node instanceof TryStatement ||
+		//				    node instanceof WhileStatement) {
+		//			
+		//		}
+		//				   
+		//				 
 		this.namesDeclaredStack.push(namesDeclared);
 		namesDeclared = new HashSet<String>();
 		super.preVisit(node);
@@ -202,9 +202,9 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		} else {
 			containsFinalVar = containsFinalVar || finalVarStack.pop();
 		}
-		
+
 		requiredNames.addAll(oldRequired);
-		
+
 		super.postVisit(node);
 	}
 
@@ -289,10 +289,12 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				VariableDeclarationStatement vd = (VariableDeclarationStatement) o;
 				fragments = vd.fragments();
 			}
-			for(Object f : fragments) {
-				VariableDeclarationFragment frag = (VariableDeclarationFragment) f;
-				this.currentLoopScope.add(frag.getName().getIdentifier());
-				this.namesDeclared.add(frag.getName().getIdentifier());
+			if(fragments != null) {
+				for(Object f : fragments) {
+					VariableDeclarationFragment frag = (VariableDeclarationFragment) f;
+					this.currentLoopScope.add(frag.getName().getIdentifier());
+					this.namesDeclared.add(frag.getName().getIdentifier());
+				}
 			}
 		}
 		return true;
@@ -377,7 +379,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		}
 		return true;
 	}
-	
+
 	public CompilationUnit getCompilationUnit() {
 		return cu;
 	}
@@ -415,17 +417,17 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.scopes = scopeList;
 	}
 
-//	@Override
-//	public boolean visit(Initializer node) {
-//		List mods = node.modifiers(); // FIXME need to deal with static.
-//
-//		for (Object o : mods) {
-//			if (o instanceof Modifier) {
-//				if (((Modifier) o).isStatic()) {
-//					this.currentMethodScope = new HashSet<String>();
-//				}
-//			}
-//		}
-//		return super.visit(node);
-//	}
+	//	@Override
+	//	public boolean visit(Initializer node) {
+	//		List mods = node.modifiers(); // FIXME need to deal with static.
+	//
+	//		for (Object o : mods) {
+	//			if (o instanceof Modifier) {
+	//				if (((Modifier) o).isStatic()) {
+	//					this.currentMethodScope = new HashSet<String>();
+	//				}
+	//			}
+	//		}
+	//		return super.visit(node);
+	//	}
 }
