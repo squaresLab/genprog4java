@@ -3,6 +3,7 @@ package clegoues.genprog4java.java;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -123,6 +124,7 @@ public class JavaSemanticInfo {
 
 	private static Map<String, List<Expression>> conditionExtensionsInScope = null;
 
+	
 	public List<Expression> getConditionalExtensionExpressions(String methodName, MethodDeclaration md) {
 		if(conditionExtensionsInScope == null) {
 			conditionExtensionsInScope = new HashMap<String, List<Expression>>();
@@ -131,72 +133,11 @@ public class JavaSemanticInfo {
 			return conditionExtensionsInScope.get(methodName);
 		} 
 		List<Expression> fullConditionsInScope = this.getConditionalReplacementExpressions(methodName, md);
-		final List<Expression> expressionsInScope = new ArrayList<Expression>(); // possible FIXME: do I start with the list above?  I think it will auto-populate, right?
+		List<Expression> expressionsInScope = new LinkedList<Expression>();
 		conditionExtensionsInScope.put(methodName, expressionsInScope);
+		CollectBooleanExpressions myVisitor = new CollectBooleanExpressions(expressionsInScope); 
 		for(ASTNode cond : fullConditionsInScope) {
-			cond.accept(new ASTVisitor() {
-				private void tryAdd(Expression node) {
-					ITypeBinding tb = node.resolveTypeBinding();
-					if(tb != null) {
-						if(tb.getName().equals("boolean")) {
-							expressionsInScope.add(node);
-						}
-					}
-				}
-				public boolean visit(PrefixExpression node) {
-					if(node.getOperator() == PrefixExpression.Operator.NOT) {
-						expressionsInScope.add(node);
-					}
-					return true;
-				}
-				public boolean visit(ConditionalExpression node) {
-					expressionsInScope.add(node);
-					return true;
-				}
-				public boolean visit(FieldAccess node) {
-					tryAdd(node);
-					return true;
-				}
-				public boolean visit(InfixExpression node) {
-					InfixExpression.Operator op = node.getOperator();
-					if(op ==  InfixExpression.Operator.LESS ||   
-							op == InfixExpression.Operator.GREATER ||
-							op == InfixExpression.Operator.LESS_EQUALS ||
-							op == InfixExpression.Operator.GREATER_EQUALS ||
-							op == InfixExpression.Operator.EQUALS || 
-							op == InfixExpression.Operator.NOT_EQUALS ||
-							op == InfixExpression.Operator.CONDITIONAL_AND ||
-							op == InfixExpression.Operator.CONDITIONAL_OR) {
-						expressionsInScope.add(node);
-					}
-					return true;
-				} 
-				public boolean visit(InstanceofExpression node) {
-					expressionsInScope.add(node);
-					return true;
-				} 
-				public boolean visit(MethodInvocation node) {
-					tryAdd(node);
-					return true;
-				} 
-				public boolean visit(SimpleName node) {
-					tryAdd(node);
-					return true;
-				} 
-				public boolean visit(QualifiedName node) {
-					tryAdd(node);
-					return true;
-				}
-				public boolean visit(SuperFieldAccess node) {
-					tryAdd(node);
-					return true;
-				}
-				public boolean visit(SuperMethodInvocation node) {
-					tryAdd(node);
-					return true;
-				}
-
-			});
+			cond.accept(myVisitor);
 		}
 		return expressionsInScope;
 	}
@@ -221,7 +162,6 @@ public class JavaSemanticInfo {
 					expressionsInScope.add(node.getExpression());
 					return true;
 				}
-
 			});
 			return expressionsInScope;
 		}

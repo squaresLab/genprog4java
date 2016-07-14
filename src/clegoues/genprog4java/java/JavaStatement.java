@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -245,12 +246,12 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					}
 
 					return node instanceof ArrayAccess || node instanceof CastExpression || node instanceof ClassInstanceCreation ||
-							  node instanceof SuperMethodInvocation || node instanceof  ParenthesizedExpression ||
-							  node instanceof SuperFieldAccess || node instanceof SuperMethodInvocation 
+							node instanceof SuperMethodInvocation || node instanceof  ParenthesizedExpression ||
+							node instanceof SuperFieldAccess || node instanceof SuperMethodInvocation 
 							;
 					/* maybe: ArrayCreation */
 				}
-				
+
 				private void saveDataOfTheExpression(ASTNode parent, ASTNode node){
 					if(parent == null || parent instanceof VariableDeclarationStatement) // heuristic pseudo-hack to prevent breaking code badly
 						return;
@@ -343,47 +344,57 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	private Map<Expression,List<Expression>> extendableExpressions = null;
 
-	// FIXME: find a way to sort options by distance where sorting by distance is specified
-	// in PAR paper
-	public Map<Expression, List<Expression>> getConditionalExpressions(final JavaSemanticInfo semanticInfo) {
-		if(extendableExpressions != null) {
-			return extendableExpressions;
-		}
-		extendableExpressions = new HashMap<Expression, List<Expression>>();
+	public Map<Expression, List<Expression>> getExtendableConditionalExpressions(final JavaSemanticInfo semanticInfo) {
+		if(extendableExpressions == null) {
+			extendableExpressions = new HashMap<Expression, List<Expression>>();
+			final MethodDeclaration md = (MethodDeclaration) ASTUtils.getEnclosingMethod(this.getASTNode());
+			final String methodName = md.getName().getIdentifier();
+			final List<Expression> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
 
-		final MethodDeclaration md = (MethodDeclaration) ASTUtils.getEnclosingMethod(this.getASTNode());
-		final String methodName = md.getName().getIdentifier();
-		final List<Expression> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
+			if(replacements != null && !replacements.isEmpty()) {
+				final ASTMatcher matcher = new ASTMatcher();
 
-		this.getASTNode().accept(new ASTVisitor() {
+				this.getASTNode().accept(new ASTVisitor() {
 
-			private void handleCondition(Expression exp) {
-				// possible FIXME: exclude those that are already in the condition?
-				if(replacements != null) {
-					List<Expression> thisList = null;
-					if(extendableExpressions.containsKey(exp)) {
-						thisList = extendableExpressions.get(exp);
-					} else {
-						thisList = new ArrayList<Expression>();
-						extendableExpressions.put(exp, thisList);
+					public boolean visit(IfStatement node) {
+						handleCondition(node.getExpression());				
+						return true;
 					}
-					thisList.addAll(replacements);
-				}
-			}
-			public boolean visit(IfStatement node) {
-				handleCondition(node.getExpression());				
-				return true;
-			}
 
-			public boolean visit(ConditionalExpression node) {
-				handleCondition(node.getExpression());
-				return true;
+					public boolean visit(ConditionalExpression node) {
+						handleCondition(node.getExpression());
+						return true;
+					}
+					
+					private void handleCondition(Expression exp) {
+						List<Expression> thisList = new LinkedList<Expression>();
+
+						List<Expression> decomposedExps = new LinkedList<Expression>();
+						CollectBooleanExpressions myVisitor = new CollectBooleanExpressions(decomposedExps);
+						exp.accept(myVisitor);
+
+						// only extend expressions with candidate subexpressions they do not already contain.
+						for(Expression replacement : replacements) {
+							for(Expression decomposedExp : decomposedExps) {
+								if(!replacement.subtreeMatch(matcher, decomposedExp)) {
+									thisList.add(replacement);
+								}
+							}
+						}
+						if(!thisList.isEmpty()) {
+							if(extendableExpressions.containsKey(exp)) {
+								extendableExpressions.get(exp).addAll(thisList);
+							} else {
+								extendableExpressions.put(exp, thisList);
+							}
+						}
+					}
+				});
 			}
-		});
+		}
 		return extendableExpressions;
-	}
 
-	// FIXME: fix Search for when we don't have enough options or edit list is empty.
+	}
 
 	private Map<Expression,List<Expression>> methodParamReplacements = null;
 
