@@ -339,7 +339,8 @@ FaultLocRepresentation<JavaEditOperation> {
 	}
 
 
-	public static boolean canRepair(ASTNode node) { // FIXME: variable declarations that have bodies?
+	public static boolean canRepair(ASTNode node) { // FIXME: variable declarations that have bodies? Or; difference between "can repair" and "can move/delete/replace"
+
 		return node instanceof AssertStatement 
 				|| node instanceof Block
 				|| node instanceof BreakStatement
