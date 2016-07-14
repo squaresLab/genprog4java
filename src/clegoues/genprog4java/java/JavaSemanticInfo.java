@@ -183,7 +183,7 @@ public class JavaSemanticInfo {
 	}
 
 	public static Set<String> inScopeAt(JavaStatement locationStmt) {
-		Set<String> classScope = classScopeMap.get(locationStmt.getStmtId());
+		Set<String> classScope = new HashSet<String>(classScopeMap.get(locationStmt.getStmtId()));
 		Set<String> methodScope = methodScopeMap.get(locationStmt.getStmtId());
 		classScope.addAll(methodScope);
 		return classScope;

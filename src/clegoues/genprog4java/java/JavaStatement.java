@@ -380,8 +380,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 			final String methodName = md.getName().getIdentifier();
 			final Set<String> namesInScopeHere = JavaSemanticInfo.inScopeAt(this);
 
-			final ASTMatcher matcher = new ASTMatcher();
-
 			this.getASTNode().accept(new ASTVisitor() {
 
 				private void handleCandidateReplacements(List<Expression> args) {
@@ -390,14 +388,17 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						if(paramType != null) { 
 							String typName = paramType.getName();
 							List<Expression> replacements = JavaSemanticInfo.getMethodParamReplacementExpressions(methodName, md, typName);
-							
+							String argAsString = arg.toString();
 							if(!replacements.isEmpty()) {
 								List<Expression> thisList = null;
 								List<Expression> filteredReplacements = new LinkedList<Expression>();
 								for(Expression candRep : replacements) {
-									if(JavaRepresentation.semanticInfo.areNamesInScope(candRep, namesInScopeHere) 
-											&& !candRep.subtreeMatch(matcher, arg))  {
-										filteredReplacements.add(candRep);
+									if(JavaRepresentation.semanticInfo.areNamesInScope(candRep, namesInScopeHere))
+									{
+										String candString = candRep.toString();
+										if(!candString.equals(argAsString)) {
+											filteredReplacements.add(candRep);
+										}
 									}
 								}
 								if(!filteredReplacements.isEmpty()) {
@@ -428,6 +429,8 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					return true;
 				}
 			});
+
+
 		}
 		return methodParamReplacements;
 	}
