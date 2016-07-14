@@ -456,6 +456,12 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	private boolean compatibleMethodMatch(IMethodBinding method1, IMethodBinding method2, boolean checkShrinkable) {
 		if(method2.equals(method1) || (checkShrinkable && !method2.getName().equals(method1.getName()))) 
 			return false;
+
+		ITypeBinding returnType1 = method1.getReturnType();
+		ITypeBinding returnType2 = method2.getReturnType();
+		if(!returnType1.isAssignmentCompatible(returnType2))
+			return false;
+
 		ArrayList<ITypeBinding> paramTypes1 = getParamTypes(method1); 
 		ArrayList<ITypeBinding> paramTypes2 = getParamTypes(method2); 
 		if(checkShrinkable && (paramTypes2.size() < paramTypes1.size()) ||
@@ -475,22 +481,25 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 			final MethodDeclaration md = (MethodDeclaration) ASTUtils.getEnclosingMethod(this.getASTNode());
 			final String methodName = md.getName().getIdentifier();
+			final Set<String> namesInScopeHere = JavaSemanticInfo.inScopeAt(this);
 
 			this.getASTNode().accept(new ASTVisitor() {
-				// FIXME: also supermethodinvocations?
 
-				public boolean visit(MethodInvocation node) {
-					IMethodBinding mb = node.resolveMethodBinding();
+				private void handleInvocation(ASTNode node, IMethodBinding mb) {
 					if(mb == null) {
-						return true;
+						return;
 					}
 					IMethodBinding myMethodBinding = mb.getMethodDeclaration();
+					if(myMethodBinding == null)
+						return;
 
 					ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
-					ArrayList<IMethodBinding> compatibleMethods = new ArrayList<IMethodBinding>();
+					List<IMethodBinding> compatibleMethods = new LinkedList<IMethodBinding>();
 
 					for(IMethodBinding otherMethod : classBinding.getDeclaredMethods()) {
-						if(compatibleMethodMatch(otherMethod,myMethodBinding, true)) {
+						int modifiers = otherMethod.getModifiers();
+
+						if(!Modifier.isAbstract(modifiers) && compatibleMethodMatch(otherMethod,myMethodBinding, true)) {
 							compatibleMethods.add(otherMethod);
 						}
 					}
@@ -508,15 +517,18 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						}
 						superClass = superClass.getSuperclass();
 					}
+					
 					if(compatibleMethods.size() > 0) {
 						ArrayList<ITypeBinding> myTypes = getParamTypes(myMethodBinding);
 						List<List<ASTNode>> thisNodesOptions;
+						
 						if(extendableParameterMethods.containsKey(node)) {
 							thisNodesOptions = extendableParameterMethods.get(node);
 						} else {
 							thisNodesOptions = new ArrayList<List<ASTNode>>();
 							extendableParameterMethods.put(node,thisNodesOptions);
 						}
+						
 						for(IMethodBinding compatibleMethod : compatibleMethods) {
 							ArrayList<ITypeBinding> compatibleParamTypes = getParamTypes(compatibleMethod);
 							int startIndex = myTypes.size() == 0 ? 0 : myTypes.size() - 1;
@@ -526,17 +538,32 @@ public class JavaStatement implements Comparable<JavaStatement>{
 							boolean extensionDoable = true;
 							for(ITypeBinding necessaryExp : toExtend) {
 								List<Expression> replacements = JavaSemanticInfo.getMethodParamReplacementExpressions(methodName, md, necessaryExp.getName());
-								if(replacements.isEmpty()) {
+								List<Expression> filteredReplacements = new LinkedList<Expression>();
+								for(Expression candRep : replacements) {
+									if(JavaRepresentation.semanticInfo.areNamesInScope(candRep, namesInScopeHere))
+										filteredReplacements.add(candRep);
+								}
+								if(filteredReplacements.isEmpty()) {
 									extensionDoable = false;
 									break;
 								}
-								thisExtension.addAll(replacements);
+								thisExtension.addAll(filteredReplacements);
 							}
 							if(extensionDoable) {
 								thisNodesOptions.add(thisExtension);
 							}
 						}
 					}
+				}
+				public boolean visit(SuperMethodInvocation node) {
+					IMethodBinding mb = node.resolveMethodBinding();
+					handleInvocation(node, mb);
+					return true;
+				}
+
+				public boolean visit(MethodInvocation node) {
+					IMethodBinding mb = node.resolveMethodBinding();
+					handleInvocation(node, mb);
 					return true;
 				}
 
@@ -721,36 +748,62 @@ if B include return statement
 			candidateMethodReplacements = new HashMap<ASTNode, List<IMethodBinding>>();
 
 			this.getASTNode().accept(new ASTVisitor() {
-				// FIXME: supermethodinvocations?
-				// FIXME: should I try stuff in superclasses too?  I'm not convinced this is the spec, double-check!
 
-				public boolean visit(MethodInvocation node) {
-					IMethodBinding myMethodBinding = node.resolveMethodBinding();
+				private void handleMethod(ASTNode node, IMethodBinding myMethodBinding) {
 					boolean addToMap = false;
-					if(myMethodBinding != null) {
-						List<IMethodBinding> possibleReps;
-						if(candidateMethodReplacements.containsKey(node)) {
-							possibleReps = candidateMethodReplacements.get(node);
-						} else {
-							possibleReps = new ArrayList<IMethodBinding> ();
-						}
-						ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
-						ITypeBinding thisReturnType = myMethodBinding.getReturnType();
+					List<IMethodBinding> possibleReps;
+					if(candidateMethodReplacements.containsKey(node)) {
+						possibleReps = candidateMethodReplacements.get(node);
+					} else {
+						possibleReps = new LinkedList<IMethodBinding> ();
+					}
+					ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
 
-						for(IMethodBinding otherMethod : classBinding.getDeclaredMethods()) {
-							ITypeBinding candReturnType = otherMethod.getReturnType();
+					for(IMethodBinding otherMethod : classBinding.getDeclaredMethods()) {
+						int modifiers = otherMethod.getModifiers();
 
-							if(candReturnType.isAssignmentCompatible(thisReturnType) &&
-									compatibleMethodMatch(myMethodBinding, otherMethod, false)) {
-								possibleReps.add(otherMethod);
-								addToMap = true;
-							}
-						}
-						if(addToMap) {
-							candidateMethodReplacements.put(node,possibleReps);
+						if(!Modifier.isAbstract(modifiers) &&
+								compatibleMethodMatch(myMethodBinding, otherMethod, false)) {
+							possibleReps.add(otherMethod);
+							addToMap = true;
 						}
 					}
 
+					ITypeBinding superClass = classBinding.getSuperclass();
+					while(superClass != null) {
+						IMethodBinding[] superMethods = superClass.getDeclaredMethods();
+
+						for(IMethodBinding superMethod : superMethods) {
+							int modifiers = superMethod.getModifiers();
+
+							if(!Modifier.isAbstract(modifiers) &&
+									(Modifier.isProtected(modifiers) || Modifier.isPublic(modifiers)) &&
+									compatibleMethodMatch(myMethodBinding, superMethod, false)) {
+								possibleReps.add(superMethod);
+								addToMap = true;
+							}
+						}
+						superClass = superClass.getSuperclass();
+					}
+
+					if(addToMap) {
+						candidateMethodReplacements.put(node,possibleReps);
+					}
+				}
+
+				public boolean visit(SuperMethodInvocation node) {
+					IMethodBinding myMethodBinding = node.resolveMethodBinding();
+					if(myMethodBinding != null) {
+						handleMethod(node, myMethodBinding);
+					}
+					return true;
+				}
+
+				public boolean visit(MethodInvocation node) {
+					IMethodBinding myMethodBinding = node.resolveMethodBinding();
+					if(myMethodBinding != null) {
+						handleMethod(node, myMethodBinding);
+					}
 					return true;
 				}
 

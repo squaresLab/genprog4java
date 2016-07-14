@@ -382,14 +382,13 @@ public class JavaEditFactory {
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 		switch(editType) {
 		case APPEND: 
-		case REPLACE:
-			//If it is a return statement, nothing should be appended after it, since it would be dead code
 			if(!(locationStmt.getASTNode() instanceof ReturnStatement || locationStmt.getASTNode() instanceof ThrowStatement )){
 				return this.editSources(variant, location,  editType).size() > 0;
 			}
 			return false;
+		case REPLACE: 
 		case SWAP: 
-			return this.editSources(variant, location,  editType).size() > 0;
+			return locationStmt.canBeDeleted() && this.editSources(variant, location,  editType).size() > 0;
 		case DELETE: 			
 			return locationStmt.canBeDeleted();
 		case OFFBYONE:  
@@ -401,20 +400,14 @@ public class JavaEditFactory {
 			return locationStmt.getCandidateMethodReplacements().size() > 0; 
 		case PARREP:
 			return locationStmt.getReplacableMethodParameters().size() > 0;
-			//Map<Expression, List<Expression>> methodParams = locationStmt.getReplacableMethodParameters();
-			//for(Entry<Expression, List<Expression>> entry : methodParams.entrySet()) {
-			//	if(!entry.getValue().isEmpty())
-			//		return true;
-			//}
-			//return false;
-		case NULLCHECK: 
-			return locationStmt.getNullCheckables().size() > 0;
-		case CASTCHECK:
-			return locationStmt.getCasts().size() > 0;
 		case PARREM:
 			return locationStmt.getShrinkableParameterMethods().size() > 0;
 		case PARADD:
 			return locationStmt.getExtendableParameterMethods().size() > 0;
+		case NULLCHECK: 
+			return locationStmt.getNullCheckables().size() > 0;
+		case CASTCHECK:
+			return locationStmt.getCasts().size() > 0;
 		case EXPREP:
 		case EXPADD:
 			return locationStmt.getExtendableConditionalExpressions().size() > 0;
