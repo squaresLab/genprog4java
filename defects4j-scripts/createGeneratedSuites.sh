@@ -11,6 +11,7 @@ rm -rf /tmp/*
 
 rm -rf $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites
 mkdir $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites
+STARTAT=1
 
 for (( projectNumb=1 ; projectNumb<=5 ; projectNumb++ ))
 do
@@ -18,26 +19,31 @@ do
   "1" )
     PROJECT="Math"
     NUMBEROFBUGS=106
+    STARTAT=1
   ;;
   "2" ) 
     PROJECT="Lang"
     NUMBEROFBUGS=65
+    STARTAT=1
   ;;
   "3" ) 
     PROJECT="Chart"
     NUMBEROFBUGS=26
+    STARTAT=1
   ;;
   "4" ) 
     PROJECT="Time"
     NUMBEROFBUGS=27
+    STARTAT=1
   ;;
   "5" ) 
     PROJECT="Closure"
     NUMBEROFBUGS=133
+    STARTAT=1
   ;;
   esac
 
-  for (( bug=1 ; bug<=$NUMBEROFBUGS ; bug++ ))
+  for (( bug=$STARTAT ; bug<=$NUMBEROFBUGS ; bug++ ))
   do
   
     $GENPROGDIR/defects4j-scripts/prepareBug.sh $PROJECT $bug $GENPROGDIR $DEFECTS4JDIR generated 100 $DEFECTS4JDIR/ExamplesCheckedOut/
