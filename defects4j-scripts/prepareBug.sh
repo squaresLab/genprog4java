@@ -139,6 +139,7 @@ case "$OPTION" in
   OUTPUT=$(defects4j test -s $BUGWD/"$TESTWD"/outputOfRandoop/$PROJECT/randoop/1/"$PROJECT"-"$BUGNUMBER"f-randoop.1.tar.bz2 -w $BUGWD)
   echo "${OUTPUT:(15)}: tests failed in $PROJECT $BUGNUMBER" >> $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites.txt
 
+
   #PRINT=$(echo "${OUTPUT:(15)}")
   #echo "This is what happened after the substitution: $PRINT"
 

@@ -9,8 +9,10 @@ DEFECTS4JDIR="$2"
 #rm -rf "$DEFECTS4JDIR"/testGenerated/
 #rm -rf /tmp/*
 
+
 rm -rf $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites.txt
 mkdir $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites.txt
+
 STARTAT=1
 
 for (( projectNumb=2 ; projectNumb<=2 ; projectNumb++ ))
@@ -19,10 +21,12 @@ do
   "1" )
     PROJECT="Math"
     NUMBEROFBUGS=106
-    STARTAT=61
+    STARTAT=1
+
   ;;
   "2" ) 
     PROJECT="Lang"
+#    NUMBEROFBUGS=65
     NUMBEROFBUGS=42
     STARTAT=42
   ;;
@@ -34,12 +38,12 @@ do
   "4" ) 
     PROJECT="Time"
     NUMBEROFBUGS=27
-    STARTAT=12
+    STARTAT=1
   ;;
   "5" ) 
     PROJECT="Closure"
-    NUMBEROFBUGS=80
-    STARTAT=80
+    NUMBEROFBUGS=133
+    STARTAT=1
   ;;
   esac
 
