@@ -50,7 +50,7 @@ BUGWD=$BUGSFOLDER"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
 
 #Checkout the buggy and fixed versions of the code (latter to make second testsuite
 #THIS IS COMMENTED BECAUSE THIS WAS ALREADY CREATED
-#defects4j checkout -p $1 -v "$BUGNUMBER"b -w $BUGWD
+defects4j checkout -p $1 -v "$BUGNUMBER"b -w $BUGWD
 
 ##defects4j checkout -p $1 -v "$BUGNUMBER"f -w $BUGSFOLDER/$LOWERCASEPACKAGE"$2"Fixed
 
