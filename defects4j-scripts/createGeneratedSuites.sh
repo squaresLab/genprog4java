@@ -9,11 +9,13 @@ DEFECTS4JDIR="$2"
 rm -rf "$DEFECTS4JDIR"/testGenerated/
 rm -rf /tmp/*
 
+rm -rf "$DEFECTS4JDIR"/resultsFromRunningGeneratedTestSuiteInBuggyCode.txt
+
 rm -rf $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites
 mkdir $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites
 STARTAT=1
 
-for (( projectNumb=1 ; projectNumb<=5 ; projectNumb++ ))
+for (( projectNumb=2 ; projectNumb<=2 ; projectNumb++ ))
 do
   case "$projectNumb" in
   "1" )
@@ -23,8 +25,9 @@ do
   ;;
   "2" ) 
     PROJECT="Lang"
-    NUMBEROFBUGS=65
-    STARTAT=1
+#    NUMBEROFBUGS=65
+    NUMBEROFBUGS=42
+    STARTAT=42
   ;;
   "3" ) 
     PROJECT="Chart"
