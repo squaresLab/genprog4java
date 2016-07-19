@@ -42,58 +42,46 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayAccess;
-import org.eclipse.jdt.core.dom.ArrayCreation;
-import org.eclipse.jdt.core.dom.ArrayInitializer;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CastExpression;
-import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.NullLiteral;
-import org.eclipse.jdt.core.dom.NumberLiteral;
-import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
-import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeLiteral;
-import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import clegoues.genprog4java.rep.WeightedAtom;
+import clegoues.genprog4java.rep.JavaRepresentation;
 
 public class JavaStatement implements Comparable<JavaStatement>{
 
 	private ASTNode astNode;
 	private ClassInfo classInfo;
 
-	private int lineno;
 	private int stmtId; // unique
 	private Set<String> mustBeInScope;
 	private Set<String> namesDeclared;
@@ -128,14 +116,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	public void setASTNode(ASTNode node) {
 		this.astNode = node;
-	}
-
-	public int getLineno() {
-		return lineno;
-	}
-
-	public void setLineno(int lineno) {
-		this.lineno = lineno;
 	}
 
 	public Set<String> getRequiredNames() {
@@ -204,71 +184,52 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	public  Map<ASTNode, List<ASTNode>> getNullCheckables() {
 		if(nullCheckable == null) {
 			nullCheckable = new HashMap<ASTNode, List<ASTNode>>();
-			if(this.getASTNode() instanceof MethodInvocation 
-					|| this.getASTNode() instanceof ExpressionStatement 
-					|| this.getASTNode() instanceof ReturnStatement ){
+			this.getASTNode().accept(new ASTVisitor() {
 
-				this.getASTNode().accept(new ASTVisitor() {
-					// method to visit all Expressions relevant for this in locationNode and
-					// store their parents
-					public boolean visit(MethodInvocation node) {
-						if(node.getExpression() != null && isNullCheckable(node.getExpression())) {
-							saveDataOfTheExpression(node);
-						}
-						return true;
+				public boolean visit(MethodInvocation node) {
+					ASTNode stmtParent = statementParent(node);
+					saveDataOfTheExpression(stmtParent, node.getExpression());
+					return true;
+				}
+				public boolean visit(FieldAccess node) {
+					ASTNode stmtParent = statementParent(node);
+					saveDataOfTheExpression(stmtParent, node.getExpression());
+					return true;
+				}
+
+				public boolean visit(QualifiedName node) {
+					ASTNode stmtParent = statementParent(node);
+					saveDataOfTheExpression(stmtParent, node.getQualifier());
+					return true;
+				}
+
+				private ASTNode statementParent(ASTNode node) {
+					while(node != null && !(node instanceof Statement)) {
+						node = node.getParent();
 					}
-					public boolean visit(FieldAccess node) {
-						saveDataOfTheExpression(node);
-						return true;
-					}
+					return node;
+				}
 
-					private boolean isNullCheckable(Expression exp) {
-						if(exp instanceof Annotation ||						   
-								exp instanceof ArrayCreation ||
-								exp instanceof ArrayInitializer ||
-								exp instanceof Assignment ||
-								exp instanceof BooleanLiteral ||
-								exp instanceof CharacterLiteral ||
-								exp instanceof ClassInstanceCreation ||
-								exp instanceof ConditionalExpression ||
-								exp instanceof InstanceofExpression ||
-								exp instanceof NullLiteral ||
-								exp instanceof NumberLiteral ||
-								exp instanceof StringLiteral ||
-								exp instanceof TypeLiteral ||
-								exp instanceof ThisExpression ||
-								exp instanceof InfixExpression ||
-								exp instanceof PostfixExpression ||
-								exp instanceof PrefixExpression ||
-								exp instanceof VariableDeclarationExpression
-								)
-							return false;
-						if(exp instanceof SimpleName) {
-							SimpleName asSimpleName = (SimpleName) exp;
-							IBinding binding = asSimpleName.resolveTypeBinding();
-							if(binding == null)
-								return false;
-						}
-
-						/* this leaves:
-						    ArrayAccess
-						    CastExpression,
-						    FieldAccess,
-						    MethodInvocation,
-						    Name [SimpleName, QualifiedName]
-						    ParenthesizedExpression,
-						    SuperFieldAccess,
-						    SuperMethodInvocation
-						    ... as the only options
-						 */
-						return true;
-
+				private boolean isNullCheckable(ASTNode node) {
+					if(node == null) 
+						return false;
+					if(node instanceof SimpleName) {
+						SimpleName asSimpleName = (SimpleName) node;
+						IBinding binding = asSimpleName.resolveBinding();
+						return binding != null && binding instanceof IVariableBinding;
 					}
 
-					public void saveDataOfTheExpression(ASTNode node){
-						if(!isNullCheckable((Expression)node))
-							return;					
-						ASTNode parent = getParent(node);
+					return node instanceof ArrayAccess || node instanceof CastExpression || node instanceof ClassInstanceCreation ||
+							node instanceof SuperMethodInvocation || node instanceof  ParenthesizedExpression ||
+							node instanceof SuperFieldAccess || node instanceof SuperMethodInvocation 
+							;
+					/* maybe: ArrayCreation */
+				}
+
+				private void saveDataOfTheExpression(ASTNode parent, ASTNode node){
+					if(parent == null || parent instanceof VariableDeclarationStatement) // heuristic pseudo-hack to prevent breaking code badly
+						return;
+					if(isNullCheckable(node)) {
 						if (!nullCheckable.containsKey(parent)) {
 							List<ASTNode> thisList = new ArrayList<ASTNode>();
 							thisList.add(node);
@@ -281,9 +242,8 @@ public class JavaStatement implements Comparable<JavaStatement>{
 							nullCheckable.put(parent, thisList);
 						}
 					}
-				});
-
-			}
+				}
+			});
 		}
 		return nullCheckable;
 	}
@@ -358,81 +318,120 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	private Map<Expression,List<Expression>> extendableExpressions = null;
 
-	// FIXME: find a way to sort options by distance where sorting by distance is specified
-	// in PAR paper
-	public Map<Expression, List<Expression>> getConditionalExpressions(final JavaSemanticInfo semanticInfo) {
-		if(extendableExpressions != null) {
-			return extendableExpressions;
-		}
-		extendableExpressions = new HashMap<Expression, List<Expression>>();
+	public Map<Expression, List<Expression>> getExtendableConditionalExpressions() {
+		if(extendableExpressions == null) {
+			extendableExpressions = new HashMap<Expression, List<Expression>>();
+			final MethodDeclaration md = (MethodDeclaration) ASTUtils.getEnclosingMethod(this.getASTNode());
+			final String methodName = md.getName().getIdentifier();
+			final List<Expression> replacements = JavaSemanticInfo.getConditionalExtensionExpressions(methodName, md);
 
-		final MethodDeclaration md = (MethodDeclaration) ASTUtils.getEnclosingMethod(this.getASTNode());
-		final String methodName = md.getName().getIdentifier();
-		final List<Expression> replacements = semanticInfo.getConditionalExtensionExpressions(methodName, md);
+			if(replacements != null && !replacements.isEmpty()) {
+				final ASTMatcher matcher = new ASTMatcher();
 
-		this.getASTNode().accept(new ASTVisitor() {
+				this.getASTNode().accept(new ASTVisitor() {
 
-			private void handleCondition(Expression exp) {
-				// possible FIXME: exclude those that are already in the condition?
-				if(replacements != null) {
-					List<Expression> thisList = null;
-					if(extendableExpressions.containsKey(exp)) {
-						thisList = extendableExpressions.get(exp);
-					} else {
-						thisList = new ArrayList<Expression>();
-						extendableExpressions.put(exp, thisList);
+					public boolean visit(IfStatement node) {
+						handleCondition(node.getExpression());				
+						return true;
 					}
-					thisList.addAll(replacements);
-				}
-			}
-			public boolean visit(IfStatement node) {
-				handleCondition(node.getExpression());				
-				return true;
-			}
 
-			public boolean visit(ConditionalExpression node) {
-				handleCondition(node.getExpression());
-				return true;
+					public boolean visit(ConditionalExpression node) {
+						handleCondition(node.getExpression());
+						return true;
+					}
+
+					private void handleCondition(Expression exp) {
+						List<Expression> thisList = new LinkedList<Expression>();
+
+						List<Expression> decomposedExps = new LinkedList<Expression>();
+						CollectBooleanExpressions myVisitor = new CollectBooleanExpressions(decomposedExps);
+						exp.accept(myVisitor);
+
+						// only extend expressions with candidate subexpressions they do not already contain.
+						for(Expression replacement : replacements) {
+							for(Expression decomposedExp : decomposedExps) {
+								if(!replacement.subtreeMatch(matcher, decomposedExp)) {
+									thisList.add(replacement);
+								}
+							}
+						}
+						if(!thisList.isEmpty()) {
+							if(extendableExpressions.containsKey(exp)) {
+								extendableExpressions.get(exp).addAll(thisList);
+							} else {
+								extendableExpressions.put(exp, thisList);
+							}
+						}
+					}
+				});
 			}
-		});
+		}
 		return extendableExpressions;
-	}
 
-	// FIXME: fix Search for when we don't have enough options or edit list is empty.
+	}
 
 	private Map<Expression,List<Expression>> methodParamReplacements = null;
 
-	public Map<Expression,List<Expression>> getReplacableMethodParameters(final JavaSemanticInfo semanticInfo) {
+	public Map<Expression,List<Expression>> getReplacableMethodParameters() {
 		if(methodParamReplacements == null) {
 			methodParamReplacements = new HashMap<Expression,List<Expression>>();
-		}
-		final MethodDeclaration md = (MethodDeclaration) ASTUtils.getEnclosingMethod(this.getASTNode());
-		final String methodName = md.getName().getIdentifier();
 
-		this.getASTNode().accept(new ASTVisitor() {
-			// method to visit all Expressions relevant for this in locationNode and
-			// store their parents
-			public boolean visit(MethodInvocation node) {		
-				List<Expression> args = node.arguments();
-				for(Expression arg : args) {
-					ITypeBinding paramType = arg.resolveTypeBinding();
-					if(paramType != null) { 
-						String typName = paramType.getName();
-						List<Expression> replacements = semanticInfo.getMethodParamReplacementExpressions(methodName, md, typName);
-						List<Expression> thisList = null;
-						if(methodParamReplacements.containsKey(arg)) {
-							thisList = methodParamReplacements.get(arg);
-						} else {
-							thisList = new ArrayList<Expression>();
-							methodParamReplacements.put(arg, thisList);
+			final MethodDeclaration md = (MethodDeclaration) ASTUtils.getEnclosingMethod(this.getASTNode());
+			final String methodName = md.getName().getIdentifier();
+			final Set<String> namesInScopeHere = JavaSemanticInfo.inScopeAt(this);
+
+			this.getASTNode().accept(new ASTVisitor() {
+
+				private void handleCandidateReplacements(List<Expression> args) {
+					for(Expression arg : args) {
+						ITypeBinding paramType = arg.resolveTypeBinding();
+						if(paramType != null) { 
+							String typName = paramType.getName();
+							List<Expression> replacements = JavaSemanticInfo.getMethodParamReplacementExpressions(methodName, md, typName);
+							String argAsString = arg.toString();
+							if(!replacements.isEmpty()) {
+								List<Expression> thisList = null;
+								List<Expression> filteredReplacements = new LinkedList<Expression>();
+								for(Expression candRep : replacements) {
+									if(JavaRepresentation.semanticInfo.areNamesInScope(candRep, namesInScopeHere))
+									{
+										String candString = candRep.toString();
+										if(!candString.equals(argAsString)) {
+											filteredReplacements.add(candRep);
+										}
+									}
+								}
+								if(!filteredReplacements.isEmpty()) {
+									if(methodParamReplacements.containsKey(arg)) {
+										thisList = methodParamReplacements.get(arg);
+									} else {
+										thisList = new ArrayList<Expression>();
+										methodParamReplacements.put(arg, thisList);
+									}
+									thisList.addAll(filteredReplacements);
+								}
+							}
 						}
-						thisList.addAll(replacements);
 					}
 				}
-				return true;
 
-			}
-		});
+				@SuppressWarnings("unchecked")
+				public boolean visit(SuperMethodInvocation node) {
+					List<Expression> args = node.arguments();
+					handleCandidateReplacements(args);
+					return true;
+				}
+
+				@SuppressWarnings("unchecked")
+				public boolean visit(MethodInvocation node) {		
+					List<Expression> args = node.arguments();
+					handleCandidateReplacements(args);
+					return true;
+				}
+			});
+
+
+		}
 		return methodParamReplacements;
 	}
 
@@ -457,6 +456,12 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	private boolean compatibleMethodMatch(IMethodBinding method1, IMethodBinding method2, boolean checkShrinkable) {
 		if(method2.equals(method1) || (checkShrinkable && !method2.getName().equals(method1.getName()))) 
 			return false;
+
+		ITypeBinding returnType1 = method1.getReturnType();
+		ITypeBinding returnType2 = method2.getReturnType();
+		if(!returnType1.isAssignmentCompatible(returnType2))
+			return false;
+
 		ArrayList<ITypeBinding> paramTypes1 = getParamTypes(method1); 
 		ArrayList<ITypeBinding> paramTypes2 = getParamTypes(method2); 
 		if(checkShrinkable && (paramTypes2.size() < paramTypes1.size()) ||
@@ -470,28 +475,31 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 	private Map<ASTNode,List<List<ASTNode>>> extendableParameterMethods = null;
 
-	public Map<ASTNode, List<List<ASTNode>>> getExtendableParameterMethods(final JavaSemanticInfo semanticInfo) {
+	public Map<ASTNode, List<List<ASTNode>>> getExtendableParameterMethods() {
 		if(extendableParameterMethods == null) {
 			extendableParameterMethods = new HashMap<ASTNode,List<List<ASTNode>>>();
 
 			final MethodDeclaration md = (MethodDeclaration) ASTUtils.getEnclosingMethod(this.getASTNode());
 			final String methodName = md.getName().getIdentifier();
+			final Set<String> namesInScopeHere = JavaSemanticInfo.inScopeAt(this);
 
 			this.getASTNode().accept(new ASTVisitor() {
-				// FIXME: also supermethodinvocations?
 
-				public boolean visit(MethodInvocation node) {
-					IMethodBinding mb = node.resolveMethodBinding();
+				private void handleInvocation(ASTNode node, IMethodBinding mb) {
 					if(mb == null) {
-						return true;
+						return;
 					}
 					IMethodBinding myMethodBinding = mb.getMethodDeclaration();
+					if(myMethodBinding == null)
+						return;
 
 					ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
-					ArrayList<IMethodBinding> compatibleMethods = new ArrayList<IMethodBinding>();
+					List<IMethodBinding> compatibleMethods = new LinkedList<IMethodBinding>();
 
 					for(IMethodBinding otherMethod : classBinding.getDeclaredMethods()) {
-						if(compatibleMethodMatch(otherMethod,myMethodBinding, true)) {
+						int modifiers = otherMethod.getModifiers();
+
+						if(!Modifier.isAbstract(modifiers) && compatibleMethodMatch(otherMethod,myMethodBinding, true)) {
 							compatibleMethods.add(otherMethod);
 						}
 					}
@@ -509,15 +517,18 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						}
 						superClass = superClass.getSuperclass();
 					}
+					
 					if(compatibleMethods.size() > 0) {
 						ArrayList<ITypeBinding> myTypes = getParamTypes(myMethodBinding);
 						List<List<ASTNode>> thisNodesOptions;
+						
 						if(extendableParameterMethods.containsKey(node)) {
 							thisNodesOptions = extendableParameterMethods.get(node);
 						} else {
 							thisNodesOptions = new ArrayList<List<ASTNode>>();
 							extendableParameterMethods.put(node,thisNodesOptions);
 						}
+						
 						for(IMethodBinding compatibleMethod : compatibleMethods) {
 							ArrayList<ITypeBinding> compatibleParamTypes = getParamTypes(compatibleMethod);
 							int startIndex = myTypes.size() == 0 ? 0 : myTypes.size() - 1;
@@ -526,18 +537,33 @@ public class JavaStatement implements Comparable<JavaStatement>{
 							List<ASTNode> thisExtension = new ArrayList<ASTNode>();
 							boolean extensionDoable = true;
 							for(ITypeBinding necessaryExp : toExtend) {
-								List<Expression> replacements = semanticInfo.getMethodParamReplacementExpressions(methodName, md, necessaryExp.getName());
-								if(replacements.isEmpty()) {
+								List<Expression> replacements = JavaSemanticInfo.getMethodParamReplacementExpressions(methodName, md, necessaryExp.getName());
+								List<Expression> filteredReplacements = new LinkedList<Expression>();
+								for(Expression candRep : replacements) {
+									if(JavaRepresentation.semanticInfo.areNamesInScope(candRep, namesInScopeHere))
+										filteredReplacements.add(candRep);
+								}
+								if(filteredReplacements.isEmpty()) {
 									extensionDoable = false;
 									break;
 								}
-								thisExtension.addAll(replacements);
+								thisExtension.addAll(filteredReplacements);
 							}
 							if(extensionDoable) {
 								thisNodesOptions.add(thisExtension);
 							}
 						}
 					}
+				}
+				public boolean visit(SuperMethodInvocation node) {
+					IMethodBinding mb = node.resolveMethodBinding();
+					handleInvocation(node, mb);
+					return true;
+				}
+
+				public boolean visit(MethodInvocation node) {
+					IMethodBinding mb = node.resolveMethodBinding();
+					handleInvocation(node, mb);
 					return true;
 				}
 
@@ -722,36 +748,62 @@ if B include return statement
 			candidateMethodReplacements = new HashMap<ASTNode, List<IMethodBinding>>();
 
 			this.getASTNode().accept(new ASTVisitor() {
-				// FIXME: supermethodinvocations?
-				// FIXME: should I try stuff in superclasses too?  I'm not convinced this is the spec, double-check!
 
-				public boolean visit(MethodInvocation node) {
-					IMethodBinding myMethodBinding = node.resolveMethodBinding();
+				private void handleMethod(ASTNode node, IMethodBinding myMethodBinding) {
 					boolean addToMap = false;
-					if(myMethodBinding != null) {
-						List<IMethodBinding> possibleReps;
-						if(candidateMethodReplacements.containsKey(node)) {
-							possibleReps = candidateMethodReplacements.get(node);
-						} else {
-							possibleReps = new ArrayList<IMethodBinding> ();
-						}
-						ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
-						ITypeBinding thisReturnType = myMethodBinding.getReturnType();
+					List<IMethodBinding> possibleReps;
+					if(candidateMethodReplacements.containsKey(node)) {
+						possibleReps = candidateMethodReplacements.get(node);
+					} else {
+						possibleReps = new LinkedList<IMethodBinding> ();
+					}
+					ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
 
-						for(IMethodBinding otherMethod : classBinding.getDeclaredMethods()) {
-							ITypeBinding candReturnType = otherMethod.getReturnType();
+					for(IMethodBinding otherMethod : classBinding.getDeclaredMethods()) {
+						int modifiers = otherMethod.getModifiers();
 
-							if(candReturnType.isAssignmentCompatible(thisReturnType) &&
-									compatibleMethodMatch(myMethodBinding, otherMethod, false)) {
-								possibleReps.add(otherMethod);
-								addToMap = true;
-							}
-						}
-						if(addToMap) {
-							candidateMethodReplacements.put(node,possibleReps);
+						if(!Modifier.isAbstract(modifiers) &&
+								compatibleMethodMatch(myMethodBinding, otherMethod, false)) {
+							possibleReps.add(otherMethod);
+							addToMap = true;
 						}
 					}
 
+					ITypeBinding superClass = classBinding.getSuperclass();
+					while(superClass != null) {
+						IMethodBinding[] superMethods = superClass.getDeclaredMethods();
+
+						for(IMethodBinding superMethod : superMethods) {
+							int modifiers = superMethod.getModifiers();
+
+							if(!Modifier.isAbstract(modifiers) &&
+									(Modifier.isProtected(modifiers) || Modifier.isPublic(modifiers)) &&
+									compatibleMethodMatch(myMethodBinding, superMethod, false)) {
+								possibleReps.add(superMethod);
+								addToMap = true;
+							}
+						}
+						superClass = superClass.getSuperclass();
+					}
+
+					if(addToMap) {
+						candidateMethodReplacements.put(node,possibleReps);
+					}
+				}
+
+				public boolean visit(SuperMethodInvocation node) {
+					IMethodBinding myMethodBinding = node.resolveMethodBinding();
+					if(myMethodBinding != null) {
+						handleMethod(node, myMethodBinding);
+					}
+					return true;
+				}
+
+				public boolean visit(MethodInvocation node) {
+					IMethodBinding myMethodBinding = node.resolveMethodBinding();
+					if(myMethodBinding != null) {
+						handleMethod(node, myMethodBinding);
+					}
 					return true;
 				}
 
@@ -796,42 +848,6 @@ if B include return statement
 		}
 
 		return true;
-		/* FIXME: CLG believes that these are all now unnecessary in light of making delete "replace with empty
-		 * block", which is what it should always have been.  However, am leaving this in for the 
-		 * time being just to be safe, will remove later */
-		/*
-		//Heuristic: If it is the body of an if, while, or for, it should not be removed
-
-		if(faultyNode instanceof Block){
-			//this boolean states if the faultyNode is the body of an IfStatement
-			if (parent instanceof IfStatement
-					&& ((IfStatement)parent).getThenStatement().equals(faultyNode))
-				return false;
-			//same for all these booleans
-			if(parent instanceof WhileStatement
-					&& ((WhileStatement)parent).getBody().equals(faultyNode))
-				return false;
-			if(parent instanceof ForStatement
-					&& ((ForStatement)parent).getBody().equals(faultyNode))
-				return false;
-			if(parent instanceof EnhancedForStatement
-					&& ((EnhancedForStatement)parent).getBody().equals(faultyNode))
-				return false;
-			if(parent instanceof IfStatement && (((IfStatement)parent).getElseStatement() != null) &&
-					((IfStatement)parent).getElseStatement().equals(faultyNode))
-				return false;
-		}
-
-
-		//Heuristic: If an stmt is the only stmt in a block, don´t delete it
-		parent = blockThatContainsThisStatement();
-		if(parent instanceof Block){
-			if(((Block)parent).statements().size()==1){
-				return false;
-			}
-		}
-
-		return true;*/
 	}
 
 
@@ -879,7 +895,6 @@ if B include return statement
 
 	public void setInfo(int stmtCounter, ASTNode node) {
 		this.setStmtId(stmtCounter);
-		this.setLineno(ASTUtils.getLineNumber(node));
 		this.setASTNode(node);
 	}
 

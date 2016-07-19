@@ -34,8 +34,10 @@ TESTSUITEPERCENTAGE="$6"
 BUGSFOLDER="$7"
 
 #Add the path of defects4j so the defects4j's commands run 
-export PATH=$PATH:"$DEFECTS4JDIR"/framework/bin
-export PATH=$PATH:"$DEFECTS4JDIR"/major/bin
+export PATH=$PATH:"$DEFECTS4JDIR"/framework/bin/
+export PATH=$PATH:"$DEFECTS4JDIR"/framework/util/
+export PATH=$PATH:"$DEFECTS4JDIR"/major/bin/
+
 
 #copy these files to the source control
 
@@ -47,8 +49,10 @@ LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 BUGWD=$BUGSFOLDER"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
 
 #Checkout the buggy and fixed versions of the code (latter to make second testsuite
+#THIS IS COMMENTED BECAUSE THIS WAS ALREADY CREATED
 defects4j checkout -p $1 -v "$BUGNUMBER"b -w $BUGWD
-#defects4j checkout -p $1 -v "$BUGNUMBER"f -w $BUGSFOLDER/$LOWERCASEPACKAGE"$2"Fixed
+
+##defects4j checkout -p $1 -v "$BUGNUMBER"f -w $BUGSFOLDER/$LOWERCASEPACKAGE"$2"Fixed
 
 #Compile the both buggy and fixed code
 for dir in Buggy
@@ -124,20 +128,27 @@ case "$OPTION" in
 
 "generated" )
 
+  JAVALOCATION=$(which java)
+
   #Create the new test suite
   echo Creating new test suite...
   cd "$DEFECTS4JDIR"/framework/bin/
-  perl run_randoop.pl -p "$PROJECT" -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfRandoop/ -b 180
- 
+  #THIS IS COMMENTED BECAUSE THIS WAS ALREADY CREATED
+  #perl run_randoop.pl -p "$PROJECT" -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfRandoop/ -b 180
+  perl "$DEFECTS4JDIR"/framework/util/fix_test_suite.pl -p "$PROJECT" -d $BUGWD/"$TESTWD"/outputOfRandoop/$PROJECT/randoop/1/
+  OUTPUT=$(defects4j test -s $BUGWD/"$TESTWD"/outputOfRandoop/$PROJECT/randoop/1/"$PROJECT"-"$BUGNUMBER"f-randoop.1.tar.bz2 -w $BUGWD)
+  echo "${OUTPUT:(15)}: tests failed in $PROJECT $BUGNUMBER" >> $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites.txt
+
+
+  #PRINT=$(echo "${OUTPUT:(15)}")
+  #echo "This is what happened after the substitution: $PRINT"
+
   #Untar the generated test into the tests folder
   cd $BUGWD/"$TESTWD"/
   tar xvjf outputOfRandoop/$PROJECT/randoop/1/"$PROJECT"-"$BUGNUMBER"f-randoop.1.tar.bz2
 
-  cd $BUGWD/
-  defects4j compile
-
-  cd $BUGWD/"$TESTWD"/
   find . -maxdepth 1 -name "*.java" -exec basename \{} .java \; > $BUGWD/pos.tests
+  rm $BUGWD/"$TESTWD"/*.java
 
 ;;
 esac

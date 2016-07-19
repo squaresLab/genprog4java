@@ -8,8 +8,10 @@ import java.util.TreeSet;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 
+import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.mut.EditHole;
+import clegoues.genprog4java.mut.WeightedHole;
 
 public abstract class JavaHole implements EditHole<ASTNode> {
 	private String name;
@@ -44,11 +46,19 @@ public abstract class JavaHole implements EditHole<ASTNode> {
 		return ((Integer) this.getCodeBankId()).toString();
 	}
 
-	public static List<EditHole> makeSubExpsHoles(Map<ASTNode, List<ASTNode>> entryMap) {
+	/** note that this assumes that all returned SubExpsHoles should have equal weight
+	 * (I wrote it for the bounds/range checking, null checking, cast checking, and off-by-one templates, 
+	 * for which this assumption holds) 
+	 * @param entryMap
+	 * @return
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static List<WeightedHole> makeSubExpsHoles(Map<ASTNode, List<ASTNode>> entryMap) {
 		if(entryMap != null && entryMap.size() > 0) {
-			List<EditHole> retVal = new LinkedList<EditHole>();
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
 			for(Map.Entry<ASTNode, List<ASTNode>> entry : entryMap.entrySet()) {
-				retVal.add(new SubExpsHole(entry.getKey(), entry.getValue()));
+				SubExpsHole thisHole = new SubExpsHole(entry.getKey(), entry.getValue());
+				retVal.add(new WeightedHole(thisHole));
 			} 
 			return retVal;
 		} 
@@ -56,13 +66,26 @@ public abstract class JavaHole implements EditHole<ASTNode> {
 	}
 
 
-	public static List<EditHole> makeExpHole( Map<Expression, List<Expression>> replacableExps, JavaStatement parentStmt) {
+	/** this assumes that all returned ExpHoles should be weighted by distance 
+	 * (by line number) from the parent Expression; this is true for parameter replacer, 
+	 * expression adder, and expression replacer
+	 * @param replacableExps
+	 * @param parentStmt
+	 * @return
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static List<WeightedHole> makeExpHole( Map<Expression, List<Expression>> replacableExps, JavaStatement parentStmt) {
 		if(replacableExps != null && replacableExps.size() > 0) {
-			List<EditHole> retVal = new LinkedList<EditHole>();
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
 			for(Map.Entry<Expression, List<Expression>> exps : replacableExps.entrySet()) {
+				Expression toBeReplaced = exps.getKey();
+				int locationLineNumber = ASTUtils.getLineNumber(toBeReplaced);
 				for(Expression replacementExp : exps.getValue()) { 
-					retVal.add(new ExpHole(exps.getKey(), replacementExp, parentStmt.getStmtId()));
-
+					ExpHole thisHole = new ExpHole(toBeReplaced, replacementExp, parentStmt.getStmtId());
+					int replacementLineNumber = ASTUtils.getLineNumber(replacementExp);
+					int lineDistance = Math.abs(locationLineNumber - replacementLineNumber);
+					double weight = lineDistance != 0 ? 1.0 / lineDistance : 1.0;
+					retVal.add(new WeightedHole(thisHole, weight));
 				}
 			}
 			return retVal;

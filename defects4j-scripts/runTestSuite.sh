@@ -35,8 +35,8 @@ case "$LOWERCASEPACKAGE" in
 
 'lang')
 
-	    SRCFOLDER=target/classes
-	    TESTFOLDER=target/tests
+	    SRCFOLDER=target/classes/
+	    TESTFOLDER=target/test-classes/
         ;;
 
 'math')
@@ -45,23 +45,20 @@ case "$LOWERCASEPACKAGE" in
         ;;
 
 'time')
- 	    SRCFOLDER=target/classes
-	    TESTFOLDER=target/test-classes
+ 	    SRCFOLDER=build/classes/
+	    TESTFOLDER=build/tests/
         ;;
 esac
 
 classSourceFolder=$DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$SRCFOLDER
 classTestFolder=$DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$TESTFOLDER
 
-echo $classSourceFolder
-echo $classTestFolder
-
 JAVALOCATION=$(which java)
 
 
 TESTCOUNT=$(cat $POSTESTS | wc -l)
 
-echo "This test suite has $TESTCOUNT tests"
+echo "$TESTCOUNT tests in this test suite"
 
 COUNTER=0
 
@@ -79,8 +76,8 @@ OUTPUT=$($JAVALOCATION -cp .:$classSourceFolder:$classTestFolder:$DEFECTS4JDIR/f
 
 #echo $OUTPUT
 echo "Last 100 characters of the output:"
-echo "${OUTPUT:(-100)}"
-
+#echo "${OUTPUT:(-100)}"
+echo $OUTPUT
 
 if [[ $OUTPUT == *"OK (0 tests)"* ]]
 then

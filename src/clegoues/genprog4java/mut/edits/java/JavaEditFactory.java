@@ -39,6 +39,7 @@ import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.holes.java.ASTNodeHole;
+import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.mut.holes.java.ExpChoiceHole;
 import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaHole;
@@ -62,8 +63,8 @@ public class JavaEditFactory {
 	protected static Logger logger = Logger.getLogger(JavaEditOperation.class);
 
 	public static final ConfigurationBuilder.RegistryToken token =
-		ConfigurationBuilder.getToken();
-	
+			ConfigurationBuilder.getToken();
+
 
 	public JavaEditOperation makeEdit(Mutation edit, Location dst, EditHole sources) {
 		switch(edit) {
@@ -114,7 +115,7 @@ public class JavaEditFactory {
 		}
 
 		Localization localization = variant.getLocalization();
-		
+
 		JavaStatement potentiallyBuggyStmt = (JavaStatement) stmtId.getLocation();
 		ASTNode faultAST = ((JavaLocation) stmtId).getCodeElement();
 		Set<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
@@ -223,32 +224,43 @@ public class JavaEditFactory {
 		return retVal;
 	}
 
-	public List<EditHole> editSources(JavaRepresentation variant, Location location, Mutation editType) {
-		ArrayList<EditHole> retVal = new ArrayList<EditHole>();
+	public List<WeightedHole> editSources(JavaRepresentation variant, Location location, Mutation editType) {
 
 		if(editType == Mutation.BABBLED) {
-			retVal.add( new ASTNodeHole( // FIXME: this whole static babbler thing is not gonna fly in the long run
+			ArrayList<WeightedHole> retVal = new ArrayList<WeightedHole>();
+			ASTNodeHole newHole =  new ASTNodeHole( // FIXME: this whole static babbler thing is not gonna fly in the long run
 					// but let's deal with it for now
-				EntropyLocalization.babbler.babbleFrom(( (JavaLocation) location).getCodeElement() )
-			) );
+					EntropyLocalization.babbler.babbleFrom(( (JavaLocation) location).getCodeElement() ));
+			retVal.add(new WeightedHole(newHole));
 			return retVal;
 		}
-		
+
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 
 		switch(editType) {
-		case DELETE: retVal.add(new StatementHole((Statement) locationStmt.getASTNode(), locationStmt.getStmtId()));
-			break;
+		case DELETE:
+		{
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
+			StatementHole stmtHole = new StatementHole((Statement) locationStmt.getASTNode(), locationStmt.getStmtId());
+			retVal.add(new WeightedHole(stmtHole)); // deletion has no special weight  
+			return retVal;
+		}
 		case APPEND: 	
 		case REPLACE:
+		{
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
 			Set<WeightedAtom> fixStmts = this.scopeHelper(location, variant, editType);
 			for(WeightedAtom fixStmt : fixStmts) {
 				JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
 				ASTNode fixAST = potentialFixStmt.getASTNode();
-				retVal.add(new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId()));
+				StatementHole stmtHole = new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId());
+				retVal.add(new WeightedHole(stmtHole, fixStmt.getSecond()));
 			}
-			break;
+			return retVal;
+		}
 		case SWAP:
+		{
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
 			for (WeightedAtom item : this.scopeHelper(location, variant, editType)) {
 				int atom = item.getAtom();
 				Set<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getSecond()), variant, editType);
@@ -256,12 +268,14 @@ public class JavaEditFactory {
 					if (there.getAtom() != location.getId()) { 
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
 						ASTNode fixAST = potentialFixStmt.getASTNode();
-						retVal.add(new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId()));
+						StatementHole stmtHole = new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId());
+						retVal.add(new WeightedHole(stmtHole, there.getSecond()));
 						break;
 					}
 				}
 			}
-			break;
+			return retVal;
+		}
 		case LBOUNDSET:
 		case UBOUNDSET:
 		case RANGECHECK:
@@ -272,81 +286,111 @@ public class JavaEditFactory {
 		case CASTCHECK:
 			return JavaHole.makeSubExpsHoles(locationStmt.getCasts());
 		case FUNREP:
+		{			
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
 			Map<ASTNode, List<IMethodBinding>> methodReplacements = locationStmt.getCandidateMethodReplacements();
 			for(Map.Entry<ASTNode,List<IMethodBinding>> entry : methodReplacements.entrySet()) {
 				ASTNode replacableMethod = entry.getKey();
 				List<IMethodBinding> possibleReplacements = entry.getValue();
 				for(IMethodBinding possibleReplacement : possibleReplacements) {
-					retVal.add(new MethodInfoHole(replacableMethod, locationStmt.getStmtId(), possibleReplacement));
-				}
-			}
-			break;
-		case PARREP:
-			return JavaHole.makeExpHole(locationStmt.getReplacableMethodParameters(variant.semanticInfo), locationStmt);
-		case EXPREP:
-			return JavaHole.makeExpHole(locationStmt.getConditionalExpressions(variant.semanticInfo), locationStmt);
-
-
-		case EXPADD:
-			Map<Expression, List<Expression>> extendableExpressions = locationStmt.getConditionalExpressions(variant.semanticInfo);
-			for(Entry<Expression, List<Expression>> entries : extendableExpressions.entrySet()) { 
-				for(Expression exp : entries.getValue()) {
-					EditHole shrinkableExpHole1 = new ExpChoiceHole(entries.getKey(), exp, locationStmt.getStmtId(), 0);
-					EditHole shrinkableExpHole2 = new ExpChoiceHole( entries.getKey(), exp, locationStmt.getStmtId(), 1);
-					retVal.add(shrinkableExpHole1);
-					retVal.add(shrinkableExpHole2);
+					MethodInfoHole thisHole = new MethodInfoHole(replacableMethod, locationStmt.getStmtId(), possibleReplacement);
+					// method replacer chooses between multiple options uniformly at random
+					retVal.add(new WeightedHole(thisHole));
 				}
 			}
 			return retVal;
+		}
+		// parameter replacer, expression replacer, and expression adder and removers
+		// should be selected between by distance from location.
+		case PARREP:
+			return JavaHole.makeExpHole(locationStmt.getReplacableMethodParameters(), locationStmt);
 		case PARREM:
+		{
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
 			Map<ASTNode,List<Integer>> options = locationStmt.getShrinkableParameterMethods();
 			for(Map.Entry<ASTNode, List<Integer>> nodeOption : options.entrySet()) {
 				for(Integer option : nodeOption.getValue()) { // probably wrong
 					EditHole shrinkableParamHole = new ExpChoiceHole((Expression) nodeOption.getKey(), (Expression) nodeOption.getKey(), locationStmt.getStmtId(), option);
-					retVal.add(shrinkableParamHole);
+					// parameter removal selects uniformly at random.
+					retVal.add(new WeightedHole(shrinkableParamHole));
 				}
 			}
 			return retVal;
-		case EXPREM:
-			Map<Expression, List<Expression>> shrinkableExpressions = locationStmt.getShrinkableConditionalExpressions();
-			for(Entry<Expression, List<Expression>> entries : shrinkableExpressions.entrySet()) {
-				for(Expression exp : entries.getValue()) { 
-					EditHole shrinkableExpHole1 = new ExpChoiceHole(exp, exp, locationStmt.getStmtId(), 0);
-					EditHole shrinkableExpHole2 = new ExpChoiceHole(exp, exp, locationStmt.getStmtId(), 1);
-					retVal.add(shrinkableExpHole1);
-					retVal.add(shrinkableExpHole2);
-				}
-			}
-			return retVal;
+		}
 		case PARADD:
-			Map<ASTNode, List<List<ASTNode>>> extensionOptions = locationStmt.getExtendableParameterMethods(variant.semanticInfo);
+		{ // selection criteria not specified in Par materials, so I give uniform weight to all options
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
+			Map<ASTNode, List<List<ASTNode>>> extensionOptions = locationStmt.getExtendableParameterMethods();
 			for(Entry<ASTNode, List<List<ASTNode>>> nodeOption : extensionOptions.entrySet()) {
 				List<List<ASTNode>> paramOptions =  nodeOption.getValue();
 				LinkedList<List<ASTNode>> res = new LinkedList<List<ASTNode>>();
 				permutations(paramOptions, res, 0, new LinkedList<ASTNode>());
 				for(List<ASTNode> oneList : res) {
 					EditHole fillIn = new SubExpsHole(nodeOption.getKey(), oneList);
-					retVal.add(fillIn);
+					retVal.add(new WeightedHole(fillIn));
 				}
 			}
 			return retVal;
-		case SIZECHECK:
-			EditHole hole = new SubExpsHole(locationStmt.getASTNode(), locationStmt.getIndexedCollectionObjects());
-			retVal.add(hole);
+		}
+		case EXPREP:
+			return JavaHole.makeExpHole(locationStmt.getExtendableConditionalExpressions(), locationStmt);
+
+
+		case EXPADD:
+		{
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
+			Map<Expression, List<Expression>> extendableExpressions = locationStmt.getExtendableConditionalExpressions();
+			for(Entry<Expression, List<Expression>> entries : extendableExpressions.entrySet()) { 
+				Expression parentExp = entries.getKey();
+				int parentExpLoc = ASTUtils.getLineNumber(parentExp);
+				for(Expression exp : entries.getValue()) {
+					EditHole shrinkableExpHole1 = new ExpChoiceHole(entries.getKey(), exp, locationStmt.getStmtId(), 0);
+					EditHole shrinkableExpHole2 = new ExpChoiceHole( entries.getKey(), exp, locationStmt.getStmtId(), 1);
+					int newExpLoc = ASTUtils.getLineNumber(exp);
+					int lineDistance = Math.abs(parentExpLoc - newExpLoc);
+					double weight = lineDistance != 0 ? 1.0 / lineDistance : 1.0;
+					retVal.add(new WeightedHole(shrinkableExpHole1, weight));
+					retVal.add(new WeightedHole(shrinkableExpHole2, weight));
+				}
+			}
 			return retVal;
+		}
+		case EXPREM:
+		{
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
+			Map<Expression, List<Expression>> shrinkableExpressions = locationStmt.getShrinkableConditionalExpressions();
+			for(Entry<Expression, List<Expression>> entries : shrinkableExpressions.entrySet()) {
+				for(Expression exp : entries.getValue()) { 
+					EditHole shrinkableExpHole1 = new ExpChoiceHole(exp, exp, locationStmt.getStmtId(), 0);
+					EditHole shrinkableExpHole2 = new ExpChoiceHole(exp, exp, locationStmt.getStmtId(), 1);
+					retVal.add(new WeightedHole(shrinkableExpHole1));
+					retVal.add(new WeightedHole(shrinkableExpHole2));
+				}
+			}
+			return retVal;
+		}
+
+		case SIZECHECK:
+		{ // no choice here or objinit, so weight of 1.0
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
+			EditHole hole = new SubExpsHole(locationStmt.getASTNode(), locationStmt.getIndexedCollectionObjects());
+			retVal.add(new WeightedHole(hole));
+			return retVal;
+		}
 		case OBJINIT:
+		{
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
 			List<ASTNode> initObjects = locationStmt.getObjectsAsMethodParams();
 			for(ASTNode initObject : initObjects) {
 				// this is a slight misuse of ExpHole, which sort of "expects" that the second argument
 				// is the "replacement" code.
 				EditHole newHole = new ExpHole((Expression) initObject, null, locationStmt.getStmtId());
-				retVal.add(newHole);
+				retVal.add(new WeightedHole(newHole));
 			}
 			return retVal;
-		case BABBLED:
-			return null;
 		}
-		return retVal;
+		}
+		return null;
 	}
 
 	void permutations(List<List<ASTNode>> original, List<List<ASTNode>> result, int d, List<ASTNode> current) {
@@ -364,7 +408,7 @@ public class JavaEditFactory {
 			permutations(original, result, d + 1, copy);
 		}
 	}
-	
+
 	public boolean doesEditApply(JavaRepresentation variant, Location location, Mutation editType) {
 		if(editType == Mutation.BABBLED) {
 			return true;
@@ -372,14 +416,13 @@ public class JavaEditFactory {
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 		switch(editType) {
 		case APPEND: 
-		case REPLACE:
-			//If it is a return statement, nothing should be appended after it, since it would be dead code
 			if(!(locationStmt.getASTNode() instanceof ReturnStatement || locationStmt.getASTNode() instanceof ThrowStatement )){
 				return this.editSources(variant, location,  editType).size() > 0;
 			}
 			return false;
+		case REPLACE: 
 		case SWAP: 
-			return this.editSources(variant, location,  editType).size() > 0;
+			return locationStmt.canBeDeleted() && this.editSources(variant, location,  editType).size() > 0;
 		case DELETE: 			
 			return locationStmt.canBeDeleted();
 		case OFFBYONE:  
@@ -390,23 +433,18 @@ public class JavaEditFactory {
 		case FUNREP: 
 			return locationStmt.getCandidateMethodReplacements().size() > 0; 
 		case PARREP:
-			Map<Expression, List<Expression>> methodParams = locationStmt.getReplacableMethodParameters(variant.semanticInfo);
-			for(Entry<Expression, List<Expression>> entry : methodParams.entrySet()) {
-				if(!entry.getValue().isEmpty())
-					return true;
-			}
-			return false;
+			return locationStmt.getReplacableMethodParameters().size() > 0;
+		case PARREM:
+			return locationStmt.getShrinkableParameterMethods().size() > 0;
+		case PARADD:
+			return locationStmt.getExtendableParameterMethods().size() > 0;
 		case NULLCHECK: 
 			return locationStmt.getNullCheckables().size() > 0;
 		case CASTCHECK:
 			return locationStmt.getCasts().size() > 0;
-		case PARREM:
-			return locationStmt.getShrinkableParameterMethods().size() > 0;
-		case PARADD:
-			return locationStmt.getExtendableParameterMethods(variant.semanticInfo).size() > 0;
 		case EXPREP:
 		case EXPADD:
-			return locationStmt.getConditionalExpressions(variant.semanticInfo).size() > 0;
+			return locationStmt.getExtendableConditionalExpressions().size() > 0;
 		case EXPREM:
 			return locationStmt.getShrinkableConditionalExpressions().size() > 0;
 		case SIZECHECK:
