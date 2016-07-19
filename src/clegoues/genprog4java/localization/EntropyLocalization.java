@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Stack;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
@@ -178,10 +179,13 @@ public class EntropyLocalization extends DefaultLocalization {
 		// declaration inside a method?
 		private JavaSemanticInfo semanticInfo = null;
 		private JavaLocation location = null;
-
-		public BabbleVisitor(JavaSemanticInfo info, JavaLocation location) {
+		private Stack<String> expectedTypeStack = new Stack<String>();
+		private ASTNode parentNode = null;
+		
+		public BabbleVisitor(JavaSemanticInfo info, JavaLocation location, ASTNode parent) {
 			this.semanticInfo = info;
 			this.location = location;
+			this.parentNode = parent;
 		}
 		
 		// FIXME: hm.  Do I need to check that the thing being accessed is in
@@ -287,6 +291,12 @@ public class EntropyLocalization extends DefaultLocalization {
 			return true;
 		}
 		public boolean visit(SimpleName node) {
+			semanticInfo.
+			if(semanticInfo.isInScope(location, node)) {
+				return true;
+			} else {
+				
+			}
 			return true;
 		}
 		
@@ -334,7 +344,7 @@ public class EntropyLocalization extends DefaultLocalization {
 	public ASTNode babbleFixCode(JavaLocation location, JavaSemanticInfo semanticInfo) {
 		ASTNode element = location.getCodeElement();
 		ASTNode babbled = babbler.babbleFrom(element);
-		babbled.accept(new BabbleVisitor(semanticInfo, location));
+		babbled.accept(new BabbleVisitor(semanticInfo, location, element.getParent()));
 		return babbled; 
 	}
 
