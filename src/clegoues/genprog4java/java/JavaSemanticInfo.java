@@ -3,6 +3,7 @@ package clegoues.genprog4java.java;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -83,7 +84,7 @@ public class JavaSemanticInfo {
 	 *  @return list of expressions, from within this method scope, that can be swapped in for the
 	 *  given desired expression type
 	 */
-	public List<Expression> getMethodParamReplacementExpressions(final String methodName, MethodDeclaration md, String desiredType) {
+	public static List<Expression> getMethodParamReplacementExpressions(final String methodName, MethodDeclaration md, String desiredType) {
 		Map<String,List<Expression>> typeToExpressions = null;
 		if(methodParamExpressionsInScope == null) {
 			methodParamExpressionsInScope = new HashMap<String, Map<String,List<Expression>>>();
@@ -124,87 +125,27 @@ public class JavaSemanticInfo {
 
 	private static Map<String, List<Expression>> conditionExtensionsInScope = null;
 
-	public List<Expression> getConditionalExtensionExpressions(String methodName, MethodDeclaration md) {
+	
+	public static List<Expression> getConditionalExtensionExpressions(String methodName, MethodDeclaration md) {
 		if(conditionExtensionsInScope == null) {
 			conditionExtensionsInScope = new HashMap<String, List<Expression>>();
 		}
 		if(conditionExtensionsInScope.containsKey(methodName)) {
 			return conditionExtensionsInScope.get(methodName);
 		} 
-		List<Expression> fullConditionsInScope = this.getConditionalReplacementExpressions(methodName, md);
-		final List<Expression> expressionsInScope = new ArrayList<Expression>(); // possible FIXME: do I start with the list above?  I think it will auto-populate, right?
+		List<Expression> fullConditionsInScope = JavaSemanticInfo.getConditionalReplacementExpressions(methodName, md);
+		List<Expression> expressionsInScope = new LinkedList<Expression>();
 		conditionExtensionsInScope.put(methodName, expressionsInScope);
+		CollectBooleanExpressions myVisitor = new CollectBooleanExpressions(expressionsInScope); 
 		for(ASTNode cond : fullConditionsInScope) {
-			cond.accept(new ASTVisitor() {
-				private void tryAdd(Expression node) {
-					ITypeBinding tb = node.resolveTypeBinding();
-					if(tb != null) {
-						if(tb.getName().equals("boolean")) {
-							expressionsInScope.add(node);
-						}
-					}
-				}
-				public boolean visit(PrefixExpression node) {
-					if(node.getOperator() == PrefixExpression.Operator.NOT) {
-						expressionsInScope.add(node);
-					}
-					return true;
-				}
-				public boolean visit(ConditionalExpression node) {
-					expressionsInScope.add(node);
-					return true;
-				}
-				public boolean visit(FieldAccess node) {
-					tryAdd(node);
-					return true;
-				}
-				public boolean visit(InfixExpression node) {
-					InfixExpression.Operator op = node.getOperator();
-					if(op ==  InfixExpression.Operator.LESS ||   
-							op == InfixExpression.Operator.GREATER ||
-							op == InfixExpression.Operator.LESS_EQUALS ||
-							op == InfixExpression.Operator.GREATER_EQUALS ||
-							op == InfixExpression.Operator.EQUALS || 
-							op == InfixExpression.Operator.NOT_EQUALS ||
-							op == InfixExpression.Operator.CONDITIONAL_AND ||
-							op == InfixExpression.Operator.CONDITIONAL_OR) {
-						expressionsInScope.add(node);
-					}
-					return true;
-				} 
-				public boolean visit(InstanceofExpression node) {
-					expressionsInScope.add(node);
-					return true;
-				} 
-				public boolean visit(MethodInvocation node) {
-					tryAdd(node);
-					return true;
-				} 
-				public boolean visit(SimpleName node) {
-					tryAdd(node);
-					return true;
-				} 
-				public boolean visit(QualifiedName node) {
-					tryAdd(node);
-					return true;
-				}
-				public boolean visit(SuperFieldAccess node) {
-					tryAdd(node);
-					return true;
-				}
-				public boolean visit(SuperMethodInvocation node) {
-					tryAdd(node);
-					return true;
-				}
-
-			});
+			cond.accept(myVisitor);
 		}
 		return expressionsInScope;
 	}
 
 	private static Map<String, List<Expression>> conditionalExpressionsInScope = null;
 
-	public List<Expression> getConditionalReplacementExpressions(final String methodName, MethodDeclaration md) {
+	public static List<Expression> getConditionalReplacementExpressions(final String methodName, MethodDeclaration md) {
 		if(conditionalExpressionsInScope == null) {
 			conditionalExpressionsInScope = new HashMap<String,List<Expression>>();
 		}
@@ -222,7 +163,6 @@ public class JavaSemanticInfo {
 					expressionsInScope.add(node.getExpression());
 					return true;
 				}
-
 			});
 			return expressionsInScope;
 		}
@@ -243,6 +183,30 @@ public class JavaSemanticInfo {
 		JavaSemanticInfo.methodScopeMap.put(s.getStmtId(),scope);
 	}
 
+	public static Set<String> inScopeAt(JavaStatement locationStmt) {
+		Set<String> classScope = new HashSet<String>(classScopeMap.get(locationStmt.getStmtId()));
+		Set<String> methodScope = methodScopeMap.get(locationStmt.getStmtId());
+		classScope.addAll(methodScope);
+		return classScope;
+	}
+	
+	public boolean areNamesInScope(ASTNode node, Set<String> names) {
+		final Set<String> namesUsed = new HashSet<String>();
+		node.accept(new ASTVisitor() {
+			@Override
+			public boolean visit(SimpleName node) {
+				namesUsed.add(node.getIdentifier());
+				return true;
+			}
+		});
+		for(String used : namesUsed) {
+			if(!names.contains(used)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	public boolean scopeCheckOK(JavaStatement potentiallyBuggyStmt, JavaStatement potentialFixStmt) {
 		// I *believe* this is just variable names and doesn't check required
 		// types, which are also collected

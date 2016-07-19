@@ -4,7 +4,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -29,6 +31,15 @@ import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
 public class NullCheckOperation extends JavaEditOperation {
 
+	// for future reference: I *think* that the technical Par description would
+	// have us add a null check for every reference within a location, whereas we 
+	// pick a sub-location parent and check everything within it.
+	// this increases our fault space a bit because every location actually
+	// consists of multiple internal locations
+	// however, it decreases the number of variants that don't compile because
+	// we don't try to null check dereferences that apply to
+	// variables declared *within* a location.
+	// I think the tradeoff is worth it, and besides, this is *much* easier to implement
 	public NullCheckOperation(JavaLocation location, EditHole source) {
 		super(location, source);
 	}
@@ -36,42 +47,29 @@ public class NullCheckOperation extends JavaEditOperation {
 	@Override
 	public void edit(final ASTRewrite rewriter) {
 		ASTNode locationNode =  ((JavaLocation) this.getLocation()).getCodeElement();
+		AST myAST = rewriter.getAST();
+		
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
 		ASTNode parent = thisHole.getHoleParent();
 		List<ASTNode> expressionsFromThisParent = thisHole.getSubExps();
 
 		Collections.reverse(expressionsFromThisParent);
-		//Create if before the error
-		IfStatement ifstmt = rewriter.getAST().newIfStatement();
+
+		// Create if before the error
+		IfStatement ifstmt = myAST.newIfStatement();
 		InfixExpression everythingInTheCondition = null; 
 
 		// for each of the expressions that can be null
 		for(ASTNode expressionToCheckIfNull : expressionsFromThisParent){
-			InfixExpression expression = ifstmt.getAST().newInfixExpression();
-			if(expressionToCheckIfNull instanceof MethodInvocation) {
-				ASTNode exp = ((MethodInvocation) expressionToCheckIfNull).getExpression();
-				Expression newExpression = (Expression) rewriter.createCopyTarget(((MethodInvocation) expressionToCheckIfNull).getExpression());
-				expression.setLeftOperand(newExpression);
-			}
-			if(expressionToCheckIfNull instanceof SimpleName) {
-				String name = ((SimpleName) expressionToCheckIfNull).getIdentifier();
-				Expression newSimpleName = ifstmt.getAST().newSimpleName(name);
-				expression.setLeftOperand(newSimpleName);
-			}
-			if(expressionToCheckIfNull instanceof FieldAccess) {
-				Expression newExpression = (Expression) rewriter.createCopyTarget(((FieldAccess) expressionToCheckIfNull).getExpression());
-
-				expression.setLeftOperand(newExpression);
-			}
-			if(expressionToCheckIfNull instanceof QualifiedName)
-				expression.setLeftOperand((Expression) rewriter.createCopyTarget(((QualifiedName) expressionToCheckIfNull).getName()));
-
+			InfixExpression expression = myAST.newInfixExpression();
+			Expression newExpression = (Expression) rewriter.createCopyTarget(expressionToCheckIfNull);
+			expression.setLeftOperand(newExpression);
 			expression.setOperator(Operator.NOT_EQUALS);
-			expression.setRightOperand(expressionToCheckIfNull.getAST().newNullLiteral());
-			if(everythingInTheCondition == null)
+			expression.setRightOperand(myAST.newNullLiteral());
+			if(everythingInTheCondition == null) {
 				everythingInTheCondition = expression;
-			else {
-				InfixExpression newInfix = ifstmt.getAST().newInfixExpression();
+			} else {
+				InfixExpression newInfix = myAST.newInfixExpression();
 				newInfix.setOperator(Operator.CONDITIONAL_AND);
 				newInfix.setLeftOperand(everythingInTheCondition);
 				newInfix.setRightOperand(expression);
@@ -79,27 +77,35 @@ public class NullCheckOperation extends JavaEditOperation {
 			}
 		}
 		if(parent instanceof ReturnStatement) {
+			ParenthesizedExpression parenthesized = myAST.newParenthesizedExpression();
+			parenthesized.setExpression(everythingInTheCondition);
+			
 			PrefixExpression prefix = ifstmt.getAST().newPrefixExpression();
 			prefix.setOperator(PrefixExpression.Operator.NOT);
-			ParenthesizedExpression parenthesized = rewriter.getAST().newParenthesizedExpression();
-			parenthesized.setExpression(everythingInTheCondition);
 			prefix.setOperand(parenthesized);
+			
 			ifstmt.setExpression(prefix);
-			ASTNode elseStmt = (Statement) parent;
-			elseStmt = ASTNode.copySubtree(parent.getAST(), elseStmt); 
-			ifstmt.setElseStatement((Statement) elseStmt); 
-			ReturnStatement newReturn = ifstmt.getAST().newReturnStatement();
+			
+			ReturnStatement newReturn = myAST.newReturnStatement();
 			// return a default value.
-			ASTNode newValue = ASTUtils.getDefaultReturn(locationNode, rewriter.getAST());
+			ASTNode newValue = ASTUtils.getDefaultReturn(locationNode, myAST);
 			if(newValue != null) 
 				newReturn.setExpression((Expression) newValue);
-			ifstmt.setThenStatement((Statement) newReturn);
+			Block newThenStatement = myAST.newBlock();
+			newThenStatement.statements().add(newReturn);
+			ifstmt.setThenStatement(newThenStatement);
+			
+			Block elseStmt = myAST.newBlock();
+			elseStmt.statements().add(rewriter.createCopyTarget(parent));
+			ifstmt.setElseStatement(elseStmt); 
+		
 		} else {
 			ifstmt.setExpression(everythingInTheCondition);
-			ASTNode thenStmt = (Statement) parent;
-			thenStmt = ASTNode.copySubtree(rewriter.getAST(), thenStmt);
-			ifstmt.setThenStatement((Statement) thenStmt);
+			Block newThenStatement = rewriter.getAST().newBlock();
+			newThenStatement.statements().add(rewriter.createCopyTarget(parent));
+			ifstmt.setThenStatement(newThenStatement);
 		}
+		
 		rewriter.replace(parent, ifstmt, null);
 
 	}

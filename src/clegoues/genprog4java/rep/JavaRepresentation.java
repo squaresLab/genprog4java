@@ -643,35 +643,9 @@ CachingRepresentation<JavaEditOperation> {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<WeightedHole> editSources(Location location, Mutation editType) {
-		List<EditHole> holes = editFactory.editSources(this,location,editType);
-		List<WeightedHole> retVal = new ArrayList<WeightedHole>();
-		for(EditHole hole : holes) {
-			// possible FIXME for later: weighting options equally for the time being.  One day
-			// maybe we'll do something smarter...
-			retVal.add(new WeightedHole(hole));
-		}
-		return retVal;
+		return editFactory.editSources(this,location,editType);
 	}
 
-
-	@SuppressWarnings("rawtypes")
-	@Override
-	protected void printDebugInfo() {
-		ArrayList<Location> buggyLocations = localization.getFaultLocalization();
-		for (Location location : buggyLocations) {
-			int atomid = ((JavaStatement) location.getLocation()).getStmtId(); 
-			JavaStatement stmt = sourceInfo.getBase().get(atomid);
-			ASTNode actualStmt = stmt.getASTNode();
-			String stmtStr = actualStmt.toString();
-			logger.debug("statement " + atomid + " at line " + stmt.getLineno()
-			+ ": " + stmtStr);
-		
-			logger.debug("\t Required Names:");
-			for (String scope : stmt.getRequiredNames()) {
-				logger.debug("\t\t" + scope);
-			}
-		}
-	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -727,5 +701,11 @@ CachingRepresentation<JavaEditOperation> {
 	@Override
 	public Map<ClassInfo, String> getOriginalSource() {
 		return sourceInfo.getOriginalSource();
+	}
+
+	@Override
+	protected void printDebugInfo() {
+		// TODO Auto-generated method stub
+		
 	}
 }
