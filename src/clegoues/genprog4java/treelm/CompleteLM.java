@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.function.BiConsumer;
 import java.util.logging.Logger;
 
 import com.google.common.collect.HashMultiset;
@@ -15,6 +16,7 @@ import codemining.ast.TreeNode;
 import codemining.lm.tsg.FormattedTSGrammar;
 import codemining.lm.tsg.TSGNode;
 import codemining.lm.tsg.TSGrammar;
+import codemining.lm.tsg.samplers.ClassicTsgPosteriorComputer;
 import codemining.math.random.SampleUtils;
 
 public class CompleteLM  extends FormattedTSGrammar {
@@ -29,6 +31,9 @@ public class CompleteLM  extends FormattedTSGrammar {
 		SampleUtils.setRandomizer(Configuration.randomizer);
 		internalMap = new HashMap< TSGNode, Multiset< TreeNode< TSGNode > > >();
 		modified = false;
+		setPosteriorComputer( new ClassicTsgPosteriorComputer(
+			this, (ClassicTsgPosteriorComputer) trained.getPosteriorComputer()
+		) );
 		addAll( trained );
 	}
 	
@@ -59,6 +64,7 @@ public class CompleteLM  extends FormattedTSGrammar {
 				}
 			}
 		}
+		modified = false;
 	}
 
 	@Override
@@ -89,20 +95,14 @@ public class CompleteLM  extends FormattedTSGrammar {
 	public double computeRulePosteriorLog2Probability(
 		TreeNode< TSGNode > tree
 	) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException(
-			"probability not implemented yet"
-		);
+		return posteriorComputer.computeLog2PosteriorProbabilityOfRule( tree, false );
 	}
 
 	@Override
 	public double computeRulePosteriorLog2Probability(
 		TreeNode< TSGNode > tree, boolean remove
 	) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException(
-			"probability not implemented yet"
-		);
+		return posteriorComputer.computeLog2PosteriorProbabilityOfRule( tree, remove );
 	}
 
 	@Override
@@ -117,24 +117,50 @@ public class CompleteLM  extends FormattedTSGrammar {
 			return 0;
 		return productions.count( root );
 	}
+	
+	@Override
+	public int countTreesWithRoot( TSGNode root ) {
+		rebuildInternalMap();
+		Multiset< TreeNode< TSGNode > > productions;
+		if ( root.isRoot )
+			productions = grammar.get( root );
+		else
+			productions = internalMap.get( root );
+		if ( productions == null )
+			return 0;
+		return productions.size();
+	}
 
 	@Override
 	public TreeNode< TSGNode > generateRandom( TreeNode< TSGNode > root ) {
 		rebuildInternalMap();
 		
-		Queue<TreeNode<TSGNode>> pending = new LinkedList<TreeNode<TSGNode>>();
-		pending.add( root );
-		while ( !pending.isEmpty() ) {
-			TreeNode< TSGNode > node = pending.poll();
-			if ( node.getData().isRoot ) {
-				super.generateRandom( node );
-			} else {
-				boolean isNonTerminal = node.nProperties() > 0;
-				if ( node.isLeaf() && isNonTerminal ) {
-					Multiset< TreeNode< TSGNode > > productions =
-						internalMap.get( node.getData() );
-					if ( productions == null )
-						continue;
+		Multiset< TreeNode< TSGNode > > productions;
+
+		// We don't know if we're starting at the root of a grammar production
+		// or not. So create a new node (so we can change its isRoot status) and
+		// check for productions with both root and non-root.
+		
+		root = TreeNode.create(
+			new TSGNode( root.getData().nodeKey ), root.nProperties()
+		);
+		productions = internalMap.getOrDefault(
+			root.getData(), HashMultiset.< TreeNode< TSGNode > >create()
+		);
+		root.getData().isRoot = true;
+		productions.addAll( internalMap.getOrDefault(
+			root, HashMultiset.< TreeNode< TSGNode > >create()
+		) );
+		
+		final Queue<TreeNode<TSGNode>> pending = new LinkedList<TreeNode<TSGNode>>();
+
+		BiConsumer< TreeNode<TSGNode>, Multiset<TreeNode<TSGNode>> > select =
+			new BiConsumer< TreeNode<TSGNode>, Multiset<TreeNode<TSGNode>> >() {
+				@Override
+				public void accept(
+					TreeNode< TSGNode > node,
+					Multiset< TreeNode< TSGNode > > productions
+				) {
 					TreeNode< TSGNode > selected =
 						SampleUtils.getRandomElement( productions );
 					selected = selected.deepCopy();
@@ -146,6 +172,25 @@ public class CompleteLM  extends FormattedTSGrammar {
 							pending.add( child );
 						}
 					}
+				}
+			};
+		select.accept( root, productions );
+
+
+		while ( !pending.isEmpty() ) {
+			TreeNode< TSGNode > node = pending.poll();
+			if ( node.getData().isRoot ) {
+				super.generateRandom( node );
+			} else {
+				boolean isNonTerminal = node.nProperties() > 0;
+				if ( node.isLeaf() && isNonTerminal ) {
+					if ( node.getData().isRoot )
+						productions = grammar.get( node.getData() );
+					else
+						productions = internalMap.get( node.getData() );
+					if ( productions == null )
+						continue;
+					select.accept( node, productions );
 				} else if ( !node.isLeaf() ){
 					for ( int i = 0; i < node.getChildrenByProperty().size(); ++i ) {
 						for ( TreeNode< TSGNode > child
@@ -177,7 +222,7 @@ public class CompleteLM  extends FormattedTSGrammar {
 		modified = true;
 		super.prune( threshold );
 	}
-
+	
 	private final Map< TSGNode, Multiset< TreeNode< TSGNode > > > internalMap;
 	private boolean modified;
 }
