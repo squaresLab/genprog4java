@@ -141,16 +141,13 @@ public class CompleteLM  extends FormattedTSGrammar {
 		// or not. So create a new node (so we can change its isRoot status) and
 		// check for productions with both root and non-root.
 		
-		root = TreeNode.create(
-			new TSGNode( root.getData().nodeKey ), root.nProperties()
-		);
+		TSGNode data = new TSGNode( root.getData().nodeKey );
 		productions = internalMap.getOrDefault(
-			root.getData(), HashMultiset.< TreeNode< TSGNode > >create()
+			data, HashMultiset.< TreeNode< TSGNode > >create()
 		);
-		root.getData().isRoot = true;
-		productions.addAll( internalMap.getOrDefault(
-			root, HashMultiset.< TreeNode< TSGNode > >create()
-		) );
+		data.isRoot = true;
+		if ( grammar.containsKey( data ) )
+			productions.addAll( grammar.get( data ) );
 		
 		final Queue<TreeNode<TSGNode>> pending = new LinkedList<TreeNode<TSGNode>>();
 
@@ -174,9 +171,8 @@ public class CompleteLM  extends FormattedTSGrammar {
 					}
 				}
 			};
+
 		select.accept( root, productions );
-
-
 		while ( !pending.isEmpty() ) {
 			TreeNode< TSGNode > node = pending.poll();
 			if ( node.getData().isRoot ) {
