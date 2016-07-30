@@ -15,7 +15,7 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 	
 	protected static int maxVariants = ConfigurationBuilder.of( INT )
 			.withVarName( "maxVariants" )
-			.withDefault( "10" )
+			.withDefault( "400" )
 			.withHelp( "maximum number of variants to consider" )
 			.inGroup( "Search Parameters" )
 			.build();
