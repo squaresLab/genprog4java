@@ -66,6 +66,12 @@ public class JavaEditFactory {
 			ConfigurationBuilder.getToken();
 
 
+	private EntropyLocalization localization; 
+	
+	public void setEntropyLocalization(EntropyLocalization localization) {
+		this.localization = localization;
+	}
+	
 	public JavaEditOperation makeEdit(Mutation edit, Location dst, EditHole sources) {
 		switch(edit) {
 		case DELETE: 
@@ -228,9 +234,8 @@ public class JavaEditFactory {
 
 		if(editType == Mutation.BABBLED) {
 			ArrayList<WeightedHole> retVal = new ArrayList<WeightedHole>();
-			ASTNodeHole newHole =  new ASTNodeHole( // FIXME: this whole static babbler thing is not gonna fly in the long run
-					// but let's deal with it for now
-					EntropyLocalization.babbler.babbleFrom(( (JavaLocation) location).getCodeElement() ));
+			ASTNode node = localization.babbleFixCode((JavaLocation) location, variant.semanticInfo);
+			ASTNodeHole newHole =  new ASTNodeHole(node);
 			retVal.add(new WeightedHole(newHole));
 			return retVal;
 		}

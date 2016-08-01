@@ -5,7 +5,9 @@ import static clegoues.util.ConfigurationBuilder.STRING;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
 
@@ -181,11 +183,16 @@ public class EntropyLocalization extends DefaultLocalization {
 		private JavaLocation location = null;
 		private Stack<String> expectedTypeStack = new Stack<String>();
 		private ASTNode parentNode = null;
+		private Set<String> namesInScope = null;
 		
 		public BabbleVisitor(JavaSemanticInfo info, JavaLocation location, ASTNode parent) {
 			this.semanticInfo = info;
 			this.location = location;
 			this.parentNode = parent;
+			Set<String> classScope = JavaSemanticInfo.classScopeMap.get(location.getId());
+			Set<String> methodScope = JavaSemanticInfo.methodScopeMap.get(location.getId());
+			namesInScope = new HashSet<String>(methodScope);
+			namesInScope.addAll(classScope);
 		}
 		
 		// FIXME: hm.  Do I need to check that the thing being accessed is in
@@ -291,11 +298,11 @@ public class EntropyLocalization extends DefaultLocalization {
 			return true;
 		}
 		public boolean visit(SimpleName node) {
-			semanticInfo.
-			if(semanticInfo.isInScope(location, node)) {
-				return true;
-			} else {
-				
+			if(!namesInScope.contains(node.getIdentifier())) {
+				ArrayList<String> allNames = new ArrayList<String>(namesInScope);
+				Collections.shuffle(allNames,Configuration.randomizer);
+				String picked = allNames.get(0);
+				node.setIdentifier(picked);
 			}
 			return true;
 		}
@@ -344,7 +351,9 @@ public class EntropyLocalization extends DefaultLocalization {
 	public ASTNode babbleFixCode(JavaLocation location, JavaSemanticInfo semanticInfo) {
 		ASTNode element = location.getCodeElement();
 		ASTNode babbled = babbler.babbleFrom(element);
+		System.err.println("babbled:" + babbled.toString());
 		babbled.accept(new BabbleVisitor(semanticInfo, location, element.getParent()));
+		System.err.println("replaced:" + babbled.toString());
 		return babbled; 
 	}
 
