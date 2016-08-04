@@ -282,8 +282,9 @@ public abstract class Search<G extends EditOperation> {
 				}else{
 					foundMutationThatCanApplyToAtom = true;
 				}
-				//choose a mutation at random
-				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(new ArrayList(availableMutations));
+				//choose a mutation 
+				ArrayList availableMutationsAL = rescaleMutations(availableMutations);
+				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(availableMutationsAL);
 				Mutation mut = chosenMutation.getFirst();
 				List<WeightedHole> allowed = variant.editSources(location, mut);
 				allowed = rescaleAllowed(mut,allowed, variant,location.getId());
@@ -294,12 +295,21 @@ public abstract class Search<G extends EditOperation> {
 			}
 		}
 	}
+	
+	private ArrayList rescaleMutations(Set<WeightedMutation> availableMutations) {
+		if(Search.model.equalsIgnoreCase("default")){
+			return new ArrayList(availableMutations);
+		}else if(Search.model.equalsIgnoreCase("probabilistic")){
+			return rm.rescaleMutationsBasedOnModel(new ArrayList(availableMutations));
+		}
+		return null;
+	}
 
 	private List rescaleAllowed(Mutation mut, List<WeightedHole> allowed, Representation variant, int stmtid) {
 		if(mut != Mutation.REPLACE || Search.model.equalsIgnoreCase("default")){
 			return allowed;
 		}else if(Search.model.equalsIgnoreCase("probabilistic")){
-			return rm.rescaleBasedOnModel(new ArrayList(allowed), variant, stmtid);
+			return rm.rescaleReplacementsBasedOnModel(new ArrayList(allowed), variant, stmtid);
 		}
 		return null;
 	}
