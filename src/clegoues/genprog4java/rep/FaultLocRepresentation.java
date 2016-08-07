@@ -74,8 +74,6 @@ import clegoues.util.Pair;
 @SuppressWarnings("rawtypes")
 public abstract class FaultLocRepresentation<G extends EditOperation> extends
 CachingRepresentation<G> {
-
-	private static final long serialVersionUID = 5565985345093963559L;
 	
 	protected Logger logger = Logger.getLogger(FaultLocRepresentation.class);
 	

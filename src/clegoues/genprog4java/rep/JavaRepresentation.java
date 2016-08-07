@@ -139,8 +139,6 @@ import clegoues.util.Pair;
 public class JavaRepresentation extends
 FaultLocRepresentation<JavaEditOperation> {
 
-	private static final long serialVersionUID = 5869549375148860322L;
-
 	protected Logger logger = Logger.getLogger(JavaRepresentation.class);
 
 	private JavaEditFactory editFactory = new JavaEditFactory();

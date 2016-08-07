@@ -33,6 +33,8 @@
 
 package clegoues.genprog4java.fitness;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -45,8 +47,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * @author clegoues
  *
  */
-public class TestCase implements Comparable<TestCase> {
-	private TestType posOrNeg;
+public class TestCase implements Comparable<TestCase>, Serializable {
+
+	private static final long serialVersionUID = 6781231573789815806L;
+	private final TestType posOrNeg;
 	private final String testName;
 	private int numPatchesKilled = 0;
 
@@ -55,7 +59,7 @@ public class TestCase implements Comparable<TestCase> {
 	}
 	
 	public TestCase(TestType t, String name) {
-		this.setPosOrNeg(t);
+		this.posOrNeg = t;
 		this.testName = name; 
 		this.numPatchesKilled = 0;
 	}
@@ -73,9 +77,6 @@ public class TestCase implements Comparable<TestCase> {
 
 	public TestType getPosOrNeg() {
 		return posOrNeg;
-	}
-	public void setPosOrNeg(TestType posOrNeg) {
-		this.posOrNeg = posOrNeg;
 	}
 
 	@Override
