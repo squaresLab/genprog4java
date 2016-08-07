@@ -33,6 +33,7 @@
 
 package clegoues.genprog4java.fitness;
 
+import static clegoues.util.ConfigurationBuilder.BOOLEAN;
 import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
@@ -116,7 +117,11 @@ public class Fitness {
 			.withHelp( "file containing names of negative test classes" )
 			.inGroup( "Fitness Parameters" )
 			.build();
-
+	public static Boolean clearTestCache = ConfigurationBuilder.of(BOOLEAN ) 
+			.withDefault("false")
+			.withHelp("clear the test cache")
+			.inGroup("Fitness Parameters")
+			.build();
 
 	/** this is necessary because of the generational sample strategy, which 
 	 *  resamples at generational boundaries. 
@@ -136,6 +141,7 @@ public class Fitness {
 	private static int numPositiveTests;
 	private static int numNegativeTests;
 
+	
 	// persistent test cache
 	private static HashMap<Integer, HashMap<TestCase, FitnessValue>> fitnessCache = new HashMap<Integer, HashMap<TestCase, FitnessValue>>();
 
@@ -156,7 +162,7 @@ public class Fitness {
 	public static void deserializeTestCache(){
 		File fl = new File("testcache.ser");
 		HashMap<Integer, HashMap<TestCase, FitnessValue>> testCache = null;
-		if(fl.isFile()){
+		if(fl.isFile() && !clearTestCache){
 			try
 			{
 				FileInputStream fis = new FileInputStream("testcache.ser");
@@ -173,7 +179,7 @@ public class Fitness {
 				c.printStackTrace();
 			}
 			System.out.println("Deserialized fitnessCache HashMap");			
-		}else {
+		} else {
 			testCache = new HashMap<Integer, HashMap<TestCase, FitnessValue>>();
 		}
 		System.out.println("hashmap is = " + testCache.entrySet().size() + "  " + testCache.toString());
