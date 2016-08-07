@@ -167,7 +167,7 @@ Representation<G> {
 				logger.info("false (0)\n");
 				logger.error("cacheRep: sanity: "
 						+ CachingRepresentation.sanityFilename
-						+ " failed positive test " + posTest.toString());
+						+ " failed positive test " + posTest.getTestName());
 				if (!skipFailedSanity) {
 					return false;
 				}
@@ -220,14 +220,14 @@ Representation<G> {
 				this.setFitness(0.0);
 				logger.info(this.getName() + " at " + newName + " fails to compile\n");
 				FitnessValue compileFail = new FitnessValue();
-				compileFail.setTestClassName(test.toString());
+				compileFail.setTestClassName(test.getTestName());
 				compileFail.setAllPassed(false);
 				this.setFitness(0.0);
 				return compileFail;
 			}
 		} else if (!this.alreadyCompiled.getFirst()) {
 			FitnessValue compileFail = new FitnessValue();
-			compileFail.setTestClassName(test.toString());
+			compileFail.setTestClassName(test.getTestName());
 			compileFail.setAllPassed(false);
 			this.setFitness(0.0);
 			return compileFail;
@@ -334,7 +334,7 @@ Representation<G> {
 			String output = out.toString();
 			out.reset();
 			posFit = CachingRepresentation.parseTestResults(
-					thisTest.toString(), output);
+					thisTest.getTestName(), output);
 
 		} catch (ExecuteException exception) {
 			posFit.setAllPassed(false);
