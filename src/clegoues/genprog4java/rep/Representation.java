@@ -49,6 +49,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.Search.GiveUpException;
@@ -213,7 +214,20 @@ Comparable<Representation<G>> {
 	public abstract Set<WeightedMutation> availableMutations(
 			Location faultyLocation);
 
-
+	protected int myHashCode = -1;
+	@Override
+	public int hashCode() {
+		if(myHashCode < 0) {
+		HashCodeBuilder builder = new HashCodeBuilder();
+		List<Pair<ClassInfo, String>> sourceBuffers = computeSourceBuffers();
+		for (Pair<ClassInfo, String> ele : sourceBuffers) {
+			builder.append(ele.getSecond());
+		}
+		myHashCode = builder.toHashCode();
+		}
+		return myHashCode;
+	}
+	
 	public static void configure(Properties prop) {
 	}
 	

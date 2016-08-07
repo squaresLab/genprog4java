@@ -381,20 +381,6 @@ Representation<G> {
 
 	protected abstract boolean internalCompile(String sourceName, String exeName);
 
-	private int myHashCode = -1;
-	@Override
-	public int hashCode() {
-		if(myHashCode < 0) {
-		HashCodeBuilder builder = new HashCodeBuilder();
-		List<Pair<ClassInfo, String>> sourceBuffers = computeSourceBuffers();
-		for (Pair<ClassInfo, String> ele : sourceBuffers) {
-			builder.append(ele.getSecond());
-		}
-		myHashCode = builder.toHashCode();
-		}
-		return myHashCode;
-	}
-
 	/*
 	 * indicates that cached information based on our AST structure is no longer
 	 * valid
