@@ -40,7 +40,7 @@ public class LocalizationRepresentation extends JavaRepresentation {
 			}
 			TreeSet<Integer> thisTestResult = this.getCoverageInfo();
 			atoms.addAll(thisTestResult);
-			testAtomMap.put(test.toString(), thisTestResult);
+			testAtomMap.put(test.toString(), thisTestResult); // consider making this map from testcases to results
 		}
 
 		BufferedWriter out = new BufferedWriter(new FileWriter(new File(

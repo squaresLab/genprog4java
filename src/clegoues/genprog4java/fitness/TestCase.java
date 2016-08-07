@@ -33,6 +33,9 @@
 
 package clegoues.genprog4java.fitness;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 /** 
  * Tracks basic information about a test case; primarily useful
  * for when we're using a test model, otherwise we could probably
@@ -44,7 +47,7 @@ package clegoues.genprog4java.fitness;
  */
 public class TestCase implements Comparable<TestCase> {
 	private TestType posOrNeg;
-	private String testName = null;
+	private final String testName;
 	private int numPatchesKilled = 0;
 
 	public enum TestType {
@@ -56,6 +59,10 @@ public class TestCase implements Comparable<TestCase> {
 		this.testName = name; 
 		this.numPatchesKilled = 0;
 	}
+	public String getTestName() {
+		return testName;
+	}
+	
 	public String toString () {
 		return this.testName;
 	}
@@ -77,6 +84,20 @@ public class TestCase implements Comparable<TestCase> {
 			return this.testName.compareTo(o.testName);
 		} // FIXME: possibly also consider type?
 		return this.numPatchesKilled - o.numPatchesKilled;
+	}
+	
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder().append(testName).toHashCode();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof TestCase) {
+			TestCase other = (TestCase) obj;
+			return new EqualsBuilder().append(this.testName, other.getTestName()).isEquals();
+		}
+		return false;
 	}
 
 }
