@@ -47,6 +47,7 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.Search.GiveUpException;
@@ -380,18 +381,18 @@ Representation<G> {
 
 	protected abstract boolean internalCompile(String sourceName, String exeName);
 
-	private List<Integer> astHashCode = null;
-
-	protected List<Integer> astHash() {
-		if (astHashCode != null)
-			return astHashCode;
-		astHashCode = new ArrayList<Integer>();
+	private int myHashCode = -1;
+	@Override
+	public int hashCode() {
+		if(myHashCode < 0) {
+		HashCodeBuilder builder = new HashCodeBuilder();
 		List<Pair<ClassInfo, String>> sourceBuffers = computeSourceBuffers();
 		for (Pair<ClassInfo, String> ele : sourceBuffers) {
-			String code = ele.getSecond();
-			astHashCode.add(code.hashCode());
+			builder.append(ele.getSecond());
 		}
-		return astHashCode;
+		myHashCode = builder.toHashCode();
+		}
+		return myHashCode;
 	}
 
 	/*
@@ -403,7 +404,7 @@ Representation<G> {
 		alreadySourced = new ArrayList<String>();
 		alreadyCompiled = null;
 		fitness = -1.0;
-		astHashCode = null;
+		myHashCode = -1;
 	}
 
 	public void reduceSearchSpace() throws GiveUpException {
