@@ -1,5 +1,7 @@
 package clegoues.genprog4java.mut.holes.java;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import clegoues.genprog4java.java.ClassInfo;
@@ -56,5 +58,30 @@ public class JavaLocation extends Location<JavaStatement> {
 
 	public String toString() {
 		return ((Integer) this.getId()).toString();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof JavaLocation) {
+			JavaLocation other = (JavaLocation) obj;
+			if(this.codeElement != null && other.getCodeElement() != null) {
+			return new EqualsBuilder()
+					.append(this.classInfo, other.getClassInfo())
+					.append(this.codeElement.toString(), other.getCodeElement().toString())
+					.append(this.id, other.getId())
+					.isEquals();
+			} 
+			return false;
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder()
+				.append(this.classInfo)
+				.append(this.codeElement.toString())
+				.append(this.id)
+				.toHashCode();
 	}
 }

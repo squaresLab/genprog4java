@@ -215,7 +215,6 @@ Representation<G>  {
 				FitnessValue compileFail = new FitnessValue();
 				compileFail.setTestClassName(test.getTestName());
 				compileFail.setAllPassed(false);
-				this.setFitness(0.0);
 				return compileFail;
 			}
 		} else if (!this.alreadyCompiled.getFirst()) {
