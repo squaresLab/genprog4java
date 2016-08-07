@@ -222,10 +222,10 @@ public class JavaEditFactory {
 			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
 			Set<WeightedAtom> fixStmts = this.scopeHelper(location, variant, editType);
 			for(WeightedAtom fixStmt : fixStmts) {
-				JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
+				JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getLeft());
 				ASTNode fixAST = potentialFixStmt.getASTNode();
 				StatementHole stmtHole = new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId());
-				retVal.add(new WeightedHole(stmtHole, fixStmt.getSecond()));
+				retVal.add(new WeightedHole(stmtHole, fixStmt.getRight()));
 			}
 			return retVal;
 		}
@@ -234,13 +234,13 @@ public class JavaEditFactory {
 			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
 			for (WeightedAtom item : this.scopeHelper(location, variant, editType)) {
 				int atom = item.getAtom();
-				Set<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getSecond()), variant, editType);
+				Set<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getRight()), variant, editType);
 				for (WeightedAtom there : inScopeThere) {
 					if (there.getAtom() != location.getId()) { 
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
 						ASTNode fixAST = potentialFixStmt.getASTNode();
 						StatementHole stmtHole = new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId());
-						retVal.add(new WeightedHole(stmtHole, there.getSecond()));
+						retVal.add(new WeightedHole(stmtHole, there.getRight()));
 						break;
 					}
 				}

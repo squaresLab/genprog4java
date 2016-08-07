@@ -53,13 +53,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
-import clegoues.util.Pair;
 
 /**
  * This class manages fitness evaluation for a variant of an arbitrary {@link clegoues.genprog4java.rep.Representation}.
@@ -436,7 +436,7 @@ public class Fitness {
 		} 
 		double sampleFitness = fac * numNegPassed + numPosPassed;
 		double totalFitness = sampleFitness + numRestPassed;
-		return new Pair<Double,Double>(totalFitness,sampleFitness);
+		return Pair.of(totalFitness,sampleFitness);
 	}
 
 	/** unsampled fitness.  Just test everything 
@@ -458,7 +458,7 @@ public class Fitness {
 				fitness += fac;
 			}
 		}
-		return new Pair<Double, Double>(fitness, fitness);
+		return  Pair.of(fitness, fitness);
 	}
 
 	/** computes fitness on a variant; only does so if the variant does not already
@@ -489,7 +489,7 @@ public class Fitness {
 			logger.info("\t gen: " + generation + " " + curFit + " " + rep.getName() + " (stored at: " + rep.getVariantFolder() + ")");
 			return !(curFit < maxFitness);
 		}
-		Pair<Double, Double> fitnessPair = new Pair<Double, Double>(-1.0, -1.0);
+		Pair<Double, Double> fitnessPair =  Pair.of(-1.0, -1.0);
 		if (Fitness.sample < 1.0) {
 			if (((Fitness.sampleStrategy == "generation") && (Fitness.generation != generation)) ||
 					(Fitness.sampleStrategy == "variant")) {
@@ -500,10 +500,10 @@ public class Fitness {
 		} else {
 			fitnessPair = this.testFitnessFull(rep, fac);
 		}
-		logger.info("\t gen: " + generation + " " + fitnessPair.getFirst() + " " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
-		rep.setFitness(fitnessPair.getSecond());
+		logger.info("\t gen: " + generation + " " + fitnessPair.getLeft() + " " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
+		rep.setFitness(fitnessPair.getRight());
 		rep.cleanup();
-		return !(fitnessPair.getSecond() < maxFitness);
+		return !(fitnessPair.getRight() < maxFitness);
 
 	}
 

@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import clegoues.genprog4java.java.JavaStatement;
@@ -19,7 +20,6 @@ import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
-import clegoues.util.Pair;
 
 public class ReplacementModel {
 
@@ -111,9 +111,9 @@ public class ReplacementModel {
 		int row = stmtKindOfJavaStmt(buggyAstNode);
 
 		for(Pair<?,Double> atom: atoms){
-			ASTNode fixStmt = ((EditHole<ASTNode>)((WeightedHole)atom).getFirst()).getCode();
+			ASTNode fixStmt = ((EditHole<ASTNode>)((WeightedHole)atom).getLeft()).getCode();
 			int column = stmtKindOfJavaStmt(fixStmt);
-			atom.setSecond(Double.valueOf(replacementModel[row][column]+1));
+			atom.setValue(Double.valueOf(replacementModel[row][column]+1));
 			retVal.add(atom);
 
 		}
@@ -124,7 +124,7 @@ public class ReplacementModel {
 		assert(availableMutations.size() > 0);
 		ArrayList retVal = new ArrayList();
 		for(WeightedMutation wmut: availableMutations){
-			Mutation mutation = (Mutation) ((WeightedMutation)wmut).getFirst();
+			Mutation mutation = (Mutation) ((WeightedMutation)wmut).getLeft();
 			double prob = 0;
 			if(mutation == Mutation.REPLACE){
 				prob = replacementCount;
@@ -136,7 +136,7 @@ public class ReplacementModel {
 				int row = mutKind(mutation);
 				prob=Double.valueOf(templatesCounter[row]);
 			}
-			wmut.setSecond(prob);
+			wmut.setValue(prob);
 			retVal.add(wmut);
 		}
 		return retVal;
