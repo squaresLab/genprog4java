@@ -137,9 +137,9 @@ public class Fitness {
 	private static int numNegativeTests;
 
 	// persistent test cache
-	private static HashMap<Representation, HashMap<TestCase, FitnessValue>> fitnessCache = new HashMap<Representation, HashMap<TestCase, FitnessValue>>();
+	private static HashMap<Integer, HashMap<TestCase, FitnessValue>> fitnessCache = new HashMap<Integer, HashMap<TestCase, FitnessValue>>();
 
-	// FIXME: add some kind of runtime hook to serialize this if the process gets killed prematurely.
+	// FIXME: add some kind of runtime hook to serialize if the process gets killed prematurely.
 	public static void serializeTestCache() {
 		try {
 			FileOutputStream fos = new FileOutputStream("testcache.ser");
@@ -155,7 +155,7 @@ public class Fitness {
 
 	public static void deserializeTestCache(){
 		File fl = new File("testcache.ser");
-		HashMap<Representation, HashMap<TestCase, FitnessValue>> testCache = null;
+		HashMap<Integer, HashMap<TestCase, FitnessValue>> testCache = null;
 		if(fl.isFile()){
 			try
 			{
@@ -174,7 +174,7 @@ public class Fitness {
 			}
 			System.out.println("Deserialized fitnessCache HashMap");			
 		}else {
-			testCache = new HashMap<Representation, HashMap<TestCase, FitnessValue>>();
+			testCache = new HashMap<Integer, HashMap<TestCase, FitnessValue>>();
 		}
 		System.out.println("hashmap is = " + testCache.entrySet().size() + "  " + testCache.toString());
 		fitnessCache.putAll(testCache);
@@ -303,13 +303,16 @@ public class Fitness {
 
 	private boolean singleTestCasePass(Representation rep, TestCase test) {
 		HashMap<TestCase, FitnessValue> thisVariantsFitness = null;
-		if(fitnessCache.containsKey(rep)) {
-			thisVariantsFitness = fitnessCache.get(rep);
-			if (thisVariantsFitness.containsKey(test))
+		// FIXME: things would be better if the fitness cache were actually keyed on rep and not integers.  Also why on earth
+		// is the following "containsKey" typesafe without the hashCode()??? I hate Java.
+		if(fitnessCache.containsKey(rep.hashCode())) {
+			thisVariantsFitness = fitnessCache.get(rep.hashCode());
+			if (thisVariantsFitness.containsKey(test)) {
 				return thisVariantsFitness.get(test).isAllPassed();
+			}
 		} else {
 			thisVariantsFitness = new HashMap<TestCase, FitnessValue>();
-			fitnessCache.put(rep, thisVariantsFitness);
+			fitnessCache.put(rep.hashCode(), thisVariantsFitness);
 		}
 		FitnessValue thisTest = rep.testCase(test);
 		thisVariantsFitness.put(test, thisTest);

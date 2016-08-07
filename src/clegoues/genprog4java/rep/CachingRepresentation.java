@@ -66,8 +66,6 @@ import clegoues.util.Pair;
 public abstract class CachingRepresentation<G extends EditOperation> extends
 Representation<G>  {
 
-	private static final long serialVersionUID = -1136012873048477306L;
-
 	protected transient Logger logger = Logger.getLogger(CachingRepresentation.class);
 
 	public transient static final ConfigurationBuilder.RegistryToken token =

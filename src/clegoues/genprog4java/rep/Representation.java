@@ -73,9 +73,7 @@ import clegoues.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class Representation<G extends EditOperation> implements
-Comparable<Representation<G>>, Serializable {
-
-	private static final long serialVersionUID = 3413435196614684927L;
+Comparable<Representation<G>> {
 
 	protected transient Logger logger = Logger.getLogger(Representation.class);
 	
