@@ -337,14 +337,14 @@ public abstract class Search<G extends EditOperation> {
 		try {
 			original.cacheflag = true;
 			this.runAlgorithm(original, incomingPopulation);
-			original.searilizeTestCache(original.getTestCache());
+			original.serializeTestCache(original.getTestCache());
 			original.cacheflag = false;
 		} catch(RepairFoundException e) {
-			original.searilizeTestCache(original.getTestCache());
+			original.serializeTestCache(original.getTestCache());
 			original.cacheflag = false;
 			return;
 		} catch (GiveUpException e) {
-			original.searilizeTestCache(original.getTestCache());
+			original.serializeTestCache(original.getTestCache());
 			original.cacheflag = false;
 			return;
 		}
