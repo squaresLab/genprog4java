@@ -47,6 +47,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,8 +74,12 @@ import clegoues.util.Pair;
 @SuppressWarnings("rawtypes")
 public abstract class FaultLocRepresentation<G extends EditOperation> extends
 CachingRepresentation<G> {
+
+	private static final long serialVersionUID = 5565985345093963559L;
+	
 	protected Logger logger = Logger.getLogger(FaultLocRepresentation.class);
-	public static final ConfigurationBuilder.RegistryToken token =
+	
+	public transient static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
 
 	public static boolean justTestingFaultLoc = ConfigurationBuilder.of( BOOL_ARG )
@@ -147,116 +152,6 @@ CachingRepresentation<G> {
 		super();
 	}
 
-	@Override
-	public void serialize(String filename, ObjectOutputStream fout,
-			boolean globalinfo) {
-		ObjectOutputStream out = null;
-		FileOutputStream fileOut = null;
-		try {
-			if (fout == null) {
-				fileOut = new FileOutputStream(filename + ".ser");
-				out = new ObjectOutputStream(fileOut);
-			} else {
-				out = fout;
-			}
-			super.serialize(filename, out, globalinfo);
-			out.writeObject(this.faultLocalization);
-			out.writeObject(this.fixLocalization);
-
-			// doesn't exist yet, but remember when you add it:
-			// out.writeObject(FaultLocalization.faultScheme);
-			if (globalinfo) {
-				out.writeObject(FaultLocRepresentation.negativePathWeight);
-				out.writeObject(FaultLocRepresentation.positivePathWeight);
-			}
-		} catch (IOException e) {
-			System.err
-			.println("faultLocRep: largely unexpected failure in serialization.");
-			e.printStackTrace();
-		} finally {
-			if (fout == null) {
-				try {
-					if (out != null)
-						out.close();
-					if (fileOut != null)
-						fileOut.close();
-				} catch (IOException e) {
-					System.err
-					.println("faultLocRep: largely unexpected failure in serialization.");
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public boolean deserialize(String filename, ObjectInputStream fin,
-			boolean globalinfo) {
-		FileInputStream fileIn = null;
-		ObjectInputStream in = null;
-		boolean succeeded = true;
-		try {
-			if (fin == null) {
-				fileIn = new FileInputStream(filename + ".ser");
-				in = new ObjectInputStream(fileIn);
-			} else {
-				in = fin;
-			}
-			if (super.deserialize(filename, in, globalinfo)) {
-				this.faultLocalization = (ArrayList<Location>) in
-						.readObject();
-				this.fixLocalization = (ArrayList<WeightedAtom>) in
-						.readObject();
-				// doesn't exist yet, but remember when you add it:
-				// out.writeObject(FaultLocalization.faultScheme);
-				double negWeight = (double) in.readObject();
-				double posWeight = (double) in.readObject();
-				if (negWeight != FaultLocRepresentation.negativePathWeight
-						|| posWeight != FaultLocRepresentation.positivePathWeight
-						|| FaultLocRepresentation.regenPaths) {
-					this.computeLocalization(); // I remember needing to do this
-					// in OCaml but I don't remember
-					// why?
-				}
-				logger.info("faultLocRepresentation: " + filename + "loaded\n");
-			} else {
-				succeeded = false;
-			}
-		} catch (IOException e) {
-			System.err
-			.println("faultLocRepresentation: IOException in deserialize "
-					+ filename + " which is probably OK");
-			succeeded = false;
-		} catch (ClassNotFoundException e) {
-			System.err
-			.println("faultLocRepresentation: ClassNotFoundException in deserialize "
-					+ filename + " which is probably *not* OK");
-			e.printStackTrace();
-			succeeded = false;
-		} catch (UnexpectedCoverageResultException e) {
-			System.err
-			.println("faultLocRepresentation: reran coverage in faultLocRep deserialize and something unexpected happened, so I'm giving up.");
-			Runtime.getRuntime().exit(1);
-		} finally {
-			try {
-				if (fin == null) {
-					if (in != null)
-						in.close();
-					if (fileIn != null)
-						fileIn.close();
-				}
-			} catch (IOException e) {
-				succeeded = false;
-				System.err
-				.println("faultLocRepresentation: IOException in file close in deserialize "
-						+ filename + " which is weird?");
-				e.printStackTrace();
-			}
-		}
-		return succeeded;
-	}
-
 	public ArrayList<Location> getFaultyLocations() {
 		return this.faultLocalization;
 	}
@@ -275,7 +170,6 @@ CachingRepresentation<G> {
 		}
 		return retVal;
 	}
-
 
 	/*
 	 * 
@@ -372,7 +266,7 @@ CachingRepresentation<G> {
 
 	protected void computeLocalization() throws IOException,
 	UnexpectedCoverageResultException {
-		// FIXME: THIS ONLY DOES STANDARD PATH FILE localization
+		// THIS ONLY DOES STANDARD PATH FILE localization
 		/*
 		 * Default "ICSE'09"-style fault and fix localization from path files.
 		 * The weighted path fault localization is a list of <atom,weight>
@@ -486,5 +380,4 @@ CachingRepresentation<G> {
 		}
 		// }
 	}
-
 }

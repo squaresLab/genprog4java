@@ -43,6 +43,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.StringWriter;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -137,6 +138,9 @@ import clegoues.util.Pair;
 
 public class JavaRepresentation extends
 FaultLocRepresentation<JavaEditOperation> {
+
+	private static final long serialVersionUID = 5869549375148860322L;
+
 	protected Logger logger = Logger.getLogger(JavaRepresentation.class);
 
 	private JavaEditFactory editFactory = new JavaEditFactory();
@@ -385,106 +389,6 @@ FaultLocRepresentation<JavaEditOperation> {
 			return 0;
 		}
 		return genome.size();
-	}
-
-	@Override
-	public void serialize(String filename, ObjectOutputStream fout,
-			boolean globalinfo) {
-		// fout is going to be null for sure until I implement a subclass, but
-		// whatever
-		ObjectOutputStream out = null;
-		FileOutputStream fileOut = null;
-		try {
-			if (fout == null) {
-				fileOut = new FileOutputStream(filename + ".ser");
-				out = new ObjectOutputStream(fileOut);
-			} else {
-				out = fout;
-			}
-			super.serialize(filename, out, globalinfo);
-			out.writeObject(this.genome);
-
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			try {
-				if (fout == null) {
-					if (out != null)
-						out.close();
-					if (fileOut != null)
-						fileOut.close();
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public boolean deserialize(String filename, ObjectInputStream fin,
-			boolean globalinfo) {
-		ObjectInputStream in = null;
-		FileInputStream fileIn = null;
-		boolean succeeded = true;
-		try {
-			if (fin == null) {
-				fileIn = new FileInputStream(filename + ".ser");
-				in = new ObjectInputStream(fileIn);
-			} else {
-				in = fin;
-			}
-			if (super.deserialize(filename, in, globalinfo)) {
-				if (globalinfo) {
-					// OK, tragically none of the dom.ASTNode stuff is
-					// serializable, and it's *really* not obvious
-					// how to fix that. So we need to parse the file again,
-					// which is a total bummer.
-					// this is still worth doing for the genome thing below, I
-					// guess, in particular
-					// because it allows us to serialize/deserialize incoming
-					// populations
-					//					this.fromSource(filename.replace('.', '/')
-					//							+ Configuration.globalExtension);
-					// FIXME: deserialize needs fixed; fromSource wants a classname and package, now....
-				}
-				this.genome.addAll((ArrayList<JavaEditOperation>) (in
-						.readObject()));
-				logger.info("javaRepresentation: " + filename + "loaded\n");
-			} else {
-				succeeded = false;
-			}
-		} catch (ClassNotFoundException e) {
-			logger.error("ClassNotFoundException in deserialize " + filename
-					+ " which is probably *not* OK");
-			e.printStackTrace();
-			succeeded = false;
-		} catch (IOException e) {
-			logger.error("IOException in deserialize " + filename
-					+ " which is probably OK");
-			succeeded = false;
-		} finally {
-			try {
-				if (fin == null) {
-					if (in != null)
-						in.close();
-					if (fileIn != null)
-						fileIn.close();
-				}
-			} catch (IOException e) {
-				//System.err.println("javaRepresentation: IOException in file close in deserialize " + filename + " which is weird?");
-				logger.error("javaRepresentation: IOException in file close in deserialize "
-						+ filename + " which is weird?");
-				e.printStackTrace();
-			}
-		}
-		return succeeded;
 	}
 
 	@Override
@@ -857,4 +761,17 @@ FaultLocRepresentation<JavaEditOperation> {
 			super.computeFixSpace(negativePath, positivePath);
 		}
 	}
+	
+	 private void writeObject(java.io.ObjectOutputStream out)
+		     throws IOException {
+
+	 }
+		 private void readObject(java.io.ObjectInputStream in)
+		     throws IOException, ClassNotFoundException {
+			 
+		 }
+		 private void readObjectNoData()
+		     throws ObjectStreamException {
+			 
+		 }
 }
