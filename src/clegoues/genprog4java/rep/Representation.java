@@ -34,24 +34,14 @@
 package clegoues.genprog4java.rep;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.Search.GiveUpException;
@@ -64,8 +54,6 @@ import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.mut.WeightedMutation;
-import clegoues.genprog4java.mut.holes.java.StatementHole;
-import clegoues.util.Pair;
 
 // it's not clear that this EditOperation thing is a good choice because 
 // it basically forces the patch representation.  Possibly it's flexible and the naming scheme is 
@@ -149,7 +137,7 @@ Comparable<Representation<G>> {
 		HashCodeBuilder builder = new HashCodeBuilder();
 		List<Pair<ClassInfo, String>> sourceBuffers = computeSourceBuffers();
 		for (Pair<ClassInfo, String> ele : sourceBuffers) {
-			builder.append(ele.getSecond());
+			builder.append(ele.getRight());
 		}
 		myHashCode = builder.toHashCode();
 		}

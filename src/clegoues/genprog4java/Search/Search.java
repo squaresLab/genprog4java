@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.fitness.Fitness;
@@ -60,7 +61,6 @@ import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
-import clegoues.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class Search<G extends EditOperation> {
@@ -284,7 +284,7 @@ public abstract class Search<G extends EditOperation> {
 				//choose a mutation 
 				ArrayList availableMutationsAL = rescaleMutations(availableMutations);
 				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(availableMutationsAL);
-				Mutation mut = chosenMutation.getFirst();
+				Mutation mut = chosenMutation.getLeft();
 				List<WeightedHole> allowed = variant.editSources(location, mut);
 				allowed = rescaleAllowed(mut,allowed, variant,location.getId());
 				WeightedHole selected = (WeightedHole) GlobalUtils

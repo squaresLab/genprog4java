@@ -69,7 +69,6 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
-import clegoues.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class FaultLocRepresentation<G extends EditOperation> extends
@@ -311,7 +310,7 @@ CachingRepresentation<G> {
 		//printout fault space with their weights
 		PrintWriter writer = new PrintWriter("FaultyStmtsAndWeights.txt", "UTF-8");
 		for (int i = 0; i < faultLocalization.size(); i++) {
-			writer.println("Location:\n" + faultLocalization.get(i).getFirst() + "Weight:\n" + faultLocalization.get(i).getWeight() + "\n");
+			writer.println("Location:\n" + faultLocalization.get(i).getLeft() + "Weight:\n" + faultLocalization.get(i).getWeight() + "\n");
 		}
 		writer.close();
 

@@ -36,26 +36,19 @@ package clegoues.genprog4java.rep;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.io.StringWriter;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -63,13 +56,11 @@ import javax.tools.ToolProvider;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AssertStatement;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -78,23 +69,18 @@ import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.BadLocationException;
@@ -134,7 +120,6 @@ import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
-import clegoues.util.Pair;
 
 public class JavaRepresentation extends
 FaultLocRepresentation<JavaEditOperation> {
@@ -437,7 +422,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			// computeSourceBuffers failed than
 			// to return null at those catch blocks
 
-			retVal.add(new Pair<ClassInfo, String>(ci, original.get()));
+			retVal.add(Pair.of(ci, original.get()));
 		}
 		return retVal;
 	}
@@ -535,8 +520,8 @@ FaultLocRepresentation<JavaEditOperation> {
 
 		try {
 			for (Pair<ClassInfo, String> ele : sourceBuffers) {
-				ClassInfo ci = ele.getFirst();
-				String program = ele.getSecond();
+				ClassInfo ci = ele.getLeft();
+				String program = ele.getRight();
 				String pathToFile = ci.pathToJavaFile();
 
 				createPathFiles(outDirName, pathToFile);
@@ -632,8 +617,8 @@ FaultLocRepresentation<JavaEditOperation> {
 			if(availableMutations.isEmpty()){
 				locsToRemove.add(potentiallyBuggyLoc);
 			}else{
-				for (Pair<Mutation, Double> mutation : availableMutations) {
-					thereIsAtLeastOneMutThatApplies = thereIsAtLeastOneMutThatApplies || this.editFactory.doesEditApply(this, potentiallyBuggyLoc, mutation.getFirst());
+				for (WeightedMutation mutation : availableMutations) {
+					thereIsAtLeastOneMutThatApplies = thereIsAtLeastOneMutThatApplies || this.editFactory.doesEditApply(this, potentiallyBuggyLoc, mutation.getLeft());
 				}
 				if(!thereIsAtLeastOneMutThatApplies){
 					locsToRemove.add(potentiallyBuggyLoc);

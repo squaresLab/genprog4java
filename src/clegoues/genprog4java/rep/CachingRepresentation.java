@@ -50,6 +50,7 @@ import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.Search.GiveUpException;
@@ -60,7 +61,6 @@ import clegoues.genprog4java.java.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.util.ConfigurationBuilder;
-import clegoues.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class CachingRepresentation<G extends EditOperation> extends
@@ -217,7 +217,7 @@ Representation<G>  {
 				compileFail.setAllPassed(false);
 				return compileFail;
 			}
-		} else if (!this.alreadyCompiled.getFirst()) {
+		} else if (!this.alreadyCompiled.getLeft()) {
 			FitnessValue compileFail = new FitnessValue();
 			compileFail.setTestClassName(test.getTestName());
 			compileFail.setAllPassed(false);
@@ -335,10 +335,10 @@ Representation<G>  {
 	public boolean compile(String sourceName, String exeName) {
 
 		if (this.alreadyCompiled != null) {
-			return alreadyCompiled.getFirst();
+			return alreadyCompiled.getLeft();
 		} else {
 			boolean result = this.internalCompile(sourceName, exeName);
-			this.alreadyCompiled = new Pair<Boolean, String>(result, exeName);
+			this.alreadyCompiled =  Pair.of(result, exeName);
 			return result;
 		}
 	}

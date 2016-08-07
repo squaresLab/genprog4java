@@ -41,6 +41,7 @@ import java.util.TreeSet;
 
 import javax.tools.SimpleJavaFileObject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -50,8 +51,6 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WildcardType;
-
-import clegoues.util.Pair;
 
 /** provides static utils for manipulating java ASTs.  Used to be much longer
  * before I refactored semantic check info; it may be possible to refactor this away
@@ -98,7 +97,7 @@ public class ASTUtils {
 		for (Pair<ClassInfo, String> ele : code) {
 
 			JavaSourceFromString oneSource = new JavaSourceFromString(progName,
-					ele.getFirst(), ele.getSecond());
+					ele.getLeft(), ele.getRight());
 			jsfs.add(oneSource);
 
 		}
