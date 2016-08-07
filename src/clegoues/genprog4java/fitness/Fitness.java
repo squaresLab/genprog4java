@@ -37,12 +37,18 @@ import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -64,57 +70,57 @@ public class Fitness {
 	protected static Logger logger = Logger.getLogger(Fitness.class);
 
 	public static final ConfigurationBuilder.RegistryToken token =
-		ConfigurationBuilder.getToken();
+			ConfigurationBuilder.getToken();
 
 	/** weight to give to negative test cases; note that this is <i>relative to the total number of positive tests</i>, 
 	 * not <i>absolute weight</i>.
 	 */
 	private static double negativeTestWeight = ConfigurationBuilder.of( DOUBLE )
-		.withVarName( "negativeTestWeight" )
-		.withDefault( "2.0" )
-		.withHelp( "weighting to give results of negative test cases" )
-		.inGroup( "Fitness Parameters" )
-		.build();
+			.withVarName( "negativeTestWeight" )
+			.withDefault( "2.0" )
+			.withHelp( "weighting to give results of negative test cases" )
+			.inGroup( "Fitness Parameters" )
+			.build();
 
 	/** how much to sample the positive tests.  Negative tests are never sampled */
 	private static double sample = ConfigurationBuilder.of( DOUBLE )
-		.withVarName( "sample" )
-		.withDefault( "1.0" )
-		.withHelp( "fraction of the positive tests to sample" )
-		.inGroup( "Fitness Parameters" )
-		.build();
+			.withVarName( "sample" )
+			.withDefault( "1.0" )
+			.withHelp( "fraction of the positive tests to sample" )
+			.inGroup( "Fitness Parameters" )
+			.build();
 
 	/** controls when we regenerate a test sample (per variant or per generation) */
 	private static String sampleStrategy = ConfigurationBuilder.of( STRING )
-		.withVarName( "sampleStrategy" )
-		.withDefault( "variant" )
-		.withHelp( "strategy to use for resampling tests" )
-		.inGroup( "Fitness Parameters" )
-		.build();
+			.withVarName( "sampleStrategy" )
+			.withDefault( "variant" )
+			.withHelp( "strategy to use for resampling tests" )
+			.inGroup( "Fitness Parameters" )
+			.build();
 
 	/** files listing the positive and negative tests */
 	private static String posTestFile = ConfigurationBuilder.of( STRING )
-		.withVarName( "posTestFile" )
-		.withFlag( "positiveTests" )
-		.withDefault( "pos.tests" )
-		.withHelp( "file containing names of positive test classes" )
-		.inGroup( "Fitness Parameters" )
-		.build();
+			.withVarName( "posTestFile" )
+			.withFlag( "positiveTests" )
+			.withDefault( "pos.tests" )
+			.withHelp( "file containing names of positive test classes" )
+			.inGroup( "Fitness Parameters" )
+			.build();
 
 	private static String negTestFile = ConfigurationBuilder.of( STRING )
-		.withVarName( "negTestFile" )
-		.withFlag( "negativeTests" )
-		.withDefault( "neg.tests" )
-		.withHelp( "file containing names of negative test classes" )
-		.inGroup( "Fitness Parameters" )
-		.build();
-	
-	
+			.withVarName( "negTestFile" )
+			.withFlag( "negativeTests" )
+			.withDefault( "neg.tests" )
+			.withHelp( "file containing names of negative test classes" )
+			.inGroup( "Fitness Parameters" )
+			.build();
+
+
 	/** this is necessary because of the generational sample strategy, which 
 	 *  resamples at generational boundaries. 
 	 */
 	private static int generation = -1;
-	
+
 	/** store the sample and the unsampled portion of the test suite */
 	private static List<TestCase> testSample = null;
 	private static List<TestCase> restSample = null;
@@ -124,11 +130,52 @@ public class Fitness {
 	 */
 	public static ArrayList<TestCase> positiveTests = new ArrayList<TestCase>();
 	public static ArrayList<TestCase> negativeTests = new ArrayList<TestCase>();
-	
+
 	private static int numPositiveTests;
 	private static int numNegativeTests;
 
+	// persistent test cache
+	private static HashMap<Representation, HashMap<String, FitnessValue>> fitnessCache = new HashMap<Representation, HashMap<String, FitnessValue>>();
 
+	public static void serializeTestCache() {
+		try {
+			FileOutputStream fos = new FileOutputStream("testcache.ser");
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(Fitness.fitnessCache);
+			oos.close();
+			fos.close();
+			System.out.println("Serialized fitnessCache HashMap to file hashmap.ser");
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+	}
+
+	public static void deserializeTestCache(){
+		File fl = new File("testcache.ser");
+		HashMap<Representation, HashMap<String, FitnessValue>> testCache = null;
+		if(fl.isFile()){
+			try
+			{
+				FileInputStream fis = new FileInputStream("testcache.ser");
+				ObjectInputStream ois = new ObjectInputStream(fis);
+				testCache = (HashMap) ois.readObject();
+				ois.close();
+				fis.close();
+			}catch(IOException ioe)
+			{
+				ioe.printStackTrace();
+			}catch(ClassNotFoundException c)
+			{
+				System.out.println("Class not found");
+				c.printStackTrace();
+			}
+			System.out.println("Deserialized fitnessCache HashMap");			
+		}else {
+			testCache = new HashMap<Representation, HashMap<String, FitnessValue>>();
+		}
+		//	System.out.println("hashmap is = " + testCache.entrySet().size() + "  " + testCache.toString());
+		fitnessCache.putAll(testCache);
+	}
 	/** 
 	 * Loads the tests from specified files, initializes the sample vars to not be null.
 	 * Samples properly when the search actually begins.
@@ -143,15 +190,15 @@ public class Fitness {
 
 		filterTests(intermedPosTests, intermedNegTests);
 		filterTests(intermedNegTests, intermedPosTests);
-		
+
 		for(String posTest : intermedPosTests) {
 			positiveTests.add(new TestCase(TestCase.TestType.POSITIVE, posTest));
 		}
-		
+
 		for(String negTest : intermedNegTests) {
 			negativeTests.add(new TestCase(TestCase.TestType.NEGATIVE, negTest));
 		}
-		
+
 		Fitness.numPositiveTests = Fitness.positiveTests.size();
 		Fitness.numNegativeTests = Fitness.negativeTests.size();
 		testSample = new ArrayList<TestCase>(Fitness.positiveTests);
@@ -237,7 +284,7 @@ public class Fitness {
 	 *  initializeModel needs to be called before it's used.  
 	 */
 	private ArrayList<TestCase> testModel = null;
-	
+
 	public void initializeModel() { 
 		testModel = new ArrayList<TestCase>(Fitness.numNegativeTests + Fitness.numPositiveTests);
 		for(TestCase negTest : Fitness.negativeTests) {
@@ -249,7 +296,22 @@ public class Fitness {
 		}
 		Collections.sort(testModel,Collections.reverseOrder());
 	}
-	
+
+	private boolean singleTestCasePass(Representation rep, TestCase test) {
+		HashMap<String, FitnessValue> thisVariantsFitness = null;
+		if(fitnessCache.containsKey(rep)) {
+			thisVariantsFitness = fitnessCache.get(rep);
+			if (thisVariantsFitness.containsKey(test.toString()))
+				return thisVariantsFitness.get(test.toString()).isAllPassed();
+		} else {
+			thisVariantsFitness = new HashMap<String, FitnessValue>();
+			fitnessCache.put(rep, thisVariantsFitness);
+		}
+		FitnessValue thisTest = rep.testCase(test);
+		thisVariantsFitness.put(test.toString(), thisTest);
+		return thisTest.isAllPassed();
+	}
+
 	/** generates a new random sample of the positive tests. */
 	private static void resample() {
 		Long L = Math.round(sample * Fitness.numPositiveTests);
@@ -277,7 +339,7 @@ public class Fitness {
 	private int testPassCount(Representation rep, boolean shortCircuit, List<TestCase> tests) {
 		int numPassed = 0;
 		for (TestCase thisTest : tests) {
-			if (!rep.testCase(thisTest)) {
+			if (!singleTestCasePass(rep, thisTest)) {
 				rep.cleanup();
 				if(shortCircuit) {
 					return numPassed;
@@ -313,14 +375,14 @@ public class Fitness {
 			boolean foundFail = false;
 			int numPassed = 0;
 			for(TestCase thisTest : testModel) {
-				if (!rep.testCase(thisTest)) {
+				if (!singleTestCasePass(rep, thisTest)) {
 					rep.cleanup();
 					thisTest.incrementPatchesKilled();
 					foundFail = true;
 					break;
-			 } else {
-				 numPassed ++;
-			 }
+				} else {
+					numPassed ++;
+				}
 			}
 			if(foundFail) {
 				Collections.sort(testModel,Collections.reverseOrder());
@@ -329,21 +391,21 @@ public class Fitness {
 			}
 			return true;
 		} else {
-		int numNegativePassed = this.testPassCount(rep, true, Fitness.negativeTests);
-		if(numNegativePassed < Fitness.numNegativeTests) {
-			logger.info("\t passed " + numNegativePassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
+			int numNegativePassed = this.testPassCount(rep, true, Fitness.negativeTests);
+			if(numNegativePassed < Fitness.numNegativeTests) {
+				logger.info("\t passed " + numNegativePassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 
-			return false;
-		}
-		int numPositivePassed = this.testPassCount(rep,  true, Fitness.positiveTests);
-		if(numPositivePassed < Fitness.numPositiveTests) {
+				return false;
+			}
+			int numPositivePassed = this.testPassCount(rep,  true, Fitness.positiveTests);
+			if(numPositivePassed < Fitness.numPositiveTests) {
+				int totalPassed = numNegativePassed + numPositivePassed;
+				logger.info("\t passed " + totalPassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
+				return false;
+			}
 			int totalPassed = numNegativePassed + numPositivePassed;
-			logger.info("\t passed " + totalPassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
-			return false;
-		}
-		int totalPassed = numNegativePassed + numPositivePassed;
-		logger.info("\t passed " + totalPassed + " (ALL) tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
-		return true;
+			logger.info("\t passed " + totalPassed + " (ALL) tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
+			return true;
 		}
 	}
 
@@ -380,12 +442,12 @@ public class Fitness {
 			double fac) {
 		double fitness = 0.0;
 		for (TestCase thisTest : Fitness.positiveTests) {
-			if (rep.testCase(thisTest)) {
+			if (singleTestCasePass(rep, thisTest)) {
 				fitness += 1.0;
 			}
 		}
 		for (TestCase thisTest : Fitness.negativeTests) {
-			if (rep.testCase(thisTest)) {
+			if (singleTestCasePass(rep, thisTest)) {
 				fitness += fac;
 			}
 		}
@@ -420,7 +482,6 @@ public class Fitness {
 			logger.info("\t gen: " + generation + " " + curFit + " " + rep.getName() + " (stored at: " + rep.getVariantFolder() + ")");
 			return !(curFit < maxFitness);
 		}
-
 		Pair<Double, Double> fitnessPair = new Pair<Double, Double>(-1.0, -1.0);
 		if (Fitness.sample < 1.0) {
 			if (((Fitness.sampleStrategy == "generation") && (Fitness.generation != generation)) ||
@@ -438,7 +499,7 @@ public class Fitness {
 		return !(fitnessPair.getSecond() < maxFitness);
 
 	}
-	
+
 	/** debug/convenience functionality; saves the tests that should be considered in scope.
 	 * called from {@link clegoues.genprog4java.rep.CachingRepresentation} 
 	 * @param passingTests

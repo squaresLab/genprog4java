@@ -32,7 +32,7 @@ public class LocalizationRepresentation extends JavaRepresentation {
 				coverageRaw.delete();
 			}
 
-			if (this.testCase(test) != expectedResult
+			if (this.testCase(test).isAllPassed() != expectedResult
 					&& !FaultLocRepresentation.allowCoverageFail) {
 				throw new UnexpectedCoverageResultException(
 						"FaultLocRep: unexpected coverage result: "

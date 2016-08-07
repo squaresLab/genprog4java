@@ -210,21 +210,7 @@ Representation<G> {
 		return true;
 	}
 
-	public boolean testCase(TestCase test) {
-		List<Integer> hash = astHash();
-		HashMap<String, FitnessValue> thisVariantsFitness = null;
-		if(cacheflag == true){ 
-			getFitnessCache().putAll(desearializeTestCache());
-			cacheflag = false;
-		}
-		if (getFitnessCache().containsKey(hash)) {
-			thisVariantsFitness = getFitnessCache().get(hash);
-			if (thisVariantsFitness.containsKey(test.toString()))
-				return thisVariantsFitness.get(test.toString()).isAllPassed();
-		} else {
-			thisVariantsFitness = new HashMap<String, FitnessValue>();
-			getFitnessCache().put(hash, thisVariantsFitness);
-		}
+	public FitnessValue testCase(TestCase test) {
 		 		
 		if (this.alreadyCompiled == null) {
 			String newName = CachingRepresentation.newVariantFolder();
@@ -233,21 +219,21 @@ Representation<G> {
 			if (!this.compile(newName, newName)) {
 				this.setFitness(0.0);
 				logger.info(this.getName() + " at " + newName + " fails to compile\n");
-				return false;
+				FitnessValue compileFail = new FitnessValue();
+				compileFail.setTestClassName(test.toString());
+				compileFail.setAllPassed(false);
+				this.setFitness(0.0);
+				return compileFail;
 			}
 		} else if (!this.alreadyCompiled.getFirst()) {
 			FitnessValue compileFail = new FitnessValue();
 			compileFail.setTestClassName(test.toString());
 			compileFail.setAllPassed(false);
-			thisVariantsFitness.put(test.toString(), compileFail);
-			// this WILL update it in the fitness cache, right, because state?
 			this.setFitness(0.0);
-			return false;
+			return compileFail;
 		}
-		FitnessValue fitness = this.internalTestCase(this.variantFolder,
+		return this.internalTestCase(this.variantFolder,
 				this.variantFolder + Configuration.globalExtension, test);
-		thisVariantsFitness.put(test.toString(), fitness);
-		return fitness.isAllPassed();
 	}
 
 	// kind of think internal test case should return here to save in

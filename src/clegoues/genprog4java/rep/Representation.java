@@ -75,56 +75,6 @@ Comparable<Representation<G>> {
 	protected Logger logger = Logger.getLogger(Representation.class);
 	
 	protected String variantFolder = "";
-	
-	// persistent test cache
-	private static HashMap<List<Integer>, HashMap<String, FitnessValue>> fitnessCache = new HashMap<List<Integer>, HashMap<String, FitnessValue>>();
-	
-	// flag to indicate when to serialize the fitnessCache
-	public static boolean cacheflag = false;
-	
-	public HashMap<List<Integer>, HashMap<String, FitnessValue>> getTestCache() {
-	     return Representation.fitnessCache;
-	}
-	
-	public void serializeTestCache(HashMap<List<Integer>, HashMap<String, FitnessValue>> testCacheMap) {
-		try {
-			FileOutputStream fos = new FileOutputStream("testcache.ser");
-			ObjectOutputStream oos = new ObjectOutputStream(fos);
-			oos.writeObject(testCacheMap);
-			oos.close();
-			fos.close();
-			System.out.println("Serialized fitnessCache HashMap to file hashmap.ser");
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-	}
-	
-	public HashMap<List<Integer>, HashMap<String, FitnessValue>> desearializeTestCache(){
-		File fl = new File("testcache.ser");
-		HashMap<List<Integer>, HashMap<String, FitnessValue>> testCache = null;
-		if(fl.isFile()){
-			try
-		      {
-		         FileInputStream fis = new FileInputStream("testcache.ser");
-		         ObjectInputStream ois = new ObjectInputStream(fis);
-		         testCache = (HashMap) ois.readObject();
-		         ois.close();
-		         fis.close();
-		      }catch(IOException ioe)
-		      {
-		         ioe.printStackTrace();
-		      }catch(ClassNotFoundException c)
-		      {
-		         System.out.println("Class not found");
-		         c.printStackTrace();
-		      }
-		      System.out.println("Deserialized fitnessCache HashMap");			
-		}else {
-			testCache = new HashMap<List<Integer>, HashMap<String, FitnessValue>>();
-		}
-	//	System.out.println("hashmap is = " + testCache.entrySet().size() + "  " + testCache.toString());
-		return testCache;
-	}
 
 	public Representation() {
 	}
@@ -256,7 +206,7 @@ Comparable<Representation<G>> {
 
 	public abstract boolean compile(String sourceName, String exeName);
 
-	public abstract boolean testCase(TestCase test);
+	public abstract FitnessValue testCase(TestCase test);
 
 	public abstract void reduceSearchSpace() throws GiveUpException; 
 
@@ -300,11 +250,4 @@ Comparable<Representation<G>> {
 
 	public abstract void setAllPossibleStmtsToFixLocalization();
 
-	public static HashMap<List<Integer>, HashMap<String, FitnessValue>> getFitnessCache() {
-		return fitnessCache;
-	}
-
-	public static void setFitnessCache(HashMap<List<Integer>, HashMap<String, FitnessValue>> fitnessCache) {
-		Representation.fitnessCache = fitnessCache;
-	}
 }
