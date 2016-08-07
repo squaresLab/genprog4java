@@ -41,6 +41,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -71,9 +73,11 @@ import clegoues.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class Representation<G extends EditOperation> implements
-Comparable<Representation<G>> {
+Comparable<Representation<G>>, Serializable {
 
-	protected Logger logger = Logger.getLogger(Representation.class);
+	private static final long serialVersionUID = 3413435196614684927L;
+
+	protected transient Logger logger = Logger.getLogger(Representation.class);
 	
 	protected String variantFolder = "";
 
@@ -117,80 +121,6 @@ Comparable<Representation<G>> {
 	public abstract void load(ArrayList<ClassInfo> classNames) throws IOException,
 	UnexpectedCoverageResultException;
 
-	public void serialize(String filename, ObjectOutputStream fout,
-			boolean globalinfo) { // second parameter is optional
-		ObjectOutputStream out = null;
-		FileOutputStream fileOut = null;
-		try {
-			if (fout == null) {
-				fileOut = new FileOutputStream(filename + ".ser");
-				out = new ObjectOutputStream(fileOut);
-			} else {
-				out = fout;
-			}
-			out.writeObject(this.getGenome());
-		} catch (IOException e) {
-			System.err
-			.println("Representation: largely unexpected failure in serialization.");
-			e.printStackTrace();
-		} finally {
-			if (fout == null) {
-				try {
-					if (out != null)
-						out.close();
-					if (fileOut != null)
-						fileOut.close();
-				} catch (IOException e) {
-					System.err
-					.println("Representation: largely unexpected failure in serialization.");
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public boolean deserialize(String filename, ObjectInputStream fin,
-			boolean globalinfo) { // second parameter is optional
-		FileInputStream fileIn = null;
-		ObjectInputStream in = null;
-		boolean succeeded = true;
-		try {
-			if (fin == null) {
-				fileIn = new FileInputStream(filename + ".ser");
-				in = new ObjectInputStream(fileIn);
-			} else {
-				in = fin;
-			}
-			this.setGenome((ArrayList<G>) in.readObject());
-		} catch (IOException e) {
-			logger.error("Representation: IOException in deserialize "
-					+ filename + " which is probably OK");
-			e.printStackTrace();
-			succeeded = false;
-		} catch (ClassNotFoundException e) {
-			System.err
-			.println("Representation: ClassNotFoundException in deserialize "
-					+ filename + " which is probably *not* OK");
-			e.printStackTrace();
-			succeeded = false;
-		} finally {
-			try {
-				if (fin == null) {
-					in.close();
-					fileIn.close();
-				}
-			} catch (IOException e) {
-				System.err
-				.println("Representation: IOException in file close in deserialize "
-						+ filename + " which is weird?");
-				succeeded = false;
-				e.printStackTrace();
-			}
-		}
-		return succeeded;
-	}
-
 	public abstract ArrayList<Location> getFaultyLocations();
 
 	public abstract ArrayList<WeightedAtom> getFixSourceAtoms();
@@ -214,7 +144,7 @@ Comparable<Representation<G>> {
 	public abstract Set<WeightedMutation> availableMutations(
 			Location faultyLocation);
 
-	protected int myHashCode = -1;
+	protected transient int myHashCode = -1;
 	@Override
 	public int hashCode() {
 		if(myHashCode < 0) {
@@ -226,9 +156,6 @@ Comparable<Representation<G>> {
 		myHashCode = builder.toHashCode();
 		}
 		return myHashCode;
-	}
-	
-	public static void configure(Properties prop) {
 	}
 	
 	public abstract void performEdit(Mutation edit, Location dst, EditHole source); 
@@ -251,7 +178,6 @@ Comparable<Representation<G>> {
 		String line;
 		ArrayList<String> allLines = new ArrayList<String>();
 		while ((line = br.readLine()) != null) {
-			// print the line.
 			allLines.add(line);
 		}
 		br.close();

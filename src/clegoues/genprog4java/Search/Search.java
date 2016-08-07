@@ -115,7 +115,6 @@ public abstract class Search<G extends EditOperation> {
 			.build();
 
 	//20 mutations 1/20 = 0.05
-	//public static HashMap<Mutation,Double> availableMutations = new HashMap<Mutation,Double>();
 	public static Map< Mutation, Double > availableMutations =
 			new ConfigurationBuilder< Map< Mutation, Double > >()
 			.withVarName( "availableMutations" )

@@ -51,10 +51,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.Pair;
@@ -137,6 +139,7 @@ public class Fitness {
 	// persistent test cache
 	private static HashMap<Representation, HashMap<TestCase, FitnessValue>> fitnessCache = new HashMap<Representation, HashMap<TestCase, FitnessValue>>();
 
+	// FIXME: add some kind of runtime hook to serialize this if the process gets killed prematurely.
 	public static void serializeTestCache() {
 		try {
 			FileOutputStream fos = new FileOutputStream("testcache.ser");
@@ -144,7 +147,7 @@ public class Fitness {
 			oos.writeObject(Fitness.fitnessCache);
 			oos.close();
 			fos.close();
-			System.out.println("Serialized fitnessCache HashMap to file hashmap.ser");
+			logger.debug("Serialized fitnessCache HashMap to file hashmap.ser");
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
@@ -173,7 +176,7 @@ public class Fitness {
 		}else {
 			testCache = new HashMap<Representation, HashMap<TestCase, FitnessValue>>();
 		}
-		//	System.out.println("hashmap is = " + testCache.entrySet().size() + "  " + testCache.toString());
+		System.out.println("hashmap is = " + testCache.entrySet().size() + "  " + testCache.toString());
 		fitnessCache.putAll(testCache);
 	}
 	/** 
@@ -203,6 +206,7 @@ public class Fitness {
 		Fitness.numNegativeTests = Fitness.negativeTests.size();
 		testSample = new ArrayList<TestCase>(Fitness.positiveTests);
 		restSample = new ArrayList<TestCase>();
+		Fitness.deserializeTestCache();
 	}
 
 	/**

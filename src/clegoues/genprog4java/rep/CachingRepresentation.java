@@ -38,6 +38,8 @@ import static clegoues.util.ConfigurationBuilder.BOOL_ARG;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,13 +64,15 @@ import clegoues.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class CachingRepresentation<G extends EditOperation> extends
-Representation<G> {
-	protected Logger logger = Logger.getLogger(CachingRepresentation.class);
+Representation<G>  {
 
-	public static final ConfigurationBuilder.RegistryToken token =
+	private static final long serialVersionUID = -1136012873048477306L;
+
+	protected transient Logger logger = Logger.getLogger(CachingRepresentation.class);
+
+	public transient static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
-	
-	//public static boolean skipFailedSanity = true;
+
 	public static boolean skipFailedSanity = ConfigurationBuilder.of( BOOL_ARG )
 		.withVarName( "skipFailedSanity" )
 		.withDefault( "true" )
@@ -81,10 +85,6 @@ Representation<G> {
 	
 	private double fitness = -1.0;
 
-	/*
-	 * cached file contents from [internal_compute_source_buffers]; avoid
-	 * recomputing/reserializing
-	 */
 	public ArrayList<Pair<ClassInfo, String>> alreadySourceBuffers = null;
 
 	public static int sequence = 0;
@@ -108,7 +108,6 @@ Representation<G> {
 		return this.fitness;
 	}
 
-	private ArrayList<String> alreadySourced = new ArrayList<String>();
 	private Pair<Boolean, String> alreadyCompiled = null;
 
 	public boolean getVariableLength() {
@@ -116,11 +115,7 @@ Representation<G> {
 	}
 
 	public void load(ArrayList<ClassInfo> bases) throws IOException {
-		
-		// FIXME: do deserializing String cacheName = base + ".cache";
-		// boolean didDeserialize = this.deserialize(cacheName,null, true);
-		// if(!didDeserialize) {
-		// this.serialize(cacheName, null, true);
+		// FIXME: deserialize properly
 		for (ClassInfo base : bases) {
 			this.fromSource(base);
 			logger.info("loaded from source " + base);
@@ -212,7 +207,6 @@ Representation<G> {
 	}
 
 	public FitnessValue testCase(TestCase test) {
-		 		
 		if (this.alreadyCompiled == null) {
 			String newName = CachingRepresentation.newVariantFolder();
 			this.variantFolder = newName;
@@ -236,31 +230,6 @@ Representation<G> {
 		return this.internalTestCase(this.variantFolder,
 				this.variantFolder + Configuration.globalExtension, test);
 	}
-
-	// kind of think internal test case should return here to save in
-	// fitnessTable,
-	// but wtfever for now
-
-	// compile assumes that the source has already been serialized to disk.
-
-	// I think for here, it's best to put it down in Java representation
-
-	// FIXME: OK, in OCaml there's an outputSource declaration here that assumes
-	// that
-	// the way we output code is to compute the source buffers AS STRINGS and
-	// then print out one per file.
-	// it's possible this is the same in Java, but unlikely, so I'm going to not
-	// implement this here yet
-	// and figure out how java files are manipulated first
-	// it would be nice if this, as the caching representation superclass,
-	// cached the "already sourced" info somehow, as with compile below
-	/*
-	 * void outputSource(String filename) { List<Pair<String,String>>
-	 * sourceBuffers = this.computeSourceBuffers(); for(Pair<String,String>
-	 * element : sourceBuffers) { String sourcename = element.getFirst(); String
-	 * outBuffer = element.getSecond; // output to disk } // alreadySourced :=
-	 * Some(lmap (fun (sname,_) -> sname) many_files); }
-	 */
 
 	@Override
 	protected List<Pair<ClassInfo, String>> computeSourceBuffers() {
@@ -311,7 +280,6 @@ Representation<G> {
 
 	protected FitnessValue internalTestCase(String sanityExename,
 			String sanityFilename, TestCase thisTest) {
-		// FIXME: the filename is wrong, here; it's looking based on the name of the edits incorporated, not the variant folder name, as it should be
 		
 		CommandLine command = this.internalTestCaseCommand(sanityExename,
 				sanityFilename, thisTest);
@@ -323,7 +291,6 @@ Representation<G> {
 		executor.setWatchdog(watchdog);
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		// FIXME: the problem is it's not finding the jacocagent because it's at ./lib, not at /path/to/lib
 		executor.setExitValue(0);
 
 		executor.setStreamHandler(new PumpStreamHandler(out));
@@ -353,7 +320,7 @@ Representation<G> {
 	}
 
 	public void cleanup() {
-		// TODO: remove source code from disk
+		// TODO: remove source code from disk?
 		// TODO: remove compiled binary from disk
 		// TODO: remove applicable subdirectories from disk
 	}
@@ -387,7 +354,6 @@ Representation<G> {
 	 */
 	void updated() {
 		alreadySourceBuffers = null;
-		alreadySourced = new ArrayList<String>();
 		alreadyCompiled = null;
 		fitness = -1.0;
 		myHashCode = -1;
@@ -397,10 +363,13 @@ Representation<G> {
 	} // subclasses can override as desired
 
 	public void reduceFixSpace() {
-
 	}
 
 	protected abstract CommandLine internalTestCaseCommand(String exeName,
 			String fileName, TestCase test);
+	
+	 private void writeObject(java.io.ObjectOutputStream out)
+		     throws IOException {
 
+	 }
 }
