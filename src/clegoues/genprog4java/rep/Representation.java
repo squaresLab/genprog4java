@@ -83,10 +83,10 @@ Comparable<Representation<G>> {
 	public static boolean cacheflag = false;
 	
 	public HashMap<List<Integer>, HashMap<String, FitnessValue>> getTestCache() {
-	     return this.fitnessCache;
+	     return Representation.fitnessCache;
 	}
 	
-	public void searilizeTestCache(HashMap<List<Integer>, HashMap<String, FitnessValue>> testCacheMap) {
+	public void serializeTestCache(HashMap<List<Integer>, HashMap<String, FitnessValue>> testCacheMap) {
 		try {
 			FileOutputStream fos = new FileOutputStream("testcache.ser");
 			ObjectOutputStream oos = new ObjectOutputStream(fos);

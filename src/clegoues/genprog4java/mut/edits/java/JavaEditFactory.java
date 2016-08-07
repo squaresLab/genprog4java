@@ -107,7 +107,7 @@ public class JavaEditFactory {
 			// I *believe* this is just variable names and doesn't check required
 			// types, which are also collected
 			// at parse time and thus could be considered here.
-			if(!variant.semanticInfo.scopeCheckOK(potentiallyBuggyStmt, potentialFixStmt)) {
+			if(!JavaRepresentation.semanticInfo.scopeCheckOK(potentiallyBuggyStmt, potentialFixStmt)) {
 				continue;
 			}
 

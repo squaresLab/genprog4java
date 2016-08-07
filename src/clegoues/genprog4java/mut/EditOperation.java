@@ -33,9 +33,6 @@
 
 package clegoues.genprog4java.mut;
 
-import java.util.HashMap;
-import java.util.List;
-
 public interface EditOperation<R> {
 	
 	public EditHole getHoleCode();
