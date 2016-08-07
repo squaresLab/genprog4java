@@ -321,7 +321,7 @@ CachingRepresentation<G> {
 			logger.info(test);
 			// this expectedResult is just 'true' for positive tests and 'false'
 			// for neg tests
-			if (this.testCase(test) != expectedResult
+			if (this.testCase(test).isAllPassed() != expectedResult
 					&& !FaultLocRepresentation.allowCoverageFail) {
 				logger.error("FaultLocRep: unexpected coverage result: "
 						+ test.toString());

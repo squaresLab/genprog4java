@@ -335,17 +335,13 @@ public abstract class Search<G extends EditOperation> {
 	CloneNotSupportedException {
 
 		try {
-			original.cacheflag = true;
 			this.runAlgorithm(original, incomingPopulation);
-			original.serializeTestCache(original.getTestCache());
-			original.cacheflag = false;
+			Fitness.serializeTestCache();
 		} catch(RepairFoundException e) {
-			original.serializeTestCache(original.getTestCache());
-			original.cacheflag = false;
+			Fitness.serializeTestCache();
 			return;
 		} catch (GiveUpException e) {
-			original.serializeTestCache(original.getTestCache());
-			original.cacheflag = false;
+			Fitness.serializeTestCache();
 			return;
 		}
 	}
