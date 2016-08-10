@@ -68,7 +68,6 @@ import clegoues.genprog4java.rep.JavaRepresentation;
 
 public class SemanticInfoVisitor extends ASTVisitor {
 
-	private List<ASTNode> nodeSet;
 	private ScopeInfo scopes;
 
 	private boolean containsFinalVar = false;
@@ -84,7 +83,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private HashSet<String> currentMethodScope = new HashSet<String>();
 	private Stack<HashSet<String>> methodScopeStack = new Stack<HashSet<String>>();
 
-	private HashMap<String,String> methodReturnType;
 	private HashMap<String,String> variableType;
 
 	private HashSet<String> currentLoopScope = new HashSet<String>();
@@ -131,7 +129,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			newScope.addAll(this.availableTypes);
 			this.scopes.addToMethodScope(node, newScope);
 			this.scopes.addToClassScope(this.availableMethodsAndFields);
-			this.nodeSet.add(node);
+			this.scopes.addToNodeSet(node);
 
 		}
 
@@ -339,7 +337,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			}
 		}
 		String returnType = node.getReturnType2()==null?"null":node.getReturnType2().toString();
-		this.methodReturnType.put(node.getName().getIdentifier(), returnType);
+		this.scopes.addMethodReturnType(node.getName().getIdentifier(), returnType);
 		return true;
 	}
 
@@ -383,29 +381,12 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.cu = cu;
 	}
 
-
-	public void setNodeSet(List<ASTNode> o) {
-		this.nodeSet = o;
-	}
-
-	public HashMap<String,String> getMethodReturnType() {
-		return this.methodReturnType;
-	}
-
-	public void setMethodReturnType(HashMap<String,String> methodReturnTypeMap) {
-		this.methodReturnType = methodReturnTypeMap;
-	}
-
 	public HashMap<String,String> getVariableType() {
 		return this.variableType;
 	}
 
 	public void setVariableType(HashMap<String,String> variableTypeSet) {
 		this.variableType = variableTypeSet;
-	}
-
-	public List<ASTNode> getNodeSet() {
-		return this.nodeSet;
 	}
 
 	public void setScopeList(ScopeInfo scopeList) {
