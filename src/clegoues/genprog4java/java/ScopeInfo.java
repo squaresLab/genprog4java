@@ -36,6 +36,7 @@ package clegoues.genprog4java.java;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
@@ -92,6 +93,7 @@ public class ScopeInfo implements SymbolTable
 		this.variableTypes = new HashMap<String,String>();
 		this.availableTypes = new HashSet<String>();
 		this.availableMethodsAndFields = new HashSet<String>();
+		this.availableMethodsAndFields.add("this");
 	}
 	
 	public Set<String> getNamesDeclared(ASTNode buggy) {
@@ -184,6 +186,7 @@ public class ScopeInfo implements SymbolTable
 		newScope.addAll(currentLoopScope);
 		newScope.addAll(this.availableTypes);
 		this.addToMethodScope(node, newScope);
+		this.addToClassScope(this.availableMethodsAndFields);
 		this.stmts.add(node);
 	}
 
@@ -204,5 +207,21 @@ public class ScopeInfo implements SymbolTable
 				(availableTypes != null && availableTypes.contains(lookingFor)) ||
 				(currentMethodScope != null && currentMethodScope.contains(lookingFor)) ||
 				(currentLoopScope != null && currentLoopScope.contains(lookingFor));
+	}
+
+	public void addToAvailableMethodsAndFields(String identifier) {
+		this.availableMethodsAndFields.add(identifier);
+	}
+
+	public List<ASTNode> getStatements() {
+		return this.stmts;
+	}
+
+	public Set<String> getAvailableTypes() {
+		return this.availableTypes;
+	}
+
+	public Set<String> getAvailableMethodsAndFields() {
+		return this.availableMethodsAndFields;
 	}
 }

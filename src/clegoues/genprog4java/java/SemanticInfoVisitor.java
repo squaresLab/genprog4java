@@ -33,12 +33,10 @@
 
 package clegoues.genprog4java.java;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
-import java.util.TreeSet;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -84,11 +82,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private Stack<HashSet<String>> methodScopeStack = new Stack<HashSet<String>>();
 
 	private HashSet<String> currentLoopScope = new HashSet<String>();
-	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>();
-
-	// it might make sense to store these separately, but for now, this will do
-	// upon reflection, it makes more sense to do add these after the whole thing has been parsed
-	private HashSet<String> availableMethodsAndFields; 
+	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>(); 
 
 	private HashSet<String> namesDeclared = new HashSet<String>();
 	private Stack<HashSet<String>> namesDeclaredStack = new Stack<HashSet<String>>();
@@ -97,10 +91,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	public SemanticInfoVisitor() {
 
-	}
-	public void setAvailableMethodsAndFields(HashSet<String> mandf) {
-		this.availableMethodsAndFields = mandf;
-		this.availableMethodsAndFields.add("this");
 	}
 
 
@@ -114,12 +104,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 		if (JavaRepresentation.canRepair(node)) 
 		{
-			// add scope information
-			TreeSet<String> newScope = new TreeSet<String>();
-
-			this.scopes.addToClassScope(this.availableMethodsAndFields);
 			this.scopes.addToNodeSet(node, currentMethodScope, currentLoopScope);
-
 		}
 
 		if(node instanceof EnhancedForStatement || 
@@ -295,16 +280,16 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				for (Object o : fd.fragments()) {
 					if (o instanceof VariableDeclarationFragment) {
 						VariableDeclarationFragment v = (VariableDeclarationFragment) o;
-						this.availableMethodsAndFields.add(v.getName().getIdentifier());
+						scopes.addToAvailableMethodsAndFields(v.getName().getIdentifier());
 					}
 				}
 			}
 
 			for(MethodDeclaration md : node.getMethods()) {
-				this.availableMethodsAndFields.add(md.getName().getIdentifier());
+				scopes.addToAvailableMethodsAndFields(md.getName().getIdentifier());
 			}
 			if(node.getSuperclassType() != null) {
-				this.availableMethodsAndFields.add("super");
+				scopes.addToAvailableMethodsAndFields("super");
 			}
 		}
 		return true;
