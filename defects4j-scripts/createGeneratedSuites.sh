@@ -10,8 +10,8 @@ DEFECTS4JDIR="$2"
 #rm -rf /tmp/*
 
 
-rm -rf $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites.txt
-mkdir $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites.txt
+rm $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites.txt
+touch $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites.txt
 
 STARTAT=1
 
@@ -27,8 +27,8 @@ do
   "2" ) 
     PROJECT="Lang"
 #    NUMBEROFBUGS=65
-    NUMBEROFBUGS=42
-    STARTAT=42
+    NUMBEROFBUGS=43
+    STARTAT=41
   ;;
   "3" ) 
     PROJECT="Chart"

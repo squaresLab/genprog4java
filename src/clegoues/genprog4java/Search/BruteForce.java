@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.localization.Location;
@@ -19,7 +21,6 @@ import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.WeightedAtom;
-import clegoues.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public class BruteForce<G extends EditOperation> extends Search<G> {
@@ -115,8 +116,8 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 				@Override
 				public int compare(Pair<Mutation, Double> one,
 						Pair<Mutation, Double> two) {
-					return (new Double(two.getSecond())).compareTo((new Double(
-							one.getSecond())));
+					return (new Double(two.getRight())).compareTo((new Double(
+							one.getRight())));
 				}
 			};
 			// wouldn't real polymorphism be the actual legitimate best right
@@ -127,12 +128,12 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 					descendingMutations);
 			double sumMutScale = 0.0;
 			for (Pair<Mutation, Double> item : availableMutations) {
-				sumMutScale += item.getSecond();
+				sumMutScale += item.getRight();
 			}
 			double mutScale = 1 / sumMutScale;
 			for (Pair<Mutation, Double> item : availableMutations) {
 				rescaledMutations.add(new WeightedMutation(item
-						.getFirst(), item.getSecond() * mutScale));
+						.getLeft(), item.getRight() * mutScale));
 			}
 
 			// rescaled Mutations gives us the mutation,weight pairs available
@@ -146,8 +147,8 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 				}
 			};
 			for (Pair<Mutation, Double> mutation : rescaledMutations) {
-				Mutation mut = mutation.getFirst();
-				double prob = mutation.getSecond();
+				Mutation mut = mutation.getLeft();
+				double prob = mutation.getRight();
 				logger.info(faultyLocation.getWeight() + " " + prob);
 				
 				switch(mut) {

@@ -33,12 +33,11 @@
 
 package clegoues.util;
 
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.main.Configuration;
@@ -57,13 +56,13 @@ public class GlobalUtils {
 		assert(atoms.size() > 0);
 		double totalWeight = 0.0;
 		for(Pair<?,Double> atom : atoms) {
-			totalWeight += atom.getSecond();
+			totalWeight += atom.getRight();
 		}
 		assert(totalWeight > 0.0) ;
 		double wanted = Configuration.randomizer.nextDouble() * totalWeight;
 		double sofar = 0.0;
 		for(Pair<?,Double> atom : atoms) {
-			double here = sofar + atom.getSecond();
+			double here = sofar + atom.getRight();
 			if(here >= wanted) {
 				return atom;
 			}
@@ -76,14 +75,14 @@ public class GlobalUtils {
 		assert(atoms.size() > 0);
 		double totalWeight = 0.0;
 		for(Pair<?,Double> atom : atoms) {
-			totalWeight += atom.getSecond();
+			totalWeight += atom.getRight();
 		}
 		assert(totalWeight > 0.0) ;
 
 		double wanted = weight * totalWeight;
 		double sofar = 0.0;
 		for(Pair<?,Double> atom : atoms) {
-			double here = sofar + atom.getSecond();
+			double here = sofar + atom.getRight();
 			if(here >= wanted) {
 				return atom;
 			}

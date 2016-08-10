@@ -134,7 +134,7 @@ public class JavaEditFactory {
 			// I *believe* this is just variable names and doesn't check required
 			// types, which are also collected
 			// at parse time and thus could be considered here.
-			if(!variant.semanticInfo.scopeCheckOK(potentiallyBuggyStmt, potentialFixStmt)) {
+			if(!JavaRepresentation.semanticInfo.scopeCheckOK(potentiallyBuggyStmt, potentialFixStmt)) {
 				continue;
 			}
 
@@ -256,10 +256,10 @@ public class JavaEditFactory {
 			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
 			Set<WeightedAtom> fixStmts = this.scopeHelper(location, variant, editType);
 			for(WeightedAtom fixStmt : fixStmts) {
-				JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getFirst());
+				JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getLeft());
 				ASTNode fixAST = potentialFixStmt.getASTNode();
 				StatementHole stmtHole = new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId());
-				retVal.add(new WeightedHole(stmtHole, fixStmt.getSecond()));
+				retVal.add(new WeightedHole(stmtHole, fixStmt.getRight()));
 			}
 			return retVal;
 		}
@@ -268,13 +268,13 @@ public class JavaEditFactory {
 			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
 			for (WeightedAtom item : this.scopeHelper(location, variant, editType)) {
 				int atom = item.getAtom();
-				Set<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getSecond()), variant, editType);
+				Set<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getRight()), variant, editType);
 				for (WeightedAtom there : inScopeThere) {
 					if (there.getAtom() != location.getId()) { 
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
 						ASTNode fixAST = potentialFixStmt.getASTNode();
 						StatementHole stmtHole = new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId());
-						retVal.add(new WeightedHole(stmtHole, there.getSecond()));
+						retVal.add(new WeightedHole(stmtHole, there.getRight()));
 						break;
 					}
 				}

@@ -134,10 +134,15 @@ case "$OPTION" in
   echo Creating new test suite...
   cd "$DEFECTS4JDIR"/framework/bin/
   #THIS IS COMMENTED BECAUSE THIS WAS ALREADY CREATED
-  #perl run_randoop.pl -p "$PROJECT" -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfRandoop/ -b 180
+  perl run_randoop.pl -p "$PROJECT" -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfRandoop/ -b 10
   perl "$DEFECTS4JDIR"/framework/util/fix_test_suite.pl -p "$PROJECT" -d $BUGWD/"$TESTWD"/outputOfRandoop/$PROJECT/randoop/1/
   OUTPUT=$(defects4j test -s $BUGWD/"$TESTWD"/outputOfRandoop/$PROJECT/randoop/1/"$PROJECT"-"$BUGNUMBER"f-randoop.1.tar.bz2 -w $BUGWD)
-  echo "${OUTPUT:(15)}: tests failed in $PROJECT $BUGNUMBER" >> $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites.txt
+  TOTALEXECUTED=$(wc -l < "$DEFECTS4JDIR/totalTestsExecuted.txt")
+  FAILEDTESTS=$(echo ${OUTPUT:(15)} | awk '{print $1;}')
+  echo "$PROJECT $BUGNUMBER $TOTALEXECUTED $FAILEDTESTS" >> $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites.txt
+  echo "$FAILEDTESTS: tests failed from $TOTALEXECUTED in $PROJECT $BUGNUMBER"
+  rm "$DEFECTS4JDIR/totalTestsExecuted.txt"
+
 
 
   #PRINT=$(echo "${OUTPUT:(15)}")
@@ -152,8 +157,6 @@ case "$OPTION" in
 
 ;;
 esac
-
-
 
 
 #Remove a percentage of the positive tests in the test suite

@@ -34,23 +34,16 @@
 package clegoues.genprog4java.rep;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.exec.CommandLine;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.Search.GiveUpException;
@@ -64,7 +57,6 @@ import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.mut.WeightedMutation;
-import clegoues.util.Pair;
 
 
 @SuppressWarnings("rawtypes")
@@ -75,56 +67,6 @@ Comparable<Representation<G>> {
 	protected Localization localization = null;
 
 	protected String variantFolder = "";
-	
-	// persistent test cache
-	private static HashMap<List<Integer>, HashMap<String, FitnessValue>> fitnessCache = new HashMap<List<Integer>, HashMap<String, FitnessValue>>();
-	
-	// flag to indicate when to serialize the fitnessCache
-	public static boolean cacheflag = false;
-	
-	public HashMap<List<Integer>, HashMap<String, FitnessValue>> getTestCache() {
-	     return this.fitnessCache;
-	}
-	
-	public void searilizeTestCache(HashMap<List<Integer>, HashMap<String, FitnessValue>> testCacheMap) {
-		try {
-			FileOutputStream fos = new FileOutputStream("testcache.ser");
-			ObjectOutputStream oos = new ObjectOutputStream(fos);
-			oos.writeObject(testCacheMap);
-			oos.close();
-			fos.close();
-			System.out.println("Serialized fitnessCache HashMap to file hashmap.ser");
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-	}
-	
-	public HashMap<List<Integer>, HashMap<String, FitnessValue>> desearializeTestCache(){
-		File fl = new File("testcache.ser");
-		HashMap<List<Integer>, HashMap<String, FitnessValue>> testCache = null;
-		if(fl.isFile()){
-			try
-		      {
-		         FileInputStream fis = new FileInputStream("testcache.ser");
-		         ObjectInputStream ois = new ObjectInputStream(fis);
-		         testCache = (HashMap) ois.readObject();
-		         ois.close();
-		         fis.close();
-		      }catch(IOException ioe)
-		      {
-		         ioe.printStackTrace();
-		      }catch(ClassNotFoundException c)
-		      {
-		         System.out.println("Class not found");
-		         c.printStackTrace();
-		      }
-		      System.out.println("Deserialized fitnessCache HashMap");			
-		}else {
-			testCache = new HashMap<List<Integer>, HashMap<String, FitnessValue>>();
-		}
-	//	System.out.println("hashmap is = " + testCache.entrySet().size() + "  " + testCache.toString());
-		return testCache;
-	}
 
 	public Representation() {
 	}
@@ -165,80 +107,6 @@ Comparable<Representation<G>> {
 
 	public abstract void load(ArrayList<ClassInfo> classNames) throws IOException,
 	UnexpectedCoverageResultException;
-
-	public void serialize(String filename, ObjectOutputStream fout,
-			boolean globalinfo) { // second parameter is optional
-		ObjectOutputStream out = null;
-		FileOutputStream fileOut = null;
-		try {
-			if (fout == null) {
-				fileOut = new FileOutputStream(filename + ".ser");
-				out = new ObjectOutputStream(fileOut);
-			} else {
-				out = fout;
-			}
-			out.writeObject(this.getGenome());
-		} catch (IOException e) {
-			System.err
-			.println("Representation: largely unexpected failure in serialization.");
-			e.printStackTrace();
-		} finally {
-			if (fout == null) {
-				try {
-					if (out != null)
-						out.close();
-					if (fileOut != null)
-						fileOut.close();
-				} catch (IOException e) {
-					System.err
-					.println("Representation: largely unexpected failure in serialization.");
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public boolean deserialize(String filename, ObjectInputStream fin,
-			boolean globalinfo) { // second parameter is optional
-		FileInputStream fileIn = null;
-		ObjectInputStream in = null;
-		boolean succeeded = true;
-		try {
-			if (fin == null) {
-				fileIn = new FileInputStream(filename + ".ser");
-				in = new ObjectInputStream(fileIn);
-			} else {
-				in = fin;
-			}
-			this.setGenome((ArrayList<G>) in.readObject());
-		} catch (IOException e) {
-			logger.error("Representation: IOException in deserialize "
-					+ filename + " which is probably OK");
-			e.printStackTrace();
-			succeeded = false;
-		} catch (ClassNotFoundException e) {
-			System.err
-			.println("Representation: ClassNotFoundException in deserialize "
-					+ filename + " which is probably *not* OK");
-			e.printStackTrace();
-			succeeded = false;
-		} finally {
-			try {
-				if (fin == null) {
-					in.close();
-					fileIn.close();
-				}
-			} catch (IOException e) {
-				System.err
-				.println("Representation: IOException in file close in deserialize "
-						+ filename + " which is weird?");
-				succeeded = false;
-				e.printStackTrace();
-			}
-		}
-		return succeeded;
-	}
 	
 	public abstract boolean sanityCheck();
 
@@ -255,14 +123,24 @@ Comparable<Representation<G>> {
 	// I don't love this solution (test case knowing about coverage), but
 	// it's the easiest way to get the necessary info to internalTestCaseCommand
 	// without making coverage computation a state variable on rep.
-	public abstract boolean testCase(TestCase test);
-	public abstract boolean testCase(TestCase test, boolean doingCoverage);
+	public abstract FitnessValue testCase(TestCase test);
+	public abstract FitnessValue testCase(TestCase test, boolean doingCoverage);
 
 	public abstract Set<WeightedMutation> availableMutations(
 			Location faultyLocation);
 
-
-	public static void configure(Properties prop) {
+	protected transient int myHashCode = -1;
+	@Override
+	public int hashCode() {
+		if(myHashCode < 0) {
+		HashCodeBuilder builder = new HashCodeBuilder();
+		List<Pair<ClassInfo, String>> sourceBuffers = computeSourceBuffers();
+		for (Pair<ClassInfo, String> ele : sourceBuffers) {
+			builder.append(ele.getRight());
+		}
+		myHashCode = builder.toHashCode();
+		}
+		return myHashCode;
 	}
 	
 	public abstract void performEdit(Mutation edit, Location dst, EditHole source); 
@@ -302,6 +180,7 @@ Comparable<Representation<G>> {
 
 	public abstract Location instantiateLocation(Integer i, double negWeight);
 	
+	// FIXME: why do I need this in representation again?
 	public abstract CommandLine internalTestCaseCommand(String exeName, String fileName, TestCase test, boolean doingCoverage);
 
 	protected abstract CommandLine internalTestCaseCommand(String exeName,
@@ -320,11 +199,4 @@ Comparable<Representation<G>> {
 	}
 	
 
-	public static HashMap<List<Integer>, HashMap<String, FitnessValue>> getFitnessCache() {
-		return fitnessCache;
-	}
-
-	public static void setFitnessCache(HashMap<List<Integer>, HashMap<String, FitnessValue>> fitnessCache) {
-		Representation.fitnessCache = fitnessCache;
-	}
 }
