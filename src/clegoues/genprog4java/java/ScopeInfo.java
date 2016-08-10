@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
@@ -223,5 +224,13 @@ public class ScopeInfo implements SymbolTable
 
 	public Set<String> getAvailableMethodsAndFields() {
 		return this.availableMethodsAndFields;
+	}
+
+	public Map<String,String> getMethodReturnTypes() {
+		return this.methodReturnType;
+	}
+
+	public Map<String,String> getVariableDataTypes() {
+		return this.variableTypes;
 	}
 }
