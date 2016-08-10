@@ -68,8 +68,6 @@ public class JavaParser
 	
 		this.visitor = new SemanticInfoVisitor();
 		this.visitor.setScopeList(scopeList);
-
-		this.visitor.setVariableType(variableTypes);
 		
 		this.visitor.setAvailableTypes(availableTypes);
 		this.visitor.setAvailableMethodsAndFields(availableMethodsAndFields);
@@ -82,10 +80,6 @@ public class JavaParser
 	
 	public HashSet<String> getAvailableMethodsAndFields() {
 		return this.availableMethodsAndFields;
-	}
-	
-	public HashMap<String,String> getVariableDataTypes(){
-		return variableTypes;
 	}
 	
 	public CompilationUnit getCompilationUnit()

@@ -83,8 +83,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private HashSet<String> currentMethodScope = new HashSet<String>();
 	private Stack<HashSet<String>> methodScopeStack = new Stack<HashSet<String>>();
 
-	private HashMap<String,String> variableType;
-
 	private HashSet<String> currentLoopScope = new HashSet<String>();
 	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>();
 
@@ -350,7 +348,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				namesDeclared.add(name);
 				if(!currentLoopScope.contains(name)) {
 					this.currentMethodScope.add(v.getName().getIdentifier());
-					variableType.put(v.getName().toString(), node.getType().toString());
+					this.scopes.addVariableType(v.getName().toString(), node.getType().toString());
 				}
 			}
 		}
@@ -366,7 +364,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				namesDeclared.add(name);
 				if(!currentLoopScope.contains(name)) {
 					this.currentMethodScope.add(v.getName().getIdentifier());
-					variableType.put(v.getName().toString().toLowerCase(), node.getType().toString());
+					this.scopes.addVariableType(v.getName().toString().toLowerCase(), node.getType().toString());
 				}
 			}
 		}
@@ -381,29 +379,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.cu = cu;
 	}
 
-	public HashMap<String,String> getVariableType() {
-		return this.variableType;
-	}
-
-	public void setVariableType(HashMap<String,String> variableTypeSet) {
-		this.variableType = variableTypeSet;
-	}
-
 	public void setScopeList(ScopeInfo scopeList) {
 		this.scopes = scopeList;
 	}
 
-	//	@Override
-	//	public boolean visit(Initializer node) {
-	//		List mods = node.modifiers(); // FIXME need to deal with static.
-	//
-	//		for (Object o : mods) {
-	//			if (o instanceof Modifier) {
-	//				if (((Modifier) o).isStatic()) {
-	//					this.currentMethodScope = new HashSet<String>();
-	//				}
-	//			}
-	//		}
-	//		return super.visit(node);
-	//	}
 }
