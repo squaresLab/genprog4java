@@ -60,26 +60,12 @@ public class JavaParser
 	
 	/** compilation unit from parsed file; to be returned/collected by the parser client */
 	private CompilationUnit compilationUnit;
-
 	
 
 	public JavaParser(ScopeInfo scopeList)
 	{
-	
 		this.visitor = new SemanticInfoVisitor();
 		this.visitor.setScopeList(scopeList);
-		
-		this.visitor.setAvailableTypes(availableTypes);
-		this.visitor.setAvailableMethodsAndFields(availableMethodsAndFields);
-
-	}
-
-	public HashSet<String> getAvailableTypes() {
-		return this.availableTypes;
-	}
-	
-	public HashSet<String> getAvailableMethodsAndFields() {
-		return this.availableMethodsAndFields;
 	}
 	
 	public CompilationUnit getCompilationUnit()

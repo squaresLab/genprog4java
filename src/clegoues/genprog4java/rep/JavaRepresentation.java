@@ -213,12 +213,12 @@ CachingRepresentation<JavaEditOperation> {
 
 		myParser.parse(path, Configuration.libs.split(File.pathSeparator));
 
-		List<ASTNode> stmts = myParser.getStatements();
+		List<ASTNode> stmts = scopeInfo.getStatements();
 		sourceInfo.addToBaseCompilationUnits(pair, myParser.getCompilationUnit());
 		semanticInfo.addAllSemanticInfo(myParser);
 		
-		Set<String> knownTypesInScope = myParser.getAvailableTypes();
-		Set<String> knownMethodsAndFields = myParser.getAvailableMethodsAndFields();
+		Set<String> knownTypesInScope = scopeInfo.getAvailableTypes();
+		Set<String> knownMethodsAndFields = scopeInfo.getAvailableMethodsAndFields();
 		
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
