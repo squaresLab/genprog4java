@@ -182,4 +182,8 @@ public class ScopeInfo implements SymbolTable
 	public void addMethodReturnType(String methodName, String methodType) {
 		this.methodReturnType.put(methodName, methodType);
 	}
+
+	public void addVariableType(String varName, String varTyp) {
+		this.variableTypes.put(varName, varTyp);
+	}
 }
