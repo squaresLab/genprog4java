@@ -117,8 +117,10 @@ public class Fitness {
 			.withHelp( "file containing names of negative test classes" )
 			.inGroup( "Fitness Parameters" )
 			.build();
+	
 	public static Boolean clearTestCache = ConfigurationBuilder.of(BOOLEAN ) 
 			.withDefault("false")
+			.withVarName("clearTestCache")
 			.withHelp("clear the test cache")
 			.inGroup("Fitness Parameters")
 			.build();
@@ -141,7 +143,6 @@ public class Fitness {
 	private static int numPositiveTests;
 	private static int numNegativeTests;
 
-	
 	// persistent test cache
 	private static HashMap<Integer, HashMap<TestCase, FitnessValue>> fitnessCache = new HashMap<Integer, HashMap<TestCase, FitnessValue>>();
 
