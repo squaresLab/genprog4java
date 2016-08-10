@@ -118,6 +118,7 @@ public class Fitness {
 			.inGroup( "Fitness Parameters" )
 			.build();
 	
+	/** clear the test cache.  Primarily for debug purposes. */
 	public static Boolean clearTestCache = ConfigurationBuilder.of(BOOLEAN ) 
 			.withDefault("false")
 			.withVarName("clearTestCache")
