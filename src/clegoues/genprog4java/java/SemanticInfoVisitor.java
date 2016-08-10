@@ -86,8 +86,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private HashSet<String> currentLoopScope = new HashSet<String>();
 	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>();
 
-	// declared or imported; primitive types are always available;
-	private HashSet<String> availableTypes; 
 	// it might make sense to store these separately, but for now, this will do
 	// upon reflection, it makes more sense to do add these after the whole thing has been parsed
 	private HashSet<String> availableMethodsAndFields; 
@@ -104,11 +102,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.availableMethodsAndFields = mandf;
 		this.availableMethodsAndFields.add("this");
 	}
-	public void setAvailableTypes(HashSet<String> typs) {
-		this.availableTypes = typs;
-	}
 
-	// FIXME figure out what a node declares
 
 	@Override
 	public void preVisit(ASTNode node) {
@@ -122,12 +116,9 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		{
 			// add scope information
 			TreeSet<String> newScope = new TreeSet<String>();
-			newScope.addAll(this.currentMethodScope);
-			newScope.addAll(this.currentLoopScope);
-			newScope.addAll(this.availableTypes);
-			this.scopes.addToMethodScope(node, newScope);
+
 			this.scopes.addToClassScope(this.availableMethodsAndFields);
-			this.scopes.addToNodeSet(node);
+			this.scopes.addToNodeSet(node, currentMethodScope, currentLoopScope);
 
 		}
 
@@ -231,12 +222,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		return true;
 	}
 
-	private boolean anywhereInScope(String lookingFor) {
-		return (availableMethodsAndFields != null && availableMethodsAndFields.contains(lookingFor)) || 
-				(availableTypes != null && availableTypes.contains(lookingFor)) ||
-				(currentMethodScope != null && currentMethodScope.contains(lookingFor)) ||
-				(currentLoopScope != null && currentLoopScope.contains(lookingFor));
-	}
+
 
 	@Override
 	public boolean visit(SimpleName node) {
@@ -246,7 +232,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		// but I'm not yet so we'll make do
 		String name = node.getIdentifier();
 		this.requiredNames.add(name);
-		if(!anywhereInScope(name)) {
+		if(!scopes.anywhereInScope(name, currentMethodScope, currentLoopScope)) {
 			// because we're parsing, *if this CU parses*, we can assume it doesn't reference
 			// anything that's not in scope
 			// this means that if we haven't seen a name before, it's almost certainly the name of a method
@@ -255,7 +241,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			// imports, we just add the SimpleName to the list of available names
 			// kind of a cheap trick, but whatever
 			// the one thing I'm not sure about is if I should add this to available types or...something else
-			this.availableTypes.add(name);
+			this.scopes.addToAvailableTypes(name);
 		}
 		return true;
 	}
@@ -296,7 +282,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		if(!node.isOnDemand() && !node.isStatic()) { // possible FIXME: handle all static stuff separately?
 			String name = node.getName().getFullyQualifiedName();
 			String[] split = name.split("\\.");
-			availableTypes.add(split[split.length - 1]);
+			this.scopes.addToAvailableTypes(split[split.length - 1]);
 		}
 		return false;
 	}
@@ -304,7 +290,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(TypeDeclaration node) {
 		if(!node.isInterface()) {
-			availableTypes.add(node.getName().getIdentifier());
+			this.scopes.addToAvailableTypes(node.getName().getIdentifier());
 			for(FieldDeclaration fd : node.getFields()) {
 				for (Object o : fd.fragments()) {
 					if (o instanceof VariableDeclarationFragment) {
