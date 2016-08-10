@@ -74,7 +74,8 @@ public class ObjectInitializer extends JavaEditOperation {
 						newAssignment.setOperator(Assignment.Operator.ASSIGN);
 					
 						ExpressionStatement es = myAST.newExpressionStatement(newAssignment);
-						argsToInit.add(Pair.of(asExp, newVarName));
+						Pair toAdd = Pair.of(asExp, newVarName);
+						argsToInit.add(toAdd);
 						newDeclarations.add(es);
 						break;
 					}
