@@ -36,10 +36,13 @@ package clegoues.genprog4java.java;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
-public class ScopeInfo
+import clegoues.genprog4java.treelm.SymbolTable;
+
+public class ScopeInfo implements SymbolTable
 {
 	private Set<String> classScope; // stuff that's IN SCOPE at the statement, not used at the statement
 
@@ -109,5 +112,35 @@ public class ScopeInfo
 	public Set<String> getRequiredNames(ASTNode buggy)
 	{
 		return this.requiredNames.get(buggy);
+	}
+
+	@Override
+	public void enter(int nodeType) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void leave(int nodeType) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getFullyQualifiedTypeName(String simpleName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Supplier<String> allocFreeName(String type) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Supplier<String> getNameForType(String type) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
