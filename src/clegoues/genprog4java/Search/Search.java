@@ -90,7 +90,6 @@ public abstract class Search<G extends EditOperation> {
 			.withHelp( "path of the model" )
 			.inGroup( "Search Parameters" )
 			.build();
-	//private static int generations = 10;
 	protected static int generations = ConfigurationBuilder.of( INT )
 			.withVarName( "generations" )
 			.withDefault( "10" )
