@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -69,6 +70,8 @@ public class ScopeInfo implements SymbolTable
 	private HashMap<String,String> variableTypes;
 	
 	/** all imported types, or types seen over the course of parsing the CU */
+	// declared or imported; primitive types are always available;
+
 	private HashSet<String> availableTypes;
 	
 	/** methods and fields available in this CU, which we know either because
@@ -175,7 +178,12 @@ public class ScopeInfo implements SymbolTable
 		return null;
 	}
 
-	public void addToNodeSet(ASTNode node) {
+	public void addToNodeSet(ASTNode node, Set<String> currentMethodScope, Set<String> currentLoopScope) {
+		TreeSet<String> newScope = new TreeSet<String>();
+		newScope.addAll(currentMethodScope);
+		newScope.addAll(currentLoopScope);
+		newScope.addAll(this.availableTypes);
+		this.addToMethodScope(node, newScope);
 		this.stmts.add(node);
 	}
 
@@ -185,5 +193,16 @@ public class ScopeInfo implements SymbolTable
 
 	public void addVariableType(String varName, String varTyp) {
 		this.variableTypes.put(varName, varTyp);
+	}
+
+	public void addToAvailableTypes(String identifier) {
+		this.availableTypes.add(identifier);
+	}
+	
+	public boolean anywhereInScope(String lookingFor, Set<String> currentMethodScope, Set<String> currentLoopScope) {
+		return (availableMethodsAndFields != null && availableMethodsAndFields.contains(lookingFor)) || 
+				(availableTypes != null && availableTypes.contains(lookingFor)) ||
+				(currentMethodScope != null && currentMethodScope.contains(lookingFor)) ||
+				(currentLoopScope != null && currentLoopScope.contains(lookingFor));
 	}
 }
