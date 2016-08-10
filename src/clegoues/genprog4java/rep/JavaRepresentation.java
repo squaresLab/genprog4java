@@ -215,7 +215,7 @@ CachingRepresentation<JavaEditOperation> {
 
 		List<ASTNode> stmts = scopeInfo.getStatements();
 		sourceInfo.addToBaseCompilationUnits(pair, myParser.getCompilationUnit());
-		semanticInfo.addAllSemanticInfo(myParser);
+		semanticInfo.addAllSemanticInfo(scopeInfo);
 		
 		Set<String> knownTypesInScope = scopeInfo.getAvailableTypes();
 		Set<String> knownMethodsAndFields = scopeInfo.getAvailableMethodsAndFields();
