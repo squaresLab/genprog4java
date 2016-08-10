@@ -35,11 +35,13 @@ package clegoues.genprog4java.java;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.treelm.SymbolTable;
 
 public class ScopeInfo implements SymbolTable
@@ -51,6 +53,29 @@ public class ScopeInfo implements SymbolTable
 	private HashMap<ASTNode,Set<String>> namesDeclared; 
 	private HashMap<ASTNode, Boolean> containsFinalVarAssignment;
 	
+	
+	/** all ASTNodes of interest, corresponding to "repairable" Java statement types
+	 * a question (currently a question answered by {@link JavaRepresentation.canRepair})
+	 */
+	private LinkedList<ASTNode> stmts;
+	
+	/** method names --> type name.  I keep considering changing this --- hate having
+	 * types as strings --- but haven't had a good reason to yet.
+	 */
+	private HashMap<String,String> methodReturnType;
+	/** same thing, for variable names.  In theory might not work well b/c of scoping; in practice
+	 * doesn't seem to be a problem. 
+	 */
+	private HashMap<String,String> variableTypes;
+	
+	/** all imported types, or types seen over the course of parsing the CU */
+	private HashSet<String> availableTypes;
+	
+	/** methods and fields available in this CU, which we know either because
+	 * we see their declaration, or because we've seen them used at some point (heuristic);
+	 */
+	private HashSet<String> availableMethodsAndFields;
+	
 	public ScopeInfo()
 	{
 		this.methodScope = new HashMap<ASTNode,Set<String>>();
@@ -58,6 +83,12 @@ public class ScopeInfo implements SymbolTable
 		this.requiredNames = new HashMap<ASTNode,Set<String>>();
 		this.namesDeclared = new HashMap<ASTNode,Set<String>>();
 		this.containsFinalVarAssignment = new HashMap<ASTNode, Boolean>();
+		
+		this.stmts = new LinkedList<ASTNode>();
+		this.methodReturnType = new HashMap<String,String>();
+		this.variableTypes = new HashMap<String,String>();
+		this.availableTypes = new HashSet<String>();
+		this.availableMethodsAndFields = new HashSet<String>();
 	}
 	
 	public Set<String> getNamesDeclared(ASTNode buggy) {
@@ -142,5 +173,13 @@ public class ScopeInfo implements SymbolTable
 	public Supplier<String> getNameForType(String type) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public void addToNodeSet(ASTNode node) {
+		this.stmts.add(node);
+	}
+
+	public void addMethodReturnType(String methodName, String methodType) {
+		this.methodReturnType.put(methodName, methodType);
 	}
 }
