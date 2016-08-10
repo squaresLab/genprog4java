@@ -8,17 +8,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TreeSet;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.mut.EditHole;
+import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
+import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
-import clegoues.util.Pair;
 
 public class ReplacementModel {
 
@@ -46,7 +46,12 @@ public class ReplacementModel {
 	final int WhileStatement = 21;
 
 	double replacementModel[][] = new double[22][22];
-	
+	double templatesCounter[] = new double[16];
+
+	double replacementCount =0;
+	double appendCount =0;
+	double deleteCount =0;
+
 
 	public void populateModel(String path){
 
@@ -58,13 +63,21 @@ public class ReplacementModel {
 			FileReader fileReader = new FileReader(path);
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-			int row = 0;
+			int lineNumber = 0;
 			while((line = bufferedReader.readLine()) != null) {
-				String[] tmp =line.split(" ");
-				for (int i = 0; i < tmp.length; i++) {
-					replacementModel[row][i]=Double.valueOf(tmp[i]);
+				if(lineNumber<484){
+					int column = lineNumber % 22;
+					int row = (int) Math.floor(lineNumber / 22);
+					replacementModel[row][column]=Double.valueOf(line);
 				}
-				++row;
+
+				if(lineNumber==484)replacementCount=Double.valueOf(line);
+				if(lineNumber==485)appendCount=Double.valueOf(line);
+				if(lineNumber==486)deleteCount=Double.valueOf(line);
+				if(lineNumber>=487 && !line.equalsIgnoreCase("")){
+					templatesCounter[lineNumber-487]=Double.valueOf(line);
+				}  
+				++lineNumber;
 			}   
 
 			// Always close files.
@@ -86,7 +99,7 @@ public class ReplacementModel {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public List<Pair<?,Double>> rescaleBasedOnModel(ArrayList<Pair<?,Double>> atoms, Representation<?> variant, int stmtIdBuggy) {
+	public List<Pair<?,Double>> rescaleReplacementsBasedOnModel(ArrayList<Pair<?,Double>> atoms, Representation<?> variant, int stmtIdBuggy) {
 		assert(atoms.size() > 0);
 
 		List retVal = new LinkedList();
@@ -97,15 +110,61 @@ public class ReplacementModel {
 		int row = stmtKindOfJavaStmt(buggyAstNode);
 
 		for(Pair<?,Double> atom: atoms){
-			ASTNode fixStmt = ((EditHole<ASTNode>)((WeightedHole)atom).getFirst()).getCode();
+			ASTNode fixStmt = ((EditHole<ASTNode>)((WeightedHole)atom).getLeft()).getCode();
 			int column = stmtKindOfJavaStmt(fixStmt);
-			atom.setSecond(Double.valueOf(replacementModel[row][column]+1));
+			atom.setValue(Double.valueOf(replacementModel[row][column]+1));
 			retVal.add(atom);
 
 		}
 		return retVal;
 	}
 
+	public ArrayList rescaleMutationsBasedOnModel(ArrayList<WeightedMutation> availableMutations){
+		assert(availableMutations.size() > 0);
+		ArrayList retVal = new ArrayList();
+		for(WeightedMutation wmut: availableMutations){
+			Mutation mutation = (Mutation) ((WeightedMutation)wmut).getLeft();
+			double prob = 0;
+			if(mutation == Mutation.REPLACE){
+				prob = replacementCount;
+			}else if(mutation == Mutation.APPEND){
+				prob = appendCount;
+			}else if(mutation == Mutation.DELETE){
+				prob = deleteCount;
+			}else{
+				int row = mutKind(mutation);
+				prob=Double.valueOf(templatesCounter[row]);
+			}
+			wmut.setValue(prob);
+			retVal.add(wmut);
+		}
+		return retVal;
+	}
+
+	private static int mutKind(Mutation mutation){
+		int retVal = -1;
+		switch(mutation){
+		case NULLCHECK: retVal=0; break;
+		case PARREP: retVal=1; break;
+		case FUNREP: retVal=2; break;
+		case PARADD: retVal=3; break;
+		case PARREM: retVal=3; break;
+		case OBJINIT: retVal=4; break;
+		case SEQEXCH: retVal=5; break;
+		case RANGECHECK: retVal=6; break;
+		case SIZECHECK: retVal=7; break;
+		case LBOUNDSET: retVal=8; break;
+		case UBOUNDSET: retVal=9; break;
+		case OFFBYONE: retVal=10; break;
+		case CASTCHECK: retVal=11; break;
+		case CASTERMUT: retVal=12; break;
+		case CASTEEMUT: retVal=13; break;
+		case EXPREP: retVal=14; break;
+		case EXPADD: retVal=15; break;
+		case EXPREM: retVal=15; break;
+		}
+		return retVal;
+	}
 
 
 	private static int stmtKindOfJavaStmt(ASTNode node){

@@ -23,6 +23,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
@@ -47,7 +48,6 @@ import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
-import clegoues.util.Pair;
 
 // this class implements boring, default path-file-style localization.
 @SuppressWarnings("rawtypes")
@@ -147,7 +147,7 @@ public class DefaultLocalization extends Localization {
 				locsToRemove.add(potentiallyBuggyLoc);
 			}else{
 				for (Pair<Mutation, Double> mutation : availableMutations) {
-					thereIsAtLeastOneMutThatApplies = thereIsAtLeastOneMutThatApplies || original.doesEditApply(potentiallyBuggyLoc, mutation.getFirst());
+					thereIsAtLeastOneMutThatApplies = thereIsAtLeastOneMutThatApplies || original.doesEditApply(potentiallyBuggyLoc, mutation.getLeft());
 				}
 				if(!thereIsAtLeastOneMutThatApplies){
 					locsToRemove.add(potentiallyBuggyLoc);
@@ -216,7 +216,7 @@ public class DefaultLocalization extends Localization {
 			logger.info(test);
 			// this expectedResult is just 'true' for positive tests and 'false'
 			// for neg tests
-			if (original.testCase(test, true) != expectedResult
+			if (original.testCase(test, true).isAllPassed() != expectedResult
 					&& !DefaultLocalization.allowCoverageFail) {
 				logger.error("FaultLocRep: unexpected coverage result: "
 						+ test.toString());
@@ -372,7 +372,7 @@ public class DefaultLocalization extends Localization {
 		//printout fault space with their weights
 		PrintWriter writer = new PrintWriter("FaultyStmtsAndWeights.txt", "UTF-8");
 		for (int i = 0; i < faultLocalization.size(); i++) {
-			writer.println("Location:\n" + faultLocalization.get(i).getFirst() + "Weight:\n" + faultLocalization.get(i).getWeight() + "\n");
+			writer.println("Location:\n" + faultLocalization.get(i).getLeft() + "Weight:\n" + faultLocalization.get(i).getWeight() + "\n");
 		}
 		writer.close();
 

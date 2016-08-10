@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.fitness.Fitness;
@@ -61,7 +62,6 @@ import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
-import clegoues.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class Search<G extends EditOperation> {
@@ -91,7 +91,6 @@ public abstract class Search<G extends EditOperation> {
 			.withHelp( "path of the model" )
 			.inGroup( "Search Parameters" )
 			.build();
-	//private static int generations = 10;
 	protected static int generations = ConfigurationBuilder.of( INT )
 			.withVarName( "generations" )
 			.withDefault( "10" )
@@ -116,7 +115,6 @@ public abstract class Search<G extends EditOperation> {
 			.build();
 
 	//20 mutations 1/20 = 0.05
-	//public static HashMap<Mutation,Double> availableMutations = new HashMap<Mutation,Double>();
 	public static Map< Mutation, Double > availableMutations =
 			new ConfigurationBuilder< Map< Mutation, Double > >()
 			.withVarName( "availableMutations" )
@@ -141,7 +139,7 @@ public abstract class Search<G extends EditOperation> {
 	public static String searchStrategy = ConfigurationBuilder.of( STRING )
 			.withVarName( "searchStrategy" )
 			.withFlag( "search" )
-			.withDefault( "ga" )
+			.withDefault( "rsrepair" )
 			.withHelp( "the search strategy to employ" )
 			.inGroup( "Search Parameters" )
 			.build();
@@ -282,9 +280,10 @@ public abstract class Search<G extends EditOperation> {
 				}else{
 					foundMutationThatCanApplyToAtom = true;
 				}
-				//choose a mutation at random
-				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(new ArrayList(availableMutations));
-				Mutation mut = chosenMutation.getFirst();
+				//choose a mutation 
+				ArrayList availableMutationsAL = rescaleMutations(availableMutations);
+				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(availableMutationsAL);
+				Mutation mut = chosenMutation.getLeft();
 				List<WeightedHole> allowed = variant.editSources(location, mut);
 				allowed = rescaleAllowed(mut,allowed, variant,location.getId());
 				WeightedHole selected = (WeightedHole) GlobalUtils
@@ -293,12 +292,21 @@ public abstract class Search<G extends EditOperation> {
 			}
 		}
 	}
+	
+	private ArrayList rescaleMutations(Set<WeightedMutation> availableMutations) {
+		if(Search.model.equalsIgnoreCase("default")){
+			return new ArrayList(availableMutations);
+		}else if(Search.model.equalsIgnoreCase("probabilistic")){
+			return rm.rescaleMutationsBasedOnModel(new ArrayList(availableMutations));
+		}
+		return null;
+	}
 
 	private List rescaleAllowed(Mutation mut, List<WeightedHole> allowed, Representation variant, int stmtid) {
 		if(mut != Mutation.REPLACE || Search.model.equalsIgnoreCase("default")){
 			return allowed;
 		}else if(Search.model.equalsIgnoreCase("probabilistic")){
-			return rm.rescaleBasedOnModel(new ArrayList(allowed), variant, stmtid);
+			return rm.rescaleReplacementsBasedOnModel(new ArrayList(allowed), variant, stmtid);
 		}
 		return null;
 	}
@@ -324,17 +332,13 @@ public abstract class Search<G extends EditOperation> {
 	CloneNotSupportedException {
 
 		try {
-			original.cacheflag = true;
 			this.runAlgorithm(original, incomingPopulation);
-			original.searilizeTestCache(original.getTestCache());
-			original.cacheflag = false;
+			Fitness.serializeTestCache();
 		} catch(RepairFoundException e) {
-			original.searilizeTestCache(original.getTestCache());
-			original.cacheflag = false;
+			Fitness.serializeTestCache();
 			return;
 		} catch (GiveUpException e) {
-			original.searilizeTestCache(original.getTestCache());
-			original.cacheflag = false;
+			Fitness.serializeTestCache();
 			return;
 		}
 	}

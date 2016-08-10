@@ -32,26 +32,40 @@
  */
 
 package clegoues.genprog4java.rep;
-import clegoues.util.*;
 
-public class WeightedAtom extends Pair<Integer,Double> implements Comparable<Object> {
+import org.apache.commons.lang3.tuple.Pair;
 
+public class WeightedAtom extends Pair<Integer,Double> {
+
+	private static final long serialVersionUID = -7122167819159806479L;
+	
+	private int id;
+	private double weight = 1.0;
+	
 	public WeightedAtom(Integer atomid) {
-		super(atomid, 1.0);
+		this.id = atomid;
 	}
 	public WeightedAtom(Integer atomid, Double weight) {
-		super(atomid, weight);
+		this.id = atomid;
+		this.weight = weight;
 	}
-	public int getAtom() { return super.getFirst(); }
-	public double getWeight() { return super.getSecond(); }
+	public int getAtom() { return this.getLeft(); }
+	public double getWeight() { return this.getRight(); }
+
 
 	@Override
-	public int compareTo(Object o) {
-		WeightedAtom otherAtomPair = (WeightedAtom) o;
-		if(otherAtomPair.getSecond().equals(this.getSecond())) {
-			return new Double(this.getFirst()).compareTo(new Double(otherAtomPair.getFirst()));
-		} 
-		return this.getSecond().compareTo(otherAtomPair.getSecond());
+	public Double setValue(Double value) {
+		double oldValue = this.weight;
+		this.weight = value;
+		return oldValue;
+	}
+	@Override
+	public Integer getLeft() {
+		return this.id;
+	}
+	@Override
+	public Double getRight() {
+		return this.weight;
 	}
 
 }

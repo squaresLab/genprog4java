@@ -1,37 +1,28 @@
 package clegoues.genprog4java.mut.edits.java;
 
-import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.ParameterizedType;
-import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.java.ASTUtils;
-import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
-import clegoues.util.Pair;
 
 public class ObjectInitializer extends JavaEditOperation {
 
@@ -83,7 +74,7 @@ public class ObjectInitializer extends JavaEditOperation {
 						newAssignment.setOperator(Assignment.Operator.ASSIGN);
 					
 						ExpressionStatement es = myAST.newExpressionStatement(newAssignment);
-						argsToInit.add(new Pair(asExp, newVarName));
+						argsToInit.add(Pair.of(asExp, newVarName));
 						newDeclarations.add(es);
 						break;
 					}
@@ -94,7 +85,7 @@ public class ObjectInitializer extends JavaEditOperation {
 			}
 		});
 		for(Pair<Expression,Expression> repExp : argsToInit) {
-			rewriter.replace(repExp.getFirst(), repExp.getSecond(), null);
+			rewriter.replace(repExp.getLeft(), repExp.getRight(), null);
 		}
 
 		Block newBlock = myAST.newBlock();

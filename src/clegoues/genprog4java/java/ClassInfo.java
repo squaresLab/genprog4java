@@ -2,6 +2,9 @@ package clegoues.genprog4java.java;
 
 import java.io.File;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 /** 
  * information about a java file (class, package) and helper utilities for managing
  * paths.  Comparable because we use them in sets/lists/etc, and also because they're
@@ -46,4 +49,23 @@ public class ClassInfo implements Comparable<ClassInfo> {
 		}
 	}
 	
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder()
+				.append(this.packageName)
+				.append(this.className)
+				.toHashCode();
+	}
+	
+	@Override 
+	public boolean equals(final Object obj) {
+		if(obj instanceof ClassInfo) {
+			ClassInfo other = (ClassInfo) obj;
+			return new EqualsBuilder()
+					.append(this.className, other.getClassName())
+					.append(this.packageName, other.getPackage())
+					.isEquals();
+		} 
+		return false;
+	}
 }

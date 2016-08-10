@@ -37,21 +37,19 @@ import static clegoues.util.ConfigurationBuilder.BOOL_ARG;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.PrintWriter;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.Search.GiveUpException;
@@ -62,17 +60,16 @@ import clegoues.genprog4java.java.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.util.ConfigurationBuilder;
-import clegoues.util.Pair;
 
 @SuppressWarnings("rawtypes")
 public abstract class CachingRepresentation<G extends EditOperation> extends
-Representation<G> {
-	protected Logger logger = Logger.getLogger(CachingRepresentation.class);
+Representation<G>  {
 
-	public static final ConfigurationBuilder.RegistryToken token =
+	protected transient Logger logger = Logger.getLogger(CachingRepresentation.class);
+
+	public transient static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
-	
-	//public static boolean skipFailedSanity = true;
+
 	public static boolean skipFailedSanity = ConfigurationBuilder.of( BOOL_ARG )
 		.withVarName( "skipFailedSanity" )
 		.withDefault( "true" )
@@ -85,10 +82,6 @@ Representation<G> {
 	
 	private double fitness = -1.0;
 
-	/*
-	 * cached file contents from [internal_compute_source_buffers]; avoid
-	 * recomputing/reserializing
-	 */
 	public ArrayList<Pair<ClassInfo, String>> alreadySourceBuffers = null;
 
 	public static int sequence = 0;
@@ -112,7 +105,6 @@ Representation<G> {
 		return this.fitness;
 	}
 
-	private ArrayList<String> alreadySourced = new ArrayList<String>();
 	private Pair<Boolean, String> alreadyCompiled = null;
 
 	public boolean getVariableLength() {
@@ -120,11 +112,7 @@ Representation<G> {
 	}
 
 	public void load(ArrayList<ClassInfo> bases) throws IOException {
-		
-		// FIXME: do deserializing String cacheName = base + ".cache";
-		// boolean didDeserialize = this.deserialize(cacheName,null, true);
-		// if(!didDeserialize) {
-		// this.serialize(cacheName, null, true);
+		// FIXME: deserialize properly
 		for (ClassInfo base : bases) {
 			this.fromSource(base);
 			logger.info("loaded from source " + base);
@@ -172,7 +160,7 @@ Representation<G> {
 				logger.info("false (0)\n");
 				logger.error("cacheRep: sanity: "
 						+ CachingRepresentation.sanityFilename
-						+ " failed positive test " + posTest.toString());
+						+ " failed positive test " + posTest.getTestName());
 				if (!skipFailedSanity) {
 					return false;
 				}
@@ -216,22 +204,7 @@ Representation<G> {
 	}
 
 	@Override
-	public boolean testCase(TestCase test, boolean doingCoverage) {
-		List<Integer> hash = astHash();
-		HashMap<String, FitnessValue> thisVariantsFitness = null;
-		if(cacheflag == true){ 
-			getFitnessCache().putAll(desearializeTestCache());
-			cacheflag = false;
-		}
-		if (getFitnessCache().containsKey(hash)) {
-			thisVariantsFitness = getFitnessCache().get(hash);
-			if (thisVariantsFitness.containsKey(test.toString()))
-				return thisVariantsFitness.get(test.toString()).isAllPassed();
-		} else {
-			thisVariantsFitness = new HashMap<String, FitnessValue>();
-			getFitnessCache().put(hash, thisVariantsFitness);
-		}
-		 		
+	public FitnessValue testCase(TestCase test, boolean doingCoverage) {
 		if (this.alreadyCompiled == null) {
 			String newName = CachingRepresentation.newVariantFolder();
 			this.variantFolder = newName;
@@ -239,52 +212,26 @@ Representation<G> {
 			if (!this.compile(newName, newName)) {
 				this.setFitness(0.0);
 				logger.info(this.getName() + " at " + newName + " fails to compile\n");
-				return false;
+				FitnessValue compileFail = new FitnessValue();
+				compileFail.setTestClassName(test.getTestName());
+				compileFail.setAllPassed(false);
+				return compileFail;
 			}
-		} else if (!this.alreadyCompiled.getFirst()) {
+		} else if (!this.alreadyCompiled.getLeft()) {
 			FitnessValue compileFail = new FitnessValue();
-			compileFail.setTestClassName(test.toString());
+			compileFail.setTestClassName(test.getTestName());
 			compileFail.setAllPassed(false);
-			thisVariantsFitness.put(test.toString(), compileFail);
-			// this WILL update it in the fitness cache, right, because state?
 			this.setFitness(0.0);
-			return false;
+			return compileFail;
 		}
-		FitnessValue fitness = this.internalTestCase(this.variantFolder,
+		return this.internalTestCase(this.variantFolder,
 				this.variantFolder + ".java", test, doingCoverage);
-		thisVariantsFitness.put(test.toString(), fitness);
-		return fitness.isAllPassed();	
 		}
 
-	public boolean testCase(TestCase test) {
+	public FitnessValue testCase(TestCase test) {
 		return this.testCase(test,false);
 		
 	}
-
-	// kind of think internal test case should return here to save in
-	// fitnessTable,
-	// but wtfever for now
-
-	// compile assumes that the source has already been serialized to disk.
-
-	// I think for here, it's best to put it down in Java representation
-
-	// FIXME: OK, in OCaml there's an outputSource declaration here that assumes
-	// that
-	// the way we output code is to compute the source buffers AS STRINGS and
-	// then print out one per file.
-	// it's possible this is the same in Java, but unlikely, so I'm going to not
-	// implement this here yet
-	// and figure out how java files are manipulated first
-	// it would be nice if this, as the caching representation superclass,
-	// cached the "already sourced" info somehow, as with compile below
-	/*
-	 * void outputSource(String filename) { List<Pair<String,String>>
-	 * sourceBuffers = this.computeSourceBuffers(); for(Pair<String,String>
-	 * element : sourceBuffers) { String sourcename = element.getFirst(); String
-	 * outBuffer = element.getSecond; // output to disk } // alreadySourced :=
-	 * Some(lmap (fun (sname,_) -> sname) many_files); }
-	 */
 
 	@Override
 	protected List<Pair<ClassInfo, String>> computeSourceBuffers() {
@@ -357,7 +304,7 @@ Representation<G> {
 			String output = out.toString();
 			out.reset();
 			posFit = CachingRepresentation.parseTestResults(
-					thisTest.toString(), output);
+					thisTest.getTestName(), output);
 
 		} catch (ExecuteException exception) {
 			posFit.setAllPassed(false);
@@ -375,7 +322,7 @@ Representation<G> {
 	}
 
 	public void cleanup() {
-		// TODO: remove source code from disk
+		// TODO: remove source code from disk?
 		// TODO: remove compiled binary from disk
 		// TODO: remove applicable subdirectories from disk
 	}
@@ -392,29 +339,15 @@ Representation<G> {
 
 	public boolean compile(String sourceName, String exeName) {
 		if (this.alreadyCompiled != null) {
-			return alreadyCompiled.getFirst();
+			return alreadyCompiled.getLeft();
 		} else {
 			boolean result = this.internalCompile(sourceName, exeName);
-			this.alreadyCompiled = new Pair<Boolean, String>(result, exeName);
+			this.alreadyCompiled =  Pair.of(result, exeName);
 			return result;
 		}
 	}
 
 	protected abstract boolean internalCompile(String sourceName, String exeName);
-
-	private List<Integer> astHashCode = null;
-
-	protected List<Integer> astHash() {
-		if (astHashCode != null)
-			return astHashCode;
-		astHashCode = new ArrayList<Integer>();
-		List<Pair<ClassInfo, String>> sourceBuffers = computeSourceBuffers();
-		for (Pair<ClassInfo, String> ele : sourceBuffers) {
-			String code = ele.getSecond();
-			astHashCode.add(code.hashCode());
-		}
-		return astHashCode;
-	}
 
 	/*
 	 * indicates that cached information based on our AST structure is no longer
@@ -422,18 +355,20 @@ Representation<G> {
 	 */
 	void updated() {
 		alreadySourceBuffers = null;
-		alreadySourced = new ArrayList<String>();
 		alreadyCompiled = null;
 		fitness = -1.0;
-		astHashCode = null;
+		myHashCode = -1;
 	}
 
 	public void reduceSearchSpace() throws GiveUpException {
 	} // subclasses can override as desired
 
 	public void reduceFixSpace() {
-
 	}
 
+	
+	 private void writeObject(java.io.ObjectOutputStream out)
+		     throws IOException {
 
+	 }
 }

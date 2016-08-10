@@ -33,9 +33,6 @@
 
 package clegoues.genprog4java.mut;
 
-import java.util.HashMap;
-import java.util.List;
-
 import clegoues.genprog4java.localization.Location;
 
 public interface EditOperation<R> {

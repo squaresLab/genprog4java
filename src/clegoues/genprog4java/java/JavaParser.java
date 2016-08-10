@@ -49,7 +49,6 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import clegoues.genprog4java.main.Configuration;
-import clegoues.util.Pair;
 
 /**
  * Parses a single java file, and delegates to a semantic info visitor the goal

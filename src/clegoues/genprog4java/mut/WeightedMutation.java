@@ -1,23 +1,39 @@
 package clegoues.genprog4java.mut;
 
-import clegoues.util.Pair;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.tuple.Pair;
 
-public class WeightedMutation extends Pair<Mutation, Double> implements Comparable {
+public class WeightedMutation extends Pair<Mutation, Double> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8093281192263809575L;
+	private Mutation mut;
+	private double weight;
 	
 	public WeightedMutation(Mutation one, Double two) {
-		super();
-		this.setFirst(one);
-		this.setSecond(two);
+		this.mut  = one;
+		this.weight = two;
 	}
 	
+
 	@Override
-	public int compareTo(Object o) {
-		WeightedMutation otherMut = (WeightedMutation) o;
-		if(this.getFirst() == otherMut.getFirst()) {
-			return this.getSecond().compareTo(otherMut.getSecond());
-		}
-		return this.getFirst().compareTo(otherMut.getFirst());
+	public Double setValue(Double value) {
+		Double oldVal = weight;
+		this.weight = value;
+		return oldVal;
+
 	}
 
+	@Override
+	public Mutation getLeft() {
+		return mut;
+	}
+
+	@Override
+	public Double getRight() {
+		return weight;
+	}
 }
