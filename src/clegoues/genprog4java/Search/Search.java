@@ -274,14 +274,14 @@ public abstract class Search<G extends EditOperation> {
 			for (Location location : proMutList) {
 				// FIXME: deal with the case where there are no edits that apply ever, because infinite loop
 				//the available mutations for this stmt
-				Set<WeightedMutation> availableMutations = variant.availableMutations(location);
+				List<WeightedMutation> availableMutations = variant.availableMutations(location);
 				if(availableMutations.isEmpty()){
 					continue; 
 				}else{
 					foundMutationThatCanApplyToAtom = true;
 				}
 				//choose a mutation 
-				ArrayList availableMutationsAL = rescaleMutations(availableMutations);
+				List availableMutationsAL = rescaleMutations(availableMutations);
 				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(availableMutationsAL);
 				Mutation mut = chosenMutation.getLeft();
 				List<WeightedHole> allowed = variant.editSources(location, mut);
@@ -294,11 +294,11 @@ public abstract class Search<G extends EditOperation> {
 		}
 	}
 	
-	private ArrayList rescaleMutations(Set<WeightedMutation> availableMutations) {
+	private List<WeightedMutation> rescaleMutations(List<WeightedMutation> availableMutations) {
 		if(Search.model.equalsIgnoreCase("default")){
-			return new ArrayList(availableMutations);
+			return availableMutations;
 		}else if(Search.model.equalsIgnoreCase("probabilistic")){
-			return rm.rescaleMutationsBasedOnModel(new ArrayList(availableMutations));
+			return rm.rescaleMutationsBasedOnModel(availableMutations);
 		}
 		return null;
 	}

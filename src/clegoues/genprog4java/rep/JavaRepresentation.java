@@ -613,7 +613,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		ArrayList<Location> locsToRemove = new ArrayList<Location>();
 		for (Location potentiallyBuggyLoc : faultLocalization) {
 			thereIsAtLeastOneMutThatApplies = false;
-			Set<WeightedMutation> availableMutations = availableMutations(potentiallyBuggyLoc);
+			List<WeightedMutation> availableMutations = availableMutations(potentiallyBuggyLoc);
 			if(availableMutations.isEmpty()){
 				locsToRemove.add(potentiallyBuggyLoc);
 			}else{
