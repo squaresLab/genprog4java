@@ -1,9 +1,11 @@
 package clegoues.genprog4java.Search;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,9 +42,9 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 	}
 
 	
-	private TreeSet<Location> rescaleLocations(TreeSet<Location> items) {
+	private List<Location> rescaleLocations(List<Location> items) {
 		double fullSum = 0.0;
-		TreeSet<Location> retVal = new TreeSet<Location>();
+		List<Location> retVal = new LinkedList<Location>();
 		for (Location item : items) {
 			fullSum += item.getWeight();
 		}
@@ -78,15 +80,14 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 		return null;
 	}
 
-	// FIXME: this thing is such a mess.
+	// FIXME: this thing is such a mess.  And I think it's broken.  But we don't use it anyway, so who cares?
 	@Override
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
 			throws RepairFoundException, GiveUpException {
 		original.reduceSearchSpace();
 
 		int count = 0;
-		TreeSet<Location> allFaultyLocations = new TreeSet<Location>(
-				original.getFaultyLocations());
+		List<Location> allFaultyLocations = original.getFaultyLocations();
 
 		for (Location faultyLocation : allFaultyLocations) {
 
@@ -107,7 +108,7 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 		int sofar = 1;
 		boolean repairFound = false;
 
-		TreeSet<Location> rescaledAtoms = rescaleLocations(allFaultyLocations);
+		List<Location> rescaledAtoms = rescaleLocations(allFaultyLocations);
 
 		for (Location faultyLocation : rescaledAtoms) {
 			Comparator<Pair<Mutation, Double>> descendingMutations = new Comparator<Pair<Mutation, Double>>() {
@@ -120,10 +121,9 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 			};
 			// wouldn't real polymorphism be the actual legitimate best right
 			// here?
-			Set<WeightedMutation> availableMutations = original
+			List<WeightedMutation> availableMutations = original
 					.availableMutations(faultyLocation);
-			TreeSet<WeightedMutation> rescaledMutations = new TreeSet<WeightedMutation>(
-					descendingMutations);
+			List<WeightedMutation> rescaledMutations = new LinkedList<WeightedMutation>();
 			double sumMutScale = 0.0;
 			for (Pair<Mutation, Double> item : availableMutations) {
 				sumMutScale += item.getRight();
@@ -134,6 +134,7 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 						.getLeft(), item.getRight() * mutScale));
 			}
 
+			Collections.sort(rescaledMutations, descendingMutations);
 			// rescaled Mutations gives us the mutation,weight pairs available
 			// at this atom
 			// which itself has its own weight
@@ -144,6 +145,7 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 							one.getWeight())));
 				}
 			};
+			
 			for (Pair<Mutation, Double> mutation : rescaledMutations) {
 				Mutation mut = mutation.getLeft();
 				double prob = mutation.getRight();

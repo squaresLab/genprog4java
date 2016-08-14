@@ -120,9 +120,9 @@ public class ReplacementModel {
 		return retVal;
 	}
 
-	public ArrayList rescaleMutationsBasedOnModel(ArrayList<WeightedMutation> availableMutations){
+	public List<WeightedMutation> rescaleMutationsBasedOnModel(List<WeightedMutation> availableMutations){
 		assert(availableMutations.size() > 0);
-		ArrayList retVal = new ArrayList();
+		List<WeightedMutation> retVal = new ArrayList<WeightedMutation>();
 		for(WeightedMutation wmut: availableMutations){
 			Mutation mutation = (Mutation) ((WeightedMutation)wmut).getLeft();
 			double prob = 0;

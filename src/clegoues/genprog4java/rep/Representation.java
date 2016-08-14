@@ -127,7 +127,7 @@ Comparable<Representation<G>> {
 
 	public abstract void reduceSearchSpace() throws GiveUpException; 
 
-	public abstract Set<WeightedMutation> availableMutations(
+	public abstract List<WeightedMutation> availableMutations(
 			Location faultyLocation);
 
 	protected transient int myHashCode = -1;

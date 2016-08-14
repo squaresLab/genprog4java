@@ -37,6 +37,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
@@ -52,7 +54,7 @@ public class GlobalUtils {
 		return returnVal;
 	}
 
-	public static Pair<?,Double> chooseOneWeighted(ArrayList<Pair<?,Double>> atoms) {
+	public static Pair<?,Double> chooseOneWeighted(List<Pair<?,Double>> atoms) {
 		assert(atoms.size() > 0);
 		double totalWeight = 0.0;
 		for(Pair<?,Double> atom : atoms) {
