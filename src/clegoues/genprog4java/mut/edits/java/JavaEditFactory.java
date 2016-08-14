@@ -6,23 +6,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
-import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimplePropertyDescriptor;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
@@ -45,7 +40,7 @@ import clegoues.genprog4java.rep.WeightedAtom;
 @SuppressWarnings("rawtypes")
 public class JavaEditFactory {
 
-	private static HashMap<Integer, Set<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, Set<WeightedAtom>>();
+	private static HashMap<Integer, List<WeightedAtom>> scopeSafeAtomMap = new HashMap<Integer, List<WeightedAtom>>();
 
 	protected Logger logger = Logger.getLogger(JavaEditOperation.class);
 
@@ -90,14 +85,14 @@ public class JavaEditFactory {
 		return null;
 	}
 
-	private Set<WeightedAtom> scopeHelper(Location stmtId, JavaRepresentation variant, Mutation mut) {
+	private List<WeightedAtom> scopeHelper(Location stmtId, JavaRepresentation variant, Mutation mut) {
 		if (JavaEditFactory.scopeSafeAtomMap.containsKey(stmtId.getId())) {
 			return JavaEditFactory.scopeSafeAtomMap.get(stmtId.getId());
 		}
 
 		JavaStatement potentiallyBuggyStmt = (JavaStatement) stmtId.getLocation();
 		ASTNode faultAST = ((JavaLocation) stmtId).getCodeElement();
-		Set<WeightedAtom> retVal = new TreeSet<WeightedAtom>();
+		List<WeightedAtom> retVal = new ArrayList<WeightedAtom>();
 
 		for (WeightedAtom potentialFixAtom : variant.getFixSourceAtoms()) {
 			int index = potentialFixAtom.getAtom();
@@ -220,7 +215,7 @@ public class JavaEditFactory {
 		case REPLACE:
 		{
 			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
-			Set<WeightedAtom> fixStmts = this.scopeHelper(location, variant, editType);
+			List<WeightedAtom> fixStmts = this.scopeHelper(location, variant, editType);
 			for(WeightedAtom fixStmt : fixStmts) {
 				JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getLeft());
 				ASTNode fixAST = potentialFixStmt.getASTNode();
@@ -234,7 +229,7 @@ public class JavaEditFactory {
 			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
 			for (WeightedAtom item : this.scopeHelper(location, variant, editType)) {
 				int atom = item.getAtom();
-				Set<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getRight()), variant, editType);
+				List<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getRight()), variant, editType);
 				for (WeightedAtom there : inScopeThere) {
 					if (there.getAtom() != location.getId()) { 
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
