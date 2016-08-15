@@ -35,7 +35,9 @@ package clegoues.genprog4java.java;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
@@ -48,6 +50,28 @@ public class ScopeInfo
 	private HashMap<ASTNode,Set<String>> namesDeclared; 
 	private HashMap<ASTNode, Boolean> containsFinalVarAssignment;
 	
+	
+	/** all ASTNodes of interest, corresponding to "repairable" Java statement types
+	 * a question (currently a question answered by {@link JavaRepresentation.canRepair})
+	 */
+	private LinkedList<ASTNode> stmts;
+	
+	/** method names --> type name.  I keep considering changing this --- hate having
+	 * types as strings --- but haven't had a good reason to yet.
+	 */
+	private HashMap<String,String> methodReturnType;
+	/** same thing, for variable names.  In theory might not work well b/c of scoping; in practice
+	 * doesn't seem to be a problem. 
+	 */
+	private HashMap<String,String> variableTypes;
+	
+	/** all imported types, or types seen over the course of parsing the CU */
+	private HashSet<String> availableTypes;
+	
+	/** methods and fields available in this CU, which we know either because
+	 * we see their declaration, or because we've seen them used at some point (heuristic);
+	 */
+	private HashSet<String> availableMethodsAndFields;
 	public ScopeInfo()
 	{
 		this.methodScope = new HashMap<ASTNode,Set<String>>();
@@ -69,15 +93,19 @@ public class ScopeInfo
 		this.requiredNames.put(buggy,names);
 	}
 	
-	public void addToMethodScope(ASTNode buggy, Set<String> shown)
+	public void addToMethodScope(ASTNode buggy, Set<String> methodScope, Set<String> loopScope)
 	{
+		Set<String> newScope = new TreeSet<String>();
+		newScope.addAll(methodScope);
+		newScope.addAll(loopScope);
+		newScope.addAll(this.availableTypes);
 		if(this.methodScope.containsKey(buggy))
 		{
-			this.methodScope.get(buggy).addAll(shown);
+			this.methodScope.get(buggy).addAll(newScope);
 		}
 		else
 		{
-			this.methodScope.put(buggy, shown);
+			this.methodScope.put(buggy, newScope);
 		}
 	}
 	
@@ -98,8 +126,8 @@ public class ScopeInfo
 		this.classScope.add(varname);
 	}
 	
-	public void addToClassScope(Set<String> vars) {
-		this.classScope.addAll(vars);
+	public void addToClassScope() {
+		this.classScope.addAll(this.availableMethodsAndFields);
 	}
 	public Set<String> getClassScope()
 	{
@@ -110,4 +138,32 @@ public class ScopeInfo
 	{
 		return this.requiredNames.get(buggy);
 	}
+
+	public void addMethodReturnType(String methodName, String returnType) {
+		this.methodReturnType.put(methodName,returnType);
+	}
+
+	public void addVariableType(String varName, String typ) {
+		this.variableTypes.put(varName, typ);
+	}
+
+	public void addAvailableMethodsAndFields(String identifier) {
+		this.availableMethodsAndFields.add(identifier);
+	}
+
+	public void addToAvailableTypes(String typ) {
+		this.availableTypes.add(typ);
+	}
+
+	public void addNode(ASTNode node) {
+		this.stmts.add(node);
+	}
+	
+	public boolean anywhereInScope(String lookingFor, Set<String> currentMethodScope, Set<String> currentLoopScope) {
+		return (availableMethodsAndFields != null && availableMethodsAndFields.contains(lookingFor)) || 
+				(availableTypes != null && availableTypes.contains(lookingFor)) ||
+				(currentMethodScope != null && currentMethodScope.contains(lookingFor)) ||
+				(currentLoopScope != null && currentLoopScope.contains(lookingFor));
+	}
+
 }

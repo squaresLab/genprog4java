@@ -60,69 +60,14 @@ public class JavaParser
 	/** compilation unit from parsed file; to be returned/collected by the parser client */
 	private CompilationUnit compilationUnit;
 	
-	/** all ASTNodes of interest, corresponding to "repairable" Java statement types
-	 * a question (currently a question answered by {@link JavaRepresentation.canRepair})
-	 */
-	private LinkedList<ASTNode> stmts;
 	
-	/** method names --> type name.  I keep considering changing this --- hate having
-	 * types as strings --- but haven't had a good reason to yet.
-	 */
-	private HashMap<String,String> methodReturnType;
-	/** same thing, for variable names.  In theory might not work well b/c of scoping; in practice
-	 * doesn't seem to be a problem. 
-	 */
-	private HashMap<String,String> variableTypes;
-	
-	/** all imported types, or types seen over the course of parsing the CU */
-	private HashSet<String> availableTypes;
-	
-	/** methods and fields available in this CU, which we know either because
-	 * we see their declaration, or because we've seen them used at some point (heuristic);
-	 */
-	private HashSet<String> availableMethodsAndFields;
 
 	public JavaParser(ScopeInfo scopeList)
 	{
-		this.stmts = new LinkedList<ASTNode>();
-		this.methodReturnType = new HashMap<String,String>();
-		this.variableTypes = new HashMap<String,String>();
-		this.availableTypes = new HashSet<String>();
-		this.availableMethodsAndFields = new HashSet<String>();
-
 		this.visitor = new SemanticInfoVisitor();
-		
-		this.visitor.setNodeSet(this.stmts);		
 		this.visitor.setScopeList(scopeList);
-		this.visitor.setMethodReturnType(methodReturnType);
-		this.visitor.setVariableType(variableTypes);
-		
-		this.visitor.setAvailableTypes(availableTypes);
-		this.visitor.setAvailableMethodsAndFields(availableMethodsAndFields);
-
 	}
 
-	public HashSet<String> getAvailableTypes() {
-		return this.availableTypes;
-	}
-	
-	public HashSet<String> getAvailableMethodsAndFields() {
-		return this.availableMethodsAndFields;
-	}
-	
-	public HashMap<String,String> getMethodReturnTypes(){
-		return this.methodReturnType;
-	}
-	
-	
-	public HashMap<String,String> getVariableDataTypes(){
-		return variableTypes;
-	}
-	
-	public LinkedList<ASTNode> getStatements()
-	{
-		return this.stmts;
-	}
 	
 	public CompilationUnit getCompilationUnit()
 	{
