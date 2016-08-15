@@ -162,7 +162,7 @@ CachingRepresentation<G> {
 	@Override
 	public List<WeightedMutation> availableMutations(Location atomId) {
 		List<WeightedMutation> retVal = new LinkedList<WeightedMutation>();
-		for (Map.Entry mutation : Search.availableMutations.entrySet()) {
+		for (WeightedMutation mutation : Search.availableMutations) {
 			if(this.doesEditApply(atomId, (Mutation) mutation.getKey())) {
 				retVal.add(new WeightedMutation((Mutation) mutation.getKey(), (Double) mutation.getValue()));
 			}
