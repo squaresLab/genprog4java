@@ -91,7 +91,7 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 
 		for (Location faultyLocation : allFaultyLocations) {
 
-			for(Map.Entry mutation : availableMutations.entrySet()) {
+			for(WeightedMutation mutation : availableMutations) {
 				Mutation key = (Mutation) mutation.getKey();
 				Double prob = (Double) mutation.getValue();
 				

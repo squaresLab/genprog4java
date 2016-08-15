@@ -184,7 +184,7 @@ public class Fitness {
 		} else {
 			testCache = new HashMap<Integer, HashMap<TestCase, FitnessValue>>();
 		}
-		System.out.println("hashmap is = " + testCache.entrySet().size() + "  " + testCache.toString());
+		//System.out.println("hashmap is = " + testCache.entrySet().size() + "  " + testCache.toString());
 		fitnessCache.putAll(testCache);
 	}
 	/** 

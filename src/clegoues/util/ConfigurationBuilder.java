@@ -44,6 +44,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -58,6 +59,9 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
+
+import clegoues.genprog4java.mut.WeightedMutation;
+import clegoues.util.ConfigurationBuilder.LexicalCast;
 
 /**
  * Allows the construction of configuration parameters that may be set by the
@@ -788,4 +792,6 @@ public class ConfigurationBuilder< T > {
 	 * is written.
 	 */
 	private String groupName;
+
+
 }
