@@ -46,7 +46,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 public class ScopeInfo
 {
 	private Set<String> classScope; // stuff that's IN SCOPE at the statement, not used at the statement
-
 	private HashMap<ASTNode,Set<String>> methodScope; // stuff that's IN SCOPE at the statement, not used at the statement
 	private HashMap<ASTNode,Set<String>> requiredNames; 
 	private HashMap<ASTNode,Set<String>> namesDeclared; 
@@ -81,6 +80,11 @@ public class ScopeInfo
 		this.requiredNames = new HashMap<ASTNode,Set<String>>();
 		this.namesDeclared = new HashMap<ASTNode,Set<String>>();
 		this.containsFinalVarAssignment = new HashMap<ASTNode, Boolean>();
+		this.availableTypes = new HashSet<String>();
+		this.availableMethodsAndFields = new HashSet<String>();
+		this.methodReturnType = new HashMap<String,String>();
+		this.variableTypes = new HashMap<String,String>();
+		this.stmts = new LinkedList<ASTNode>();
 	}
 	
 	public Set<String> getNamesDeclared(ASTNode buggy) {
