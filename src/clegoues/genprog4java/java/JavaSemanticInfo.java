@@ -148,9 +148,9 @@ public class JavaSemanticInfo {
 		}
 	}
 
-	public void addAllSemanticInfo(JavaParser myParser) {
-		JavaSemanticInfo.methodReturnType.putAll(myParser.getMethodReturnTypes());
-		JavaSemanticInfo.getVariableDataTypes().putAll(myParser.getVariableDataTypes());
+	public void addAllSemanticInfo(ScopeInfo info) {
+		JavaSemanticInfo.methodReturnType.putAll(info.getMethodReturnTypes());
+		JavaSemanticInfo.getVariableDataTypes().putAll(info.getVariableDataTypes());
 	}
 
 	public void addToClassScopeMap(JavaStatement s, Set<String> scope) {
