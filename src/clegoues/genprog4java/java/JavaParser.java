@@ -59,15 +59,11 @@ public class JavaParser
 	
 	/** compilation unit from parsed file; to be returned/collected by the parser client */
 	private CompilationUnit compilationUnit;
-	
-	
 
 	public JavaParser(ScopeInfo scopeList)
 	{
-		this.visitor = new SemanticInfoVisitor();
-		this.visitor.setScopeList(scopeList);
+		this.visitor = new SemanticInfoVisitor(scopeList);
 	}
-
 	
 	public CompilationUnit getCompilationUnit()
 	{

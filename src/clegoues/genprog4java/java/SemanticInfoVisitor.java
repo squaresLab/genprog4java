@@ -91,8 +91,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	private CompilationUnit cu;
 
-	public SemanticInfoVisitor() {
-
+	public SemanticInfoVisitor(ScopeInfo scopeInfo) {
+		this.scopes = scopeInfo;
 	}
 
 	// FIXME figure out what a node declares
@@ -355,11 +355,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	public void setCompilationUnit(CompilationUnit cu) {
 		this.cu = cu;
-	}
-
-
-	public void setScopeList(ScopeInfo scopeList) {
-		this.scopes = scopeList;
 	}
 
 }
