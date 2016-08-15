@@ -36,6 +36,8 @@ package clegoues.genprog4java.java;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -126,8 +128,12 @@ public class ScopeInfo
 		this.classScope.add(varname);
 	}
 	
-	public void addToClassScope() {
+	public void addKnownToClassScope() {
 		this.classScope.addAll(this.availableMethodsAndFields);
+	}
+
+	public void addToClassScope(Set<String> addToScope) {
+		this.classScope.addAll(addToScope);
 	}
 	public Set<String> getClassScope()
 	{
@@ -164,6 +170,26 @@ public class ScopeInfo
 				(availableTypes != null && availableTypes.contains(lookingFor)) ||
 				(currentMethodScope != null && currentMethodScope.contains(lookingFor)) ||
 				(currentLoopScope != null && currentLoopScope.contains(lookingFor));
+	}
+
+	public List<ASTNode> getStatements() {
+		return this.stmts;
+	}
+
+	public Map<String,String> getMethodReturnTypes() {
+		return this.methodReturnType;
+	}
+
+	public Map<String,String> getVariableDataTypes() {
+		return this.variableTypes;
+	}
+
+	public Set<String> getAvailableTypes() {
+		return this.availableTypes;
+	}
+
+	public Set<String> getAvailableMethodsAndFields() {
+		return this.availableMethodsAndFields;
 	}
 
 }

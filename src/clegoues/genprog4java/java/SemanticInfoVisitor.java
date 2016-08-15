@@ -111,7 +111,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			TreeSet<String> newScope = new TreeSet<String>();
 
 			this.scopes.addToMethodScope(node,this.currentMethodScope, this.currentLoopScope);
-			this.scopes.addToClassScope();
+			this.scopes.addKnownToClassScope();
 			this.scopes.addNode(node);
 		}
 
