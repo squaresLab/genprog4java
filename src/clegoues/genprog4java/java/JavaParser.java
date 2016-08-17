@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.rep.JavaRepresentation;
 
 /**
  * Parses a single java file, and delegates to a semantic info visitor the goal
@@ -59,6 +60,7 @@ public class JavaParser
 	
 	/** compilation unit from parsed file; to be returned/collected by the parser client */
 	private CompilationUnit compilationUnit;
+	
 
 	public JavaParser(ScopeInfo scopeList)
 	{
