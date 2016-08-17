@@ -42,6 +42,7 @@ import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.java.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
@@ -142,7 +143,7 @@ public class DefaultLocalization extends Localization {
 		ArrayList<Location> locsToRemove = new ArrayList<Location>();
 		for (Location potentiallyBuggyLoc : faultLocalization) {
 			thereIsAtLeastOneMutThatApplies = false;
-			Set<Pair<Mutation, Double>> availableMutations = original.availableMutations(potentiallyBuggyLoc);
+			List<WeightedMutation> availableMutations = original.availableMutations(potentiallyBuggyLoc);
 			if(availableMutations.isEmpty()){
 				locsToRemove.add(potentiallyBuggyLoc);
 			}else{

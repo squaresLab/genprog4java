@@ -146,9 +146,9 @@ CachingRepresentation<JavaEditOperation> {
 	}
 
 	@Override
-	public Set<WeightedMutation> availableMutations(Location atomId) {
-		Set<WeightedMutation> retVal = new TreeSet<WeightedMutation>();
-		for (Map.Entry mutation : Search.availableMutations.entrySet()) {
+	public List<WeightedMutation> availableMutations(Location atomId) {
+		List<WeightedMutation> retVal = new LinkedList<WeightedMutation>();
+		for (WeightedMutation mutation : Search.availableMutations) {
 			if(this.doesEditApply(atomId, (Mutation) mutation.getKey())) {
 				retVal.add(new WeightedMutation((Mutation) mutation.getKey(), (Double) mutation.getValue()));
 			}

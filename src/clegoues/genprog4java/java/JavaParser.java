@@ -84,6 +84,11 @@ public class JavaParser
 		
 		Map options = JavaCore.getOptions();
 		JavaCore.setComplianceOptions(Configuration.sourceVersion, options);
+		if(!Configuration.sourceVersion.equals("1.8")) { // FIXME: make this less fragile
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_7);
+		} else {
+			options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);			
+		}
 		parser.setCompilerOptions(options);
 		
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);

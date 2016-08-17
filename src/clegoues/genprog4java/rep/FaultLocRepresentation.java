@@ -51,6 +51,8 @@ import java.io.ObjectStreamException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -158,9 +160,9 @@ CachingRepresentation<G> {
 	}
 
 	@Override
-	public Set<WeightedMutation> availableMutations(Location atomId) {
-		Set<WeightedMutation> retVal = new TreeSet<WeightedMutation>();
-		for (Map.Entry mutation : Search.availableMutations.entrySet()) {
+	public List<WeightedMutation> availableMutations(Location atomId) {
+		List<WeightedMutation> retVal = new LinkedList<WeightedMutation>();
+		for (WeightedMutation mutation : Search.availableMutations) {
 			if(this.doesEditApply(atomId, (Mutation) mutation.getKey())) {
 				retVal.add(new WeightedMutation((Mutation) mutation.getKey(), (Double) mutation.getValue()));
 			}

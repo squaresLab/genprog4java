@@ -41,7 +41,10 @@ import static clegoues.util.ConfigurationBuilder.STRING;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -115,20 +118,20 @@ public abstract class Search<G extends EditOperation> {
 			.build();
 
 	//20 mutations 1/20 = 0.05
-	public static Map< Mutation, Double > availableMutations =
-			new ConfigurationBuilder< Map< Mutation, Double > >()
+	public static List< WeightedMutation > availableMutations =
+			new ConfigurationBuilder< List< WeightedMutation > >()
 			.withVarName( "availableMutations" )
 			.withFlag( "edits" )
 			.withDefault( "append;replace;delete" )
 			.withHelp( "mutations to use in search, with optional weights" )
 			.inGroup( "Search Parameters" )
-			.withCast( new ConfigurationBuilder.LexicalCast< Map< Mutation, Double > >() {
-				public Map<Mutation, Double> parse(String value) {
+			.withCast( new ConfigurationBuilder.LexicalCast< List< WeightedMutation > >() {
+				public List<WeightedMutation> parse(String value) {
 					String[] values = value.toLowerCase().split( ";" );
 					for ( int i = 0; i < values.length; ++i )
 						values[ i ] = values[ i ].trim();
 					return parseEdits(
-							values, new HashMap< Mutation, Double >()
+							values, new LinkedList< WeightedMutation >()
 							);
 				}
 			})
@@ -153,7 +156,7 @@ public abstract class Search<G extends EditOperation> {
 		}
 	}
 
-	public static Map<Mutation,Double> parseEdits(String[] editList, Map<Mutation,Double> mutations) {
+	public static List<WeightedMutation> parseEdits(String[] editList, List<WeightedMutation> mutations) {
 		for(String oneItem : editList) {
 			String edit = "";
 			Double weight = 1.0;
@@ -167,28 +170,29 @@ public abstract class Search<G extends EditOperation> {
 			
 			//funrep;parrep;paradd;parrem;exprep;expadd;exprem;nullcheck;rangecheck;sizecheck;castcheck;lbset;offbyone;ubset
 			switch(edit.toLowerCase()) {
-			case "append": mutations.put(Mutation.APPEND, weight); break;
-			case "swap":  mutations.put(Mutation.SWAP, weight); break;
-			case "delete":  mutations.put(Mutation.DELETE, weight); break;
-			case "replace":  mutations.put(Mutation.REPLACE, weight); break;
-			case "funrep":  mutations.put(Mutation.FUNREP, weight); break;
-			case "parrep":  mutations.put(Mutation.PARREP, weight); break;
-			case "paradd":  mutations.put(Mutation.PARADD, weight); break;
-			case "parrem":  mutations.put(Mutation.PARREM, weight); break;
-			case "exprep":  mutations.put(Mutation.EXPREP, weight); break;
-			case "expadd":  mutations.put(Mutation.EXPADD, weight); break;
-			case "exprem":  mutations.put(Mutation.EXPREM, weight); break;
-			case "nullcheck":  mutations.put(Mutation.NULLCHECK, weight); break;
-			case "objinit":  mutations.put(Mutation.OBJINIT, weight); break;
-			case "rangecheck":  mutations.put(Mutation.RANGECHECK, weight); break;
-			case "sizecheck":  mutations.put(Mutation.SIZECHECK, weight); break;
-			case "castcheck":  mutations.put(Mutation.CASTCHECK, weight); break;
-			case "lbset":  mutations.put(Mutation.LBOUNDSET, weight); break;
-			case "ubset":  mutations.put(Mutation.UBOUNDSET, weight); break;
-			case "offbyone":  mutations.put(Mutation.OFFBYONE, weight); break;
-			case "babbled":  mutations.put(Mutation.BABBLED, weight); break;
+			case "append": mutations.add(new WeightedMutation(Mutation.APPEND, weight)); break;
+			case "swap":  mutations.add(new WeightedMutation(Mutation.SWAP, weight)); break;
+			case "delete":  mutations.add(new WeightedMutation(Mutation.DELETE, weight)); break;
+			case "replace":  mutations.add(new WeightedMutation(Mutation.REPLACE, weight)); break;
+			case "funrep":  mutations.add(new WeightedMutation(Mutation.FUNREP, weight)); break;
+			case "parrep":  mutations.add(new WeightedMutation(Mutation.PARREP, weight)); break;
+			case "paradd":  mutations.add(new WeightedMutation(Mutation.PARADD, weight)); break;
+			case "parrem":  mutations.add(new WeightedMutation(Mutation.PARREM, weight)); break;
+			case "exprep":  mutations.add(new WeightedMutation(Mutation.EXPREP, weight)); break;
+			case "expadd":  mutations.add(new WeightedMutation(Mutation.EXPADD, weight)); break;
+			case "exprem":  mutations.add(new WeightedMutation(Mutation.EXPREM, weight)); break;
+			case "nullcheck":  mutations.add(new WeightedMutation(Mutation.NULLCHECK, weight)); break;
+			case "objinit":  mutations.add(new WeightedMutation(Mutation.OBJINIT, weight)); break;
+			case "rangecheck":  mutations.add(new WeightedMutation(Mutation.RANGECHECK, weight)); break;
+			case "sizecheck":  mutations.add(new WeightedMutation(Mutation.SIZECHECK, weight)); break;
+			case "castcheck":  mutations.add(new WeightedMutation(Mutation.CASTCHECK, weight)); break;
+			case "lbset":  mutations.add(new WeightedMutation(Mutation.LBOUNDSET, weight)); break;
+			case "ubset":  mutations.add(new WeightedMutation(Mutation.UBOUNDSET, weight)); break;
+			case "offbyone":  mutations.add(new WeightedMutation(Mutation.OFFBYONE, weight)); break;
+			case "babbled":  mutations.add(new WeightedMutation(Mutation.BABBLED, weight)); break;
 			}
 		}
+		Collections.sort(mutations);
 		return mutations;
 	}
 
@@ -274,14 +278,14 @@ public abstract class Search<G extends EditOperation> {
 				proMutList.add(wa);
 			}
 			for (Location location : proMutList) {
-				Set<WeightedMutation> availableMutations = variant.availableMutations(location);
+				List<WeightedMutation> availableMutations = variant.availableMutations(location);
 				if(availableMutations.isEmpty()){
 					continue; 
 				}else{
 					foundMutationThatCanApplyToAtom = true;
 				}
 				//choose a mutation 
-				ArrayList availableMutationsAL = rescaleMutations(availableMutations);
+				List availableMutationsAL = rescaleMutations(availableMutations);
 				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(availableMutationsAL);
 				Mutation mut = chosenMutation.getLeft();
 				List<WeightedHole> allowed = variant.editSources(location, mut);
@@ -293,11 +297,11 @@ public abstract class Search<G extends EditOperation> {
 		}
 	}
 	
-	private ArrayList rescaleMutations(Set<WeightedMutation> availableMutations) {
+	private List<WeightedMutation> rescaleMutations(List<WeightedMutation> availableMutations) {
 		if(Search.model.equalsIgnoreCase("default")){
-			return new ArrayList(availableMutations);
+			return availableMutations;
 		}else if(Search.model.equalsIgnoreCase("probabilistic")){
-			return rm.rescaleMutationsBasedOnModel(new ArrayList(availableMutations));
+			return rm.rescaleMutationsBasedOnModel(availableMutations);
 		}
 		return null;
 	}
