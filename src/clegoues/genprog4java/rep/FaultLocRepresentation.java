@@ -64,9 +64,9 @@ import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.java.ClassInfo;
+import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
-import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.util.ConfigurationBuilder;
@@ -195,7 +195,7 @@ CachingRepresentation<G> {
 	 * statements visited while executing the positive test case(s).
 	 */
 
-	protected abstract ArrayList<Integer> atomIDofSourceLine(int lineno);
+	public abstract ArrayList<Integer> atomIDofSourceLine(int lineno);
 
 	private TreeSet<Integer> runTestsCoverage(String pathFile,
 			ArrayList<TestCase> tests, boolean expectedResult, String wd)
@@ -358,7 +358,7 @@ CachingRepresentation<G> {
 		}	
 	}
 
-	protected abstract Location instantiateLocation(Integer i, double negWeight);
+	public abstract Location instantiateLocation(Integer i, double negWeight);
 
 	protected abstract void instrumentForFaultLocalization();
 

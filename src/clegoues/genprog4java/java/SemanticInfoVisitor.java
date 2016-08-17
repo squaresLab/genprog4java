@@ -33,12 +33,10 @@
 
 package clegoues.genprog4java.java;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
-import java.util.TreeSet;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -84,6 +82,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private Stack<HashSet<String>> methodScopeStack = new Stack<HashSet<String>>();
 
 	private HashSet<String> currentLoopScope = new HashSet<String>();
+
 	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>();
 
 	private HashSet<String> namesDeclared = new HashSet<String>();
@@ -95,7 +94,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.scopes = scopeInfo;
 	}
 
-	// FIXME figure out what a node declares
 
 	@Override
 	public void preVisit(ASTNode node) {
@@ -108,7 +106,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		if (JavaRepresentation.canRepair(node)) 
 		{
 			// add scope information
-			TreeSet<String> newScope = new TreeSet<String>();
 
 			this.scopes.addToMethodScope(node,this.currentMethodScope, this.currentLoopScope);
 			this.scopes.addKnownToClassScope();
@@ -214,6 +211,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		}
 		return true;
 	}
+
 
 
 	@Override
@@ -356,5 +354,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	public void setCompilationUnit(CompilationUnit cu) {
 		this.cu = cu;
 	}
+
 
 }

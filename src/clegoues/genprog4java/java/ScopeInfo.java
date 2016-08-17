@@ -40,17 +40,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
-public class ScopeInfo
+import clegoues.genprog4java.rep.JavaRepresentation;
+import clegoues.genprog4java.treelm.SymbolTable;
+
+public class ScopeInfo implements SymbolTable
 {
 	private Set<String> classScope; // stuff that's IN SCOPE at the statement, not used at the statement
+
 	private HashMap<ASTNode,Set<String>> methodScope; // stuff that's IN SCOPE at the statement, not used at the statement
 	private HashMap<ASTNode,Set<String>> requiredNames; 
 	private HashMap<ASTNode,Set<String>> namesDeclared; 
 	private HashMap<ASTNode, Boolean> containsFinalVarAssignment;
-	
 	
 	/** all ASTNodes of interest, corresponding to "repairable" Java statement types
 	 * a question (currently a question answered by {@link JavaRepresentation.canRepair})
@@ -85,6 +89,7 @@ public class ScopeInfo
 		this.methodReturnType = new HashMap<String,String>();
 		this.variableTypes = new HashMap<String,String>();
 		this.stmts = new LinkedList<ASTNode>();
+		this.availableMethodsAndFields.add("this");
 	}
 	
 	public Set<String> getNamesDeclared(ASTNode buggy) {
@@ -139,6 +144,7 @@ public class ScopeInfo
 	public void addToClassScope(Set<String> addToScope) {
 		this.classScope.addAll(addToScope);
 	}
+	
 	public Set<String> getClassScope()
 	{
 		return this.classScope;
@@ -147,6 +153,36 @@ public class ScopeInfo
 	public Set<String> getRequiredNames(ASTNode buggy)
 	{
 		return this.requiredNames.get(buggy);
+	}
+
+	@Override
+	public void enter(int nodeType) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void leave(int nodeType) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getFullyQualifiedTypeName(String simpleName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Supplier<String> allocFreeName(String type) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Supplier<String> getNameForType(String type) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	public void addMethodReturnType(String methodName, String returnType) {
