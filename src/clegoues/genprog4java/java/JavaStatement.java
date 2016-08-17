@@ -133,7 +133,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 			return "null";
 	}
 
-	// method to get the statemetn parent of an ASTnode. We traverse the ast upwards until the parent node is an instance of statement
+	// method to get the statement parent of an ASTnode. We traverse the ast upwards until the parent node is an instance of statement
 	private ASTNode getParent(ASTNode node) {
 		ASTNode parent = node.getParent();
 		while(!(parent instanceof Statement)){
