@@ -79,15 +79,11 @@ public class Configuration {
 	//public static String sourceVersion = "1.6";
 	public static String sourceVersion = ConfigurationBuilder.of( STRING )
 		.withVarName( "sourceVersion" )
-		.withDefault(JavaCore.VERSION_1_6)
+		// note that this is different from default
+		.withDefault(JavaCore.VERSION_1_8)
 		.withHelp( "Java version of the source code" )
 		.build();
-	//public static String globalExtension = ".java";
-	public static String globalExtension = ConfigurationBuilder.of( STRING )
-		.withVarName( "globalExtension" )
-		.withDefault( ".java" )
-		.withHelp( "source file extension" )
-		.build();
+
 	//public static ArrayList<ClassInfo> targetClassNames = new ArrayList<ClassInfo>();
 	public static ArrayList<ClassInfo> targetClassNames =
 		new ConfigurationBuilder< ArrayList< ClassInfo > >()

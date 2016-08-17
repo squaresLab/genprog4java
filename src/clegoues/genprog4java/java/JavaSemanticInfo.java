@@ -233,5 +233,6 @@ public class JavaSemanticInfo {
 		}
 		return null;
 	}
+
 }
 
