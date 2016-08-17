@@ -49,7 +49,6 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
@@ -77,7 +76,7 @@ Representation<G>  {
 		.withHelp( "do not include positive tests if they fail sanity" )
 		.inGroup( "CachingRepresentation Parameters" )
 		.build();
-	
+
 	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
 	
@@ -154,7 +153,7 @@ Representation<G>  {
 			logger.info("Checking test number " + testNumber + " out of " + Fitness.positiveTests.size());
 			FitnessValue res = this.internalTestCase(
 					CachingRepresentation.sanityExename,
-					CachingRepresentation.sanityFilename, posTest);
+					CachingRepresentation.sanityFilename, posTest, false);
 			if (!res.isAllPassed()) {
 				testsOutOfScope++;
 				logger.info(testsOutOfScope + " tests out of scope so far, out of " + Fitness.positiveTests.size());
@@ -186,7 +185,7 @@ Representation<G>  {
 			logger.info("\tn" + testNum + ": ");
 			FitnessValue res = this.internalTestCase(
 					CachingRepresentation.sanityExename,
-					CachingRepresentation.sanityFilename, negTest);
+					CachingRepresentation.sanityFilename, negTest, false);
 			if (res.isAllPassed()) {
 				logger.info("true (1)\n");
 				logger.error("cacheRep: sanity: "
@@ -204,11 +203,12 @@ Representation<G>  {
 		return true;
 	}
 
-	public FitnessValue testCase(TestCase test) {
+	@Override
+	public FitnessValue testCase(TestCase test, boolean doingCoverage) {
 		if (this.alreadyCompiled == null) {
 			String newName = CachingRepresentation.newVariantFolder();
 			this.variantFolder = newName;
-		//	logger.info("History of variant " + getVariantFolder() + " is: " + getHistory());
+
 			if (!this.compile(newName, newName)) {
 				this.setFitness(0.0);
 				logger.info(this.getName() + " at " + newName + " fails to compile\n");
@@ -225,7 +225,12 @@ Representation<G>  {
 			return compileFail;
 		}
 		return this.internalTestCase(this.variantFolder,
-				this.variantFolder + Configuration.globalExtension, test);
+				this.variantFolder + ".java", test, doingCoverage);
+		}
+
+	public FitnessValue testCase(TestCase test) {
+		return this.testCase(test,false);
+		
 	}
 
 	@Override
@@ -276,10 +281,10 @@ Representation<G>  {
 	protected abstract ArrayList<Pair<ClassInfo, String>> internalComputeSourceBuffers();
 
 	protected FitnessValue internalTestCase(String sanityExename,
-			String sanityFilename, TestCase thisTest) {
+			String sanityFilename, TestCase thisTest, boolean doingCoverage) {
 		
 		CommandLine command = this.internalTestCaseCommand(sanityExename,
-				sanityFilename, thisTest);
+				sanityFilename, thisTest, doingCoverage);
 		// System.out.println("command: " + command.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);
 		DefaultExecutor executor = new DefaultExecutor();
@@ -333,7 +338,6 @@ Representation<G>  {
 	// time being and just doing the caching, which makes sense anyway
 
 	public boolean compile(String sourceName, String exeName) {
-
 		if (this.alreadyCompiled != null) {
 			return alreadyCompiled.getLeft();
 		} else {
@@ -362,8 +366,6 @@ Representation<G>  {
 	public void reduceFixSpace() {
 	}
 
-	protected abstract CommandLine internalTestCaseCommand(String exeName,
-			String fileName, TestCase test);
 	
 	 private void writeObject(java.io.ObjectOutputStream out)
 		     throws IOException {

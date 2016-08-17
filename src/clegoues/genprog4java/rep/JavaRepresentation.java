@@ -36,13 +36,14 @@ package clegoues.genprog4java.rep;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.ObjectStreamException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -81,6 +82,8 @@ import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.BadLocationException;
@@ -88,42 +91,33 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
-import org.jacoco.core.analysis.Analyzer;
-import org.jacoco.core.analysis.CoverageBuilder;
-import org.jacoco.core.analysis.IClassCoverage;
-import org.jacoco.core.analysis.ICounter;
-import org.jacoco.core.data.ExecutionData;
-import org.jacoco.core.data.ExecutionDataReader;
-import org.jacoco.core.data.ExecutionDataStore;
-import org.jacoco.core.data.IExecutionDataVisitor;
-import org.jacoco.core.data.ISessionInfoVisitor;
-import org.jacoco.core.data.SessionInfo;
 
-import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.java.ASTUtils;
-import clegoues.genprog4java.java.ClassInfo;
 import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaSemanticInfo;
 import clegoues.genprog4java.java.JavaSourceInfo;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.java.ScopeInfo;
+import clegoues.genprog4java.localization.EntropyLocalization;
+import clegoues.genprog4java.localization.Localization;
+import clegoues.genprog4java.localization.Location;
+import clegoues.genprog4java.java.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditHole;
-import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.mut.edits.java.JavaEditFactory;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
+import clegoues.genprog4java.mut.holes.java.JavaStatementLocation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
 
 public class JavaRepresentation extends
-FaultLocRepresentation<JavaEditOperation> {
-
+CachingRepresentation<JavaEditOperation> {
 	protected Logger logger = Logger.getLogger(JavaRepresentation.class);
 
 	private JavaEditFactory editFactory = new JavaEditFactory();
@@ -131,108 +125,45 @@ FaultLocRepresentation<JavaEditOperation> {
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
 
-	private JavaSourceInfo sourceInfo = new JavaSourceInfo();
-	public static JavaSemanticInfo semanticInfo = new JavaSemanticInfo();
+	public JavaSourceInfo sourceInfo = new JavaSourceInfo();
+	public  static JavaSemanticInfo semanticInfo = new JavaSemanticInfo();
 
-	private static int stmtCounter = 0;
+	public static int stmtCounter = 0;
 
 	private ArrayList<JavaEditOperation> genome = new ArrayList<JavaEditOperation>();
 
 	public JavaRepresentation(ArrayList<JavaEditOperation> genome2,
-			ArrayList<Location> arrayList,
-			ArrayList<WeightedAtom> arrayList2) {
-		super(genome2, arrayList, arrayList2);
+			Localization localizationInfo) {
+		super(genome2);
+		this.localization = localizationInfo; // FIXME make a legit copy of this for copy?
+		if(localizationInfo instanceof EntropyLocalization) {
+			editFactory.setEntropyLocalization((EntropyLocalization) localization);
+		}
 	}
 
 	public JavaRepresentation() {
 		super();
 	}
 
-	protected void instrumentForFaultLocalization() {
-		// needs nothing for Java. Don't love the "doing coverage" boolean flag
-		// thing, but it's possible I just decided it's fine.
+	@Override
+	public List<WeightedMutation> availableMutations(Location atomId) {
+		List<WeightedMutation> retVal = new LinkedList<WeightedMutation>();
+		for (WeightedMutation mutation : Search.availableMutations) {
+			if(this.doesEditApply(atomId, (Mutation) mutation.getKey())) {
+				retVal.add(new WeightedMutation((Mutation) mutation.getKey(), (Double) mutation.getValue()));
+			}
+		}
+		return retVal;
 	}
 
 	// Java-specific coverage stuff:
 
-	private ExecutionDataStore executionData = null;
-
-	protected ArrayList<Integer> atomIDofSourceLine(int lineno) {
+	@Override
+	public ArrayList<Integer> atomIDofSourceLine(int lineno) {
 		return sourceInfo.atomIDofSourceLine(lineno);
 	}
 
-	public TreeSet<Integer> getCoverageInfo() throws IOException {
-		TreeSet<Integer> atoms = new TreeSet<Integer>();
 
-		for (Map.Entry<ClassInfo, String> ele : sourceInfo.getOriginalSource()
-				.entrySet()) {
-			ClassInfo targetClassInfo = ele.getKey();
-			String pathToCoverageClass = Configuration.outputDir + File.separator
-					+ "coverage/coverage.out" + File.separator + targetClassInfo.pathToClassFile();
-			File compiledClass = new File(pathToCoverageClass);
-			if(!compiledClass.exists()) {
-				pathToCoverageClass = Configuration.classSourceFolder + File.separator + targetClassInfo.pathToClassFile();
-				compiledClass = new File(pathToCoverageClass);
-			}
-
-			if (executionData == null) {
-				executionData = new ExecutionDataStore();
-			}
-
-			final FileInputStream in = new FileInputStream(new File(
-					"jacoco.exec"));
-			final ExecutionDataReader reader = new ExecutionDataReader(in);
-			reader.setSessionInfoVisitor(new ISessionInfoVisitor() {
-				public void visitSessionInfo(final SessionInfo info) {
-				}
-			});
-			reader.setExecutionDataVisitor(new IExecutionDataVisitor() {
-				public void visitClassExecution(final ExecutionData data) {
-					executionData.put(data);
-				}
-			});
-
-			reader.read();
-			in.close();
-
-			final CoverageBuilder coverageBuilder = new CoverageBuilder();
-			final Analyzer analyzer = new Analyzer(executionData,
-					coverageBuilder);
-			analyzer.analyzeAll(new File(pathToCoverageClass));
-
-			TreeSet<Integer> coveredLines = new TreeSet<Integer>();
-			for (final IClassCoverage cc : coverageBuilder.getClasses()) {
-				for (int i = cc.getFirstLine(); i <= cc.getLastLine(); i++) {
-					boolean covered = false;
-					switch (cc.getLine(i).getStatus()) {
-					case ICounter.PARTLY_COVERED:
-						covered = true;
-						break;
-					case ICounter.FULLY_COVERED:
-						covered = true;
-						break;
-					case ICounter.NOT_COVERED:
-						break;
-					case ICounter.EMPTY:
-						break;
-					default:
-						break;
-					}
-					if (covered) {
-						coveredLines.add(i);
-					}
-				}
-			}
-			for (int line : coveredLines) {
-				ArrayList<Integer> atomIds = this.atomIDofSourceLine(line);
-				if (atomIds != null && atomIds.size() >= 0) {
-					atoms.addAll(atomIds);
-				}
-			}
-		}
-		return atoms;
-	}
-	
 	static int dumpCount = 0;
 	private void dumpStmts() {
 		BufferedWriter bw;
@@ -282,12 +213,12 @@ FaultLocRepresentation<JavaEditOperation> {
 
 		myParser.parse(path, Configuration.libs.split(File.pathSeparator));
 
-		List<ASTNode> stmts = myParser.getStatements();
+		List<ASTNode> stmts = scopeInfo.getStatements();
 		sourceInfo.addToBaseCompilationUnits(pair, myParser.getCompilationUnit());
-		semanticInfo.addAllSemanticInfo(myParser);
+		semanticInfo.addAllSemanticInfo(scopeInfo);
 		
-		Set<String> knownTypesInScope = myParser.getAvailableTypes();
-		Set<String> knownMethodsAndFields = myParser.getAvailableMethodsAndFields();
+		Set<String> knownTypesInScope = scopeInfo.getAvailableTypes();
+		Set<String> knownMethodsAndFields = scopeInfo.getAvailableMethodsAndFields();
 		
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
@@ -311,7 +242,7 @@ FaultLocRepresentation<JavaEditOperation> {
 			}
 		}	
 
-	//	dumpStmts();
+		dumpStmts();
 	}
 
 	public void fromSource(ClassInfo pair) throws IOException {
@@ -326,8 +257,7 @@ FaultLocRepresentation<JavaEditOperation> {
 	}
 
 
-	public static boolean canRepair(ASTNode node) { // FIXME: variable declarations that have bodies? Or; difference between "can repair" and "can move/delete/replace"
-
+	public static boolean canRepair(ASTNode node) { // FIXME: variable declarations that have bodies?
 		return node instanceof AssertStatement 
 				|| node instanceof Block
 				|| node instanceof BreakStatement
@@ -373,6 +303,8 @@ FaultLocRepresentation<JavaEditOperation> {
 		}
 		return genome.size();
 	}
+
+
 
 	@Override
 	public void outputSource(String filename) {
@@ -427,9 +359,14 @@ FaultLocRepresentation<JavaEditOperation> {
 		return retVal;
 	}
 
-	@Override
 	protected CommandLine internalTestCaseCommand(String exeName,
 			String fileName, TestCase test) {
+		return this.internalTestCaseCommand(exeName, fileName, test, false);
+	}
+
+	@Override
+	public CommandLine internalTestCaseCommand(String exeName,
+			String fileName, TestCase test, boolean doingCoverage) {
 		// read in the test files to get a list of test class names
 		// store it in the testcase object, which will be the name
 		// this is a little strange because each test class has multiple
@@ -441,7 +378,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		CommandLine command = CommandLine.parse(Configuration.javaVM);
 		String outputDir = "";
 
-		if (this.doingCoverage) {
+		if (doingCoverage) {
 			outputDir =  Configuration.outputDir + File.separator
 					+ "coverage/coverage.out/";
 			//+ System.getProperty("path.separator") + ":"
@@ -466,7 +403,7 @@ FaultLocRepresentation<JavaEditOperation> {
 		command.addArgument("-classpath");
 		command.addArgument(classPath);
 
-		if (this.doingCoverage) {
+		if (doingCoverage) {
 
 			command.addArgument("-Xmx1024m");
 			command.addArgument("-javaagent:" + Configuration.jacocoPath
@@ -480,7 +417,6 @@ FaultLocRepresentation<JavaEditOperation> {
 		command.addArgument("clegoues.genprog4java.fitness.JUnitTestRunner");
 
 		command.addArgument(test.toString());
-	//	logger.info("Command: " + command.toString());
 		return command;
 
 	}
@@ -601,67 +537,9 @@ FaultLocRepresentation<JavaEditOperation> {
 
 	public JavaRepresentation copy() {
 		JavaRepresentation copy = new JavaRepresentation(
-				this.getGenome(), this.getFaultyLocations(),
-				this.getFixSourceAtoms());
+				this.getGenome(), this.localization);
 		return copy;
 	}
-
-	@Override
-	public void reduceSearchSpace() throws GiveUpException {
-		if(Search.checkSpace) {
-		boolean thereIsAtLeastOneMutThatApplies;
-		ArrayList<Location> locsToRemove = new ArrayList<Location>();
-		for (Location potentiallyBuggyLoc : faultLocalization) {
-			thereIsAtLeastOneMutThatApplies = false;
-			List<WeightedMutation> availableMutations = availableMutations(potentiallyBuggyLoc);
-			if(availableMutations.isEmpty()){
-				locsToRemove.add(potentiallyBuggyLoc);
-			}else{
-				for (WeightedMutation mutation : availableMutations) {
-					thereIsAtLeastOneMutThatApplies = thereIsAtLeastOneMutThatApplies || this.editFactory.doesEditApply(this, potentiallyBuggyLoc, mutation.getLeft());
-				}
-				if(!thereIsAtLeastOneMutThatApplies){
-					locsToRemove.add(potentiallyBuggyLoc);
-				}
-			}
-		}
-		faultLocalization.removeAll(locsToRemove);
-		if(faultLocalization.isEmpty()){
-			logger.info("\nThere is no valid mutation to perform in the fault space. Exiting program\n");
-			throw new GiveUpException();
-		}
-	}
-		//Reduce Fix space
-		final ArrayList<WeightedAtom> toRemove = new ArrayList<WeightedAtom>();
-
-		for (final WeightedAtom potentialFixAtom : this.getFixSourceAtoms()) {
-			int index = potentialFixAtom.getAtom();
-			JavaStatement potentialFixStmt = this.getFromCodeBank(index); 
-			ASTNode fixASTNode = potentialFixStmt.getASTNode();
-
-			//Don't make a call to a constructor
-			if(fixASTNode instanceof MethodRef){
-				MethodRef mr = (MethodRef) potentialFixStmt.getASTNode();
-				// mrt = method return type
-				String returnType = semanticInfo.returnTypeOfThisMethod(mr.getName().toString());
-				if(returnType != null && returnType.equalsIgnoreCase("null")) {
-					toRemove.add(potentialFixAtom);
-					continue;
-				}
-			}
-			
-			// we collected this info on parse.  If the block contains any type of assignment to
-			// or declaration of a final variable, this should be true.
-			if(semanticInfo.getFinalVarStatus(index)) {
-				toRemove.add(potentialFixAtom);
-			}
-			
-		}
-		for(WeightedAtom atom : toRemove) {
-			fixLocalization.remove(atom);
-		}
-	}
-
 
 	@Override
 	public Boolean doesEditApply(Location location, Mutation editType) {
@@ -682,79 +560,58 @@ FaultLocRepresentation<JavaEditOperation> {
 			return this.sourceInfo.getLocationInformation().get(i);
 		}
 		JavaStatement stmt = sourceInfo.getBase().get(i);
-		JavaLocation location = new JavaLocation(stmt, negWeight);
+		JavaStatementLocation location = new JavaStatementLocation(stmt, negWeight);
 		location.setClassInfo(stmt.getClassInfo());
 		this.sourceInfo.getLocationInformation().put(i, location);
 		return location;
 	}
 
-	public void setAllPossibleStmtsToFixLocalization(){
-		super.fixLocalization.clear();
-		for(int i = 0; i < JavaRepresentation.stmtCounter; i++) {
-			super.fixLocalization.add(new WeightedAtom(i,1.0));
-		}
-	}
 
-	public void setAllPossibleStmtsToFaultyLocalization(){
-		super.faultLocalization.clear();
-		for(JavaStatement js : getCodeBank().values()) {	
-			super.faultLocalization.add(this.instantiateLocation(js.getStmtId(), 0.1));
-		}
-	}
-	
 	public HashMap<Integer, JavaStatement> getCodeBank() {
-		return sourceInfo.getCodeBank(); // FIXME: this is for the replacement model, there should be a better way to do this based on
-		// hole fill-in information, but I just want this thing to compile for now.
+		return sourceInfo.getCodeBank(); 
 	}
 
 	@Override
-	protected void computeFixSpace(TreeSet<Integer> negativePath, TreeSet<Integer> positivePath) {
-		if(FaultLocRepresentation.fixStrategy.equalsIgnoreCase("packageScope")) {
-			HashMap<ClassInfo,String> originalSource = sourceInfo.getOriginalSource();
-			Set<String> packages = new TreeSet<String>();
-			final Set<String> clazzes = new TreeSet<String>();
-			ArrayList<File> packageFiles = new ArrayList<File>();
-			for(ClassInfo clazzInfo : originalSource.keySet()) {
-				packages.add(clazzInfo.getPackage());
-				clazzes.add(clazzInfo.getClassName() + ".java");
-			}
-			for(String packagePath : packages) {
-				// question: should I save the package code as well in original?  I think no...
-				List<File> list = Arrays.asList(new File(Configuration.workingDir + File.separatorChar + Configuration.sourceDir + File.separatorChar + packagePath).listFiles(new FilenameFilter(){
-					@Override
-					public boolean accept(File dir, String name) {
-						return name.endsWith(".java") && !clazzes.contains(name); // or something else
-					}}));
-				packageFiles.addAll(list);	
-			}
-			for(File packageFile : packageFiles) {
-				ClassInfo newCi = new ClassInfo(packageFile.getName(), packageFile.getPath()); // FIXME this is wrong
-				try {
-					this.fromSource(newCi, packageFile.getPath(), packageFile);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			this.fixLocalization.clear();
-			for(int i = 0; i < JavaRepresentation.stmtCounter; i++) {
-				this.fixLocalization.add(new WeightedAtom(i, 1.0));
-			}
-		} else {
-			super.computeFixSpace(negativePath, positivePath);
-		}
+	public Localization getLocalization() {
+		return this.localization;
 	}
-	
-	 private void writeObject(java.io.ObjectOutputStream out)
-		     throws IOException {
 
-	 }
-		 private void readObject(java.io.ObjectInputStream in)
-		     throws IOException, ClassNotFoundException {
-			 
-		 }
-		 private void readObjectNoData()
-		     throws ObjectStreamException {
-			 
-		 }
+	@Override
+	public Boolean shouldBeRemovedFromFix(WeightedAtom potentialFixAtom) {
+		// Possible FIXME: I don't really like having this here, but it needs enough
+		// variant-specific info that it's hard to put into localization where it may actually belong
+		int index = potentialFixAtom.getAtom();
+		JavaStatement potentialFixStmt = getFromCodeBank(index); 
+		ASTNode fixASTNode = potentialFixStmt.getASTNode();
+
+		//Don't make a call to a constructor
+		if(fixASTNode instanceof MethodRef){
+			MethodRef mr = (MethodRef) potentialFixStmt.getASTNode();
+			// mrt = method return type
+			String returnType = semanticInfo.returnTypeOfThisMethod(mr.getName().toString());
+			if(returnType != null && returnType.equalsIgnoreCase("null")) {
+				return true;
+			}
+		}
+
+				// we collected this info on parse.  If the block contains any type of assignment to
+				// or declaration of a final variable, this should be true.
+				if(semanticInfo.getFinalVarStatus(index)) {
+					return true;
+				}
+				
+
+		return false;
+	}
+
+	@Override
+	public Map<ClassInfo, String> getOriginalSource() {
+		return sourceInfo.getOriginalSource();
+	}
+
+	@Override
+	protected void printDebugInfo() {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -33,12 +33,10 @@
 
 package clegoues.genprog4java.java;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
-import java.util.TreeSet;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -68,7 +66,6 @@ import clegoues.genprog4java.rep.JavaRepresentation;
 
 public class SemanticInfoVisitor extends ASTVisitor {
 
-	private List<ASTNode> nodeSet;
 	private ScopeInfo scopes;
 
 	private boolean containsFinalVar = false;
@@ -84,17 +81,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private HashSet<String> currentMethodScope = new HashSet<String>();
 	private Stack<HashSet<String>> methodScopeStack = new Stack<HashSet<String>>();
 
-	private HashMap<String,String> methodReturnType;
-	private HashMap<String,String> variableType;
-
 	private HashSet<String> currentLoopScope = new HashSet<String>();
-	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>();
-
-	// declared or imported; primitive types are always available;
-	private HashSet<String> availableTypes; 
-	// it might make sense to store these separately, but for now, this will do
-	// upon reflection, it makes more sense to do add these after the whole thing has been parsed
-	private HashSet<String> availableMethodsAndFields; 
+	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>(); 
 
 	private HashSet<String> namesDeclared = new HashSet<String>();
 	private Stack<HashSet<String>> namesDeclaredStack = new Stack<HashSet<String>>();
@@ -104,15 +92,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	public SemanticInfoVisitor() {
 
 	}
-	public void setAvailableMethodsAndFields(HashSet<String> mandf) {
-		this.availableMethodsAndFields = mandf;
-		this.availableMethodsAndFields.add("this");
-	}
-	public void setAvailableTypes(HashSet<String> typs) {
-		this.availableTypes = typs;
-	}
 
-	// FIXME figure out what a node declares
 
 	@Override
 	public void preVisit(ASTNode node) {
@@ -124,15 +104,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 		if (JavaRepresentation.canRepair(node)) 
 		{
-			// add scope information
-			TreeSet<String> newScope = new TreeSet<String>();
-			newScope.addAll(this.currentMethodScope);
-			newScope.addAll(this.currentLoopScope);
-			newScope.addAll(this.availableTypes);
-			this.scopes.addToMethodScope(node, newScope);
-			this.scopes.addToClassScope(this.availableMethodsAndFields);
-			this.nodeSet.add(node);
-
+			this.scopes.addToNodeSet(node, currentMethodScope, currentLoopScope);
 		}
 
 		if(node instanceof EnhancedForStatement || 
@@ -235,12 +207,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		return true;
 	}
 
-	private boolean anywhereInScope(String lookingFor) {
-		return (availableMethodsAndFields != null && availableMethodsAndFields.contains(lookingFor)) || 
-				(availableTypes != null && availableTypes.contains(lookingFor)) ||
-				(currentMethodScope != null && currentMethodScope.contains(lookingFor)) ||
-				(currentLoopScope != null && currentLoopScope.contains(lookingFor));
-	}
+
 
 	@Override
 	public boolean visit(SimpleName node) {
@@ -250,7 +217,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		// but I'm not yet so we'll make do
 		String name = node.getIdentifier();
 		this.requiredNames.add(name);
-		if(!anywhereInScope(name)) {
+		if(!scopes.anywhereInScope(name, currentMethodScope, currentLoopScope)) {
 			// because we're parsing, *if this CU parses*, we can assume it doesn't reference
 			// anything that's not in scope
 			// this means that if we haven't seen a name before, it's almost certainly the name of a method
@@ -259,7 +226,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			// imports, we just add the SimpleName to the list of available names
 			// kind of a cheap trick, but whatever
 			// the one thing I'm not sure about is if I should add this to available types or...something else
-			this.availableTypes.add(name);
+			this.scopes.addToAvailableTypes(name);
 		}
 		return true;
 	}
@@ -300,7 +267,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		if(!node.isOnDemand() && !node.isStatic()) { // possible FIXME: handle all static stuff separately?
 			String name = node.getName().getFullyQualifiedName();
 			String[] split = name.split("\\.");
-			availableTypes.add(split[split.length - 1]);
+			this.scopes.addToAvailableTypes(split[split.length - 1]);
 		}
 		return false;
 	}
@@ -308,21 +275,21 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(TypeDeclaration node) {
 		if(!node.isInterface()) {
-			availableTypes.add(node.getName().getIdentifier());
+			this.scopes.addToAvailableTypes(node.getName().getIdentifier());
 			for(FieldDeclaration fd : node.getFields()) {
 				for (Object o : fd.fragments()) {
 					if (o instanceof VariableDeclarationFragment) {
 						VariableDeclarationFragment v = (VariableDeclarationFragment) o;
-						this.availableMethodsAndFields.add(v.getName().getIdentifier());
+						scopes.addToAvailableMethodsAndFields(v.getName().getIdentifier());
 					}
 				}
 			}
 
 			for(MethodDeclaration md : node.getMethods()) {
-				this.availableMethodsAndFields.add(md.getName().getIdentifier());
+				scopes.addToAvailableMethodsAndFields(md.getName().getIdentifier());
 			}
 			if(node.getSuperclassType() != null) {
-				this.availableMethodsAndFields.add("super");
+				scopes.addToAvailableMethodsAndFields("super");
 			}
 		}
 		return true;
@@ -339,7 +306,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			}
 		}
 		String returnType = node.getReturnType2()==null?"null":node.getReturnType2().toString();
-		this.methodReturnType.put(node.getName().getIdentifier(), returnType);
+		this.scopes.addMethodReturnType(node.getName().getIdentifier(), returnType);
 		return true;
 	}
 
@@ -352,7 +319,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				namesDeclared.add(name);
 				if(!currentLoopScope.contains(name)) {
 					this.currentMethodScope.add(v.getName().getIdentifier());
-					variableType.put(v.getName().toString(), node.getType().toString());
+					this.scopes.addVariableType(v.getName().toString(), node.getType().toString());
 				}
 			}
 		}
@@ -368,7 +335,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				namesDeclared.add(name);
 				if(!currentLoopScope.contains(name)) {
 					this.currentMethodScope.add(v.getName().getIdentifier());
-					variableType.put(v.getName().toString().toLowerCase(), node.getType().toString());
+					this.scopes.addVariableType(v.getName().toString().toLowerCase(), node.getType().toString());
 				}
 			}
 		}
@@ -383,46 +350,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.cu = cu;
 	}
 
-
-	public void setNodeSet(List<ASTNode> o) {
-		this.nodeSet = o;
-	}
-
-	public HashMap<String,String> getMethodReturnType() {
-		return this.methodReturnType;
-	}
-
-	public void setMethodReturnType(HashMap<String,String> methodReturnTypeMap) {
-		this.methodReturnType = methodReturnTypeMap;
-	}
-
-	public HashMap<String,String> getVariableType() {
-		return this.variableType;
-	}
-
-	public void setVariableType(HashMap<String,String> variableTypeSet) {
-		this.variableType = variableTypeSet;
-	}
-
-	public List<ASTNode> getNodeSet() {
-		return this.nodeSet;
-	}
-
 	public void setScopeList(ScopeInfo scopeList) {
 		this.scopes = scopeList;
 	}
 
-	//	@Override
-	//	public boolean visit(Initializer node) {
-	//		List mods = node.modifiers(); // FIXME need to deal with static.
-	//
-	//		for (Object o : mods) {
-	//			if (o instanceof Modifier) {
-	//				if (((Modifier) o).isStatic()) {
-	//					this.currentMethodScope = new HashSet<String>();
-	//				}
-	//			}
-	//		}
-	//		return super.visit(node);
-	//	}
 }
