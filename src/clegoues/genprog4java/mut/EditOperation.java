@@ -33,6 +33,8 @@
 
 package clegoues.genprog4java.mut;
 
+import clegoues.genprog4java.localization.Location;
+
 public interface EditOperation<R> {
 	
 	public EditHole getHoleCode();
