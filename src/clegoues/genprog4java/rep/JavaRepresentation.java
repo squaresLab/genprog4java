@@ -100,7 +100,6 @@ import clegoues.genprog4java.java.JavaSemanticInfo;
 import clegoues.genprog4java.java.JavaSourceInfo;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.java.ScopeInfo;
-import clegoues.genprog4java.localization.EntropyLocalization;
 import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.java.ClassInfo;
@@ -136,9 +135,6 @@ CachingRepresentation<JavaEditOperation> {
 			Localization localizationInfo) {
 		super(genome2);
 		this.localization = localizationInfo; // FIXME make a legit copy of this for copy?
-		if(localizationInfo instanceof EntropyLocalization) {
-			editFactory.setEntropyLocalization((EntropyLocalization) localization);
-		}
 	}
 
 	public JavaRepresentation() {
