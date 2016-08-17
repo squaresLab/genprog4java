@@ -47,7 +47,6 @@ import clegoues.genprog4java.Search.RandomSingleEdit;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.localization.DefaultLocalization;
-import clegoues.genprog4java.localization.EntropyLocalization;
 import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.mut.edits.java.JavaEditFactory;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
@@ -77,7 +76,6 @@ public class Main {
 		ConfigurationBuilder.register( CachingRepresentation.token );
 		ConfigurationBuilder.register( Localization.token );
 		ConfigurationBuilder.register( DefaultLocalization.token );
-		ConfigurationBuilder.register( EntropyLocalization.token );
 		ConfigurationBuilder.register( JavaRepresentation.token );
 		ConfigurationBuilder.register( JavaEditFactory.token );
 		ConfigurationBuilder.register( Population.token );
@@ -99,8 +97,6 @@ public class Main {
 		baseRep.load(Configuration.targetClassNames);
 
 		switch(Localization.faultStrategy.trim()) {
-		case "entropy": localization = new EntropyLocalization(baseRep);
-		break;
 		case "default": 
 		default: localization = new DefaultLocalization(baseRep);
 		break;
