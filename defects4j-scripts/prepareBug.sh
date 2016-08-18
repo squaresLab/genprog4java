@@ -132,11 +132,12 @@ case "$OPTION" in
 
   #Create the new test suite
   echo Creating new test suite...
+  SEED=2
   cd "$DEFECTS4JDIR"/framework/bin/
   #THIS IS COMMENTED BECAUSE THIS WAS ALREADY CREATED
-  perl run_randoop.pl -p "$PROJECT" -v "$BUGNUMBER"f -n 1 -o $BUGWD/"$TESTWD"/outputOfRandoop/ -b 10
-  perl "$DEFECTS4JDIR"/framework/util/fix_test_suite.pl -p "$PROJECT" -d $BUGWD/"$TESTWD"/outputOfRandoop/$PROJECT/randoop/1/
-  OUTPUT=$(defects4j test -s $BUGWD/"$TESTWD"/outputOfRandoop/$PROJECT/randoop/1/"$PROJECT"-"$BUGNUMBER"f-randoop.1.tar.bz2 -w $BUGWD)
+  perl run_randoop.pl -p "$PROJECT" -v "$BUGNUMBER"f -n "$SEED" -o $BUGWD/"$TESTWD"/outputOfRandoop/ -b 1800
+  perl "$DEFECTS4JDIR"/framework/util/fix_test_suite.pl -p "$PROJECT" -d $BUGWD/"$TESTWD"/outputOfRandoop/$PROJECT/randoop/$SEED/
+  OUTPUT=$(defects4j test -s $BUGWD/"$TESTWD"/outputOfRandoop/$PROJECT/randoop/"$SEED"/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -w $BUGWD)
   TOTALEXECUTED=$(wc -l < "$DEFECTS4JDIR/totalTestsExecuted.txt")
   FAILEDTESTS=$(echo ${OUTPUT:(15)} | awk '{print $1;}')
   echo "$PROJECT $BUGNUMBER $TOTALEXECUTED $FAILEDTESTS" >> $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites.txt
