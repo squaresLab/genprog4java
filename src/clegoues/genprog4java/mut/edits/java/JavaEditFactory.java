@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.Type;
 
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaStatement;
@@ -81,6 +82,12 @@ public class JavaEditFactory {
 			return new CollectionSizeChecker((JavaLocation) dst, sources);
 		case OBJINIT:
 			return new ObjectInitializer((JavaLocation) dst, sources);
+		case SEQEXCH:
+			return new SequenceExchanger((JavaLocation) dst, sources);
+		case CASTERMUT:
+			return new CasterMutator((JavaLocation) dst, sources);
+		case CASTEEMUT:
+			return new CasteeMutator((JavaLocation) dst, sources);
 		}
 		return null;
 	}
@@ -309,7 +316,7 @@ public class JavaEditFactory {
 				int parentExpLoc = ASTUtils.getLineNumber(parentExp);
 				for(Expression exp : entries.getValue()) {
 					EditHole shrinkableExpHole1 = new ExpChoiceHole(entries.getKey(), exp, locationStmt.getStmtId(), 0);
-					EditHole shrinkableExpHole2 = new ExpChoiceHole( entries.getKey(), exp, locationStmt.getStmtId(), 1);
+					EditHole shrinkableExpHole2 = new ExpChoiceHole(entries.getKey(), exp, locationStmt.getStmtId(), 1);
 					int newExpLoc = ASTUtils.getLineNumber(exp);
 					int lineDistance = Math.abs(parentExpLoc - newExpLoc);
 					double weight = lineDistance != 0 ? 1.0 / lineDistance : 1.0;
@@ -333,7 +340,7 @@ public class JavaEditFactory {
 			}
 			return retVal;
 		}
-	
+
 		case SIZECHECK:
 		{ // no choice here or objinit, so weight of 1.0
 			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
@@ -350,6 +357,80 @@ public class JavaEditFactory {
 				// is the "replacement" code.
 				EditHole newHole = new ExpHole((Expression) initObject, null, locationStmt.getStmtId());
 				retVal.add(new WeightedHole(newHole));
+			}
+			return retVal;
+		}
+		case SEQEXCH:
+		{
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
+			List<Expression> expressionObjects = locationStmt.getExpressions();
+			List<Expression> toReplaceForExpressions = locationStmt.getExpressionsToReplaceWith();
+			for(Expression expressionObject : expressionObjects) {
+				for(Expression toReplaceForExpression : toReplaceForExpressions) {
+					if(!expressionObject.toString().equalsIgnoreCase(toReplaceForExpression.toString())
+							&& expressionObject.getNodeType()==toReplaceForExpression.getNodeType()){
+						EditHole newHole = new ExpHole(toReplaceForExpression, expressionObject, locationStmt.getStmtId());
+						retVal.add(new WeightedHole(newHole));
+					}
+				}
+			}
+			return retVal;
+			
+			/*
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
+			List<WeightedAtom> fixStmts = this.scopeHelper(location, variant, editType);
+			for(WeightedAtom fixStmt : fixStmts) {
+				JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getLeft());
+				ASTNode fixAST = potentialFixStmt.getASTNode();
+				StatementHole stmtHole = new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId());
+				retVal.add(new WeightedHole(stmtHole, fixStmt.getRight()));
+			}
+			return retVal;
+			 */
+		}
+		case CASTERMUT:
+		{
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
+			List<Type> casterObjects = locationStmt.getCasterTypes();
+			List<ASTNode> toReplaceForCasters = locationStmt.getTypesToReplaceCaster();
+			for(ASTNode casterObject : casterObjects) {
+				/*
+				for(ASTNode toReplaceForCaster : toReplaceForCasters) {
+					if(!casterObject.toString().equalsIgnoreCase(toReplaceForCaster.toString())){
+						List<ASTNode> newList = casterObjects.//new List<Type>(); 
+						newList.add(casterObject.);
+						EditHole newHole = new SubExpsHole(toReplaceForCaster, newList);
+						retVal.add(new WeightedHole(newHole));
+					}
+				}*/
+
+				ASTNode toRemove = null;
+				for(ASTNode toReplaceForCaster : toReplaceForCasters){
+					if(casterObject.toString().equalsIgnoreCase(toReplaceForCaster.toString())){
+						toRemove = toReplaceForCaster;
+					}
+				}
+				if(toRemove!=null){
+					toReplaceForCasters.remove(toRemove);
+				}
+				EditHole newHole = new SubExpsHole(casterObject, toReplaceForCasters);
+				retVal.add(new WeightedHole(newHole));
+				
+			}
+			return retVal;
+		}
+		case CASTEEMUT:
+		{
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
+			List<Expression> casteeObjects = locationStmt.getCasteeExpressions();
+			List<Expression> toReplaceForCastees = locationStmt.getExpressionsToReplaceCastee();
+			for(Expression casteeObject : casteeObjects) {
+				for(Expression toReplaceForCastee : toReplaceForCastees) {
+					if(!casteeObject.toString().equalsIgnoreCase(toReplaceForCastee.toString())){
+						EditHole newHole = new ExpHole(toReplaceForCastee, casteeObject, locationStmt.getStmtId());
+						retVal.add(new WeightedHole(newHole));
+					}
+				}
 			}
 			return retVal;
 		}
@@ -412,6 +493,12 @@ public class JavaEditFactory {
 			return locationStmt.getIndexedCollectionObjects().size() > 0;
 		case OBJINIT:
 			return locationStmt.getObjectsAsMethodParams().size() > 0;
+		case SEQEXCH:
+			return locationStmt.getExpressions().size() > 0;
+		case CASTERMUT:
+			return locationStmt.getCasterTypes().size() > 0;
+		case CASTEEMUT:
+			return locationStmt.getCasteeExpressions().size() > 0;
 		}
 		return false;
 	}

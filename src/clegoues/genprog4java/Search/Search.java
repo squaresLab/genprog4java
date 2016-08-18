@@ -169,6 +169,7 @@ public abstract class Search<G extends EditOperation> {
 			
 			//funrep;parrep;paradd;parrem;exprep;expadd;exprem;nullcheck;rangecheck;sizecheck;castcheck;lbset;offbyone;ubset
 			switch(edit.toLowerCase()) {
+
 			case "append": mutations.add(new WeightedMutation(Mutation.APPEND, weight)); break;
 			case "swap":  mutations.add(new WeightedMutation(Mutation.SWAP, weight)); break;
 			case "delete":  mutations.add(new WeightedMutation(Mutation.DELETE, weight)); break;
@@ -188,6 +189,10 @@ public abstract class Search<G extends EditOperation> {
 			case "lbset":  mutations.add(new WeightedMutation(Mutation.LBOUNDSET, weight)); break;
 			case "ubset":  mutations.add(new WeightedMutation(Mutation.UBOUNDSET, weight)); break;
 			case "offbyone":  mutations.add(new WeightedMutation(Mutation.OFFBYONE, weight)); break;
+			case "seqexch":  mutations.add( new WeightedMutation(Mutation.SEQEXCH, weight)); break;
+			case "castermut":  mutations.add(new WeightedMutation(Mutation.CASTERMUT, weight)); break;
+			case "casteemut":  mutations.add(new WeightedMutation(Mutation.CASTEEMUT, weight)); break;
+
 			}
 		}
 		Collections.sort(mutations);

@@ -15,7 +15,7 @@ touch $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites.txt
 
 STARTAT=1
 
-for (( projectNumb=2 ; projectNumb<=2 ; projectNumb++ ))
+for (( projectNumb=4 ; projectNumb<=4 ; projectNumb++ ))
 do
   case "$projectNumb" in
   "1" )
@@ -27,8 +27,8 @@ do
   "2" ) 
     PROJECT="Lang"
 #    NUMBEROFBUGS=65
-    NUMBEROFBUGS=43
-    STARTAT=41
+    NUMBEROFBUGS=32
+    STARTAT=32
   ;;
   "3" ) 
     PROJECT="Chart"
@@ -37,8 +37,9 @@ do
   ;;
   "4" ) 
     PROJECT="Time"
-    NUMBEROFBUGS=27
-    STARTAT=1
+    #NUMBEROFBUGS=27
+    NUMBEROFBUGS=7
+    STARTAT=7
   ;;
   "5" ) 
     PROJECT="Closure"

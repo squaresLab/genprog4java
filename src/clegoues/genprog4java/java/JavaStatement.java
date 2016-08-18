@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -63,17 +64,28 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.UnionType;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.WildcardType;
 
 import clegoues.genprog4java.rep.JavaRepresentation;
 
@@ -517,18 +529,18 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						}
 						superClass = superClass.getSuperclass();
 					}
-					
+
 					if(compatibleMethods.size() > 0) {
 						ArrayList<ITypeBinding> myTypes = getParamTypes(myMethodBinding);
 						List<List<ASTNode>> thisNodesOptions;
-						
+
 						if(extendableParameterMethods.containsKey(node)) {
 							thisNodesOptions = extendableParameterMethods.get(node);
 						} else {
 							thisNodesOptions = new ArrayList<List<ASTNode>>();
 							extendableParameterMethods.put(node,thisNodesOptions);
 						}
-						
+
 						for(IMethodBinding compatibleMethod : compatibleMethods) {
 							ArrayList<ITypeBinding> compatibleParamTypes = getParamTypes(compatibleMethod);
 							int startIndex = myTypes.size() == 0 ? 0 : myTypes.size() - 1;
@@ -850,6 +862,369 @@ if B include return statement
 		return true;
 	}
 
+	
+	private List<Expression> casteeExpressions = null;
+	public  List<Expression> getCasteeExpressions(){
+		if(casteeExpressions == null) {
+			casteeExpressions = new LinkedList<Expression>();
+
+			this.getASTNode().accept(new ASTVisitor() {
+				private List<String> casteeExpressionsString = new ArrayList<String>();
+				public boolean visit(CastExpression node) {
+					if(!casteeExpressionsString.contains(node.getExpression().toString())){
+						casteeExpressions.add(node.getExpression());
+						casteeExpressionsString.add(node.getExpression().toString());
+					}
+					return true;
+				}
+			});
+		}
+
+		return casteeExpressions;
+	}
+
+	private List<Expression> toReplaceCasteeExpressions = null;
+	public  List<Expression> getExpressionsToReplaceCastee(){
+		if(toReplaceCasteeExpressions == null) {
+			toReplaceCasteeExpressions = new LinkedList<Expression>();
+
+			ASTNode startAt = this.getASTNode();
+			while(!(startAt instanceof TypeDeclaration)){
+				startAt=startAt.getParent();
+			}
+
+			startAt.accept(new ASTVisitor() {
+				private List<String> toReplaceCasteeExpressionsStrings = new ArrayList<String>();
+				public boolean visit(CastExpression node) {
+					if(!toReplaceCasteeExpressionsStrings.contains(node.getExpression().toString())){
+						toReplaceCasteeExpressions.add(node.getExpression());
+						toReplaceCasteeExpressionsStrings.add(node.getExpression().toString());
+					}
+					return true;
+				}
+				public boolean visit(MethodInvocation node) {
+					if(!toReplaceCasteeExpressionsStrings.contains(node.toString())){
+						toReplaceCasteeExpressions.add(node);
+						toReplaceCasteeExpressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(VariableDeclarationFragment node) {
+					if(!toReplaceCasteeExpressionsStrings.contains(node.getName().toString())){
+						toReplaceCasteeExpressions.add(node.getName());
+						toReplaceCasteeExpressionsStrings.add(node.getName().toString());
+					}
+					return true;
+				}
+				public boolean visit(ArrayAccess node) {
+					if(!toReplaceCasteeExpressionsStrings.contains(node.toString())){
+						toReplaceCasteeExpressions.add(node);
+						toReplaceCasteeExpressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+			});
+		}
+
+		return toReplaceCasteeExpressions;
+	}
+	
+	private List<Type> casterTypes = null;
+	public  List<Type> getCasterTypes(){
+		if(casterTypes == null) {
+			casterTypes = new LinkedList<Type>();
+			this.getASTNode().accept(new ASTVisitor() {
+				/*
+				public boolean visit(SimpleType node) {
+					casterTypes.add(node);
+					return true;
+				}*/
+				private List<String> casterTypesString = new ArrayList<String>();
+				public boolean visit(CastExpression node) {
+					if(!casterTypesString.contains(node.getType().toString())){
+						casterTypes.add(node.getType());
+						casterTypesString.add(node.getType().toString());
+					}
+					return true;
+				}
+
+			});
+		}
+
+		return casterTypes;
+	}
+
+	private List<ASTNode> toReplaceCasterTypes = null;
+	public  List<ASTNode> getTypesToReplaceCaster(){
+		if(toReplaceCasterTypes == null) {
+			toReplaceCasterTypes = new LinkedList<ASTNode>();
+
+			ASTNode startAt = this.getASTNode();
+			while(!(startAt instanceof TypeDeclaration)){
+				startAt=startAt.getParent();
+			}
+
+			startAt.accept(new ASTVisitor() {
+				private List<String> toReplaceCasterTypesStrings = new ArrayList<String>();
+				public boolean visit(ArrayType node) {
+					if(!toReplaceCasterTypesStrings.contains(node.toString())){
+						toReplaceCasterTypes.add(node);
+						toReplaceCasterTypesStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(ParameterizedType node) {
+					if(!toReplaceCasterTypesStrings.contains(node.toString())){
+						toReplaceCasterTypes.add(node);
+						toReplaceCasterTypesStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(PrimitiveType node) {
+					if(!toReplaceCasterTypesStrings.contains(node.toString())){
+						toReplaceCasterTypes.add(node);
+						toReplaceCasterTypesStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(QualifiedType node) {
+					if(!toReplaceCasterTypesStrings.contains(node.toString())){
+						toReplaceCasterTypes.add(node);
+						toReplaceCasterTypesStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(SimpleType node) {
+					if(!toReplaceCasterTypesStrings.contains(node.toString())){
+						toReplaceCasterTypes.add(node);
+						toReplaceCasterTypesStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(UnionType node) {
+					if(!toReplaceCasterTypesStrings.contains(node.toString())){
+						toReplaceCasterTypes.add(node);
+						toReplaceCasterTypesStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(WildcardType node) {
+					if(!toReplaceCasterTypesStrings.contains(node.toString())){
+						toReplaceCasterTypes.add(node);
+						toReplaceCasterTypesStrings.add(node.toString());
+					}
+					return true;
+				}
+
+				/*
+				public boolean visit(CastExpression node) {
+					if(!toReplaceCasterTypes.contains(node.getType())){
+						toReplaceCasterTypes.add(node.getType());
+					}
+					return true;
+				}
+				public boolean visit(MethodDeclaration node) {
+					if(!toReplaceCasterTypes.contains(node.getReturnType2())){
+						toReplaceCasterTypes.add(node.getReturnType2());
+					}
+					return true;
+				}
+				public boolean visit(SingleVariableDeclaration node) {
+					if(!toReplaceCasterTypes.contains(node.getType())){
+						toReplaceCasterTypes.add(node.getType());
+					}
+					return true;
+				}
+				public boolean visit(ArrayCreation node) {
+					if(!toReplaceCasterTypes.contains(node.getType())){
+						toReplaceCasterTypes.add(node.getType());
+					}
+					return true;
+				}
+				public boolean visit(ClassInstanceCreation node) {
+					if(!toReplaceCasterTypes.contains(node.getType())){
+						toReplaceCasterTypes.add(node.getType());
+					}
+					return true;
+				}
+				 */
+			});
+		}
+
+		return toReplaceCasterTypes; 
+	}
+	
+	private List<Expression> expressions = null;
+	public  List<Expression> getExpressions(){
+		if(expressions == null) {
+			expressions = new LinkedList<Expression>();
+			//CHECK SCOPE OF THIS THIS.GETASTNODE.ACCEPT
+			this.getASTNode().accept(new ASTVisitor() {
+				private List<String> expressionsStrings = new ArrayList<String>();
+				public boolean visit(ArrayAccess node) {
+					if(!expressionsStrings.contains(node.toString())){
+						expressions.add(node);
+						expressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(CastExpression node) {
+					if(!expressionsStrings.contains(node.toString())){
+						expressions.add(node);
+						expressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(InfixExpression node) {
+					if(!expressionsStrings.contains(node.toString())){
+						expressions.add(node);
+						expressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(FieldAccess node) {
+					if(!expressionsStrings.contains(node.toString())){
+						expressions.add(node);
+						expressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(MethodInvocation node) {
+					if(!expressionsStrings.contains(node.toString())){
+						expressions.add(node);
+						expressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(SimpleName node) {
+					if(!expressionsStrings.contains(node.toString())){
+						expressions.add(node);
+						expressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(NullLiteral node) {
+					if(!expressionsStrings.contains(node.toString())){
+						expressions.add(node);
+						expressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(NumberLiteral node) {
+					if(!expressionsStrings.contains(node.toString())){
+						expressions.add(node);
+						expressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(ParenthesizedExpression node) {
+					if(!expressionsStrings.contains(node.toString())){
+						expressions.add(node);
+						expressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(ThisExpression node) {
+					if(!expressionsStrings.contains(node.toString())){
+						expressions.add(node);
+						expressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+			});
+		}
+
+		return expressions;
+	}
+
+	private List<Expression> toReplaceWithExpressions = null;
+	public  List<Expression> getExpressionsToReplaceWith(){
+		if(toReplaceWithExpressions == null) {
+			toReplaceWithExpressions = new LinkedList<Expression>();
+
+			ASTNode startAt = this.getASTNode();
+			while(!(startAt instanceof TypeDeclaration)){
+				startAt=startAt.getParent();
+			}
+
+			startAt.accept(new ASTVisitor() {
+				private List<String> toReplaceWithExpressionsStrings = new ArrayList<String>();
+				public boolean visit(ArrayAccess node) {
+					if(!toReplaceWithExpressionsStrings.contains(node.toString())){
+						toReplaceWithExpressions.add(node);
+						toReplaceWithExpressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(CastExpression node) {
+					if(!toReplaceWithExpressionsStrings.contains(node.toString())){
+						toReplaceWithExpressions.add(node);
+						toReplaceWithExpressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(InfixExpression node) {
+					if(!toReplaceWithExpressionsStrings.contains(node.toString())){
+						toReplaceWithExpressions.add(node);
+						toReplaceWithExpressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(FieldAccess node) {
+					if(!toReplaceWithExpressionsStrings.contains(node.toString())){
+						toReplaceWithExpressions.add(node);
+						toReplaceWithExpressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(MethodInvocation node) {
+					if(!toReplaceWithExpressionsStrings.contains(node.toString())){
+						toReplaceWithExpressions.add(node);
+						toReplaceWithExpressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(SimpleName node) {
+					if(!toReplaceWithExpressionsStrings.contains(node.toString())){
+						toReplaceWithExpressions.add(node);
+						toReplaceWithExpressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(NullLiteral node) {
+					if(!toReplaceWithExpressionsStrings.contains(node.toString())){
+						toReplaceWithExpressions.add(node);
+						toReplaceWithExpressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit( NumberLiteral node) {
+					if(!toReplaceWithExpressionsStrings.contains(node.toString())){
+						toReplaceWithExpressions.add(node);
+						toReplaceWithExpressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit( ParenthesizedExpression node) {
+					if(!toReplaceWithExpressionsStrings.contains(node.toString())){
+						toReplaceWithExpressions.add(node);
+						toReplaceWithExpressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				public boolean visit(ThisExpression node) {
+					if(!toReplaceWithExpressionsStrings.contains(node.toString())){
+						toReplaceWithExpressions.add(node);
+						toReplaceWithExpressionsStrings.add(node.toString());
+					}
+					return true;
+				}
+				
+			});
+		}
+
+		return toReplaceWithExpressions;
+	}
 
 	public boolean isLikelyAConstructor() {
 		ASTNode enclosingMethod = ASTUtils.getEnclosingMethod(this.getASTNode());
