@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import clegoues.genprog4java.mut.EditHole;
+import clegoues.genprog4java.mut.holes.java.ExpChoiceHole;
 import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.mut.holes.java.MethodInfoHole;
@@ -65,5 +66,22 @@ public class CasteeMutator extends JavaEditOperation {
 		}
 		*/
 	}
+	
+	public String toString() {
+		ExpHole thisHole = (ExpHole) this.getHoleCode();
+		String retval = "csteeM(" + this.getLocation().getId() + ": ";
+		retval += "(" + thisHole.getCode() + ") replaced with ";
+		retval +=  "(" + thisHole.getLocationExp() + "))";
+		return retval;
+	}
 
 }
+
+
+
+
+
+
+
+
+

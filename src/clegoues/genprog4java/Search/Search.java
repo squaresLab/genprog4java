@@ -167,7 +167,7 @@ public abstract class Search<G extends EditOperation> {
 				edit = oneItem;
 			}
 			
-			//funrep;parrep;paradd;parrem;exprep;expadd;exprem;nullcheck;rangecheck;sizecheck;castcheck;lbset;offbyone;ubset
+			//funrep;parrep;paradd;parrem;exprep;expadd;exprem;nullcheck;rangecheck;sizecheck;castcheck;lbset;offbyone;ubset;seqexch;castermut;casteemut
 			switch(edit.toLowerCase()) {
 
 			case "append": mutations.add(new WeightedMutation(Mutation.APPEND, weight)); break;
@@ -313,7 +313,7 @@ public abstract class Search<G extends EditOperation> {
 	}
 
 	private List rescaleAllowed(Mutation mut, List<WeightedHole> allowed, Representation variant, int stmtid) {
-		if(mut != Mutation.REPLACE || Search.model.equalsIgnoreCase("default")){
+		if(mut != Mutation.REPLACE || !Search.model.equalsIgnoreCase("probabilistic")){
 			return allowed;
 		}else if(Search.model.equalsIgnoreCase("probabilistic")){
 			return rm.rescaleReplacementsBasedOnModel(new ArrayList(allowed), variant, stmtid);
