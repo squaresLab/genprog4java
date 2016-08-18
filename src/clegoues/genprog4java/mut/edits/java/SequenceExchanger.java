@@ -19,5 +19,13 @@ public class SequenceExchanger  extends JavaEditOperation {
 		ASTNode replaceWith = ASTNode.copySubtree(rewriter.getAST(), thisHole.getLocationExp());
 		rewriter.replace(toReplace, replaceWith, null);
 	}
+	
+	public String toString() {
+		ExpHole thisHole = (ExpHole) this.getHoleCode();
+		String retval = "sqncEx(" + this.getLocation().getId() + ": ";
+		retval += "(" + thisHole.getCode() + ") replaced with ";
+		retval +=  "(" + thisHole.getLocationExp() + "))";
+		return retval;
+	}
 
 }
