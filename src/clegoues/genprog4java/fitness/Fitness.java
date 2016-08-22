@@ -232,8 +232,8 @@ public class Fitness {
 	 * @param filterBy stuff to filter out of toFilter
 	 */
 	private void filterTests(ArrayList<String> toFilter, ArrayList<String> filterBy) {
-		HashSet<String> clazzesInFilterSet = new HashSet<String>();
-		HashSet<String> removeFromFilterSet = new HashSet<String>();
+		ArrayList<String> clazzesInFilterSet = new ArrayList<String>();
+		ArrayList<String> removeFromFilterSet = new ArrayList<String>();
 
 		// stuff in negative tests, must remove class from positive test list and add non-negative tests to list
 		for(String specifiedMethod : filterBy) {
@@ -250,7 +250,7 @@ public class Fitness {
 		}
 		filterBy.addAll(clazzesInFilterSet);
 
-		HashSet<String> removeFromFilteredSet = new HashSet<String>();
+		ArrayList<String> removeFromFilteredSet = new ArrayList<String>();
 		for(String testNameInToFilter : toFilter ) {
 			String clazzName = "";
 			if(testNameInToFilter.contains("::")) {
