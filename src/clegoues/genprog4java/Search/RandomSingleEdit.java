@@ -9,17 +9,17 @@ import clegoues.util.ConfigurationBuilder;
 
 public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 
-	
+
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
-	
+
 	protected static int maxVariants = ConfigurationBuilder.of( INT )
 			.withVarName( "maxVariants" )
 			.withDefault( "400" )
 			.withHelp( "maximum number of variants to consider" )
 			.inGroup( "Search Parameters" )
 			.build();
-	
+
 	public RandomSingleEdit(Fitness engine) {
 		super(engine);
 		engine.initializeModel();
@@ -37,16 +37,15 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 			throws RepairFoundException, GiveUpException {
 		int numVariantsConsidered = 0;
 		while(numVariantsConsidered < RandomSingleEdit.maxVariants) {
-			System.out.println("while(numVariantsConsidered < RandomSingleEdit.maxVariants)");
 			Representation<G> variant = original.copy();
 			mutate(variant);
 			if (fitnessEngine.testToFirstFailure(variant, true)) { 
 				this.noteSuccess(variant, original, 0);
-					if(!continueSearch) 
-						return;
-				}
-			numVariantsConsidered++;
+				if(!continueSearch) 
+					return;
 			}
+			numVariantsConsidered++;
+		}
 	}
 
 
