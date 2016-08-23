@@ -257,10 +257,11 @@ public abstract class Search<G extends EditOperation> {
 	 * 
 	 * @return variant' modified/potentially mutated variant
 	 */
-	public void mutate(Representation<G> variant) {
+	public void mutate(Representation<G> variant) throws GiveUpException {
 		ArrayList<Location> faultyAtoms = variant.getFaultyLocations();
 		ArrayList<Location> proMutList = new ArrayList<Location>();
 		boolean foundMutationThatCanApplyToAtom = false;
+		boolean alreadySetAllStmtsToFixLoc = false;
 		while(!foundMutationThatCanApplyToAtom){
 			//promut default is 1 // promut stands for proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
 			for (int i = 0; i < Search.promut; i++) {
@@ -269,7 +270,9 @@ public abstract class Search<G extends EditOperation> {
 				boolean alreadyOnList = false;
 				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
 				if(proMutList.size()>=faultyAtoms.size()){ 
-					variant.setAllPossibleStmtsToFixLocalization();				}
+					variant.setAllPossibleStmtsToFixLocalization();				
+					alreadySetAllStmtsToFixLoc = true;
+				}
 				//only adds the random atom if it is different from the others already added
 				do {
 					//chooses a random faulty atom from the subset of faulty atoms
@@ -281,10 +284,12 @@ public abstract class Search<G extends EditOperation> {
 				proMutList.add((Location)wa);
 			}
 			for (Location location : proMutList) {
-				// FIXME: deal with the case where there are no edits that apply ever, because infinite loop
 				//the available mutations for this stmt
 				List<WeightedMutation> availableMutations = variant.availableMutations(location);
 				if(availableMutations.isEmpty()){
+					if(alreadySetAllStmtsToFixLoc && proMutList.size()>=faultyAtoms.size() && location==proMutList.get(proMutList.size())){
+						throw new GiveUpException();
+					}
 					continue; 
 				}else{
 					foundMutationThatCanApplyToAtom = true;

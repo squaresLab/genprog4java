@@ -37,25 +37,20 @@ import static clegoues.util.ConfigurationBuilder.BOOLEAN;
 import static clegoues.util.ConfigurationBuilder.BOOL_ARG;
 import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.STRING;
+import static clegoues.util.ConfigurationBuilder.INT;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
@@ -70,7 +65,6 @@ import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.util.ConfigurationBuilder;
-import clegoues.util.GlobalUtils;
 
 @SuppressWarnings("rawtypes")
 public abstract class FaultLocRepresentation<G extends EditOperation> extends
@@ -133,6 +127,18 @@ CachingRepresentation<G> {
 			.withVarName("fixStrategy")
 			.withHelp("Fix source strategy")
 			.withDefault("classScope")
+			.inGroup( "FaultLocRepresentation Parameters" )
+			.build();
+	protected static String faultLocStrategy = ConfigurationBuilder.of ( STRING )
+			.withVarName("faultLocStrategy")
+			.withHelp("Fault localization strategy")
+			.withDefault("standardPathFile")
+			.inGroup( "FaultLocRepresentation Parameters" )
+			.build();
+	protected static int faultLocFromFileLineNumber = ConfigurationBuilder.of ( INT )
+			.withVarName("faultLocFromFileLineNumber")
+			.withHelp("The line number of the faulty stmt, when fault localization is human inserted and not created by the coverage")
+			.withDefault("1")
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
 
@@ -262,7 +268,7 @@ CachingRepresentation<G> {
 		return retVal;
 
 	}
-
+	
 	protected void computeLocalization() throws IOException,
 	UnexpectedCoverageResultException {
 		// THIS ONLY DOES STANDARD PATH FILE localization
@@ -292,18 +298,14 @@ CachingRepresentation<G> {
 		if (positivePathFile.exists() && !FaultLocRepresentation.regenPaths) {
 			positivePath = readPathFile(FaultLocRepresentation.posCoverageFile);
 		} else {
-			positivePath = runTestsCoverage(
-					FaultLocRepresentation.posCoverageFile,
-					Fitness.positiveTests, true, Configuration.outputDir + "/coverage/");
+			positivePath = createPosFile();
 		}
 		File negativePathFile = new File(FaultLocRepresentation.negCoverageFile);
 
 		if (negativePathFile.exists() && !FaultLocRepresentation.regenPaths) {
 			negativePath = readPathFile(FaultLocRepresentation.negCoverageFile);
 		} else {
-			negativePath = runTestsCoverage(
-					FaultLocRepresentation.negCoverageFile,
-					Fitness.negativeTests, false, Configuration.outputDir + "/coverage/");
+			negativePath = createNegFile();	
 		}
 
 		computeFixSpace(negativePath, positivePath);
@@ -320,6 +322,54 @@ CachingRepresentation<G> {
 		assert (fixLocalization.size() > 0);
 		this.doingCoverage = false;
 		logger.info("Finish Fault Localization");
+	}
+	
+	private TreeSet<Integer> createPosFile(){
+		TreeSet<Integer> positivePath = null;
+		switch(faultLocStrategy.trim()) {
+		case "fromfile": 
+			//positivePath = new TreeSet<Integer>();
+			//positivePath.add(faultLocFromFileHoleNumber);
+			break;
+		case "standardPathFile": 
+		default:
+			try {
+				positivePath = runTestsCoverage(
+						FaultLocRepresentation.posCoverageFile,
+						Fitness.positiveTests, true, Configuration.outputDir + "/coverage/");
+			} catch (IOException | UnexpectedCoverageResultException e) {
+				e.printStackTrace();
+			}
+			break;
+		}
+		return positivePath;
+	}
+	
+	private TreeSet<Integer> createNegFile(){
+		TreeSet<Integer> negativePath = null;
+		switch(faultLocStrategy.trim()) {
+		case "fromfile": 
+			negativePath = transformLineNumberToStmtNumbers(faultLocFromFileLineNumber);
+			break;
+		case "standardPathFile": 
+		default:
+			try {
+				negativePath = runTestsCoverage(
+						FaultLocRepresentation.negCoverageFile,
+						Fitness.negativeTests, false, Configuration.outputDir + "/coverage/");
+			} catch (IOException | UnexpectedCoverageResultException e) {
+				e.printStackTrace();
+			}
+			break;
+		}
+		return negativePath;
+	}
+	
+	private TreeSet<Integer> transformLineNumberToStmtNumbers(int faultyLineNumber){
+		TreeSet<Integer> negativePath = new TreeSet<Integer>();
+		ArrayList<Integer> atomIds = this.atomIDofSourceLine(faultyLineNumber);
+		negativePath.addAll(atomIds);
+		return negativePath;
 	}
 
 	protected void computeFaultSpace(TreeSet<Integer> negativePath, TreeSet<Integer> positivePath) {

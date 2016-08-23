@@ -34,9 +34,10 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 
 	@Override
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
-			throws RepairFoundException {
+			throws RepairFoundException, GiveUpException {
 		int numVariantsConsidered = 0;
 		while(numVariantsConsidered < RandomSingleEdit.maxVariants) {
+			System.out.println("while(numVariantsConsidered < RandomSingleEdit.maxVariants)");
 			Representation<G> variant = original.copy();
 			mutate(variant);
 			if (fitnessEngine.testToFirstFailure(variant, true)) { 
