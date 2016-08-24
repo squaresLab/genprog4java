@@ -380,6 +380,10 @@ public class DefaultLocalization extends Localization {
 		assert (faultLocalization.size() > 0);
 		assert (fixLocalization.size() > 0);
 		logger.info("Finish Fault Localization");
+		if(justTestingFaultLoc == true){
+			logger.info("Fault localization was peprformed successfully");
+			System.exit(0);
+		}
 	}
 
 	protected void computeFaultSpace(TreeSet<Integer> negativePath, TreeSet<Integer> positivePath) {
