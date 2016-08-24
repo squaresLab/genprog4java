@@ -81,12 +81,6 @@ CachingRepresentation<G> {
 	public transient static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
 
-	public static boolean justTestingFaultLoc = ConfigurationBuilder.of( BOOL_ARG )
-			.withVarName( "justTestingFaultLoc" )
-			.withDefault( "false" )
-			.withHelp( "boolean to be turned true if the purpose is to test that fault loc is performed correctly" )
-			.inGroup( "FaultLocRepresentation Parameters" )
-			.build();
 	
 	//private static double positivePathWeight = 0.1;
 	private static double positivePathWeight = ConfigurationBuilder.of( DOUBLE )
@@ -369,10 +363,7 @@ CachingRepresentation<G> {
 		// computed
 		try {
 			this.computeLocalization();
-			if(justTestingFaultLoc == true){
-				logger.info("Fault localization was peprformed successfully");
-				System.exit(0);
-			}
+			
 		} catch (UnexpectedCoverageResultException e) {
 			logger.error("FaultLocRep: UnexpectedCoverageResult");
 			Runtime.getRuntime().exit(1);

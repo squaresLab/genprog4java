@@ -1,5 +1,6 @@
 package clegoues.genprog4java.localization;
 
+import static clegoues.util.ConfigurationBuilder.BOOL_ARG;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
 import java.io.IOException;
@@ -28,6 +29,13 @@ public abstract class Localization {
 			.withHelp("Fault localization strategy")
 			.withDefault("classScope")
 			.inGroup( "Localization Parameters" )
+			.build();
+	
+	public static boolean justTestingFaultLoc = ConfigurationBuilder.of( BOOL_ARG )
+			.withVarName( "justTestingFaultLoc" )
+			.withDefault( "false" )
+			.withHelp( "boolean to be turned true if the purpose is to test that fault loc is performed correctly" )
+			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
 	
 	public abstract ArrayList<Location> getFaultLocalization();
