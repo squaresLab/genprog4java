@@ -81,6 +81,8 @@ import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.BadLocationException;
@@ -347,8 +349,8 @@ FaultLocRepresentation<JavaEditOperation> {
 				|| node instanceof SynchronizedStatement
 				|| node instanceof ThrowStatement
 				|| node instanceof TryStatement
-		//		|| node instanceof TypeDeclarationStatement
-		//		|| node instanceof VariableDeclarationStatement
+				|| node instanceof TypeDeclarationStatement
+				|| node instanceof VariableDeclarationStatement
 				|| node instanceof WhileStatement;
 	}
 
