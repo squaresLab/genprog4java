@@ -4,6 +4,7 @@ import static clegoues.util.ConfigurationBuilder.BOOLEAN;
 import static clegoues.util.ConfigurationBuilder.BOOL_ARG;
 import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.STRING;
+import static clegoues.util.ConfigurationBuilder.INT;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -105,6 +106,24 @@ public class DefaultLocalization extends Localization {
 			.withHelp( "regenerate coverage information" )
 			.inGroup( "DefaultLocalization Parameters" )
 			.build();
+	protected static String fixStrategy = ConfigurationBuilder.of ( STRING )
+ 			.withVarName("fixStrategy")
+ 			.withHelp("Fix source strategy")
+ 			.withDefault("classScope")
+ 			.inGroup( "FaultLocRepresentation Parameters" )
+ 			.build();
+	protected static String faultLocStrategy = ConfigurationBuilder.of ( STRING )
+			.withVarName("faultLocStrategy")
+			.withHelp("Fault localization strategy")
+			.withDefault("standardPathFile")
+			.inGroup( "FaultLocRepresentation Parameters" )
+			.build();
+	protected static int lineNumberOfFaultLocFromFile  = ConfigurationBuilder.of ( INT )
+			.withVarName("lineNumberOfFaultLocFromFile")
+			.withHelp("The line number of the faulty stmt, when fault localization is human inserted and not created by the coverage")
+			.withDefault("1")
+			.inGroup( "FaultLocRepresentation Parameters" )
+			.build();
 
 	protected Representation original = null;
 
@@ -174,6 +193,13 @@ public class DefaultLocalization extends Localization {
 		for(WeightedAtom atom : toRemove) {
 			fixLocalization.remove(atom);
 		}
+	}
+
+	private TreeSet<Integer> transformLineNumberToStmtNumbers(int faultyLineNumber){
+		TreeSet<Integer> negativePath = new TreeSet<Integer>();
+		ArrayList<Integer> atomIds = original.atomIDofSourceLine(faultyLineNumber);
+		negativePath.addAll(atomIds);
+		return negativePath;
 	}
 
 	/*
@@ -342,15 +368,24 @@ public class DefaultLocalization extends Localization {
 		if(pathFile.exists() && !DefaultLocalization.regenPaths) {
 			return readPathFile(path);
 		} else {
-			String covPath = Configuration.outputDir + "/coverage/";
-			File covDir = new File(covPath);
-			if (!covDir.exists())
-				covDir.mkdir();
-			if (!original.compile("coverage", "coverage/coverage.out")) {
-				logger.error("faultLocRep: Coverage failed to compile");
-				throw new UnexpectedCoverageResultException("compilation failure");
+			switch(faultLocStrategy.trim()) {
+			case "humanInjected":
+				if(!shouldPass){
+					return transformLineNumberToStmtNumbers(lineNumberOfFaultLocFromFile);
+					break;
+				}
+			case "standardPathFile":
+			default:
+				String covPath = Configuration.outputDir + "/coverage/";
+                        	File covDir = new File(covPath);
+                        	if (!covDir.exists())
+                                	covDir.mkdir();
+                        	if (!original.compile("coverage", "coverage/coverage.out")) {
+                                	logger.error("faultLocRep: Coverage failed to compile");
+                               		throw new UnexpectedCoverageResultException("compilation failure");
+                        	}
+                        	return runTestsCoverage(path, tests, shouldPass, covPath);
 			}
-			return runTestsCoverage(path, tests, shouldPass, covPath);
 		}
 
 	}
@@ -392,13 +427,19 @@ public class DefaultLocalization extends Localization {
 		TreeSet<Integer> posHt = new TreeSet<Integer>();
 
 		for (Integer i : positivePath) {
-			fw.put(i, DefaultLocalization.positivePathWeight);
+			if(faultLocStrategy.trim().equalsIgnoreCase("standardPathFile")){
+				fw.put(i, DefaultLocalization.positivePathWeight);
+			}else if(faultLocStrategy.trim().equalsIgnoreCase("humanInjected")){
+				fw.put(i, 0.0);
+			}
+			posHt.add(i);
 		}
 
-		for (Integer i : positivePath) {
+/*		for (Integer i : positivePath) {
 			posHt.add(i);
-			fw.put(i, 0.5);
+			//fw.put(i, 0.5);
 		}
+*/
 		for (Integer i : negativePath) {
 			if (!negHt.contains(i)) {
 				double negWeight = DefaultLocalization.negativePathWeight;
@@ -406,7 +447,7 @@ public class DefaultLocalization extends Localization {
 					negWeight = DefaultLocalization.positivePathWeight;
 				}
 				negHt.add(i);
-				fw.put(i, 0.5);
+				//fw.put(i, 0.5);
 				faultLocalization.add(original.instantiateLocation(i, negWeight)); 
 			}
 		}		
@@ -442,14 +483,14 @@ public class DefaultLocalization extends Localization {
 			}
 			this.fixLocalization.clear();
 			for(int i = 0; i < JavaRepresentation.stmtCounter; i++) {
-				this.fixLocalization.add(new WeightedAtom(i, 1.0));
+				this.fixLocalization.add(new WeightedAtom(i, 1.0)); //why is this 1.0 a hardwired number? Can it be DefaultLocalization.negativePathWeight? Or create another constant?
 			}
 		} else {
 			for (Integer i : positivePath) {
-				fixLocalization.add(new WeightedAtom(i, 0.5));
+				fixLocalization.add(new WeightedAtom(i, DefaultLocalization.positivePathWeight));
 			}
 			for (Integer i : negativePath) {
-				fixLocalization.add(new WeightedAtom(i, 0.5));
+				fixLocalization.add(new WeightedAtom(i, DefaultLocalization.positivePathWeight));
 			}	
 		}
 	}
