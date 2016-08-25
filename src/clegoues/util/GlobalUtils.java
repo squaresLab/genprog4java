@@ -79,15 +79,20 @@ public class GlobalUtils {
 		if(p > 1.0) return true;
 		return Configuration.randomizer.nextDouble() <= p;
 	}
-
+	
 	public static boolean runCommand(String commandToRun){
+		long l = 999999999999L; //Longest long it allows me to write without complaining about the timeout being negative...
+		return runCommand(commandToRun,l);
+	}
+
+	public static boolean runCommand(String commandToRun, long maxTimeToRunCommandInMillis){
 		Logger logger = Logger.getLogger(GlobalUtils.class);
 
 		try {
 			Process p = Runtime.getRuntime().exec(commandToRun);
 			int retValue = 0;
 			try {
-				if(p.waitFor(5, TimeUnit.MINUTES)) {
+				if(p.waitFor(maxTimeToRunCommandInMillis, TimeUnit.MILLISECONDS)) {
 					retValue=p.exitValue();
 				}else{
 					retValue=-1; //error code
