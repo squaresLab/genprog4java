@@ -110,19 +110,19 @@ public class DefaultLocalization extends Localization {
  			.withVarName("fixStrategy")
  			.withHelp("Fix source strategy")
  			.withDefault("classScope")
- 			.inGroup( "FaultLocRepresentation Parameters" )
+ 			.inGroup( "DefaultLocalization Parameters" )
  			.build();
 	protected static String faultLocStrategy = ConfigurationBuilder.of ( STRING )
 			.withVarName("faultLocStrategy")
 			.withHelp("Fault localization strategy")
 			.withDefault("standardPathFile")
-			.inGroup( "FaultLocRepresentation Parameters" )
+			.inGroup( "DefaultLocalization Parameters" )
 			.build();
 	protected static int lineNumberOfFaultLocFromFile  = ConfigurationBuilder.of ( INT )
 			.withVarName("lineNumberOfFaultLocFromFile")
 			.withHelp("The line number of the faulty stmt, when fault localization is human inserted and not created by the coverage")
 			.withDefault("1")
-			.inGroup( "FaultLocRepresentation Parameters" )
+			.inGroup( "DefaultLocalization Parameters" )
 			.build();
 
 	protected Representation original = null;
