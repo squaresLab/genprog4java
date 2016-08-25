@@ -135,8 +135,8 @@ CachingRepresentation<G> {
 			.withDefault("standardPathFile")
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
-	protected static int faultLocFromFileLineNumber = ConfigurationBuilder.of ( INT )
-			.withVarName("faultLocFromFileLineNumber")
+	protected static int lineNumberOfFaultLocFromFile = ConfigurationBuilder.of ( INT )
+			.withVarName("lineNumberOfFaultLocFromFile")
 			.withHelp("The line number of the faulty stmt, when fault localization is human inserted and not created by the coverage")
 			.withDefault("1")
 			.inGroup( "FaultLocRepresentation Parameters" )
@@ -327,10 +327,10 @@ CachingRepresentation<G> {
 	private TreeSet<Integer> createPosFile(){
 		TreeSet<Integer> positivePath = null;
 		switch(faultLocStrategy.trim()) {
-		case "fromfile": 
+		case "humanInjected": 
 			//positivePath = new TreeSet<Integer>();
 			//positivePath.add(faultLocFromFileHoleNumber);
-			break;
+
 		case "standardPathFile": 
 		default:
 			try {
@@ -348,8 +348,8 @@ CachingRepresentation<G> {
 	private TreeSet<Integer> createNegFile(){
 		TreeSet<Integer> negativePath = null;
 		switch(faultLocStrategy.trim()) {
-		case "fromfile": 
-			negativePath = transformLineNumberToStmtNumbers(faultLocFromFileLineNumber);
+		case "humanInjected": 
+			negativePath = transformLineNumberToStmtNumbers(lineNumberOfFaultLocFromFile);
 			break;
 		case "standardPathFile": 
 		default:
@@ -378,12 +378,16 @@ CachingRepresentation<G> {
 		TreeSet<Integer> posHt = new TreeSet<Integer>();
 
 		for (Integer i : positivePath) {
-			fw.put(i, FaultLocRepresentation.positivePathWeight);
+			if(faultLocStrategy.trim().equalsIgnoreCase("standardPathFile")){
+				fw.put(i, FaultLocRepresentation.positivePathWeight);
+			}else if(faultLocStrategy.trim().equalsIgnoreCase("humanInjected")){
+				fw.put(i, 0.0);
+			}
 		}
 
 		for (Integer i : positivePath) {
 			posHt.add(i);
-			fw.put(i, 0.5);
+		//	fw.put(i, 0.5);
 		}
 		for (Integer i : negativePath) {
 			if (!negHt.contains(i)) {
@@ -392,7 +396,7 @@ CachingRepresentation<G> {
 					negWeight = FaultLocRepresentation.positivePathWeight;
 				}
 				negHt.add(i);
-				fw.put(i, 0.5);
+				//fw.put(i, 0.5);
 				faultLocalization.add(this.instantiateLocation(i, negWeight)); 
 			}
 		}		
@@ -400,10 +404,10 @@ CachingRepresentation<G> {
 
 	protected void computeFixSpace(TreeSet<Integer> negativePath, TreeSet<Integer> positivePath) {
 		for (Integer i : positivePath) {
-			fixLocalization.add(new WeightedAtom(i, 0.5));
+			fixLocalization.add(new WeightedAtom(i, FaultLocRepresentation.positivePathWeight));
 		}
 		for (Integer i : negativePath) {
-			fixLocalization.add(new WeightedAtom(i, 0.5));
+			fixLocalization.add(new WeightedAtom(i, FaultLocRepresentation.positivePathWeight));
 
 		}	
 	}
