@@ -583,7 +583,7 @@ FaultLocRepresentation<JavaEditOperation> {
 				return true;
 			}
 		} else {
-			return GlobalUtils.runCommand(Configuration.compileCommand, timeCompilingOriginal*10);
+			return GlobalUtils.runCommand(Configuration.compileCommand);
 		}
 	}
 
