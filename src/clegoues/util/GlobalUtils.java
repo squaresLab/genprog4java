@@ -35,10 +35,10 @@ package clegoues.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
@@ -53,16 +53,6 @@ public class GlobalUtils {
 			returnVal.add(i);
 		}
 		return returnVal;
-	}
-
-	public static boolean isAlive( Process p ) {
-		try
-		{
-			p.exitValue();
-			return false;
-		} catch (IllegalThreadStateException e) {
-			return true;
-		}
 	}
 
 	public static Pair<?,Double> chooseOneWeighted(List<Pair<?,Double>> atoms) {
@@ -89,74 +79,51 @@ public class GlobalUtils {
 		if(p > 1.0) return true;
 		return Configuration.randomizer.nextDouble() <= p;
 	}
-
+	
 	public static boolean runCommand(String commandToRun){
-		long l = 999999999999L; //Longest long it allows me to write without complaining about the timeout being negative...
-		return runCommand(commandToRun,l);
-	}
-
-	public static boolean runCommand(String commandToRun, long maxTimeToRunCommandInMillis){
 		Logger logger = Logger.getLogger(GlobalUtils.class);
-		int retValue = 0;
-		try {
-			Process p = Runtime.getRuntime().exec(commandToRun);
-
-			try {
-				retValue = p.waitFor();
-
-				long now = System.currentTimeMillis();
-				long finish = now + maxTimeToRunCommandInMillis;
-				while ( isAlive( p ) && ( System.currentTimeMillis() < finish ) )
-				{
-					Thread.sleep( 10 );
-				}
-				if ( isAlive( p ) )
-				{
-					retValue=-1;
-					//throw new InterruptedException( "Process timeout out after " + (int)(maxTimeToRunCommandInMillis/1000) + " seconds" );
-				}else{
-					retValue = p.exitValue();
-				}
+	
+        try {
+        	
+            Process p = Runtime.getRuntime().exec(commandToRun);
+             
+            int retValue = 0;
+            try {
+            	InputStream stdin = p.getInputStream();
+                InputStreamReader isr = new InputStreamReader(stdin);
+                BufferedReader br = new BufferedReader(isr);
+                String line = null;
+                logger.info("Output when running the command:");
+                while ( (line = br.readLine()) != null)
+                	logger.info(line);
+                retValue = p.waitFor();            
+            	
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			/*
-
-			try {
-				if(p.waitFor(maxTimeToRunCommandInMillis, TimeUnit.MILLISECONDS)) {
-					retValue=p.exitValue();
-				}else{
-					retValue=-1; //error code
-					p.destroy();
-				}
-
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			 */
-
-			if(retValue != 0)
-			{
-				logger.error("Command " + commandToRun + " exited abnormally with status " + retValue);
-				String line;
-				logger.error("Stdout of command:");
-				BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-				while ((line = input.readLine()) != null) {
-					System.out.println(line);
-				}
-				logger.error("Stderr of command:");
-				input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-				while ((line = input.readLine()) != null) {
-					System.out.println(line);
-				}
-				return false;
-			}
-		}
-		catch (IOException e) {
-			logger.error("Exception occurred executing command: " + commandToRun); 
-			logger.error(e.getStackTrace());
-			return false;
-		}	
-		return true;
+            
+            if(retValue != 0)
+            {
+            	logger.error("Command " + commandToRun + " exited abnormally with status " + retValue);
+            	 String line;
+            	 logger.error("Stdout of command:");
+            	  BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            	  while ((line = input.readLine()) != null) {
+            	    System.out.println(line);
+            	  }
+            	  logger.error("Stderr of command:");
+            	  input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            	  while ((line = input.readLine()) != null) {
+              	    System.out.println(line);
+              	  }
+              	  return false;
+            }
+         }
+        catch (IOException e) {
+            logger.error("Exception occurred executing command: " + commandToRun); 
+            logger.error(e.getStackTrace());
+            return false;
+        }	
+        return true;
 	}
 }
