@@ -55,6 +55,16 @@ public class GlobalUtils {
 		return returnVal;
 	}
 
+	public static boolean isAlive( Process p ) {
+		try
+		{
+			p.exitValue();
+			return false;
+		} catch (IllegalThreadStateException e) {
+			return true;
+		}
+	}
+
 	public static Pair<?,Double> chooseOneWeighted(List<Pair<?,Double>> atoms) {
 		assert(atoms.size() > 0);
 		double totalWeight = 0.0;
@@ -79,7 +89,7 @@ public class GlobalUtils {
 		if(p > 1.0) return true;
 		return Configuration.randomizer.nextDouble() <= p;
 	}
-	
+
 	public static boolean runCommand(String commandToRun){
 		long l = 999999999999L; //Longest long it allows me to write without complaining about the timeout being negative...
 		return runCommand(commandToRun,l);
@@ -87,10 +97,31 @@ public class GlobalUtils {
 
 	public static boolean runCommand(String commandToRun, long maxTimeToRunCommandInMillis){
 		Logger logger = Logger.getLogger(GlobalUtils.class);
-
+		int retValue = 0;
 		try {
 			Process p = Runtime.getRuntime().exec(commandToRun);
-			int retValue = 0;
+
+			try {
+				retValue = p.waitFor();
+
+				long now = System.currentTimeMillis();
+				long finish = now + maxTimeToRunCommandInMillis;
+				while ( isAlive( p ) && ( System.currentTimeMillis() < finish ) )
+				{
+					Thread.sleep( 10 );
+				}
+				if ( isAlive( p ) )
+				{
+					retValue=-1;
+					//throw new InterruptedException( "Process timeout out after " + (int)(maxTimeToRunCommandInMillis/1000) + " seconds" );
+				}else{
+					retValue = p.exitValue();
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			/*
+
 			try {
 				if(p.waitFor(maxTimeToRunCommandInMillis, TimeUnit.MILLISECONDS)) {
 					retValue=p.exitValue();
@@ -102,6 +133,7 @@ public class GlobalUtils {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			 */
 
 			if(retValue != 0)
 			{
