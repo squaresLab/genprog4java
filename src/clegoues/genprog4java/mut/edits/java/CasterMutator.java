@@ -25,26 +25,7 @@ public class CasterMutator extends JavaEditOperation {
 		ASTNode replaceWith = ASTNode.copySubtree(rewriter.getAST(), thisHole.getSubExps().get(rand));	
 		replaceWithString = replaceWith.toString();
 		rewriter.replace(toReplace, replaceWith, null);
-		
-		
-/*
-		ASTNode locationNode = ((JavaLocation) this.getLocation()).getCodeElement(); 
-		ExpHole thisHole = (ExpHole) this.getHoleCode();
-		//EditHole thisHole = this.getHoleCode();
-		ASTNode toReplace = (ASTNode) thisHole.getCode();
-		int typeNumber = thisHole.getCode().getNodeType();
 
-		CastExpression newNode = rewriter.getAST().newCastExpression();
-		//MethodInvocation newNode = rewriter.getAST().newMethodInvocation();
-		Class replaceWith = ASTNode.nodeClassForType(typeNumber);
-		SimpleType type = new SimpleType(replaceWith.getTypeName());//rewriter.getAST().newSimpleName(replaceWith.getName());
-		//SimpleName newMethodName = rewriter.getAST().newSimpleName(replaceWith.getName());
-		newNode.setType(type);
-		//newNode.setName(newMethodName);
-	
-		
-		rewriter.replace(toReplace, newNode, null); 
-	*/
 	}
 	public String toString() {
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
