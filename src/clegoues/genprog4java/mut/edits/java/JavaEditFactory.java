@@ -376,17 +376,6 @@ public class JavaEditFactory {
 			}
 			return retVal;
 			
-			/*
-			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
-			List<WeightedAtom> fixStmts = this.scopeHelper(location, variant, editType);
-			for(WeightedAtom fixStmt : fixStmts) {
-				JavaStatement potentialFixStmt = variant.getFromCodeBank(fixStmt.getLeft());
-				ASTNode fixAST = potentialFixStmt.getASTNode();
-				StatementHole stmtHole = new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId());
-				retVal.add(new WeightedHole(stmtHole, fixStmt.getRight()));
-			}
-			return retVal;
-			 */
 		}
 		case CASTERMUT:
 		{
@@ -394,15 +383,6 @@ public class JavaEditFactory {
 			List<Type> casterObjects = locationStmt.getCasterTypes();
 			List<ASTNode> toReplaceForCasters = locationStmt.getTypesToReplaceCaster();
 			for(ASTNode casterObject : casterObjects) {
-				/*
-				for(ASTNode toReplaceForCaster : toReplaceForCasters) {
-					if(!casterObject.toString().equalsIgnoreCase(toReplaceForCaster.toString())){
-						List<ASTNode> newList = casterObjects.//new List<Type>(); 
-						newList.add(casterObject.);
-						EditHole newHole = new SubExpsHole(toReplaceForCaster, newList);
-						retVal.add(new WeightedHole(newHole));
-					}
-				}*/
 
 				ASTNode toRemove = null;
 				for(ASTNode toReplaceForCaster : toReplaceForCasters){
