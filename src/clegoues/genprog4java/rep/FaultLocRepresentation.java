@@ -69,9 +69,9 @@ import clegoues.util.ConfigurationBuilder;
 @SuppressWarnings("rawtypes")
 public abstract class FaultLocRepresentation<G extends EditOperation> extends
 CachingRepresentation<G> {
-	
+
 	protected Logger logger = Logger.getLogger(FaultLocRepresentation.class);
-	
+
 	public transient static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
 
@@ -81,7 +81,7 @@ CachingRepresentation<G> {
 			.withHelp( "boolean to be turned true if the purpose is to test that fault loc is performed correctly" )
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
-	
+
 	//private static double positivePathWeight = 0.1;
 	private static double positivePathWeight = ConfigurationBuilder.of( DOUBLE )
 			.withVarName( "positivePathWeight" )
@@ -135,10 +135,13 @@ CachingRepresentation<G> {
 			.withDefault("standardPathFile")
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
-	protected static int lineNumberOfFaultLocFromFile = ConfigurationBuilder.of ( INT )
-			.withVarName("lineNumberOfFaultLocFromFile")
-			.withHelp("The line number of the faulty stmt, when fault localization is human inserted and not created by the coverage")
-			.withDefault("1")
+	private static String pathToBug = ConfigurationBuilder.of ( STRING )
+			.withVarName("workingDir")
+			.build();
+	protected static String pathToFileHumanInjectedFaultLoc = ConfigurationBuilder.of ( STRING )
+			.withVarName("pathToFileHumanInjectedFaultLoc")
+			.withHelp("The path of the file with classes and line numbers of the faulty stmts, when fault localization is human inserted and not created by the coverage")
+			.withDefault(pathToBug+"fileHumanInjectedFaultLoc.txt")
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
 
@@ -202,6 +205,8 @@ CachingRepresentation<G> {
 	 */
 
 	protected abstract ArrayList<Integer> atomIDofSourceLine(int lineno);
+
+	protected abstract ClassInfo getFileFromStmt(int stmtId);
 
 	private TreeSet<Integer> runTestsCoverage(String pathFile,
 			ArrayList<TestCase> tests, boolean expectedResult, String wd)
@@ -268,7 +273,7 @@ CachingRepresentation<G> {
 		return retVal;
 
 	}
-	
+
 	protected void computeLocalization() throws IOException,
 	UnexpectedCoverageResultException {
 		// THIS ONLY DOES STANDARD PATH FILE localization
@@ -310,7 +315,7 @@ CachingRepresentation<G> {
 
 		computeFixSpace(negativePath, positivePath);
 		computeFaultSpace(negativePath,positivePath); 
-		
+
 		//printout fault space with their weights
 		PrintWriter writer = new PrintWriter("FaultyStmtsAndWeights.txt", "UTF-8");
 		for (int i = 0; i < faultLocalization.size(); i++) {
@@ -323,7 +328,7 @@ CachingRepresentation<G> {
 		this.doingCoverage = false;
 		logger.info("Finish Fault Localization");
 	}
-	
+
 	private TreeSet<Integer> createPosFile(){
 		TreeSet<Integer> positivePath = null;
 		switch(faultLocStrategy.trim()) {
@@ -344,12 +349,12 @@ CachingRepresentation<G> {
 		}
 		return positivePath;
 	}
-	
+
 	private TreeSet<Integer> createNegFile(){
 		TreeSet<Integer> negativePath = null;
 		switch(faultLocStrategy.trim()) {
 		case "humanInjected": 
-			negativePath = transformLineNumberToStmtNumbers(lineNumberOfFaultLocFromFile);
+			negativePath = transformFileWithLineNumbersToStmtNumbers(pathToFileHumanInjectedFaultLoc);
 			break;
 		case "standardPathFile": 
 		default:
@@ -364,11 +369,40 @@ CachingRepresentation<G> {
 		}
 		return negativePath;
 	}
-	
-	private TreeSet<Integer> transformLineNumberToStmtNumbers(int faultyLineNumber){
+
+	private TreeSet<Integer> transformFileWithLineNumbersToStmtNumbers(String pathOfFileWithFaultyLineNumbers){
 		TreeSet<Integer> negativePath = new TreeSet<Integer>();
-		ArrayList<Integer> atomIds = this.atomIDofSourceLine(faultyLineNumber);
-		negativePath.addAll(atomIds);
+		Scanner reader = null;
+		try {
+			reader = new Scanner(new FileInputStream(pathOfFileWithFaultyLineNumbers));
+			while (reader.hasNextLine()) {
+				String line = reader.nextLine();
+				if(!line.equalsIgnoreCase("")){
+					String packageName = line.split(",")[0];
+					String className = line.split(",")[1];
+					String lineNumberString = line.split(",")[2];
+					int lineNumber = Integer.parseInt(lineNumberString);
+					ArrayList<Integer> atomIds = this.atomIDofSourceLine(lineNumber);
+					if(atomIds!=null){
+						for(int atomId:atomIds){
+							ClassInfo ci = this.getFileFromStmt(atomId);
+							if(ci.getClassName().equalsIgnoreCase(className) && ci.getPackage().equalsIgnoreCase(packageName)){
+								negativePath.addAll(atomIds);
+							}
+						}
+					}
+				}
+			}
+			reader.close();
+		} catch (FileNotFoundException e) {
+			logger.error("coverage file " + pathOfFileWithFaultyLineNumbers + " not found");
+			e.printStackTrace();
+		} finally {
+			if (reader != null)
+				reader.close();
+		}
+
+
 		return negativePath;
 	}
 
@@ -387,7 +421,7 @@ CachingRepresentation<G> {
 
 		for (Integer i : positivePath) {
 			posHt.add(i);
-		//	fw.put(i, 0.5);
+			//	fw.put(i, 0.5);
 		}
 		for (Integer i : negativePath) {
 			if (!negHt.contains(i)) {

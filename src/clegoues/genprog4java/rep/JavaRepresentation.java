@@ -162,6 +162,10 @@ FaultLocRepresentation<JavaEditOperation> {
 	protected ArrayList<Integer> atomIDofSourceLine(int lineno) {
 		return sourceInfo.atomIDofSourceLine(lineno);
 	}
+	
+	protected ClassInfo getFileFromStmt(int stmtId){
+		return sourceInfo.getFileFromStmt(stmtId);
+	}
 
 	public TreeSet<Integer> getCoverageInfo() throws IOException {
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
