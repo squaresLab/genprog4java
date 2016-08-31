@@ -78,8 +78,10 @@ cd $BUGWD/$WD
 FILE=$BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 /bin/cat <<EOM >$FILE
 #!/bin/bash
+sudo update-java-alternatives -s java-1.7.0-openjdk-amd64
 cd $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
 $DEFECTS4JDIR/framework/bin/defects4j compile
+sudo update-java-alternatives -s java-1.8.0-openjdk-amd64
 EOM
 
 chmod 777 $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/runCompile.sh

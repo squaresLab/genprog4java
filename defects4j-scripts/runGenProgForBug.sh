@@ -18,6 +18,7 @@
 #VM:
 #./runGenProgForBug.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/ allHuman 100 /home/ubuntu/defects4j/ExamplesCheckedOut/ 1 5 false
 
+
 if [ "$#" -ne 10 ]; then
     echo "This script should be run with 10 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size, bugs folder, initial seed, final seed, just testing fault localization"
 
@@ -49,6 +50,12 @@ BUGWD=$BUGSFOLDER"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
 if [ -d "$GENPROGDIR" ]; then
   cd "$GENPROGDIR"
   mvn package
+  if [[ $? -ne 0 ]] ; then
+      echo "error building GenProg; exiting"
+      exit 1
+  fi
+
+  sudo update-java-alternatives -s java-1.7.0-openjdk-amd64
 
   if [ -d "$GENPROGDIR/defects4j-scripts/" ]; then
     cd "$GENPROGDIR"/defects4j-scripts/
@@ -82,6 +89,7 @@ if [ -d "$GENPROGDIR" ]; then
 	  eval $REMOVEREGENPATHS
 	fi
     
+	sudo update-java-alternatives -s java-1.8.0-openjdk-amd64
 	$JAVALOCATION -ea -Dlog4j.configurationFile=file:"$GENPROGDIR"/src/log4j.properties -Dfile.encoding=UTF-8 -classpath "$GENPROGDIR"/target/uber-GenProg4Java-0.0.1-SNAPSHOT.jar clegoues.genprog4java.main.Main $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/defects4j.config | tee $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/log"$PROJECT""$BUGNUMBER"Seed$seed.txt
 
 
