@@ -135,13 +135,10 @@ CachingRepresentation<G> {
 			.withDefault("standardPathFile")
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
-	private static String pathToBug = ConfigurationBuilder.of ( STRING )
-			.withVarName("workingDir")
-			.build();
 	protected static String pathToFileHumanInjectedFaultLoc = ConfigurationBuilder.of ( STRING )
 			.withVarName("pathToFileHumanInjectedFaultLoc")
 			.withHelp("The path of the file with classes and line numbers of the faulty stmts, when fault localization is human inserted and not created by the coverage")
-			.withDefault(pathToBug+"fileHumanInjectedFaultLoc.txt")
+			.withDefault("fileHumanInjectedFaultLoc.txt")
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
 
