@@ -43,7 +43,7 @@ export PATH=$PATH:$DEFECTS4JDIR/framework/bin
 
 # directory with the checked out buggy project
 BUGWD=$BUGSFOLDER"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
-
+sudo update-java-alternatives -s java-1.8.0-openjdk-amd64
 
 #Compile Genprog and put the class files in /bin
 #Go to the GenProg folder
