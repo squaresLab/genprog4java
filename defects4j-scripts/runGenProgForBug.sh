@@ -64,7 +64,7 @@ if [ -d "$GENPROGDIR" ]; then
 
   #export JAVA_HOME=$DIROFJAVA7
   #export PATH=$DIROFJAVA7/bin/:$PATH
-  update-java-alternatives -s java-7-oracle
+  update-java-alternatives -s $DIROFJAVA7
 
   if [ -d "$GENPROGDIR/defects4j-scripts/" ]; then
     cd "$GENPROGDIR"/defects4j-scripts/
