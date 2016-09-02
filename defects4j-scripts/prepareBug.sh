@@ -7,6 +7,8 @@
 # 5th param: testing option (ex: humanMade, generated)
 # 6th param: test suite sample size (ex: 1, 100)
 # 7th param is the folder where the bug files will be cloned to
+# 8th param is the folder where the java 7 instalation is located
+# 9th param is the folder where the java 8 instalation is located
 
 # Example usage, local for Mau
 #./prepareBug.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ humanMade 100 /home/mau/Research/defects4j/ExamplesCheckedOut/
@@ -20,8 +22,8 @@
 # export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/
 # export PATH=$JAVA_HOME/bin/:$PATH
 
-if [ "$#" -ne 7 ]; then
-    echo "This script should be run with 7 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size, bugs folder"
+if [ "$#" -ne 9 ]; then
+    echo "This script should be run with 7 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size, bugs folder, java 7 installation folder, java 8 installation folder"
     exit 0
 fi
 
@@ -32,6 +34,8 @@ DEFECTS4JDIR="$4"
 OPTION="$5"
 TESTSUITEPERCENTAGE="$6"
 BUGSFOLDER="$7"
+DIROFJAVA7="$8"
+DIROFJAVA8="$9"
 
 #Add the path of defects4j so the defects4j's commands run 
 export PATH=$PATH:"$DEFECTS4JDIR"/framework/bin/
@@ -78,10 +82,14 @@ cd $BUGWD/$WD
 FILE=$BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 /bin/cat <<EOM >$FILE
 #!/bin/bash
-sudo update-java-alternatives -s java-1.7.0-openjdk-amd64
+export JAVA_HOME=$DIROFJAVA7
+export PATH=$DIROFJAVA7/bin/:$PATH
+#sudo update-java-alternatives -s java-7-oracle
 cd $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
 $DEFECTS4JDIR/framework/bin/defects4j compile
-sudo update-java-alternatives -s java-1.8.0-openjdk-amd64
+export JAVA_HOME=$DIROFJAVA8
+export PATH=$DIROFJAVA8/bin/:$PATH
+#sudo update-java-alternatives -s java-8-oracle
 EOM
 
 chmod 777 $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
@@ -95,7 +103,7 @@ FILE=$BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/defects4j.config
 seed = 0
 sanity = yes
 popsize = 20
-javaVM = /usr/lib/jvm/java-7-openjdk-amd64/jre/bin/java
+javaVM = $DIROFJAVA7/jre/bin/java
 workingDir = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
 outputDir = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/tmp
 classSourceFolder = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/$SRCFOLDER

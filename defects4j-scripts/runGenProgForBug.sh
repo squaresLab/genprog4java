@@ -9,18 +9,21 @@
 # 8th param is the initial seed. It will then increase the seeds by adding 1 until it gets to the number in the 9th param.
 # 9th param is the final seed.
 #10th param is on if the purpose is to test only fault loc and not really trying to find a patch
+#11th param is the folder where the java 7 instalation is located
+#12th param is the folder where the java 8 instalation is located
+
 
 #cp runGenProgForBug.bash ./genprog4java/defects4jStuff/
 
 #Mau runs it like this:
-#./runGenProgForBug.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ allHuman 100 /home/mau/Research/defects4j/ExamplesCheckedOut/ 1 5 false
+#./runGenProgForBug.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ allHuman 100 /home/mau/Research/defects4j/ExamplesCheckedOut/ 1 5 false /usr/lib/jvm/java-7-oracle/ /usr/lib/jvm/java-8-oracle/
 
 #VM:
 #./runGenProgForBug.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/ allHuman 100 /home/ubuntu/defects4j/ExamplesCheckedOut/ 1 5 false
 
 
-if [ "$#" -ne 10 ]; then
-    echo "This script should be run with 10 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size, bugs folder, initial seed, final seed, just testing fault localization"
+if [ "$#" -ne 12 ]; then
+    echo "This script should be run with 10 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size, bugs folder, initial seed, final seed, just testing fault localization, java 7 installation folder, java 8 installation folder"
 
 else
 
@@ -34,6 +37,8 @@ BUGSFOLDER="$7"
 STARTSEED="$8"
 UNTILSEED="$9"
 JUSTTESTINGFAULTLOC="${10}"
+DIROFJAVA7="${11}"
+DIROFJAVA8="${12}"
 
 #This transforms the first parameter to lower case. Ex: lang, chart, closure, math or time
 LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
@@ -43,7 +48,9 @@ export PATH=$PATH:$DEFECTS4JDIR/framework/bin
 
 # directory with the checked out buggy project
 BUGWD=$BUGSFOLDER"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
-sudo update-java-alternatives -s java-1.8.0-openjdk-amd64
+export JAVA_HOME=$DIROFJAVA8
+export PATH=$DIROFJAVA8/bin/:$PATH
+#sudo update-java-alternatives -s java-8-oracle
 
 #Compile Genprog and put the class files in /bin
 #Go to the GenProg folder
@@ -55,12 +62,14 @@ if [ -d "$GENPROGDIR" ]; then
       exit 1
   fi
 
-  sudo update-java-alternatives -s java-1.7.0-openjdk-amd64
+  #export JAVA_HOME=$DIROFJAVA7
+  #export PATH=$DIROFJAVA7/bin/:$PATH
+  update-java-alternatives -s java-7-oracle
 
   if [ -d "$GENPROGDIR/defects4j-scripts/" ]; then
     cd "$GENPROGDIR"/defects4j-scripts/
 
-    ./prepareBug.sh $PROJECT $BUGNUMBER $GENPROGDIR $DEFECTS4JDIR $OPTION $TESTSUITEPERCENTAGE $BUGSFOLDER
+    ./prepareBug.sh $PROJECT $BUGNUMBER $GENPROGDIR $DEFECTS4JDIR $OPTION $TESTSUITEPERCENTAGE $BUGSFOLDER $DIROFJAVA7 $DIROFJAVA8
 
     JAVALOCATION=$(which java)
 
@@ -89,7 +98,9 @@ if [ -d "$GENPROGDIR" ]; then
 	  eval $REMOVEREGENPATHS
 	fi
     
-	sudo update-java-alternatives -s java-1.8.0-openjdk-amd64
+	export JAVA_HOME=$DIROFJAVA8
+  	export PATH=$DIROFJAVA8/bin/:$PATH
+	#sudo update-java-alternatives -s java-8-oracle
 	$JAVALOCATION -ea -Dlog4j.configurationFile=file:"$GENPROGDIR"/src/log4j.properties -Dfile.encoding=UTF-8 -classpath "$GENPROGDIR"/target/uber-GenProg4Java-0.0.1-SNAPSHOT.jar clegoues.genprog4java.main.Main $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/defects4j.config | tee $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/log"$PROJECT""$BUGNUMBER"Seed$seed.txt
 
 
