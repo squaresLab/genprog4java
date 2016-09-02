@@ -94,7 +94,6 @@ public class GlobalUtils {
 
 			int retValue = 0;
 			try {
-
 				if(p.waitFor(maxTimeToRunCommandInMillis, TimeUnit.MILLISECONDS)) {
 					retValue=p.exitValue();
 				}else{

@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -363,19 +364,17 @@ public class JavaEditFactory {
 		case SEQEXCH:
 		{
 			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
-			List<Expression> expressionObjects = locationStmt.getExpressions();
-			List<Expression> toReplaceForExpressions = locationStmt.getExpressionsToReplaceWith();
-			for(Expression expressionObject : expressionObjects) {
-				for(Expression toReplaceForExpression : toReplaceForExpressions) {
-					if(!expressionObject.toString().equalsIgnoreCase(toReplaceForExpression.toString())
-							&& expressionObject.getNodeType()==toReplaceForExpression.getNodeType()){
-						EditHole newHole = new ExpHole(toReplaceForExpression, expressionObject, locationStmt.getStmtId());
-						retVal.add(new WeightedHole(newHole));
-					}
+			JavaStatement faultyStmt = variant.getFromCodeBank(locationStmt.getStmtId());
+			for (WeightedAtom potentialFixAtom : variant.getFixSourceAtoms()) {
+
+				JavaStatement possibleFixStmt = variant.getFromCodeBank(potentialFixAtom.getLeft());
+				if(!faultyStmt.toString().equalsIgnoreCase(possibleFixStmt.toString())
+						&& faultyStmt.getASTNode().getNodeType()==possibleFixStmt.getASTNode().getNodeType()){
+					StatementHole stmtHole = new StatementHole((Statement) possibleFixStmt.getASTNode(), possibleFixStmt.getStmtId());
+					retVal.add(new WeightedHole(stmtHole, potentialFixAtom.getRight()));
 				}
 			}
 			return retVal;
-			
 		}
 		case CASTERMUT:
 		{
@@ -417,7 +416,7 @@ public class JavaEditFactory {
 		}
 		return null;
 	}
-
+	
 	void permutations(List<List<ASTNode>> original, List<List<ASTNode>> result, int d, List<ASTNode> current) {
 		// if depth equals number of original collections, final reached, add and return
 		if (d == original.size()) {
@@ -474,7 +473,8 @@ public class JavaEditFactory {
 		case OBJINIT:
 			return locationStmt.getObjectsAsMethodParams().size() > 0;
 		case SEQEXCH:
-			return locationStmt.getExpressions().size() > 0;
+			//FIXME: there might be a stronger requirement than this
+			return locationStmt.canBeDeleted() && variant.getFixSourceAtoms().size() > 0;
 		case CASTERMUT:
 			return locationStmt.getCasterTypes().size() > 0;
 		case CASTEEMUT:

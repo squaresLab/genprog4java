@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
+import clegoues.genprog4java.mut.holes.java.StatementHole;
 
 public class SequenceExchanger  extends JavaEditOperation {
 
@@ -14,18 +15,17 @@ public class SequenceExchanger  extends JavaEditOperation {
 	}
 	@Override
 	public void edit(ASTRewrite rewriter) {
-		ExpHole thisHole = (ExpHole) this.getHoleCode();
-		ASTNode toReplace = (ASTNode) thisHole.getCode();
-		ASTNode replaceWith = ASTNode.copySubtree(rewriter.getAST(), thisHole.getLocationExp());
-		rewriter.replace(toReplace, replaceWith, null);
+		
+		ASTNode locationNode = ((JavaLocation) this.getLocation()).getCodeElement(); 
+		StatementHole fixHole = (StatementHole) this.getHoleCode();
+		ASTNode fixCodeNode =
+				 ASTNode.copySubtree(rewriter.getAST(), fixHole.getCode());
+		rewriter.replace(locationNode, fixCodeNode, null);
 	}
 	
 	public String toString() {
-		ExpHole thisHole = (ExpHole) this.getHoleCode();
-		String retval = "sqncEx(" + this.getLocation().getId() + ": ";
-		retval += "(" + thisHole.getCode() + ") replaced with ";
-		retval +=  "(" + thisHole.getLocationExp() + "))";
-		return retval;
+		StatementHole fixHole = (StatementHole) this.getHoleCode();
+		return "sqncEx(" + this.getLocation().getId() + "," + fixHole.getCodeBankId() + ")";
 	}
 
 }
