@@ -22,8 +22,8 @@
 #./runGenProgForBug.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/ allHuman 100 /home/ubuntu/defects4j/ExamplesCheckedOut/ 1 5 false
 
 
-if [ "$#" -ne 12 ]; then
-    echo "This script should be run with 10 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size, bugs folder, initial seed, final seed, just testing fault localization, java 7 installation folder, java 8 installation folder"
+if [ "$#" -lt 10 ]; then
+    echo "This script should be run with 10 to 12 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size, bugs folder, initial seed, final seed, just testing fault localization, [java 7 installation folder], [java 8 installation folder]"
 
 else
 
@@ -37,8 +37,14 @@ BUGSFOLDER="$7"
 STARTSEED="$8"
 UNTILSEED="$9"
 JUSTTESTINGFAULTLOC="${10}"
-DIROFJAVA7="${11}"
-DIROFJAVA8="${12}"
+DIROFJAVA7="/usr/lib/jvm/java-1.7.0-openjdk-amd64"
+DIROFJAVA8="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
+
+if [ "$#" -eq 12 ]; then
+  DIROFJAVA7="${11}"
+  DIROFJAVA8="${12}"
+fi
+
 
 #This transforms the first parameter to lower case. Ex: lang, chart, closure, math or time
 LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
