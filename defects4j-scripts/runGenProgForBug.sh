@@ -54,9 +54,9 @@ export PATH=$PATH:$DEFECTS4JDIR/framework/bin
 
 # directory with the checked out buggy project
 BUGWD=$BUGSFOLDER"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
-export JAVA_HOME=$DIROFJAVA8
-export PATH=$DIROFJAVA8/bin/:$PATH
-#sudo update-java-alternatives -s java-8-oracle
+#export JAVA_HOME=$DIROFJAVA8
+#export PATH=$DIROFJAVA8/bin/:$PATH
+sudo update-java-alternatives -s $DIROFJAVA8
 
 #Compile Genprog and put the class files in /bin
 #Go to the GenProg folder
@@ -70,7 +70,7 @@ if [ -d "$GENPROGDIR" ]; then
 
   #export JAVA_HOME=$DIROFJAVA7
   #export PATH=$DIROFJAVA7/bin/:$PATH
-  update-java-alternatives -s $DIROFJAVA7
+  sudo update-java-alternatives -s $DIROFJAVA7
 
   if [ -d "$GENPROGDIR/defects4j-scripts/" ]; then
     cd "$GENPROGDIR"/defects4j-scripts/
@@ -104,9 +104,9 @@ if [ -d "$GENPROGDIR" ]; then
 	  eval $REMOVEREGENPATHS
 	fi
     
-	export JAVA_HOME=$DIROFJAVA8
-  	export PATH=$DIROFJAVA8/bin/:$PATH
-	#sudo update-java-alternatives -s java-8-oracle
+	#export JAVA_HOME=$DIROFJAVA8
+  	#export PATH=$DIROFJAVA8/bin/:$PATH
+	sudo update-java-alternatives -s $DIROFJAVA8
 	$JAVALOCATION -ea -Dlog4j.configurationFile=file:"$GENPROGDIR"/src/log4j.properties -Dfile.encoding=UTF-8 -classpath "$GENPROGDIR"/target/uber-GenProg4Java-0.0.1-SNAPSHOT.jar clegoues.genprog4java.main.Main $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/defects4j.config | tee $BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/log"$PROJECT""$BUGNUMBER"Seed$seed.txt
 
 

@@ -375,9 +375,11 @@ CachingRepresentation<G> {
 			while (reader.hasNextLine()) {
 				String line = reader.nextLine();
 				if(!line.equalsIgnoreCase("")){
-					String packageName = line.split(",")[0];
-					String className = line.split(",")[1];
-					String lineNumberString = line.split(",")[2];
+					String packageName = line.split(",")[0].trim();
+					String className = line.split(",")[1].trim();
+					//trim .java if the user types the class name with the extension
+					className = className.contains(".")? className.split(".")[0] : className;
+					String lineNumberString = line.split(",")[2].trim();
 					int lineNumber = Integer.parseInt(lineNumberString);
 					ArrayList<Integer> atomIds = this.atomIDofSourceLine(lineNumber);
 					if(atomIds!=null){
