@@ -81,44 +81,26 @@ public class GlobalUtils {
 	}
 
 	public static boolean runCommand(String commandToRun){
-		long l = 999999999999L; //Longest long it allows me to write without complaining about the timeout being negative...
-		return runCommand(commandToRun,l);
-	}
-
-	public static boolean runCommand(String commandToRun, long maxTimeToRunCommandInMillis){
+		long maxTimeToRunCommandInMin = 15; 
 		Logger logger = Logger.getLogger(GlobalUtils.class);
 
 		try {
-
 			Process p = Runtime.getRuntime().exec(commandToRun);
-
 			int retValue = 0;
 			try {
-				if(p.waitFor(maxTimeToRunCommandInMillis, TimeUnit.MILLISECONDS)) {
+				if(p.waitFor(maxTimeToRunCommandInMin, TimeUnit.MINUTES)) {
 					retValue=p.exitValue();
 				}else{
 					retValue=-1; //error code
 					p.destroy();
 				}         
-
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-
+			
 			if(retValue != 0)
 			{
 				logger.error("Command " + commandToRun + " exited abnormally with status " + retValue);
-				String line;
-				logger.error("Stdout of command:");
-				BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-				while ((line = input.readLine()) != null) {
-					System.out.println(line);
-				}
-				logger.error("Stderr of command:");
-				input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-				while ((line = input.readLine()) != null) {
-					System.out.println(line);
-				}
 				return false;
 			}
 		}
