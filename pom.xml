@@ -5,6 +5,9 @@
   <version>0.0.1-SNAPSHOT</version>
   <name>GenProg4Java</name>
   <description>Main genprog4java build</description>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>  
   <build>
     <sourceDirectory>src</sourceDirectory>
     <resources>
