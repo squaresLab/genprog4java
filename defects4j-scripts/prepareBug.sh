@@ -53,7 +53,6 @@ LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 BUGWD=$BUGSFOLDER"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
 
 #Checkout the buggy and fixed versions of the code (latter to make second testsuite
-#THIS IS COMMENTED BECAUSE THIS WAS ALREADY CREATED
 defects4j checkout -p $1 -v "$BUGNUMBER"b -w $BUGWD
 
 ##defects4j checkout -p $1 -v "$BUGNUMBER"f -w $BUGSFOLDER/$LOWERCASEPACKAGE"$2"Fixed
@@ -144,7 +143,6 @@ case "$OPTION" in
   echo Creating new test suite...
   SEED=2
   cd "$DEFECTS4JDIR"/framework/bin/
-  #THIS IS COMMENTED BECAUSE THIS WAS ALREADY CREATED
   perl run_randoop.pl -p "$PROJECT" -v "$BUGNUMBER"f -n "$SEED" -o $BUGWD/"$TESTWD"/outputOfRandoop/ -b 1800
   perl "$DEFECTS4JDIR"/framework/util/fix_test_suite.pl -p "$PROJECT" -d $BUGWD/"$TESTWD"/outputOfRandoop/$PROJECT/randoop/$SEED/
   OUTPUT=$(defects4j test -s $BUGWD/"$TESTWD"/outputOfRandoop/$PROJECT/randoop/"$SEED"/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -w $BUGWD)
