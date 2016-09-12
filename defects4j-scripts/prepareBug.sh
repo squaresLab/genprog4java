@@ -115,6 +115,15 @@ testClassPath=$TESTCP
 srcClassPath=$COMPILECP
 compileCommand = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/runCompile.sh
 targetClassName = $BUGWD/bugfiles.txt
+faultLocStrategy=humanInjected
+pathToFileHumanInjectedFaultLoc=$BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/humanInjectedFault.txt
+#edits=append;replace;delete;FUNREP;PARREP;PARADD;PARREM;EXPREP;EXPADD;EXPREM;NULLCHECK;OBJINIT;RANGECHECK;SIZECHECK;CASTCHECK;LBOUNDSET;UBOUNDSET;OFFBYONE;SEQEXCH;CASTERMUT;CASTEEMUT
+edits=append;replace;delete
+EOM
+
+FILE2=$BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/humanInjectedFault.txt
+/bin/cat <<EOM >$FILE2
+org/jfree/data/time,Week,175
 EOM
 
 #  get passing and failing tests as well as files

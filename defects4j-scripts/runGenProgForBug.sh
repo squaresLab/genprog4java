@@ -127,3 +127,4 @@ fi
 
 fi #correct number of params
 
+mv $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/ $BUGSFOLDER/"ResultsRegvsProb"/$LOWERCASEPACKAGE$2"RegGPMutOnly"/
