@@ -1,5 +1,7 @@
 package clegoues.genprog4java.treelm;
 
+import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,22 +9,44 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Multiset;
 import com.google.common.math.DoubleMath;
 
+import codemining.ast.AbstractTreeExtractor;
+import codemining.ast.AstNodeSymbol;
 import codemining.ast.TreeNode;
 import codemining.ast.java.AbstractJavaTreeExtractor;
 import codemining.ast.java.JavaAstTreeExtractor;
+import codemining.java.codedata.MethodRetriever;
+import codemining.lm.tsg.FormattedTSGrammar;
 import codemining.lm.tsg.TSGNode;
 import codemining.lm.tsg.TSGrammar;
 import codemining.util.StatsUtil;
+import codemining.util.serialization.ISerializationStrategy.SerializationException;
+import codemining.util.serialization.Serializer;
+import clegoues.genprog4java.java.JavaParser;
+import clegoues.genprog4java.java.ScopeInfo;
+import clegoues.genprog4java.main.Configuration;
+import clegoues.util.ConfigurationBuilder;
+import static clegoues.util.ConfigurationBuilder.INT;
+import static clegoues.util.ConfigurationBuilder.STRING;
 
 public class EclipseTSG {
 	public EclipseTSG( TSGrammar< TSGNode > grammar ) {
@@ -30,6 +54,86 @@ public class EclipseTSG {
 		this.tsgExtractor = (AbstractJavaTreeExtractor) grammar.getTreeExtractor();
 	}
 	
+	private < T extends Serializable > String debugNode(
+		TreeNode< T > node, Function< TreeNode< T >, Integer > getKey
+	) {
+		AstNodeSymbol symbol = tsgExtractor.getSymbol( getKey.apply( node ) );
+		/*
+		return symbol.toString( DebugAST::getNodeTypeName );
+		*/
+		int type = symbol.nodeType;
+
+		StringBuilder info = new StringBuilder();
+		if ( type == AstNodeSymbol.MULTI_NODE )
+			info.append( "MULTI_NODE (meta)" );
+		else if ( type == AstNodeSymbol.TEMPLATE_NODE )
+			info.append( "TEMPLATE_NODE (meta)" );
+		else if ( type == AstNodeSymbol.UNK_SYMBOL )
+			info.append( "UNK_SYMBOL (meta)" );
+		else {
+			String name = DebugAST.getNodeTypeName( type );
+			if ( name == null )
+				info.append( "null (" + type + ")" );
+			else
+				info.append( name );
+		}
+		info.append( "  [" );
+		info.append( symbol.hashCode() );
+		info.append( ']' );
+		
+		TreeSet< String > names =
+			new TreeSet<>( symbol.getSimpleProperties() );
+		if ( ! names.isEmpty() )
+			info.append( "\n  Simple-Properties:" );
+		for ( String name : names ) {
+			info.append( "\n    " );
+			info.append( name );
+			info.append( ": " );
+			info.append( symbol.getSimpleProperty( name ) );
+		}
+		
+		if ( symbol.nChildProperties() > 0 )
+			info.append( "\n  Child-Properties:" );
+		for ( int i = 0; i < symbol.nChildProperties(); ++i ) {
+			info.append( "\n    ("  );
+			info.append( i );
+			info.append( ") " );
+			info.append( symbol.getChildProperty( i ) );
+			if ( symbol.getChildProperty( i ).equals( "name" ) ) {
+				if ( ! node.getChildrenByProperty().get( i ).isEmpty() ) {
+					AstNodeSymbol nameSymbol = tsgExtractor.getSymbol(
+						getKey.apply( node.getChild( 0, i ) )
+					);
+					info.append( ": " );
+					info.append( nameSymbol.getSimpleProperty( "identifier" ) );
+				}
+			}
+		}
+		
+		names = new TreeSet<>( symbol.getAnnotations() );
+		if ( ! names.isEmpty() )
+			info.append( "\n  Annotations:" );
+		for ( String name : names ) {
+			info.append( "\n    " );
+			info.append( symbol.getAnnotation( name ) );
+		}
+		
+		return info.toString();
+	}
+	
+	private void debugProduction( TreeNode< TSGNode > production ) {
+		StringBuilder indent = new StringBuilder();
+		TreeNodeUtils.walk( production, (t) -> {
+			AstNodeSymbol symbol = tsgExtractor.getSymbol( t.getData().nodeKey );
+			String name = DebugAST.getNodeTypeName( symbol.nodeType );
+			System.err.printf( "%s%s\n", indent, name );
+			indent.append( "  " );
+		} , (t) -> {
+			indent.delete( indent.length() - 2, indent.length() );
+		} );
+		System.err.println( "=====" );
+	}
+
 	private static class EclipseASTExtractor extends JavaAstTreeExtractor {
 		private static final long serialVersionUID = 20160825L;
 
@@ -84,7 +188,7 @@ public class EclipseTSG {
 
 		public final TreeNode< TSGNode > tree;
 		public final TreeNode< TSGNode > production;
-		public final double logProb;
+		public double logProb;
 	}
 
 	private static class ParseState {
@@ -93,6 +197,11 @@ public class EclipseTSG {
 		private ParseState( Status status, List< StartPoint > points ) {
 			this.status = status;
 			this.points = points;
+		}
+		
+		public ParseState( ParseState that ) {
+			this.status = that.status;
+			this.points = new ArrayList<>( that.points );
 		}
 		
 		public static ParseState failure =
@@ -155,7 +264,7 @@ public class EclipseTSG {
 		private final List< StartPoint > points;
 	}
 
-	private double parse( ASTNode root, ASTNode target, double logProb ) {
+	private double parse( ASTNode root, ASTNode target ) {
 		EclipseASTExtractor astExtractor = new EclipseASTExtractor();
 		TreeNode< Integer > astTree = astExtractor.getTree( root );
 		TreeNode< TSGNode > tsgTree = TSGNode.convertTree( tsgExtractor.getTree( root ), 0 );
@@ -169,7 +278,7 @@ public class EclipseTSG {
 			new HashMap<>();
 		ParseState matches = findTarget(
 			astExtractor, astTree, tsgTree, production, target,
-			logProb, searchCache
+			searchCache
 		);
 		if ( ! matches.isValid() )
 			return Double.NEGATIVE_INFINITY;
@@ -201,7 +310,6 @@ public class EclipseTSG {
 		TreeNode< TSGNode > tsgTree,
 		TreeNode< TSGNode > production,
 		ASTNode target,
-		double logProb,
 		Map< TreeNode< Integer >, ParseState > searchCache
 	) {
 		ParseState result = ParseState.success;
@@ -224,7 +332,7 @@ public class EclipseTSG {
 				// would only allow productions from the identical TSGNode.
 				// Instead, save the parse state here. If the rest of the parse
 				// succeeds, we have a match and can return it outside the loop.
-				result = result.and( ParseState.found( node, prod, logProb ) );
+				result = result.and( ParseState.found( node, prod, 0.0 ) );
 				continue;
 			}
 
@@ -248,7 +356,7 @@ public class EclipseTSG {
 				// at most one production will contain the target, so reset will
 				// only be updated at most once.
 				result = result.and( branchProductions(
-					ae, curr, node, target, logProb, searchCache
+					ae, curr, node, target, searchCache
 				) );
 			} else {
 				// This is not a new production: every child of the production
@@ -285,11 +393,10 @@ public class EclipseTSG {
 		TreeNode< Integer > astTree,
 		TreeNode< TSGNode > tsgTree,
 		ASTNode target,
-		double logProb,
 		Map< TreeNode< Integer >, ParseState > searchCache
 	) {
 		if ( searchCache.containsKey( astTree ) )
-			return searchCache.get( astTree );
+			return new ParseState( searchCache.get( astTree ) );
 		
 		TSGNode key = new TSGNode( tsgTree.getData() );
 		key.isRoot = true;
@@ -300,16 +407,19 @@ public class EclipseTSG {
 		List< Multiset.Entry< TreeNode< TSGNode > > > entries =
 			new ArrayList<>( productions.entrySet() );
 			
-		logProb -= DoubleMath.log2( productions.size() );
 		ParseState result = ParseState.failure;
+		double unit = DoubleMath.log2( productions.size() );
 		for ( int i = 0; i < entries.size(); ++i ) {
 			TreeNode< TSGNode > production = entries.get( i ).getElement();
-			result = result.or( findTarget(
+			ParseState tmp = findTarget(
 				astExtractor, astTree, tsgTree,
 				production, target,
-				logProb + DoubleMath.log2( entries.get( i ).getCount() ),
 				searchCache
-			) );
+			);
+			for ( StartPoint point : tmp.getPoints() )
+				point.logProb +=
+					DoubleMath.log2( entries.get( i ).getCount() ) - unit;
+			result = result.or( tmp );
 		}
 		searchCache.put( astTree, result );
 		return result;
@@ -408,7 +518,146 @@ public class EclipseTSG {
 	}
 
 	public double getLogProb( ASTNode root, ASTNode target ) {
-		return parse( root, target, 0.0 );
+		return parse( root, target );
+	}
+
+	private static final ConfigurationBuilder.RegistryToken token =
+		ConfigurationBuilder.getToken();
+	
+	private static String source = ConfigurationBuilder.of( STRING )
+		.withVarName( "source" )
+		.withHelp( "name of file to parse" )
+		.build();
+	
+	private static String grammarFile = ConfigurationBuilder.of( STRING )
+		.withVarName( "grammarFile" )
+		.withFlag( "grammar" )
+		.withHelp( "name of grammar file to parse" )
+		.withDefault( "tsg.ser" )
+		.build();
+	
+	private static int targetLine = ConfigurationBuilder.of( INT )
+		.withVarName( "targetLine" )
+		.withFlag( "target-line" )
+		.withHelp( "line number to target" )
+		.withDefault( "-1" )
+		.build();
+	
+	private static class RemoveComments extends ASTVisitor {
+		@Override
+		public void endVisit( Javadoc node ) {
+			node.delete();
+		}
+	}
+	
+	private static class MethodExtractor extends ASTVisitor {
+		private List< MethodDeclaration > methods = new ArrayList<>();
+
+		public List< MethodDeclaration > getMethods( ASTNode node ) {
+			methods.clear();
+			node.accept( this );
+			return new ArrayList< MethodDeclaration >( methods );
+		}
+
+		@Override
+		public boolean visit( MethodDeclaration node ) {
+			methods.add( node );
+			return false;
+		}
+	}
+	
+	private static class NodeByLine extends ASTVisitor {
+		private List< ASTNode > breadcrumbs = new ArrayList<>();
+		private CompilationUnit file = null;
+		private ASTNode match = null;
+		private int target = -1;
+		
+		public ASTNode getNodeForLine( CompilationUnit root, int line ) {
+			file = root;
+			match = null;
+			target = line;
+
+			root.accept( this );
+			ASTNode result = match;
+
+			file = null;
+			match = null;
+			return result;
+		}
+		
+		@Override
+		public void preVisit( ASTNode node ) {
+			breadcrumbs.add( node );
+			if ( match != null )
+				return;
+			if ( file.getLineNumber( node.getStartPosition() ) == target ) {
+				match = node;
+				StringBuilder indent = new StringBuilder();
+				for ( int i = 0; i < breadcrumbs.size(); ++i ) {
+					System.err.printf( "%s%s\n",
+						indent, DebugAST.getNodeTypeName(
+							breadcrumbs.get( i ).getNodeType()
+						)
+					);
+					indent.append( "  " );
+				}
+			}
+		}
+		
+		@Override
+		public void postVisit( ASTNode node ) {
+			assert breadcrumbs.get( breadcrumbs.size() - 1 ) == node;
+			breadcrumbs.remove( node );
+		}
+	}
+	
+	private static double getLogProb( CompleteLM grammar, ASTNode node ) {
+		JavaAstTreeExtractor extractor =
+			(JavaAstTreeExtractor) grammar.getTreeExtractor();
+
+		TreeNode< Integer > intTree = extractor.getTree( node );
+		TreeNode< TSGNode > tsgTree = TSGNode.convertTree( intTree, 0 );
+		return grammar.computeRulePosteriorLog2Probability( tsgTree );
+	}
+
+	public static void main( String[] args ) {
+		ConfigurationBuilder.register( token );
+		ConfigurationBuilder.register( Configuration.token );
+		ConfigurationBuilder.parseArgs( args );
+		
+		JavaParser parser = new JavaParser( new ScopeInfo() );
+		parser.parse( source, Configuration.libs.split( File.pathSeparator ) );
+		CompilationUnit root = parser.getCompilationUnit();
+		root.accept( new RemoveComments() );
+		
+		ASTNode target = null;
+		if ( targetLine > 0 ) {
+			target = new NodeByLine().getNodeForLine( root, targetLine );
+			System.out.printf( "targeting:\n%s\n=====\n", target );
+		}
+		
+		EclipseTSG grammar;
+		try {
+			@SuppressWarnings( "unchecked" )
+			TSGrammar< TSGNode > tmp = ( TSGrammar< TSGNode > )
+				Serializer.getSerializer().deserializeFrom( grammarFile );
+			grammar = new EclipseTSG( tmp );
+		}
+		catch ( SerializationException e ) {
+			e.printStackTrace();
+			return;
+		}
+		
+		for ( MethodDeclaration method : new MethodExtractor().getMethods( root ) ) {
+			System.out.printf( "method: %s\n", method.getName() );
+			double logProb;
+			if ( target == null )
+				logProb = grammar.getLogProb( method, method );
+			else
+				logProb = grammar.getLogProb( method, target );
+			System.out.printf( "log prob: %g\n", logProb );
+			System.out.printf( "probability: %g\n", Math.pow( 2.0, logProb ) );
+		}
 	}
 
 	private final Map< TSGNode, ? extends Multiset< TreeNode< TSGNode > > > grammar;
