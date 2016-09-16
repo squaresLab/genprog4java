@@ -24,6 +24,7 @@ import codemining.ast.java.AbstractJavaTreeExtractor;
 import codemining.ast.java.JavaAstTreeExtractor;
 import codemining.lm.tsg.TSGNode;
 import codemining.lm.tsg.TSGrammar;
+import codemining.math.random.SampleUtils;
 import codemining.util.StatsUtil;
 
 public class EclipseTSG {
@@ -100,7 +101,7 @@ public class EclipseTSG {
 			Status status, List< StartPoint > points, double logProb
 		) {
 			this.status = status;
-			this.points = points;
+			this.points = Collections.unmodifiableList( points );
 			this.logProb = logProb;
 		}
 		
@@ -134,6 +135,8 @@ public class EclipseTSG {
 			if ( this.status == Status.VALID && that.status == Status.VALID )
 				return success( this.logProb + that.logProb );
 
+			assert this.status == Status.VALID || that.status == Status.VALID;
+
 			List< StartPoint > newPoints =
 				Stream.concat( this.points.stream(), that.points.stream() ).map(
 					(point) -> point.withLogProb(
@@ -154,13 +157,20 @@ public class EclipseTSG {
 				) );
 			
 			assert this.status == Status.FOUND && that.status == Status.FOUND;
-			List< StartPoint > newPoints =
-				Stream.concat( this.points.stream(), that.points.stream() ).map(
-					(point) -> point.withLogProb( StatsUtil.log2SumOfExponentials(
-						point.logProb, this.logProb, that.logProb
-					) )
-				).collect( Collectors.toList() );
-			return new ParseState( Status.FOUND, newPoints, 0.0 );
+
+			Map< TreeNode< TSGNode >, StartPoint > pointmap = new HashMap<>();
+			Stream.concat( this.points.stream(), that.points.stream() ).forEach(
+				(p) -> {
+					if ( pointmap.containsKey( p.production ) )
+						p = p.withLogProb( StatsUtil.log2SumOfExponentials(
+							p.logProb, pointmap.get( p.production ).logProb
+						) );
+					pointmap.put( p.production, p );
+				}
+			);
+			return new ParseState(
+				Status.FOUND, new ArrayList<>( pointmap.values() ), 0.0
+			);
 		}
 		
 		public boolean isValid() {
@@ -181,10 +191,33 @@ public class EclipseTSG {
 	}
 
 	private static interface Parser< T > {
-		public T process( ParseState state );
+		public T process( List< StartPoint > points );
 	}
 	
-	private <T> T parse( ASTNode root, ASTNode target, Parser< T > parser ) {
+	public static class ParseException extends Exception {
+		private static final long serialVersionUID = 20160914L;
+
+		public ParseException() {}
+		public ParseException( String message ) {
+			super( message );
+		}
+		public ParseException( String message, Throwable cause ) {
+			super( message, cause );
+		}
+		protected ParseException(
+			String message, Throwable cause,
+			boolean enableSuppression, boolean writeableStackTrace
+		) {
+			super( message, cause, enableSuppression, writeableStackTrace );
+		}
+		public ParseException( Throwable cause ) {
+			super( cause );
+		}
+	}
+
+	private <T> T parse( ASTNode root, ASTNode target, Parser< T > parser )
+		throws ParseException
+	{
 		EclipseASTExtractor astExtractor = new EclipseASTExtractor();
 		TreeNode< Integer > astTree = astExtractor.getTree( root );
 		TreeNode< TSGNode > tsgTree = TSGNode.convertTree( tsgExtractor.getTree( root ), 0 );
@@ -200,8 +233,12 @@ public class EclipseTSG {
 			astExtractor, astTree, tsgTree, production, target,
 			searchCache
 		);
-		
-		return parser.process( matches );
+		if ( ! matches.isValid() )
+			throw new ParseException( "could not parse AST" );
+		if ( ! matches.isFound() )
+			throw new ParseException( "could not find target node to replace" );	
+
+		return parser.process( matches.getPoints() );
 	}
 
 	private ParseState findTarget(
@@ -414,21 +451,54 @@ public class EclipseTSG {
 		parseCache.put( tsgTree, results );
 		return results;	
 	}
+	
+	private TreeNode< TSGNode > generateRandom(
+		TreeNode< TSGNode > root, TreeNode< TSGNode > production
+	) {
+		Deque< Pair< TreeNode< TSGNode >, TreeNode< TSGNode > > > pending =
+			new ArrayDeque<>();
+		pending.addFirst( Pair.of( root, production ) );
+		while ( ! pending.isEmpty() ) {
+			TreeNode< TSGNode > node = pending.peekFirst().getLeft();
+			TreeNode< TSGNode > prod = pending.peekFirst().getRight();
+			pending.removeFirst();
+			if ( prod.isLeaf() && 0 < node.nProperties() ) {
+				TSGNode key = new TSGNode( node.getData() );
+				key.isRoot = true;
+				Multiset< TreeNode< TSGNode > > productions = grammar.get( key );
+				if ( productions == null )
+					continue;
+				prod = SampleUtils.getRandomElement( productions );
+			}
+			if ( ! prod.isLeaf() ) {
+				for ( int i = 0; i < prod.nProperties(); ++i ) {
+					List< TreeNode< TSGNode > > children =
+						prod.getChildrenByProperty().get( i );
+					for ( TreeNode< TSGNode > child : children ) {
+						TreeNode< TSGNode > copy = TreeNode.create(
+							new TSGNode( child.getData().nodeKey ),
+							child.nProperties()
+						);
+						node.addChildNode( copy, i );
+						pending.addFirst( Pair.of( copy, child ) );
+					}
+				}
+			}
+		}
+		return root;
+	}
 
-	public double getLogProb( ASTNode root, ASTNode target ) {
-		return parse( root, target, ( matches ) -> {
-			if ( ! matches.isValid() )
-				return Double.NEGATIVE_INFINITY;
-			if ( ! matches.isFound() )
-				return 0.0;
-		
+	public double getLogProb( ASTNode root, ASTNode target )
+		throws ParseException
+	{
+		return parse( root, target, ( points ) -> {
 			Map< TreeNode< TSGNode >, List< Double > > parseCache = new HashMap<>();
 			double weight = Double.NEGATIVE_INFINITY;
 			double probability = Double.NEGATIVE_INFINITY;
-			for ( StartPoint start : matches.getPoints() ) {
-				weight = StatsUtil.log2SumOfExponentials( weight, start.logProb );
+			for ( StartPoint point : points ) {
+				weight = StatsUtil.log2SumOfExponentials( weight, point.logProb );
 				List< Double > probs =
-					doParse( start.tree, start.production, start.logProb, parseCache );
+					doParse( point.tree, point.production, point.logProb, parseCache );
 				if ( probs.isEmpty() )
 					continue;
 
@@ -442,6 +512,29 @@ public class EclipseTSG {
 		} );
 	}
 	
+	public ASTNode babble( ASTNode root, ASTNode target )
+		throws ParseException
+	{
+		return parse( root, target, ( points ) -> {
+			double[] logProbs = new double[ points.size() ];
+			for ( int i = 0; i < points.size(); ++i )
+				logProbs[ i ] = points.get( i ).logProb;
+			int i = SampleUtils.getRandomIndex( logProbs );
+			StartPoint p = points.get( i );
+
+			TreeNode< TSGNode > tsgTree = TreeNode.create(
+				new TSGNode( p.production.getData().nodeKey ),
+				p.production.nProperties()
+			);
+			tsgTree = generateRandom( tsgTree, p.production );
+			TreeNode< Integer > intTree = TreeNode.create(
+				tsgTree.getData().nodeKey, tsgTree.nProperties()
+			);
+			TSGNode.copyChildren( intTree, tsgTree );
+			return tsgExtractor.getASTFromTree( intTree );
+		} );
+	}
+
 	private final Map< TSGNode, ? extends Multiset< TreeNode< TSGNode > > > grammar;
 	private final AbstractJavaTreeExtractor tsgExtractor;
 }
