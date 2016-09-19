@@ -93,7 +93,7 @@ public class ClassCastChecker extends JavaEditOperation {
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
 		List<ASTNode> expressionsFromThisParent = thisHole.getSubExps();
 		Collections.reverse(expressionsFromThisParent);
-		String retval = "cc(@" + this.getLocation().getId() + ": [ ";
+		String retval = "ClassCastChecker(@" + this.getLocation().getId() + ": [ ";
 		String castString = null;
 		for(ASTNode castToCheck : expressionsFromThisParent){
 			CastExpression asCast = (CastExpression) castToCheck;
