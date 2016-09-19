@@ -29,7 +29,7 @@ public class CasterMutator extends JavaEditOperation {
 	}
 	public String toString() {
 		SubExpsHole thisHole = (SubExpsHole) this.getHoleCode();
-		String retval = "csterM(" + this.getLocation().getId() + ": ";
+		String retval = "CasterMutator(" + this.getLocation().getId() + ": ";
 		retval += "(" + thisHole.getCode() + ") replaced with ";
 		retval +=  "(" + replaceWithString + "))";
 		return retval;

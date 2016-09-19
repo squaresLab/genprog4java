@@ -25,7 +25,7 @@ public class SequenceExchanger  extends JavaEditOperation {
 	
 	public String toString() {
 		StatementHole fixHole = (StatementHole) this.getHoleCode();
-		return "sqncEx(" + this.getLocation().getId() + "," + fixHole.getCodeBankId() + ")";
+		return "SequenceExchanger(" + this.getLocation().getId() + "," + fixHole.getCodeBankId() + ")";
 	}
 
 }

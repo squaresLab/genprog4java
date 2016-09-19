@@ -145,5 +145,10 @@ if B include return statement
 		rewriter.replace(parent, ifstmt, null);
 		
 	}
+	
+	@Override
+	public String toString() {
+		return "CollectionSizeChecker";
+	}
 
 }

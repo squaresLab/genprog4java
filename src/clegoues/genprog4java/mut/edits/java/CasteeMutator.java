@@ -32,7 +32,7 @@ public class CasteeMutator extends JavaEditOperation {
 	
 	public String toString() {
 		ExpHole thisHole = (ExpHole) this.getHoleCode();
-		String retval = "csteeM(" + this.getLocation().getId() + ": ";
+		String retval = "CasteeMutator(" + this.getLocation().getId() + ": ";
 		retval += "(" + thisHole.getCode() + ") replaced with ";
 		retval +=  "(" + thisHole.getLocationExp() + "))";
 		return retval;

@@ -29,7 +29,7 @@ public class JavaDeleteOperation extends JavaEditOperation {
 	
 	@Override
 	public String toString() {
-		return "d(" + this.getLocation().getId() + ")";
+		return "StmtDelete(" + this.getLocation().getId() + ")";
 	}
 }
 

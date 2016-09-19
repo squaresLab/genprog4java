@@ -190,7 +190,7 @@ public class OffByOneOperation extends JavaEditOperation {
 	@Override
 	public String toString() {
 		// FIXME: this is lazy
-		return "obo(" + this.getLocation().getId() + ")";
+		return "OffByOneMutator(" + this.getLocation().getId() + ")";
 	}
 	
 }
