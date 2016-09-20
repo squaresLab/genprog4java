@@ -10,12 +10,12 @@ DEFECTS4JDIR="$2"
 #rm -rf /tmp/*
 
 
-rm $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites.txt
+rm -f $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites.txt
 touch $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites.txt
 
 STARTAT=1
 
-for (( projectNumb=4 ; projectNumb<=4 ; projectNumb++ ))
+for (( projectNumb=2 ; projectNumb<=2 ; projectNumb++ ))
 do
   case "$projectNumb" in
   "1" )
@@ -27,8 +27,8 @@ do
   "2" ) 
     PROJECT="Lang"
 #    NUMBEROFBUGS=65
-    NUMBEROFBUGS=32
-    STARTAT=32
+    NUMBEROFBUGS=45
+    STARTAT=45
   ;;
   "3" ) 
     PROJECT="Chart"
@@ -51,11 +51,12 @@ do
   for (( bug=$STARTAT ; bug<=$NUMBEROFBUGS ; bug++ ))
   do
   
-    $GENPROGDIR/defects4j-scripts/prepareBug.sh $PROJECT $bug $GENPROGDIR $DEFECTS4JDIR generated 100 $DEFECTS4JDIR/ExamplesCheckedOut/
+    $GENPROGDIR/defects4j-scripts/prepareBug.sh $PROJECT $bug $GENPROGDIR $DEFECTS4JDIR humanMade 100 $DEFECTS4JDIR/ExamplesCheckedOut/ /usr/lib/jvm/java-1.7.0-openjdk-amd64/ /usr/lib/jvm/java-8-oracle/
 
 #    echo ""
 #    echo "prepareBug.sh finished executing"
 
+#     ./testGeneratedSuite.sh $PROJECT $bug $GENPROGDIR $DEFECTS4JDIR allHuman 100 $DEFECTS4JDIR/ExamplesCheckedOut/ 1 1 false /usr/lib/jvm/java-1.7.0-openjdk-amd64/ /usr/lib/jvm/java-8-oracle/ Randoop
 #    $GENPROGDIR/defects4j-scripts/runTestSuite.sh $PROJECT $bug  $GENPROGDIR $DEFECTS4JDIR > $DEFECTS4JDIR/ResultsFromRunningGenereatedTestSuites/resultsFromRunningGenereatedTestSuites"$PROJECT""$bug".txt
 
 #    echo ""
