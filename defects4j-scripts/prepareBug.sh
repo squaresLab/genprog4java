@@ -23,7 +23,7 @@
 # export PATH=$JAVA_HOME/bin/:$PATH
 
 if [ "$#" -ne 9 ]; then
-    echo "This script should be run with 7 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size, bugs folder, java 7 installation folder, java 8 installation folder"
+    echo "This script should be run with 9 parameters: Project name, bug number, location of genprog4java, defects4j installation, testing option, test suite size, bugs folder, java 7 installation folder, java 8 installation folder"
     exit 0
 fi
 
@@ -141,7 +141,7 @@ case "$OPTION" in
 
   #Create the new test suite
   echo Creating new test suite...
-  SEED=2
+  SEED=1
   cd "$DEFECTS4JDIR"/framework/bin/
   perl run_randoop.pl -p "$PROJECT" -v "$BUGNUMBER"f -n "$SEED" -o $BUGWD/"$TESTWD"/outputOfRandoop/ -b 1800
   perl "$DEFECTS4JDIR"/framework/util/fix_test_suite.pl -p "$PROJECT" -d $BUGWD/"$TESTWD"/outputOfRandoop/$PROJECT/randoop/$SEED/

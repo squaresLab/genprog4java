@@ -64,7 +64,7 @@ export PATH=$DIROFJAVA8/bin/:$PATH
 if [ -d "$GENPROGDIR" ]; then
   cd "$GENPROGDIR"
   mvn package
-  if [[ $? -ne 0 ]] ; then
+  if [[ $? -ne 0 ]]; then
       echo "error building GenProg; exiting"
       exit 1
   fi
