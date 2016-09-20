@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import codemining.ast.TreeNode;
 import codemining.ast.java.AbstractJavaTreeExtractor;
+import codemining.ast.java.BinaryJavaAstTreeExtractor;
 import codemining.ast.java.JavaAstTreeExtractor;
 import codemining.java.tokenizers.JavaTokenizer;
 import codemining.lm.tsg.FormattedTSGrammar;
@@ -33,6 +34,7 @@ import clegoues.genprog4java.main.Main;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.ShutdownDelay;
 
+import static clegoues.util.ConfigurationBuilder.BOOLEAN;
 import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.INT;
 import static clegoues.util.ConfigurationBuilder.PATH;
@@ -80,6 +82,12 @@ public class SampleTSG {
 		.withHelp( "concentration parameter for updating posterior probabilities" )
 		.build();
 
+	private static boolean binarize = ConfigurationBuilder.of( BOOLEAN )
+		.inGroup( "Training Parameters" )
+		.withVarName( "binarize" )
+		.withHelp( "reshape extracted tree to be binary tree" )
+		.build();
+
 	private static class RemoveComments extends ASTVisitor {
 		@Override
 		public void endVisit( Javadoc node ) {
@@ -105,6 +113,8 @@ public class SampleTSG {
 	
 	private static BlockCollapsedGibbsSampler getSamplerForSources() {
 		AbstractJavaTreeExtractor format = new JavaAstTreeExtractor();
+		if ( binarize )
+			format = new BinaryJavaAstTreeExtractor( format );
 		BlockCollapsedGibbsSampler sampler = new BlockCollapsedGibbsSampler(
 			100, concentration,
 			new FormattedTSGrammar(format), new FormattedTSGrammar(format)
