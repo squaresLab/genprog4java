@@ -61,10 +61,9 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	public static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
 	
-	//private static int popsize = 20;
 	private static int popsize = ConfigurationBuilder.of( INT )
 		.withVarName( "popsize" )
-		.withDefault( "20" )
+		.withDefault( "40" )
 		.withHelp( "size of the population" )
 		.inGroup( "Population Parameters" )
 		.withCast( new ConfigurationBuilder.LexicalCast< Integer >(){
