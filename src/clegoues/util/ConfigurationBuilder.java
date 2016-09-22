@@ -204,6 +204,18 @@ public class ConfigurationBuilder< T > {
 		};
 	
 	/**
+	 * Interprets option arguments as colon-separated list of filenames.
+	 */
+	public static final LexicalCast<String[]> PATH =
+		new LexicalCast<String[]>() {
+			public String[] parse(String value) {
+				if ( value.isEmpty() )
+					return new String[ 0 ];
+				return value.split( File.pathSeparator );
+			}
+		};
+
+	/**
 	 * Interprets option arguments as {@code short} values.
 	 */
 	public static final LexicalCast< Short > SHORT =
@@ -425,8 +437,10 @@ public class ConfigurationBuilder< T > {
 
 		if ( value != null )
 			props.setProperty( opt.getLongOpt(), value );
-		if ( dflt == null && opt.hasArg() )
+		if ( dflt == null && opt.hasArg() ) {
 			required.add( opt.getLongOpt() );
+			groups.get( "Required Flags" ).addOption( opt );
+		}
 		options.addOption( opt );
 		if ( ! groups.containsKey( groupName ) )
 			groups.put( groupName, new Options() );
@@ -529,6 +543,12 @@ public class ConfigurationBuilder< T > {
 			}
 			padding.put( me.getKey(), local );
 		}
+		
+		// Move the required flags to the bottom so they show up near the user's
+		// prompt.
+		
+		Options requiredFlags = groups.remove( "Required Flags" );
+		groups.put( "Required Flags", requiredFlags );
 
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printUsage( pw, 80, usage.toString() );
@@ -749,6 +769,7 @@ public class ConfigurationBuilder< T > {
 
 	// Initialize the options to include a --help flag.
 	static {
+		groups.put( "Required Flags", new Options() );
 		Option help = 
 			new Option( "h", "help", false, "show this help and exit" );
 		options = new Options();
