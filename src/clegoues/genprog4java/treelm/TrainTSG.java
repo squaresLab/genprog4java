@@ -1,10 +1,8 @@
 package clegoues.genprog4java.treelm;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -12,15 +10,13 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Javadoc;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import codemining.ast.TreeNode;
 import codemining.ast.java.AbstractJavaTreeExtractor;
 import codemining.ast.java.BinaryJavaAstTreeExtractor;
 import codemining.ast.java.JavaAstTreeExtractor;
+import codemining.ast.java.VariableTypeJavaTreeExtractor;
 import codemining.java.tokenizers.JavaTokenizer;
 import codemining.lm.tsg.FormattedTSGrammar;
 import codemining.lm.tsg.TSGNode;
@@ -41,7 +37,7 @@ import static clegoues.util.ConfigurationBuilder.INT;
 import static clegoues.util.ConfigurationBuilder.PATH;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
-public class SampleTSG {
+public class TrainTSG {
 	protected static Logger logger = Logger.getLogger(Main.class);
 
 	private static final ConfigurationBuilder.RegistryToken token =
@@ -89,8 +85,19 @@ public class SampleTSG {
 		.withHelp( "reshape extracted tree to be binary tree" )
 		.build();
 
+	private static boolean varAbstraction = ConfigurationBuilder.of( BOOLEAN )
+		.inGroup( "Training Parameters" )
+		.withVarName( "varAbstraction" )
+		.withFlag( "variables" )
+		.withHelp( "make variables abstract" )
+		.build();
+	
 	private static BlockCollapsedGibbsSampler getSamplerForSources() {
-		AbstractJavaTreeExtractor format = new JavaAstTreeExtractor();
+		AbstractJavaTreeExtractor format;
+		if ( varAbstraction )
+			format = new VariableTypeJavaTreeExtractor();
+		else
+			format = new JavaAstTreeExtractor();
 		if ( binarize )
 			format = new BinaryJavaAstTreeExtractor( format );
 		BlockCollapsedGibbsSampler sampler = new BlockCollapsedGibbsSampler(
