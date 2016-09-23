@@ -44,7 +44,6 @@ import clegoues.genprog4java.mut.holes.java.StatementHole;
 import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.WeightedAtom;
-import clegoues.genprog4java.treelm.TreeBabbler;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.ConfigurationBuilder.LexicalCast;
 

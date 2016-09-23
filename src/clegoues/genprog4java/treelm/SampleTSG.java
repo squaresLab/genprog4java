@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
@@ -88,29 +89,6 @@ public class SampleTSG {
 		.withHelp( "reshape extracted tree to be binary tree" )
 		.build();
 
-	private static class RemoveComments extends ASTVisitor {
-		@Override
-		public void endVisit( Javadoc node ) {
-			node.delete();
-		}
-	}
-	
-	private static class MethodExtractor extends ASTVisitor {
-		private List< MethodDeclaration > methods = new ArrayList<>();
-
-		public List< MethodDeclaration > getMethods( ASTNode node ) {
-			methods.clear();
-			node.accept( this );
-			return new ArrayList< MethodDeclaration >( methods );
-		}
-
-		@Override
-		public boolean visit( MethodDeclaration node ) {
-			methods.add( node );
-			return false;
-		}
-	}
-	
 	private static BlockCollapsedGibbsSampler getSamplerForSources() {
 		AbstractJavaTreeExtractor format = new JavaAstTreeExtractor();
 		if ( binarize )
@@ -136,18 +114,16 @@ public class SampleTSG {
 			else
 				files = Collections.singleton( sourceFile );
 
-			MethodExtractor m = new MethodExtractor();
-			
 			for ( File f : files ) {
 				JavaParser parser = new JavaParser( new ScopeInfo() );
 				parser.parse(
 					f.getPath(), Configuration.libs.split( File.pathSeparator )
 				);
-				ASTNode root = parser.getCompilationUnit();
-				root.accept( new RemoveComments() );
-				for ( MethodDeclaration method : m.getMethods( root ) ) {
+				CompilationUnit root = parser.getCompilationUnit();
+				GrammarUtils.prepareAST( root );
+				for ( ASTNode node : GrammarUtils.getForest( root ) ) {
 					TreeNode< TSGNode > tree =
-						TSGNode.convertTree( format.getTree( method ), 0.9 );
+						TSGNode.convertTree( format.getTree( node ), 0.9 );
 					nNodes += tree.getTreeSize();
 					filter.addTree( tree );
 				}

@@ -3,6 +3,8 @@ package clegoues.genprog4java.localization;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -58,7 +60,8 @@ import clegoues.genprog4java.mut.holes.java.JavaASTNodeLocation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
-import clegoues.genprog4java.treelm.TreeBabbler;
+import clegoues.genprog4java.treelm.EclipseTSG;
+import clegoues.genprog4java.treelm.EclipseTSG.ParseException;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
 import clegoues.util.ConfigurationBuilder.LexicalCast;
@@ -75,15 +78,15 @@ public class EntropyLocalization extends DefaultLocalization {
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
 
-	public static TreeBabbler babbler = ConfigurationBuilder.of(
-			new LexicalCast< TreeBabbler >() {
-				public TreeBabbler parse(String value) {
+	public static EclipseTSG babbler = ConfigurationBuilder.of(
+			new LexicalCast< EclipseTSG >() {
+				public EclipseTSG parse(String value) {
 					if ( value.equals( "" ) )
 						return null;
 					try {
 						FormattedTSGrammar grammar =
 								(FormattedTSGrammar) Serializer.getSerializer().deserializeFrom( value );
-						return new TreeBabbler( grammar );
+						return new EclipseTSG( grammar );
 					} catch (SerializationException e) {
 						logger.error( e.getMessage() );
 						return null;
@@ -350,7 +353,16 @@ public class EntropyLocalization extends DefaultLocalization {
 	// babbles fix code, manipulates it to reference in-scope variables
 	public ASTNode babbleFixCode(JavaLocation location, JavaSemanticInfo semanticInfo) {
 		ASTNode element = location.getCodeElement();
-		ASTNode babbled = babbler.babbleFrom(element);
+		ASTNode babbled;
+		try {
+			babbled = babbler.babbleFrom(element);
+		}
+		catch ( ParseException e ) {
+			StringWriter message = new StringWriter();
+			e.printStackTrace( new PrintWriter( message ) );
+			logger.fatal( message.toString() );
+			throw new RuntimeException( e );
+		}
 		System.err.println("babbled:" + babbled.toString());
 		babbled.accept(new BabbleVisitor(semanticInfo, location, element.getParent()));
 		System.err.println("replaced:" + babbled.toString());
