@@ -7,6 +7,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -205,10 +206,6 @@ public class EclipseTSG {
 		private final double logProb;
 	}
 
-	private static interface Parser< T > {
-		public T process( List< StartPoint > points );
-	}
-	
 	public static class ParseException extends Exception {
 		private static final long serialVersionUID = 20160914L;
 
@@ -230,7 +227,9 @@ public class EclipseTSG {
 		}
 	}
 
-	private <T> T parse( ASTNode root, ASTNode target, Parser< T > parser )
+	private <T> T parse(
+		ASTNode root, ASTNode target, Function< List< StartPoint >, T > parser
+	)
 		throws ParseException
 	{
 		AbstractJavaTreeExtractor astExtractor =
@@ -254,7 +253,7 @@ public class EclipseTSG {
 		if ( ! matches.isFound() )
 			throw new ParseException( "could not find target node to replace" );	
 
-		return parser.process( matches.getPoints() );
+		return parser.apply( matches.getPoints() );
 	}
 
 	private ParseState findTarget(
@@ -509,9 +508,10 @@ public class EclipseTSG {
 		return root;
 	}
 
-	public double getLogProb( ASTNode root, ASTNode target )
+	public double getLogProb( ASTNode target )
 		throws ParseException
 	{
+		ASTNode root = GrammarUtils.getStartNode( target );
 		return parse( root, target, ( points ) -> {
 			Map< TreeNode< Integer >, List< Double > > parseCache = new HashMap<>();
 			double weight = Double.NEGATIVE_INFINITY;
@@ -533,9 +533,10 @@ public class EclipseTSG {
 		} );
 	}
 	
-	public ASTNode babble( ASTNode root, ASTNode target )
+	public ASTNode babbleFrom( ASTNode target )
 		throws ParseException
 	{
+		ASTNode root = GrammarUtils.getStartNode( target );
 		return parse( root, target, ( points ) -> {
 			double[] logProbs = new double[ points.size() ];
 			for ( int i = 0; i < points.size(); ++i )
