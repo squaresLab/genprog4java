@@ -101,7 +101,7 @@ FILE=$BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/defects4j.config
 /bin/cat <<EOM >$FILE
 seed = 0
 sanity = yes
-popsize = 20
+popsize = 40
 javaVM = $DIROFJAVA7/jre/bin/java
 workingDir = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
 outputDir = $BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/tmp
