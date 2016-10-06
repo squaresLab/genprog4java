@@ -35,10 +35,6 @@ echo ""
 
 SEED=1
 
-#declare -a arr=("chart21Buggy" "lang59Buggy" "math24Buggy" "math29Buggy" "math49Buggy" "time19Buggy" "closure125Buggy" "closure86Buggy" "math7Buggy" "closure83Buggy" "lang45Buggy" "chart3Buggy" "chart5Buggy" "lang39Buggy" "math40Buggy" "closure66Buggy" "lang43Buggy" "chart1Buggy" "math18Buggy" "lang10Buggy" "math20Buggy" "lang7Buggy" "math73Buggy" "math95Buggy" "math82Buggy" "closure46Buggy" "lang22Buggy" "chart26Buggy" "chart25Buggy" "lang63Buggy" "chart13Buggy" "closure107Buggy" "closure115Buggy" "closure126Buggy" "closure13Buggy" "closure19Buggy" "closure21Buggy" "closure22Buggy" "math28Buggy" "math50Buggy" "math80Buggy" "math81Buggy" "math85Buggy" "math8Buggy")
-
-#for i in "${arr[@]}"
-#do
 
 rm -f $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"log.txt
  #run_bug_detection.pl -p $PROJECT -d $DEFECTS4JDIR/generatedTestSuitesForBugsWeFoundARepairFor/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -o out_dir [-f include_file_pattern] [-v version_id] [-t tmp_dir] [-D]
@@ -47,7 +43,5 @@ COM="./defects4j test -s $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-randoop."$S
 echo "$COM"
 echo "Running... Log file located in $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"log.txt"
 eval $COM
-
-#done
 
 
