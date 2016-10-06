@@ -44,7 +44,7 @@ for i in "${arr[@]}"
 do
   echo "Si:"
   echo ""
-  COM="./testGeneratedSuite.sh "$i" $1 $2 $3 $4 $5 $6 $7 $8 "
+  COM="./cfeIndividual.sh "$i" $1 $2 $3 $4 $5 $6 $7 $8 "
 #&>> $DEFECTS4JDIR/generatedTestSuites/$LOWERCASERANDOOPOREVOSUITE/$IDENTIFIER/resultsEvaluatingSeveralTestSuites.txt"
   echo "$COM"
   eval $COM
