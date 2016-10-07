@@ -1,18 +1,20 @@
 package clegoues.genprog4java.treelm;
 
+import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import com.google.common.collect.Multiset;
@@ -20,9 +22,6 @@ import com.google.common.math.DoubleMath;
 
 import codemining.ast.AstNodeSymbol;
 import codemining.ast.TreeNode;
-import codemining.ast.java.AbstractJavaTreeExtractor;
-import codemining.ast.java.BinaryJavaAstTreeExtractor;
-import codemining.ast.java.JavaAstTreeExtractor;
 import codemining.lm.tsg.TSGNode;
 import codemining.lm.tsg.TSGrammar;
 import codemining.math.random.SampleUtils;
@@ -31,69 +30,51 @@ import codemining.util.StatsUtil;
 public class EclipseTSG {
 	public EclipseTSG( TSGrammar< TSGNode > grammar ) {
 		this.grammar = grammar.getInternalGrammar();
-		this.tsgExtractor = (AbstractJavaTreeExtractor) grammar.getTreeExtractor();
-	}
-
-	private static class EclipseASTExtractor extends JavaAstTreeExtractor {
-		private static final long serialVersionUID = 20160825L;
-
-		protected EclipseASTExtractor() {}
-		
-		public static AbstractJavaTreeExtractor parallelTo(
-			AbstractJavaTreeExtractor example
-		) {
-			AbstractJavaTreeExtractor extractor = new EclipseASTExtractor();
-			if ( example instanceof BinaryJavaAstTreeExtractor )
-				return new BinaryJavaAstTreeExtractor( extractor );
-			else
-				return extractor;
-		}
-
-		private class ASTExtractor extends TreeNodeExtractor {
-			public ASTExtractor( boolean useComments ) {
-				super( useComments );
-			}
-			
-			@Override
-			public TreeNode<Integer> postProcessNodeBeforeAdding(
-				TreeNode< Integer > treeNode, ASTNode node
-			) {
-				AstNodeSymbol symbol = getSymbol( treeNode.getData() );
-				AstNodeSymbol copy = new AstNodeSymbol( symbol.nodeType );
-				for ( String key : symbol.getSimpleProperties() )
-					copy.addSimpleProperty( key, symbol.getSimpleProperty( key ) );
-				for ( int i = 0; i < symbol.nChildProperties(); ++i )
-					copy.addChildProperty( symbol.getChildProperty( i ) );
-				for ( String key : symbol.getAnnotations() )
-					copy.addAnnotation( key, symbol.getAnnotation( key ) );
-				copy.addAnnotation( "EclipseASTNode", node );
-				int symbolId = getOrAddSymbolId( copy );
-
-				TreeNode< Integer > result =
-					TreeNode.create( symbolId, treeNode.nProperties() );
-				List< List< TreeNode< Integer > > > children =
-					treeNode.getChildrenByProperty();
-				for ( int i = 0; i < treeNode.nProperties(); ++i ) {
-					for ( TreeNode< Integer > child : children.get( i ) )
-						result.addChildNode( child, i );
-				}
-				return result;
-			}
-		}
-		
-		@Override
-		public TreeNode< Integer > getTree( ASTNode node, boolean useComments ) {
-			ASTExtractor extractor = new ASTExtractor( useComments );
-			extractor.extractFromNode( node );
-			return extractor.computedNodes.get( node );
-		}
-
-		@Override
-		public ASTNode getASTFromTree( TreeNode< Integer > tree ) {
-			return (ASTNode) getSymbol( tree.getData() ).getAnnotation( "EclipseASTNode" );
-		}
+		ChainedJavaTreeExtractor ex =
+			(ChainedJavaTreeExtractor) grammar.getTreeExtractor();
+		this.tsgExtractor = new ChainedJavaTreeExtractor( ex );
 	}
 	
+	private static class EclipseASTProcess
+		implements ChainedJavaTreeExtractor.PostProcess,
+			Supplier< EclipseASTProcess >,
+			Serializable
+	{
+		private static final long serialVersionUID = 20160930L;
+
+		public EclipseASTProcess () {
+			this.nodeTable = new IdentityHashMap<>();
+		}
+
+		@Override
+		public TreeNode< Integer > encode(
+			TreeNode< Integer > tree, ASTNode node,
+			Function< AstNodeSymbol, Integer > getOrAddSymbol
+		) {
+			nodeTable.putIfAbsent( tree, node );
+			return tree;
+		}
+
+		@Override
+		public TreeNode< Integer > decode(
+			TreeNode< Integer > tree, Function< Integer,
+			AstNodeSymbol > getSymbol
+		) {
+			return tree;
+		}
+		
+		@Override
+		public EclipseASTProcess get() {
+			return this;
+		}
+		
+		public ASTNode getASTNode( TreeNode< Integer > tree ) {
+			return nodeTable.get( tree );
+		}
+
+		private final IdentityHashMap< TreeNode< Integer >, ASTNode > nodeTable;
+	}
+
 	private static class StartPoint {
 		public StartPoint(
 			TreeNode< Integer > tree,
@@ -232,21 +213,20 @@ public class EclipseTSG {
 	)
 		throws ParseException
 	{
-		AbstractJavaTreeExtractor astExtractor =
-			EclipseASTExtractor.parallelTo( tsgExtractor );
-		TreeNode< Integer > astTree = astExtractor.getTree( root );
-		TreeNode< Integer > tsgTree = tsgExtractor.getTree( root );
+		EclipseASTProcess nodeMapper = new EclipseASTProcess();
+		ChainedJavaTreeExtractor astExtractor =
+			new ChainedJavaTreeExtractor( tsgExtractor );
+		astExtractor.addPostProcessFactory( nodeMapper );
+		TreeNode< Integer > tsgTree = astExtractor.getTree( root );
 		
 		TSGNode starter = new TSGNode( tsgTree.getData() );
 		starter.isRoot = true;
 		TreeNode< TSGNode > production =
 			TreeNode.create( starter, tsgTree.nProperties() );
 		
-		final Map< TreeNode< Integer >, ParseState > searchCache =
-			new HashMap<>();
+		final Map< ASTNode, ParseState > searchCache = new HashMap<>();
 		ParseState matches = findTarget(
-			astExtractor, astTree, tsgTree, production, target,
-			searchCache
+			nodeMapper, tsgTree, production, target, searchCache
 		);
 		if ( ! matches.isValid() )
 			throw new ParseException( "could not parse AST" );
@@ -257,49 +237,33 @@ public class EclipseTSG {
 	}
 
 	private ParseState findTarget(
-		AbstractJavaTreeExtractor ae,
-		TreeNode< Integer > astTree,
+		EclipseASTProcess nodeMapper,
 		TreeNode< Integer > tsgTree,
 		TreeNode< TSGNode > production,
 		ASTNode target,
-		Map< TreeNode< Integer >, ParseState > searchCache
+		Map< ASTNode, ParseState > searchCache
 	) {
 		ParseState result = ParseState.success( 0.0 );
 		
-		Deque< Triple<
-			TreeNode< Integer >,
-			TreeNode< Integer >,
-			TreeNode< TSGNode >
-		> > pending = new ArrayDeque<>();
-		pending.addFirst( Triple.of( astTree, tsgTree, production ) );
+		Deque< Pair< TreeNode< Integer >, TreeNode< TSGNode > > > pending =
+			new ArrayDeque<>();
+		pending.addFirst( Pair.of( tsgTree, production ) );
 		while ( ! pending.isEmpty() ) {
-			TreeNode< Integer > curr = pending.peekFirst().getLeft();
-			TreeNode< Integer > node = pending.peekFirst().getMiddle();
+			TreeNode< Integer > node = pending.peekFirst().getLeft();
 			TreeNode< TSGNode > prod = pending.peekFirst().getRight();
 			pending.removeFirst();
 			
-			AstNodeSymbol symbol = ae.getSymbol( curr.getData() );
-			if ( symbol.hasAnnotation( "EclipseASTNode" ) ) {
-				ASTNode current =
-					(ASTNode) symbol.getAnnotation( "EclipseASTNode" );
-				if ( current == target ) {
-					// If we've reached the target node, do not match it. Doing
-					// so would only allow productions from the identical
-					// TSGNode. Instead, save the parse state here. If the rest
-					// of the parse succeeds, we have a match and can return it
-					// outside the loop.
-					result = result.and( ParseState.found( node, prod, 0.0 ) );
-					continue;
-				}
+			ASTNode current = nodeMapper.getASTNode( node );
+			if ( current == target ) {
+				// If we've reached the target node, do not match it. Doing
+				// so would only allow productions from the identical
+				// TSGNode. Instead, save the parse state here. If the rest
+				// of the parse succeeds, we have a match and can return it
+				// outside the loop.
+				result = result.and( ParseState.found( node, prod, 0.0 ) );
+				continue;
 			}
 
-			int astType = ae.getSymbol( curr.getData() ).nodeType;
-			int tsgType = tsgExtractor.getSymbol( node.getData() ).nodeType;
-			assert astType == tsgType :
-				"node type mismatch: " + astType + " != " + tsgType;
-			assert curr.nProperties() == node.nProperties() :
-				"properties mismatch: " + curr.nProperties() + " != " + node.nProperties();
-			
 			if ( prod.getData().nodeKey != node.getData() )
 				return ParseState.failure;
 			if ( prod.nProperties() != node.nProperties() )
@@ -313,30 +277,24 @@ public class EclipseTSG {
 				// at most one production will contain the target, so reset will
 				// only be updated at most once.
 				result = result.and( branchProductions(
-					ae, curr, node, target, searchCache
+					nodeMapper, node, target, searchCache
 				) );
 			} else {
 				// This is not a new production: every child of the production
 				// must match a child in the tree
 				
 				List< List< TreeNode< Integer > > > leftChildren =
-					curr.getChildrenByProperty();
-				List< List< TreeNode< Integer > > > midChildren =
 					node.getChildrenByProperty();
 				List< List< TreeNode< TSGNode > > > rightChildren =
 					prod.getChildrenByProperty();
 				for ( int i = leftChildren.size() - 1; i >= 0; --i ) {
 					List< TreeNode< Integer > > left = leftChildren.get( i );
-					List< TreeNode< Integer > > mid = midChildren.get( i );
 					List< TreeNode< TSGNode > > right = rightChildren.get( i );
-					assert left.size() == mid.size() :
-						"children mismatch: " + left.size() + " != " + mid.size();
-					if ( mid.size() != right.size() ) {
+					if ( left.size() != right.size() )
 						return ParseState.failure;
-					}
 					for ( int j = left.size() - 1; j >= 0; --j )
-						pending.addFirst( Triple.of(
-							left.get( j ), mid.get( j ), right.get( j )
+						pending.addFirst( Pair.of(
+							left.get( j ), right.get( j )
 						) );
 				}
 			}
@@ -346,14 +304,14 @@ public class EclipseTSG {
 	}
 	
 	private ParseState branchProductions(
-		AbstractJavaTreeExtractor astExtractor,
-		TreeNode< Integer > astTree,
+		EclipseASTProcess nodeMapper,
 		TreeNode< Integer > tsgTree,
 		ASTNode target,
-		Map< TreeNode< Integer >, ParseState > searchCache
+		Map< ASTNode, ParseState > searchCache
 	) {
-		if ( searchCache.containsKey( astTree ) )
-			return searchCache.get( astTree );
+		ASTNode current = nodeMapper.getASTNode( tsgTree );
+		if ( current != null && searchCache.containsKey( current ) )
+			return searchCache.get( current );
 		
 		TSGNode key = new TSGNode( tsgTree.getData() );
 		key.isRoot = true;
@@ -371,12 +329,11 @@ public class EclipseTSG {
 				DoubleMath.log2( entries.get( i ).getCount() ) - unit;
 			TreeNode< TSGNode > production = entries.get( i ).getElement();
 			result = result.or( ParseState.success( logProb ).and( findTarget(
-				astExtractor, astTree, tsgTree,
-				production, target,
-				searchCache
+				nodeMapper, tsgTree, production, target, searchCache
 			) ) );
 		}
-		searchCache.put( astTree, result );
+		if ( current != null )
+			searchCache.put( current, result );
 		return result;
 	}
 
@@ -558,5 +515,5 @@ public class EclipseTSG {
 	}
 
 	private final Map< TSGNode, ? extends Multiset< TreeNode< TSGNode > > > grammar;
-	private final AbstractJavaTreeExtractor tsgExtractor;
+	private final ChainedJavaTreeExtractor tsgExtractor;
 }

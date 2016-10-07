@@ -13,10 +13,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import codemining.ast.TreeNode;
-import codemining.ast.java.AbstractJavaTreeExtractor;
-import codemining.ast.java.BinaryJavaAstTreeExtractor;
-import codemining.ast.java.JavaAstTreeExtractor;
-import codemining.ast.java.VariableTypeJavaTreeExtractor;
 import codemining.java.tokenizers.JavaTokenizer;
 import codemining.lm.tsg.FormattedTSGrammar;
 import codemining.lm.tsg.TSGNode;
@@ -27,7 +23,6 @@ import codemining.util.serialization.Serializer;
 import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.ScopeInfo;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.main.Main;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.ShutdownDelay;
 
@@ -38,7 +33,7 @@ import static clegoues.util.ConfigurationBuilder.PATH;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
 public class TrainTSG {
-	protected static Logger logger = Logger.getLogger(Main.class);
+	protected static Logger logger = Logger.getLogger(TrainTSG.class);
 
 	private static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
@@ -93,13 +88,11 @@ public class TrainTSG {
 		.build();
 	
 	private static BlockCollapsedGibbsSampler getSamplerForSources() {
-		AbstractJavaTreeExtractor format;
+		ChainedJavaTreeExtractor format = new ChainedJavaTreeExtractor();
 		if ( varAbstraction )
-			format = new VariableTypeJavaTreeExtractor();
-		else
-			format = new JavaAstTreeExtractor();
+			format.addPostProcessFactory( new VariableAbstractor() );
 		if ( binarize )
-			format = new BinaryJavaAstTreeExtractor( format );
+			format.addPostProcessFactory( new TreeBinarizer() );
 		BlockCollapsedGibbsSampler sampler = new BlockCollapsedGibbsSampler(
 			100, concentration,
 			new FormattedTSGrammar(format), new FormattedTSGrammar(format)
