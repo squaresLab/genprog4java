@@ -8,7 +8,7 @@
 # 6th param is the path where the test suite is located
 
 #VM:
-#./testGeneratedSuite.sh /home/ubuntu/defects4j/ /usr/lib/jvm/java-1.7.0-openjdk-amd64/ /home/ubuntu/defects4j/generatedTestSuitesForBugsWeFoundARepairFor
+#./checkoutAndTestSetOfBugs.sh /home/ubuntu/defects4j/ /usr/lib/jvm/java-1.7.0-openjdk-amd64/ /home/ubuntu/defects4j/generatedTestSuitesForBugsWeFoundARepairFor
 
 
 if [ "$#" -ne 3 ]; then
@@ -40,9 +40,9 @@ BUGNUMBER=${i#* }
 LOWERCASEPROJECT=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 
 PATHOFBUGGYFOLDER="$DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPROJECT""$BUGNUMBER"Buggy/"
-#COM0="./defects4j checkout -p $PROJECT -v "$BUGNUMBER"b -w $PATHOFBUGGYFOLDER &>> $PATHOFSUITEFOLDER/UniqueLog.txt"
-#echo "$COM0"
-#eval $COM0
+COM0="./defects4j checkout -p $PROJECT -v "$BUGNUMBER"b -w $PATHOFBUGGYFOLDER &>> $PATHOFSUITEFOLDER/UniqueLog.txt"
+echo "$COM0"
+eval $COM0
 
 #run_bug_detection.pl -p $PROJECT -d $DEFECTS4JDIR/generatedTestSuitesForBugsWeFoundARepairFor/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -o out_dir [-f include_file_pattern] [-v version_id] [-t tmp_dir] [-D]
 COM="./defects4j test -s $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -w $PATHOFBUGGYFOLDER &>> $PATHOFSUITEFOLDER/UniqueLog.txt"
