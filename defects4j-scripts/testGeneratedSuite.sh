@@ -8,7 +8,7 @@
 # 6th param is the path where the test suite is located
 
 #VM:
-#./testGeneratedSuite.sh Chart 1 /home/ubuntu/defects4j/ /usr/lib/jvm/java-1.7.0-openjdk-amd64/ /home/ubuntu/defects4j/ExamplesCheckedOut/chart1Buggy/ /home/ubuntu/defects4j/generatedTestSuitesForBugsWeFoundARepairFor
+#./testGeneratedSuite.sh Chart 1 /home/ubuntu/defects4j/ /usr/lib/jvm/java-1.7.0-openjdk-amd64/ /home/ubuntu/defects4j/BugsWithAFix/chart1Buggy/ /home/ubuntu/defects4j/generatedTestSuitesForBugsWeFoundARepairFor
 
 
 if [ "$#" -ne 6 ]; then
@@ -21,7 +21,7 @@ PROJECT="$1"
 BUGNUMBER="$2"
 DEFECTS4JDIR="$3"
 DIROFJAVA7="$4"
-PATHOFBUGGYFOLDER="$5"
+PATHOFFIXEDFOLDER="$5"
 PATHOFSUITEFOLDER="$6"
 
 export JAVA_HOME=$DIROFJAVA7
@@ -38,7 +38,7 @@ SEED=1
 
 rm -f $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"log.txt
  #run_bug_detection.pl -p $PROJECT -d $DEFECTS4JDIR/generatedTestSuitesForBugsWeFoundARepairFor/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -o out_dir [-f include_file_pattern] [-v version_id] [-t tmp_dir] [-D]
-COM="./defects4j test -s $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -w $PATHOFBUGGYFOLDER &>> $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"log.txt"
+COM="./defects4j test -s $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -w $PATHOFFIXEDFOLDER &>> $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"log.txt"
  
 echo "$COM"
 echo "Running... Log file located in $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"log.txt"
