@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # Example usage, local for Mau
-#./createGeneratedSuites.sh /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/ 
-
+#./eraseAndRegenerateBugs.sh /home/mausoto/genprog4j/ /home/mausoto/defects4j/
 GENPROGDIR="$1"
 DEFECTS4JDIR="$2"
 

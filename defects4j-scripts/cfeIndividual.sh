@@ -80,81 +80,55 @@ export PATH=$DIROFJAVA7/bin/:$PATH
 SEED=1
 
 if [ $CFE == "CFE" ] || [ $CFE == "CF" ] || [ $CFE == "C" ]; then
-echo "Creating test suite"
-
-cd $DEFECTS4JDIR/framework/bin
-#echo ""
-if [ $RANDOOPOREVOSUITE == "Randoop" ]; then
-
-COM1="perl run_randoop.pl -p $PROJECT -v "$BUGNUMBER"f -n $SEED -o $DEFECTS4JDIR/generatedTestSuites/randoop/$IDENTIFIER/ -b $BUDGET"
-#COM1=""
-elif [ $RANDOOPOREVOSUITE == "Evosuite" ]; then
-
-COM1="perl run_evosuite.pl -p $PROJECT -v "$BUGNUMBER"f -n $SEED -o $DEFECTS4JDIR/generatedTestSuites/evosuite/$IDENTIFIER/ -c branch -b $BUDGET"
-#COM1=""
-fi
-echo "$COM1"
-START=$(date +%s.%N)
-eval $COM1
-END=$(date +%s.%N)
-DIFF=$(echo "$END - $START" | bc)
-echo "Time elapsed creating the test suite: $DIFF"
-
+  echo "Creating test suite"
+  cd $DEFECTS4JDIR/framework/bin
+  if [ $RANDOOPOREVOSUITE == "Randoop" ]; then
+    COM1="perl run_randoop.pl -p $PROJECT -v "$BUGNUMBER"f -n $SEED -o $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/ -b $BUDGET"
+  elif [ $RANDOOPOREVOSUITE == "Evosuite" ]; then
+    COM1="perl run_evosuite.pl -p $PROJECT -v "$BUGNUMBER"f -n $SEED -o $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/ -c branch -b $BUDGET"
+  fi
+  echo "$COM1"
+  #START=$(date +%s.%N)
+  eval $COM1
+  #END=$(date +%s.%N)
+  #DIFF=$(echo "$END - $START" | bc)
+  #echo "Time elapsed creating the test suite: $DIFF"
 fi
 
 
 if [ $CFE == "CFE" ] || [ $CFE == "CF" ] || [ $CFE == "F" ]; then
-
-echo "Fixing test suite"
-cd $DEFECTS4JDIR/framework/util
-echo ""
-if [ $RANDOOPOREVOSUITE == "Randoop" ]; then
-
-COM2="perl fix_test_suite.pl -p $PROJECT -d $DEFECTS4JDIR/generatedTestSuites/randoop/$IDENTIFIER/"$PROJECT"/randoop/"$SEED"/"
-#COM2=""
-elif [ $RANDOOPOREVOSUITE == "Evosuite" ]; then
-
-COM2="perl fix_test_suite.pl -p $PROJECT -d $DEFECTS4JDIR/generatedTestSuites/evosuite/$IDENTIFIER/"$PROJECT"/evosuite-branch/"$SEED"/"
-#COM2=""
+  echo "Fixing test suite"
+  cd $DEFECTS4JDIR/framework/util
+  if [ $RANDOOPOREVOSUITE == "Randoop" ]; then
+    COM2="perl fix_test_suite.pl -p $PROJECT -d $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/randoop/"$SEED"/"
+  elif [ $RANDOOPOREVOSUITE == "Evosuite" ]; then
+    COM2="perl fix_test_suite.pl -p $PROJECT -d $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/evosuite-branch/"$SEED"/"
+  fi
+  echo "$COM2"
+  #START=$(date +%s.%N)
+  eval $COM2
+  #END=$(date +%s.%N)
+  #DIFF=$(echo "$END - $START" | bc)
+  #echo "Time elapsed fixing the test suite: $DIFF"
 fi
-echo "$COM2"
-START=$(date +%s.%N)
-eval $COM2
-END=$(date +%s.%N)
-DIFF=$(echo "$END - $START" | bc)
-echo "Time elapsed fixing the test suite: $DIFF"
-
-fi
-
 
 
 if [ $CFE == "CFE" ] || [ $CFE == "FE" ] || [ $CFE == "E" ]; then
-
-echo "Evaluating test suite"
-cd $DEFECTS4JDIR/framework/bin
-echo ""
-if [ $RANDOOPOREVOSUITE == "Randoop" ]; then
-
-#needs update
-#COM3="./defects4j test -s $DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/$TESTFOLDER/outputOfRandoop/$IDENTIFIER/"$PROJECT"/randoop/"$SEED"/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -w $DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/ | tee $DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/$TESTFOLDER/outputOfRandoop/"$PROJECT"/randoop/"$SEED"/testOutput.txt"
-COM3=""
-elif [ $RANDOOPOREVOSUITE == "Evosusite" ]; then
-
-#needs update
-#COM3="sh defects4j test -s $DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/$TESTFOLDER/outputOfEvosuite/$IDENTIFIER/"$PROJECT"/evosuite-branch/"$SEED"/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2 -w $DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/ | tee $DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/$TESTFOLDER/outputOfEvosuite/"$PROJECT"/evosuite-branch/"$SEED"/testOutput.txt"
-COM3=""
+  echo "Evaluating test suite"
+  cd $DEFECTS4JDIR/framework/bin
+  if [ $RANDOOPOREVOSUITE == "Randoop" ]; then
+    COM3="./defects4j test -s $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/randoop/"$SEED"/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -w $DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/ &>> $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/evosuite-branch/"$SEED"/EvaluatingTestSuite"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bzOn"$LOWERCASEPACKAGE""$BUGNUMBER"BuggyOutput.txt"
+  elif [ $RANDOOPOREVOSUITE == "Evosuite" ]; then
+    COM3="./defects4j test -s $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/evosuite-branch/"$SEED"/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2 -w $DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/ &>> $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/evosuite-branch/"$SEED"/EvaluatingTestSuite"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2On"$LOWERCASEPACKAGE""$BUGNUMBER"BuggyOutput.txt"
+  fi
+  echo "$COM3"
+  eval $COM3
 fi
-echo "$COM3"
-eval $COM3
-
-fi
-
-
 
 #Counting the total test cases created
 COM4=$(wc -l < $DEFECTS4JDIR/totalTestsExecuted.txt)
-echo "Total test cases created: $COM4"
-#echo "Total test cases created: $COM4" > $DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/$TESTFOLDER/outputOfRandoop/$IDENTIFIER/"$PROJECT"/randoop/"$SEED"/testCount.txt
+#echo "Total test cases created: $COM4"
+echo "Total test cases created: $COM4" &>> $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/evosuite-branch/"$SEED"/EvaluatingTestSuite"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2On"$LOWERCASEPACKAGE""$BUGNUMBER"BuggyOutput.txt
 
 
 #done
