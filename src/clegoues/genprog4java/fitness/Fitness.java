@@ -332,8 +332,8 @@ public class Fitness {
 		Long L = Math.round(sample * Fitness.numPositiveTests);
 		int sampleSize = Integer.valueOf(L.intValue());
 		Collections.shuffle(Fitness.positiveTests, Configuration.randomizer);
-		List<TestCase> intSample = Fitness.positiveTests.subList(0,sampleSize); 
-		List<TestCase> intRestSample = Fitness.positiveTests.subList(sampleSize, positiveTests.size()-1);
+		List<TestCase> intSample = Fitness.positiveTests.subList(0,sampleSize); //0 inclusive to sampleSize exclusive
+		List<TestCase> intRestSample = Fitness.positiveTests.subList(sampleSize, positiveTests.size()); // sampleSize inclusive to size exclusive
 		Fitness.testSample.clear(); 
 		Fitness.restSample.clear();
 		for(TestCase test : intSample) {
@@ -511,7 +511,7 @@ public class Fitness {
 		logger.info("\t gen: " + generation + " " + fitnessPair.getLeft() + " " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 		rep.setFitness(fitnessPair.getRight());
 		rep.cleanup();
-		return !(fitnessPair.getRight() < maxFitness);
+		return !(fitnessPair.getLeft() < maxFitness);
 
 	}
 
