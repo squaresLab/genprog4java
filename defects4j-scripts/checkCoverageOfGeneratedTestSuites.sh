@@ -39,7 +39,7 @@ SEED=1
 
 rm -f $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"log.txt
  #run_bug_detection.pl -p $PROJECT -d $DEFECTS4JDIR/generatedTestSuitesForBugsWeFoundARepairFor/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -o out_dir [-f include_file_pattern] [-v version_id] [-t tmp_dir] [-D]
-COM="./defects4j coverage -w $PATHOFFIXEDFOLDER/ -s $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2"
+COM="./defects4j coverage -w $PATHOFFIXEDFOLDER/ -s $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2"
 # &>> $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"Coveragelog.txt"
  
 echo "$COM"

@@ -9,7 +9,7 @@
 #8th param is the budget
 
 #VM:
-#./testGeneratedSuite.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/ /usr/lib/jvm/java-1.7.0-openjdk-amd64  /usr/lib/jvm/java-1.8.0-openjdk-amd64 Randoop 180 CFE September21
+#./cfeIndividual.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/ /usr/lib/jvm/java-1.7.0-openjdk-amd64  /usr/lib/jvm/java-1.8.0-openjdk-amd64 Randoop 180 CFE September21
 
 
 if [ "$#" -ne 10 ]; then
@@ -100,9 +100,9 @@ if [ $CFE == "CFE" ] || [ $CFE == "CF" ] || [ $CFE == "F" ]; then
   echo "Fixing test suite"
   cd $DEFECTS4JDIR/framework/util
   if [ $RANDOOPOREVOSUITE == "Randoop" ]; then
-    COM2="perl fix_test_suite.pl -p $PROJECT -d $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/randoop/"$SEED"/"
+    COM2="perl fix_test_suite.pl -p $PROJECT -d $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/randoop/"$SEED"/ -v "$BUGNUMBER"f"
   elif [ $RANDOOPOREVOSUITE == "Evosuite" ]; then
-    COM2="perl fix_test_suite.pl -p $PROJECT -d $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/evosuite-branch/"$SEED"/"
+    COM2="perl fix_test_suite.pl -p $PROJECT -d $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/evosuite-branch/"$SEED"/ -v "$BUGNUMBER"f"
   fi
   echo "$COM2"
   #START=$(date +%s.%N)
@@ -117,7 +117,8 @@ if [ $CFE == "CFE" ] || [ $CFE == "FE" ] || [ $CFE == "E" ]; then
   echo "Evaluating test suite"
   cd $DEFECTS4JDIR/framework/bin
   if [ $RANDOOPOREVOSUITE == "Randoop" ]; then
-    COM3="./defects4j test -s $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/randoop/"$SEED"/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -w $DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/ &>> $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/evosuite-branch/"$SEED"/EvaluatingTestSuite"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bzOn"$LOWERCASEPACKAGE""$BUGNUMBER"BuggyOutput.txt"
+    COM3="./defects4j test -s $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/randoop/"$SEED"/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -w $DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/"
+# &>> $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/randoop/"$SEED"/EvaluatingTestSuite"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bzOn"$LOWERCASEPACKAGE""$BUGNUMBER"BuggyOutput.txt"
   elif [ $RANDOOPOREVOSUITE == "Evosuite" ]; then
     COM3="./defects4j test -s $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/evosuite-branch/"$SEED"/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2 -w $DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/ &>> $DEFECTS4JDIR/generatedTestSuites/$IDENTIFIER/"$PROJECT"/evosuite-branch/"$SEED"/EvaluatingTestSuite"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2On"$LOWERCASEPACKAGE""$BUGNUMBER"BuggyOutput.txt"
   fi

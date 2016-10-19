@@ -42,7 +42,7 @@ COM="./defects4j test -s $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-randoop."$S
 # &>> $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"log.txt"
  
 echo "$COM"
-echo "Running... Log file located in $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"log.txt"
+#echo "Running... Log file located in $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"log.txt"
 eval $COM
 
 

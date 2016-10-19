@@ -34,11 +34,11 @@ touch $DEFECTS4JDIR/generatedTestSuites/$LOWERCASERANDOOPOREVOSUITE/$IDENTIFIER/
 
 #Change this list to the Bugs you want to evaluate
 #All bugs with fix found:
-#declare -a arr=("Chart 1" "Chart 3" "Chart 5" "Chart 13" "Chart 21" "Chart 25" "Chart 26" "Closure 13" "Closure 19" "Closure 21" "Closure 22" "Closure 46" "Closure 66" "Closure 83" "Closure 86" "Closure 107" "Closure 115" "Closure 125" "Closure 126" "Lang 7" "Lang 10" "Lang 22" "Lang 39" "Lang 43" "Lang 45" "Lang 59" "Lang 63" "Math 7" "Math 8" "Math 18" "Math 20" "Math 24" "Math 28" "Math 29" "Math 40" "Math 49" "Math 50" "Math 73" "Math 80" "Math 81" "Math 82" "Math 85" "Math 95" "Time 19")
+declare -a arr=("Chart 1" "Chart 3" "Chart 5" "Chart 13" "Chart 21" "Chart 25" "Chart 26" "Closure 13" "Closure 19" "Closure 21" "Closure 22" "Closure 46" "Closure 66" "Closure 83" "Closure 86" "Closure 107" "Closure 115" "Closure 125" "Closure 126" "Lang 7" "Lang 10" "Lang 22" "Lang 39" "Lang 43" "Lang 45" "Lang 59" "Lang 63" "Math 7" "Math 8" "Math 18" "Math 20" "Math 24" "Math 28" "Math 29" "Math 40" "Math 49" "Math 50" "Math 73" "Math 80" "Math 81" "Math 82" "Math 85" "Math 95" "Time 19")
 #bugs we dont have triggering test cases for
 #declare -a arr=("Chart 1" "Chart 5" "Chart 13" "Chart 21" "Chart 25" "Closure 13" "Closure 19" "Closure 21" "Closure 22" "Closure 46" "Closure 66" "Closure 86" "Closure 126" "Lang 10" "Lang 22" "Lang 39" "Lang 43" "Lang 63" "Math 7" "Math 8" "Math 20" "Math 24" "Math 40" "Math 49" "Math 73" "Math 80" "Math 81" "Math 82")
 #sprecific ones
-declare -a arr=("Closure 86" "Lang 39")
+#declare -a arr=("Closure 86" "Lang 39")
 
 ## now loop through the above array
 for i in "${arr[@]}"
