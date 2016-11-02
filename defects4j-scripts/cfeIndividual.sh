@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # 1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)
 # 2nd param is the bug number (ex: 1,2,3,4,...)
 # 3rd param is the folder where the genprog project is (ex: /home/mau/Research/genprog4java/ )
