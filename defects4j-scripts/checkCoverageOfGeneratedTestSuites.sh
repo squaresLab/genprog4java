@@ -1,49 +1,62 @@
 #!/bin/bash
 
+#The purpose of this script is to test the coverage of a generated test sutie.
+
+#Preconditions:
+#The variable D4J_HOME should be directed to the folder where defects4j is installed.
+#The variable JAVA_HOME should be directed to the folder where java 7 is installed (It must be Java 7).
+
+#Output
+#The output is a txt file with the output of running the coverage analysis of the test suite on the folder indicated. 
+
+#Parameters:
 # 1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)
 # 2nd param is the bug number (ex: 1,2,3,4,...)
-# 3td param is the folder where defects4j is installed (ex: /home/mau/Research/defects4j/ )
-# 4th param is the folder where the java 7 instalation is located
-# 5th param is the path of the buggy folder 
-# 6th param is the path where the test suite is located
+# 3th param is the generation tool (Randoop or Evosuite)
+# 4th param is the path of the buggy folder 
+# 5th param is the path where the test suite is located
 
-#VM:
-#./testGeneratedSuite.sh Chart 1 /home/ubuntu/defects4j/ /usr/lib/jvm/java-1.7.0-openjdk-amd64/ /home/ubuntu/defects4j/BugsWithAFix/chart1Buggy/ /home/ubuntu/defects4j/generatedTestSuitesForBugsWeFoundARepairFor
+#Example of usage:
+#./checkCoverageOfGeneratedTestSuites.sh Math 2 Randoop /home/ubuntu/defects4j/BugsWithAFix/lang32Buggy/ /home/ubuntu/defects4j/generatedTestSuitesForBugsWeFoundARepairFor/
 
+if [ "$#" -ne 5 ]; then
+    echo "This script should be run with 5 parameters:"
+	echo "1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)"
+	echo "2nd param is the bug number (ex: 1,2,3,4,...)"
+	echo "3th param is the generation tool (Randoop or Evosuite)"
+	echo "4th param is the path of the buggy folder "
+	echo "5th param is the path where the test suite is located"
 
-if [ "$#" -ne 6 ]; then
-    echo "This script should be run with 6 parameters"
     exit 0
 fi
 
-
 PROJECT="$1"
 BUGNUMBER="$2"
-DEFECTS4JDIR="$3"
-DIROFJAVA7="$4"
-PATHOFFIXEDFOLDER="$5"
-PATHOFSUITEFOLDER="$6"
+RANDOOPOREVOSUITE="$3"
+PATHOFFIXEDFOLDER="$4"
+PATHOFSUITEFOLDER="$5"
 
-export JAVA_HOME=$DIROFJAVA7
-export JRE_HOME=$DIROFJAVA7/jre
-export PATH=$DIROFJAVA7/bin/:$PATH
+export JRE_HOME=$JAVA_HOME/jre
+export PATH=$JAVA_HOME/bin/:$PATH
 
-
-#echo "Evaluating test suite"
-cd $DEFECTS4JDIR/framework/bin
+echo ""
+echo "Evaluating coverage of the test suite"
+echo ""
+cd $D4J_HOME/framework/bin
 echo ""
 
-#LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 SEED=1
 
+OUTPUTFILE="$PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"CoverageLog.txt"
+if [ $RANDOOPOREVOSUITE == "Randoop" ]; then
+  COM="./defects4j coverage -w $PATHOFFIXEDFOLDER/ -s $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 &>> $OUTPUTFILE" 
+elif [ $RANDOOPOREVOSUITE == "Evosuite" ]; then
+  COM="./defects4j coverage -w $PATHOFFIXEDFOLDER/ -s $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2 &>> $OUTPUTFILE" 
+fi
 
-rm -f $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"log.txt
- #run_bug_detection.pl -p $PROJECT -d $DEFECTS4JDIR/generatedTestSuitesForBugsWeFoundARepairFor/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -o out_dir [-f include_file_pattern] [-v version_id] [-t tmp_dir] [-D]
-COM="./defects4j coverage -w $PATHOFFIXEDFOLDER/ -s $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2"
-# &>> $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"Coveragelog.txt"
- 
 echo "$COM"
-#echo "Running... Log file located in $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"log.txt"
+rm -f $OUTPUTFILE
 eval $COM
+echo "Log file located in $OUTPUTFILE"
 
 
