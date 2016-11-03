@@ -47,6 +47,10 @@ echo ""
 
 SEED=1
 
+rm -fr $PATHOFFIXEDFOLDER/build/gen-tests/
+rm -fr $PATHOFFIXEDFOLDER/gen-tests/
+rm -fr $PATHOFFIXEDFOLDER/target/gen-tests/
+
 OUTPUTFILE="$PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"CoverageLog.txt"
 if [ $RANDOOPOREVOSUITE == "Randoop" ]; then
   COM="./defects4j coverage -w $PATHOFFIXEDFOLDER/ -s $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 &>> $OUTPUTFILE" 
