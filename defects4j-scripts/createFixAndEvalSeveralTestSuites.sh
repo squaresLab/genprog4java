@@ -1,53 +1,61 @@
 #!/bin/bash
 
-# 1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)
-# 2nd param is the bug number (ex: 1,2,3,4,...)
-# 3rd param is the folder where the genprog project is (ex: /home/mau/Research/genprog4java/ )
-# 4td param is the folder where defects4j is installed (ex: /home/mau/Research/defects4j/ )
-#5th param is the folder where the java 7 instalation is located
-#6th param is the folder where the java 8 instalation is located
-#7th param is the generation tool (Randoop or Evosuite)
-#8th param is the budget
+#The purpose of this script is to Create, Fix and Test test suites for several defects4j bugs.
 
-GENPROGDIR="$1"
-DEFECTS4JDIR="$2"
-DIROFJAVA7="$3"
-DIROFJAVA8="$4"
-RANDOOPOREVOSUITE="$5"
-BUDGET="$6"
-CFE="$7"
-IDENTIFIER="$8"
+#Preconditions:
+#There should be a folder called generatedTestSuites in the defects4j folder where the test suites and their output will be stored.
+#There should be a folder called ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/ in the defects4j folder for each of the d4j bugs. This is the code the test suite will run on to get tested.
+#The variable D4J_HOME should be directed to the folder where defects4j is installed.
+#The variable JAVA_HOME should be directed to the folder where java 7 is installed (It must be Java 7).
+#You should manually modify the list of bugs to be ran in the array called "bugs"
+
+#Output
+#The output is a txt file with the output of testing the test suite on the folder indicated. The name of the txt file is: EvaluatingTestSuite"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2On"$LOWERCASEPACKAGE""$BUGNUMBER"BuggyOutput.txt and it is located in $D4J_HOME/generatedTestSuites/$IDENTIFIER/"$PROJECT"/evosuite-branch/"$SEED"/ for each of the d4j bugs
+
+#Parameters:
+# 1th param is the generation tool (Randoop or Evosuite)
+# 2th param is the budget of time in seconds the tool has to generate the test suite
+# 3th param is weather you want to run only sections of the script: C=create, F=fix, E=evaluate. You can run: CFE, FE, E (To run just a latter steps, the previous should have already been ran in the past)
+# 4th param is the name of the folder the test suite will be stored in.
+
+#Example of usage:
+#./createFixAndEvalSeveralTestSuites.sh Randoop 180 CFE September21
 
 
-#./createFixAndEvalSeveralTestSuites.sh /home/mausoto/genprog4java/ /home/mausoto/defects4j/ /usr/lib/jvm/java-1.7.0-openjdk-amd64  /usr/lib/jvm/java-8-oracle/ Randoop 180 CF September21
+RANDOOPOREVOSUITE="$1"
+BUDGET="$2"
+CFE="$3"
+IDENTIFIER="$4"
 
-if [ "$#" -ne 8 ]; then
-    echo "This script should be run with 8 parameters: For example: ./createFixAndEvalSeveralTestSuites.sh /home/mausoto/genprog4java/ /home/mausoto/defects4j/ /usr/lib/jvm/java-1.7.0-openjdk-amd64  /usr/lib/jvm/java-8-oracle/ Randoop 180 CFE TestIfWeFindNow1"
+if [ "$#" -ne 4 ]; then
+    echo "This script should be run with 4 parameters: "
+	echo " 1th param is the generation tool (Randoop or Evosuite)"
+	echo "2th param is the budget of time in seconds the tool has to generate the test suite"
+	echo "3th param is weather you want to run only sections of the script: C=create, F=fix, E=evaluate. You can run: CFE, FE, E (To run just a latter steps, the previous should have already been ran in the past)"
+	echo "4th param is the name of the folder the test suite will be stored in."
+
     exit 0
 fi
 
 LOWERCASERANDOOPOREVOSUITE=`echo $RANDOOPOREVOSUITE | tr '[:upper:]' '[:lower:]'`
 
-mkdir $DEFECTS4JDIR/generatedTestSuites/$LOWERCASERANDOOPOREVOSUITE/$IDENTIFIER
-rm -f $DEFECTS4JDIR/generatedTestSuites/$LOWERCASERANDOOPOREVOSUITE/$IDENTIFIER/resultsEvaluatingSeveralTestSuites.txt
-touch $DEFECTS4JDIR/generatedTestSuites/$LOWERCASERANDOOPOREVOSUITE/$IDENTIFIER/resultsEvaluatingSeveralTestSuites.txt
+mkdir $D4J_HOME/generatedTestSuites/$LOWERCASERANDOOPOREVOSUITE/$IDENTIFIER
+rm -f $D4J_HOME/generatedTestSuites/$LOWERCASERANDOOPOREVOSUITE/$IDENTIFIER/resultsEvaluatingSeveralTestSuites.txt
+touch $D4J_HOME/generatedTestSuites/$LOWERCASERANDOOPOREVOSUITE/$IDENTIFIER/resultsEvaluatingSeveralTestSuites.txt
 
 #Change this list to the Bugs you want to evaluate
 #All bugs with fix found:
-#declare -a arr=("Chart 1" "Chart 3" "Chart 5" "Chart 13" "Chart 21" "Chart 25" "Chart 26" "Closure 13" "Closure 19" "Closure 21" "Closure 22" "Closure 46" "Closure 66" "Closure 83" "Closure 86" "Closure 107" "Closure 115" "Closure 125" "Closure 126" "Lang 7" "Lang 10" "Lang 22" "Lang 39" "Lang 43" "Lang 45" "Lang 59" "Lang 63" "Math 7" "Math 8" "Math 18" "Math 20" "Math 24" "Math 28" "Math 29" "Math 40" "Math 49" "Math 50" "Math 73" "Math 80" "Math 81" "Math 82" "Math 85" "Math 95" "Time 19")
-#bugs we dont have triggering test cases for
-#declare -a arr=("Chart 1" "Chart 5" "Chart 13" "Chart 21" "Chart 25" "Closure 13" "Closure 19" "Closure 21" "Closure 22" "Closure 46" "Closure 66" "Closure 86" "Closure 126" "Lang 10" "Lang 22" "Lang 39" "Lang 43" "Lang 63" "Math 7" "Math 8" "Math 20" "Math 24" "Math 40" "Math 49" "Math 73" "Math 80" "Math 81" "Math 82")
+#declare -a bugs=("Chart 1" "Chart 3" "Chart 5" "Chart 13" "Chart 21" "Chart 25" "Chart 26" "Closure 13" "Closure 19" "Closure 21" "Closure 22" "Closure 46" "Closure 66" "Closure 83" "Closure 86" "Closure 107" "Closure 115" "Closure 125" "Closure 126" "Lang 7" "Lang 10" "Lang 22" "Lang 39" "Lang 43" "Lang 45" "Lang 59" "Lang 63" "Math 7" "Math 8" "Math 18" "Math 20" "Math 24" "Math 28" "Math 29" "Math 40" "Math 49" "Math 50" "Math 73" "Math 80" "Math 81" "Math 82" "Math 85" "Math 95" "Time 19")
 #sprecific ones
-declare -a arr=("Lang 39")
+declare -a bugs=("Lang 39")
 
 ## now loop through the above array
-for i in "${arr[@]}"
+for i in "${bugs[@]}"
 do
   echo "Si:"
   echo ""
 
-  COM="./cfeIndividual.sh "$i" $1 $2 $3 $4 $5 $6 $7 $8 " 
-#&>> $DEFECTS4JDIR/generatedTestSuites/$LOWERCASERANDOOPOREVOSUITE/$IDENTIFIER/resultsEvaluatingSeveralTestSuites.txt"
+  COM="./cfeIndividual.sh "$i" $1 $2 $3 $4 " 
   echo "$COM"
   eval $COM
   echo ""
