@@ -4,7 +4,6 @@
 
 #Preconditions:
 #There should be a folder called generatedTestSuites in the defects4j folder where the test suites and their output will be stored.
-#There should be a folder called ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/ in the defects4j folder for each of the d4j bugs. This is the code the test suite will run on to get tested.
 #The variable D4J_HOME should be directed to the folder where defects4j is installed.
 #The variable JAVA_HOME should be directed to the folder where java 7 is installed (It must be Java 7).
 #You should manually modify the list of bugs to be ran in the array called "bugs"
@@ -16,7 +15,8 @@
 # 1th param is the generation tool (Randoop or Evosuite)
 # 2th param is the budget of time in seconds the tool has to generate the test suite
 # 3th param is weather you want to run only sections of the script: C=create, F=fix, E=evaluate. You can run: CFE, FE, E (To run just a latter steps, the previous should have already been ran in the past)
-# 4th param is the name of the folder the test suite will be stored in.
+# 4th param is the name of the folder the test suite will be stored in. This is located in $D4J_HOME/generatedTestSuites/ . Example: September21
+# 5th param is the path of the folder to evaluate the test suite on, starting from the the D4J_HOME folder (Example: ExamplesCheckedOut or BugsWithAFix)
 
 #Example of usage:
 #./cfeIndividualList.sh Randoop 180 CFE September21
@@ -32,8 +32,7 @@ if [ "$#" -ne 4 ]; then
 	echo " 1th param is the generation tool (Randoop or Evosuite)"
 	echo "2th param is the budget of time in seconds the tool has to generate the test suite"
 	echo "3th param is weather you want to run only sections of the script: C=create, F=fix, E=evaluate. You can run: CFE, FE, E (To run just a latter steps, the previous should have already been ran in the past)"
-	echo "4th param is the name of the folder the test suite will be stored in."
-
+	echo "4th param is the name of the folder the test suite will be stored in. This is located in $D4J_HOME/generatedTestSuites/. Example: September21"
     exit 0
 fi
 

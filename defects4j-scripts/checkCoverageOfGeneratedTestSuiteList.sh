@@ -13,14 +13,18 @@
 
 #Parameters:
 # 1th param is the generation tool (Randoop or Evosuite)
-# 2th param is the path of the buggy folder 
-# 3th param is the path where the test suite is located
+# 2nd param is the path of the buggy folder, starting from the the D4J_HOME folder (Example: ExamplesCheckedOut or BugsWithAFix)
+# 3rd param is the path where the test suite is located, starting from the the D4J_HOME folder (Example: generatedTestSuites)
 
 #Example of usage:
-#./checkCoverageOfGeneratedTestSuiteList.sh Randoop /home/ubuntu/defects4j/BugsWithAFix/ /home/ubuntu/defects4j/generatedTestSuitesForBugsWeFoundARepairFor/
+#./checkCoverageOfGeneratedTestSuiteList.sh Randoop BugsWithAFix/ generatedTestSuitesForBugsWeFoundARepairFor/
 
 if [ "$#" -ne 3 ]; then
     echo "This script should be run with 3 parameters"
+	echo "1th param is the generation tool (Randoop or Evosuite)"
+	echo "2nd param is the path of the buggy folder, starting from the the D4J_HOME folder (Example: ExamplesCheckedOut or BugsWithAFix)"
+	echo "3rd param is the path where the test suite is located, starting from the the D4J_HOME folder (Example: generatedTestSuites)"
+
     exit 0
 fi
 
@@ -37,7 +41,7 @@ do
 PROJECT=${i% *}
 BUGNUMBER=${i#* }
 LOWERCASEPROJECT=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
-COM="./checkCoverageOfGeneratedTestSuite.sh $i $RANDOOPOREVOSUITE $PATHOFFIXEDFOLDER/"$LOWERCASEPROJECT""$BUGNUMBER"Buggy/ $PATHOFSUITEFOLDER/" 
+COM="./checkCoverageOfGeneratedTestSuite.sh $i $RANDOOPOREVOSUITE $D4J_HOME/$PATHOFFIXEDFOLDER/"$LOWERCASEPROJECT""$BUGNUMBER"Buggy/ $D4J_HOME/$PATHOFSUITEFOLDER/" 
 echo "$COM"
 eval $COM
 
