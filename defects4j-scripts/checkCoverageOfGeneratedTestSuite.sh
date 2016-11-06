@@ -13,19 +13,19 @@
 # 1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)
 # 2nd param is the bug number (ex: 1,2,3,4,...)
 # 3th param is the generation tool (Randoop or Evosuite)
-# 4th param is the path of the buggy folder 
-# 5th param is the path where the test suite is located
+# 4th param is the path of the buggy folder, starting from the the D4J_HOME folder (Example: ExamplesCheckedOut or BugsWithAFix)
+# 5th param is the path where the test suite is located, starting from the the D4J_HOME folder (Example: generatedTestSuites)
 
 #Example of usage:
-#./checkCoverageOfGeneratedTestSuite.sh Math 2 Randoop /home/ubuntu/defects4j/BugsWithAFix/lang32Buggy/ /home/ubuntu/defects4j/generatedTestSuitesForBugsWeFoundARepairFor/
+#./checkCoverageOfGeneratedTestSuite.sh Math 2 Randoop BugsWithAFix/lang32Buggy/ generatedTestSuitesForBugsWeFoundARepairFor/
 
 if [ "$#" -ne 5 ]; then
     echo "This script should be run with 5 parameters:"
 	echo "1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)"
 	echo "2nd param is the bug number (ex: 1,2,3,4,...)"
 	echo "3th param is the generation tool (Randoop or Evosuite)"
-	echo "4th param is the path of the buggy folder "
-	echo "5th param is the path where the test suite is located"
+	echo "4th param is the path of the buggy folder, starting from the the D4J_HOME folder (Example: ExamplesCheckedOut or BugsWithAFix)"
+	echo "5th param is the path where the test suite is located, starting from the the D4J_HOME folder (Example: generatedTestSuites)"
 
     exit 0
 fi
@@ -46,15 +46,15 @@ cd $D4J_HOME/framework/bin
 
 SEED=1
 
-rm -fr $PATHOFFIXEDFOLDER/build/gen-tests/
-rm -fr $PATHOFFIXEDFOLDER/gen-tests/
-rm -fr $PATHOFFIXEDFOLDER/target/gen-tests/
+rm -fr $D4J_HOME/$PATHOFFIXEDFOLDER/build/gen-tests/
+rm -fr $D4J_HOME/$PATHOFFIXEDFOLDER/gen-tests/
+rm -fr $D4J_HOME/$PATHOFFIXEDFOLDER/target/gen-tests/
 
-OUTPUTFILE="$PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"CoverageLog.txt"
+OUTPUTFILE="$D4J_HOME/$PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"CoverageLog.txt"
 if [ $RANDOOPOREVOSUITE == "Randoop" ]; then
-  COM="./defects4j coverage -w $PATHOFFIXEDFOLDER/ -s $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 &>> $OUTPUTFILE" 
+  COM="./defects4j coverage -w $D4J_HOME/$PATHOFFIXEDFOLDER/ -s $D4J_HOME/$PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 &>> $OUTPUTFILE" 
 elif [ $RANDOOPOREVOSUITE == "Evosuite" ]; then
-  COM="./defects4j coverage -w $PATHOFFIXEDFOLDER/ -s $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2 &>> $OUTPUTFILE" 
+  COM="./defects4j coverage -w $D4J_HOME/$PATHOFFIXEDFOLDER/ -s $D4J_HOME/$PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2 &>> $OUTPUTFILE" 
 fi
 
 echo "$COM"
