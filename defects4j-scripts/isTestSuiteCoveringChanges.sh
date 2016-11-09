@@ -7,7 +7,7 @@
 #The variable JAVA_HOME should be directed to the folder where java 7 is installed (It must be Java 7).
 
 #Output
-#TBD
+#Outputs if the human and generated changes are covered by the test suite in $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
 
 #Parameters:
 # 1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)
@@ -85,18 +85,23 @@ if [ $word1 = "Files" ] && [ $word5 = "differ" ]; then
 		hits=${word3#hits=\"} 
 		hits=${hits%\"} 
 		alreadyFound="true"
-		echo "Hits: $hits"
+		#echo "Hits: $hits"
 		
 		if [ $hits != "0" ]; then
+		  echo "Covered"
 		  atLeastOneNonZero="true"
 		fi
 		if [ $hits = "0" ]; then
+		  echo "Not covered"
 		  atLeastOneZero="true"
 		fi
-		
 	  fi
 	  fi
     done < $coveragePath
+	if [[ $alreadyFound = "false" ]]; then
+	  echo "Not covered"
+	  atLeastOneZero="true"
+	fi
   done < $linesChanged
  
   rm $D4J_HOME/$PATHTOCHECKOUTFOLDERS/lineNumbersChanged.txt
@@ -105,17 +110,22 @@ done < $filesChanged
 rm $D4J_HOME/$PATHTOCHECKOUTFOLDERS/filesChanged.txt
 
 echo ""
+echo "$PROJECT $BUGNUMBER:" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
 if [ $atLeastOneNonZero = "true" ] && [ $atLeastOneZero = "false" ]; then
   echo "HUMAN CHANGES FULLY COVERED"
-  echo "HUMAN CHANGES FULLY COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/diffBetweenBuggyAndHumanFix"$PROJECT"$BUGNUMBER.txt
+  echo "HUMAN CHANGES FULLY COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
 fi
 if [ $atLeastOneNonZero = "false" ] && [ $atLeastOneZero = "true" ]; then
   echo "HUMAN CHANGES NOT COVERED"
-  echo "HUMAN CHANGES NOT COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/diffBetweenBuggyAndHumanFix"$PROJECT"$BUGNUMBER.txt
+  echo "HUMAN CHANGES NOT COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
 fi
 if [ $atLeastOneNonZero = "true" ] && [ $atLeastOneZero = "true" ]; then
   echo "HUMAN CHANGES PARTIALLY COVERED"
-  echo "HUMAN CHANGES PARTIALLY COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/diffBetweenBuggyAndHumanFix"$PROJECT"$BUGNUMBER.txt
+  echo "HUMAN CHANGES PARTIALLY COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
+fi
+if [ $atLeastOneNonZero = "false" ] && [ $atLeastOneZero = "false" ]; then
+  echo "HUMAN CHANGES NOT COVERED"
+  echo "HUMAN CHANGES NOT COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
 fi
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -162,18 +172,23 @@ if [ $word1 = "Files" ] && [ $word5 = "differ" ]; then
 		hits=${word3#hits=\"} 
 		hits=${hits%\"} 
 		alreadyFound="true"
-		echo "Hits: $hits"
+		#echo "Hits: $hits"
 		
 		if [ $hits != "0" ]; then
+		  echo "Covered"
 		  atLeastOneNonZero="true"
 		fi
 		if [ $hits = "0" ]; then
+		  echo "Not covered"
 		  atLeastOneZero="true"
 		fi
-		
 	  fi
 	  fi
     done < $coveragePath
+	if [[ $alreadyFound = "false" ]]; then
+	  echo "Not covered"
+	  atLeastOneZero="true"
+	fi
   done < $linesChanged
  
   rm $D4J_HOME/$PATHOFFIXEDFOLDER/lineNumbersChanged.txt
@@ -184,14 +199,17 @@ rm $D4J_HOME/$PATHOFFIXEDFOLDER/filesChanged.txt
 echo ""
 if [ $atLeastOneNonZero = "true" ] && [ $atLeastOneZero = "false" ]; then
   echo "GENERATED CHANGES FULLY COVERED"
-  echo "GENERATED CHANGES FULLY COVERED" >> $D4J_HOME/$PATHOFFIXEDFOLDER/diffBetweenBuggyAndHumanFix"$PROJECT"$BUGNUMBER.txt
+  echo "GENERATED CHANGES FULLY COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
 fi
 if [ $atLeastOneNonZero = "false" ] && [ $atLeastOneZero = "true" ]; then
   echo "GENERATED CHANGES NOT COVERED"
-  echo "GENERATED CHANGES NOT COVERED" >> $D4J_HOME/$PATHOFFIXEDFOLDER/diffBetweenBuggyAndHumanFix"$PROJECT"$BUGNUMBER.txt
+  echo "GENERATED CHANGES NOT COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
 fi
 if [ $atLeastOneNonZero = "true" ] && [ $atLeastOneZero = "true" ]; then
   echo "GENERATED CHANGES PARTIALLY COVERED"
-  echo "GENERATED CHANGES PARTIALLY COVERED" >> $D4J_HOME/$PATHOFFIXEDFOLDER/diffBetweenBuggyAndHumanFix"$PROJECT"$BUGNUMBER.txt
+  echo "GENERATED CHANGES PARTIALLY COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
 fi
-
+if [ $atLeastOneNonZero = "false" ] && [ $atLeastOneZero = "false" ]; then
+  echo "GENERATED CHANGES NOT COVERED"
+  echo "GENERATED CHANGES NOT COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
+fi
