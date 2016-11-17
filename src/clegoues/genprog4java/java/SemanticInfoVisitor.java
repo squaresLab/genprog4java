@@ -122,18 +122,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			this.methodScopeStack.push(currentMethodScope);
 			currentMethodScope = new HashSet<String>(currentMethodScope);
 		}
-
-		//		if(node instanceof EnhancedForStatement ||
-		//				node instanceof ForStatement ||
-		//				node instanceof DoStatement || 
-		//				node instanceof IfStatement ||
-		//				node instanceof SwitchStatement ||
-		//				node instanceof TryStatement ||
-		//				    node instanceof WhileStatement) {
-		//			
-		//		}
-		//				   
-		//				 
+			 
 		this.namesDeclaredStack.push(namesDeclared);
 		namesDeclared = new HashSet<String>();
 		super.preVisit(node);
@@ -231,7 +220,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			// imports, we just add the SimpleName to the list of available names
 			// kind of a cheap trick, but whatever
 			// the one thing I'm not sure about is if I should add this to available types or...something else
-			this.scopes.addToAvailableTypes(name);
+			this.scopes.addToAvailableStringTypes(name);
 		}
 		return true;
 	}
@@ -272,7 +261,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		if(!node.isOnDemand() && !node.isStatic()) { // possible FIXME: handle all static stuff separately?
 			String name = node.getName().getFullyQualifiedName();
 			String[] split = name.split("\\.");
-			this.scopes.addToAvailableTypes(split[split.length - 1]);
+			this.scopes.addToAvailableStringTypes(split[split.length - 1]);
 		}
 		return false;
 	}
@@ -280,7 +269,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(TypeDeclaration node) {
 		if(!node.isInterface()) {
-			this.scopes.addToAvailableTypes(node.getName().getIdentifier());
+			this.scopes.addToAvailableStringTypes(node.getName().getIdentifier());
+			this.scopes.addToAvailableTypesMap(node.getName());
 			for(FieldDeclaration fd : node.getFields()) {
 				for (Object o : fd.fragments()) {
 					if (o instanceof VariableDeclarationFragment) {
