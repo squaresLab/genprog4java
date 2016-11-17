@@ -76,6 +76,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
@@ -219,7 +220,9 @@ CachingRepresentation<JavaEditOperation> {
 		
 		Set<String> knownTypesInScope = scopeInfo.getAvailableTypes();
 		Set<String> knownMethodsAndFields = scopeInfo.getAvailableMethodsAndFields();
-		
+		List<SimpleName> typs = scopeInfo.getTypNames();
+		semanticInfo.processTypes(typs);
+
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
 				JavaStatement s = new JavaStatement();
@@ -235,7 +238,6 @@ CachingRepresentation<JavaEditOperation> {
 				scopeInfo.addToClassScope(knownTypesInScope);
 				scopeInfo.addToClassScope(knownMethodsAndFields);
 				
-				// possible FIXME: more than one class per compilation might break this.
 				semanticInfo.addToClassScopeMap(s, scopeInfo.getClassScope());
 				semanticInfo.addToMethodScopeMap(s, scopeInfo.getMethodScope(node));
 				semanticInfo.collectFinalVarInfo(s, scopeInfo.getFinalVarInfo(node));

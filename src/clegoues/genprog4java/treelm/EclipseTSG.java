@@ -490,7 +490,7 @@ public class EclipseTSG {
 		} );
 	}
 	
-	public ASTNode babbleFrom( ASTNode target )
+	public ASTNode babbleFrom( ASTNode target, SymbolTable table)
 		throws ParseException
 	{
 		ASTNode root = GrammarUtils.getStartNode( target );

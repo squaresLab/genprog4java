@@ -43,11 +43,12 @@ import java.util.TreeSet;
 import java.util.function.Supplier;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.treelm.SymbolTable;
 
-public class ScopeInfo implements SymbolTable
+public class ScopeInfo 
 {
 	private Set<String> classScope; // stuff that's IN SCOPE at the statement, not used at the statement
 
@@ -55,7 +56,9 @@ public class ScopeInfo implements SymbolTable
 	private HashMap<ASTNode,Set<String>> requiredNames; 
 	private HashMap<ASTNode,Set<String>> namesDeclared; 
 	private HashMap<ASTNode, Boolean> containsFinalVarAssignment;
+	private LinkedList<SimpleName> typNames;
 	
+	public LinkedList<SimpleName> getTypNames() { return this.typNames; }
 	/** all ASTNodes of interest, corresponding to "repairable" Java statement types
 	 * a question (currently a question answered by {@link JavaRepresentation.canRepair})
 	 */
@@ -71,7 +74,7 @@ public class ScopeInfo implements SymbolTable
 	private HashMap<String,String> variableTypes;
 	
 	/** all imported types, or types seen over the course of parsing the CU */
-	private HashSet<String> availableTypes;
+	private HashSet<String> availableStringTypes;
 	
 	/** methods and fields available in this CU, which we know either because
 	 * we see their declaration, or because we've seen them used at some point (heuristic);
@@ -84,12 +87,13 @@ public class ScopeInfo implements SymbolTable
 		this.requiredNames = new HashMap<ASTNode,Set<String>>();
 		this.namesDeclared = new HashMap<ASTNode,Set<String>>();
 		this.containsFinalVarAssignment = new HashMap<ASTNode, Boolean>();
-		this.availableTypes = new HashSet<String>();
+		this.availableStringTypes = new HashSet<String>();
 		this.availableMethodsAndFields = new HashSet<String>();
 		this.methodReturnType = new HashMap<String,String>();
 		this.variableTypes = new HashMap<String,String>();
 		this.stmts = new LinkedList<ASTNode>();
 		this.availableMethodsAndFields.add("this");
+		this.typNames = new LinkedList<SimpleName>();
 	}
 	
 	public Set<String> getNamesDeclared(ASTNode buggy) {
@@ -109,7 +113,7 @@ public class ScopeInfo implements SymbolTable
 		Set<String> newScope = new TreeSet<String>();
 		newScope.addAll(methodScope);
 		newScope.addAll(loopScope);
-		newScope.addAll(this.availableTypes);
+		newScope.addAll(this.availableStringTypes);
 		if(this.methodScope.containsKey(buggy))
 		{
 			this.methodScope.get(buggy).addAll(newScope);
@@ -155,36 +159,6 @@ public class ScopeInfo implements SymbolTable
 		return this.requiredNames.get(buggy);
 	}
 
-	@Override
-	public void enter(int nodeType) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void leave(int nodeType) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public String getFullyQualifiedTypeName(String simpleName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Supplier<String> allocFreeName(String type) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Supplier<String> getNameForType(String type) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public void addMethodReturnType(String methodName, String returnType) {
 		this.methodReturnType.put(methodName,returnType);
 	}
@@ -197,8 +171,8 @@ public class ScopeInfo implements SymbolTable
 		this.availableMethodsAndFields.add(identifier);
 	}
 
-	public void addToAvailableTypes(String typ) {
-		this.availableTypes.add(typ);
+	public void addToAvailableStringTypes(String typ) {
+		this.availableStringTypes.add(typ);
 	}
 
 	public void addNode(ASTNode node) {
@@ -207,7 +181,7 @@ public class ScopeInfo implements SymbolTable
 	
 	public boolean anywhereInScope(String lookingFor, Set<String> currentMethodScope, Set<String> currentLoopScope) {
 		return (availableMethodsAndFields != null && availableMethodsAndFields.contains(lookingFor)) || 
-				(availableTypes != null && availableTypes.contains(lookingFor)) ||
+				(availableStringTypes != null && availableStringTypes.contains(lookingFor)) ||
 				(currentMethodScope != null && currentMethodScope.contains(lookingFor)) ||
 				(currentLoopScope != null && currentLoopScope.contains(lookingFor));
 	}
@@ -225,11 +199,15 @@ public class ScopeInfo implements SymbolTable
 	}
 
 	public Set<String> getAvailableTypes() {
-		return this.availableTypes;
+		return this.availableStringTypes;
 	}
 
 	public Set<String> getAvailableMethodsAndFields() {
 		return this.availableMethodsAndFields;
+	}
+
+	public void addToAvailableTypesMap(SimpleName name) {
+		this.typNames.add(name);
 	}
 
 }
