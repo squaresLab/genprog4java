@@ -401,7 +401,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 							String typName = paramType.getName();
 							List<Expression> replacements = JavaSemanticInfo.getMethodParamReplacementExpressions(methodName, md, typName);
 							String argAsString = arg.toString();
-							if(!replacements.isEmpty()) {
+							if(replacements != null && !replacements.isEmpty()) {
 								List<Expression> thisList = null;
 								List<Expression> filteredReplacements = new LinkedList<Expression>();
 								for(Expression candRep : replacements) {
