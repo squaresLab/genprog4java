@@ -299,10 +299,12 @@ public abstract class Search<G extends EditOperation> {
 				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(availableMutationsAL);
 				Mutation mut = chosenMutation.getLeft();
 				List<WeightedHole> allowed = variant.editSources(location, mut);
+				if(!allowed.isEmpty()){
 				allowed = rescaleAllowed(mut,allowed, variant,location.getId());
 				WeightedHole selected = (WeightedHole) GlobalUtils
 						.chooseOneWeighted(new ArrayList(allowed));
 				variant.performEdit(mut, location, selected.getHole());
+				}
 
 			}
 		}
