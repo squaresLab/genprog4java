@@ -81,7 +81,7 @@ public class GlobalUtils {
 	}
 
 	public static boolean runCommand(String commandToRun){
-		long maxTimeToRunCommandInMin = 15; 
+		long maxTimeToRunCommandInMin = 5; 
 		Logger logger = Logger.getLogger(GlobalUtils.class);
 
 		try {

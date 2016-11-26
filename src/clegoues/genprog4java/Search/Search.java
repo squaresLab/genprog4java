@@ -141,7 +141,7 @@ public abstract class Search<G extends EditOperation> {
 	public static String searchStrategy = ConfigurationBuilder.of( STRING )
 			.withVarName( "searchStrategy" )
 			.withFlag( "search" )
-			.withDefault( "rsrepair" )
+			.withDefault( "ga" )
 			.withHelp( "the search strategy to employ" )
 			.inGroup( "Search Parameters" )
 			.build();

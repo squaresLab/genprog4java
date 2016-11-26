@@ -85,14 +85,14 @@ CachingRepresentation<G> {
 	//private static double positivePathWeight = 0.1;
 	private static double positivePathWeight = ConfigurationBuilder.of( DOUBLE )
 			.withVarName( "positivePathWeight" )
-			.withDefault( "0.1" )
+			.withDefault( "0.65" )
 			.withHelp( "weighting for statements on the positive path" )
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
 	//private static double negativePathWeight = 1.0;
 	private static double negativePathWeight = ConfigurationBuilder.of( DOUBLE )
 			.withVarName( "negativePathWeight" )
-			.withDefault( "1.0" )
+			.withDefault( "0.35" )
 			.withHelp( "weighting for statements on the negative path" )
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
