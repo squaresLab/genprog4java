@@ -401,7 +401,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 							String typName = paramType.getName();
 							List<Expression> replacements = JavaSemanticInfo.getMethodParamReplacementExpressions(methodName, md, typName);
 							String argAsString = arg.toString();
-							if(!replacements.isEmpty()) {
+							if(replacements != null && !replacements.isEmpty()) {
 								List<Expression> thisList = null;
 								List<Expression> filteredReplacements = new LinkedList<Expression>();
 								for(Expression candRep : replacements) {
@@ -551,15 +551,19 @@ public class JavaStatement implements Comparable<JavaStatement>{
 							for(ITypeBinding necessaryExp : toExtend) {
 								List<Expression> replacements = JavaSemanticInfo.getMethodParamReplacementExpressions(methodName, md, necessaryExp.getName());
 								List<Expression> filteredReplacements = new LinkedList<Expression>();
-								for(Expression candRep : replacements) {
-									if(JavaRepresentation.semanticInfo.areNamesInScope(candRep, namesInScopeHere))
-										filteredReplacements.add(candRep);
+								if(replacements != null){
+									for(Expression candRep : replacements) {
+										if(JavaRepresentation.semanticInfo.areNamesInScope(candRep, namesInScopeHere))
+											filteredReplacements.add(candRep);
+									}
 								}
-								if(filteredReplacements.isEmpty()) {
-									extensionDoable = false;
-									break;
+								if(filteredReplacements != null){
+									if(filteredReplacements.isEmpty()) {
+										extensionDoable = false;
+										break;
+									}
+									thisExtension.addAll(filteredReplacements);
 								}
-								thisExtension.addAll(filteredReplacements);
 							}
 							if(extensionDoable) {
 								thisNodesOptions.add(thisExtension);
@@ -862,7 +866,7 @@ if B include return statement
 		return true;
 	}
 
-	
+
 	private List<Expression> casteeExpressions = null;
 	public  List<Expression> getCasteeExpressions(){
 		if(casteeExpressions == null) {
@@ -928,7 +932,7 @@ if B include return statement
 
 		return toReplaceCasteeExpressions;
 	}
-	
+
 	private List<Type> casterTypes = null;
 	public  List<Type> getCasterTypes(){
 		if(casterTypes == null) {
