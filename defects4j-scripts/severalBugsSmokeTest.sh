@@ -4,14 +4,14 @@
 #ones in particular
 declare -a arr=("Chart 1")
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 2 ]; then
     echo "This script should be run with 1 parameters: Path to defects4j used$"
     exit 0
 fi
 
 ## now loop through the above array
 export D4J_HOME="$1"
-export GP4J_HOME=/home/mausoto/probGenProg/genprog4java/
+export GP4J_HOME="$2"
 export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64/
 
 for i in "${arr[@]}"

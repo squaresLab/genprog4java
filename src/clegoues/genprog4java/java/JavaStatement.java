@@ -558,97 +558,97 @@ public class JavaStatement implements Comparable<JavaStatement>{
 									}
 								}
 								if(filteredReplacements != null){
-									if(filteredReplacements.isEmpty()) {
-										extensionDoable = false;
-										break;
-									}
-									thisExtension.addAll(filteredReplacements);
-								}
+							if(filteredReplacements.isEmpty()) {
+								extensionDoable = false;
+								break;
 							}
-							if(extensionDoable) {
-								thisNodesOptions.add(thisExtension);
-							}
+							thisExtension.addAll(filteredReplacements);
 						}
 					}
+					if(extensionDoable) {
+						thisNodesOptions.add(thisExtension);
+					}
 				}
-				public boolean visit(SuperMethodInvocation node) {
-					IMethodBinding mb = node.resolveMethodBinding();
-					handleInvocation(node, mb);
-					return true;
-				}
-
-				public boolean visit(MethodInvocation node) {
-					IMethodBinding mb = node.resolveMethodBinding();
-					handleInvocation(node, mb);
-					return true;
-				}
-
-			});
+			}
 		}
-		return extendableParameterMethods;	
-	}
+		public boolean visit(SuperMethodInvocation node) {
+			IMethodBinding mb = node.resolveMethodBinding();
+			handleInvocation(node, mb);
+			return true;
+		}
 
-	private List<ASTNode> indexedCollectionObjects = null;
+		public boolean visit(MethodInvocation node) {
+			IMethodBinding mb = node.resolveMethodBinding();
+			handleInvocation(node, mb);
+			return true;
+		}
 
-	public  List<ASTNode> getIndexedCollectionObjects() {
-		if(indexedCollectionObjects == null) {
-			indexedCollectionObjects = new ArrayList<ASTNode>();
+	});
+}
+return extendableParameterMethods;	
+}
 
-			this.getASTNode().accept(new ASTVisitor() {
+private List<ASTNode> indexedCollectionObjects = null;
 
-				public boolean visit(MethodInvocation node) {
-					Expression methodCall = node.getExpression();
-					SimpleName methodName = node.getName();
-					switch(methodName.getIdentifier()) {
-					case "removeRange":
-					case "subList":
+public  List<ASTNode> getIndexedCollectionObjects() {
+	if(indexedCollectionObjects == null) {
+		indexedCollectionObjects = new ArrayList<ASTNode>();
+
+		this.getASTNode().accept(new ASTVisitor() {
+
+			public boolean visit(MethodInvocation node) {
+				Expression methodCall = node.getExpression();
+				SimpleName methodName = node.getName();
+				switch(methodName.getIdentifier()) {
+				case "removeRange":
+				case "subList":
+					break;
+				case "add":
+				case "addAll": 
+					if(node.arguments().size() > 1) {
 						break;
-					case "add":
-					case "addAll": 
-						if(node.arguments().size() > 1) {
-							break;
-						}
-						else
-							return true;
-					case "get":
-					case "remove":
-					case "set":
-						break;
-					default: return true;
 					}
+					else
+						return true;
+				case "get":
+				case "remove":
+				case "set":
+					break;
+				default: return true;
+				}
 
-					ITypeBinding methodCallTypeBinding = methodCall.resolveTypeBinding();
-					if(methodCallTypeBinding == null) 
-						return true;
-					ITypeBinding td = methodCallTypeBinding.getTypeDeclaration();
-					if(td == null) 
-						return true;
-					String name = td.getName();
-					ITypeBinding decl = methodCallTypeBinding.getTypeDeclaration();
-					while(decl != null && decl.getSuperclass() != null && !name.equals("AbstractList")) {
-						decl = decl.getSuperclass().getTypeDeclaration();
-						name = decl.getName();
-					}
-					if(!name.equals("AbstractList")) { 
-						return true;
-					}
-					indexedCollectionObjects.add(node);
+				ITypeBinding methodCallTypeBinding = methodCall.resolveTypeBinding();
+				if(methodCallTypeBinding == null) 
+					return true;
+				ITypeBinding td = methodCallTypeBinding.getTypeDeclaration();
+				if(td == null) 
+					return true;
+				String name = td.getName();
+				ITypeBinding decl = methodCallTypeBinding.getTypeDeclaration();
+				while(decl != null && decl.getSuperclass() != null && !name.equals("AbstractList")) {
+					decl = decl.getSuperclass().getTypeDeclaration();
+					name = decl.getName();
+				}
+				if(!name.equals("AbstractList")) { 
 					return true;
 				}
-				/*	void	add(int index, E element)
+				indexedCollectionObjects.add(node);
+				return true;
+			}
+			/*	void	add(int index, E element)
 					boolean	addAll(int index, Collection<? extends E> c)
 					abstract E	get(int index)
 					E	remove(int index)
 					protected void	removeRange(int fromIndex, int toIndex)
 					E	set(int index, E element)
 					List<E>	subList(int fromIndex, int toIndex) */
-			});
-		}
-		return indexedCollectionObjects;
+		});
 	}
+	return indexedCollectionObjects;
+}
 
-	/*
-	 * B = buggy statements
+/*
+ * B = buggy statements
 collect method invocations of (@\textbf{[collection objects]}@) in B and put them into collection C
 insert a if statement before B
 
@@ -669,408 +669,408 @@ if B include return statement
 } else {
  insert B into THEN section of the if statement
 }
-	 */
+ */
 
 
-	private Map<ASTNode,List<Integer>> shrinkableParameterMethods = null;
+private Map<ASTNode,List<Integer>> shrinkableParameterMethods = null;
 
-	public Map<ASTNode,List<Integer>> getShrinkableParameterMethods() {
-		if(shrinkableParameterMethods == null) {
-			shrinkableParameterMethods = new HashMap<ASTNode,List<Integer>>();
-			this.getASTNode().accept(new ASTVisitor() {
-				// FIXME: also supermethodinvocations
+public Map<ASTNode,List<Integer>> getShrinkableParameterMethods() {
+	if(shrinkableParameterMethods == null) {
+		shrinkableParameterMethods = new HashMap<ASTNode,List<Integer>>();
+		this.getASTNode().accept(new ASTVisitor() {
+			// FIXME: also supermethodinvocations
 
-				public boolean visit(MethodInvocation node) {
-					IMethodBinding mb = node.resolveMethodBinding();
-					if(mb == null) {
-						return true;
-					}
-					IMethodBinding myMethodBinding = mb.getMethodDeclaration();
-
-					ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
-					ArrayList<IMethodBinding> compatibleMethods = new ArrayList<IMethodBinding>();
-
-					for(IMethodBinding otherMethod : classBinding.getDeclaredMethods()) {
-						if(compatibleMethodMatch(myMethodBinding, otherMethod, true)) {
-							compatibleMethods.add(otherMethod);
-						}
-					}
-
-					ITypeBinding superClass = classBinding.getSuperclass();
-					while(superClass != null) {
-						IMethodBinding[] superMethods = superClass.getDeclaredMethods();
-						for(IMethodBinding superMethod : superMethods) {
-							int modifiers = superMethod.getModifiers();
-							if(!Modifier.isAbstract(modifiers) &&
-									(Modifier.isProtected(modifiers) || Modifier.isPublic(modifiers)) &&
-									compatibleMethodMatch(myMethodBinding, superMethod, true)) {
-								compatibleMethods.add(superMethod);
-							}
-						}
-						superClass = superClass.getSuperclass();
-					}
-					if(compatibleMethods.size() > 0) {
-						List<Integer> thisNodesOptions;
-						if(shrinkableParameterMethods.containsKey(node)) {
-							thisNodesOptions = shrinkableParameterMethods.get(node);
-						} else {
-							thisNodesOptions = new ArrayList<Integer>();
-							shrinkableParameterMethods.put(node,thisNodesOptions);
-						}
-						for(IMethodBinding compatibleMethod : compatibleMethods) {
-							ITypeBinding[] parameterTypes = compatibleMethod.getParameterTypes();
-							int numReduce = myMethodBinding.getParameterTypes().length - parameterTypes.length;
-							thisNodesOptions.add(numReduce);
-						}
-					}
+			public boolean visit(MethodInvocation node) {
+				IMethodBinding mb = node.resolveMethodBinding();
+				if(mb == null) {
 					return true;
 				}
+				IMethodBinding myMethodBinding = mb.getMethodDeclaration();
 
-			});
-		}
-		return shrinkableParameterMethods;
-	}
+				ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
+				ArrayList<IMethodBinding> compatibleMethods = new ArrayList<IMethodBinding>();
 
-
-	private List<ASTNode> candidateObjectsToInit = null;
-
-	public   List<ASTNode> getObjectsAsMethodParams() {
-		if(candidateObjectsToInit == null) {
-			candidateObjectsToInit = new LinkedList<ASTNode>();
-
-			this.getASTNode().accept(new ASTVisitor() {
-				public boolean visit(MethodInvocation node) {
-					for(Object arg : node.arguments()) {
-						if(arg instanceof SimpleName) {
-							Expression argNode = (Expression) arg;
-							ITypeBinding binding = argNode.resolveTypeBinding();
-							if(binding != null && binding.isClass()) {
-								candidateObjectsToInit.add(node);
-							}
-						}
+				for(IMethodBinding otherMethod : classBinding.getDeclaredMethods()) {
+					if(compatibleMethodMatch(myMethodBinding, otherMethod, true)) {
+						compatibleMethods.add(otherMethod);
 					}
-					return true;
 				}
-			});
-		}
 
-		return candidateObjectsToInit;
-	}
-
-	private Map<ASTNode, List<IMethodBinding>> candidateMethodReplacements= null;
-
-	public Map<ASTNode, List<IMethodBinding>> getCandidateMethodReplacements() {
-		if(candidateMethodReplacements == null) {
-			candidateMethodReplacements = new HashMap<ASTNode, List<IMethodBinding>>();
-
-			this.getASTNode().accept(new ASTVisitor() {
-
-				private void handleMethod(ASTNode node, IMethodBinding myMethodBinding) {
-					boolean addToMap = false;
-					List<IMethodBinding> possibleReps;
-					if(candidateMethodReplacements.containsKey(node)) {
-						possibleReps = candidateMethodReplacements.get(node);
-					} else {
-						possibleReps = new LinkedList<IMethodBinding> ();
-					}
-					ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
-
-					for(IMethodBinding otherMethod : classBinding.getDeclaredMethods()) {
-						int modifiers = otherMethod.getModifiers();
-
+				ITypeBinding superClass = classBinding.getSuperclass();
+				while(superClass != null) {
+					IMethodBinding[] superMethods = superClass.getDeclaredMethods();
+					for(IMethodBinding superMethod : superMethods) {
+						int modifiers = superMethod.getModifiers();
 						if(!Modifier.isAbstract(modifiers) &&
-								compatibleMethodMatch(myMethodBinding, otherMethod, false)) {
-							possibleReps.add(otherMethod);
-							addToMap = true;
+								(Modifier.isProtected(modifiers) || Modifier.isPublic(modifiers)) &&
+								compatibleMethodMatch(myMethodBinding, superMethod, true)) {
+							compatibleMethods.add(superMethod);
 						}
 					}
+					superClass = superClass.getSuperclass();
+				}
+				if(compatibleMethods.size() > 0) {
+					List<Integer> thisNodesOptions;
+					if(shrinkableParameterMethods.containsKey(node)) {
+						thisNodesOptions = shrinkableParameterMethods.get(node);
+					} else {
+						thisNodesOptions = new ArrayList<Integer>();
+						shrinkableParameterMethods.put(node,thisNodesOptions);
+					}
+					for(IMethodBinding compatibleMethod : compatibleMethods) {
+						ITypeBinding[] parameterTypes = compatibleMethod.getParameterTypes();
+						int numReduce = myMethodBinding.getParameterTypes().length - parameterTypes.length;
+						thisNodesOptions.add(numReduce);
+					}
+				}
+				return true;
+			}
 
-					ITypeBinding superClass = classBinding.getSuperclass();
-					while(superClass != null) {
-						IMethodBinding[] superMethods = superClass.getDeclaredMethods();
+		});
+	}
+	return shrinkableParameterMethods;
+}
 
-						for(IMethodBinding superMethod : superMethods) {
-							int modifiers = superMethod.getModifiers();
 
-							if(!Modifier.isAbstract(modifiers) &&
-									(Modifier.isProtected(modifiers) || Modifier.isPublic(modifiers)) &&
-									compatibleMethodMatch(myMethodBinding, superMethod, false)) {
-								possibleReps.add(superMethod);
-								addToMap = true;
-							}
+private List<ASTNode> candidateObjectsToInit = null;
+
+public   List<ASTNode> getObjectsAsMethodParams() {
+	if(candidateObjectsToInit == null) {
+		candidateObjectsToInit = new LinkedList<ASTNode>();
+
+		this.getASTNode().accept(new ASTVisitor() {
+			public boolean visit(MethodInvocation node) {
+				for(Object arg : node.arguments()) {
+					if(arg instanceof SimpleName) {
+						Expression argNode = (Expression) arg;
+						ITypeBinding binding = argNode.resolveTypeBinding();
+						if(binding != null && binding.isClass()) {
+							candidateObjectsToInit.add(node);
 						}
-						superClass = superClass.getSuperclass();
-					}
-
-					if(addToMap) {
-						candidateMethodReplacements.put(node,possibleReps);
 					}
 				}
-
-				public boolean visit(SuperMethodInvocation node) {
-					IMethodBinding myMethodBinding = node.resolveMethodBinding();
-					if(myMethodBinding != null) {
-						handleMethod(node, myMethodBinding);
-					}
-					return true;
-				}
-
-				public boolean visit(MethodInvocation node) {
-					IMethodBinding myMethodBinding = node.resolveMethodBinding();
-					if(myMethodBinding != null) {
-						handleMethod(node, myMethodBinding);
-					}
-					return true;
-				}
-
-			});
-		}
-		return candidateMethodReplacements;
-	}
-
-
-	public ASTNode blockThatContainsThisStatement(){
-		ASTNode parent = this.getASTNode().getParent();
-		while(parent != null && !(parent instanceof Block)){
-			parent = parent.getParent();
-		}
-		return parent;
-	}
-
-	private static int howManyReturns = 0;
-
-	public static boolean hasMoreThanOneReturn(MethodDeclaration method){
-		howManyReturns = 0;
-		method.accept(new ASTVisitor() {
-			@Override
-			public boolean visit(ReturnStatement node) {
-				howManyReturns++;
 				return true;
 			}
 		});
-		return howManyReturns>=2;
 	}
 
-	public boolean canBeDeleted() {
-		ASTNode faultyNode = this.getASTNode();
-		ASTNode parent = faultyNode.getParent();
-		//Heuristic: Don't remove returns from functions that have only one return statement.
-		if(faultyNode instanceof ReturnStatement){
-			parent = ASTUtils.getEnclosingMethod(this.getASTNode());
-			if(parent != null && parent instanceof MethodDeclaration) {
-				if(!hasMoreThanOneReturn((MethodDeclaration)parent))
-					return false;
+	return candidateObjectsToInit;
+}
+
+private Map<ASTNode, List<IMethodBinding>> candidateMethodReplacements= null;
+
+public Map<ASTNode, List<IMethodBinding>> getCandidateMethodReplacements() {
+	if(candidateMethodReplacements == null) {
+		candidateMethodReplacements = new HashMap<ASTNode, List<IMethodBinding>>();
+
+		this.getASTNode().accept(new ASTVisitor() {
+
+			private void handleMethod(ASTNode node, IMethodBinding myMethodBinding) {
+				boolean addToMap = false;
+				List<IMethodBinding> possibleReps;
+				if(candidateMethodReplacements.containsKey(node)) {
+					possibleReps = candidateMethodReplacements.get(node);
+				} else {
+					possibleReps = new LinkedList<IMethodBinding> ();
+				}
+				ITypeBinding classBinding = myMethodBinding.getDeclaringClass();
+
+				for(IMethodBinding otherMethod : classBinding.getDeclaredMethods()) {
+					int modifiers = otherMethod.getModifiers();
+
+					if(!Modifier.isAbstract(modifiers) &&
+							compatibleMethodMatch(myMethodBinding, otherMethod, false)) {
+						possibleReps.add(otherMethod);
+						addToMap = true;
+					}
+				}
+
+				ITypeBinding superClass = classBinding.getSuperclass();
+				while(superClass != null) {
+					IMethodBinding[] superMethods = superClass.getDeclaredMethods();
+
+					for(IMethodBinding superMethod : superMethods) {
+						int modifiers = superMethod.getModifiers();
+
+						if(!Modifier.isAbstract(modifiers) &&
+								(Modifier.isProtected(modifiers) || Modifier.isPublic(modifiers)) &&
+								compatibleMethodMatch(myMethodBinding, superMethod, false)) {
+							possibleReps.add(superMethod);
+							addToMap = true;
+						}
+					}
+					superClass = superClass.getSuperclass();
+				}
+
+				if(addToMap) {
+					candidateMethodReplacements.put(node,possibleReps);
+				}
 			}
-		}
 
-		return true;
-	}
-
-
-	private List<Expression> casteeExpressions = null;
-	public  List<Expression> getCasteeExpressions(){
-		if(casteeExpressions == null) {
-			casteeExpressions = new LinkedList<Expression>();
-
-			this.getASTNode().accept(new ASTVisitor() {
-				private List<String> casteeExpressionsString = new ArrayList<String>();
-				public boolean visit(CastExpression node) {
-					if(!casteeExpressionsString.contains(node.getExpression().toString())){
-						casteeExpressions.add(node.getExpression());
-						casteeExpressionsString.add(node.getExpression().toString());
-					}
-					return true;
+			public boolean visit(SuperMethodInvocation node) {
+				IMethodBinding myMethodBinding = node.resolveMethodBinding();
+				if(myMethodBinding != null) {
+					handleMethod(node, myMethodBinding);
 				}
-			});
-		}
-
-		return casteeExpressions;
-	}
-
-	private List<Expression> toReplaceCasteeExpressions = null;
-	public  List<Expression> getExpressionsToReplaceCastee(){
-		if(toReplaceCasteeExpressions == null) {
-			toReplaceCasteeExpressions = new LinkedList<Expression>();
-
-			ASTNode startAt = this.getASTNode();
-			while(!(startAt instanceof TypeDeclaration)){
-				startAt=startAt.getParent();
+				return true;
 			}
 
-			startAt.accept(new ASTVisitor() {
-				private List<String> toReplaceCasteeExpressionsStrings = new ArrayList<String>();
-				public boolean visit(CastExpression node) {
-					if(!toReplaceCasteeExpressionsStrings.contains(node.getExpression().toString())){
-						toReplaceCasteeExpressions.add(node.getExpression());
-						toReplaceCasteeExpressionsStrings.add(node.getExpression().toString());
-					}
-					return true;
+			public boolean visit(MethodInvocation node) {
+				IMethodBinding myMethodBinding = node.resolveMethodBinding();
+				if(myMethodBinding != null) {
+					handleMethod(node, myMethodBinding);
 				}
-				public boolean visit(MethodInvocation node) {
-					if(!toReplaceCasteeExpressionsStrings.contains(node.toString())){
-						toReplaceCasteeExpressions.add(node);
-						toReplaceCasteeExpressionsStrings.add(node.toString());
-					}
-					return true;
-				}
-				public boolean visit(VariableDeclarationFragment node) {
-					if(!toReplaceCasteeExpressionsStrings.contains(node.getName().toString())){
-						toReplaceCasteeExpressions.add(node.getName());
-						toReplaceCasteeExpressionsStrings.add(node.getName().toString());
-					}
-					return true;
-				}
-				public boolean visit(ArrayAccess node) {
-					if(!toReplaceCasteeExpressionsStrings.contains(node.toString())){
-						toReplaceCasteeExpressions.add(node);
-						toReplaceCasteeExpressionsStrings.add(node.toString());
-					}
-					return true;
-				}
-			});
-		}
+				return true;
+			}
 
-		return toReplaceCasteeExpressions;
+		});
+	}
+	return candidateMethodReplacements;
+}
+
+
+public ASTNode blockThatContainsThisStatement(){
+	ASTNode parent = this.getASTNode().getParent();
+	while(parent != null && !(parent instanceof Block)){
+		parent = parent.getParent();
+	}
+	return parent;
+}
+
+private static int howManyReturns = 0;
+
+public static boolean hasMoreThanOneReturn(MethodDeclaration method){
+	howManyReturns = 0;
+	method.accept(new ASTVisitor() {
+		@Override
+		public boolean visit(ReturnStatement node) {
+			howManyReturns++;
+			return true;
+		}
+	});
+	return howManyReturns>=2;
+}
+
+public boolean canBeDeleted() {
+	ASTNode faultyNode = this.getASTNode();
+	ASTNode parent = faultyNode.getParent();
+	//Heuristic: Don't remove returns from functions that have only one return statement.
+	if(faultyNode instanceof ReturnStatement){
+		parent = ASTUtils.getEnclosingMethod(this.getASTNode());
+		if(parent != null && parent instanceof MethodDeclaration) {
+			if(!hasMoreThanOneReturn((MethodDeclaration)parent))
+				return false;
+		}
 	}
 
-	private List<Type> casterTypes = null;
-	public  List<Type> getCasterTypes(){
-		if(casterTypes == null) {
-			casterTypes = new LinkedList<Type>();
-			this.getASTNode().accept(new ASTVisitor() {
-				/*
+	return true;
+}
+
+
+private List<Expression> casteeExpressions = null;
+public  List<Expression> getCasteeExpressions(){
+	if(casteeExpressions == null) {
+		casteeExpressions = new LinkedList<Expression>();
+
+		this.getASTNode().accept(new ASTVisitor() {
+			private List<String> casteeExpressionsString = new ArrayList<String>();
+			public boolean visit(CastExpression node) {
+				if(!casteeExpressionsString.contains(node.getExpression().toString())){
+					casteeExpressions.add(node.getExpression());
+					casteeExpressionsString.add(node.getExpression().toString());
+				}
+				return true;
+			}
+		});
+	}
+
+	return casteeExpressions;
+}
+
+private List<Expression> toReplaceCasteeExpressions = null;
+public  List<Expression> getExpressionsToReplaceCastee(){
+	if(toReplaceCasteeExpressions == null) {
+		toReplaceCasteeExpressions = new LinkedList<Expression>();
+
+		ASTNode startAt = this.getASTNode();
+		while(!(startAt instanceof TypeDeclaration)){
+			startAt=startAt.getParent();
+		}
+
+		startAt.accept(new ASTVisitor() {
+			private List<String> toReplaceCasteeExpressionsStrings = new ArrayList<String>();
+			public boolean visit(CastExpression node) {
+				if(!toReplaceCasteeExpressionsStrings.contains(node.getExpression().toString())){
+					toReplaceCasteeExpressions.add(node.getExpression());
+					toReplaceCasteeExpressionsStrings.add(node.getExpression().toString());
+				}
+				return true;
+			}
+			public boolean visit(MethodInvocation node) {
+				if(!toReplaceCasteeExpressionsStrings.contains(node.toString())){
+					toReplaceCasteeExpressions.add(node);
+					toReplaceCasteeExpressionsStrings.add(node.toString());
+				}
+				return true;
+			}
+			public boolean visit(VariableDeclarationFragment node) {
+				if(!toReplaceCasteeExpressionsStrings.contains(node.getName().toString())){
+					toReplaceCasteeExpressions.add(node.getName());
+					toReplaceCasteeExpressionsStrings.add(node.getName().toString());
+				}
+				return true;
+			}
+			public boolean visit(ArrayAccess node) {
+				if(!toReplaceCasteeExpressionsStrings.contains(node.toString())){
+					toReplaceCasteeExpressions.add(node);
+					toReplaceCasteeExpressionsStrings.add(node.toString());
+				}
+				return true;
+			}
+		});
+	}
+
+	return toReplaceCasteeExpressions;
+}
+
+private List<Type> casterTypes = null;
+public  List<Type> getCasterTypes(){
+	if(casterTypes == null) {
+		casterTypes = new LinkedList<Type>();
+		this.getASTNode().accept(new ASTVisitor() {
+			/*
 				public boolean visit(SimpleType node) {
 					casterTypes.add(node);
 					return true;
 				}*/
-				private List<String> casterTypesString = new ArrayList<String>();
-				public boolean visit(CastExpression node) {
-					if(!casterTypesString.contains(node.getType().toString())){
-						casterTypes.add(node.getType());
-						casterTypesString.add(node.getType().toString());
-					}
-					return true;
+			private List<String> casterTypesString = new ArrayList<String>();
+			public boolean visit(CastExpression node) {
+				if(!casterTypesString.contains(node.getType().toString())){
+					casterTypes.add(node.getType());
+					casterTypesString.add(node.getType().toString());
 				}
-
-			});
-		}
-
-		return casterTypes;
-	}
-
-	private List<ASTNode> toReplaceCasterTypes = null;
-	public  List<ASTNode> getTypesToReplaceCaster(){
-		if(toReplaceCasterTypes == null) {
-			toReplaceCasterTypes = new LinkedList<ASTNode>();
-
-			ASTNode startAt = this.getASTNode();
-			while(!(startAt instanceof TypeDeclaration)){
-				startAt=startAt.getParent();
-			}
-
-			startAt.accept(new ASTVisitor() {
-				private List<String> toReplaceCasterTypesStrings = new ArrayList<String>();
-				public boolean visit(ArrayType node) {
-					if(!toReplaceCasterTypesStrings.contains(node.toString())){
-						toReplaceCasterTypes.add(node);
-						toReplaceCasterTypesStrings.add(node.toString());
-					}
-					return true;
-				}
-				public boolean visit(ParameterizedType node) {
-					if(!toReplaceCasterTypesStrings.contains(node.toString())){
-						toReplaceCasterTypes.add(node);
-						toReplaceCasterTypesStrings.add(node.toString());
-					}
-					return true;
-				}
-				public boolean visit(PrimitiveType node) {
-					if(!toReplaceCasterTypesStrings.contains(node.toString())){
-						toReplaceCasterTypes.add(node);
-						toReplaceCasterTypesStrings.add(node.toString());
-					}
-					return true;
-				}
-				public boolean visit(QualifiedType node) {
-					if(!toReplaceCasterTypesStrings.contains(node.toString())){
-						toReplaceCasterTypes.add(node);
-						toReplaceCasterTypesStrings.add(node.toString());
-					}
-					return true;
-				}
-				public boolean visit(SimpleType node) {
-					if(!toReplaceCasterTypesStrings.contains(node.toString())){
-						toReplaceCasterTypes.add(node);
-						toReplaceCasterTypesStrings.add(node.toString());
-					}
-					return true;
-				}
-				public boolean visit(UnionType node) {
-					if(!toReplaceCasterTypesStrings.contains(node.toString())){
-						toReplaceCasterTypes.add(node);
-						toReplaceCasterTypesStrings.add(node.toString());
-					}
-					return true;
-				}
-				public boolean visit(WildcardType node) {
-					if(!toReplaceCasterTypesStrings.contains(node.toString())){
-						toReplaceCasterTypes.add(node);
-						toReplaceCasterTypesStrings.add(node.toString());
-					}
-					return true;
-				}
-			});
-		}
-
-		return toReplaceCasterTypes; 
-	}
-
-	public boolean isLikelyAConstructor() {
-		ASTNode enclosingMethod = ASTUtils.getEnclosingMethod(this.getASTNode());
-		return (enclosingMethod != null) && (enclosingMethod instanceof MethodDeclaration) && 
-				((MethodDeclaration) enclosingMethod).isConstructor();
-	}
-
-	public boolean parentMethodReturnsVoid() { // FIXME fix this.
-		ASTNode enclosingMethod = ASTUtils.getEnclosingMethod(this.getASTNode());
-		if (enclosingMethod != null & enclosingMethod instanceof MethodDeclaration) {
-			MethodDeclaration asMd = (MethodDeclaration) enclosingMethod;
-			Type returnType = asMd.getReturnType2();
-			if(returnType != null) {
-				String asStr = returnType.toString(); 
-				return asStr.equalsIgnoreCase("void") || asStr.equalsIgnoreCase("null");
-			} else {
 				return true;
 			}
-		}
-		return false;
+
+		});
 	}
 
-	public boolean isWithinLoopOrCase() {
-		ASTNode buggyNode = this.getASTNode();
+	return casterTypes;
+}
+
+private List<ASTNode> toReplaceCasterTypes = null;
+public  List<ASTNode> getTypesToReplaceCaster(){
+	if(toReplaceCasterTypes == null) {
+		toReplaceCasterTypes = new LinkedList<ASTNode>();
+
+		ASTNode startAt = this.getASTNode();
+		while(!(startAt instanceof TypeDeclaration)){
+			startAt=startAt.getParent();
+		}
+
+		startAt.accept(new ASTVisitor() {
+			private List<String> toReplaceCasterTypesStrings = new ArrayList<String>();
+			public boolean visit(ArrayType node) {
+				if(!toReplaceCasterTypesStrings.contains(node.toString())){
+					toReplaceCasterTypes.add(node);
+					toReplaceCasterTypesStrings.add(node.toString());
+				}
+				return true;
+			}
+			public boolean visit(ParameterizedType node) {
+				if(!toReplaceCasterTypesStrings.contains(node.toString())){
+					toReplaceCasterTypes.add(node);
+					toReplaceCasterTypesStrings.add(node.toString());
+				}
+				return true;
+			}
+			public boolean visit(PrimitiveType node) {
+				if(!toReplaceCasterTypesStrings.contains(node.toString())){
+					toReplaceCasterTypes.add(node);
+					toReplaceCasterTypesStrings.add(node.toString());
+				}
+				return true;
+			}
+			public boolean visit(QualifiedType node) {
+				if(!toReplaceCasterTypesStrings.contains(node.toString())){
+					toReplaceCasterTypes.add(node);
+					toReplaceCasterTypesStrings.add(node.toString());
+				}
+				return true;
+			}
+			public boolean visit(SimpleType node) {
+				if(!toReplaceCasterTypesStrings.contains(node.toString())){
+					toReplaceCasterTypes.add(node);
+					toReplaceCasterTypesStrings.add(node.toString());
+				}
+				return true;
+			}
+			public boolean visit(UnionType node) {
+				if(!toReplaceCasterTypesStrings.contains(node.toString())){
+					toReplaceCasterTypes.add(node);
+					toReplaceCasterTypesStrings.add(node.toString());
+				}
+				return true;
+			}
+			public boolean visit(WildcardType node) {
+				if(!toReplaceCasterTypesStrings.contains(node.toString())){
+					toReplaceCasterTypes.add(node);
+					toReplaceCasterTypesStrings.add(node.toString());
+				}
+				return true;
+			}
+		});
+	}
+
+	return toReplaceCasterTypes; 
+}
+
+public boolean isLikelyAConstructor() {
+	ASTNode enclosingMethod = ASTUtils.getEnclosingMethod(this.getASTNode());
+	return (enclosingMethod != null) && (enclosingMethod instanceof MethodDeclaration) && 
+			((MethodDeclaration) enclosingMethod).isConstructor();
+}
+
+public boolean parentMethodReturnsVoid() { // FIXME fix this.
+	ASTNode enclosingMethod = ASTUtils.getEnclosingMethod(this.getASTNode());
+	if (enclosingMethod != null & enclosingMethod instanceof MethodDeclaration) {
+		MethodDeclaration asMd = (MethodDeclaration) enclosingMethod;
+		Type returnType = asMd.getReturnType2();
+		if(returnType != null) {
+			String asStr = returnType.toString(); 
+			return asStr.equalsIgnoreCase("void") || asStr.equalsIgnoreCase("null");
+		} else {
+			return true;
+		}
+	}
+	return false;
+}
+
+public boolean isWithinLoopOrCase() {
+	ASTNode buggyNode = this.getASTNode();
+	if(buggyNode instanceof SwitchStatement 
+			|| buggyNode instanceof ForStatement 
+			|| buggyNode instanceof WhileStatement
+			|| buggyNode instanceof DoStatement
+			|| buggyNode instanceof EnhancedForStatement)
+		return true;
+
+	while(buggyNode.getParent() != null){
+		buggyNode = buggyNode.getParent();
 		if(buggyNode instanceof SwitchStatement 
 				|| buggyNode instanceof ForStatement 
 				|| buggyNode instanceof WhileStatement
 				|| buggyNode instanceof DoStatement
 				|| buggyNode instanceof EnhancedForStatement)
 			return true;
-
-		while(buggyNode.getParent() != null){
-			buggyNode = buggyNode.getParent();
-			if(buggyNode instanceof SwitchStatement 
-					|| buggyNode instanceof ForStatement 
-					|| buggyNode instanceof WhileStatement
-					|| buggyNode instanceof DoStatement
-					|| buggyNode instanceof EnhancedForStatement)
-				return true;
-		}
-		return false;
 	}
+	return false;
+}
 
-	public void setInfo(int stmtCounter, ASTNode node) {
-		this.setStmtId(stmtCounter);
-		this.setASTNode(node);
-	}
+public void setInfo(int stmtCounter, ASTNode node) {
+	this.setStmtId(stmtCounter);
+	this.setASTNode(node);
+}
 
 
 
