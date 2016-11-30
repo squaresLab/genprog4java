@@ -54,7 +54,7 @@ public class MethodParameterAdder extends JavaEditOperation {
 	@Override
 	public String toString() {
 		// FIXME: this is lazy
-		return "pa(" + this.getLocation().getId() + ")";
+		return "ParameterAdder(" + this.getLocation().getId() + ")";
 	}
 	
 }
