@@ -28,6 +28,6 @@ public class JavaReplaceOperation extends JavaEditOperation {
 	@Override
 	public String toString() {
 		StatementHole fixHole = (StatementHole) this.getHoleCode();
-		return "r(" + this.getLocation().getId() + "," + fixHole.getCodeBankId() + ")";
+		return "StmtReplace(" + this.getLocation().getId() + "," + fixHole.getCodeBankId() + ")";
 	}
 }
