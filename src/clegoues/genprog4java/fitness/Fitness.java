@@ -374,6 +374,7 @@ public class Fitness {
 	 * @param withModel whether to use the testModel
 	 * @returns boolean, whether the rep passed all tests.  
 	 */
+	int totalVariantsTried = 0;
 	public boolean testToFirstFailure(Representation rep, boolean withModel) {
 		double fac = Fitness.numPositiveTests * Fitness.negativeTestWeight
 				/ Fitness.numNegativeTests;
@@ -383,6 +384,7 @@ public class Fitness {
 		double curFit = rep.getFitness();
 		if (curFit > -1.0) {
 			logger.info("\t passed" + curFit + " tests, " + rep.getName() + " (stored at: " + rep.getVariantFolder() + ")");
+			logger.info("Total variants tried: " + ++totalVariantsTried);
 			return !(curFit < maxFitness);
 		}
 
@@ -402,6 +404,7 @@ public class Fitness {
 			if(foundFail) {
 				Collections.sort(testModel,Collections.reverseOrder());
 				logger.info("\t passed " + numPassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
+				logger.info("Total variants tried: " + ++totalVariantsTried);
 				return false;
 			}
 			return true;
@@ -409,17 +412,19 @@ public class Fitness {
 			int numNegativePassed = this.testPassCount(rep, true, Fitness.negativeTests);
 			if(numNegativePassed < Fitness.numNegativeTests) {
 				logger.info("\t passed " + numNegativePassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
-
+				logger.info("Total variants tried: " + ++totalVariantsTried);
 				return false;
 			}
 			int numPositivePassed = this.testPassCount(rep,  true, Fitness.positiveTests);
 			if(numPositivePassed < Fitness.numPositiveTests) {
 				int totalPassed = numNegativePassed + numPositivePassed;
 				logger.info("\t passed " + totalPassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
+				logger.info("Total variants tried: " + ++totalVariantsTried);
 				return false;
 			}
 			int totalPassed = numNegativePassed + numPositivePassed;
 			logger.info("\t passed " + totalPassed + " (ALL) tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
+			logger.info("Total variants tried: " + ++totalVariantsTried);
 			return true;
 		}
 	}

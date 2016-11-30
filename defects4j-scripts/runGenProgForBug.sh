@@ -138,3 +138,9 @@ fi
 
 fi #correct number of params
 
+#For use only of the Probabilistic vs Equally distributed comparisson
+#WHICHMODE="RegAllMut"
+#mv $D4J_HOME/$BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/ $D4J_HOME/$BUGSFOLDER/"ResultsRegvsProbMultiLine"/$LOWERCASEPACKAGE$2$WHICHMODE/
+#cd $GP4J_HOME/defects4j-scripts/
+#GETLASTLINESFROMLOGS="./getLastLinesFromAllLogs.sh $PROJECT $BUGNUMBER $D4J_HOME/$BUGSFOLDER/$LOWERCASEPACKAGE$2$WHICHMODE/"
+#eval $GETLASTLINESFROMLOGS
