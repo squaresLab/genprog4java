@@ -37,13 +37,13 @@ PATHTOCHECKOUTFOLDERS="$6"
 LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 
 rm -f $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/coverage.xml
-rm -rf $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
-rm -rf $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed
+#rm -rf $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
+#rm -rf $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed
 
 
 #Checkout the buggy and fixed versions of the code 
-defects4j checkout -p $PROJECT -v "$BUGNUMBER"b -w $D4J_HOME/$PATHTOCHECKOUTFOLDERS"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
-defects4j checkout -p $PROJECT -v "$BUGNUMBER"f -w $D4J_HOME/$PATHTOCHECKOUTFOLDERS"/"$LOWERCASEPACKAGE"$BUGNUMBER"Fixed
+#defects4j checkout -p $PROJECT -v "$BUGNUMBER"b -w $D4J_HOME/$PATHTOCHECKOUTFOLDERS"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
+#defects4j checkout -p $PROJECT -v "$BUGNUMBER"f -w $D4J_HOME/$PATHTOCHECKOUTFOLDERS"/"$LOWERCASEPACKAGE"$BUGNUMBER"Fixed
 
 #Run coverage of the indicated test suite on the human fix
 ./checkCoverageOfGeneratedTestSuite.sh $PROJECT $BUGNUMBER $RANDOOPOREVOSUITE $PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/ $PATHOFSUITEFOLDER
@@ -64,7 +64,7 @@ if [ $word1 = "Files" ] && [ $word5 = "differ" ]; then
   echo ""
   echo "File: $file2"
   diff --unchanged-line-format="" --old-line-format="" --new-line-format="%dn
-" $file1 $file2 &>> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/lineNumbersChanged.txt #Think about the cases where the fix is a delete
+" $file1 $file2 2>&1 | tee -a $D4J_HOME/$PATHTOCHECKOUTFOLDERS/lineNumbersChanged.txt #Think about the cases where the fix is a delete
 
   atLeastOneNonZero="false"
   atLeastOneZero="false"
@@ -129,87 +129,3 @@ if [ $atLeastOneNonZero = "false" ] && [ $atLeastOneZero = "false" ]; then
 fi
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-rm -f $D4J_HOME/$PATHOFFIXEDFOLDER/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/coverage.xml
-
-#Run coverage of the indicated test suite on the generated fix
-./checkCoverageOfGeneratedTestSuite.sh $PROJECT $BUGNUMBER $RANDOOPOREVOSUITE $PATHOFFIXEDFOLDER/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/ $PATHOFSUITEFOLDER
-
-#Diff between buggy version and generated fix
-diff --exclude=.git --exclude=.defects4j.config --exclude=defects4j.build.properties --exclude=.svn -qr $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy $D4J_HOME/$PATHOFFIXEDFOLDER/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/ &>> $D4J_HOME/$PATHOFFIXEDFOLDER/filesChanged.txt  
-
-filesChanged=$D4J_HOME/$PATHOFFIXEDFOLDER/filesChanged.txt 
-while read lineOfFilesChanged
-do
-#echo "Analyzing this line from the diff: $lineOfFilesChanged"
-word1=$(echo $lineOfFilesChanged | cut -d " " -f 1)
-word5=$(echo $lineOfFilesChanged | cut -d " " -f 5)
-if [ $word1 = "Files" ] && [ $word5 = "differ" ]; then
-  #echo "New File: $lineOfFilesChanged"
-  file1=$(echo $lineOfFilesChanged | cut -d " " -f 2)
-  file2=$(echo $lineOfFilesChanged | cut -d " " -f 4)
-  echo ""
-  echo "File: $file2"
-  diff --unchanged-line-format="" --old-line-format="" --new-line-format="%dn
-" $file1 $file2 &>> $D4J_HOME/$PATHOFFIXEDFOLDER/lineNumbersChanged.txt #Think about the cases where the fix is a delete
-
-  atLeastOneNonZero="false"
-  atLeastOneZero="false"
-
-  linesChanged=$D4J_HOME/$PATHOFFIXEDFOLDER/lineNumbersChanged.txt
-  while read lineChanged
-  do
-    echo "Line changed: $lineChanged"
-    alreadyFound="false"  
-    coveragePath=$D4J_HOME/$PATHOFFIXEDFOLDER/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy/coverage.xml
-    while read coverageXMLLine
-    do
-	  if [[ $coverageXMLLine = *"<line number=\"$lineChanged\""* ]]
-	  then
-	  if [[ $alreadyFound = "false" ]]
-	  then
-	    word3=$(echo $coverageXMLLine | cut -d " " -f 3)
-		hits=${word3#hits=\"} 
-		hits=${hits%\"} 
-		alreadyFound="true"
-		#echo "Hits: $hits"
-		
-		if [ $hits != "0" ]; then
-		  echo "Covered"
-		  atLeastOneNonZero="true"
-		fi
-		if [ $hits = "0" ]; then
-		  echo "Not covered"
-		  atLeastOneZero="true"
-		fi
-	  fi
-	  fi
-    done < $coveragePath
-	if [[ $alreadyFound = "false" ]]; then
-	  echo "Not covered"
-	  atLeastOneZero="true"
-	fi
-  done < $linesChanged
- 
-  rm $D4J_HOME/$PATHOFFIXEDFOLDER/lineNumbersChanged.txt
-fi
-done < $filesChanged
-rm $D4J_HOME/$PATHOFFIXEDFOLDER/filesChanged.txt 
-
-echo ""
-if [ $atLeastOneNonZero = "true" ] && [ $atLeastOneZero = "false" ]; then
-  echo "GENERATED CHANGES FULLY COVERED"
-  echo "GENERATED CHANGES FULLY COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
-fi
-if [ $atLeastOneNonZero = "false" ] && [ $atLeastOneZero = "true" ]; then
-  echo "GENERATED CHANGES NOT COVERED"
-  echo "GENERATED CHANGES NOT COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
-fi
-if [ $atLeastOneNonZero = "true" ] && [ $atLeastOneZero = "true" ]; then
-  echo "GENERATED CHANGES PARTIALLY COVERED"
-  echo "GENERATED CHANGES PARTIALLY COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
-fi
-if [ $atLeastOneNonZero = "false" ] && [ $atLeastOneZero = "false" ]; then
-  echo "GENERATED CHANGES NOT COVERED"
-  echo "GENERATED CHANGES NOT COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
-fi

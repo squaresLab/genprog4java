@@ -15,7 +15,7 @@
 # 2nd param is the bug number (ex: 1,2,3,4,...)
 # 3th param is the generation tool (Randoop or Evosuite)
 # 4th param is the budget of time in seconds the tool has to generate the test suite
-# 5th param is weather you want to run only sections of the script: C=create, F=fix. You can run: CF, F
+# 5th param is weather you want to run only sections of the script: C=create, F=fix. You can run: CF, C, F
 # 6th param is the name of the folder the test suite will be stored in. This is located in $D4J_HOME/generatedTestSuites/. Example: September21
 
 
@@ -50,7 +50,7 @@ export PATH=$JAVA_HOME/bin/:$PATH
 
 SEED=1
 
-if [ [ $CF == "CF" ] || [ $CF == "C" ]; then
+if [ $CF == "CF" ] || [ $CF == "C" ]; then
   echo ""
   echo "Creating test suite"
   echo ""
@@ -65,7 +65,7 @@ if [ [ $CF == "CF" ] || [ $CF == "C" ]; then
 fi
 
 
-if [ [ $CF == "CF" ] || [ $CF == "F" ]; then
+if [ $CF == "CF" ] || [ $CF == "F" ]; then
   echo ""
   echo "Fixing test suite"
   echo ""
