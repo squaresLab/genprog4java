@@ -1,6 +1,5 @@
 package clegoues.genprog4java.java;
 
-import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -10,8 +9,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 
 public class JavaSourceInfo {
-
-        protected static Logger logger = Logger.getLogger(JavaSourceInfo.class);
 
 	private static HashMap<ClassInfo, String> originalSource = new HashMap<ClassInfo, String>();
 	private static HashMap<Integer, JavaStatement> codeBank = new HashMap<Integer, JavaStatement>();
@@ -57,8 +54,7 @@ public class JavaSourceInfo {
 		JavaSourceInfo.base.put(stmtId, s);
 	}
 	public void addToCodeBank(int stmtId, JavaStatement s) {
-	        logger.info("\n" + stmtId + ":\n" + s);
-        	JavaSourceInfo.codeBank.put(stmtId, s);
+		JavaSourceInfo.codeBank.put(stmtId, s);
 	}
 	
 	

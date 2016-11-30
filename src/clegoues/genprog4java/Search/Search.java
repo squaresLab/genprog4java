@@ -305,6 +305,7 @@ public abstract class Search<G extends EditOperation> {
 						.chooseOneWeighted(new ArrayList(allowed));
 				variant.performEdit(mut, location, selected.getHole());
 				}
+
 			}
 		}
 	}
