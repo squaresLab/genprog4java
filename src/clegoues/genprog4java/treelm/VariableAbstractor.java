@@ -17,7 +17,6 @@ import com.google.common.collect.Multiset;
 import clegoues.genprog4java.treelm.ChainedJavaTreeExtractor.PostProcess;
 import codemining.ast.AstNodeSymbol;
 import codemining.ast.TreeNode;
-import codemining.math.random.SampleUtils;
 
 public class VariableAbstractor implements
 	Supplier< ChainedJavaTreeExtractor.PostProcess >,
@@ -38,12 +37,12 @@ public class VariableAbstractor implements
 			return tree;
 		
 		IVariableBinding var = (IVariableBinding) binding;
+		String typeName = var.getType().getQualifiedName();
 
 		AstNodeSymbol symbol = new AstNodeSymbol( AstNodeSymbol.TEMPLATE_NODE );
-		symbol.addAnnotation( "TYPE", var.getType().getQualifiedName() );
+		symbol.addAnnotation( "TYPE", typeName );
 		Integer id = getSymbolId.apply( symbol );
-		if ( ! varNodes.containsKey( id ) )
-			varNodes.put( id, ConcurrentHashMultiset.create() );
+		varNodes.putIfAbsent( id, ConcurrentHashMultiset.create() );
 		varNodes.get( id ).add( tree );
 		
 		return TreeNode.create( id, 0 );
@@ -51,12 +50,23 @@ public class VariableAbstractor implements
 
 	@Override
 	public TreeNode< Integer > decode(
-		TreeNode< Integer > tree, Function< Integer, AstNodeSymbol > getSymbol
+		TreeNode< Integer > tree,
+		Function< AstNodeSymbol, Integer > getOrAddSymbolId,
+		Function< Integer, AstNodeSymbol > getSymbol,
+		SymbolTable symbols
 	) {
 		Integer id = tree.getData();
-		if ( varNodes.containsKey( id ) )
-			return SampleUtils.getRandomElement( varNodes.get( id ) );
-		else
+		if ( varNodes.containsKey( id ) ) {
+			String type = (String) getSymbol.apply( id ).getAnnotation("TYPE");
+			String name = symbols.getNameForType( type ).get();
+			AstNodeSymbol symbol = new AstNodeSymbol( ASTNode.SIMPLE_NAME );
+			symbol.addSimpleProperty(
+				SimpleName.IDENTIFIER_PROPERTY.getId(), name
+			);
+			Integer varId = getOrAddSymbolId.apply( symbol );
+
+			return TreeNode.create( varId, 0 );
+		} else
 			return tree;
 	}
 

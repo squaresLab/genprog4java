@@ -63,7 +63,10 @@ public class TreeBinarizer implements
 
 	@Override
 	public TreeNode< Integer > decode(
-		TreeNode< Integer > tree, Function< Integer, AstNodeSymbol > getSymbol
+		TreeNode< Integer > tree,
+		Function< AstNodeSymbol, Integer > getOrAddSymbolId,
+		Function< Integer, AstNodeSymbol > getSymbol,
+		SymbolTable st
 	) {
 		TreeNode< Integer > copy =
 			TreeNode.create( tree.getData(), tree.nProperties() );
@@ -79,124 +82,4 @@ public class TreeBinarizer implements
 	}
 	
 	private final Map< Pair< Integer, Integer >, Integer > contextId;
-	
-	private static String nextToken(
-		Deque< String > processed, Deque< String > pending
-	) {
-		String token = pending.removeFirst();
-		processed.addLast( token );
-		return token;
-	}
-	
-	private static TreeNode< Integer > buildTree(
-		Deque< String > processed, Deque< String > pending
-	) {
-		String token = nextToken( processed, pending );
-		if ( ! token.equals( "(" ) ) {
-			int key = Integer.parseInt( token );
-			return TreeNode.create( key, 0 );
-		}
-		
-		token = nextToken( processed, pending );
-		int key = Integer.parseInt( token );
-		List< List< TreeNode< Integer > > > properties = new ArrayList<>();
-		while ( true ) {
-			// looking for the start of a property or end of this tree...
-			token = nextToken( processed, pending );
-			if ( token.equals( ")" ) )
-				break;
-			if ( token.equals( "[" ) ) {
-				List< TreeNode< Integer > > children = new ArrayList<>();
-				while ( ! token.equals( "]" ) ) {
-					children.add( buildTree( processed, pending ) );
-					token = pending.getFirst();
-				}
-				nextToken( processed, pending );
-				properties.add( children );
-			} else {
-				processed.removeLast();
-				pending.addFirst( token );
-				properties.add(
-					Collections.singletonList( buildTree( processed, pending ) )
-				);
-			}
-		}
-		TreeNode< Integer > result = TreeNode.create( key, properties.size() );
-		for ( int i = 0; i < properties.size(); ++i )
-			for ( int j = 0; j < properties.get( i ).size(); ++j )
-				result.addChildNode( properties.get( i ).get( j ), i );
-		return result;
-	}
-
-	private static void printTree( TreeNode< Integer > tree ) {
-		StringBuilder indent = new StringBuilder();
-		TreeNodeUtils.walk( tree,
-			(t) -> {
-				System.out.printf( "%s%d\n", indent, t.getData() );
-				indent.append( "  " );
-			},
-			(t) -> {
-				indent.delete( indent.length() - 2, indent.length() );
-			}
-		);
-	}
-	
-	private static void printTokens( Deque< String > tokens ) {
-		for ( String token : tokens ) {
-			System.err.print( " " );
-			System.err.print( token );
-		}
-		System.err.println();
-	}
-
-	public static void main( String[] args ) {
-		if ( args.length < 1 ) {
-			System.err.println(
-				"Usage: java clegoues.genprog4java.treelm.TreeBinarizerFactory tree"
-			);
-			return;
-		}
-		
-		Deque< String > tokens = new ArrayDeque<>(
-			Arrays.asList( args[ 0 ].split( "\\s+"  ) )
-		);
-		if ( ! tokens.getFirst().equals( "(" ) ) {
-			tokens.addFirst( "(" );
-			tokens.addLast( ")" );
-		}
-		Deque< String > processed = new ArrayDeque<>();
-		TreeNode< Integer > tree;
-		try {
-			tree = buildTree( processed, tokens );
-		} catch ( NoSuchElementException e ) {
-			System.err.print( "ERROR: expected more tokens at end of input:" );
-			printTokens( processed );
-			System.exit( 1 );
-			return;
-		} catch ( NumberFormatException e ) {
-			System.err.print( "ERROR: expected integer:" );
-			printTokens( processed );
-			System.exit( 1 );
-			return;
-		}
-		if ( ! tokens.isEmpty() ) {
-			System.err.print( "ERROR: unprocessed tokens:" );
-			printTokens( tokens );
-			System.exit( 1 );
-		}
-
-		TreeBinarizer inst = new TreeBinarizer();
-		
-		printTree( tree );
-		System.out.println( "=====" );
-		tree = TreeNodeUtils.visit( tree, null, (t) -> {
-			return inst.encode( t, null, null );
-		} );
-		printTree( tree );
-		System.out.println( "=====" );
-		tree = TreeNodeUtils.visit( tree, (t) -> {
-			return inst.decode( t, null );
-		} );
-		printTree( tree );
-	}
 }

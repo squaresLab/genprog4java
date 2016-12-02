@@ -253,21 +253,6 @@ public class JavaSemanticInfo implements SymbolTable {
 		return null;
 	}
 
-	private HashMap<String,SimpleName> nameToSimpleName = new HashMap<String,SimpleName>();
-	public void processTypes(List<SimpleName> typNames) {
-		for(SimpleName t : typNames) {
-			nameToSimpleName.put(t.getIdentifier(), t);
-		}
-	}
-
-	@Override
-	public String getFullyQualifiedTypeName(String simpleName) {
-		if(nameToSimpleName.containsKey(simpleName)) {
-			SimpleName sName = nameToSimpleName.get(simpleName);
-			return sName.getFullyQualifiedName();
-		}
-		return null;
-	}
 	private Location babbleScope;
 	
 	public void initializeBabbleScope(Location startingPoint) {
