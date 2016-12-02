@@ -51,18 +51,6 @@ public interface SymbolTable {
 	public void leave( int nodeType );
 	
 	/**
-	 * Called to get the fully qualified type name of a variable. Note that
-	 * the String parameter represents a simple name. A qualified name may
-	 * be reconstructed using the {@link #enter(int)} and
-	 * {@link #leave(int)} calls.
-	 * 
-	 * @param simpleName the name of variable being requested
-	 * 
-	 * @return the fully qualified name of the type of the given variable.
-	 */
-	public String getFullyQualifiedTypeName( String simpleName );
-	
-	/**
 	 * Called when a new name is required to instantiate an AST. The
 	 * returned name should be added to the appropriate scope as a possible
 	 * result of future calls to {@link #getNameForType(String)}.

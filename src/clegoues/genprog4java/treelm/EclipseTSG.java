@@ -57,8 +57,10 @@ public class EclipseTSG {
 
 		@Override
 		public TreeNode< Integer > decode(
-			TreeNode< Integer > tree, Function< Integer,
-			AstNodeSymbol > getSymbol
+			TreeNode< Integer > tree,
+			Function< AstNodeSymbol, Integer > getOrAddSymbolId,
+			Function< Integer, AstNodeSymbol > getSymbol,
+			SymbolTable st
 		) {
 			return tree;
 		}
@@ -510,6 +512,8 @@ public class EclipseTSG {
 				tsgTree.getData().nodeKey, tsgTree.nProperties()
 			);
 			TSGNode.copyChildren( intTree, tsgTree );
+			
+			tsgExtractor.setSymbolTable( table );
 			return tsgExtractor.getASTFromTree( intTree );
 		} );
 	}

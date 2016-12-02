@@ -220,8 +220,6 @@ CachingRepresentation<JavaEditOperation> {
 		
 		Set<String> knownTypesInScope = scopeInfo.getAvailableTypes();
 		Set<String> knownMethodsAndFields = scopeInfo.getAvailableMethodsAndFields();
-		List<SimpleName> typs = scopeInfo.getTypNames();
-		semanticInfo.processTypes(typs);
 
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
