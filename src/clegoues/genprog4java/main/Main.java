@@ -50,9 +50,7 @@ import clegoues.genprog4java.localization.DefaultLocalization;
 import clegoues.genprog4java.localization.UnexpectedCoverageResultException;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.rep.CachingRepresentation;
-import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
-import clegoues.genprog4java.rep.LocalizationRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 
@@ -73,7 +71,6 @@ public class Main {
 		ConfigurationBuilder.register( Configuration.token );
 		ConfigurationBuilder.register( Fitness.token );
 		ConfigurationBuilder.register( CachingRepresentation.token );
-		ConfigurationBuilder.register( FaultLocRepresentation.token );
 		ConfigurationBuilder.register( JavaRepresentation.token );
 		ConfigurationBuilder.register( Population.token );
 		ConfigurationBuilder.register( Search.token );
@@ -91,11 +88,7 @@ public class Main {
 		logger.info("Configuration file loaded");
 		
 		if (Configuration.globalExtension == ".java") {
-			if (Search.searchStrategy.equals("io")) {
-				baseRep = (Representation) new LocalizationRepresentation();
-			} else {
-				baseRep = (Representation) new JavaRepresentation();
-			}
+			baseRep = (Representation) new JavaRepresentation();
 			fitnessEngine = new Fitness();
 			switch(Search.searchStrategy.trim()) {
 
