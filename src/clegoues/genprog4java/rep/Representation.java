@@ -134,8 +134,6 @@ Comparable<Representation<G>> {
 	public abstract FitnessValue testCase(TestCase test);
 	public abstract FitnessValue testCase(TestCase test, boolean doingCoverage);
 
-	public abstract void reduceSearchSpace() throws GiveUpException; 
-
 	public abstract List<WeightedMutation> availableMutations(
 			Location faultyLocation);
 

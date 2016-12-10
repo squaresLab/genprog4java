@@ -85,7 +85,7 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 	@Override
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
 			throws RepairFoundException, GiveUpException {
-		original.reduceSearchSpace();
+		original.getLocalization().reduceSearchSpace();
 		Localization localization = original.getLocalization();
 
 		int count = 0;

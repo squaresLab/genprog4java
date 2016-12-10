@@ -363,12 +363,6 @@ Representation<G>  {
 		myHashCode = -1;
 	}
 
-	public void reduceSearchSpace() throws GiveUpException {
-	} // subclasses can override as desired
-
-	public void reduceFixSpace() {
-	}
-
 	private void writeObject(java.io.ObjectOutputStream out)
 			throws IOException {
 

@@ -29,7 +29,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 	 */
 	protected Population<G> initialize(Representation<G> original,
 			Population<G> incomingPopulation) throws RepairFoundException, GiveUpException {
-		original.reduceSearchSpace();
+		original.getLocalization().reduceSearchSpace();
 
 		Population<G> initialPopulation = incomingPopulation;
 
