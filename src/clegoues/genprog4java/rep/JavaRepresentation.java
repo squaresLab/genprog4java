@@ -594,11 +594,11 @@ CachingRepresentation<JavaEditOperation> {
 			}
 		}
 
-				// we collected this info on parse.  If the block contains any type of assignment to
-				// or declaration of a final variable, this should be true.
-				if(semanticInfo.getFinalVarStatus(index)) {
-					return true;
-				}
+		// we collected this info on parse.  If the block contains any type of assignment to
+		// or declaration of a final variable, this should be true.
+		if(semanticInfo.getFinalVarStatus(index)) {
+			return true;
+		}
 				
 
 		return false;

@@ -39,7 +39,7 @@ public class JavaSemanticInfo implements SymbolTable {
 
 	/** type information, stored heuristically as strings, for methods and variables */
 	private static Map<String,String> methodReturnType = new HashMap<String,String>();
-	private static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
+	public static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
 	private static HashMap<String, Set<String>> inverseVarDataTypeMap = new HashMap<String, Set<String>>();
 
 	/** whether a statement references a final variable is relevant to whether we
@@ -156,14 +156,12 @@ public class JavaSemanticInfo implements SymbolTable {
 
 	public void addAllSemanticInfo(ScopeInfo info) {
 		JavaSemanticInfo.methodReturnType.putAll(info.getMethodReturnTypes());
-		JavaSemanticInfo.getVariableDataTypes().putAll(info.getVariableDataTypes());
+		JavaSemanticInfo.variableDataTypes.putAll(info.getVariableDataTypes());
 	}
 
 	public void addToClassScopeMap(JavaStatement s, Set<String> scope) {
 		JavaSemanticInfo.classScopeMap.put(s.getStmtId(),scope);
 	}
-
-
 
 	public void addToMethodScopeMap(JavaStatement s, Set<String> scope) {
 		JavaSemanticInfo.methodScopeMap.put(s.getStmtId(),scope);
@@ -220,15 +218,6 @@ public class JavaSemanticInfo implements SymbolTable {
 		}
 		return true;
 	}
-
-	public Map<String,String> getMethodReturnTypes() {
-		return JavaSemanticInfo.methodReturnType;
-	}
-
-	public static HashMap<String, String> getVariableDataTypes() {
-		return variableDataTypes;
-	}
-	
 
 	public static void setVariableDataTypes(HashMap<String, String> variableDataTypes) {
 		JavaSemanticInfo.variableDataTypes = variableDataTypes;
