@@ -39,6 +39,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -68,8 +69,6 @@ import clegoues.genprog4java.rep.JavaRepresentation;
 
 public class SemanticInfoVisitor extends ASTVisitor {
 
-	private ScopeInfo scopes;
-
 	/** all ASTNodes of interest, corresponding to "repairable" Java statement types
 	 * a question (currently a question answered by {@link JavaRepresentation.canRepair})
 	 */
@@ -91,13 +90,12 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	private HashSet<String> requiredNames = new HashSet<String>();
 	private Stack<HashSet<String>> requiredNamesStack = new Stack<HashSet<String>>();
-
-
 	private HashMap<ASTNode,Set<String>> requiredNamesMap = new HashMap<ASTNode,Set<String>>(); 
 
 	private HashSet<String> currentMethodScope = new HashSet<String>();
 	private Stack<HashSet<String>> methodScopeStack = new Stack<HashSet<String>>();
-
+	private HashMap<ASTNode,Set<String>> methodScopeMap = new HashMap<ASTNode,Set<String>>(); 
+	
 	private HashSet<String> currentLoopScope = new HashSet<String>();
 	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>();
 
@@ -105,15 +103,16 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private Stack<HashSet<String>> namesDeclaredStack = new Stack<HashSet<String>>();
 	private HashMap<ASTNode,Set<String>> namesDeclaredMap = new HashMap<ASTNode,Set<String>>(); 
 
+	private Set<String> classScope; // stuff that's IN SCOPE at the statement, not used at the statement
+
 	private CompilationUnit cu;
 
 	public SemanticInfoVisitor() {
-		this.scopes = new ScopeInfo();
 		this.stmts = new LinkedList<ASTNode>();
 		this.availableStringTypes = new HashSet<String>();
 		this.availableMethodsAndFields = new HashSet<String>();
 		this.availableMethodsAndFields.add("this");
-
+		this.classScope = new HashSet<String>();
 		this.typNames = new LinkedList<SimpleName>();
 
 	}
@@ -121,7 +120,26 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	public List<ASTNode> getStatements() {
 		return this.stmts;
 	}
+	
+	private void addToMethodScope(ASTNode buggy, Set<String> methodScope, Set<String> loopScope)
+	{
+		Set<String> newScope = new TreeSet<String>();
+		newScope.addAll(methodScope);
+		newScope.addAll(loopScope);
+		newScope.addAll(this.availableStringTypes);
+		if(this.methodScopeMap.containsKey(buggy))
+		{
+			this.methodScopeMap.get(buggy).addAll(newScope);
+		}
+		else
+		{
+			this.methodScopeMap.put(buggy, newScope);
+		}
+	}
 
+	private void addKnownToClassScope() {
+		this.classScope.addAll(this.availableMethodsAndFields);
+	}
 
 	@Override
 	public void preVisit(ASTNode node) {
@@ -135,8 +153,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		{
 			// add scope information
 
-			this.scopes.addToMethodScope(node,this.currentMethodScope, this.currentLoopScope);
-			this.scopes.addKnownToClassScope();
+			this.addToMethodScope(node,this.currentMethodScope, this.currentLoopScope);
+			this.addKnownToClassScope();
 			this.stmts.add(node);
 		}
 
