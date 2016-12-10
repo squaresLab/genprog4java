@@ -26,7 +26,6 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.holes.java.JavaASTNodeLocation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import clegoues.genprog4java.rep.Representation;
-import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 import clegoues.genprog4java.treelm.EclipseTSG;
 import clegoues.genprog4java.treelm.EclipseTSG.ParseException;
 import clegoues.util.ConfigurationBuilder;

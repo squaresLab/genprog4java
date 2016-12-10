@@ -49,7 +49,7 @@ public class ExpressionModAdd extends ExpressionReplacer {
 		Expression newExpCode = (Expression) thisHole.getCode();
 
 
-		String retval = "ea(" + this.getLocation().getId() + ": ";
+		String retval = "ExpressionAdd(" + this.getLocation().getId() + ": ";
 		retval += "(" + locationExp.toString() + ")";
 		if(thisHole.getChoice() == 0) 
 			retval += " && ";

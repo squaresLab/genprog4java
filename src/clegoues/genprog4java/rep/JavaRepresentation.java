@@ -163,49 +163,13 @@ CachingRepresentation<JavaEditOperation> {
 	public ArrayList<Integer> atomIDofSourceLine(int lineno) {
 		return sourceInfo.atomIDofSourceLine(lineno);
 	}
-
-
-	static int dumpCount = 0;
-	private void dumpStmts() {
-		BufferedWriter bw;
-		try {
-			bw = new BufferedWriter(new FileWriter("/Users/clegoues/Desktop/stmtinfo" + dumpCount + ".txt"));
 	
-		dumpCount++;
-		HashMap<Integer,JavaStatement> base = sourceInfo.getBase();
-		HashMap<Integer, JavaStatement> codeBank = sourceInfo.getCodeBank();
-		
-		bw.write("::BASE::\n");
-		for(Map.Entry<Integer,JavaStatement> s : base.entrySet()) {
-			JavaStatement node = s.getValue();
-			bw.write("\n\nStmt id: " + s.getKey() + " node: " + node.getASTNode());
-			bw.write("in class scope here: [[");
-			bw.write((JavaSemanticInfo.classScopeMap.get(node.getStmtId())).toString());
-			bw.write("in method scope here: [[");
-			bw.write((JavaSemanticInfo.methodScopeMap.get(node.getStmtId())).toString());
-			bw.write(" ]]\n");
-			bw.write("required names: [[");
-			bw.write((node.getRequiredNames()).toString()); 
-			bw.write("]] \n\n");
-		
-		}
-		bw.write("::CODEBANK::");
-		
-		for(Map.Entry<Integer,JavaStatement> s : codeBank.entrySet()) {
-			JavaStatement node = s.getValue();
-			bw.write("\n\nStmt id: " + s.getKey() + " node: " + node.getASTNode());
-		}
-	
-		bw.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-
+	public ClassInfo getFileFromStmt(int stmtId){
+		return sourceInfo.getFileFromStmt(stmtId);
 	}
-	
-	private void fromSource(ClassInfo pair, String path, File sourceFile) throws IOException {
+
+	@Override
+	public void fromSource(ClassInfo pair, String path, File sourceFile) throws IOException {
 
 		SemanticInfoVisitor visitor = new SemanticInfoVisitor();
 		JavaParser myParser = new JavaParser(visitor);
@@ -233,8 +197,6 @@ CachingRepresentation<JavaEditOperation> {
 
 			}
 		}	
-
-		dumpStmts();
 	}
 
 	public void fromSource(ClassInfo pair) throws IOException {

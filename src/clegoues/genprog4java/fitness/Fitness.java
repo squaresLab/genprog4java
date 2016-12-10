@@ -232,8 +232,8 @@ public class Fitness {
 	 * @param filterBy stuff to filter out of toFilter
 	 */
 	private void filterTests(ArrayList<String> toFilter, ArrayList<String> filterBy) {
-		HashSet<String> clazzesInFilterSet = new HashSet<String>();
-		HashSet<String> removeFromFilterSet = new HashSet<String>();
+		ArrayList<String> clazzesInFilterSet = new ArrayList<String>();
+		ArrayList<String> removeFromFilterSet = new ArrayList<String>();
 
 		// stuff in negative tests, must remove class from positive test list and add non-negative tests to list
 		for(String specifiedMethod : filterBy) {
@@ -250,7 +250,7 @@ public class Fitness {
 		}
 		filterBy.addAll(clazzesInFilterSet);
 
-		HashSet<String> removeFromFilteredSet = new HashSet<String>();
+		ArrayList<String> removeFromFilteredSet = new ArrayList<String>();
 		for(String testNameInToFilter : toFilter ) {
 			String clazzName = "";
 			if(testNameInToFilter.contains("::")) {
@@ -332,8 +332,8 @@ public class Fitness {
 		Long L = Math.round(sample * Fitness.numPositiveTests);
 		int sampleSize = Integer.valueOf(L.intValue());
 		Collections.shuffle(Fitness.positiveTests, Configuration.randomizer);
-		List<TestCase> intSample = Fitness.positiveTests.subList(0,sampleSize); 
-		List<TestCase> intRestSample = Fitness.positiveTests.subList(sampleSize, positiveTests.size()-1);
+		List<TestCase> intSample = Fitness.positiveTests.subList(0,sampleSize); //0 inclusive to sampleSize exclusive
+		List<TestCase> intRestSample = Fitness.positiveTests.subList(sampleSize, positiveTests.size()); // sampleSize inclusive to size exclusive
 		Fitness.testSample.clear(); 
 		Fitness.restSample.clear();
 		for(TestCase test : intSample) {
@@ -374,6 +374,7 @@ public class Fitness {
 	 * @param withModel whether to use the testModel
 	 * @returns boolean, whether the rep passed all tests.  
 	 */
+	int totalVariantsTried = 0;
 	public boolean testToFirstFailure(Representation rep, boolean withModel) {
 		double fac = Fitness.numPositiveTests * Fitness.negativeTestWeight
 				/ Fitness.numNegativeTests;
@@ -383,6 +384,7 @@ public class Fitness {
 		double curFit = rep.getFitness();
 		if (curFit > -1.0) {
 			logger.info("\t passed" + curFit + " tests, " + rep.getName() + " (stored at: " + rep.getVariantFolder() + ")");
+			logger.info("Total variants tried: " + ++totalVariantsTried);
 			return !(curFit < maxFitness);
 		}
 
@@ -402,6 +404,7 @@ public class Fitness {
 			if(foundFail) {
 				Collections.sort(testModel,Collections.reverseOrder());
 				logger.info("\t passed " + numPassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
+				logger.info("Total variants tried: " + ++totalVariantsTried);
 				return false;
 			}
 			return true;
@@ -409,17 +412,19 @@ public class Fitness {
 			int numNegativePassed = this.testPassCount(rep, true, Fitness.negativeTests);
 			if(numNegativePassed < Fitness.numNegativeTests) {
 				logger.info("\t passed " + numNegativePassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
-
+				logger.info("Total variants tried: " + ++totalVariantsTried);
 				return false;
 			}
 			int numPositivePassed = this.testPassCount(rep,  true, Fitness.positiveTests);
 			if(numPositivePassed < Fitness.numPositiveTests) {
 				int totalPassed = numNegativePassed + numPositivePassed;
 				logger.info("\t passed " + totalPassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
+				logger.info("Total variants tried: " + ++totalVariantsTried);
 				return false;
 			}
 			int totalPassed = numNegativePassed + numPositivePassed;
 			logger.info("\t passed " + totalPassed + " (ALL) tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
+			logger.info("Total variants tried: " + ++totalVariantsTried);
 			return true;
 		}
 	}
@@ -511,7 +516,7 @@ public class Fitness {
 		logger.info("\t gen: " + generation + " " + fitnessPair.getLeft() + " " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 		rep.setFitness(fitnessPair.getRight());
 		rep.cleanup();
-		return !(fitnessPair.getRight() < maxFitness);
+		return !(fitnessPair.getLeft() < maxFitness);
 
 	}
 

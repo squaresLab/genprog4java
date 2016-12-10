@@ -49,12 +49,12 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.localization.DefaultLocalization;
 import clegoues.genprog4java.localization.EntropyLocalization;
 import clegoues.genprog4java.localization.Localization;
+import clegoues.genprog4java.localization.UnexpectedCoverageResultException;
 import clegoues.genprog4java.mut.edits.java.JavaEditFactory;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
-import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 import clegoues.util.ConfigurationBuilder;
 
 public class Main {

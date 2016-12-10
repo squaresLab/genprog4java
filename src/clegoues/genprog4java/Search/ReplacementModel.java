@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -48,9 +49,12 @@ public class ReplacementModel {
 	double replacementModel[][] = new double[22][22];
 	double templatesCounter[] = new double[16];
 
-	double replacementCount =0;
-	double appendCount =0;
-	double deleteCount =0;
+	double replacementCount = 0;
+	double appendCount = 0;
+	double deleteCount = 0;
+	double defaultValue = 0;
+	
+	double totalCounter = 0;
 
 
 	public void populateModel(String path){
@@ -77,9 +81,11 @@ public class ReplacementModel {
 				if(lineNumber>=487 && !line.equalsIgnoreCase("")){
 					templatesCounter[lineNumber-487]=Double.valueOf(line);
 				}  
+				if(lineNumber>=484 && !line.equalsIgnoreCase(""))totalCounter += Double.valueOf(line);
 				++lineNumber;
 			}   
 
+			defaultValue = totalCounter / 19; //16 templates + 3 genprog mutations
 			// Always close files.
 			bufferedReader.close();         
 		}
@@ -95,7 +101,7 @@ public class ReplacementModel {
 			// Or we could just do this: 
 			// ex.printStackTrace();
 		}
-
+		
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -131,6 +137,8 @@ public class ReplacementModel {
 				prob = appendCount;
 			}else if(mutation == Mutation.DELETE){
 				prob = deleteCount;
+			}else if(mutation == Mutation.SWAP){
+				prob = replacementCount;
 			}else{
 				int row = mutKind(mutation);
 				prob=Double.valueOf(templatesCounter[row]);
