@@ -75,6 +75,14 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	 */
 	private LinkedList<ASTNode> stmts;
 
+	/** all imported types, or types seen over the course of parsing the CU */
+	private HashSet<String> availableStringTypes;
+
+	/** methods and fields available in this CU, which we know either because
+	 * we see their declaration, or because we've seen them used at some point (heuristic);
+	 */
+	private HashSet<String> availableMethodsAndFields;
+	
 	private boolean containsFinalVar = false;
 	private Stack<Boolean> finalVarStack = new Stack<Boolean>();
 
@@ -98,6 +106,10 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	public SemanticInfoVisitor() {
 		this.scopes = new ScopeInfo();
 		this.stmts = new LinkedList<ASTNode>();
+		this.availableStringTypes = new HashSet<String>();
+		this.availableMethodsAndFields = new HashSet<String>();
+		this.availableMethodsAndFields.add("this");
+
 
 	}
 
@@ -220,7 +232,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		// but I'm not yet so we'll make do
 		String name = node.getIdentifier();
 		this.requiredNames.add(name);
-		if(!scopes.anywhereInScope(name, currentMethodScope, currentLoopScope)) {
+		if(!anywhereInScope(name)) {
 			// because we're parsing, *if this CU parses*, we can assume it doesn't reference
 			// anything that's not in scope
 			// this means that if we haven't seen a name before, it's almost certainly the name of a method
@@ -229,7 +241,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			// imports, we just add the SimpleName to the list of available names
 			// kind of a cheap trick, but whatever
 			// the one thing I'm not sure about is if I should add this to available types or...something else
-			this.scopes.addToAvailableStringTypes(name);
+			
+			this.availableStringTypes.add(name);
 		}
 		return true;
 	}
@@ -270,7 +283,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		if(!node.isOnDemand() && !node.isStatic()) { // possible FIXME: handle all static stuff separately?
 			String name = node.getName().getFullyQualifiedName();
 			String[] split = name.split("\\.");
-			this.scopes.addToAvailableStringTypes(split[split.length - 1]);
+			this.availableStringTypes.add(split[split.length - 1]);
 		}
 		return false;
 	}
@@ -278,22 +291,22 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(TypeDeclaration node) {
 		if(!node.isInterface()) {
-			this.scopes.addToAvailableStringTypes(node.getName().getIdentifier());
+			this.availableStringTypes.add(node.getName().getIdentifier());
 			this.scopes.addToAvailableTypesMap(node.getName());
 			for(FieldDeclaration fd : node.getFields()) {
 				for (Object o : fd.fragments()) {
 					if (o instanceof VariableDeclarationFragment) {
 						VariableDeclarationFragment v = (VariableDeclarationFragment) o;
-						this.scopes.addAvailableMethodsAndFields(v.getName().getIdentifier());
+						this.availableMethodsAndFields.add(v.getName().getIdentifier());
 					}
 				}
 			}
 
 			for(MethodDeclaration md : node.getMethods()) {
-				this.scopes.addAvailableMethodsAndFields(md.getName().getIdentifier());
+				this.availableMethodsAndFields.add(md.getName().getIdentifier());
 			}
 			if(node.getSuperclassType() != null) {
-				this.scopes.addAvailableMethodsAndFields("super");
+				this.availableMethodsAndFields.add("super");
 			}
 		}
 		return true;
@@ -354,5 +367,12 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.cu = cu;
 	}
 
+
+	private boolean anywhereInScope(String lookingFor) {
+		return (availableMethodsAndFields != null && availableMethodsAndFields.contains(lookingFor)) || 
+				(availableStringTypes != null && availableStringTypes.contains(lookingFor)) ||
+				(currentMethodScope != null && currentMethodScope.contains(lookingFor)) ||
+				(currentLoopScope != null && currentLoopScope.contains(lookingFor));
+	}
 
 }

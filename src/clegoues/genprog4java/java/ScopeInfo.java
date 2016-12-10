@@ -61,22 +61,13 @@ public class ScopeInfo
 	
 
 	
-	/** all imported types, or types seen over the course of parsing the CU */
-	private HashSet<String> availableStringTypes;
 	
-	/** methods and fields available in this CU, which we know either because
-	 * we see their declaration, or because we've seen them used at some point (heuristic);
-	 */
-	private HashSet<String> availableMethodsAndFields;
 	public ScopeInfo()
 	{
 		this.methodScope = new HashMap<ASTNode,Set<String>>();
 		this.classScope = new HashSet<String>();
 		this.namesDeclared = new HashMap<ASTNode,Set<String>>();
 		this.containsFinalVarAssignment = new HashMap<ASTNode, Boolean>();
-		this.availableStringTypes = new HashSet<String>();
-		this.availableMethodsAndFields = new HashSet<String>();
-		this.availableMethodsAndFields.add("this");
 		this.typNames = new LinkedList<SimpleName>();
 	}
 	
@@ -134,30 +125,6 @@ public class ScopeInfo
 		return this.classScope;
 	}
 	
-
-	public void addAvailableMethodsAndFields(String identifier) {
-		this.availableMethodsAndFields.add(identifier);
-	}
-
-	public void addToAvailableStringTypes(String typ) {
-		this.availableStringTypes.add(typ);
-	}
-
-	public boolean anywhereInScope(String lookingFor, Set<String> currentMethodScope, Set<String> currentLoopScope) {
-		return (availableMethodsAndFields != null && availableMethodsAndFields.contains(lookingFor)) || 
-				(availableStringTypes != null && availableStringTypes.contains(lookingFor)) ||
-				(currentMethodScope != null && currentMethodScope.contains(lookingFor)) ||
-				(currentLoopScope != null && currentLoopScope.contains(lookingFor));
-	}
-
-
-	public Set<String> getAvailableTypes() {
-		return this.availableStringTypes;
-	}
-
-	public Set<String> getAvailableMethodsAndFields() {
-		return this.availableMethodsAndFields;
-	}
 
 	public void addToAvailableTypesMap(SimpleName name) {
 		this.typNames.add(name);
