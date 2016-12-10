@@ -101,6 +101,7 @@ import clegoues.genprog4java.java.JavaSemanticInfo;
 import clegoues.genprog4java.java.JavaSourceInfo;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.java.ScopeInfo;
+import clegoues.genprog4java.java.SemanticInfoVisitor;
 import clegoues.genprog4java.localization.EntropyLocalization;
 import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.localization.Location;
@@ -207,7 +208,8 @@ CachingRepresentation<JavaEditOperation> {
 	
 	private void fromSource(ClassInfo pair, String path, File sourceFile) throws IOException {
 
-		JavaParser myParser = new JavaParser();
+		SemanticInfoVisitor visitor = new SemanticInfoVisitor();
+		JavaParser myParser = new JavaParser(visitor);
 		String source = FileUtils.readFileToString(sourceFile);
 		sourceInfo.addToOriginalSource(pair, source);
 
@@ -216,27 +218,22 @@ CachingRepresentation<JavaEditOperation> {
 		List<ASTNode> stmts = myParser.getStatements();
 		sourceInfo.addToBaseCompilationUnits(pair, myParser.getCompilationUnit());
 		
-		Set<String> knownTypesInScope = scopeInfo.getAvailableTypes();
-		Set<String> knownMethodsAndFields = scopeInfo.getAvailableMethodsAndFields();
-
 		for (ASTNode node : stmts) {
 			if (JavaRepresentation.canRepair(node)) {
-				JavaStatement s = new JavaStatement();
-				s.setStmtId(stmtCounter);
-				s.setClassInfo(pair);
-				s.setInfo(stmtCounter, node);
-				stmtCounter++;
-
-				sourceInfo.augmentLineInfo(s.getStmtId(), node);
+				JavaStatement s = new JavaStatement(stmtCounter, node, pair);
+				sourceInfo.augmentLineInfo(stmtCounter, node);
 				sourceInfo.storeStmtInfo(s, pair);
-				s.setRequiredNames(scopeInfo.getRequiredNames(node)); // now in a map in the visitor
-				s.setNamesDeclared(scopeInfo.getNamesDeclared(node));
-				scopeInfo.addToClassScope(knownTypesInScope);
-				scopeInfo.addToClassScope(knownMethodsAndFields);
+				
+				
+				s.setRequiredNames(visitor.getRequiredNames(node)); // now in a map in the visitor
+				s.setNamesDeclared(visitor.getNamesDeclared(node));
+	
 				
 				semanticInfo.addToClassScopeMap(s, scopeInfo.getClassScope());
 				semanticInfo.addToMethodScopeMap(s, scopeInfo.getMethodScope(node));
 				semanticInfo.collectFinalVarInfo(s, scopeInfo.getFinalVarInfo(node));
+				stmtCounter++;
+
 			}
 		}	
 

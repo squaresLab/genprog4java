@@ -399,4 +399,17 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				(currentLoopScope != null && currentLoopScope.contains(lookingFor));
 	}
 
+	public void finalizeVisit() {
+		this.classScope.addAll(availableStringTypes);
+		this.classScope.addAll(availableMethodsAndFields);	
+	}
+
+	public Set<String> getRequiredNames(ASTNode node) {
+		return requiredNamesMap.get(node);
+	}
+
+	public Set<String> getNamesDeclared(ASTNode node) {
+		return namesDeclaredMap.get(node);
+	}
+
 }
