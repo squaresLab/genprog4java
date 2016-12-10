@@ -57,7 +57,7 @@ import clegoues.genprog4java.rep.JavaRepresentation;
 public class JavaParser
 {
 	/** visits all nodes while file is parsed.  Collects semantic info */
-	private SemanticInfoVisitor visitor;
+	private SimpleVisitor visitor;
 	
 	/** compilation unit from parsed file; to be returned/collected by the parser client */
 	private CompilationUnit compilationUnit;
@@ -65,7 +65,7 @@ public class JavaParser
 
 	public JavaParser()
 	{
-		this.visitor = new SemanticInfoVisitor();
+		this.visitor = new SimpleVisitor();
 	}
 	
 	
