@@ -242,7 +242,6 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		return nullCheckable;
 	}
 
-
 	private Map<ASTNode, List<ASTNode>> casts = null;
 
 	public Map<ASTNode, List<ASTNode>> getCasts() {
