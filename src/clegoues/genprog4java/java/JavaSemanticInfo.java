@@ -37,8 +37,13 @@ public class JavaSemanticInfo implements SymbolTable {
 	/** names in scope at a statement (ID'd by integer) within the enclosing method */ 
 	public static HashMap<Integer, Set<String>> methodScopeMap = new HashMap<Integer, Set<String>>();
 
-	/** type information, stored heuristically as strings, for methods and variables */
-	private static Map<String,String> methodReturnType = new HashMap<String,String>();
+	/** method names --> type name.  I keep considering changing this --- hate having
+	 * types as strings --- but haven't had a good reason to yet.
+	 */
+	static Map<String,String> methodReturnType = new HashMap<String,String>();
+	/** same thing, for variable names.  In theory might not work well b/c of scoping; in practice
+	 * doesn't seem to be a problem. 
+	 */
 	public static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
 	private static HashMap<String, Set<String>> inverseVarDataTypeMap = new HashMap<String, Set<String>>();
 
@@ -152,11 +157,6 @@ public class JavaSemanticInfo implements SymbolTable {
 			});
 			return expressionsInScope;
 		}
-	}
-
-	public void addAllSemanticInfo(ScopeInfo info) {
-		JavaSemanticInfo.methodReturnType.putAll(info.getMethodReturnTypes());
-		JavaSemanticInfo.variableDataTypes.putAll(info.getVariableDataTypes());
 	}
 
 	public void addToClassScopeMap(JavaStatement s, Set<String> scope) {

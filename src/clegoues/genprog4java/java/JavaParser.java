@@ -36,6 +36,7 @@ package clegoues.genprog4java.java;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -62,9 +63,9 @@ public class JavaParser
 	private CompilationUnit compilationUnit;
 	
 
-	public JavaParser(ScopeInfo scopeList)
+	public JavaParser()
 	{
-		this.visitor = new SemanticInfoVisitor(scopeList);
+		this.visitor = new SemanticInfoVisitor();
 	}
 	
 	public CompilationUnit getCompilationUnit()
@@ -101,6 +102,10 @@ public class JavaParser
 		parser.createASTs(new String[]{file}, null, new String[0], req, null);
 		
 		this.compilationUnit = visitor.getCompilationUnit();
+	}
+
+	public List<ASTNode> getStatements() {
+		return visitor.getStatements();
 	}
 
 }

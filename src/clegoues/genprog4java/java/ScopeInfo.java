@@ -53,25 +53,13 @@ public class ScopeInfo
 	private Set<String> classScope; // stuff that's IN SCOPE at the statement, not used at the statement
 
 	private HashMap<ASTNode,Set<String>> methodScope; // stuff that's IN SCOPE at the statement, not used at the statement
-	private HashMap<ASTNode,Set<String>> requiredNames; 
 	private HashMap<ASTNode,Set<String>> namesDeclared; 
 	private HashMap<ASTNode, Boolean> containsFinalVarAssignment;
 	private LinkedList<SimpleName> typNames;
 	
 	public LinkedList<SimpleName> getTypNames() { return this.typNames; }
-	/** all ASTNodes of interest, corresponding to "repairable" Java statement types
-	 * a question (currently a question answered by {@link JavaRepresentation.canRepair})
-	 */
-	private LinkedList<ASTNode> stmts;
 	
-	/** method names --> type name.  I keep considering changing this --- hate having
-	 * types as strings --- but haven't had a good reason to yet.
-	 */
-	private HashMap<String,String> methodReturnType;
-	/** same thing, for variable names.  In theory might not work well b/c of scoping; in practice
-	 * doesn't seem to be a problem. 
-	 */
-	private HashMap<String,String> variableTypes;
+
 	
 	/** all imported types, or types seen over the course of parsing the CU */
 	private HashSet<String> availableStringTypes;
@@ -84,14 +72,10 @@ public class ScopeInfo
 	{
 		this.methodScope = new HashMap<ASTNode,Set<String>>();
 		this.classScope = new HashSet<String>();
-		this.requiredNames = new HashMap<ASTNode,Set<String>>();
 		this.namesDeclared = new HashMap<ASTNode,Set<String>>();
 		this.containsFinalVarAssignment = new HashMap<ASTNode, Boolean>();
 		this.availableStringTypes = new HashSet<String>();
 		this.availableMethodsAndFields = new HashSet<String>();
-		this.methodReturnType = new HashMap<String,String>();
-		this.variableTypes = new HashMap<String,String>();
-		this.stmts = new LinkedList<ASTNode>();
 		this.availableMethodsAndFields.add("this");
 		this.typNames = new LinkedList<SimpleName>();
 	}
@@ -102,10 +86,6 @@ public class ScopeInfo
 	
 	public void setNamesDeclared(ASTNode buggy, Set<String> names) {
 		this.namesDeclared.put(buggy, names);
-	}
-	
-	public void addRequiredNames(ASTNode buggy, Set<String> names) {
-		this.requiredNames.put(buggy,names);
 	}
 	
 	public void addToMethodScope(ASTNode buggy, Set<String> methodScope, Set<String> loopScope)
@@ -154,18 +134,6 @@ public class ScopeInfo
 		return this.classScope;
 	}
 	
-	public Set<String> getRequiredNames(ASTNode buggy)
-	{
-		return this.requiredNames.get(buggy);
-	}
-
-	public void addMethodReturnType(String methodName, String returnType) {
-		this.methodReturnType.put(methodName,returnType);
-	}
-
-	public void addVariableType(String varName, String typ) {
-		this.variableTypes.put(varName, typ);
-	}
 
 	public void addAvailableMethodsAndFields(String identifier) {
 		this.availableMethodsAndFields.add(identifier);
@@ -175,10 +143,6 @@ public class ScopeInfo
 		this.availableStringTypes.add(typ);
 	}
 
-	public void addNode(ASTNode node) {
-		this.stmts.add(node);
-	}
-	
 	public boolean anywhereInScope(String lookingFor, Set<String> currentMethodScope, Set<String> currentLoopScope) {
 		return (availableMethodsAndFields != null && availableMethodsAndFields.contains(lookingFor)) || 
 				(availableStringTypes != null && availableStringTypes.contains(lookingFor)) ||
@@ -186,17 +150,6 @@ public class ScopeInfo
 				(currentLoopScope != null && currentLoopScope.contains(lookingFor));
 	}
 
-	public List<ASTNode> getStatements() {
-		return this.stmts;
-	}
-
-	public Map<String,String> getMethodReturnTypes() {
-		return this.methodReturnType;
-	}
-
-	public Map<String,String> getVariableDataTypes() {
-		return this.variableTypes;
-	}
 
 	public Set<String> getAvailableTypes() {
 		return this.availableStringTypes;

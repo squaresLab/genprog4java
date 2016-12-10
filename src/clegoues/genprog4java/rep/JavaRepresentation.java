@@ -207,16 +207,14 @@ CachingRepresentation<JavaEditOperation> {
 	
 	private void fromSource(ClassInfo pair, String path, File sourceFile) throws IOException {
 
-		ScopeInfo scopeInfo = new ScopeInfo();
-		JavaParser myParser = new JavaParser(scopeInfo);
+		JavaParser myParser = new JavaParser();
 		String source = FileUtils.readFileToString(sourceFile);
 		sourceInfo.addToOriginalSource(pair, source);
 
 		myParser.parse(path, Configuration.libs.split(File.pathSeparator));
 
-		List<ASTNode> stmts = scopeInfo.getStatements();
+		List<ASTNode> stmts = myParser.getStatements();
 		sourceInfo.addToBaseCompilationUnits(pair, myParser.getCompilationUnit());
-		semanticInfo.addAllSemanticInfo(scopeInfo);
 		
 		Set<String> knownTypesInScope = scopeInfo.getAvailableTypes();
 		Set<String> knownMethodsAndFields = scopeInfo.getAvailableMethodsAndFields();
@@ -231,7 +229,7 @@ CachingRepresentation<JavaEditOperation> {
 
 				sourceInfo.augmentLineInfo(s.getStmtId(), node);
 				sourceInfo.storeStmtInfo(s, pair);
-				s.setRequiredNames(scopeInfo.getRequiredNames(node));
+				s.setRequiredNames(scopeInfo.getRequiredNames(node)); // now in a map in the visitor
 				s.setNamesDeclared(scopeInfo.getNamesDeclared(node));
 				scopeInfo.addToClassScope(knownTypesInScope);
 				scopeInfo.addToClassScope(knownMethodsAndFields);
