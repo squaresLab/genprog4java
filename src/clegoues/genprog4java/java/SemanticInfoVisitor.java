@@ -82,9 +82,12 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	 * we see their declaration, or because we've seen them used at some point (heuristic);
 	 */
 	private HashSet<String> availableMethodsAndFields;
-	
+	private LinkedList<SimpleName> typNames;
+
 	private boolean containsFinalVar = false;
 	private Stack<Boolean> finalVarStack = new Stack<Boolean>();
+
+	private HashMap<ASTNode, Boolean> containsFinalVarMap = new HashMap<ASTNode,Boolean>();
 
 	private HashSet<String> requiredNames = new HashSet<String>();
 	private Stack<HashSet<String>> requiredNamesStack = new Stack<HashSet<String>>();
@@ -100,6 +103,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	private HashSet<String> namesDeclared = new HashSet<String>();
 	private Stack<HashSet<String>> namesDeclaredStack = new Stack<HashSet<String>>();
+	private HashMap<ASTNode,Set<String>> namesDeclaredMap = new HashMap<ASTNode,Set<String>>(); 
 
 	private CompilationUnit cu;
 
@@ -110,6 +114,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.availableMethodsAndFields = new HashSet<String>();
 		this.availableMethodsAndFields.add("this");
 
+		this.typNames = new LinkedList<SimpleName>();
 
 	}
 
@@ -175,8 +180,9 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 		if(JavaRepresentation.canRepair(node)) {
 			this.requiredNamesMap.put(node,new HashSet<String>(this.requiredNames));
-			this.scopes.setContainsFinalVarDecl(node, containsFinalVar);
-			this.scopes.setNamesDeclared(node, new HashSet<String>(this.namesDeclared));
+			
+			this.containsFinalVarMap.put(node, containsFinalVar);
+			this.namesDeclaredMap.put(node, new HashSet<String>(this.namesDeclared));
 		}
 
 		if (node instanceof Block) {
@@ -292,7 +298,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	public boolean visit(TypeDeclaration node) {
 		if(!node.isInterface()) {
 			this.availableStringTypes.add(node.getName().getIdentifier());
-			this.scopes.addToAvailableTypesMap(node.getName());
+			this.typNames.add(node.getName());
 			for(FieldDeclaration fd : node.getFields()) {
 				for (Object o : fd.fragments()) {
 					if (o instanceof VariableDeclarationFragment) {
