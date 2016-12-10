@@ -68,6 +68,12 @@ public class JavaParser
 		this.visitor = new SemanticInfoVisitor();
 	}
 	
+	
+	public JavaParser(SemanticInfoVisitor visitor)
+	{
+		this.visitor = visitor;
+	}
+	
 	public CompilationUnit getCompilationUnit()
 	{
 		return this.compilationUnit;
@@ -102,6 +108,7 @@ public class JavaParser
 		parser.createASTs(new String[]{file}, null, new String[0], req, null);
 		
 		this.compilationUnit = visitor.getCompilationUnit();
+		visitor.finalizeVisit();
 	}
 
 	public List<ASTNode> getStatements() {

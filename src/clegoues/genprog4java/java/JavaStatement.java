@@ -79,17 +79,19 @@ import clegoues.genprog4java.rep.JavaRepresentation;
 
 public class JavaStatement implements Comparable<JavaStatement>{
 
-	private ASTNode astNode;
-	private ClassInfo classInfo;
+	final private ASTNode astNode;
+	final private ClassInfo classInfo;
 
-	private int stmtId; // unique
+	final private int stmtId; // unique
 	private Set<String> mustBeInScope;
 	private Set<String> namesDeclared;
 
-	public void setClassInfo(ClassInfo ci) {
+	public JavaStatement(int id, ASTNode node, ClassInfo ci) {
+		this.stmtId = id;
+		this.astNode = node;
 		this.classInfo = ci;
 	}
-
+	
 	public Set<String> getNamesDeclared() {
 		return this.namesDeclared;
 	}
@@ -102,20 +104,12 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		return this.classInfo;
 	}
 
-	public void setStmtId(int id) {
-		this.stmtId = id;
-	}
-
 	public int getStmtId() {
 		return this.stmtId;
 	}
 
 	public ASTNode getASTNode() {
 		return astNode;
-	}
-
-	public void setASTNode(ASTNode node) {
-		this.astNode = node;
 	}
 
 	public Set<String> getRequiredNames() {
@@ -891,11 +885,6 @@ if B include return statement
 				return true;
 		}
 		return false;
-	}
-
-	public void setInfo(int stmtCounter, ASTNode node) {
-		this.setStmtId(stmtCounter);
-		this.setASTNode(node);
 	}
 
 
