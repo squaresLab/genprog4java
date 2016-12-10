@@ -45,6 +45,6 @@ public class JavaAppendOperation extends JavaEditOperation {
 	@Override
 	public String toString() {
 		StatementHole fixHole = (StatementHole) this.getHoleCode();
-		return "a(" + this.getLocation().getId() + "," + fixHole.getCodeBankId() + ")";
+		return "StmtAppend(" + this.getLocation().getId() + "," + fixHole.getCodeBankId() + ")";
 	}
 }

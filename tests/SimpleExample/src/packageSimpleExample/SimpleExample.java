@@ -10,7 +10,7 @@ public class SimpleExample {
 	   if(x<y){
 		ret = y;
 	   }else if(x<z){
-		ret = y; // bug, it should be ret = x;
+		ret = z; // bug, it should be ret=x;
 	   }
 	}else{
 	   if(x>y){

@@ -113,7 +113,7 @@ public class NullCheckOperation extends JavaEditOperation {
 	@Override
 	public String toString() {
 		// FIXME: this is lazy
-		return "nc(" + this.getLocation().getId() + ")";
+		return "NullCheckAdder(" + this.getLocation().getId() + ")";
 	}
 
 }

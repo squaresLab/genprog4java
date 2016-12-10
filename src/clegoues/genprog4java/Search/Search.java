@@ -142,7 +142,7 @@ public abstract class Search<G extends EditOperation> {
 	public static String searchStrategy = ConfigurationBuilder.of( STRING )
 			.withVarName( "searchStrategy" )
 			.withFlag( "search" )
-			.withDefault( "rsrepair" )
+			.withDefault( "ga" )
 			.withHelp( "the search strategy to employ" )
 			.inGroup( "Search Parameters" )
 			.build();
@@ -168,8 +168,9 @@ public abstract class Search<G extends EditOperation> {
 				edit = oneItem;
 			}
 			
-			//funrep;parrep;paradd;parrem;exprep;expadd;exprem;nullcheck;rangecheck;sizecheck;castcheck;lbset;offbyone;ubset
+			//funrep;parrep;paradd;parrem;exprep;expadd;exprem;nullcheck;rangecheck;sizecheck;castcheck;lbset;offbyone;ubset;seqexch;castermut;casteemut
 			switch(edit.toLowerCase()) {
+
 			case "append": mutations.add(new WeightedMutation(Mutation.APPEND, weight)); break;
 			case "swap":  mutations.add(new WeightedMutation(Mutation.SWAP, weight)); break;
 			case "delete":  mutations.add(new WeightedMutation(Mutation.DELETE, weight)); break;
@@ -189,7 +190,10 @@ public abstract class Search<G extends EditOperation> {
 			case "lbset":  mutations.add(new WeightedMutation(Mutation.LBOUNDSET, weight)); break;
 			case "ubset":  mutations.add(new WeightedMutation(Mutation.UBOUNDSET, weight)); break;
 			case "offbyone":  mutations.add(new WeightedMutation(Mutation.OFFBYONE, weight)); break;
-			case "babbled":  mutations.add(new WeightedMutation(Mutation.BABBLED, weight)); break;
+			case "seqexch":  mutations.add( new WeightedMutation(Mutation.SEQEXCH, weight)); break;
+			case "castermut":  mutations.add(new WeightedMutation(Mutation.CASTERMUT, weight)); break;
+			case "casteemut":  mutations.add(new WeightedMutation(Mutation.CASTEEMUT, weight)); break;
+
 			}
 		}
 		Collections.sort(mutations);
@@ -253,11 +257,12 @@ public abstract class Search<G extends EditOperation> {
 	 * 
 	 * @return variant' modified/potentially mutated variant
 	 */
-	public void mutate(Representation<G> variant) {
+	public void mutate(Representation<G> variant) throws GiveUpException {
 		Localization localization = variant.getLocalization();
 		ArrayList<Location> faultyAtoms = localization.getFaultLocalization();
 		ArrayList<Location> proMutList = new ArrayList<Location>();
 		boolean foundMutationThatCanApplyToAtom = false;
+		boolean alreadySetAllStmtsToFixLoc = false;
 		while(!foundMutationThatCanApplyToAtom){
 			//promut default is 1 // promut stands for proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
 			for (int i = 0; i < Search.promut; i++) {
@@ -266,7 +271,9 @@ public abstract class Search<G extends EditOperation> {
 				boolean alreadyOnList = false;
 				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
 				if(proMutList.size()>=faultyAtoms.size()){ 
-					localization.setAllPossibleStmtsToFixLocalization();				}
+					localization.setAllPossibleStmtsToFixLocalization();				
+					alreadySetAllStmtsToFixLoc = true;
+				}
 				//only adds the random atom if it is different from the others already added
 				do {
 					//chooses a random faulty atom from the subset of faulty atoms
@@ -278,8 +285,12 @@ public abstract class Search<G extends EditOperation> {
 				proMutList.add(wa);
 			}
 			for (Location location : proMutList) {
+				//the available mutations for this stmt
 				List<WeightedMutation> availableMutations = variant.availableMutations(location);
 				if(availableMutations.isEmpty()){
+					if(alreadySetAllStmtsToFixLoc && proMutList.size()>=faultyAtoms.size() && location==proMutList.get(proMutList.size())){
+						throw new GiveUpException();
+					}
 					continue; 
 				}else{
 					foundMutationThatCanApplyToAtom = true;
@@ -289,10 +300,13 @@ public abstract class Search<G extends EditOperation> {
 				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(availableMutationsAL);
 				Mutation mut = chosenMutation.getLeft();
 				List<WeightedHole> allowed = variant.editSources(location, mut);
+				if(!allowed.isEmpty()){
 				allowed = rescaleAllowed(mut,allowed, variant,location.getId());
 				WeightedHole selected = (WeightedHole) GlobalUtils
 						.chooseOneWeighted(new ArrayList(allowed));
 				variant.performEdit(mut, location, selected.getHole());
+				}
+
 			}
 		}
 	}
@@ -307,7 +321,7 @@ public abstract class Search<G extends EditOperation> {
 	}
 
 	private List rescaleAllowed(Mutation mut, List<WeightedHole> allowed, Representation variant, int stmtid) {
-		if(mut != Mutation.REPLACE || Search.model.equalsIgnoreCase("default")){
+		if(mut != Mutation.REPLACE || !Search.model.equalsIgnoreCase("probabilistic")){
 			return allowed;
 		}else if(Search.model.equalsIgnoreCase("probabilistic")){
 			return rm.rescaleReplacementsBasedOnModel(new ArrayList(allowed), variant, stmtid);

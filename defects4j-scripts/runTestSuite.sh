@@ -1,116 +1,65 @@
 #!/bin/bash
 
-#This file takes the bug code and runs it on the test suite in $DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/pos.tests
+#The purpose of this script is to Create, Fix and Test a test suite of a particular defects4j bug.
 
+#Preconditions:
+#There should be a folder called generatedTestSuites in the defects4j folder where the test suites and their output will be stored.
+#The variable D4J_HOME should be directed to the folder where defects4j is installed.
+#The variable JAVA_HOME should be directed to the folder where java 7 is installed (It must be Java 7).
+
+#Output
+#The output is a txt file with the output of testing the test suite on the folder indicated. The name of the txt file is: EvaluatingTestSuite"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2On"$LOWERCASEPACKAGE""$BUGNUMBER"BuggyOutput.txt and it is located in $D4J_HOME/generatedTestSuites/$IDENTIFIER/"$PROJECT"/evosuite-branch/"$SEED"/
+
+#Parameters:
 # 1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)
 # 2nd param is the bug number (ex: 1,2,3,4,...)
-# 3rd param is the folder where the genprog project is (ex: "/home/mau/Research/genprog4java/" )
-# 4td param is the folder where defects4j is installed (ex: "/home/mau/Research/defects4j/" )
+# 3th param is the generation tool (Randoop or Evosuite)
+# 4th param is the path to the test suite, starting from the the D4J_HOME folder. Example: generatedTestSuites/Randoop3Min/
+# 5th param is the path of the folder to evaluate the test suite on, starting from the the D4J_HOME folder (Example: ExamplesCheckedOut or BugsWithAFix)
 
-#Mau runs it like this:
-#./runTestSuite.sh Math 2 /home/mau/Research/genprog4java/ /home/mau/Research/defects4j/
+#Example of usage:
+#./runTestSuite.sh Math 2 Randoop generatedTestSuites/Randoop3Min/ BugsWithAFix
 
-#VM:
-#./runTestSuite.sh Math 2 /home/ubuntu/genprog4java/ /home/ubuntu/defects4j/
+
+if [ "$#" -ne 5 ]; then
+    echo "This script should be run with 5 parameters: "
+	echo "1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)"
+	echo "2nd param is the bug number (ex: 1,2,3,4,...)"
+	echo "3th param is the generation tool (Randoop or Evosuite)"
+	echo "4th param is the path to the test suite, starting from the the D4J_HOME folder. Example: generatedTestSuites/Randoop3Min/"
+	echo "5th param is the path of the folder to evaluate the test suite on, starting from the the D4J_HOME folder (Example: ExamplesCheckedOut or BugsWithAFix)"
+
+    exit 0
+fi
 
 PROJECT="$1"
 BUGNUMBER="$2"
-GENPROGDIR="$3"
-DEFECTS4JDIR="$4"
+RANDOOPOREVOSUITE="$3"
+PATHTOTESTSUITE="$4"
+PATHOFFIXEDFOLDER="$5"
 
 LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 
-POSTESTS=$DEFECTS4JDIR/ExamplesCheckedOut/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/pos.tests
+export JRE_HOME=$JAVA_HOME/jre
+export PATH=$JAVA_HOME/bin/:$PATH
 
-case "$LOWERCASEPACKAGE" in 
-'chart') 
-	    SRCFOLDER=build
-	    TESTFOLDER=build-tests
-        ;;
-
-'closure')
-	    SRCFOLDER=build/classes
-	    TESTFOLDER=build/test
-        ;;
-
-'lang')
-
-	    SRCFOLDER=target/classes/
-	    TESTFOLDER=target/test-classes/
-        ;;
-
-'math')
-	    SRCFOLDER=target/classes
-	    TESTFOLDER=target/test-classes
-        ;;
-
-'time')
- 	    SRCFOLDER=build/classes/
-	    TESTFOLDER=build/tests/
-        ;;
-esac
-
-classSourceFolder=$DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$SRCFOLDER
-classTestFolder=$DEFECTS4JDIR/ExamplesCheckedOut/$LOWERCASEPACKAGE$2Buggy/$TESTFOLDER
-
-JAVALOCATION=$(which java)
-
-
-TESTCOUNT=$(cat $POSTESTS | wc -l)
-
-echo "$TESTCOUNT tests in this test suite"
-
-COUNTER=0
-
-while read p; do
-
-COUNTER=$(($COUNTER + 1))
+SEED=1
+  echo ""
+  echo "Evaluating test suite"
+  echo ""
+  cd $D4J_HOME/framework/bin
+  
+  if [ $RANDOOPOREVOSUITE == "Randoop" ]; then
+    OUTPUTFILE="$D4J_HOME/$PATHTOTESTSUITE/EvaluatingTestSuite"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bzOn"$PROJECT""$BUGNUMBER"Buggy.txt"
+    COM3="./defects4j test -s $D4J_HOME/$PATHTOTESTSUITE/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -w $D4J_HOME/$PATHOFFIXEDFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/ &>> $OUTPUTFILE"
+  elif [ $RANDOOPOREVOSUITE == "Evosuite" ]; then
+    OUTPUTFILE="$D4J_HOME/$PATHTOTESTSUITE/EvaluatingTestSuite"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2On"$PROJECT""$BUGNUMBER"Buggy.txt"
+    COM3="./defects4j test -s $D4J_HOME/$PATHTOTESTSUITE/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2 -w $D4J_HOME/$PATHOFFIXEDFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/ &>> $OUTPUTFILE"
+  fi
+  RMV="rm -f $OUTPUTFILE"
+  eval $RMV
+  echo "$COM3"
+  eval $COM3
 
 echo ""
-echo "Running test $COUNTER out of $TESTCOUNT: $p:"
-command=($DEFECTS4JDIR/framework/projects/lib/junit-4.10.jar org.junit.runner.JUnitCore $p)
-#echo Command: $command
-
-
-OUTPUT=$($JAVALOCATION -cp .:$classSourceFolder:$classTestFolder:$DEFECTS4JDIR/framework/projects/lib/junit-4.11.jar org.junit.runner.JUnitCore $p)
-
-#echo $OUTPUT
-echo "Last 100 characters of the output:"
-#echo "${OUTPUT:(-100)}"
-echo $OUTPUT
-
-if [[ $OUTPUT == *"OK (0 tests)"* ]]
-then
-  echo ""
-  #echo "ERROR! IN THE CLASS: " $p
-  #break
-fi
-
-if [[ $OUTPUT == *"Could not find class"* ]]
-then
-  echo ""
-  #echo "ERROR! IN THE CLASS: " $p
-  #break
-fi
-
-if [[ $OUTPUT == *"OK ("* ]]
-then
-  echo ""
-  #echo "OK"
-else
-  echo ""
-  #echo "ERROR! IN THE CLASS: " $p
-  #break
-fi
-
-
-done <$POSTESTS
-
-if [[ $TESTCOUNT == $COUNTER ]]
-then
-  echo ""
-   #echo "Yey! All tests were executed successfully :D :D :D"
-fi
-
-
-
+echo "The output is saved in: $OUTPUTFILE"

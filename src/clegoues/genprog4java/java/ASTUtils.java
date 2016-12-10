@@ -1,3 +1,5 @@
+package clegoues.genprog4java.java;
+
 /*
  * Copyright (c) 2014-2015, 
  *  Claire Le Goues     <clegoues@cs.cmu.edu>
@@ -31,7 +33,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package clegoues.genprog4java.java;
 
 import java.net.URI;
 import java.util.ArrayList;

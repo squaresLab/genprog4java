@@ -30,6 +30,6 @@ public class JavaSwapOperation extends JavaEditOperation {
 	@Override
 	public String toString() {
 		StatementHole fixHole = (StatementHole) this.getHoleCode();
-		return "s(" + this.getLocation().getId() + "," + fixHole.getCodeBankId() + ")";
+		return "StmtSwap(" + this.getLocation().getId() + "," + fixHole.getCodeBankId() + ")";
 	}
 }

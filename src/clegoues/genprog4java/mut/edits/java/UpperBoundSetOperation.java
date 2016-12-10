@@ -102,7 +102,7 @@ public class UpperBoundSetOperation extends JavaEditOperation {
 @Override
 public String toString() {
 	// FIXME: this is lazy
-	return "ubs(" + this.getLocation().getId() + ")";
+	return "UpperBoundSetter(" + this.getLocation().getId() + ")";
 }
 
 }

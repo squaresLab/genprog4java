@@ -1,5 +1,6 @@
 package clegoues.genprog4java.localization;
 
+
 import static clegoues.util.ConfigurationBuilder.STRING;
 
 import java.io.IOException;
