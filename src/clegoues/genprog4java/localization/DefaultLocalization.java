@@ -392,7 +392,7 @@ public class DefaultLocalization extends Localization {
 			logger.info(test);
 			// this expectedResult is just 'true' for positive tests and 'false'
 			// for neg tests
-			if (original.testCase(test).isAllPassed() != expectedResult
+			if (original.testCase(test, true).isAllPassed() != expectedResult
 					&& !allowCoverageFail) {
 				logger.error("FaultLocRep: unexpected coverage result: "
 						+ test.toString());
