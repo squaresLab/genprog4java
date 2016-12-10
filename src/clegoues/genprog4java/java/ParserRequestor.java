@@ -33,14 +33,15 @@
 
 package clegoues.genprog4java.java;
 
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FileASTRequestor;
 
 public class ParserRequestor extends FileASTRequestor
 {
-	private SemanticInfoVisitor visitor;
+	private SimpleVisitor visitor;
 	
-	public ParserRequestor(SemanticInfoVisitor v)
+	public ParserRequestor(SimpleVisitor v)
 	{
 		this.visitor = v;
 	}

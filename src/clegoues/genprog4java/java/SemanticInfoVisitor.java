@@ -67,7 +67,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import clegoues.genprog4java.rep.JavaRepresentation;
 
-public class SemanticInfoVisitor extends ASTVisitor {
+public class SemanticInfoVisitor extends SimpleVisitor {
 
 	/** all ASTNodes of interest, corresponding to "repairable" Java statement types
 	 * a question (currently a question answered by {@link JavaRepresentation.canRepair})
@@ -105,7 +105,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	private Set<String> classScope; // stuff that's IN SCOPE at the statement, not used at the statement
 
-	private CompilationUnit cu;
 
 	public SemanticInfoVisitor() {
 		this.stmts = new LinkedList<ASTNode>();
@@ -383,14 +382,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		return true;
 	}
 
-	public CompilationUnit getCompilationUnit() {
-		return cu;
-	}
-
-	public void setCompilationUnit(CompilationUnit cu) {
-		this.cu = cu;
-	}
-
 	private boolean anywhereInScope(String lookingFor) {
 		return (availableMethodsAndFields != null && availableMethodsAndFields.contains(lookingFor)) || 
 				(availableStringTypes != null && availableStringTypes.contains(lookingFor)) ||
@@ -398,6 +389,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				(currentLoopScope != null && currentLoopScope.contains(lookingFor));
 	}
 
+	@Override
 	public void finalizeVisit() {
 		this.classScope.addAll(availableStringTypes);
 		this.classScope.addAll(availableMethodsAndFields);	
