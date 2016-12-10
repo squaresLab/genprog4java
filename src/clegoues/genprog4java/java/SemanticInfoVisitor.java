@@ -391,7 +391,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		this.cu = cu;
 	}
 
-
 	private boolean anywhereInScope(String lookingFor) {
 		return (availableMethodsAndFields != null && availableMethodsAndFields.contains(lookingFor)) || 
 				(availableStringTypes != null && availableStringTypes.contains(lookingFor)) ||
@@ -410,6 +409,18 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	public Set<String> getNamesDeclared(ASTNode node) {
 		return namesDeclaredMap.get(node);
+	}
+
+	public Set<String> getClassScope() {
+		return this.classScope;
+	}
+
+	public Set<String> getMethodScope(ASTNode node) {
+		return this.methodScopeMap.get(node);
+	}
+
+	public boolean getFinalVarInfo(ASTNode node) {
+		return this.containsFinalVarMap.get(node);
 	}
 
 }

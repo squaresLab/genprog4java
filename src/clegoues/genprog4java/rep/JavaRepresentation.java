@@ -100,7 +100,6 @@ import clegoues.genprog4java.java.JavaParser;
 import clegoues.genprog4java.java.JavaSemanticInfo;
 import clegoues.genprog4java.java.JavaSourceInfo;
 import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.java.ScopeInfo;
 import clegoues.genprog4java.java.SemanticInfoVisitor;
 import clegoues.genprog4java.localization.EntropyLocalization;
 import clegoues.genprog4java.localization.Localization;
@@ -224,14 +223,12 @@ CachingRepresentation<JavaEditOperation> {
 				sourceInfo.augmentLineInfo(stmtCounter, node);
 				sourceInfo.storeStmtInfo(s, pair);
 				
-				
 				s.setRequiredNames(visitor.getRequiredNames(node)); // now in a map in the visitor
 				s.setNamesDeclared(visitor.getNamesDeclared(node));
-	
 				
-				semanticInfo.addToClassScopeMap(s, scopeInfo.getClassScope());
-				semanticInfo.addToMethodScopeMap(s, scopeInfo.getMethodScope(node));
-				semanticInfo.collectFinalVarInfo(s, scopeInfo.getFinalVarInfo(node));
+				semanticInfo.addToClassScopeMap(s, visitor.getClassScope());
+				semanticInfo.addToMethodScopeMap(s, visitor.getMethodScope(node));
+				semanticInfo.collectFinalVarInfo(s, visitor.getFinalVarInfo(node));
 				stmtCounter++;
 
 			}

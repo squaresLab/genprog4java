@@ -21,7 +21,6 @@ import codemining.lm.tsg.samplers.blocked.TreeCorpusFilter;
 import codemining.util.serialization.ISerializationStrategy.SerializationException;
 import codemining.util.serialization.Serializer;
 import clegoues.genprog4java.java.JavaParser;
-import clegoues.genprog4java.java.ScopeInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.ShutdownDelay;
@@ -115,7 +114,7 @@ public class TrainTSG {
 				files = Collections.singleton( sourceFile );
 
 			for ( File f : files ) {
-				JavaParser parser = new JavaParser( new ScopeInfo() );
+				JavaParser parser = new JavaParser( );
 				parser.parse(
 					f.getPath(), Configuration.libs.split( File.pathSeparator )
 				);
