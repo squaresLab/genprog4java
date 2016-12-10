@@ -53,31 +53,15 @@ public class ScopeInfo
 	private Set<String> classScope; // stuff that's IN SCOPE at the statement, not used at the statement
 
 	private HashMap<ASTNode,Set<String>> methodScope; // stuff that's IN SCOPE at the statement, not used at the statement
-	private HashMap<ASTNode,Set<String>> namesDeclared; 
-	private HashMap<ASTNode, Boolean> containsFinalVarAssignment;
-	private LinkedList<SimpleName> typNames;
-	
-	public LinkedList<SimpleName> getTypNames() { return this.typNames; }
 	
 
-	
 	
 	public ScopeInfo()
 	{
 		this.methodScope = new HashMap<ASTNode,Set<String>>();
 		this.classScope = new HashSet<String>();
-		this.namesDeclared = new HashMap<ASTNode,Set<String>>();
-		this.containsFinalVarAssignment = new HashMap<ASTNode, Boolean>();
-		this.typNames = new LinkedList<SimpleName>();
 	}
 	
-	public Set<String> getNamesDeclared(ASTNode buggy) {
-		return this.namesDeclared.get(buggy);
-	}
-	
-	public void setNamesDeclared(ASTNode buggy, Set<String> names) {
-		this.namesDeclared.put(buggy, names);
-	}
 	
 	public void addToMethodScope(ASTNode buggy, Set<String> methodScope, Set<String> loopScope)
 	{
@@ -93,13 +77,6 @@ public class ScopeInfo
 		{
 			this.methodScope.put(buggy, newScope);
 		}
-	}
-	
-	public boolean getFinalVarInfo(ASTNode node) {
-		return containsFinalVarAssignment.get(node);
-	}
-	public void setContainsFinalVarDecl(ASTNode node, boolean status) {
-		containsFinalVarAssignment.put(node, status);
 	}
 	
 	public Set<String> getMethodScope(ASTNode buggy)
@@ -125,9 +102,5 @@ public class ScopeInfo
 		return this.classScope;
 	}
 	
-
-	public void addToAvailableTypesMap(SimpleName name) {
-		this.typNames.add(name);
-	}
 
 }
