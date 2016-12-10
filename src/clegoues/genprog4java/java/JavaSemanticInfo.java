@@ -24,7 +24,7 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.treelm.SymbolTable;
 
 /** stores and computes compilation unit- or file-level semantic info. */  
-public class JavaSemanticInfo implements SymbolTable {
+public class JavaSemanticInfo {
 
 	/** these maps are static because they store information about the 
 	 * original program under repair and are not updated..
@@ -45,7 +45,7 @@ public class JavaSemanticInfo implements SymbolTable {
 	 * doesn't seem to be a problem. 
 	 */
 	public static HashMap<String, String> variableDataTypes = new HashMap<String, String>();
-	private static HashMap<String, Set<String>> inverseVarDataTypeMap = new HashMap<String, Set<String>>();
+	static HashMap<String, Set<String>> inverseVarDataTypeMap = new HashMap<String, Set<String>>();
 
 	/** whether a statement references a final variable is relevant to whether we
 	 * can move or copy it around.
@@ -240,60 +240,6 @@ public class JavaSemanticInfo implements SymbolTable {
 			return methodReturnType.get(matchString.toLowerCase());
 		}
 		return null;
-	}
-
-	private Location babbleScope;
-	
-	public void initializeBabbleScope(Location startingPoint) {
-		this.babbleScope = startingPoint;
-	}
-	
-	private static int identifier;
-	private String allocFreeNameSupplier(String type, int index) {
-		Set<String> classScope = new HashSet<String>(JavaSemanticInfo.classScopeMap.get(index));
-		Set<String> methodScope = JavaSemanticInfo.methodScopeMap.get(index);
-		classScope.addAll(methodScope);
-		String newName = "newVar" + identifier++;
-		while(classScope.contains(newName)) {
-			newName = "newVar" + identifier++;
-		}
-		methodScope.add(newName);
-		return newName;
-	}
-	
-	//FIXME/question for Dorn: should this actually create the variable, or just come up with a unique name?
-	@Override
-	public Supplier<String> allocFreeName(String type) {
-		int index = babbleScope.getId();
-		return () -> allocFreeNameSupplier(type, index);
-	}
-	
-	// FIXME: this won't do the right thing for int x = [] + 1; (that is, it might return x)
-	private String getNameForTypeSupplier(String type) {
-		if(JavaSemanticInfo.inverseVarDataTypeMap.containsKey(type)) {
-			Set<String> possibleNames = inverseVarDataTypeMap.get(type);
-			int num = Configuration.randomizer.nextInt(possibleNames.size());
-			for(String poss : possibleNames) {
-				if(--num < 0) return poss;
-			}
-		}
-		return null;
-	}
-	@Override
-	public Supplier<String> getNameForType(String type) {
-		return () -> getNameForTypeSupplier(type);
-	}
-
-	@Override
-	public void enter(int nodeType) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void leave(int nodeType) {
-		// TODO Auto-generated method stub
-		
 	}
 
 
