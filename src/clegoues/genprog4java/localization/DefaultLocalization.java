@@ -44,7 +44,6 @@ import clegoues.genprog4java.java.ClassInfo;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.WeightedMutation;
-import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.rep.WeightedAtom;
