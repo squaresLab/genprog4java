@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.treelm.SymbolTable;
 
 /** stores and computes compilation unit- or file-level semantic info. */  
 public class JavaSemanticInfo {

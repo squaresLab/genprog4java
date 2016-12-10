@@ -66,7 +66,7 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 Representation<G>  {
 
 	protected transient Logger logger = Logger.getLogger(CachingRepresentation.class);
-
+	
 	public transient static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
 

@@ -37,25 +37,20 @@ import static clegoues.util.ConfigurationBuilder.BOOLEAN;
 import static clegoues.util.ConfigurationBuilder.BOOL_ARG;
 import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.STRING;
+import static clegoues.util.ConfigurationBuilder.INT;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
@@ -70,14 +65,13 @@ import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.util.ConfigurationBuilder;
-import clegoues.util.GlobalUtils;
 
 @SuppressWarnings("rawtypes")
 public abstract class FaultLocRepresentation<G extends EditOperation> extends
 CachingRepresentation<G> {
-	
+
 	protected Logger logger = Logger.getLogger(FaultLocRepresentation.class);
-	
+
 	public transient static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
 
@@ -87,18 +81,18 @@ CachingRepresentation<G> {
 			.withHelp( "boolean to be turned true if the purpose is to test that fault loc is performed correctly" )
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
-	
+
 	//private static double positivePathWeight = 0.1;
 	private static double positivePathWeight = ConfigurationBuilder.of( DOUBLE )
 			.withVarName( "positivePathWeight" )
-			.withDefault( "0.1" )
+			.withDefault( "0.65" )
 			.withHelp( "weighting for statements on the positive path" )
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
 	//private static double negativePathWeight = 1.0;
 	private static double negativePathWeight = ConfigurationBuilder.of( DOUBLE )
 			.withVarName( "negativePathWeight" )
-			.withDefault( "1.0" )
+			.withDefault( "0.35" )
 			.withHelp( "weighting for statements on the negative path" )
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
@@ -133,6 +127,18 @@ CachingRepresentation<G> {
 			.withVarName("fixStrategy")
 			.withHelp("Fix source strategy")
 			.withDefault("classScope")
+			.inGroup( "FaultLocRepresentation Parameters" )
+			.build();
+	protected static String faultLocStrategy = ConfigurationBuilder.of ( STRING )
+			.withVarName("faultLocStrategy")
+			.withHelp("Fault localization strategy")
+			.withDefault("standardPathFile")
+			.inGroup( "FaultLocRepresentation Parameters" )
+			.build();
+	protected static String pathToFileHumanInjectedFaultLoc = ConfigurationBuilder.of ( STRING )
+			.withVarName("pathToFileHumanInjectedFaultLoc")
+			.withHelp("The path of the file with classes and line numbers of the faulty stmts, when fault localization is human inserted and not created by the coverage")
+			.withDefault("fileHumanInjectedFaultLoc.txt")
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
 
@@ -196,6 +202,8 @@ CachingRepresentation<G> {
 	 */
 
 	public abstract ArrayList<Integer> atomIDofSourceLine(int lineno);
+
+	protected abstract ClassInfo getFileFromStmt(int stmtId);
 
 	private TreeSet<Integer> runTestsCoverage(String pathFile,
 			ArrayList<TestCase> tests, boolean expectedResult, String wd)
@@ -292,23 +300,19 @@ CachingRepresentation<G> {
 		if (positivePathFile.exists() && !FaultLocRepresentation.regenPaths) {
 			positivePath = readPathFile(FaultLocRepresentation.posCoverageFile);
 		} else {
-			positivePath = runTestsCoverage(
-					FaultLocRepresentation.posCoverageFile,
-					Fitness.positiveTests, true, Configuration.outputDir + "/coverage/");
+			positivePath = createPosFile();
 		}
 		File negativePathFile = new File(FaultLocRepresentation.negCoverageFile);
 
 		if (negativePathFile.exists() && !FaultLocRepresentation.regenPaths) {
 			negativePath = readPathFile(FaultLocRepresentation.negCoverageFile);
 		} else {
-			negativePath = runTestsCoverage(
-					FaultLocRepresentation.negCoverageFile,
-					Fitness.negativeTests, false, Configuration.outputDir + "/coverage/");
+			negativePath = createNegFile();	
 		}
 
 		computeFixSpace(negativePath, positivePath);
 		computeFaultSpace(negativePath,positivePath); 
-		
+
 		//printout fault space with their weights
 		PrintWriter writer = new PrintWriter("FaultyStmtsAndWeights.txt", "UTF-8");
 		for (int i = 0; i < faultLocalization.size(); i++) {
@@ -322,18 +326,101 @@ CachingRepresentation<G> {
 		logger.info("Finish Fault Localization");
 	}
 
+	private TreeSet<Integer> createPosFile(){
+		TreeSet<Integer> positivePath = null;
+		switch(faultLocStrategy.trim()) {
+		case "humanInjected": 
+			//positivePath = new TreeSet<Integer>();
+			//positivePath.add(faultLocFromFileHoleNumber);
+
+		case "standardPathFile": 
+		default:
+			try {
+				positivePath = runTestsCoverage(
+						FaultLocRepresentation.posCoverageFile,
+						Fitness.positiveTests, true, Configuration.outputDir + "/coverage/");
+			} catch (IOException | UnexpectedCoverageResultException e) {
+				e.printStackTrace();
+			}
+			break;
+		}
+		return positivePath;
+	}
+
+	private TreeSet<Integer> createNegFile(){
+		TreeSet<Integer> negativePath = null;
+		switch(faultLocStrategy.trim()) {
+		case "humanInjected": 
+			negativePath = transformFileWithLineNumbersToStmtNumbers(pathToFileHumanInjectedFaultLoc);
+			break;
+		case "standardPathFile": 
+		default:
+			try {
+				negativePath = runTestsCoverage(
+						FaultLocRepresentation.negCoverageFile,
+						Fitness.negativeTests, false, Configuration.outputDir + "/coverage/");
+			} catch (IOException | UnexpectedCoverageResultException e) {
+				e.printStackTrace();
+			}
+			break;
+		}
+		return negativePath;
+	}
+
+	private TreeSet<Integer> transformFileWithLineNumbersToStmtNumbers(String pathOfFileWithFaultyLineNumbers){
+		TreeSet<Integer> negativePath = new TreeSet<Integer>();
+		Scanner reader = null;
+		try {
+			reader = new Scanner(new FileInputStream(pathOfFileWithFaultyLineNumbers));
+			while (reader.hasNextLine()) {
+				String line = reader.nextLine();
+				if(!line.equalsIgnoreCase("")){
+					String packageName = line.split(",")[0].trim();
+					String className = line.split(",")[1].trim();
+					//trim .java if the user types the class name with the extension
+					className = className.contains(".")? className.split(".")[0] : className;
+					String lineNumberString = line.split(",")[2].trim();
+					int lineNumber = Integer.parseInt(lineNumberString);
+					ArrayList<Integer> atomIds = this.atomIDofSourceLine(lineNumber);
+					if(atomIds!=null){
+						for(int atomId:atomIds){
+							ClassInfo ci = this.getFileFromStmt(atomId);
+							if(ci.getClassName().equalsIgnoreCase(className) && ci.getPackage().equalsIgnoreCase(packageName)){
+								negativePath.addAll(atomIds);
+							}
+						}
+					}
+				}
+			}
+			reader.close();
+		} catch (FileNotFoundException e) {
+			logger.error("coverage file " + pathOfFileWithFaultyLineNumbers + " not found");
+			e.printStackTrace();
+		} finally {
+			if (reader != null)
+				reader.close();
+		}
+
+
+		return negativePath;
+	}
+
 	protected void computeFaultSpace(TreeSet<Integer> negativePath, TreeSet<Integer> positivePath) {
 		HashMap<Integer, Double> fw = new HashMap<Integer, Double>();
 		TreeSet<Integer> negHt = new TreeSet<Integer>();
 		TreeSet<Integer> posHt = new TreeSet<Integer>();
 
 		for (Integer i : positivePath) {
-			fw.put(i, FaultLocRepresentation.positivePathWeight);
+			if(faultLocStrategy.trim().equalsIgnoreCase("standardPathFile")){
+				fw.put(i, FaultLocRepresentation.positivePathWeight);
+			}else if(faultLocStrategy.trim().equalsIgnoreCase("humanInjected")){
+				fw.put(i, 0.0);
+			}
 		}
 
 		for (Integer i : positivePath) {
 			posHt.add(i);
-			fw.put(i, 0.5);
+			//	fw.put(i, 0.5);
 		}
 		for (Integer i : negativePath) {
 			if (!negHt.contains(i)) {
@@ -342,7 +429,7 @@ CachingRepresentation<G> {
 					negWeight = FaultLocRepresentation.positivePathWeight;
 				}
 				negHt.add(i);
-				fw.put(i, 0.5);
+				//fw.put(i, 0.5);
 				faultLocalization.add(this.instantiateLocation(i, negWeight)); 
 			}
 		}		
@@ -350,10 +437,10 @@ CachingRepresentation<G> {
 
 	protected void computeFixSpace(TreeSet<Integer> negativePath, TreeSet<Integer> positivePath) {
 		for (Integer i : positivePath) {
-			fixLocalization.add(new WeightedAtom(i, 0.5));
+			fixLocalization.add(new WeightedAtom(i, FaultLocRepresentation.positivePathWeight));
 		}
 		for (Integer i : negativePath) {
-			fixLocalization.add(new WeightedAtom(i, 0.5));
+			fixLocalization.add(new WeightedAtom(i, FaultLocRepresentation.positivePathWeight));
 
 		}	
 	}

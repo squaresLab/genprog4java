@@ -46,7 +46,7 @@ public class MethodReplacer extends JavaEditOperation {
 	@Override
 	public String toString() {
 		// FIXME: this is lazy
-		return "fr(" + this.getLocation().getId() + ")";
+		return "MethodReplacer(" + this.getLocation().getId() + ")";
 	}
 	
 	

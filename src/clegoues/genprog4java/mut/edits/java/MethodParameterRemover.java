@@ -48,7 +48,7 @@ public class MethodParameterRemover extends ExpressionReplacer {
 	@Override
 	public String toString() {	
 		// FIXME: is it possible to get the method call for this?  Would be nice for debug
-		String retval = "prm(" + this.getLocation().getId() + ": ";
+		String retval = "ParameterRemover(" + this.getLocation().getId() + ": ";
 		Statement parentExp = (Statement) ((JavaLocation) this.getLocation()).getCodeElement(); 
 ;
 		retval += "(" + parentExp.toString() + "))";

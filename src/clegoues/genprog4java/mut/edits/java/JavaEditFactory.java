@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -20,16 +21,10 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.Type;
 
 import clegoues.genprog4java.java.ASTUtils;
-import clegoues.genprog4java.java.JavaLMSymbolTable;
-import codemining.lm.tsg.FormattedTSGrammar;
-import codemining.lm.tsg.TSGNode;
-import codemining.lm.tsg.TSGrammar;
-import codemining.util.serialization.ISerializationStrategy.SerializationException;
-import codemining.util.serialization.Serializer;
 import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.localization.EntropyLocalization;
 import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.mut.EditHole;
@@ -61,11 +56,6 @@ public class JavaEditFactory {
 			ConfigurationBuilder.getToken();
 
 
-	private EntropyLocalization localization; 
-	
-	public void setEntropyLocalization(EntropyLocalization localization) {
-		this.localization = localization;
-	}
 	
 	public JavaEditOperation makeEdit(Mutation edit, Location dst, EditHole sources) {
 		switch(edit) {
@@ -100,12 +90,16 @@ public class JavaEditFactory {
 			return new ExpressionModRem((JavaLocation) dst, sources);
 		case PARREM:
 			return new MethodParameterRemover((JavaLocation) dst, sources);
-		case BABBLED:
-			return new JavaReplaceASTOperation((JavaLocation) dst, sources);
 		case SIZECHECK:
 			return new CollectionSizeChecker((JavaLocation) dst, sources);
 		case OBJINIT:
 			return new ObjectInitializer((JavaLocation) dst, sources);
+		case SEQEXCH:
+			return new SequenceExchanger((JavaLocation) dst, sources);
+		case CASTERMUT:
+			return new CasterMutator((JavaLocation) dst, sources);
+		case CASTEEMUT:
+			return new CasteeMutator((JavaLocation) dst, sources);
 		}
 		return null;
 	}
@@ -227,14 +221,6 @@ public class JavaEditFactory {
 
 	public List<WeightedHole> editSources(JavaRepresentation variant, Location location, Mutation editType) {
 
-		if(editType == Mutation.BABBLED) {
-			ArrayList<WeightedHole> retVal = new ArrayList<WeightedHole>();
-			ASTNode node = localization.babbleFixCode((JavaLocation) location, new JavaLMSymbolTable(location));
-			ASTNodeHole newHole =  new ASTNodeHole(node);
-			retVal.add(new WeightedHole(newHole));
-			return retVal;
-		}
-
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 
 		switch(editType) {
@@ -345,7 +331,7 @@ public class JavaEditFactory {
 				int parentExpLoc = ASTUtils.getLineNumber(parentExp);
 				for(Expression exp : entries.getValue()) {
 					EditHole shrinkableExpHole1 = new ExpChoiceHole(entries.getKey(), exp, locationStmt.getStmtId(), 0);
-					EditHole shrinkableExpHole2 = new ExpChoiceHole( entries.getKey(), exp, locationStmt.getStmtId(), 1);
+					EditHole shrinkableExpHole2 = new ExpChoiceHole(entries.getKey(), exp, locationStmt.getStmtId(), 1);
 					int newExpLoc = ASTUtils.getLineNumber(exp);
 					int lineDistance = Math.abs(parentExpLoc - newExpLoc);
 					double weight = lineDistance != 0 ? 1.0 / lineDistance : 1.0;
@@ -389,10 +375,62 @@ public class JavaEditFactory {
 			}
 			return retVal;
 		}
+		case SEQEXCH:
+		{
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
+			JavaStatement faultyStmt = variant.getFromCodeBank(locationStmt.getStmtId());
+			for (WeightedAtom potentialFixAtom : variant.getFixSourceAtoms()) {
+
+				JavaStatement possibleFixStmt = variant.getFromCodeBank(potentialFixAtom.getLeft());
+				if(!faultyStmt.toString().equalsIgnoreCase(possibleFixStmt.toString())
+						&& faultyStmt.getASTNode().getNodeType()==possibleFixStmt.getASTNode().getNodeType()){
+					StatementHole stmtHole = new StatementHole((Statement) possibleFixStmt.getASTNode(), possibleFixStmt.getStmtId());
+					retVal.add(new WeightedHole(stmtHole, potentialFixAtom.getRight()));
+				}
+			}
+			return retVal;
+		}
+		case CASTERMUT:
+		{
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
+			List<Type> casterObjects = locationStmt.getCasterTypes();
+			List<ASTNode> toReplaceForCasters = locationStmt.getTypesToReplaceCaster();
+			for(ASTNode casterObject : casterObjects) {
+
+				ASTNode toRemove = null;
+				for(ASTNode toReplaceForCaster : toReplaceForCasters){
+					if(casterObject.toString().equalsIgnoreCase(toReplaceForCaster.toString())){
+						toRemove = toReplaceForCaster;
+					}
+				}
+				if(toRemove!=null){
+					toReplaceForCasters.remove(toRemove);
+				}
+				EditHole newHole = new SubExpsHole(casterObject, toReplaceForCasters);
+				retVal.add(new WeightedHole(newHole));
+				
+			}
+			return retVal;
+		}
+		case CASTEEMUT:
+		{
+			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
+			List<Expression> casteeObjects = locationStmt.getCasteeExpressions();
+			List<Expression> toReplaceForCastees = locationStmt.getExpressionsToReplaceCastee();
+			for(Expression casteeObject : casteeObjects) {
+				for(Expression toReplaceForCastee : toReplaceForCastees) {
+					if(!casteeObject.toString().equalsIgnoreCase(toReplaceForCastee.toString())){
+						EditHole newHole = new ExpHole(toReplaceForCastee, casteeObject, locationStmt.getStmtId());
+						retVal.add(new WeightedHole(newHole));
+					}
+				}
+			}
+			return retVal;
+		}
 		}
 		return null;
 	}
-
+	
 	void permutations(List<List<ASTNode>> original, List<List<ASTNode>> result, int d, List<ASTNode> current) {
 		// if depth equals number of original collections, final reached, add and return
 		if (d == original.size()) {
@@ -410,9 +448,7 @@ public class JavaEditFactory {
 	}
 
 	public boolean doesEditApply(JavaRepresentation variant, Location location, Mutation editType) {
-		if(editType == Mutation.BABBLED) {
-			return true;
-		}
+
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
 		switch(editType) {
 		case APPEND: 
@@ -453,6 +489,13 @@ public class JavaEditFactory {
 			return true;
 		case OBJINIT:
 			return locationStmt.getObjectsAsMethodParams().size() > 0;
+		case SEQEXCH:
+			//FIXME: there might be a stronger requirement than this
+			return locationStmt.canBeDeleted() && variant.getFixSourceAtoms().size() > 0;
+		case CASTERMUT:
+			return locationStmt.getCasterTypes().size() > 0;
+		case CASTEEMUT:
+			return locationStmt.getCasteeExpressions().size() > 0;
 		}
 		return false;
 	}

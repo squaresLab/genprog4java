@@ -84,7 +84,7 @@ public class LowerBoundSetOperation extends JavaEditOperation {
 	@Override
 	public String toString() {
 		// FIXME: this is lazy
-		return "lbs(" + this.getLocation().getId() + ")";
+		return "LowerBoundSetter(" + this.getLocation().getId() + ")";
 	}
 	
 }

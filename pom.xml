@@ -120,11 +120,6 @@
   	<artifactId>junit4-runner</artifactId>
   	<version>5.0.0-ALPHA</version>
   </dependency>
-  <dependency>
-  	<groupId>codemining</groupId>
-  	<artifactId>codemining-treelm</artifactId>
-  	<version>1.1-SNAPSHOT</version>
-  </dependency>
   </dependencies>
   <properties>
   	<source>1.8</source>

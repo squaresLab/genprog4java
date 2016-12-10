@@ -1,5 +1,6 @@
 package clegoues.genprog4java.mut.edits.java;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -23,6 +25,7 @@ import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.holes.java.ExpHole;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
+import clegoues.genprog4java.mut.holes.java.SubExpsHole;
 
 public class ObjectInitializer extends JavaEditOperation {
 
@@ -105,4 +108,8 @@ public class ObjectInitializer extends JavaEditOperation {
 			}
 			insert B after statements
 	 */
+	@Override
+	public String toString() {
+		return "Object initializer";
+	}
 }
