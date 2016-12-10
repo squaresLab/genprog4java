@@ -33,7 +33,9 @@
 
 package clegoues.genprog4java.java;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
@@ -68,21 +70,24 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	private ScopeInfo scopes;
 
+	/** all ASTNodes of interest, corresponding to "repairable" Java statement types
+	 * a question (currently a question answered by {@link JavaRepresentation.canRepair})
+	 */
+	private LinkedList<ASTNode> stmts;
+
 	private boolean containsFinalVar = false;
 	private Stack<Boolean> finalVarStack = new Stack<Boolean>();
-
 
 	private HashSet<String> requiredNames = new HashSet<String>();
 	private Stack<HashSet<String>> requiredNamesStack = new Stack<HashSet<String>>();
 
 
-	// FIXME: types on variables in different scopes? Types in general, really
+	private HashMap<ASTNode,Set<String>> requiredNamesMap = new HashMap<ASTNode,Set<String>>(); 
 
 	private HashSet<String> currentMethodScope = new HashSet<String>();
 	private Stack<HashSet<String>> methodScopeStack = new Stack<HashSet<String>>();
 
 	private HashSet<String> currentLoopScope = new HashSet<String>();
-
 	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>();
 
 	private HashSet<String> namesDeclared = new HashSet<String>();
@@ -90,8 +95,14 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	private CompilationUnit cu;
 
-	public SemanticInfoVisitor(ScopeInfo scopeInfo) {
-		this.scopes = scopeInfo;
+	public SemanticInfoVisitor() {
+		this.scopes = new ScopeInfo();
+		this.stmts = new LinkedList<ASTNode>();
+
+	}
+
+	public List<ASTNode> getStatements() {
+		return this.stmts;
 	}
 
 
@@ -109,7 +120,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 			this.scopes.addToMethodScope(node,this.currentMethodScope, this.currentLoopScope);
 			this.scopes.addKnownToClassScope();
-			this.scopes.addNode(node);
+			this.stmts.add(node);
 		}
 
 		if(node instanceof EnhancedForStatement || 
@@ -131,7 +142,6 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	@Override
 	public void postVisit(ASTNode node) {
-
 		// required names are known only after the node has been processed
 		HashSet<String> oldRequired = requiredNamesStack.pop();
 		if(node instanceof EnhancedForStatement || 
@@ -146,14 +156,13 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			toRemove.removeAll(newLocalVariables);
 
 			requiredNames.removeAll(toRemove);
-
 			currentMethodScope = newLocalVariables;
 		}
 
 		namesDeclared.addAll(namesDeclaredStack.pop());
 
 		if(JavaRepresentation.canRepair(node)) {
-			this.scopes.addRequiredNames(node,new HashSet<String>(this.requiredNames));
+			this.requiredNamesMap.put(node,new HashSet<String>(this.requiredNames));
 			this.scopes.setContainsFinalVarDecl(node, containsFinalVar);
 			this.scopes.setNamesDeclared(node, new HashSet<String>(this.namesDeclared));
 		}
@@ -301,7 +310,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			}
 		}
 		String returnType = node.getReturnType2()==null?"null":node.getReturnType2().toString();
-		this.scopes.addMethodReturnType(node.getName().getIdentifier(), returnType);
+		JavaSemanticInfo.methodReturnType.put(node.getName().getIdentifier(), returnType);
 		return true;
 	}
 
@@ -314,7 +323,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				namesDeclared.add(name);
 				if(!currentLoopScope.contains(name)) {
 					this.currentMethodScope.add(v.getName().getIdentifier());
-					this.scopes.addVariableType(v.getName().toString(), node.getType().toString());
+					JavaSemanticInfo.variableDataTypes.put(v.getName().toString(), node.getType().toString());
 				}
 			}
 		}
@@ -330,7 +339,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 				namesDeclared.add(name);
 				if(!currentLoopScope.contains(name)) {
 					this.currentMethodScope.add(v.getName().getIdentifier());
-					this.scopes.addVariableType(v.getName().toString().toLowerCase(), node.getType().toString());
+					JavaSemanticInfo.variableDataTypes.put(v.getName().toString().toLowerCase(), node.getType().toString());
 				}
 			}
 		}
