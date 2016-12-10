@@ -22,6 +22,7 @@ public abstract class Localization {
 			.inGroup( "Localization Parameters" )
 			.build();
 
+	// FIXME: overloading fault strategy between lm and default branch
 	public static String faultStrategy = ConfigurationBuilder.of ( STRING )
 			.withVarName("faultStrategy")
 			.withHelp("Fault localization strategy")

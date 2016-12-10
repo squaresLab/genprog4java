@@ -197,6 +197,11 @@ CachingRepresentation<JavaEditOperation> {
 
 			}
 		}	
+		// FIXME: terrible place to put this but whatever.  I know for 
+		// certain that everything's loaded at this point.  Good enough for now/testing.
+		if(localization instanceof EntropyLocalization) {
+			editFactory.setEntropyLocalization((EntropyLocalization) localization);
+		}
 	}
 
 	public void fromSource(ClassInfo pair) throws IOException {
