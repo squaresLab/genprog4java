@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
 import clegoues.genprog4java.java.ASTUtils;
+import clegoues.genprog4java.java.JavaLMSymbolTable;
 import codemining.lm.tsg.FormattedTSGrammar;
 import codemining.lm.tsg.TSGNode;
 import codemining.lm.tsg.TSGrammar;
@@ -228,7 +229,7 @@ public class JavaEditFactory {
 
 		if(editType == Mutation.BABBLED) {
 			ArrayList<WeightedHole> retVal = new ArrayList<WeightedHole>();
-			ASTNode node = localization.babbleFixCode((JavaLocation) location, variant.semanticInfo);
+			ASTNode node = localization.babbleFixCode((JavaLocation) location, new JavaLMSymbolTable(location));
 			ASTNodeHole newHole =  new ASTNodeHole(node);
 			retVal.add(new WeightedHole(newHole));
 			return retVal;

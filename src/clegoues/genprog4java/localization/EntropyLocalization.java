@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.java.ASTUtils;
+import clegoues.genprog4java.java.JavaLMSymbolTable;
 import clegoues.genprog4java.java.JavaSemanticInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.holes.java.JavaASTNodeLocation;
@@ -122,7 +123,7 @@ public class EntropyLocalization extends DefaultLocalization {
 
 	
 	// babbles fix code, manipulates it to reference in-scope variables
-	public ASTNode babbleFixCode(JavaLocation location, JavaSemanticInfo info) {
+	public ASTNode babbleFixCode(JavaLocation location, JavaLMSymbolTable info) {
 		ASTNode element = location.getCodeElement();
 		ASTNode babbled;
 		try {
