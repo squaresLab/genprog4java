@@ -87,9 +87,8 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 			throws RepairFoundException, GiveUpException {
 		Localization localization = original.getLocalization();
 		localization.reduceSearchSpace();
-
 		int count = 0;
-		List<Location> allFaultyLocations =  localization.getFaultLocalization();
+		List<Location> allFaultyLocations = localization.getFaultLocalization();
 
 		for (Location faultyLocation : allFaultyLocations) {
 
@@ -137,7 +136,17 @@ public class BruteForce<G extends EditOperation> extends Search<G> {
 			}
 
 			Collections.sort(rescaledMutations, descendingMutations);
-
+			// rescaled Mutations gives us the mutation,weight pairs available
+			// at this atom
+			// which itself has its own weight
+			Comparator<WeightedAtom> descendingAtom = new Comparator<WeightedAtom>() {
+				@Override
+				public int compare(WeightedAtom one, WeightedAtom two) {
+					return (new Double(two.getWeight())).compareTo((new Double(
+							one.getWeight())));
+				}
+			};
+			
 			for (Pair<Mutation, Double> mutation : rescaledMutations) {
 				Mutation mut = mutation.getLeft();
 				double prob = mutation.getRight();

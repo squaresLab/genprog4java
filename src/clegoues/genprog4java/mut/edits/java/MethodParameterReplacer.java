@@ -18,7 +18,7 @@ public class MethodParameterReplacer extends ExpressionReplacer {
 		Expression locationExp = (Expression) thisHole.getLocationExp();
 		Expression newExpCode = (Expression) thisHole.getCode();
 		// FIXME: is it possible to get the method call for this?  Would be nice for debug
-		String retval = "mpr(" + this.getLocation().getId() + ": ";
+		String retval = "ParameterReplacer(" + this.getLocation().getId() + ": ";
 		retval += "(" + locationExp.toString() + ") -->";
 		retval +=  "(" + newExpCode.toString() + "))";
 		return retval;

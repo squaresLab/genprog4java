@@ -37,7 +37,7 @@ public class ExpressionModRem extends ExpressionReplacer {
 	@Override
 	public String toString() {
 		// FIXME: this is lazy
-		return "erm(" + this.getLocation().getId() + ")";
+		return "ExpressionRemove(" + this.getLocation().getId() + ")";
 	}
 	
 }

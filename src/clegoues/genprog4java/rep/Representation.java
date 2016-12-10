@@ -34,6 +34,7 @@
 package clegoues.genprog4java.rep;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,9 +50,10 @@ import org.apache.log4j.Logger;
 import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.FitnessValue;
 import clegoues.genprog4java.fitness.TestCase;
+import clegoues.genprog4java.java.ClassInfo;
 import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.localization.Location;
-import clegoues.genprog4java.java.ClassInfo;
+import clegoues.genprog4java.localization.UnexpectedCoverageResultException;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
@@ -63,7 +65,8 @@ import clegoues.genprog4java.mut.WeightedMutation;
 public abstract class Representation<G extends EditOperation> implements
 Comparable<Representation<G>> {
 
-	protected Logger logger = Logger.getLogger(Representation.class);
+	protected transient Logger logger = Logger.getLogger(Representation.class);
+
 	protected Localization localization = null;
 
 	protected String variantFolder = "";
@@ -110,6 +113,8 @@ Comparable<Representation<G>> {
 	
 	public abstract boolean sanityCheck();
 
+	public abstract void fromSource(ClassInfo pair, String path, File sourceFile) throws IOException;
+
 	public abstract void fromSource(ClassInfo base) throws IOException;
 
 	public abstract void outputSource(String filename);
@@ -125,6 +130,8 @@ Comparable<Representation<G>> {
 	// without making coverage computation a state variable on rep.
 	public abstract FitnessValue testCase(TestCase test);
 	public abstract FitnessValue testCase(TestCase test, boolean doingCoverage);
+
+	public abstract void reduceSearchSpace() throws GiveUpException; 
 
 	public abstract List<WeightedMutation> availableMutations(
 			Location faultyLocation);
@@ -163,7 +170,6 @@ Comparable<Representation<G>> {
 		String line;
 		ArrayList<String> allLines = new ArrayList<String>();
 		while ((line = br.readLine()) != null) {
-			// print the line.
 			allLines.add(line);
 		}
 		br.close();
@@ -171,16 +177,15 @@ Comparable<Representation<G>> {
 	}
 
 	public abstract List<WeightedHole> editSources(Location stmtId, Mutation editType);
-
-	public abstract Boolean shouldBeRemovedFromFix(WeightedAtom atom);
 	
+	public abstract Boolean shouldBeRemovedFromFix(WeightedAtom atom);
+
 	public abstract Boolean doesEditApply(Location location, Mutation editType);
 
 	public abstract ArrayList<Integer> atomIDofSourceLine(int line);
 
 	public abstract Location instantiateLocation(Integer i, double negWeight);
 	
-	// FIXME: why do I need this in representation again?
 	public abstract CommandLine internalTestCaseCommand(String exeName, String fileName, TestCase test, boolean doingCoverage);
 
 	protected abstract CommandLine internalTestCaseCommand(String exeName,
@@ -197,6 +202,9 @@ Comparable<Representation<G>> {
 	public Localization getLocalization() {
 		return this.localization ;
 	}
+	
+	public abstract ClassInfo getFileFromStmt(int stmtId);
+
 	
 
 }
