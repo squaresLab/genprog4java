@@ -6,7 +6,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 
 import clegoues.genprog4java.java.ClassInfo;
 import clegoues.genprog4java.java.JavaStatement;
-import clegoues.genprog4java.mut.Location;
+import clegoues.genprog4java.localization.Location;
 
 public class JavaLocation extends Location<JavaStatement> {
 

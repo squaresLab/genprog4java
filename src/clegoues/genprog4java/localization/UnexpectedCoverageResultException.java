@@ -31,9 +31,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package clegoues.genprog4java.rep;
+package clegoues.genprog4java.localization;
 
 public class UnexpectedCoverageResultException extends Exception {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5827189766166770328L;
+
 	public UnexpectedCoverageResultException(String msg) {
 		super(msg);
 	}

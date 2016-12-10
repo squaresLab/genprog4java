@@ -34,12 +34,15 @@
 package clegoues.genprog4java.rep;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.exec.CommandLine;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
@@ -48,9 +51,11 @@ import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.FitnessValue;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.java.ClassInfo;
+import clegoues.genprog4java.localization.Localization;
+import clegoues.genprog4java.localization.Location;
+import clegoues.genprog4java.localization.UnexpectedCoverageResultException;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
-import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.mut.WeightedMutation;
@@ -64,7 +69,9 @@ public abstract class Representation<G extends EditOperation> implements
 Comparable<Representation<G>> {
 
 	protected transient Logger logger = Logger.getLogger(Representation.class);
-	
+
+	protected Localization localization = null;
+
 	protected String variantFolder = "";
 
 	public Representation() {
@@ -107,11 +114,9 @@ Comparable<Representation<G>> {
 	public abstract void load(ArrayList<ClassInfo> classNames) throws IOException,
 	UnexpectedCoverageResultException;
 
-	public abstract ArrayList<Location> getFaultyLocations();
-
-	public abstract ArrayList<WeightedAtom> getFixSourceAtoms();
-
 	public abstract boolean sanityCheck();
+
+	public abstract void fromSource(ClassInfo pair, String path, File sourceFile) throws IOException;
 
 	public abstract void fromSource(ClassInfo base) throws IOException;
 
@@ -172,8 +177,32 @@ Comparable<Representation<G>> {
 
 	public abstract List<WeightedHole> editSources(Location stmtId, Mutation editType);
 
+	public abstract Boolean shouldBeRemovedFromFix(WeightedAtom atom);
+
 	public abstract Boolean doesEditApply(Location location, Mutation editType);
 
-	public abstract void setAllPossibleStmtsToFixLocalization();
+	public abstract ArrayList<Integer> atomIDofSourceLine(int line);
+
+	public abstract Location instantiateLocation(Integer i, double negWeight);
+
+
+	public abstract CommandLine internalTestCaseCommand(String exeName, String fileName, TestCase test, boolean doingCoverage);
+
+	protected abstract CommandLine internalTestCaseCommand(String exeName,
+			String fileName, TestCase test);
+	
+	public abstract Map<ClassInfo, String> getOriginalSource();
+
+	public void setLocalization(Localization l) {
+		this.localization = l;
+	}
+	
+	public Localization getLocalization() {
+		return this.localization ;
+	}
+	
+	public abstract ClassInfo getFileFromStmt(int stmtId);
+
+	
 
 }
