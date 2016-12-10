@@ -47,6 +47,7 @@ import clegoues.genprog4java.Search.RandomSingleEdit;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.localization.DefaultLocalization;
+import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.localization.UnexpectedCoverageResultException;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.rep.CachingRepresentation;
@@ -59,7 +60,7 @@ public class Main {
 	protected static Logger logger = Logger.getLogger(Main.class);
 
 	public static void main(String[] args) throws IOException,
-			UnexpectedCoverageResultException {
+	UnexpectedCoverageResultException {
 		Search searchEngine = null;
 		Representation baseRep = null;
 		Fitness fitnessEngine = null;
@@ -86,30 +87,32 @@ public class Main {
 		if (!workDir.exists())
 			workDir.mkdir();
 		logger.info("Configuration file loaded");
-		
-		if (Configuration.globalExtension == ".java") {
-			baseRep = (Representation) new JavaRepresentation();
-			fitnessEngine = new Fitness();
-			switch(Search.searchStrategy.trim()) {
 
-			case "brute": searchEngine = new BruteForce<JavaEditOperation>(fitnessEngine);
-				break;
-			case "rsrepair": searchEngine = new RandomSingleEdit<JavaEditOperation>(fitnessEngine);
-				break;
-			case "oracle": searchEngine = new OracleSearch<JavaEditOperation>(fitnessEngine);
-			break;
-			case "ga":
-			default: searchEngine = new GeneticProgramming<JavaEditOperation>(fitnessEngine);
-				break;
-			}
-			incomingPopulation = new Population<JavaEditOperation>(); 
+		fitnessEngine = new Fitness();  // Fitness must be created before rep!
+		baseRep = (Representation) new JavaRepresentation();
+		baseRep.load(Configuration.targetClassNames);
+		Localization localization = new DefaultLocalization(baseRep);
+		baseRep.setLocalization(localization);
+		
+		switch(Search.searchStrategy.trim()) {
+
+		case "brute": searchEngine = new BruteForce<JavaEditOperation>(fitnessEngine);
+		break;
+		case "rsrepair": searchEngine = new RandomSingleEdit<JavaEditOperation>(fitnessEngine);
+		break;
+		case "oracle": searchEngine = new OracleSearch<JavaEditOperation>(fitnessEngine);
+		break;
+		case "ga":
+		default: searchEngine = new GeneticProgramming<JavaEditOperation>(fitnessEngine);
+		break;
 		}
+		incomingPopulation = new Population<JavaEditOperation>(); 
+
 		// loads the class file into the representation.
 		// Does the Following:
 		// 1) If "yes" in sanity check in Configuration file, then does sanity
 		// check.
 		// 2)
-		baseRep.load(Configuration.targetClassNames);
 		try {
 			searchEngine.doSearch(baseRep, incomingPopulation);
 		} catch (CloneNotSupportedException e) {
