@@ -46,13 +46,14 @@ import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.RandomSingleEdit;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.localization.DefaultLocalization;
+import clegoues.genprog4java.localization.UnexpectedCoverageResultException;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.LocalizationRepresentation;
 import clegoues.genprog4java.rep.Representation;
-import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 import clegoues.util.ConfigurationBuilder;
 
 public class Main {
@@ -78,6 +79,7 @@ public class Main {
 		ConfigurationBuilder.register( Search.token );
 		ConfigurationBuilder.register( OracleSearch.token );
 		ConfigurationBuilder.register( RandomSingleEdit.token );
+		ConfigurationBuilder.register( DefaultLocalization.token );
 
 		ConfigurationBuilder.parseArgs( args );
 		Configuration.saveOrLoadTargetFiles();

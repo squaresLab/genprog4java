@@ -362,9 +362,6 @@ Representation<G>  {
 	public void reduceFixSpace() {
 	}
 
-	protected abstract CommandLine internalTestCaseCommand(String exeName,
-			String fileName, TestCase test);
-	
 	 private void writeObject(java.io.ObjectOutputStream out)
 		     throws IOException {
 
