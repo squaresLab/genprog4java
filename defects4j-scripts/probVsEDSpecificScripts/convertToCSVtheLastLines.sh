@@ -1,14 +1,16 @@
 #!/bin/bash
 
-if [ "$#" -ne 1 ]; then
-    echo "This script should be run with 1 parameters: Path where the lastLinesOfAllLogs.txt is$"
+if [ "$#" -ne 2 ]; then
+    echo "This script should be run with 2 parameters: Path where the lastLinesOfAllLogs.txt is, and an output file path$"
     exit 0
 fi
 
 
 dirToWork="$1"
+output="$2"
+
 cd "$dirToWork"
-  rm -f Results.csv
+  #rm -f Results.csv
   lastLinesFile="lastLinesOfAllLogs.txt"
   lookingForRepair=0
   variantNum="Check Manually"
@@ -28,21 +30,21 @@ cd "$dirToWork"
       then	  
         lookingForRepair=1
       else 
-	    echo "Not found" >> Results.csv
+	    echo "Not found" >> $output
         #printf '%s\n' "Not found" | paste -sd " " >> Results.csv
       fi
 	fi
     if [[ $lineInLastLinesFile == "Repair Found:"* ]]
     then 
       lookingForRepair=0
-      echo " $variantNumber" >> Results.csv
+      echo " $variantNumber" >> $output
 	  #printf '%s\n' $variantNumber | paste -sd " " >> Results.csv
     fi
   done < $lastLinesFile
   if [[ $lookingForRepair == 0 ]]
   then	  
-    echo " $variantNumber" >> Results.csv
+    echo " $variantNumber" >> $output
   else 
-    echo "Not found" >> Results.csv
+    echo "Not found" >> $output
   fi
 cd ..
