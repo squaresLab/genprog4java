@@ -53,7 +53,7 @@ import clegoues.util.GlobalUtils;
 //this class implements boring, default path-file-style localization.
 @SuppressWarnings("rawtypes")
 public class DefaultLocalization extends Localization {
-	
+
 	protected Logger logger = Logger.getLogger(DefaultLocalization.class);
 
 	public static final ConfigurationBuilder.RegistryToken token =
@@ -65,25 +65,25 @@ public class DefaultLocalization extends Localization {
 			.withHelp( "boolean to be turned true if the purpose is to test that fault loc is performed correctly" )
 			.inGroup( "DefaultLocalization Parameters" )
 			.build();
-	
+
 	protected static String fixStrategy = ConfigurationBuilder.of ( STRING )
 			.withVarName("fixStrategy")
 			.withHelp("Fix source strategy")
 			.withDefault("classScope")
 			.inGroup( "DefaultLocalization Parameters" )
 			.build();
-	
+
 	//private static double positivePathWeight = 0.1;
 	private static double positivePathWeight = ConfigurationBuilder.of( DOUBLE )
 			.withVarName( "positivePathWeight" )
-			.withDefault( "0.65" )
+			.withDefault( "0.1" )
 			.withHelp( "weighting for statements on the positive path" )
 			.inGroup( "DefaultLocalization Parameters" )
 			.build();
 	//private static double negativePathWeight = 1.0;
 	private static double negativePathWeight = ConfigurationBuilder.of( DOUBLE )
 			.withVarName( "negativePathWeight" )
-			.withDefault( "0.35" )
+			.withDefault( "1.0" )
 			.withHelp( "weighting for statements on the negative path" )
 			.inGroup( "DefaultLocalization Parameters" )
 			.build();
@@ -113,7 +113,7 @@ public class DefaultLocalization extends Localization {
 			.withHelp( "regenerate coverage information" )
 			.inGroup( "DefaultLocalization Parameters" )
 			.build();
-	
+
 	// FIXME: I think this should be pushed to subclasses
 	protected static String faultLocStrategy = ConfigurationBuilder.of ( STRING )
 			.withVarName("faultLocStrategy")
@@ -127,7 +127,7 @@ public class DefaultLocalization extends Localization {
 			.withDefault("fileHumanInjectedFaultLoc.txt")
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
-	
+
 	protected Representation original = null;
 	protected ArrayList<Location> faultLocalization = new ArrayList<Location>();
 	private ArrayList<Location> faultSortedByWeight = null;
@@ -152,7 +152,7 @@ public class DefaultLocalization extends Localization {
 		return this.faultLocalization;
 	}
 
-	
+
 	@Override
 	public Location getRandomLocation(double weight) {
 		return (Location) GlobalUtils.chooseOneWeighted(new ArrayList(this.getFaultLocalization()), weight);
@@ -168,7 +168,7 @@ public class DefaultLocalization extends Localization {
 			Location ele = faultSortedByWeight.get(index);
 			index++;
 			return ele;
-		} 
+		}
 		throw new GiveUpException();
 	}
 
@@ -182,7 +182,7 @@ public class DefaultLocalization extends Localization {
 		fixLocalization.clear();
 		for(int i = 0; i < JavaRepresentation.stmtCounter; i++) {
 			fixLocalization.add(new WeightedAtom(i,1.0));
-		}		
+		}
 	}
 
 	@Override
@@ -210,7 +210,7 @@ public class DefaultLocalization extends Localization {
 				throw new GiveUpException();
 			}
 		}
-		
+
 		//Reduce Fix space
 		ArrayList<WeightedAtom> toRemove = new ArrayList<WeightedAtom>();
 		//potentialFix is a potential fix statement
@@ -237,22 +237,22 @@ public class DefaultLocalization extends Localization {
 		logger.info("Start Fault Localization");
 		TreeSet<Integer> positivePath = getPathInfo(DefaultLocalization.posCoverageFile, Fitness.positiveTests, true);
 		TreeSet<Integer> negativePath = null;
-		
+
 		switch(faultLocStrategy.trim()) { // FIXME: push this to a subclass.
-		
-		case "humanInjected": 
+
+		case "humanInjected":
 			negativePath = transformFileWithLineNumbersToStmtNumbers(pathToFileHumanInjectedFaultLoc);
 			break;
-		case "standardPathFile": 
+		case "standardPathFile":
 		default:
 			negativePath = getPathInfo(DefaultLocalization.negCoverageFile, Fitness.negativeTests, false);
 		}
 		switch(faultLocStrategy.trim()) { // FIXME: push this to a subclass.
-		case "humanInjected": 
+		case "humanInjected":
 			break;
-		case "standardPathFile": 
+		case "standardPathFile":
 		default:
-			computeFaultSpace(negativePath,positivePath); 
+			computeFaultSpace(negativePath,positivePath);
 		}
 		computeFixSpace(negativePath, positivePath);
 
@@ -265,9 +265,9 @@ public class DefaultLocalization extends Localization {
 
 		assert (faultLocalization.size() > 0);
 		assert (fixLocalization.size() > 0);
-		logger.info("Finish Fault Localization");		
+		logger.info("Finish Fault Localization");
 	}
-	
+
 	protected void computeFaultSpace(TreeSet<Integer> negativePath, TreeSet<Integer> positivePath) {
 		HashMap<Integer, Double> fw = new HashMap<Integer, Double>();
 		TreeSet<Integer> negHt = new TreeSet<Integer>();
@@ -289,9 +289,9 @@ public class DefaultLocalization extends Localization {
 				}
 				negHt.add(i);
 				fw.put(i, 0.5);
-				faultLocalization.add(original.instantiateLocation(i, negWeight)); 
+				faultLocalization.add(original.instantiateLocation(i, negWeight));
 			}
-		}		
+		}
 	}
 
 	protected void computeFixSpace(TreeSet<Integer> negativePath, TreeSet<Integer> positivePath) {
@@ -311,7 +311,7 @@ public class DefaultLocalization extends Localization {
 					public boolean accept(File dir, String name) {
 						return name.endsWith(".java") && !clazzes.contains(name); // or something else
 					}}));
-				packageFiles.addAll(list);	
+				packageFiles.addAll(list);
 			}
 			for(File packageFile : packageFiles) {
 				ClassInfo newCi = new ClassInfo(packageFile.getName(), packageFile.getPath());
@@ -332,7 +332,7 @@ public class DefaultLocalization extends Localization {
 			}
 			for (Integer i : negativePath) {
 				fixLocalization.add(new WeightedAtom(i, 0.5));
-			}	
+			}
 		}
 	}
 
@@ -421,7 +421,7 @@ public class DefaultLocalization extends Localization {
 
 	public TreeSet<Integer> getCoverageInfo() throws IOException {
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
-		
+
 		Map<ClassInfo,String> source = original.getOriginalSource();
 
 		for (Map.Entry<ClassInfo, String> ele : source.entrySet()) {
