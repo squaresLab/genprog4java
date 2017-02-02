@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.rep.JavaRepresentation;
+import clegoues.genprog4java.treelm.GrammarUtils;
 
 /**
  * Parses a single java file, and delegates to a semantic info visitor the goal
@@ -108,6 +109,7 @@ public class JavaParser
 		parser.createASTs(new String[]{file}, null, new String[0], req, null);
 		
 		this.compilationUnit = visitor.getCompilationUnit();
+		GrammarUtils.prepareAST( this.compilationUnit );
 		visitor.finalizeVisit();
 	}
 
