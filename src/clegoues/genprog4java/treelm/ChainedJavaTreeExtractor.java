@@ -19,10 +19,10 @@ import codemining.ast.TreeNode;
 import codemining.ast.java.JavaAstTreeExtractor;
 
 /**
- * This {@link JavaAstExtractor} allowed the resulting tree to be modified by
+ * This {@link JavaAstExtractor} allows the resulting tree to be modified by
  * a chain of post-processing strategies. For example, variables and literals
  * might be abstracted by a post-processor or it might annotate nodes with
- * information for later use. In particular, this allows strategies that do not
+ * information for later use. In particular, this ensures strategies that do not
  * alter the structure of the tree do not need to "know" about the structure;
  * they can apply to any structure without extra sub-classing.
  * 
@@ -96,13 +96,15 @@ public class ChainedJavaTreeExtractor extends JavaAstTreeExtractor {
 		 * @param node        the ASTNode being processed
 		 * @param getSymbolId callback to get an integer representation of an
 		 *                    AstNodeSymbol from the base extractor.
+		 * @param getSymbol   callback to get an AstNodeSymbol for an integer
 		 *                       
 		 * @return the processed integer tree.
 		 */
 		public TreeNode< Integer > encode(
 			TreeNode< Integer > tree,
 			ASTNode node,
-			Function< AstNodeSymbol, Integer > getSymbolId
+			Function< AstNodeSymbol, Integer > getSymbolId,
+			Function< Integer, AstNodeSymbol > getSymbol
 		);
 
 		/**
@@ -189,7 +191,8 @@ public class ChainedJavaTreeExtractor extends JavaAstTreeExtractor {
 			for ( int i = 0; i < postProcessors.size(); ++i )
 				treeNode = postProcessors.get( i ).encode(
 					treeNode, node,
-					ChainedJavaTreeExtractor.this::getOrAddSymbolId
+					ChainedJavaTreeExtractor.this::getOrAddSymbolId,
+					ChainedJavaTreeExtractor.this::getSymbol
 				);
 			return treeNode;
 		}
@@ -213,7 +216,7 @@ public class ChainedJavaTreeExtractor extends JavaAstTreeExtractor {
 		List< PostProcess > postProcessors = new ArrayList<>();
 		for ( Supplier< ? extends PostProcess > factory : factories )
 			postProcessors.add( factory.get() );
-		tree = TreeNodeUtils.visit( tree, (t) -> {
+		tree = TreeNodeUtils.transform( tree, (t) -> {
 			for ( int i = postProcessors.size() - 1; i >=0; --i )
 				t = postProcessors.get( i ).decode(
 					t, this::getOrAddSymbolId, this::getSymbol, symbols

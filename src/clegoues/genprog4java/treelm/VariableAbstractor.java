@@ -28,7 +28,8 @@ public class VariableAbstractor implements
 	@Override
 	public TreeNode< Integer > encode(
 		TreeNode< Integer > tree, ASTNode node,
-		Function< AstNodeSymbol, Integer > getSymbolId
+		Function< AstNodeSymbol, Integer > getSymbolId,
+		Function< Integer, AstNodeSymbol > getSymbol
 	) {
 		if ( node.getNodeType() != ASTNode.SIMPLE_NAME )
 			return tree;

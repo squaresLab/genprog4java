@@ -49,7 +49,8 @@ public class EclipseTSG {
 		@Override
 		public TreeNode< Integer > encode(
 			TreeNode< Integer > tree, ASTNode node,
-			Function< AstNodeSymbol, Integer > getOrAddSymbol
+			Function< AstNodeSymbol, Integer > getOrAddSymbol,
+			Function< Integer, AstNodeSymbol > getSymbol
 		) {
 			nodeTable.putIfAbsent( tree, node );
 			return tree;
