@@ -582,7 +582,7 @@ public class ConfigurationBuilder< T > {
 		try {
 			cl = parser.parse( options, args );
 		} catch ( ParseException e ) {
-			logger.error( e.getMessage() );
+			System.out.println( e.getMessage() );
 			showHelp();
 			System.exit( 1 );
 		}
