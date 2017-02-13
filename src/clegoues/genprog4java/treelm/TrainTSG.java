@@ -16,7 +16,9 @@ import codemining.ast.TreeNode;
 import codemining.java.tokenizers.JavaTokenizer;
 import codemining.lm.tsg.FormattedTSGrammar;
 import codemining.lm.tsg.TSGNode;
+import codemining.lm.tsg.samplers.AbstractTSGSampler;
 import codemining.lm.tsg.samplers.blocked.BlockCollapsedGibbsSampler;
+import codemining.lm.tsg.samplers.blocked.JavaFilteredBlockCollapsedGibbsSampler;
 import codemining.lm.tsg.samplers.blocked.TreeCorpusFilter;
 import codemining.util.serialization.ISerializationStrategy.SerializationException;
 import codemining.util.serialization.Serializer;
@@ -86,17 +88,13 @@ public class TrainTSG {
 		.withHelp( "make variables abstract" )
 		.build();
 	
-	private static BlockCollapsedGibbsSampler getSamplerForSources() {
+	private static AbstractTSGSampler getSamplerForSources() {
 		ChainedJavaTreeExtractor format = new ChainedJavaTreeExtractor();
 		if ( varAbstraction )
 			format.addPostProcessFactory( new VariableAbstractor() );
 		if ( binarize )
 			format.addPostProcessFactory( new TreeBinarizer() );
-		BlockCollapsedGibbsSampler sampler = new BlockCollapsedGibbsSampler(
-			100, concentration,
-			new FormattedTSGrammar(format), new FormattedTSGrammar(format)
-		);
-		
+
         final TreeCorpusFilter filter = new TreeCorpusFilter(format, 0);
         int nFiles = 0;
         int nNodes = 0;
@@ -133,6 +131,13 @@ public class TrainTSG {
 		logger.info(
 			"Loaded " + nFiles + " files containing " + nNodes + " nodes"
 		);
+
+		BlockCollapsedGibbsSampler sampler =
+			new JavaFilteredBlockCollapsedGibbsSampler(
+				(double)nNodes / (double)nFiles, concentration,
+				new FormattedTSGrammar(format), new FormattedTSGrammar(format)
+			);
+		
 		for ( TreeNode< TSGNode > tree : filter.getFilteredTrees() )
 			sampler.addTree( tree );
 		sampler.lockSamplerData();
@@ -153,7 +158,7 @@ public class TrainTSG {
 			return;
 		}
 		
-		BlockCollapsedGibbsSampler sampler;
+		AbstractTSGSampler sampler;
 		if ( checkpoint.isEmpty() ) {
 			sampler = getSamplerForSources();
 		} else {
@@ -164,7 +169,7 @@ public class TrainTSG {
 				System.err.println( e.getMessage() );
 				return;
 			}
-			sampler = (BlockCollapsedGibbsSampler) deserialized;
+			sampler = (AbstractTSGSampler) deserialized;
 		}
 		
 		try ( ShutdownDelay delay = new ShutdownDelay( 500000 ) ) {
