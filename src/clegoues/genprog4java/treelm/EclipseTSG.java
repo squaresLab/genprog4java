@@ -11,30 +11,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jdt.core.dom.ASTNode;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Multiset;
-import com.google.common.math.DoubleMath;
 
 import codemining.ast.AstNodeSymbol;
 import codemining.ast.TreeNode;
+import codemining.lm.tsg.ITsgPosteriorProbabilityComputer;
 import codemining.lm.tsg.TSGNode;
 import codemining.lm.tsg.TSGrammar;
 import codemining.math.random.SampleUtils;
-import codemining.util.StatsUtil;
+
+import clegoues.util.Probability;
 
 public class EclipseTSG {
 	public EclipseTSG( TSGrammar< TSGNode > grammar ) {
 		this.grammar = grammar.getInternalGrammar();
+		this.posterior = grammar.getPosteriorComputer();
 		ChainedJavaTreeExtractor ex =
 			(ChainedJavaTreeExtractor) grammar.getTreeExtractor();
 		this.tsgExtractor = new ChainedJavaTreeExtractor( ex );
 	}
 	
+	private static class TreeNote {
+		public ASTNode node = null;
+		public TreeNode< Integer > target = null;
+		public ParseState parseResult = null;
+	}
+
 	private static class EclipseASTProcess
 		implements ChainedJavaTreeExtractor.PostProcess,
 			Supplier< EclipseASTProcess >,
@@ -42,8 +49,10 @@ public class EclipseTSG {
 	{
 		private static final long serialVersionUID = 20160930L;
 
-		public EclipseASTProcess () {
-			this.nodeTable = new IdentityHashMap<>();
+		public EclipseASTProcess(
+			Map< TreeNode< Integer >, TreeNote > notes
+		) {
+			this.notes = notes;
 		}
 
 		@Override
@@ -52,7 +61,7 @@ public class EclipseTSG {
 			Function< AstNodeSymbol, Integer > getOrAddSymbol,
 			Function< Integer, AstNodeSymbol > getSymbol
 		) {
-			nodeTable.putIfAbsent( tree, node );
+			notes.computeIfAbsent( tree, ( t ) -> new TreeNote() ).node = node;
 			return tree;
 		}
 
@@ -71,123 +80,7 @@ public class EclipseTSG {
 			return this;
 		}
 		
-		public ASTNode getASTNode( TreeNode< Integer > tree ) {
-			return nodeTable.get( tree );
-		}
-
-		private final IdentityHashMap< TreeNode< Integer >, ASTNode > nodeTable;
-	}
-
-	private static class StartPoint {
-		public StartPoint(
-			TreeNode< Integer > tree,
-			TreeNode< TSGNode > production,
-			double logProb
-		) {
-			this.tree = tree;
-			this.production = production;
-			this.logProb = logProb;
-		}
-		
-		public StartPoint withLogProb( double logProb ) {
-			return new StartPoint( this.tree, this.production, logProb );
-		}
-
-		public final TreeNode< Integer > tree;
-		public final TreeNode< TSGNode > production;
-		public final double logProb;
-	}
-
-	private static class ParseState {
-		private static enum Status { INVALID, VALID, FOUND };
-		
-		private ParseState(
-			Status status, List< StartPoint > points, double logProb
-		) {
-			this.status = status;
-			this.points = Collections.unmodifiableList( points );
-			this.logProb = logProb;
-		}
-		
-		public static ParseState failure = new ParseState(
-			Status.INVALID, Collections.emptyList(), Double.NEGATIVE_INFINITY
-		);
-		
-		public static ParseState success( double logProb ) {
-			return new ParseState(
-				Status.VALID, Collections.emptyList(), logProb
-			);
-		}
-		
-		public static ParseState found(
-			TreeNode< Integer > tree,
-			TreeNode< TSGNode > production,
-			double logProb
-		) {
-			return new ParseState( Status.FOUND, Collections.singletonList(
-				new StartPoint( tree, production, logProb )
-			), 0.0 );
-		}
-		
-		public ParseState and( ParseState that ) {
-			if ( this.status == Status.INVALID || that.status == Status.INVALID )
-				return failure;
-			if ( this.status == Status.VALID && that.status == Status.VALID )
-				return success( this.logProb + that.logProb );
-
-			assert this.status == Status.VALID || that.status == Status.VALID;
-
-			List< StartPoint > newPoints =
-				Stream.concat( this.points.stream(), that.points.stream() ).map(
-					(point) -> point.withLogProb(
-						point.logProb + this.logProb + that.logProb
-					)
-				).collect( Collectors.toList() );
-			return new ParseState( Status.FOUND, newPoints, 0.0 );
-		}
-		
-		public ParseState or( ParseState that ) {
-			if ( this.status == Status.INVALID )
-				return that;
-			else if ( that.status == Status.INVALID )
-				return this;
-			if ( this.status == Status.VALID && that.status == Status.VALID )
-				return success( StatsUtil.log2SumOfExponentials(
-					this.logProb, that.logProb
-				) );
-			
-			assert this.status == Status.FOUND && that.status == Status.FOUND;
-
-			Map< TreeNode< TSGNode >, StartPoint > pointmap = new HashMap<>();
-			Stream.concat( this.points.stream(), that.points.stream() ).forEach(
-				(p) -> {
-					if ( pointmap.containsKey( p.production ) )
-						p = p.withLogProb( StatsUtil.log2SumOfExponentials(
-							p.logProb, pointmap.get( p.production ).logProb
-						) );
-					pointmap.put( p.production, p );
-				}
-			);
-			return new ParseState(
-				Status.FOUND, new ArrayList<>( pointmap.values() ), 0.0
-			);
-		}
-		
-		public boolean isValid() {
-			return status != Status.INVALID;
-		}
-		
-		public boolean isFound() {
-			return status == Status.FOUND;
-		}
-		
-		public List< StartPoint > getPoints() {
-			return points;
-		}
-
-		private final Status status;
-		private final List< StartPoint > points;
-		private final double logProb;
+		private final Map< TreeNode< Integer >, TreeNote > notes;
 	}
 
 	public static class ParseException extends Exception {
@@ -211,227 +104,288 @@ public class EclipseTSG {
 		}
 	}
 
-	private <T> T parse(
-		ASTNode root, ASTNode target, Function< List< StartPoint >, T > parser
-	)
+	private ParseState parse( ASTNode root, ASTNode target )
 		throws ParseException
 	{
-		EclipseASTProcess nodeMapper = new EclipseASTProcess();
+		// Set up notes for every node in the tree. This way we can associate
+		// data with each node.
+		
+		Map< TreeNode< Integer >, TreeNote > notes = new IdentityHashMap<>();
 		ChainedJavaTreeExtractor astExtractor =
 			new ChainedJavaTreeExtractor( tsgExtractor );
-		astExtractor.addPostProcessFactory( nodeMapper );
-		TreeNode< Integer > tsgTree = astExtractor.getTree( root );
+		astExtractor.addPostProcessFactory( new EclipseASTProcess( notes ) );
+		TreeNode< Integer > source = astExtractor.getTree( root );
+
+		// Walk the tree to find the target node. Add each node to the current
+		// path in the preOrder visit, then remove it in the postOrder visit.
+		// When we find the target node, the current path is the path to the
+		// target.
 		
-		TSGNode starter = new TSGNode( tsgTree.getData() );
+		Deque< TreeNode< Integer > > path = new ArrayDeque<>();
+		TreeNodeUtils.visit( source, ( t ) -> {
+			path.addLast( t );
+			TreeNote note =
+				notes.computeIfAbsent( t, ( s ) -> new TreeNote() );
+			if ( note.node == target ) {
+				for ( TreeNode< Integer > node : path )
+					notes.get( node ).target = t;
+			}
+			return TreeNodeUtils.VisitResult.CONTINUE;
+		}, ( t ) -> {
+			path.removeLast();
+			return TreeNodeUtils.VisitResult.CONTINUE;
+		} );
+		if ( notes.get( source ).target == null )
+			throw new ParseException( "could not find target node to replace" );	
+		
+		// Create a one-node "production" representing the root of the tree.
+
+		TSGNode starter = new TSGNode( source.getData() );
 		starter.isRoot = true;
 		TreeNode< TSGNode > production =
-			TreeNode.create( starter, tsgTree.nProperties() );
+			TreeNode.create( starter, source.nProperties() );
 		
-		final Map< ASTNode, ParseState > searchCache = new HashMap<>();
-		ParseState matches = findTarget(
-			nodeMapper, tsgTree, production, target, searchCache
-		);
-		if ( ! matches.isValid() )
-			throw new ParseException( "could not parse AST" );
-		if ( ! matches.isFound() )
-			throw new ParseException( "could not find target node to replace" );	
-
-		return parser.apply( matches.getPoints() );
+		ParseState result = tryProduction( source, production, notes );
+		return result.with( notes.get( source ).target );
 	}
 
-	private ParseState findTarget(
-		EclipseASTProcess nodeMapper,
-		TreeNode< Integer > tsgTree,
-		TreeNode< TSGNode > production,
-		ASTNode target,
-		Map< ASTNode, ParseState > searchCache
-	) {
-		ParseState result = ParseState.success( 0.0 );
-		
-		Deque< Pair< TreeNode< Integer >, TreeNode< TSGNode > > > pending =
-			new ArrayDeque<>();
-		pending.addFirst( Pair.of( tsgTree, production ) );
-		while ( ! pending.isEmpty() ) {
-			TreeNode< Integer > node = pending.peekFirst().getLeft();
-			TreeNode< TSGNode > prod = pending.peekFirst().getRight();
-			pending.removeFirst();
-			
-			ASTNode current = nodeMapper.getASTNode( node );
-			if ( current == target ) {
-				// If we've reached the target node, do not match it. Doing
-				// so would only allow productions from the identical
-				// TSGNode. Instead, save the parse state here. If the rest
-				// of the parse succeeds, we have a match and can return it
-				// outside the loop.
-				result = result.and( ParseState.found( node, prod, 0.0 ) );
-				continue;
-			}
+	private static class ParseState {
+		public ParseState(
+			List< Pair< TreeNode< TSGNode >, Probability > > prods
+		) {
+			Probability net = Probability.FALSE;
+			for ( Pair< TreeNode< TSGNode >, Probability > prod : prods )
+				net = net.or( prod.getRight() );
 
-			if ( prod.getData().nodeKey != node.getData() )
-				return ParseState.failure;
-			if ( prod.nProperties() != node.nProperties() )
-				return ParseState.failure;
-			
-			if ( prod.isLeaf() && ! node.isLeaf() ) {
-				// We've reached another production. If that production is
-				// is invalid, then so is this one. Otherwise, if that
-				// production contains the target, then we save it and wait for
-				// the rest of the parse to succeed before returning. Note that
-				// at most one production will contain the target, so reset will
-				// only be updated at most once.
-				result = result.and( branchProductions(
-					nodeMapper, node, target, searchCache
-				) );
-			} else {
-				// This is not a new production: every child of the production
-				// must match a child in the tree
-				
-				List< List< TreeNode< Integer > > > leftChildren =
-					node.getChildrenByProperty();
-				List< List< TreeNode< TSGNode > > > rightChildren =
-					prod.getChildrenByProperty();
-				for ( int i = leftChildren.size() - 1; i >= 0; --i ) {
-					List< TreeNode< Integer > > left = leftChildren.get( i );
-					List< TreeNode< TSGNode > > right = rightChildren.get( i );
-					if ( left.size() != right.size() )
-						return ParseState.failure;
-					for ( int j = left.size() - 1; j >= 0; --j )
-						pending.addFirst( Pair.of(
-							left.get( j ), right.get( j )
-						) );
-				}
-			}
+			this.prods = Collections.unmodifiableList( prods );
+			this.p = net;
+			this.subtree = null;
 		}
 		
-		return result;
+		public ParseState( Probability p ) {
+			this.prods = Collections.emptyList();
+			this.p = p;
+			this.subtree = null;
+		}
+		
+		private ParseState(
+			List< Pair< TreeNode< TSGNode >, Probability > > prods,
+			Probability p,
+			TreeNode< Integer > subtree
+		) {
+			this.prods = prods;
+			this.p = p;
+			this.subtree = subtree;
+		}
+
+		public ParseState with( TreeNode< Integer > subtree ) {
+			return new ParseState( prods, p, subtree );
+		}
+		
+		public List< Pair< TreeNode< TSGNode >, Probability > > getProductions() {
+			return prods;
+		}
+		
+		public Probability getProbability() {
+			return p;
+		}
+		
+		public TreeNode< Integer > getSubtree() {
+			return subtree;
+		}
+		
+		private final List< Pair< TreeNode< TSGNode >, Probability > > prods;
+		private final Probability p;
+		private final TreeNode< Integer > subtree;
+	}
+
+	private static class ParseStateBuilder {
+		// invariant: probability != Probability.TRUE => productions.isEmpty()
+
+		public static ParseStateBuilder leafCollector() {
+			return new ParseStateBuilder( Probability.TRUE );
+		}
+		
+		public static ParseStateBuilder ruleCollector() {
+			return new ParseStateBuilder( Probability.FALSE );
+		}
+
+		private ParseStateBuilder( Probability initial ) {
+			this.productions = new HashMap<>();
+			this.probability = initial;
+		}
+		
+		public ParseState build() {
+			if ( productions.isEmpty() )
+				return new ParseState( probability );
+
+			List< Pair< TreeNode< TSGNode >, Probability > > prods =
+				new ArrayList<>( productions.size() );
+			for ( Map.Entry< TreeNode< TSGNode >, Probability > prod
+					: productions.entrySet() )
+				prods.add( Pair.of( prod.getKey(), prod.getValue() ) );
+			return new ParseState( prods );
+		}
+
+		public void and( ParseState state ) {
+			Preconditions.checkArgument(
+				productions.isEmpty() || state.getProductions().isEmpty(),
+				"target node is not unique"
+			);
+
+			// Failure "and" anything is failure.
+			
+			if ( probability == Probability.FALSE )
+				return;
+			
+			// If this has productions, then we know state does not and vice
+			// versa. Thus only one of these two loops will do anything.
+			
+			for ( Map.Entry< TreeNode< TSGNode >, Probability > prod
+					: productions.entrySet() )
+				prod.setValue( prod.getValue().and( state.getProbability() ) );
+			for ( Pair< TreeNode< TSGNode >, Probability > prod
+					: state.getProductions() )
+				productions.put( prod.getKey(), prod.getValue().and( probability ) );
+			
+			// Maintain the invariant
+			
+			if ( productions.isEmpty() )
+				probability = probability.and( state.getProbability() );
+			else
+				probability = Probability.TRUE;
+		}
+		
+		public void or( Probability p, ParseState state ) {
+			// Add every production from state after "anding" its probability
+			// with p. If we already have the production, just "or" the new and
+			// old values together.
+			
+			for ( Pair< TreeNode< TSGNode >, Probability > prod
+					: state.getProductions() ) {
+				Probability newp = prod.getValue().and( p ).or(
+					productions.getOrDefault( prod.getKey(), Probability.FALSE )
+				);
+				productions.put( prod.getKey(), newp );
+			}
+
+			if ( productions.isEmpty() )
+				// Keep track of the probability if we still have no productions
+				probability = probability.or( p.and( state.getProbability() ) );
+			else
+				// If we do have productions, those are the only probabilities
+				// that matter. We ignore a failure to match on one possibility
+				// as soon as another one succeeds. This maintains the invariant
+				probability = Probability.TRUE;
+		}
+
+		public void addTarget( TreeNode< TSGNode > production ) {
+			if ( probability == Probability.FALSE )
+				return;
+			productions.put( production, probability );
+			probability = Probability.TRUE;
+		}
+		
+		public void noMatch() {
+			probability = Probability.FALSE;
+			productions.clear();
+		}
+		
+		private Map< TreeNode< TSGNode >, Probability > productions;
+		private Probability probability;
+	}
+
+	private ParseState tryProduction(
+		TreeNode< Integer > sourceTree,
+		TreeNode< TSGNode > production,
+		Map< TreeNode< Integer >, TreeNote > notes
+	) {
+		ParseStateBuilder result = ParseStateBuilder.leafCollector();
+		try {
+			TreeNodeUtils.visit2( production, sourceTree, ( prod, node ) -> {
+				TreeNote note = notes.get( node );
+				if ( note.target == node ) {
+					// We've reached the target node. This node and its subtree
+					// always match so that it can be replaced with different
+					// productions. SKIP the rest of this subtree but keep
+					// matching the rest.
+					result.addTarget( prod );
+					return TreeNodeUtils.VisitResult.SKIP;
+				} else if ( prod.getData().nodeKey != node.getData() ) {
+					// NOT A MATCH: the production specifies a different type of
+					// node here. Just abort here: this failure supersedes any
+					// productions or probabilities from other branches.
+					result.noMatch();
+					return TreeNodeUtils.VisitResult.ABORT;
+				} else if ( prod.isLeaf() && ! node.isLeaf() ) {
+					// We've reached another production. SKIP the rest of this
+					// subtree and rely on branchProductions() to parse it instead.
+					result.and( branchProductions( node, notes ) );
+					return TreeNodeUtils.VisitResult.SKIP;
+				}
+				return TreeNodeUtils.VisitResult.CONTINUE;
+			}, null );
+		} catch ( TreeNodeUtils.TreeStructureException e ) {
+			// NOT A MATCH: The production and source trees did not match.
+			result.noMatch();
+		}
+		return result.build();
 	}
 	
 	private ParseState branchProductions(
-		EclipseASTProcess nodeMapper,
-		TreeNode< Integer > tsgTree,
-		ASTNode target,
-		Map< ASTNode, ParseState > searchCache
+		TreeNode< Integer > sourceTree,
+		Map< TreeNode< Integer >, TreeNote > notes
 	) {
-		ASTNode current = nodeMapper.getASTNode( tsgTree );
-		if ( current != null && searchCache.containsKey( current ) )
-			return searchCache.get( current );
+		// If we have already parsed the subtree rooted at this node, we do not
+		// need to parse it again.
 		
-		TSGNode key = new TSGNode( tsgTree.getData() );
+		TreeNote note = notes.get( sourceTree );
+		if ( note.parseResult != null )
+			return note.parseResult;
+		
+		ParseStateBuilder result = ParseStateBuilder.ruleCollector();
+		
+		// Get the set of grammar productions with this root.
+		
+		TSGNode key = new TSGNode( sourceTree.getData() );
 		key.isRoot = true;
 		Multiset< TreeNode< TSGNode > > productions = grammar.get( key );
-		if ( productions == null )
-			return ParseState.failure;
-		
-		List< Multiset.Entry< TreeNode< TSGNode > > > entries =
-			new ArrayList<>( productions.entrySet() );
-			
-		ParseState result = ParseState.failure;
-		double unit = DoubleMath.log2( productions.size() );
-		for ( int i = 0; i < entries.size(); ++i ) {
-			double logProb =
-				DoubleMath.log2( entries.get( i ).getCount() ) - unit;
-			TreeNode< TSGNode > production = entries.get( i ).getElement();
-			result = result.or( ParseState.success( logProb ).and( findTarget(
-				nodeMapper, tsgTree, production, target, searchCache
-			) ) );
-		}
-		if ( current != null )
-			searchCache.put( current, result );
-		return result;
-	}
 
-	private List< Double > doParse(
-		TreeNode< Integer > tsgTree,
-		TreeNode< TSGNode > production,
-		double logProb,
-		Map< TreeNode< Integer >, List< Double > > parseCache
-	) {
-		List< List< Double > > children = new ArrayList<>();
-		Deque< Pair< TreeNode< Integer >, TreeNode< TSGNode > > > pending =
-			new ArrayDeque<>();
-		pending.addFirst( Pair.of( tsgTree, production ) );
-		while ( ! pending.isEmpty() ) {
-			Pair< TreeNode< Integer >, TreeNode< TSGNode > > pair =
-				pending.removeFirst();
-			TreeNode< Integer > node = pair.getLeft();
-			TreeNode< TSGNode > prod = pair.getRight();
-			
-			if ( prod.getData().nodeKey != node.getData() )
-				return Collections.emptyList();
-			if ( prod.nProperties() != node.nProperties() )
-				return Collections.emptyList();
-			
-			if ( prod.isLeaf() && ! node.isLeaf() ) {
-				// we've reached another production: gather the possible parses
-				// for the subtree as children of this one
-				
-				List< Double > tmp = doProductions( node, logProb, parseCache );
-				if ( tmp.isEmpty() )
-					return Collections.emptyList();
-				children.add( tmp );
-			} else {
-				// this is not a new production: every child of the production
-				// must match a child in the tree
+		// If we found some productions, we need to try each one to see if it
+		// matches the source tree.
 
-				List< List< TreeNode< Integer > > > leftChildren =
-					node.getChildrenByProperty();
-				List< List< TreeNode< TSGNode > > > rightChildren =
-					prod.getChildrenByProperty();
-				for ( int i = leftChildren.size() - 1; i >= 0; --i ) {
-					List< TreeNode< Integer > > left = leftChildren.get( i );
-					List< TreeNode< TSGNode > > right = rightChildren.get( i );
-					if ( left.size() != right.size() )
-						return Collections.emptyList();
-					for ( int j = left.size() - 1; j >= 0; --j )
-						pending.addFirst(
-							Pair.of( left.get( j ), right.get( j ) )
-						);
-				}
+		if ( productions != null ) {
+			List< Multiset.Entry< TreeNode< TSGNode > > > entries =
+				new ArrayList<>( productions.entrySet() );
+			for ( int i = 0; i < entries.size(); ++i ) {
+				TreeNode< TSGNode > production = entries.get( i ).getElement();
+				result.or(
+					Probability.logProb(
+						posterior.computeLog2PosteriorProbabilityOfRule( production, false )
+					), tryProduction( sourceTree, production, notes )
+				);
 			}
 		}
-		
-		// probability of this parse is based on getting here (logProb) AND
-		// selecting one parse (via OR) for each child
 
-		for ( List< Double > options : children )
-			logProb += StatsUtil.log2SumOfExponentials( options );
-		return Collections.singletonList( logProb );
-	}
-	
-	private List< Double > doProductions(
-		TreeNode< Integer > tsgTree,
-		double logProb,
-		Map< TreeNode< Integer >, List< Double > > parseCache
-	) {
-		if ( parseCache.containsKey( tsgTree ) )
-			return parseCache.get( tsgTree );
+		// If we had no productions to try or if none of our productions matched
+		// then we just assign a probability for the production generating the
+		// whole subtree.
 
-		TSGNode key = new TSGNode( tsgTree.getData() );
-		key.isRoot = true;
-		Multiset< TreeNode< TSGNode > > productions = grammar.get( key );
-		if ( productions == null )
-			return Collections.emptyList();
-
-		List< Multiset.Entry< TreeNode< TSGNode > > > entries =
-			new ArrayList<>( productions.entrySet() );
-		
-		logProb -= DoubleMath.log2( productions.size() );
-		List< Double > results = new ArrayList<>();
-		for ( int i = 0; i < entries.size(); ++i ) {
-			TreeNode< TSGNode > production = entries.get( i ).getElement();
-			results.addAll( doParse(
-				tsgTree, production,
-				logProb + DoubleMath.log2( entries.get( i ).getCount() ),
-				parseCache
-			) );
+		ParseState state = result.build();
+		if ( productions == null ||
+				state.getProbability().getLog() == Double.NEGATIVE_INFINITY ) {
+			Probability p = Probability.logProb(
+				posterior.computeLog2PosteriorProbabilityOfRule(
+					TSGNode.convertTree( sourceTree, 0 ), false
+				)
+			);
+			state = new ParseState( p );
 		}
-		if ( results.isEmpty() )
-			return results;
-		results = Collections.singletonList( StatsUtil.log2SumOfExponentials( results ) );
-		parseCache.put( tsgTree, results );
-		return results;	
+
+		note.parseResult = state;
+		return state;
 	}
-	
+
 	private TreeNode< TSGNode > generateRandom(
 		TreeNode< TSGNode > root, TreeNode< TSGNode > production
 	) {
@@ -472,53 +426,60 @@ public class EclipseTSG {
 		throws ParseException
 	{
 		ASTNode root = GrammarUtils.getStartNode( target );
-		return parse( root, target, ( points ) -> {
-			Map< TreeNode< Integer >, List< Double > > parseCache = new HashMap<>();
-			double weight = Double.NEGATIVE_INFINITY;
-			double probability = Double.NEGATIVE_INFINITY;
-			for ( StartPoint point : points ) {
-				weight = StatsUtil.log2SumOfExponentials( weight, point.logProb );
-				List< Double > probs =
-					doParse( point.tree, point.production, point.logProb, parseCache );
-				if ( probs.isEmpty() )
-					continue;
+		ParseState state = parse( root, target );
 
-				for ( double d : probs )
-					probability = StatsUtil.log2SumOfExponentials( probability, d );
-			}
+		Map< TreeNode< Integer >, TreeNote > notes = new IdentityHashMap<>();
+		TreeNodeUtils.visit( state.getSubtree(), ( t ) -> {
+			notes.put( t, new TreeNote() );
+			return TreeNodeUtils.VisitResult.CONTINUE;
+		}, null );
 
-			if ( Double.isInfinite( probability ) )
-				return probability;
-			return probability - weight;
-		} );
+		ParseStateBuilder builder = ParseStateBuilder.ruleCollector();
+		Probability denom = Probability.FALSE;
+		for ( Pair< TreeNode< TSGNode >, Probability > prod
+				: state.getProductions() ) {
+			ParseState tmp = tryProduction(
+				state.getSubtree(), prod.getLeft(), notes
+			);
+			builder.or( prod.getRight(), tmp );
+			denom = denom.or( prod.getRight() );
+		}
+		
+		double numer = builder.build().getProbability().getLog();
+		if ( Double.isFinite( numer ) )
+			return numer - denom.getLog();
+		else
+			return posterior.computeLog2PosteriorProbabilityOfRule(
+				TSGNode.convertTree( state.getSubtree(), 0 ), false
+			);
 	}
 	
-	public ASTNode babbleFrom( ASTNode target, SymbolTable table)
+	public ASTNode babbleFrom( ASTNode target, SymbolTable table )
 		throws ParseException
 	{
 		ASTNode root = GrammarUtils.getStartNode( target );
-		return parse( root, target, ( points ) -> {
-			double[] logProbs = new double[ points.size() ];
-			for ( int i = 0; i < points.size(); ++i )
-				logProbs[ i ] = points.get( i ).logProb;
-			int i = SampleUtils.getRandomIndex( logProbs );
-			StartPoint p = points.get( i );
+		ParseState state = parse( root, target );
+		
+		double[] logProbs = new double[ state.getProductions().size() ];
+		for ( int i = 0; i < logProbs.length; ++i )
+			logProbs[ i ] = state.getProductions().get( i ).getRight().getLog();
+		
+		int i = SampleUtils.getRandomIndex( logProbs );
+		TreeNode< TSGNode > prod = state.getProductions().get( i ).getLeft();
+		TreeNode< TSGNode > tsgTree = TreeNode.create(
+			new TSGNode( prod.getData().nodeKey ), prod.nProperties()
+		);
+		tsgTree = generateRandom( tsgTree, prod );
+		TreeNode< Integer > intTree = TreeNode.create(
+			tsgTree.getData().nodeKey, tsgTree.nProperties()
+		);
+		TSGNode.copyChildren( intTree, tsgTree );
+		tsgExtractor.setSymbolTable( table );
 
-			TreeNode< TSGNode > tsgTree = TreeNode.create(
-				new TSGNode( p.production.getData().nodeKey ),
-				p.production.nProperties()
-			);
-			tsgTree = generateRandom( tsgTree, p.production );
-			TreeNode< Integer > intTree = TreeNode.create(
-				tsgTree.getData().nodeKey, tsgTree.nProperties()
-			);
-			TSGNode.copyChildren( intTree, tsgTree );
-			
-			tsgExtractor.setSymbolTable( table );
-			return tsgExtractor.getASTFromTree( intTree );
-		} );
+		return tsgExtractor.getASTFromTree( intTree );
 	}
 
 	private final Map< TSGNode, ? extends Multiset< TreeNode< TSGNode > > > grammar;
 	private final ChainedJavaTreeExtractor tsgExtractor;
+	private final ITsgPosteriorProbabilityComputer< TSGNode > posterior;
 }
