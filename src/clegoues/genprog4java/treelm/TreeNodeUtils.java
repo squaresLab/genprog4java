@@ -16,9 +16,7 @@ import codemining.ast.TreeNode;
 public class TreeNodeUtils {
 	public static enum VisitResult { CONTINUE, SKIP, ABORT };
 	
-	public static class TreeStructureException
-		extends IllegalArgumentException
-	{
+	public static class TreeStructureException extends Exception {
 		private static final long serialVersionUID = 20170208L;
 		
 		public TreeStructureException() {}
@@ -134,7 +132,7 @@ public class TreeNodeUtils {
 		final BiFunction<
 		    TreeNode< T >, TreeNode< U >, VisitResult
 		> postOrder
-	) {
+	) throws TreeStructureException {
 		Deque<
 			Triple< TreeNode< T >, TreeNode< U >, Boolean >
 		> pending = new ArrayDeque<>();
