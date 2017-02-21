@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2014-2015, 
+ * Copyright (c) 2014-2015,
  *  Claire Le Goues     <clegoues@cs.cmu.edu>
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
@@ -64,7 +64,7 @@ import clegoues.util.ConfigurationBuilder;
 
 /**
  * This class manages fitness evaluation for a variant of an arbitrary {@link clegoues.genprog4java.rep.Representation}.
- * Its duties consist of loading/tracking the test cases to be run and managing the sampling strategy, if applicable. 
+ * Its duties consist of loading/tracking the test cases to be run and managing the sampling strategy, if applicable.
  * @author clegoues
  *
  */
@@ -75,7 +75,7 @@ public class Fitness {
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
 
-	/** weight to give to negative test cases; note that this is <i>relative to the total number of positive tests</i>, 
+	/** weight to give to negative test cases; note that this is <i>relative to the total number of positive tests</i>,
 	 * not <i>absolute weight</i>.
 	 */
 	private static double negativeTestWeight = ConfigurationBuilder.of( DOUBLE )
@@ -117,17 +117,17 @@ public class Fitness {
 			.withHelp( "file containing names of negative test classes" )
 			.inGroup( "Fitness Parameters" )
 			.build();
-	
+
 	/** clear the test cache.  Primarily for debug purposes. */
-	public static Boolean clearTestCache = ConfigurationBuilder.of(BOOLEAN ) 
+	public static Boolean clearTestCache = ConfigurationBuilder.of(BOOLEAN )
 			.withDefault("false")
 			.withVarName("clearTestCache")
 			.withHelp("clear the test cache")
 			.inGroup("Fitness Parameters")
 			.build();
 
-	/** this is necessary because of the generational sample strategy, which 
-	 *  resamples at generational boundaries. 
+	/** this is necessary because of the generational sample strategy, which
+	 *  resamples at generational boundaries.
 	 */
 	private static int generation = -1;
 
@@ -155,7 +155,7 @@ public class Fitness {
 			oos.writeObject(Fitness.fitnessCache);
 			oos.close();
 			fos.close();
-			logger.debug("Serialized fitnessCache HashMap to file hashmap.ser");
+			logger.info("Serialized test cache to file testcache.ser");
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
@@ -180,14 +180,14 @@ public class Fitness {
 				System.out.println("Class not found");
 				c.printStackTrace();
 			}
-			System.out.println("Deserialized fitnessCache HashMap");			
+			System.out.println("Deserialized fitnessCache HashMap");
 		} else {
 			testCache = new HashMap<Integer, HashMap<TestCase, FitnessValue>>();
 		}
 		//System.out.println("hashmap is = " + testCache.entrySet().size() + "  " + testCache.toString());
 		fitnessCache.putAll(testCache);
 	}
-	/** 
+	/**
 	 * Loads the tests from specified files, initializes the sample vars to not be null.
 	 * Samples properly when the search actually begins.
 	 * Note that this <i>must</i> be called before the initial representation is
@@ -220,11 +220,11 @@ public class Fitness {
 	/**
 	 * JUnit is annoying.  Basically, a junit test within a larger test class can be failing.
 	 * This method figures out if that's the way these tests are specified and, if so
-	 * determines their class and then filters those classes out of the 
+	 * determines their class and then filters those classes out of the
 	 * this method filters those classes out of the positive tests and adds them to the negative test list.
 	 * Note that CLG considered just filtering out the individual methods and allowing the junittestrunner to run
 	 * classes by method in addition to just by class.
-	 * I didn't do it because the max test count is presently still the number of 
+	 * I didn't do it because the max test count is presently still the number of
 	 * test classes specified in the test files and so we'd either need to actually count
 	 * how many tests are being run in total or have the counts/weights be skewed by the one
 	 * class file where we call the methods one at a time.
@@ -237,7 +237,7 @@ public class Fitness {
 
 		// stuff in negative tests, must remove class from positive test list and add non-negative tests to list
 		for(String specifiedMethod : filterBy) {
-			if(specifiedMethod.contains("::")) { 
+			if(specifiedMethod.contains("::")) {
 				// remove from toFilter all tests that have this class name
 				// remove from filterBy this particular entry and replace it with just the className
 				String[] split = specifiedMethod.split("::");
@@ -291,13 +291,13 @@ public class Fitness {
 	}
 
 	/** testModel is used for certain kinds of search, namely RSRepair; it tracks
-	 *  how "useful" tests have been in the past in terms of number of patches "killed" 
+	 *  how "useful" tests have been in the past in terms of number of patches "killed"
 	 *  and thus governs the order in which tests are run (when the feature is being used).
-	 *  initializeModel needs to be called before it's used.  
+	 *  initializeModel needs to be called before it's used.
 	 */
 	private ArrayList<TestCase> testModel = null;
 
-	public void initializeModel() { 
+	public void initializeModel() {
 		testModel = new ArrayList<TestCase>(Fitness.numNegativeTests + Fitness.numPositiveTests);
 		for(TestCase negTest : Fitness.negativeTests) {
 			negTest.incrementPatchesKilled();
@@ -334,7 +334,7 @@ public class Fitness {
 		Collections.shuffle(Fitness.positiveTests, Configuration.randomizer);
 		List<TestCase> intSample = Fitness.positiveTests.subList(0,sampleSize); //0 inclusive to sampleSize exclusive
 		List<TestCase> intRestSample = Fitness.positiveTests.subList(sampleSize, positiveTests.size()); // sampleSize inclusive to size exclusive
-		Fitness.testSample.clear(); 
+		Fitness.testSample.clear();
 		Fitness.restSample.clear();
 		for(TestCase test : intSample) {
 			Fitness.testSample.add(test);
@@ -345,7 +345,7 @@ public class Fitness {
 	}
 
 	/** try all tests
-	 *  
+	 *
 	 * @param rep variant to test
 	 * @param shortCircuit whether to quit when first failure is reached
 	 * @param tests tests to run
@@ -367,12 +367,12 @@ public class Fitness {
 	}
 
 	/**
-	 * Test a variant sequentially on all tests, starting with the negative tests. 
-	 * Quits as soon as a failed test is found.  Uses the test model @see {@link clegoues.genprog4java.Search.RSRepair} 
-	 * if specified. Does not sample. 
+	 * Test a variant sequentially on all tests, starting with the negative tests.
+	 * Quits as soon as a failed test is found.  Uses the test model @see {@link clegoues.genprog4java.Search.RSRepair}
+	 * if specified. Does not sample.
 	 * @param rep variant to be tested
 	 * @param withModel whether to use the testModel
-	 * @returns boolean, whether the rep passed all tests.  
+	 * @returns boolean, whether the rep passed all tests.
 	 */
 	int totalVariantsTried = 0;
 	public boolean testToFirstFailure(Representation rep, boolean withModel) {
@@ -431,10 +431,10 @@ public class Fitness {
 
 
 	/** performs sampled fitness.  If variant passes everything in the sample,
-	 * tests on the rest as well.   
+	 * tests on the rest as well.
 	 * @param rep variant to test
 	 * @param fac weight to give to negative tests passed for fitness
-	 * @return Pair<sample fitness, total fitness>; returns both mostly so we can track fitness 
+	 * @return Pair<sample fitness, total fitness>; returns both mostly so we can track fitness
 	 * behavior if desired.
 	 */
 	private Pair<Double,Double> testFitnessSample(Representation rep, double fac) {
@@ -444,16 +444,16 @@ public class Fitness {
 		if((numNegPassed == Fitness.numNegativeTests) &&
 				(numPosPassed == testSample.size())) {
 			if(Fitness.sample < 1.0) { // restSample won't be null by definition here
-				numRestPassed = this.testPassCount(rep, false, Fitness.restSample);				
+				numRestPassed = this.testPassCount(rep, false, Fitness.restSample);
 			}
-		} 
+		}
 		double sampleFitness = fac * numNegPassed + numPosPassed;
 		double totalFitness = sampleFitness + numRestPassed;
 		return Pair.of(totalFitness,sampleFitness);
 	}
 
-	/** unsampled fitness.  Just test everything 
-	 * 
+	/** unsampled fitness.  Just test everything
+	 *
 	 * @param rep variant to test
 	 * @param fac weight to give the negative tests
 	 * @return Pair, where both elements of the pair are the same (full fitness)
@@ -477,11 +477,11 @@ public class Fitness {
 	/** computes fitness on a variant; only does so if the variant does not already
 	 * know its fitness (will have been saved/returned by getFitness().  May implement sampling
 	 * if specified.  Must always call rep.cleanup()
-	 * 
+	 *
 	 * @param generation what generation we're on.  Necessary in case we're doing
 	 * generational fitness resampling.
 	 * @param rep variant to test
-	 * @return true if variant passes all test cases, false otherwise. 
+	 * @return true if variant passes all test cases, false otherwise.
 	 */
 	public boolean testFitness(int generation, Representation rep) {
 
@@ -508,7 +508,7 @@ public class Fitness {
 					(Fitness.sampleStrategy == "variant")) {
 				Fitness.generation = generation;
 				Fitness.resample();
-			} 	
+			}
 			fitnessPair = this.testFitnessSample(rep, fac);
 		} else {
 			fitnessPair = this.testFitnessFull(rep, fac);
@@ -521,7 +521,7 @@ public class Fitness {
 	}
 
 	/** debug/convenience functionality; saves the tests that should be considered in scope.
-	 * called from {@link clegoues.genprog4java.rep.CachingRepresentation} 
+	 * called from {@link clegoues.genprog4java.rep.CachingRepresentation}
 	 * @param passingTests
 	 */
 	public static void printTestsInScope(ArrayList<TestCase> passingTests){

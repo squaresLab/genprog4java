@@ -25,8 +25,9 @@ import org.eclipse.jdt.core.dom.Type;
 
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaStatement;
+import clegoues.genprog4java.localization.Localization;
+import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.mut.EditHole;
-import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.mut.holes.java.ExpChoiceHole;
@@ -97,12 +98,13 @@ public class JavaEditFactory {
 		if (JavaEditFactory.scopeSafeAtomMap.containsKey(stmtId.getId())) {
 			return JavaEditFactory.scopeSafeAtomMap.get(stmtId.getId());
 		}
+		Localization localization = variant.getLocalization();
 
 		JavaStatement potentiallyBuggyStmt = (JavaStatement) stmtId.getLocation();
 		ASTNode faultAST = ((JavaLocation) stmtId).getCodeElement();
 		List<WeightedAtom> retVal = new ArrayList<WeightedAtom>();
 
-		for (WeightedAtom potentialFixAtom : variant.getFixSourceAtoms()) {
+		for (WeightedAtom potentialFixAtom : localization.getFixSourceAtoms()) {
 			int index = potentialFixAtom.getAtom();
 			JavaStatement potentialFixStmt = variant.getFromCodeBank(index);
 			ASTNode fixAST = potentialFixStmt.getASTNode();
@@ -210,7 +212,7 @@ public class JavaEditFactory {
 	@SuppressWarnings("unchecked")
 	public List<WeightedHole> editSources(JavaRepresentation variant, Location location, Mutation editType) {
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
-
+		Localization localization = variant.getLocalization();
 		switch(editType) {
 		case DELETE:
 		{
@@ -365,7 +367,7 @@ public class JavaEditFactory {
 		{
 			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
 			JavaStatement faultyStmt = variant.getFromCodeBank(locationStmt.getStmtId());
-			for (WeightedAtom potentialFixAtom : variant.getFixSourceAtoms()) {
+			for (WeightedAtom potentialFixAtom : localization.getFixSourceAtoms()) {
 
 				JavaStatement possibleFixStmt = variant.getFromCodeBank(potentialFixAtom.getLeft());
 				if(!faultyStmt.toString().equalsIgnoreCase(possibleFixStmt.toString())
@@ -435,6 +437,7 @@ public class JavaEditFactory {
 
 	public boolean doesEditApply(JavaRepresentation variant, Location location, Mutation editType) {
 		JavaStatement locationStmt = (JavaStatement) location.getLocation();
+		Localization localization = variant.getLocalization();
 		switch(editType) {
 		case APPEND: 
 			if(!(locationStmt.getASTNode() instanceof ReturnStatement || locationStmt.getASTNode() instanceof ThrowStatement )){
@@ -474,7 +477,7 @@ public class JavaEditFactory {
 			return locationStmt.getObjectsAsMethodParams().size() > 0;
 		case SEQEXCH:
 			//FIXME: there might be a stronger requirement than this
-			return locationStmt.canBeDeleted() && variant.getFixSourceAtoms().size() > 0;
+			return locationStmt.canBeDeleted() && localization.getFixSourceAtoms().size() > 0;
 		case CASTERMUT:
 			return locationStmt.getCasterTypes().size() > 0;
 		case CASTEEMUT:

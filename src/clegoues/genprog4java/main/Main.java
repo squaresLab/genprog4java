@@ -46,13 +46,13 @@ import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.RandomSingleEdit;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.localization.DefaultLocalization;
+import clegoues.genprog4java.localization.Localization;
+import clegoues.genprog4java.localization.UnexpectedCoverageResultException;
 import clegoues.genprog4java.mut.edits.java.JavaEditOperation;
 import clegoues.genprog4java.rep.CachingRepresentation;
-import clegoues.genprog4java.rep.FaultLocRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
-import clegoues.genprog4java.rep.LocalizationRepresentation;
 import clegoues.genprog4java.rep.Representation;
-import clegoues.genprog4java.rep.UnexpectedCoverageResultException;
 import clegoues.util.ConfigurationBuilder;
 
 public class Main {
@@ -60,7 +60,7 @@ public class Main {
 	protected static Logger logger = Logger.getLogger(Main.class);
 
 	public static void main(String[] args) throws IOException,
-			UnexpectedCoverageResultException {
+	UnexpectedCoverageResultException {
 		Search searchEngine = null;
 		Representation baseRep = null;
 		Fitness fitnessEngine = null;
@@ -72,12 +72,12 @@ public class Main {
 		ConfigurationBuilder.register( Configuration.token );
 		ConfigurationBuilder.register( Fitness.token );
 		ConfigurationBuilder.register( CachingRepresentation.token );
-		ConfigurationBuilder.register( FaultLocRepresentation.token );
 		ConfigurationBuilder.register( JavaRepresentation.token );
 		ConfigurationBuilder.register( Population.token );
 		ConfigurationBuilder.register( Search.token );
 		ConfigurationBuilder.register( OracleSearch.token );
 		ConfigurationBuilder.register( RandomSingleEdit.token );
+		ConfigurationBuilder.register( DefaultLocalization.token );
 
 		ConfigurationBuilder.parseArgs( args );
 		Configuration.saveOrLoadTargetFiles();
@@ -87,34 +87,32 @@ public class Main {
 		if (!workDir.exists())
 			workDir.mkdir();
 		logger.info("Configuration file loaded");
-		
-		if (Configuration.globalExtension == ".java") {
-			if (Search.searchStrategy.equals("io")) {
-				baseRep = (Representation) new LocalizationRepresentation();
-			} else {
-				baseRep = (Representation) new JavaRepresentation();
-			}
-			fitnessEngine = new Fitness();
-			switch(Search.searchStrategy.trim()) {
 
-			case "brute": searchEngine = new BruteForce<JavaEditOperation>(fitnessEngine);
-				break;
-			case "rsrepair": searchEngine = new RandomSingleEdit<JavaEditOperation>(fitnessEngine);
-				break;
-			case "oracle": searchEngine = new OracleSearch<JavaEditOperation>(fitnessEngine);
-			break;
-			case "ga":
-			default: searchEngine = new GeneticProgramming<JavaEditOperation>(fitnessEngine);
-				break;
-			}
-			incomingPopulation = new Population<JavaEditOperation>(); 
+		fitnessEngine = new Fitness();  // Fitness must be created before rep!
+		baseRep = (Representation) new JavaRepresentation();
+		baseRep.load(Configuration.targetClassNames);
+		Localization localization = new DefaultLocalization(baseRep);
+		baseRep.setLocalization(localization);
+		
+		switch(Search.searchStrategy.trim()) {
+
+		case "brute": searchEngine = new BruteForce<JavaEditOperation>(fitnessEngine);
+		break;
+		case "rsrepair": searchEngine = new RandomSingleEdit<JavaEditOperation>(fitnessEngine);
+		break;
+		case "oracle": searchEngine = new OracleSearch<JavaEditOperation>(fitnessEngine);
+		break;
+		case "ga":
+		default: searchEngine = new GeneticProgramming<JavaEditOperation>(fitnessEngine);
+		break;
 		}
+		incomingPopulation = new Population<JavaEditOperation>(); 
+
 		// loads the class file into the representation.
 		// Does the Following:
 		// 1) If "yes" in sanity check in Configuration file, then does sanity
 		// check.
 		// 2)
-		baseRep.load(Configuration.targetClassNames);
 		try {
 			searchEngine.doSearch(baseRep, incomingPopulation);
 		} catch (CloneNotSupportedException e) {

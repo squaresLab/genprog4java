@@ -28,7 +28,7 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 	@Override
 	protected Population<G> initialize(Representation<G> original, Population<G> incomingPopulation)
 			throws RepairFoundException, GiveUpException {
-		original.reduceSearchSpace();
+		original.getLocalization().reduceSearchSpace();
 		return null;
 	}
 
