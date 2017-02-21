@@ -13,12 +13,11 @@
 # 1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)
 # 2nd param is the bug number (ex: 1,2,3,4,...)
 # 3th param is the generation tool (Randoop or Evosuite)
-# 4th param is the path of the fixed version of the bug. Starting in $D4J_HOME.
-# 5th param is the path where the test suite is located
-# 6th param is the path of the folder where the bugs will be checked out. Starting in $D4J_HOME
+# 4th param is the path where the test suite is located
+# 5th param is the path of the folder where the bugs will be checked out. Starting in $D4J_HOME
 
 #Example of usage:
-#./isTestSuiteCoveringChanges.sh Math 2 Randoop BugsWithAFix generatedTestSuites/Randoop3Min/ ExamplesCheckedOut
+#./isTestSuiteCoveringChanges.sh Math 2 Randoop generatedTestSuites/Randoop3Min/ ExamplesCheckedOut
 
 #Add the path of defects4j so the defects4j's commands run 
 export PATH=$PATH:"$D4J_HOME"/framework/bin/
@@ -30,19 +29,18 @@ export PATH=$JAVA_HOME/bin/:$PATH
 PROJECT="$1"
 BUGNUMBER="$2"
 RANDOOPOREVOSUITE="$3"
-PATHOFFIXEDFOLDER="$4"
-PATHOFSUITEFOLDER="$5"
-PATHTOCHECKOUTFOLDERS="$6"
+PATHOFSUITEFOLDER="$4"
+PATHTOCHECKOUTFOLDERS="$5"
 
 LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 
-rm -f $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/coverage.xml
-#rm -rf $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
+#rm -f $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/coverage.xml
+rm -rf $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
 #rm -rf $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed
 
 
 #Checkout the buggy and fixed versions of the code 
-#defects4j checkout -p $PROJECT -v "$BUGNUMBER"b -w $D4J_HOME/$PATHTOCHECKOUTFOLDERS"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
+defects4j checkout -p $PROJECT -v "$BUGNUMBER"b -w $D4J_HOME/$PATHTOCHECKOUTFOLDERS"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
 #defects4j checkout -p $PROJECT -v "$BUGNUMBER"f -w $D4J_HOME/$PATHTOCHECKOUTFOLDERS"/"$LOWERCASEPACKAGE"$BUGNUMBER"Fixed
 
 #Run coverage of the indicated test suite on the human fix
