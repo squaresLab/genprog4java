@@ -11,24 +11,21 @@
 
 #Parameters:
 # 1th param is the generation tool (Randoop or Evosuite)
-# 2th param is the path of the fixed version of the bug. Starting in $D4J_HOME.
-# 3th param is the path where the test suite is located
-# 4th param is the path of the folder where the bugs will be checked out. Starting in $D4J_HOME
+# 2th param is the path where the test suite is located
+# 3th param is the path of the folder where the bugs will be checked out. Starting in $D4J_HOME
 
 #Example of usage:
-#./isTestSuiteCoveringChangesList.sh Evosuite BugsWithAFix generatedTestSuites/Evosuite30Min/testSuites/ ExamplesCheckedOut
+#./isTestSuiteCoveringChangesList.sh Evosuite generatedTestSuites/Evosuite30MinTRPFixes/testSuites/ ExamplesCheckedOut
 
 RANDOOPOREVOSUITE="$1"
-PATHOFFIXEDFOLDER="$2"
-PATHOFSUITEFOLDER="$3"
-PATHTOCHECKOUTFOLDERS="$4"
+PATHOFSUITEFOLDER="$2"
+PATHTOCHECKOUTFOLDERS="$3"
 
-if [ "$#" -ne 4 ]; then
-    echo "This script should be run with 4 parameters: "
+if [ "$#" -ne 3 ]; then
+    echo "This script should be run with 3 parameters: "
 	echo "1th param is the generation tool (Randoop or Evosuite)"
-	echo "2th param is the path of the fixed version of the bug. Starting in $D4J_HOME."
-	echo " 3th param is the path where the test suite is located"
-	echo " 4th param is the path of the folder where the bugs will be checked out. Starting in $D4J_HOME"
+	echo " 2th param is the path where the test suite is located"
+	echo " 3th param is the path of the folder where the bugs will be checked out. Starting in $D4J_HOME"
     exit 0
 fi
 
