@@ -32,7 +32,6 @@ if [ "$#" -ne 5 ]; then
     exit 0
 fi
 
-
 PROJECT="$1"
 BUGNUMBER="$2"
 RANDOOPOREVOSUITE="$3"

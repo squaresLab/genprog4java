@@ -67,20 +67,20 @@ public abstract class CachingRepresentation<G extends EditOperation> extends
 Representation<G>  {
 
 	protected transient Logger logger = Logger.getLogger(CachingRepresentation.class);
-	
+
 	public transient static final ConfigurationBuilder.RegistryToken token =
-		ConfigurationBuilder.getToken();
+			ConfigurationBuilder.getToken();
 
 	public static boolean skipFailedSanity = ConfigurationBuilder.of( BOOL_ARG )
-		.withVarName( "skipFailedSanity" )
-		.withDefault( "true" )
-		.withHelp( "do not include positive tests if they fail sanity" )
-		.inGroup( "CachingRepresentation Parameters" )
-		.build();
-	
+			.withVarName( "skipFailedSanity" )
+			.withDefault( "true" )
+			.withHelp( "do not include positive tests if they fail sanity" )
+			.inGroup( "CachingRepresentation Parameters" )
+			.build();
+
 	public static String sanityFilename = "repair.sanity";
 	public static String sanityExename = "repair.sanity";
-	
+
 	private double fitness = -1.0;
 
 	public ArrayList<Pair<ClassInfo, String>> alreadySourceBuffers = null;
@@ -154,7 +154,7 @@ Representation<G>  {
 			logger.info("Checking test number " + testNumber + " out of " + Fitness.positiveTests.size());
 			FitnessValue res = this.internalTestCase(
 					CachingRepresentation.sanityExename,
-					CachingRepresentation.sanityFilename, posTest);
+					CachingRepresentation.sanityFilename, posTest, false);
 			if (!res.isAllPassed()) {
 				testsOutOfScope++;
 				logger.info(testsOutOfScope + " tests out of scope so far, out of " + Fitness.positiveTests.size());
@@ -186,7 +186,7 @@ Representation<G>  {
 			logger.info("\tn" + testNum + ": ");
 			FitnessValue res = this.internalTestCase(
 					CachingRepresentation.sanityExename,
-					CachingRepresentation.sanityFilename, negTest);
+					CachingRepresentation.sanityFilename, negTest, false);
 			if (res.isAllPassed()) {
 				logger.info("true (1)\n");
 				logger.error("cacheRep: sanity: "
@@ -204,11 +204,12 @@ Representation<G>  {
 		return true;
 	}
 
-	public FitnessValue testCase(TestCase test) {
+
+	@Override
+	public FitnessValue testCase(TestCase test, boolean doingCoverage) {
 		if (this.alreadyCompiled == null) {
 			String newName = CachingRepresentation.newVariantFolder();
 			this.variantFolder = newName;
-		//	logger.info("History of variant " + getVariantFolder() + " is: " + getHistory());
 			if (!this.compile(newName, newName)) {
 				this.setFitness(0.0);
 				logger.info(this.getName() + " at " + newName + " fails to compile\n");
@@ -225,8 +226,14 @@ Representation<G>  {
 			return compileFail;
 		}
 		return this.internalTestCase(this.variantFolder,
-				this.variantFolder + Configuration.globalExtension, test);
+				this.variantFolder + Configuration.globalExtension, test, doingCoverage);
 	}
+
+	public FitnessValue testCase(TestCase test) {
+		return this.testCase(test,false);
+
+	}
+
 
 	@Override
 	protected List<Pair<ClassInfo, String>> computeSourceBuffers() {
@@ -276,10 +283,10 @@ Representation<G>  {
 	protected abstract ArrayList<Pair<ClassInfo, String>> internalComputeSourceBuffers();
 
 	protected FitnessValue internalTestCase(String sanityExename,
-			String sanityFilename, TestCase thisTest) {
-		
+			String sanityFilename, TestCase thisTest, boolean doingCoverage) {
+
 		CommandLine command = this.internalTestCaseCommand(sanityExename,
-				sanityFilename, thisTest);
+				sanityFilename, thisTest, doingCoverage);
 		// System.out.println("command: " + command.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);
 		DefaultExecutor executor = new DefaultExecutor();
@@ -356,17 +363,8 @@ Representation<G>  {
 		myHashCode = -1;
 	}
 
-	public void reduceSearchSpace() throws GiveUpException {
-	} // subclasses can override as desired
+	private void writeObject(java.io.ObjectOutputStream out)
+			throws IOException {
 
-	public void reduceFixSpace() {
 	}
-
-	protected abstract CommandLine internalTestCaseCommand(String exeName,
-			String fileName, TestCase test);
-	
-	 private void writeObject(java.io.ObjectOutputStream out)
-		     throws IOException {
-
-	 }
 }

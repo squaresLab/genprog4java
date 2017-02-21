@@ -54,10 +54,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.localization.Localization;
+import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
-import clegoues.genprog4java.mut.Location;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
 import clegoues.genprog4java.mut.WeightedMutation;
@@ -258,7 +259,10 @@ public abstract class Search<G extends EditOperation> {
 	 * @return variant' modified/potentially mutated variant
 	 */
 	public void mutate(Representation<G> variant) throws GiveUpException {
-		ArrayList<Location> faultyAtoms = variant.getFaultyLocations();
+		Localization localization = variant.getLocalization();
+
+		ArrayList<Location> faultyAtoms = localization.getFaultLocalization();
+		
 		ArrayList<Location> proMutList = new ArrayList<Location>();
 		boolean foundMutationThatCanApplyToAtom = false;
 		boolean alreadySetAllStmtsToFixLoc = false;
@@ -270,13 +274,13 @@ public abstract class Search<G extends EditOperation> {
 				boolean alreadyOnList = false;
 				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
 				if(proMutList.size()>=faultyAtoms.size()){ 
-					variant.setAllPossibleStmtsToFixLocalization();				
+					localization.setAllPossibleStmtsToFixLocalization();				
 					alreadySetAllStmtsToFixLoc = true;
 				}
 				//only adds the random atom if it is different from the others already added
 				do {
 					//chooses a random faulty atom from the subset of faulty atoms
-					wa = GlobalUtils.chooseOneWeighted(new ArrayList(faultyAtoms));
+					wa = localization.getRandomLocation(Configuration.randomizer.nextDouble());
 					// insert a check to see if this location has any valid mutations?  If not, look again
 					// if not, somehow tell the variant to remove that location from the list of faulty atoms
 					alreadyOnList = proMutList.contains(wa);
