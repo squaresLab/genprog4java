@@ -36,15 +36,17 @@ LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 
 #rm -f $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/coverage.xml
 rm -rf $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
-#rm -rf $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed
+rm -rf $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed
 
 
 #Checkout the buggy and fixed versions of the code 
 defects4j checkout -p $PROJECT -v "$BUGNUMBER"b -w $D4J_HOME/$PATHTOCHECKOUTFOLDERS"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
-#defects4j checkout -p $PROJECT -v "$BUGNUMBER"f -w $D4J_HOME/$PATHTOCHECKOUTFOLDERS"/"$LOWERCASEPACKAGE"$BUGNUMBER"Fixed
+defects4j checkout -p $PROJECT -v "$BUGNUMBER"f -w $D4J_HOME/$PATHTOCHECKOUTFOLDERS"/"$LOWERCASEPACKAGE"$BUGNUMBER"Fixed
 
 #Run coverage of the indicated test suite on the human fix
-./checkCoverageOfGeneratedTestSuite.sh $PROJECT $BUGNUMBER $RANDOOPOREVOSUITE $PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/ $PATHOFSUITEFOLDER
+#./checkCoverageOfGeneratedTestSuite.sh $PROJECT $BUGNUMBER $RANDOOPOREVOSUITE $PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/ $PATHOFSUITEFOLDER
+#Changed for AllPublic
+./checkCoverageOfGeneratedTestSuite.sh $PROJECT $BUGNUMBER $RANDOOPOREVOSUITE $PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"FixedPatched/ $PATHOFSUITEFOLDER
 
 #Diff between buggy version and human fix
 diff --exclude=.git --exclude=.defects4j.config --exclude=defects4j.build.properties --exclude=.svn -qr $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed &>> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/filesChanged.txt
@@ -72,7 +74,10 @@ if [ $word1 = "Files" ] && [ $word5 = "differ" ]; then
   do
     echo "Line changed: $lineChanged"
     alreadyFound="false"  
-    coveragePath=$D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/coverage.xml
+#    coveragePath=$D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/coverage.xml
+
+#Changed for AllPublic
+    coveragePath=$D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"FixedPatched/coverage.xml
     while read coverageXMLLine
     do
 	  if [[ $coverageXMLLine = *"<line number=\"$lineChanged\""* ]]
