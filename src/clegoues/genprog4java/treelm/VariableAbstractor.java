@@ -40,7 +40,7 @@ public class VariableAbstractor implements
 	ChainedJavaTreeExtractor.PostProcess,
 	Serializable
 {
-	private static final long serialVersionUID = 20161006L;
+	private static final long serialVersionUID = 20170226L;
 	
 	public static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
