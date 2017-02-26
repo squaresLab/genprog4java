@@ -41,10 +41,10 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -55,13 +55,9 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
-
-import clegoues.genprog4java.mut.WeightedMutation;
-import clegoues.util.ConfigurationBuilder.LexicalCast;
 
 /**
  * Allows the construction of configuration parameters that may be set by the
@@ -240,7 +236,7 @@ public class ConfigurationBuilder< T > {
 	 * Creates a new {@code ConfigurationBuilder} instance that uses the given
 	 * {@code cast}. This is a convenience method to allow the Java type checker
 	 * to deduce the type parameter, which is the return type of {@link
-	 * #build(}.
+	 * #build()}.
 	 * <p>
 	 * This method assumes the field containing the parameter value is in the
 	 * calling class.
@@ -270,7 +266,7 @@ public class ConfigurationBuilder< T > {
 	 * method to acquire a token.
 	 */
 	public static interface RegistryToken {
-		public Class< ? > getOwnerClass();
+		public Set< Class< ? > > getOwnerClasses();
 	}
 	
 	/**
@@ -291,7 +287,7 @@ public class ConfigurationBuilder< T > {
 	 *              value
 	 */
 	public ConfigurationBuilder( Class< ? > owner ) {
-		this.optbuilder = OptionBuilder.hasArg();
+		this.helpText   = "";
 		this.varName    = null;
 		this.flagName   = null;
 		this.cast       = null;
@@ -321,13 +317,8 @@ public class ConfigurationBuilder< T > {
 	 * 
 	 * @return a reference to this builder
 	 */
-	@SuppressWarnings("static-access")
 	public ConfigurationBuilder< T > withCast( LexicalCast< T > cast ) {
 		this.cast = cast;
-		if ( cast == BOOLEAN )
-			this.optbuilder.hasArg( false );
-		else
-			this.optbuilder.hasArg( true );
 		return this;
 	}
 	
@@ -351,9 +342,7 @@ public class ConfigurationBuilder< T > {
 	 * 
 	 * @return a reference to this builder
 	 */
-	@SuppressWarnings( "static-access" )
 	public ConfigurationBuilder< T > withFlag( String flagName ) {
-		optbuilder.withLongOpt( flagName );
 		this.flagName = flagName;
 		return this;
 	}
@@ -365,9 +354,8 @@ public class ConfigurationBuilder< T > {
 	 *
 	 * @return a reference to this builder
 	 */
-	@SuppressWarnings( "static-access" )
 	public ConfigurationBuilder< T > withHelp( String helpText ) {
-		optbuilder.withDescription( helpText );
+		this.helpText = helpText;
 		return this;
 	}
 	
@@ -380,11 +368,8 @@ public class ConfigurationBuilder< T > {
 	 * 
 	 * @return a reference to this builder
 	 */
-	@SuppressWarnings("static-access")
 	public ConfigurationBuilder< T > withVarName( String var ) {
 		this.varName = var;
-		if ( this.flagName == null )
-			optbuilder.withLongOpt( varName );
 		return this;
 	}
 	
@@ -396,7 +381,6 @@ public class ConfigurationBuilder< T > {
 	 * 
 	 * @return the default value, parsed into the appropriate data type
 	 */
-	@SuppressWarnings("static-access")
 	public T build() {
 		if ( registryGate && !registry.contains( owner ) ) {
 			logger.warn(
@@ -404,17 +388,22 @@ public class ConfigurationBuilder< T > {
 				+ "building. Please register to ensure help text is accurate."
 			);
 			register( new RegistryToken() {
-				public Class<?> getOwnerClass() {
-					return owner;
+				public Set<Class<?>> getOwnerClasses() {
+					return Collections.singleton( owner );
 				}
 			} );
 		}
 
-		Option opt = optbuilder.create();
-		String fieldName = varName == null ? opt.getLongOpt() : varName;
+		boolean hasArg   = cast != BOOLEAN;
+		String flag      = flagName == null ? varName : flagName;
+		String fieldName = varName == null ? flagName : varName;
 		String fqn = owner.getName() + "." + fieldName;
-		String value =
-			opt.hasArg() ? props.getProperty(opt.getLongOpt(), dflt) : "false";
+
+		String value;
+		if ( hasArg || props.containsKey( flag ) )
+			value = props.getProperty( flag, dflt );
+		else
+			value = "false";
 
 		T result = null;
 		try {
@@ -423,7 +412,7 @@ public class ConfigurationBuilder< T > {
 			FieldAccess< T > accessor = new FieldAccess< T >( f, cast );
 			if ( value != null )
 				result = accessor.set( value );
-			accessors.put( opt.getLongOpt(), accessor );
+			accessors.put( flag, accessor );
 		} catch (NoSuchFieldException | SecurityException e) {
 			logger.error( "cannot access field: " + fqn );
 			return value == null ? null : cast.parse( value );
@@ -435,10 +424,16 @@ public class ConfigurationBuilder< T > {
 			return value == null ? null : cast.parse( value );
 		}
 
+		Option opt = new Option( null, flag, hasArg, helpText );
+		if ( hasArg )
+			opt.setArgName( "arg" );
+		else
+			opt.setArgName( null );
+
 		if ( value != null )
-			props.setProperty( opt.getLongOpt(), value );
-		if ( dflt == null && opt.hasArg() ) {
-			required.add( opt.getLongOpt() );
+			props.setProperty( flag, value );
+		if ( dflt == null && hasArg ) {
+			required.add( flag );
 			groups.get( "Required Flags" ).addOption( opt );
 		}
 		options.addOption( opt );
@@ -473,28 +468,34 @@ public class ConfigurationBuilder< T > {
 
 	/**
 	 * Returns a token that can be used to {@link #register(RegistryToken)} the
-	 * calling class.
+	 * calling class. Note that registering a token multiple times has no effect
+	 * beyond that of registering it the first time.
+	 * 
+	 * @param dependencies tokens that should be registered along with this one
 	 * 
 	 * @return a token that can be used to register the calling class.
 	 */
-	public static RegistryToken getToken() {
-		final Class< ? > caller = getCallingClass();
+	public static RegistryToken getToken(RegistryToken... dependencies) {
+		final Set< Class< ? > > owners = new HashSet<>();
+		owners.add( getCallingClass() );
+		for ( RegistryToken token : dependencies )
+			owners.addAll( token.getOwnerClasses() );
 		return new RegistryToken() {
-			public Class<?> getOwnerClass() {
-				return caller;
+			public Set<Class<?>> getOwnerClasses() {
+				return owners;
 			}
 		};
 	}
 
 	/**
 	 * Registers the class represented by the given token. This is intended to
-	 * help ensure that classes are fully loaded, including and fields
+	 * help ensure that classes are fully loaded, including any fields
 	 * corresponding to command-line options, before parsing the command-line.
 	 * 
 	 * @param token the token assigned to the class being registered
 	 */
 	public static void register( RegistryToken token ) {
-		registry.add( token.getOwnerClass() );
+		registry.addAll( token.getOwnerClasses() );
 	}
 
 	/**
@@ -779,11 +780,6 @@ public class ConfigurationBuilder< T > {
 	}
 	
 	/**
-	 * The {@code OptionBuilder} used for constructing command-line options.
-	 */
-	private OptionBuilder optbuilder;
-	
-	/**
 	 * The class containing the field to assign to.
 	 */
 	private Class< ? > owner;
@@ -792,6 +788,11 @@ public class ConfigurationBuilder< T > {
 	 * The function object to convert arguments into appropriate data types.
 	 */
 	private LexicalCast< T > cast;
+	
+	/**
+	 * The help text for this option.
+	 */
+	private String helpText;
 	
 	/**
 	 * The name of the field to assign to.
