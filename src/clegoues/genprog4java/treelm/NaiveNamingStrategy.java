@@ -27,7 +27,6 @@ public enum NaiveNamingStrategy implements NamingStrategy {
 		String name = base + id++;
 		while ( st.inScope( name ) )
 			name = base + id++;
-		System.out.printf( "DEBUG: allocating %s of type %s\n", name, type );
 		return name;
 	}
 
@@ -38,9 +37,7 @@ public enum NaiveNamingStrategy implements NamingStrategy {
 			throw new IllegalStateException(
 				"No in-scope variables with type " + type
 			);
-		String name = SampleUtils.getRandomElement( available );
-		System.out.printf( "DEBUG: retrieving %s of type %s\n", name, type );
-		return name;
+		return SampleUtils.getRandomElement( available );
 	}
 
 	protected int id = 0;
