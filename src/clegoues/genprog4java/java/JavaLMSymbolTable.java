@@ -7,6 +7,11 @@ import java.util.Set;
 import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.treelm.SymbolTable;
 
+import static clegoues.genprog4java.java.JavaSemanticInfo.classScopeMap;
+import static clegoues.genprog4java.java.JavaSemanticInfo.inverseVarDataTypeMap;
+import static clegoues.genprog4java.java.JavaSemanticInfo.methodScopeMap;
+import static clegoues.genprog4java.java.JavaSemanticInfo.variableDataTypes;
+
 public class JavaLMSymbolTable implements SymbolTable {
 	private transient Set< String > allNames;
 	private final int id;
@@ -31,9 +36,9 @@ public class JavaLMSymbolTable implements SymbolTable {
 	public Set< String > getInScopeNames() {
 		if ( allNames == null ) {
 			allNames = new java.util.TreeSet<>();
-			allNames.addAll( JavaSemanticInfo.classScopeMap.get( id ) );
-			allNames.addAll( JavaSemanticInfo.methodScopeMap.get( id ) );
-			allNames.retainAll( JavaSemanticInfo.variableDataTypes.keySet() );
+			allNames.addAll( classScopeMap.get( id ) );
+			allNames.addAll( methodScopeMap.get( id ) );
+			allNames.retainAll( variableDataTypes.keySet() );
 			allNames = Collections.unmodifiableSet( allNames );
 		}
 		return allNames;
@@ -42,7 +47,9 @@ public class JavaLMSymbolTable implements SymbolTable {
 	@Override
 	public Set< String > getNamesForType( String type ) {
 		Set< String > names = new HashSet<>( getInScopeNames() );
-		names.retainAll( JavaSemanticInfo.inverseVarDataTypeMap.get( type ) );
+		names.retainAll(
+			inverseVarDataTypeMap.getOrDefault( type, Collections.emptySet() )
+		);
 		return Collections.unmodifiableSet( names );
 	}
 	

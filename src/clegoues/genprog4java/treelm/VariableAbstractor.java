@@ -349,6 +349,22 @@ public class VariableAbstractor implements
 		}
 		
 		/**
+		 * Retrieves the name of an in-scope variable with the given type.
+		 * 
+		 * @param st   the symbol table of current names
+		 * @param type the type of name to retrieve
+		 * 
+		 * @return the requested name
+		 */
+		private static String retrieveName( SymbolTable st, String type ) {
+			try {
+				return naming.getInScopeName( st, type );
+			} catch ( IllegalStateException e ) {
+				throw new CodeGenerationException( e );
+			}
+		}
+		
+		/**
 		 * Returns a delayed computation to compute a name and add it to the
 		 * scope. If this is the first call to {@code getName} since the last
 		 * call to either {@link #setFieldDeclaration()} or
@@ -372,7 +388,7 @@ public class VariableAbstractor implements
 					return r.resolve.get().get();
 				} );
 			} else
-				return addEntry( variables, naming::getInScopeName, type );
+				return addEntry( variables, Scope::retrieveName, type );
 		}
 		
 		private final SymbolTable symbols;
