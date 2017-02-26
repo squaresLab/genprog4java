@@ -40,7 +40,7 @@ public class VariableAbstractor implements
 	ChainedJavaTreeExtractor.PostProcess,
 	Serializable
 {
-	private static final long serialVersionUID = 20170226L;
+	private static final long serialVersionUID = 20161006;
 	
 	public static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
@@ -276,12 +276,7 @@ public class VariableAbstractor implements
 					variables.get( vid - 1 ).get();
 				if ( fid > 0 )
 					fields.get( fid - 1 ).get();
-				String name = getName.apply( symbols, type );
-				if ( ! symbols.addVariable( type, name ) )
-					throw new CodeGenerationException(
-						"attempted to reallocate variable " + name
-					);
-				return name;
+				return getName.apply( symbols, type );
 			} );
 			kind.add( task );
 			return task;
@@ -337,6 +332,23 @@ public class VariableAbstractor implements
 		}
 		
 		/**
+		 * Allocates a new name and adds it to the symbol table.
+		 * 
+		 * @param st   the symbol table of current names
+		 * @param type the type of name to allocate
+		 * 
+		 * @return the newly allocated name
+		 */
+		private static String allocateName( SymbolTable st, String type ) {
+			String name = naming.getUniqueName( st, type );
+			if ( ! st.addVariable( type, name ) )
+				throw new CodeGenerationException(
+					"attempted to reallocate variable " + name
+				);
+			return name;
+		}
+		
+		/**
 		 * Returns a delayed computation to compute a name and add it to the
 		 * scope. If this is the first call to {@code getName} since the last
 		 * call to either {@link #setFieldDeclaration()} or
@@ -354,7 +366,7 @@ public class VariableAbstractor implements
 				resolution = null;
 				List< Supplier< String > > target = r.kind;
 				r.resolve = Suppliers.memoize( () ->
-					addEntry( target, naming::getUniqueName, type )
+					addEntry( target, Scope::allocateName, type )
 				);
 				return Suppliers.memoize( () -> {
 					return r.resolve.get().get();
