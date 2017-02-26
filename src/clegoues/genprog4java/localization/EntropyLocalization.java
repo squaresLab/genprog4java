@@ -39,7 +39,7 @@ public class EntropyLocalization extends DefaultLocalization {
 	protected static Logger logger = Logger.getLogger(EntropyLocalization.class);
 
 	public static final ConfigurationBuilder.RegistryToken token =
-			ConfigurationBuilder.getToken();
+			ConfigurationBuilder.getToken(EclipseTSG.token);
 
 	public static EclipseTSG babbler = ConfigurationBuilder.of(
 			new LexicalCast< EclipseTSG >() {

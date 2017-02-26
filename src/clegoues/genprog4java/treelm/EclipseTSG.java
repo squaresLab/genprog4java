@@ -1,5 +1,6 @@
 package clegoues.genprog4java.treelm;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import com.google.common.base.Preconditions;
@@ -24,10 +26,25 @@ import codemining.lm.tsg.ITsgPosteriorProbabilityComputer;
 import codemining.lm.tsg.TSGNode;
 import codemining.lm.tsg.TSGrammar;
 import codemining.math.random.SampleUtils;
-
+import clegoues.util.ConfigurationBuilder;
 import clegoues.util.Probability;
 
+import static clegoues.util.ConfigurationBuilder.STRING;
+	
 public class EclipseTSG {
+	private static final Logger logger = Logger.getLogger( EclipseTSG.class );
+	
+	public static final ConfigurationBuilder.RegistryToken token =
+		ConfigurationBuilder.getToken( VariableAbstractor.token );
+	
+	private static String dottyFile = ConfigurationBuilder.of( STRING )
+		.inGroup( "Grammar-Based Insertions" )
+		.withFlag( "graphviz-file" )
+		.withVarName( "dottyFile" )
+		.withHelp( "write the production graph as a GraphViz graph" )
+		.withDefault( "" )
+		.build();
+
 	public EclipseTSG( TSGrammar< TSGNode > grammar ) {
 		this.grammar = grammar.getInternalGrammar();
 		this.posterior = grammar.getPosteriorComputer();
@@ -389,6 +406,12 @@ public class EclipseTSG {
 	private TreeNode< TSGNode > generateRandom(
 		TreeNode< TSGNode > root, TreeNode< TSGNode > production
 	) {
+		TreeToGraphViz< TSGNode > dotty = null;
+		if ( ! dottyFile.isEmpty() ) {
+			dotty = new TreeToGraphViz<>( tsgExtractor, (t) -> t.getData().nodeKey );
+			dotty.addGroup( production );
+		}
+
 		Deque< Pair< TreeNode< TSGNode >, TreeNode< TSGNode > > > pending =
 			new ArrayDeque<>();
 		pending.addFirst( Pair.of( root, production ) );
@@ -402,7 +425,16 @@ public class EclipseTSG {
 				Multiset< TreeNode< TSGNode > > productions = grammar.get( key );
 				if ( productions == null )
 					continue;
-				prod = SampleUtils.getRandomElement( productions );
+				TreeNode< TSGNode > newProd =
+					SampleUtils.getRandomElement( productions );
+				if ( ! dottyFile.isEmpty() ) {
+					// Make sure that each production is separate in the graph,
+					// even if we reuse the same actual production.
+					newProd = newProd.deepCopy();
+					dotty.addGroup( newProd );
+					dotty.addEdge( prod, newProd );
+				}
+				prod = newProd;
 			}
 			if ( ! prod.isLeaf() ) {
 				for ( int i = 0; i < prod.nProperties(); ++i ) {
@@ -419,6 +451,14 @@ public class EclipseTSG {
 				}
 			}
 		}
+		if ( ! dottyFile.isEmpty() )
+			try {
+				dotty.writeFile( dottyFile );
+			} catch ( IOException e ) {
+				logger.warn(
+					"could not create GraphViz file: " + e.getMessage()
+				);
+			}
 		return root;
 	}
 
@@ -464,19 +504,33 @@ public class EclipseTSG {
 		for ( int i = 0; i < logProbs.length; ++i )
 			logProbs[ i ] = state.getProductions().get( i ).getRight().getLog();
 		
-		int i = SampleUtils.getRandomIndex( logProbs );
-		TreeNode< TSGNode > prod = state.getProductions().get( i ).getLeft();
-		TreeNode< TSGNode > tsgTree = TreeNode.create(
-			new TSGNode( prod.getData().nodeKey ), prod.nProperties()
-		);
-		tsgTree = generateRandom( tsgTree, prod );
-		TreeNode< Integer > intTree = TreeNode.create(
-			tsgTree.getData().nodeKey, tsgTree.nProperties()
-		);
-		TSGNode.copyChildren( intTree, tsgTree );
-		tsgExtractor.setSymbolTable( table );
+		// Currently we have no way to avoid babbling code that requires
+		// variables of types for which there are no in-scope examples. Instead,
+		// we detect the failure after babbling, when decoding into an AST
+		// fails. So the following loop repeats until we can successfully decode
+		
+		for ( int attempt = 1; true; ++attempt ) {
+			int i = SampleUtils.getRandomIndex( logProbs );
+			TreeNode< TSGNode > prod = state.getProductions().get( i ).getLeft();
+			TreeNode< TSGNode > tsgTree = TreeNode.create(
+				new TSGNode( prod.getData().nodeKey ), prod.nProperties()
+			);
+			tsgTree = generateRandom( tsgTree, prod );
+			TreeNode< Integer > intTree = TreeNode.create(
+				tsgTree.getData().nodeKey, tsgTree.nProperties()
+			);
+			TSGNode.copyChildren( intTree, tsgTree );
+			tsgExtractor.setSymbolTable( table );
 
-		return tsgExtractor.getASTFromTree( intTree );
+			try {
+				return tsgExtractor.getASTFromTree( intTree );
+			} catch ( CodeGenerationException e ) {
+				// ignore -- we'll just try again
+				logger.error(
+					"babbling attempt " + attempt + " failed: " + e.getMessage()
+				);
+			}
+		}
 	}
 
 	private final Map< TSGNode, ? extends Multiset< TreeNode< TSGNode > > > grammar;

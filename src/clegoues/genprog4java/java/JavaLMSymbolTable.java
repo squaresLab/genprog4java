@@ -1,68 +1,49 @@
 package clegoues.genprog4java.java;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import clegoues.genprog4java.localization.Location;
-import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.treelm.SymbolTable;
 
 public class JavaLMSymbolTable implements SymbolTable {
-	private Location babbleScope;
+	private transient Set< String > allNames;
+	private final int id;
 	
-	public JavaLMSymbolTable (Location startingPoint) {
-		this.babbleScope = startingPoint;
+	/**
+	 * Create a new symbol table including everything in scope at the given
+	 * location.
+	 * 
+	 * @param startingPoint the location to import in-scope variables from
+	 */
+	public JavaLMSymbolTable (Location< ? > startingPoint) {
+		allNames = null;
+		id = startingPoint.getId();
 	}
 	
-	private static int identifier;
-	private String allocFreeNameSupplier(String type, int index) {
-		Set<String> classScope = new HashSet<String>(JavaSemanticInfo.classScopeMap.get(index));
-		Set<String> methodScope = JavaSemanticInfo.methodScopeMap.get(index);
-		classScope.addAll(methodScope);
-		String newName = "newVar" + identifier++;
-		while(classScope.contains(newName)) {
-			newName = "newVar" + identifier++;
+	@Override
+	public boolean addVariable( String type, String name ) {
+		throw new UnsupportedOperationException( "addVariable(type,name)" );
+	}
+
+	@Override
+	public Set< String > getInScopeNames() {
+		if ( allNames == null ) {
+			allNames = new java.util.TreeSet<>();
+			allNames.addAll( JavaSemanticInfo.classScopeMap.get( id ) );
+			allNames.addAll( JavaSemanticInfo.methodScopeMap.get( id ) );
+			allNames.retainAll( JavaSemanticInfo.variableDataTypes.keySet() );
+			allNames = Collections.unmodifiableSet( allNames );
 		}
-		methodScope.add(newName);
-		return newName;
+		return allNames;
+	}
+
+	@Override
+	public Set< String > getNamesForType( String type ) {
+		Set< String > names = new HashSet<>( getInScopeNames() );
+		names.retainAll( JavaSemanticInfo.inverseVarDataTypeMap.get( type ) );
+		return Collections.unmodifiableSet( names );
 	}
 	
-
-	//FIXME/question for Dorn: should this actually create the variable, or just come up with a unique name?
-	@Override
-	public Supplier<String> allocFreeName(String type) {
-		int index = babbleScope.getId();
-		return () -> allocFreeNameSupplier(type, index);
-	}
-	
-	// FIXME: this won't do the right thing for int x = [] + 1; (that is, it might return x)
-	private String getNameForTypeSupplier(String type) {
-		if(JavaSemanticInfo.inverseVarDataTypeMap.containsKey(type)) {
-			Set<String> possibleNames = JavaSemanticInfo.inverseVarDataTypeMap.get(type);
-			int num = Configuration.randomizer.nextInt(possibleNames.size());
-			for(String poss : possibleNames) {
-				if(--num < 0) return poss;
-			}
-		}
-		return null;
-	}
-	@Override
-	public Supplier<String> getNameForType(String type) {
-		return () -> getNameForTypeSupplier(type);
-	}
-
-
-	@Override
-	public void enter(int nodeType) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void leave(int nodeType) {
-		// TODO Auto-generated method stub
-		
-	}
-
 }
