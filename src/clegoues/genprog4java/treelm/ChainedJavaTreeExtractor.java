@@ -213,20 +213,14 @@ public class ChainedJavaTreeExtractor extends JavaAstTreeExtractor {
 	 */
 	@Override
 	public ASTNode getASTFromTree( TreeNode< Integer > tree ) {
-		List< PostProcess > postProcessors = new ArrayList<>();
-		for ( Supplier< ? extends PostProcess > factory : factories )
-			postProcessors.add( factory.get() );
-		tree = TreeNodeUtils.transform( tree, (t) -> {
-			for ( int i = postProcessors.size() - 1; i >=0; --i )
-				t = postProcessors.get( i ).decode(
+		for ( Supplier< ? extends PostProcess > factory : factories ) {
+			PostProcess processor = factory.get();
+			tree = TreeNodeUtils.transform( tree, (t) ->
+				processor.decode(
 					t, this::getOrAddSymbolId, this::getSymbol, symbols
-				);
-			symbols.enter( getSymbol( t.getData() ).nodeType );
-			return t;
-		}, (t) -> {
-			symbols.leave( getSymbol( t.getData() ).nodeType );
-			return t;
-		} );
+				)
+			);
+		}
 		return super.getASTFromTree( tree );
 	}
 

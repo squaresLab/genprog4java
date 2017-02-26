@@ -1,11 +1,11 @@
 package clegoues.genprog4java.treelm;
 
-import java.util.function.Supplier;
+import java.util.Collections;
+import java.util.Set;
 
 /**
- * An empty SymbolTable placeholder. This symbol table always contains only the
- * variable {@code x} and always allows treats {@code x} as the next free
- * variable name.
+ * An empty SymbolTable placeholder. This symbol table never contains any
+ * variables. Attempting to add a variable always fails.
  * 
  * @author jonathan
  */
@@ -13,31 +13,38 @@ public enum EmptySymbolTable implements SymbolTable {
 	INSTANCE;
 
 	/**
-	 * Ignored, since the in scope variables never change.
+	 * Never succeeds.
+	 * 
+	 * @param type  ignored
+	 * @param name  ignored
+	 * 
+	 * @return {@code false}.
 	 */
 	@Override
-	public void enter( int nodeType ) { }
-
-	/**
-	 * Ignored, since the in scope variables never change.
-	 */
-	@Override
-	public void leave( int nodeType ) { }
-
-	/**
-	 * Always allocates {@code x}.
-	 */
-	@Override
-	public Supplier< String > allocFreeName( String type ) {
-		return () -> "x";
+	public boolean addVariable( String type, String name ) {
+		return false;
 	}
 
 	/**
-	 * Always returns {@code x}.
+	 * Returns the empty set.
+	 * 
+	 * @return the empty set.
 	 */
 	@Override
-	public Supplier< String > getNameForType( String type ) {
-		return () -> "x";
+	public Set< String > getInScopeNames() {
+		return Collections.emptySet();
+	}
+
+	/**
+	 * Returns the empty set.
+	 * 
+	 * @param type  ignored
+	 * 
+	 * @return the empty set.
+	 */
+	@Override
+	public Set< String > getNamesForType( String type ) {
+		return Collections.emptySet();
 	}
 
 }
