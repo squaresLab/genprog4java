@@ -75,7 +75,6 @@ if [ $word1 = "Files" ] && [ $word5 = "differ" ]; then
     echo "Line changed: $lineChanged"
     alreadyFound="false"  
 #    coveragePath=$D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/coverage.xml
-
 #Changed for AllPublic
     coveragePath=$D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"FixedPatched/coverage.xml
     while read coverageXMLLine

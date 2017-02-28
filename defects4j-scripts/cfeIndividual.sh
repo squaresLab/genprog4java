@@ -23,7 +23,7 @@
 #./CFIndividual.sh Math 2 Randoop 180 CF September21 
 
 
-if [ "$#" -ne 7 ]; then
+if [ "$#" -lt 6 ]; then
     echo "This script should be run with 6 parameters: "
 	echo "1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)"
 	echo "2nd param is the bug number (ex: 1,2,3,4,...)"
