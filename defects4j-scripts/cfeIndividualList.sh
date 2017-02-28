@@ -18,7 +18,7 @@
 # 4th param is the name of the folder the test suite will be stored in. This is located in $D4J_HOME/generatedTestSuites/ . Example: September21
 
 #Example of usage:
-#./cfeIndividualList.sh Evosuite 180 CF AllPublic /home/mausoto/defects4j/ExamplesCheckedOut/patchMath28.txt
+#./cfeIndividualList.sh Evosuite 180 CF AllPublic /home/mau/Research/defects4j/ExamplesCheckedOut/math82.patch
 
 
 RANDOOPOREVOSUITE="$1"
@@ -27,7 +27,7 @@ CFE="$3"
 IDENTIFIER="$4"
 PATCHFILE="$5"
 
-if [ "$#" -ne 5 ]; then
+if [ "$#" -lt 4 ]; then
     echo "This script should be run with 4 parameters: "
 	echo " 1th param is the generation tool (Randoop or Evosuite)"
 	echo "2th param is the budget of time in seconds the tool has to generate the test suite"
@@ -47,9 +47,9 @@ touch $D4J_HOME/generatedTestSuites/$IDENTIFIER/resultsEvaluatingSeveralTestSuit
 #All bugs with fix found (TRPAutoRepair):
 #declare -a bugs=("Chart 1" "Chart 3" "Chart 5" "Chart 13" "Chart 21" "Chart 25" "Chart 26" "Closure 13" "Closure 19" "Closure 21" "Closure 22" "Closure 46" "Closure 66" "Closure 83" "Closure 86" "Closure 107" "Closure 115" "Closure 125" "Closure 126" "Lang 7" "Lang 10" "Lang 22" "Lang 39" "Lang 43" "Lang 45" "Lang 59" "Lang 63" "Math 7" "Math 8" "Math 18" "Math 20" "Math 24" "Math 28" "Math 29" "Math 40" "Math 49" "Math 50" "Math 73" "Math 80" "Math 81" "Math 82" "Math 85" "Math 95" "Time 19")
 #Allbugs with a fix found (GenProg) Remaining from the list above:
-declare -a bugs=("Math 28")
+declare -a bugs=("Math 82")
 #sprecific ones
-#declare -a bugs=("Lang 39")
+#declare -a bugs=("Chart 13" "Chart 1" "Chart 7" "Closure 115" "Closure 11" "Closure 126" "Closure 13" "Closure 21" "Closure 22" "Closure 31" "Closure 38" "Closure 45" "Closure 62" "Closure 63" "Closure 64" "Lang 10" "Lang 33" "Lang 44" "Lang 51" "Lang 58" "Lang 59" "Lang 63" "Math 28" "Math 29" "Math 2" "Math 40" "Math 49" "Math 50" "Math 5" "Math 62" "Math 75" "Math 78" "Math 80" "Math 81" "Math 82" "Math 85" "Math 8" "Time 7")
 
 ## now loop through the above array
 for i in "${bugs[@]}"
