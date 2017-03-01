@@ -66,12 +66,15 @@ if [ $word1 = "Files" ] && [ $word5 = "differ" ]; then
   diff --unchanged-line-format="" --old-line-format="" --new-line-format="%dn
 " $file1 $file2 2>&1 | tee -a $D4J_HOME/$PATHTOCHECKOUTFOLDERS/lineNumbersChanged.txt #Think about the cases where the fix is a delete
 
-  atLeastOneNonZero="false"
-  atLeastOneZero="false"
+  #atLeastOneNonZero="false"
+  #atLeastOneZero="false"
+  numberOfLinesChanged=0
+  numberOfLinesCovered=0
 
   linesChanged=$D4J_HOME/$PATHTOCHECKOUTFOLDERS/lineNumbersChanged.txt
   while read lineChanged
   do
+    ((numberOfLinesChanged++))
     echo "Line changed: $lineChanged"
     alreadyFound="false"  
 #    coveragePath=$D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/coverage.xml
@@ -91,11 +94,12 @@ if [ $word1 = "Files" ] && [ $word5 = "differ" ]; then
 		
 		if [ $hits != "0" ]; then
 		  echo "Covered"
-		  atLeastOneNonZero="true"
+		  #atLeastOneNonZero="true"
+		  ((numberOfLinesCovered++))
 		fi
 		if [ $hits = "0" ]; then
 		  echo "Not covered"
-		  atLeastOneZero="true"
+		  #atLeastOneZero="true"
 		fi
 	  fi
 	  fi
@@ -112,22 +116,35 @@ done < $filesChanged
 rm $D4J_HOME/$PATHTOCHECKOUTFOLDERS/filesChanged.txt
 
 echo ""
-echo "$PROJECT $BUGNUMBER:" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
-if [ $atLeastOneNonZero = "true" ] && [ $atLeastOneZero = "false" ]; then
-  echo "HUMAN CHANGES FULLY COVERED"
-  echo "HUMAN CHANGES FULLY COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
+if [ $numberOfLinesChanged = 0 ]
+then
+  echo "The change was a delete, analyze manually"
+else
+  ((percentage=$numberOfLinesCovered*100/$numberOfLinesChanged))
+  echo "$numberOfLinesChanged line(s) changed"
+  echo "$numberOfLinesCovered line(s) covered"
+  echo "$percentage% changed lines covered by the test suite"
 fi
-if [ $atLeastOneNonZero = "false" ] && [ $atLeastOneZero = "true" ]; then
-  echo "HUMAN CHANGES NOT COVERED"
-  echo "HUMAN CHANGES NOT COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
-fi
-if [ $atLeastOneNonZero = "true" ] && [ $atLeastOneZero = "true" ]; then
-  echo "HUMAN CHANGES PARTIALLY COVERED"
-  echo "HUMAN CHANGES PARTIALLY COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
-fi
-if [ $atLeastOneNonZero = "false" ] && [ $atLeastOneZero = "false" ]; then
-  echo "HUMAN CHANGES NOT COVERED"
-  echo "HUMAN CHANGES NOT COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
-fi
+
+
+
+#echo ""
+#echo "$PROJECT $BUGNUMBER:" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
+#if [ $atLeastOneNonZero = "true" ] && [ $atLeastOneZero = "false" ]; then
+#  echo "HUMAN CHANGES FULLY COVERED"
+#  echo "HUMAN CHANGES FULLY COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
+#fi
+#if [ $atLeastOneNonZero = "false" ] && [ $atLeastOneZero = "true" ]; then
+#  echo "HUMAN CHANGES NOT COVERED"
+#  echo "HUMAN CHANGES NOT COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
+#fi
+#if [ $atLeastOneNonZero = "true" ] && [ $atLeastOneZero = "true" ]; then
+#  echo "HUMAN CHANGES PARTIALLY COVERED"
+#  echo "HUMAN CHANGES PARTIALLY COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
+#fi
+#if [ $atLeastOneNonZero = "false" ] && [ $atLeastOneZero = "false" ]; then
+#  echo "HUMAN CHANGES NOT COVERED"
+#  echo "HUMAN CHANGES NOT COVERED" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
+#fi
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------

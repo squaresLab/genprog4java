@@ -18,7 +18,7 @@
 # 4th param is the name of the folder the test suite will be stored in. This is located in $D4J_HOME/generatedTestSuites/ . Example: September21
 
 #Example of usage:
-#./cfeIndividualList.sh Evosuite 180 CF AllPublic /home/mau/Research/defects4j/ExamplesCheckedOut/math82.patch
+#./cfeIndividualList.sh Evosuite 180 CF AllPublic /home/mausoto/defects4j/ExamplesCheckedOut/math82.patch
 
 
 RANDOOPOREVOSUITE="$1"
@@ -47,9 +47,9 @@ touch $D4J_HOME/generatedTestSuites/$IDENTIFIER/resultsEvaluatingSeveralTestSuit
 #All bugs with fix found (TRPAutoRepair):
 #declare -a bugs=("Chart 1" "Chart 3" "Chart 5" "Chart 13" "Chart 21" "Chart 25" "Chart 26" "Closure 13" "Closure 19" "Closure 21" "Closure 22" "Closure 46" "Closure 66" "Closure 83" "Closure 86" "Closure 107" "Closure 115" "Closure 125" "Closure 126" "Lang 7" "Lang 10" "Lang 22" "Lang 39" "Lang 43" "Lang 45" "Lang 59" "Lang 63" "Math 7" "Math 8" "Math 18" "Math 20" "Math 24" "Math 28" "Math 29" "Math 40" "Math 49" "Math 50" "Math 73" "Math 80" "Math 81" "Math 82" "Math 85" "Math 95" "Time 19")
 #Allbugs with a fix found (GenProg) Remaining from the list above:
-#declare -a bugs=("Math 28")
+declare -a bugs=("Math 82")
 #sprecific ones
-declare -a bugs=("Lang 59" "Time 19" "Closure 83" "Math 24" "Closure 46" "Math 7" "Math 29" "Math 49" "Math 73" "Lang 39" "Closure 125" "Closure 66" "Lang 43" "Math 40" "Math 95" "Lang 63" "Math 18" "Math 20" "Chart 26" "Math 80" "Math 82" "Chart 1" "Closure 19" "Lang 10" "Lang 22" "Chart 25" "Chart 13" "Closure 13" "Closure 21" "Closure 22" "Closure 107" "Closure 115" "Closure 126" "Math 28" "Math 50" "Math 81" "Math 85")
+#declare -a bugs=("Lang 59" "Time 19" "Closure 83" "Math 24" "Closure 46" "Math 7" "Math 29" "Math 49" "Math 73" "Lang 39" "Closure 125" "Closure 66" "Lang 43" "Math 40" "Math 95" "Lang 63" "Math 18" "Math 20" "Chart 26" "Math 80" "Math 82" "Chart 1" "Closure 19" "Lang 10" "Lang 22" "Chart 25" "Chart 13" "Closure 13" "Closure 21" "Closure 22" "Closure 107" "Closure 115" "Closure 126" "Math 28" "Math 50" "Math 81" "Math 85")
 
 ## now loop through the above array
 for i in "${bugs[@]}"

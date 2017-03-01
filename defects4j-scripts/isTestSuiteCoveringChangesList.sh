@@ -15,7 +15,7 @@
 # 3th param is the path of the folder where the bugs will be checked out. Starting in $D4J_HOME
 
 #Example of usage:
-#./isTestSuiteCoveringChangesList.sh Evosuite generatedTestSuites/Evosuite30MinsPAR/testSuites/ ExamplesCheckedOut
+#./isTestSuiteCoveringChangesList.sh Evosuite generatedTestSuites/AllPublic/Math/evosuite-branch/1/ ExamplesCheckedOut
 
 RANDOOPOREVOSUITE="$1"
 PATHOFSUITEFOLDER="$2"
