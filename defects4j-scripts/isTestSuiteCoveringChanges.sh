@@ -36,17 +36,17 @@ LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 
 #rm -f $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/coverage.xml
 rm -rf $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
-rm -rf $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed
+#rm -rf $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed
 
 
 #Checkout the buggy and fixed versions of the code 
 defects4j checkout -p $PROJECT -v "$BUGNUMBER"b -w $D4J_HOME/$PATHTOCHECKOUTFOLDERS"/"$LOWERCASEPACKAGE"$BUGNUMBER"Buggy
-defects4j checkout -p $PROJECT -v "$BUGNUMBER"f -w $D4J_HOME/$PATHTOCHECKOUTFOLDERS"/"$LOWERCASEPACKAGE"$BUGNUMBER"Fixed
+#defects4j checkout -p $PROJECT -v "$BUGNUMBER"f -w $D4J_HOME/$PATHTOCHECKOUTFOLDERS"/"$LOWERCASEPACKAGE"$BUGNUMBER"Fixed
 
 #Run coverage of the indicated test suite on the human fix
-#./checkCoverageOfGeneratedTestSuite.sh $PROJECT $BUGNUMBER $RANDOOPOREVOSUITE $PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/ $PATHOFSUITEFOLDER
+./checkCoverageOfGeneratedTestSuite.sh $PROJECT $BUGNUMBER $RANDOOPOREVOSUITE $PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/ $PATHOFSUITEFOLDER
 #Changed for AllPublic
-./checkCoverageOfGeneratedTestSuite.sh $PROJECT $BUGNUMBER $RANDOOPOREVOSUITE $PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"FixedPatched/ $PATHOFSUITEFOLDER
+#./checkCoverageOfGeneratedTestSuite.sh $PROJECT $BUGNUMBER $RANDOOPOREVOSUITE $PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"FixedPatched/ $PATHOFSUITEFOLDER
 
 #Diff between buggy version and human fix
 diff --exclude=.git --exclude=.defects4j.config --exclude=defects4j.build.properties --exclude=.svn -qr $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Buggy $D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed &>> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/filesChanged.txt
@@ -77,9 +77,9 @@ if [ $word1 = "Files" ] && [ $word5 = "differ" ]; then
     ((numberOfLinesChanged++))
     echo "Line changed: $lineChanged"
     alreadyFound="false"  
-#    coveragePath=$D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/coverage.xml
+    coveragePath=$D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"Fixed/coverage.xml
 #Changed for AllPublic
-    coveragePath=$D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"FixedPatched/coverage.xml
+#    coveragePath=$D4J_HOME/$PATHTOCHECKOUTFOLDERS/$LOWERCASEPACKAGE"$BUGNUMBER"FixedPatched/coverage.xml
     while read coverageXMLLine
     do
 	  if [[ $coverageXMLLine = *"<line number=\"$lineChanged\""* ]]
@@ -118,14 +118,16 @@ rm $D4J_HOME/$PATHTOCHECKOUTFOLDERS/filesChanged.txt
 echo ""
 if [ $numberOfLinesChanged = 0 ]
 then
-  echo "The change was a delete, analyze manually"
+  echo "The change was a delete, analyze manually" | tee $D4J_HOME/$PATHTOCHECKOUTFOLDERS/CoverageOfGeneratedRepairs.txt
 else
   ((percentage=$numberOfLinesCovered*100/$numberOfLinesChanged))
   echo "$numberOfLinesChanged line(s) changed"
   echo "$numberOfLinesCovered line(s) covered"
-  echo "$percentage% changed lines covered by the test suite"
+  echo "$percentage% changed lines covered by the test suite" 
+  echo "$percentage% changed lines covered by the test suite" >> $D4J_HOME/$PATHTOCHECKOUTFOLDERS/CoverageOfGeneratedRepairs.txt
 fi
 
+echo ""
 
 
 #echo ""
