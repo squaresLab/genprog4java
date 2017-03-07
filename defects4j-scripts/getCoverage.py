@@ -49,10 +49,11 @@ def computeCoverage(args):
 def generateCovXML(d4j, bug, tool):
 	cmd = d4j + " coverage -w " + bug.fixedPath() + " -s " +  bug.suitePath(tool) # note that suitepath doesn't exist yet
 	subprocess.call(cmd, shell=True) # this doesn't save the log or do any kind of error checking (yet!)
-	
-def getEditedFiles():
-	cmd = defects4jCommand + " export -p classes.modified"
-	p = subprocess.Popen(cmd, shell=True, cwd="/home/mau/Research/defects4j/ExamplesCheckedOut/closure35FixedPatched", stdout=subprocess.PIPE)
+
+def getEditedFiles(d4j):
+	cmd = d4j + " export -p classes.modified"
+	p = subprocess.Popen(cmd, shell=True, cwd=self.d4jHome+ "/ExamplesCheckedOut/" + args.project + args.bugNum + "FixedPatched", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
 	realpaths = [ line.strip().replace(".", "/") + ".java" for line in p.stdout ]
 	return realpaths
 
@@ -65,7 +66,7 @@ def getADiff(file1, file2):
 		print line
 
 def getOptions():
-	parser = argparse.ArgumentParser(description="")
+	parser = argparse.ArgumentParser(description="This script checks if a test suite is covering the human changes")
 	parser.add_argument("project", help="1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)")
 	parser.add_argument("bugNum", help="2nd param is the bug number (ex: 1,2,3,4,...)")
 	parser.add_argument("buggyFolder", help="folder to check out buggy version of the bug")
