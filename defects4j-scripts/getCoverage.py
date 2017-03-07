@@ -48,13 +48,13 @@ def computeCoverage(args):
 			# check if covered
 			print realLine
 
-def generateCovXML(d4j, bug, tool):
-	cmd = d4j + " coverage -w " + bug.fixedPath() + " -s " +  bug.suitePath(tool) # note that suitepath doesn't exist yet
+def generateCovXML(bug, tool):
+	cmd = defects4jCommand + " coverage -w " + bug.fixedPath() + " -s " +  bug.suitePath(tool) # note that suitepath doesn't exist yet
 	subprocess.call(cmd, shell=True) # this doesn't save the log or do any kind of error checking (yet!)
 
-def getEditedFiles(d4j):
-	cmd = d4j + " export -p classes.modified"
-	p = subprocess.Popen(cmd, shell=True, cwd=self.d4jHome+ "/ExamplesCheckedOut/" + args.project + args.bugNum + "FixedPatched", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def getEditedFiles(bug):
+	cmd = defects4jCommand + " export -p classes.modified"
+	p = subprocess.Popen(cmd, shell=True, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 	realpaths = [ line.strip().replace(".", "/") + ".java" for line in p.stdout ]
 	return realpaths
@@ -90,10 +90,10 @@ def main():
 
 	bug = BugInfo(args.project, args.bugNum, args.buggyFolder, args.fixedFolder)
 
-        for f in getEditedFiles():
+        for f in getEditedFiles(bug):
                 bugVersion = bug.getBugPath() + "/" + f
                 fixedVersion = bug.getFixPath() + "/" + f
-                gedtADiff(bugVersion,fixedVersion)
+                getADiff(bugVersion,fixedVersion)
 
         if(not(args.file1 is None) and (not (args.file2 is None))):
                 getADiff(args.file1, args.file2)
