@@ -48,7 +48,8 @@ def generateCovXML(d4j, bug, tool):
 	
 # assume that file1, file2 are java files
 def getADiff(file1, file2):
-        cmd = "diff --unchanged-line-format=\"\" --old-line-format=\"\" --new-line-format=\"\%dn\n " + file1 + file2
+        cmd = "diff  --unchanged-line-format=\"\"  --old-line-format=\"%dn \" --new-line-format=\"%dn \" " + file1 +" " + file2
+        print cmd
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         for line in p.stdout:
                 print line
