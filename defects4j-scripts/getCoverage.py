@@ -5,14 +5,16 @@ import os
 import xml.etree.ElementTree
 import subprocess
 
+d4jHome = os.environ['D4J_HOME']
+defects4jCommand = d4jHome + "/framework/bin/defects4j"
+
 class BugInfo(object):
-	def __init__(self, project, bugNum, d4jDir, buggyFolder, fixedFolder, defects4jCommand):
+	def __init__(self, project, bugNum, d4jDir, buggyFolder, fixedFolder):
 		self.project = project
 		self.bugNum = bugNum
 		self.d4jDir = d4jDir
 		self.buggyFolder = buggyFolder
 		self.fixedFolder = fixedFolder
-		self.defects4jCommand = defects4jCommand
 		self.ensureVersionAreCheckedOut()
 
 	def fixedPath(self):
@@ -25,7 +27,7 @@ class BugInfo(object):
 			self.checkout(self.fixedFolder, "f")
 
 	def checkout(self, folderToCheckout, vers):
-		cmd = self.defects4jCommand + " checkout -p " + self.project + " -v " + self.bugNum + vers + " -w " + self.d4jDir + "/" + folderToCheckout
+		cmd = defects4jCommand + " checkout -p " + self.project + " -v " + self.bugNum + vers + " -w " + self.d4jDir + "/" + folderToCheckout
 		p = subprocess.call(cmd, shell=True) #, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		
 
@@ -48,8 +50,8 @@ def generateCovXML(d4j, bug, tool):
 	cmd = d4j + " coverage -w " + bug.fixedPath() + " -s " +  bug.suitePath(tool) # note that suitepath doesn't exist yet
 	subprocess.call(cmd, shell=True) # this doesn't save the log or do any kind of error checking (yet!)
 	
-def getEditedFiles(d4j):
-	cmd = d4j + " export -p classes.modified"
+def getEditedFiles():
+	cmd = defects4jCommand + " export -p classes.modified"
 	p = subprocess.Popen(cmd, shell=True, cwd="/home/mau/Research/defects4j/ExamplesCheckedOut/closure35FixedPatched", stdout=subprocess.PIPE)
 	realpaths = [ line.strip().replace(".", "/") + ".java" for line in p.stdout ]
 	return realpaths
@@ -83,13 +85,11 @@ def main():
 	# also, line wrap this file at 80 characters or so
 	# and make your argument description sentences shorter
 
-	d4jHome = os.environ['D4J_HOME']
-	defects4jCommand = d4jHome + "/framework/bin/defects4j"
-	bug = BugInfo(args.project, args.bugNum, d4jHome, args.buggyFolder, args.fixedFolder, defects4jCommand)
+	bug = BugInfo(args.project, args.bugNum, d4jHome, args.buggyFolder, args.fixedFolder)
 	
 
 #	def __init__(self, project, bugNum, d4jDir, buggyFolder, fixedFolder):
-	editedFiles = getEditedFiles(defects4jCommand)
+	editedFiles = getEditedFiles()
 
         if(not(args.file1 is None) and (not (args.file2 is None))):
                 getADiff(args.file1, args.file2)
