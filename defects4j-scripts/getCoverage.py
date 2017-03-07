@@ -15,6 +15,8 @@ def getOptions():
 	parser.add_argument("--buggyFolder", help="4th param is the path of the buggy folder, starting from the the D4J_HOME folder (Example: ExamplesCheckedOut or BugsWithAFix)")
 	parser.add_argument("--testSuiteFolder", help="5th param is the path where the test suite is located, starting from the the D4J_HOME folder (Example: generatedTestSuites)")
 	parser.add_argument("--coverage", help="a coverage file")
+        parser.add_argument("--file1", help="test parameter, first file to diff")
+        parser.add_argument("--file2", help="test parameter, second file to diff")
 	return parser.parse_args()
 
 class BugInfo(object):
@@ -27,7 +29,7 @@ class BugInfo(object):
 		return str(os.path.join(self.d4jDir, self.pathToFix))
 
 def computeCoverage(args):
-	numberOfLinesChanged=0
+        numberOfLinesChanged=0
 	numberOfLinesCovered=0
 
 	if(not (args.coverage is None)):
@@ -41,9 +43,15 @@ def computeCoverage(args):
 			print realLine
 
 def generateCovXML(d4j, bug, tool):
-	cmd = d4j + " coverage -w " + bug.fixedPath() + " -s " bug.suitePath(tool) # note that suitepath doesn't exist yet
+	cmd = d4j + " coverage -w " + bug.fixedPath() + " -s " +  bug.suitePath(tool) # note that suitepath doesn't exist yet
 	subprocess.call(cmd, shell=True) # this doesn't save the log or do any kind of error checking (yet!)
 	
+# assume that file1, file2 are java files
+def getADiff(file1, file2):
+        cmd = "diff --unchanged-line-format=\"\" --old-line-format=\"\" --new-line-format=\"\%dn\n " + file1 + file2
+        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        for line in p.stdout:
+                print line
 def main():
 	args=getOptions()
 	# insert error handling/sanity checking to be sure the appropriate environment variables are set and abort with an error/usage message if not
@@ -51,10 +59,8 @@ def main():
 	# and make your argument description sentences shorter
 
 	d4jHome = os.environ['D4J_HOME']
-
-			
-
-
+        if(not(args.file1 is None) and (not (args.file2 is None))):
+                getADiff(args.file1, args.file2)
 	print "the project you specified is: " + args.project
 
 main()
