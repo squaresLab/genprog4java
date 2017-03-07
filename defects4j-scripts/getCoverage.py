@@ -26,7 +26,7 @@ class BugInfo(object):
 
 	def checkout(self, folderToCheckout, vers):
 		cmd = self.defects4jCommand + " checkout -p " + self.project + " -v " + self.bugNum + vers + " -w " + self.d4jDir + "/" + folderToCheckout
-		p = subprocess.Popen(cmd, shell=True) #, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		p = subprocess.call(cmd, shell=True) #, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		
 
 
@@ -50,7 +50,7 @@ def generateCovXML(d4j, bug, tool):
 	
 def getEditedFiles(d4j):
 	cmd = d4j + " export -p classes.modified"
-	p = subprocess.Popen(cmd, shell=True, cwd="/home/mau/Research/defects4j/ExamplesCheckedOut/closure35FixedPatched", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	p = subprocess.Popen(cmd, shell=True, cwd="/home/mau/Research/defects4j/ExamplesCheckedOut/closure35FixedPatched", stdout=subprocess.PIPE)
 	realpaths = [ line.strip().replace(".", "/") + ".java" for line in p.stdout ]
 	return realpaths
 
