@@ -55,7 +55,6 @@ def generateCovXML(bug, tool):
 def getEditedFiles(bug):
 	cmd = defects4jCommand + " export -p classes.modified"
 	p = subprocess.Popen(cmd, shell=True, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
 	realpaths = [ line.strip().replace(".", "/") + ".java" for line in p.stdout ]
 	return realpaths
 
@@ -64,8 +63,7 @@ def getADiff(file1, file2):
         cmd = "diff  --unchanged-line-format=\"\"  --old-line-format=\"%dn \" --new-line-format=\"%dn \" " + file1 +" " + file2
         print cmd
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        for line in p.stdout:
-		print line
+        print [line.strip() for line in p.stdout]
 
 def getOptions():
 	parser = argparse.ArgumentParser(description="This script checks if a test suite is covering the human changes")
@@ -78,15 +76,14 @@ def getOptions():
 	parser.add_argument("--coverage", help="a coverage file")
         parser.add_argument("--file1", help="test parameter, first file to diff")
         parser.add_argument("--file2", help="test parameter, second file to diff")
-       
 	return parser.parse_args()
 
 
 def main():
 	args=getOptions()
-	# insert error handling/sanity checking to be sure the appropriate environment variables are set and abort with an error/usage message if not
-	# also, line wrap this file at 80 characters or so
-	# and make your argument description sentences shorter
+	# TODO: insert error handling/sanity checking to be sure the appropriate environment variables are set and abort with an error/usage message if not
+	# TODO: line wrap this file at 80 characters or so
+	# TODO: make argument description sentences shorter
 
 	bug = BugInfo(args.project, args.bugNum, args.buggyFolder, args.fixedFolder)
 
