@@ -9,16 +9,18 @@ d4jHome = os.environ['D4J_HOME']
 defects4jCommand = d4jHome + "/framework/bin/defects4j"
 
 class BugInfo(object):
-	def __init__(self, project, bugNum, d4jDir, buggyFolder, fixedFolder):
+	def __init__(self, project, bugNum, buggyFolder, fixedFolder):
 		self.project = project
 		self.bugNum = bugNum
-		self.d4jDir = d4jDir
 		self.buggyFolder = buggyFolder
 		self.fixedFolder = fixedFolder
 		self.ensureVersionAreCheckedOut()
 
-	def fixedPath(self):
-		return str(os.path.join(self.d4jDir, self.pathToFix))
+	def getFixPath(self):
+		return str(os.path.join(d4jHome, self.fixedFolder))
+
+	def getBugPath(self):
+		return str(os.path.join(d4jHome, self.buggyFolder))
 	
 	def ensureVersionAreCheckedOut(self):
 		if(not os.path.exists(self.buggyFolder)):
@@ -27,7 +29,7 @@ class BugInfo(object):
 			self.checkout(self.fixedFolder, "f")
 
 	def checkout(self, folderToCheckout, vers):
-		cmd = defects4jCommand + " checkout -p " + self.project + " -v " + self.bugNum + vers + " -w " + self.d4jDir + "/" + folderToCheckout
+		cmd = defects4jCommand + " checkout -p " + self.project + " -v " + self.bugNum + vers + " -w " + d4jHome + "/" + folderToCheckout
 		p = subprocess.call(cmd, shell=True) #, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		
 
@@ -86,11 +88,12 @@ def main():
 	# also, line wrap this file at 80 characters or so
 	# and make your argument description sentences shorter
 
-	bug = BugInfo(args.project, args.bugNum, d4jHome, args.buggyFolder, args.fixedFolder)
-	
+	bug = BugInfo(args.project, args.bugNum, args.buggyFolder, args.fixedFolder)
 
-#	def __init__(self, project, bugNum, d4jDir, buggyFolder, fixedFolder):
-	editedFiles = getEditedFiles()
+        for f in getEditedFiles():
+                bugVersion = bug.getBugPath() + "/" + f
+                fixedVersion = bug.getFixPath() + "/" + f
+                gedtADiff(bugVersion,fixedVersion)
 
         if(not(args.file1 is None) and (not (args.file2 is None))):
                 getADiff(args.file1, args.file2)
