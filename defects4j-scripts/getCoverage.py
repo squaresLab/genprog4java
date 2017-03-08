@@ -4,6 +4,7 @@ import argparse
 import os
 import xml.etree.ElementTree
 import subprocess
+import sys
 
 d4jHome = os.environ['D4J_HOME']
 defects4jCommand = d4jHome + "/framework/bin/defects4j"
@@ -91,9 +92,11 @@ def generateCovXML(bug, tool, seed):
 	elif(tool.lower() == "randoop"):
 		testSuiteName="randoop"
 	suitePath =  os.path.join(bug.getTestDir(), bug.getProject()+"-"+bug.getBugNum()+"f-"+testSuiteName+"."+str(seed)+".tar.bz2")
-	cmd = defects4jCommand + " coverage -w " + bug.getFixPath() + " -s " + str(suitePath)
-	subprocess.call(cmd, shell=True) # this doesn't save the log or do any kind of error checking (yet!)
-
+	if(os.path.isfile(suitePath)):
+		cmd = defects4jCommand + " coverage -w " + bug.getFixPath() + " -s " + str(suitePath)
+		subprocess.call(cmd, shell=True) # this doesn't save the log or do any kind of error checking (yet!)
+	else:
+		sys.exit("The script did not find a test suite: " + str(suitePath))
 def getEditedFiles(bug):
 	cmd = defects4jCommand + " export -p classes.modified"
 	p = subprocess.Popen(cmd, shell=True, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -132,8 +135,7 @@ def getOptions():
 #args.many is assumed to be not None
 def getAllBugs(bugs,args):
 	if(not os.path.isfile(args.many)):
-		# MAU TODO: ADD GRACEFUL ERROR HANDLING/MESSAGE HERE
-		return
+		sys.exit("The file " + str(args.many) + " does not exist")
 	else:
 		with open(args.many) as f:
 			pairs = [x.strip().split(',') for x in f.readlines() if x[0] != '#']
@@ -142,8 +144,22 @@ def getAllBugs(bugs,args):
 				bugs.append(bug)
 def main():
 	args=getOptions()
-	# TODO: insert error handling/sanity checking to be sure the appropriate environment variables are set and abort with an error/usage message if not
-	# TODO: line wrap this file at 80 characters or so
+	if(os.environ['D4J_HOME'] is None):
+		sys.exit("Environment variable D4J_HOME is not set")
+	if(not os.path.isdir(args.wd)):
+		sys.exit("The folder " + str(args.wd) + " does not exist")
+	if(not os.path.isdir(args.testDir)):
+		sys.exit("The folder " + str(args.testDir) + " does not exist")
+	if(args.many is None and (args.project is None or args.bug is None)):
+		sys.exit("Either a file with a list of bugs should be provided with the --many parameter, or a particular bug with the --project and --bug parameters")
+	if(not(args.tool is None)):
+		if(args.tool != "Randoop" and args.tool != "Evosuite"):	
+			sys.exit("tool should be Randoop or Evosuite")
+	if(not(args.seed is None) and (not (args.seed.isdigit()))):
+		sys.exit("Seed should be an integer")
+	if(not(args.coverage is None) and (not os.path.isfile(args.coverage))):
+		sys.exit("The file " + str(args.coverage) + " does not exist")
+	# TODO: line wrap this file at 80 characters or so	
 	bugs = []
 	if(args.many == None):
 		bugs.append(BugInfo(args.project, args.bug, args.wd, args.testDir))
