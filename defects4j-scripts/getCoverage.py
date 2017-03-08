@@ -63,21 +63,37 @@ def computeCoverage(listOfChangedLines, coverageFile):
 
 		methodsChanged = printMethodCorrespondingToLine(realLine.attrib['number'], e)
 
+
 	linesChanged=len(realLines)
 	percentageLinesCovered=linesCovered*100/linesChanged
-	print "Lines modified: " + str(linesChanged) 
-	print "Percentage of modified lines covered: " + str(percentageLinesCovered) + "%"
-	print "Methods changed and corresponding Line/Branch coverage: " + str(methodsChanged)
+	#print "Lines modified: " + str(linesChanged) 
+	#print "Percentage of modified lines covered: " + str(percentageLinesCovered) + "%"
+	#print "Methods changed and corresponding Line/Branch coverage: " + str(methodsChanged)
+
+	classLineCoverage=0
+	classConditionCoverage=0
+
+	for coverage in e.findall("coverage"):
+		classLineCoverage=coverage.attrib['line-rate']
+		classConditionCoverage=coverage.attrib['branch-rate']
+
+	classLineCoverage*=100
+	classConditionCoverage*=100
+	
+	ret = str(classLineCoverage) + "%," + str(classConditionCoverage) + "%," +  str(linesChanged) + "," + str(percentageLinesCovered)+"%,"
+	for m in methodsChanged:
+		ret = ret+str(m)+" " 
+	return ret
 
 def printMethodCorrespondingToLine(lineNum, tree):
 	methodsChanged=[]
-	for method in tree.findall(".//method"):]
+	for method in tree.findall(".//method"):
 		lines = method.find("lines")
 		for line in lines:
 			if(line.attrib['number'] == lineNum):
 				methodLineCov= float(method.attrib['line-rate'])*100
 				methodBranchCov=float(method.attrib['branch-rate'])*100
-				methodsChanged.append(method.attrib['name']+": Line:" + str(methodLineCov) + "%" + " Branch:" + str(methodBranchCov) + "%" )
+				methodsChanged.append(method.attrib['name']+":{Line:" + str(methodLineCov) + "%" + " Branch:" + str(methodBranchCov) + "%}" )
 	return methodsChanged
 
 def generateCovXML(bug, tool, seed):
@@ -150,6 +166,12 @@ def main():
 	if(not(args.coverage is None) and (not os.path.isfile(args.coverage))):
 		sys.exit("The file " + str(args.coverage) + " does not exist")
 	# TODO: line wrap this file at 80 characters or so	
+
+	#removes outputfile if exists
+	outputFile= str(d4jHome)+ str(args.wd) + "/coverageOfBugs.csv"
+	if(os.path.isfile(outputFile)):
+		os.remove(outputFile)
+	
 	bugs = []
 	if(args.many == None):
 		bugs.append(BugInfo(args.project, args.bug, args.wd, args.testDir))
@@ -160,6 +182,10 @@ def main():
 			generateCovXML(bug,args.tool, args.seed)
 		for f in getEditedFiles(bug):
 			listOfChangedLines = getADiff(f, bug)
-			computeCoverage(listOfChangedLines, bug.getFixPath()+"/coverage.xml")
-
+			allCoverageMetrics=computeCoverage(listOfChangedLines, bug.getFixPath()+"/coverage.xml")
+			#pipes the result to a csv file
+			cmd = "echo "+str(allCoverageMetrics)+ " >> "+ outputFile
+			p = subprocess.call(cmd, shell=True)#, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			
+	print "Results in "+outputFile
 main()
