@@ -33,25 +33,24 @@ class BugInfo(object):
 		return str(os.path.join(d4jHome, self.testSuitePath))
 	
 	def ensureVersionAreCheckedOut(self):
-		if(not os.path.exists(self.buggyFolder)):
-			self.checkout(self.buggyFolder, "b")
-		if(not os.path.exists(self.fixedFolder)):
-			self.checkout(self.fixedFolder, "f")
+		if(not os.path.exists(self.getBugPath())):
+			self.checkout(self.getBugPath(), "b")
+		if(not os.path.exists(self.getFixPath())):
+			self.checkout(self.getFixPath(), "f")
 
 	def checkout(self, folderToCheckout, vers):
-		cmd = defects4jCommand + " checkout -p " + self.project + " -v " + self.bugNum + vers + " -w " + d4jHome + "/" + folderToCheckout
+		cmd = defects4jCommand + " checkout -p " + self.project + " -v " + self.bugNum + vers + " -w " +folderToCheckout
 		p = subprocess.call(cmd, shell=True) #, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		
-def computeCoverage(args):
-	if(not (args.coverage is None)):
-		e = xml.etree.ElementTree.parse(args.coverage).getroot()
-		print e
-		lines = e.findall(".//line")
-		#linesWereLookingFor = [103, 105, 106]
-		realLines = [line for line in lines if int(line.attrib['number']) in linesWereLookingFor]
-		for realLine in realLines:
-			# check if covered
-			print realLine
+def computeCoverage(listOfChangedLines, coverageFile):
+#	if(not (args.coverage is None)):
+	e = xml.etree.ElementTree.parse(coverageFile).getroot()
+	#print e
+	lines = e.findall(".//line")
+	realLines = [line for line in lines if int(line.attrib['number']) in listOfChangedLines]
+	for realLine in realLines:
+		# check if covered
+		print realLine
 
 def generateCovXML(bug, tool):
 	if(tool == "Evosuite"):
@@ -109,10 +108,11 @@ def main():
 	# and make your argument description sentences shorter
 
 	bug = BugInfo(args.project, args.bugNum, args.buggyFolder, args.fixedFolder, args.testSuiteFolder)
-	generateCovXML(bug,args.genTool)
+	if(not os.path.exists(bug.getFixPath()+"/coverage.xml")):
+		generateCovXML(bug,args.genTool)
 	for f in getEditedFiles(bug):
 		listOfChangedLines = getADiff(bug.getBugPath(),bug.getFixPath(), f, bug)
-
+		computeCoverage(listOfChangedLines, bug.getFixPath()+"/coverage.xml")
 
 	if(not(args.file1 is None) and ( not (args.file2 is None))):
 		getADiff(args.file1, args.file2)
