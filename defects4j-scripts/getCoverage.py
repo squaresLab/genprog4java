@@ -9,11 +9,11 @@ d4jHome = os.environ['D4J_HOME']
 defects4jCommand = d4jHome + "/framework/bin/defects4j"
 
 class BugInfo(object):
-	def __init__(self, project, bugNum, buggyFolder, fixedFolder, testSuitePath):
+	def __init__(self, project, bugNum, wd, testSuitePath):
 		self.project = project
 		self.bugNum = bugNum
-		self.buggyFolder = buggyFolder
-		self.fixedFolder = fixedFolder
+		self.buggyFolder = wd + "/" + project.lower() + str(bugNum) + "Buggy"
+		self.fixedFolder = wd + "/" + project.lower() + str(bugNum) + "Buggy"
 		self.testSuitePath = testSuitePath
 		self.ensureVersionAreCheckedOut()
 
@@ -96,8 +96,7 @@ def generateCovXML(bug, tool, seed):
 def getEditedFiles(bug):
 	cmd = defects4jCommand + " export -p classes.modified"
 	p = subprocess.Popen(cmd, shell=True, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	realpaths = [ line.strip().replace(".", "/") + ".java" for line in p.stdout ]
-	return realpaths
+	return [ line.strip().replace(".", "/") + ".java" for line in p.stdout ]
 
 # assume that file1, file2 are java files
 def getADiff(buggyPath, fixedPath, pathToFile, bug):
@@ -120,9 +119,8 @@ def getOptions():
 	parser = argparse.ArgumentParser(description="This script checks if a test suite is covering the human changes")
 	parser.add_argument("project", help="the project in upper case (ex: Lang, Chart, Closure, Math, Time)")
 	parser.add_argument("bugNum", help="the bug number (ex: 1,2,3,4,...)")
-	parser.add_argument("buggyFolder", help="folder to check out buggy version of the bug")
-	parser.add_argument("fixedFolder", help="folder to check out fixed version of the bug")
-	parser.add_argument("testSuiteFolder", help="the path where the test suite is located, starting from the the D4J_HOME folder (Example: generatedTestSuites)")
+	parser.add_argument("wd", help="working directory to check out project versions")
+	parser.add_argument("--testSuiteFolder", help="the path where the test suite is located, starting from the the D4J_HOME folder (Example: generatedTestSuites)")
 	parser.add_argument("--genTool", help="the generation tool (Randoop or Evosuite)", default="Evosuite")
 	parser.add_argument("--seed", help="the seed the test suite was created with", default="1")
 	parser.add_argument("--coverage", help="a coverage file")
@@ -134,8 +132,8 @@ def main():
 	# TODO: insert error handling/sanity checking to be sure the appropriate environment variables are set and abort with an error/usage message if not
 	# TODO: line wrap this file at 80 characters or so
 
-	bug = BugInfo(args.project, args.bugNum, args.buggyFolder, args.fixedFolder, args.testSuiteFolder)
-	if((args.coverage == None) && (not os.path.exists(bug.getFixPath()+"/coverage.xml"))):
+	bug = BugInfo(args.project, args.bugNum, args.wd, args.testSuiteFolder)
+	if((args.coverage == None) and (not os.path.exists(bug.getFixPath()+"/coverage.xml"))):
 		generateCovXML(bug,args.genTool, args.seed)
 	for f in getEditedFiles(bug):
 		listOfChangedLines = getADiff(bug.getBugPath(),bug.getFixPath(), f, bug)
