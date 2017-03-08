@@ -32,8 +32,6 @@ class BugInfo(object):
 		cmd = defects4jCommand + " checkout -p " + self.project + " -v " + self.bugNum + vers + " -w " + d4jHome + "/" + folderToCheckout
 		p = subprocess.call(cmd, shell=True) #, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		
-
-
 def computeCoverage(args):
         numberOfLinesChanged=0
 	numberOfLinesCovered=0
@@ -49,7 +47,7 @@ def computeCoverage(args):
 			print realLine
 
 def generateCovXML(bug, tool):
-	cmd = defects4jCommand + " coverage -w " + bug.fixedPath() + " -s " +  bug.suitePath(tool) # note that suitepath doesn't exist yet
+	cmd = defects4jCommand + " coverage -w " + bug.getFixPath() + " -s " +  bug.suitePath(tool) # note that suitepath doesn't exist yet
 	subprocess.call(cmd, shell=True) # this doesn't save the log or do any kind of error checking (yet!)
 
 def getEditedFiles(bug):
@@ -63,7 +61,7 @@ def getEditedFiles(bug):
 def getADiff(buggyPath, fixedPath, pathToFile, bug):
 	cmd = defects4jCommand + " export -p dir.src.classes"
 	p = subprocess.Popen(cmd, shell=True, cwd=bug.getBugPath(), stdout=subprocess.PIPE)
-        for line in p.stdout:
+	for line in p.stdout:
 		pathToSource=line
 	#print pathToSource
 
@@ -71,19 +69,23 @@ def getADiff(buggyPath, fixedPath, pathToFile, bug):
         #print cmd
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         for line in p.stdout:
-		print line
+			diffLines = line
+
+	return diffLines.split()
+	
+
 
 def getOptions():
 	parser = argparse.ArgumentParser(description="This script checks if a test suite is covering the human changes")
-	parser.add_argument("project", help="1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)")
-	parser.add_argument("bugNum", help="2nd param is the bug number (ex: 1,2,3,4,...)")
+	parser.add_argument("project", help="the project in upper case (ex: Lang, Chart, Closure, Math, Time)")
+	parser.add_argument("bugNum", help="the bug number (ex: 1,2,3,4,...)")
 	parser.add_argument("buggyFolder", help="folder to check out buggy version of the bug")
-        parser.add_argument("fixedFolder", help="folder to check out fixed version of the bug")
-	parser.add_argument("--genTool", help="3th param is the generation tool (Randoop or Evosuite)", default="Randoop")
-	parser.add_argument("--testSuiteFolder", help="5th param is the path where the test suite is located, starting from the the D4J_HOME folder (Example: generatedTestSuites)")
+	parser.add_argument("fixedFolder", help="folder to check out fixed version of the bug")
+	#parser.add_argument("--genTool", help="3th param is the generation tool (Randoop or Evosuite)", default="Randoop")
+	parser.add_argument("--testSuiteFolder", help="the path where the test suite is located, starting from the the D4J_HOME folder (Example: generatedTestSuites)")
 	parser.add_argument("--coverage", help="a coverage file")
-        parser.add_argument("--file1", help="test parameter, first file to diff")
-        parser.add_argument("--file2", help="test parameter, second file to diff")
+	parser.add_argument("--file1", help="test parameter, first file to diff")
+	parser.add_argument("--file2", help="test parameter, second file to diff")
        
 	return parser.parse_args()
 
@@ -97,7 +99,7 @@ def main():
 	bug = BugInfo(args.project, args.bugNum, args.buggyFolder, args.fixedFolder)
 
         for f in getEditedFiles(bug):
-                getADiff(bug.getBugPath(),bug.getFixPath(), f, bug)
+                print getADiff(bug.getBugPath(),bug.getFixPath(), f, bug)
 
         if(not(args.file1 is None) and (not (args.file2 is None))):
                 getADiff(args.file1, args.file2)
