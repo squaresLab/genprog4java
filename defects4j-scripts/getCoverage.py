@@ -126,8 +126,6 @@ def getOptions():
 	parser.add_argument("--genTool", help="the generation tool (Randoop or Evosuite)", default="Evosuite")
 	parser.add_argument("--seed", help="the seed the test suite was created with", default="1")
 	parser.add_argument("--coverage", help="a coverage file")
-	parser.add_argument("--file1", help="test parameter, first file to diff")
-	parser.add_argument("--file2", help="test parameter, second file to diff")
 	return parser.parse_args()
 
 
@@ -135,17 +133,12 @@ def main():
 	args=getOptions()
 	# TODO: insert error handling/sanity checking to be sure the appropriate environment variables are set and abort with an error/usage message if not
 	# TODO: line wrap this file at 80 characters or so
-	# TODO: make argument description sentences shorter
 
 	bug = BugInfo(args.project, args.bugNum, args.buggyFolder, args.fixedFolder, args.testSuiteFolder)
-	if(not os.path.exists(bug.getFixPath()+"/coverage.xml")):
+	if((args.coverage == None) && (not os.path.exists(bug.getFixPath()+"/coverage.xml"))):
 		generateCovXML(bug,args.genTool, args.seed)
 	for f in getEditedFiles(bug):
 		listOfChangedLines = getADiff(bug.getBugPath(),bug.getFixPath(), f, bug)
 		computeCoverage(listOfChangedLines, bug.getFixPath()+"/coverage.xml")
-
-	if(not(args.file1 is None) and ( not (args.file2 is None))):
-		getADiff(args.file1, args.file2)
-	#print "the project you specified is: " + args.project
 
 main()
