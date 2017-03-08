@@ -47,17 +47,47 @@ def computeCoverage(listOfChangedLines, coverageFile):
 	e = xml.etree.ElementTree.parse(coverageFile).getroot()
 	#print e
 	lines = e.findall(".//line")
-	realLines = [line for line in lines if int(line.attrib['number']) in listOfChangedLines]
+	#print listOfChangedLines
+	realLines = []
+	lineNumbersCoveredAlready = []
+	for line in lines:
+		if(line.attrib['number'] in listOfChangedLines):
+			if(not (line.attrib['number'] in lineNumbersCoveredAlready)):
+				realLines.append(line)
+				lineNumbersCoveredAlready.append(line.attrib['number'])
+
+	linesCovered=0
 	for realLine in realLines:
 		# check if covered
-		print realLine
+		#print realLine.attrib['hits']
+		if(int(realLine.attrib['hits']) != 0):
+			linesCovered += 1
 
-def generateCovXML(bug, tool):
+		methodsChanged = printMethodCorrespondingToLine(realLine.attrib['number'], e)
+
+	linesChanged=len(realLines)
+	percentageLinesCovered=linesCovered*100/linesChanged
+	print "Lines modified: " + str(linesChanged) 
+	print "Percentage of lines covered: " + str(percentageLinesCovered) + "%"
+	print "Methods changed: " + str(methodsChanged)
+
+def printMethodCorrespondingToLine(lineNum, tree):
+	methodsChanged=[]
+	for method in tree.findall(".//method"):
+		#print method.attrib['name']
+		lines = method.find("lines")
+		for line in lines:
+			#print line.attrib['number']
+			#print lineNum
+			if((not(method.attrib['name'] in methodsChanged)) and (line.attrib['number'] == lineNum)):
+				methodsChanged.append(method.attrib['name'])
+	return methodsChanged
+
+def generateCovXML(bug, tool, seed):
 	if(tool == "Evosuite"):
 		testSuiteName="evosuite-branch"
 	elif(tool == "Randoop"):
 		testSuiteName="randoop"
-	seed=1
 	cmd = defects4jCommand + " coverage -w " + bug.getFixPath() + " -s " +  bug.getTestSuitePath()+bug.getProject()+"-"+bug.getBugNum()+"f-"+testSuiteName+"."+str(seed)+".tar.bz2"
 	subprocess.call(cmd, shell=True) # this doesn't save the log or do any kind of error checking (yet!)
 
@@ -71,7 +101,7 @@ def getEditedFiles(bug):
 # assume that file1, file2 are java files
 def getADiff(buggyPath, fixedPath, pathToFile, bug):
 	cmd = defects4jCommand + " export -p dir.src.classes"
-	p = subprocess.Popen(cmd, shell=True, cwd=bug.getBugPath(), stdout=subprocess.PIPE)
+	p = subprocess.Popen(cmd, shell=True, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	for line in p.stdout:
 		pathToSource=line
 	#print pathToSource
@@ -81,7 +111,7 @@ def getADiff(buggyPath, fixedPath, pathToFile, bug):
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         for line in p.stdout:
 			diffLines = line
-
+	#print "Diff lines: "+diffLines
 	return diffLines.split()
 	
 
@@ -93,10 +123,12 @@ def getOptions():
 	parser.add_argument("buggyFolder", help="folder to check out buggy version of the bug")
 	parser.add_argument("fixedFolder", help="folder to check out fixed version of the bug")
 	parser.add_argument("testSuiteFolder", help="the path where the test suite is located, starting from the the D4J_HOME folder (Example: generatedTestSuites)")
-	parser.add_argument("--genTool", help="3th param is the generation tool (Randoop or Evosuite)", default="Evosuite")
+	parser.add_argument("--genTool", help="the generation tool (Randoop or Evosuite)", default="Evosuite")
+	parser.add_argument("--seed", help="the seed the test suite was created with", default="1")
 	parser.add_argument("--coverage", help="a coverage file")
 	parser.add_argument("--file1", help="test parameter, first file to diff")
 	parser.add_argument("--file2", help="test parameter, second file to diff")
+
  
 	return parser.parse_args()
 
@@ -109,7 +141,7 @@ def main():
 
 	bug = BugInfo(args.project, args.bugNum, args.buggyFolder, args.fixedFolder, args.testSuiteFolder)
 	if(not os.path.exists(bug.getFixPath()+"/coverage.xml")):
-		generateCovXML(bug,args.genTool)
+		generateCovXML(bug,args.genTool, args.seed)
 	for f in getEditedFiles(bug):
 		listOfChangedLines = getADiff(bug.getBugPath(),bug.getFixPath(), f, bug)
 		computeCoverage(listOfChangedLines, bug.getFixPath()+"/coverage.xml")
