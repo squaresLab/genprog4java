@@ -60,9 +60,15 @@ def getEditedFiles(bug):
 	return realpaths
 
 # assume that file1, file2 are java files
-def getADiff(file1, file2):
-        cmd = "diff  --unchanged-line-format=\"\"  --old-line-format=\"%dn \" --new-line-format=\"%dn \" " + file1 +" " + file2
-        print cmd
+def getADiff(buggyPath, fixedPath, pathToFile, bug):
+	cmd = defects4jCommand + " export -p dir.src.classes"
+	p = subprocess.Popen(cmd, shell=True, cwd=bug.getBugPath(), stdout=subprocess.PIPE)
+        for line in p.stdout:
+		pathToSource=line
+	#print pathToSource
+
+        cmd = "diff --unchanged-line-format=\"\"  --old-line-format=\"%dn \" --new-line-format=\"%dn \" " + buggyPath+"/"+pathToSource+"/"+pathToFile +" " + fixedPath+"/"+pathToSource+"/"+pathToFile
+        #print cmd
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         for line in p.stdout:
 		print line
@@ -91,12 +97,10 @@ def main():
 	bug = BugInfo(args.project, args.bugNum, args.buggyFolder, args.fixedFolder)
 
         for f in getEditedFiles(bug):
-                bugVersion = bug.getBugPath() + "/" + f
-                fixedVersion = bug.getFixPath() + "/" + f
-                getADiff(bugVersion,fixedVersion)
+                getADiff(bug.getBugPath(),bug.getFixPath(), f, bug)
 
         if(not(args.file1 is None) and (not (args.file2 is None))):
                 getADiff(args.file1, args.file2)
-	print "the project you specified is: " + args.project
+	#print "the project you specified is: " + args.project
 
 main()
