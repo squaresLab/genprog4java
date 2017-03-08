@@ -46,9 +46,7 @@ class BugInfo(object):
 def computeCoverage(listOfChangedLines, coverageFile):
 #	if(not (args.coverage is None)):
 	e = xml.etree.ElementTree.parse(coverageFile).getroot()
-	#print e
 	lines = e.findall(".//line")
-	#print listOfChangedLines
 	realLines = []
 	lineNumbersCoveredAlready = []
 	for line in lines:
@@ -60,7 +58,6 @@ def computeCoverage(listOfChangedLines, coverageFile):
 	linesCovered=0
 	for realLine in realLines:
 		# check if covered
-		#print realLine.attrib['hits']
 		if(int(realLine.attrib['hits']) != 0):
 			linesCovered += 1
 
@@ -74,12 +71,9 @@ def computeCoverage(listOfChangedLines, coverageFile):
 
 def printMethodCorrespondingToLine(lineNum, tree):
 	methodsChanged=[]
-	for method in tree.findall(".//method"):
-		#print method.attrib['name']
+	for method in tree.findall(".//method"):]
 		lines = method.find("lines")
 		for line in lines:
-			#print line.attrib['number']
-			#print lineNum
 			if(line.attrib['number'] == lineNum):
 				methodLineCov= float(method.attrib['line-rate'])*100
 				methodBranchCov=float(method.attrib['branch-rate'])*100
@@ -102,27 +96,23 @@ def getEditedFiles(bug):
 	p = subprocess.Popen(cmd, shell=True, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	return [ line.strip().replace(".", "/") + ".java" for line in p.stdout ]
 
-# assume that file1, file2 are java files
-def getADiff(buggyPath, fixedPath, pathToFile, bug):
+
+def getADiff(pathToFile, bug):
 	cmd = defects4jCommand + " export -p dir.src.classes"
 	p = subprocess.Popen(cmd, shell=True, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	for line in p.stdout:
 		pathToSource=line
-	#print pathToSource
 
-        cmd = "diff --unchanged-line-format=\"\"  --old-line-format=\"%dn \" --new-line-format=\"%dn \" " + buggyPath+"/"+pathToSource+"/"+pathToFile +" " + fixedPath+"/"+pathToSource+"/"+pathToFile
-#        print cmd
+        cmd = "diff --unchanged-line-format=\"\"  --old-line-format=\"%dn \" --new-line-format=\"%dn \" " + bug.getBugPath()+"/"+pathToSource+"/"+pathToFile +" " + bug.getFixPath()+"/"+pathToSource+"/"+pathToFile
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         for line in p.stdout:
-#			print "Line: " + line
 			diffLines = line
-#	print "Diff lines: "+diffLines
 	return diffLines.split()
 	
 
 def getOptions():
-	parser = argparse.ArgumentParser(description="This script checks if a test suite is covering the human changes")
-	parser.add_argument("wd", help="working directory to check out project versions")
+	parser = argparse.ArgumentParser(description="This script checks if a test suite is covering the human changes. Example of usage: python getCoverage.py ExamplesCheckedOut generatedTestSuites/Evosuite30MinsPAR/testSuites/ --project Closure --bug 38")
+	parser.add_argument("wd", help="working directory to check out project versions, starting from the the D4J_HOME folder")
 	parser.add_argument("testDir", help="the path where the test suite is located, starting from the the D4J_HOME folder (Example: generatedTestSuites)")
 	parser.add_argument("--project", help="the project in upper case (ex: Lang, Chart, Closure, Math, Time)")
 	parser.add_argument("--bug", help="the bug number (ex: 1,2,3,4,...)")
@@ -146,9 +136,9 @@ def main():
 	args=getOptions()
 	if(os.environ['D4J_HOME'] is None):
 		sys.exit("Environment variable D4J_HOME is not set")
-	if(not os.path.isdir(args.wd)):
+	if(not os.path.isdir(os.path.join(d4jHome, args.wd))):
 		sys.exit("The folder " + str(args.wd) + " does not exist")
-	if(not os.path.isdir(args.testDir)):
+	if(not os.path.isdir(os.path.join(d4jHome, args.testDir))):
 		sys.exit("The folder " + str(args.testDir) + " does not exist")
 	if(args.many is None and (args.project is None or args.bug is None)):
 		sys.exit("Either a file with a list of bugs should be provided with the --many parameter, or a particular bug with the --project and --bug parameters")
@@ -169,7 +159,7 @@ def main():
 		if((args.coverage == None) and (not os.path.exists(bug.getFixPath()+"/coverage.xml"))):
 			generateCovXML(bug,args.tool, args.seed)
 		for f in getEditedFiles(bug):
-			listOfChangedLines = getADiff(bug.getBugPath(),bug.getFixPath(), f, bug)
+			listOfChangedLines = getADiff(f, bug)
 			computeCoverage(listOfChangedLines, bug.getFixPath()+"/coverage.xml")
 
 main()
