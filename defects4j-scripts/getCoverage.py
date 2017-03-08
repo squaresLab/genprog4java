@@ -68,8 +68,8 @@ def computeCoverage(listOfChangedLines, coverageFile):
 	linesChanged=len(realLines)
 	percentageLinesCovered=linesCovered*100/linesChanged
 	print "Lines modified: " + str(linesChanged) 
-	print "Percentage of lines covered: " + str(percentageLinesCovered) + "%"
-	print "Methods changed: " + str(methodsChanged)
+	print "Percentage of modified lines covered: " + str(percentageLinesCovered) + "%"
+	print "Methods changed and corresponding Line/Branch coverage: " + str(methodsChanged)
 
 def printMethodCorrespondingToLine(lineNum, tree):
 	methodsChanged=[]
@@ -79,8 +79,10 @@ def printMethodCorrespondingToLine(lineNum, tree):
 		for line in lines:
 			#print line.attrib['number']
 			#print lineNum
-			if((not(method.attrib['name'] in methodsChanged)) and (line.attrib['number'] == lineNum)):
-				methodsChanged.append(method.attrib['name'])
+			if(line.attrib['number'] == lineNum):
+				methodLineCov= float(method.attrib['line-rate'])*100
+				methodBranchCov=float(method.attrib['branch-rate'])*100
+				methodsChanged.append(method.attrib['name']+": Line:" + str(methodLineCov) + "%" + " Branch:" + str(methodBranchCov) + "%" )
 	return methodsChanged
 
 def generateCovXML(bug, tool, seed):
