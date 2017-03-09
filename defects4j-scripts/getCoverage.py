@@ -16,7 +16,7 @@ class BugInfo(object):
 		self.buggyFolder = wd + "/" + project.lower() + str(bugNum) + "Buggy"
 		self.fixedFolder = wd + "/" + project.lower() + str(bugNum) + "Fixed"
 		self.testDir = testDir
-		self.ensureVersionAreCheckedOut()
+		
 
 	def getProject(self):
 		return str(self.project)
@@ -32,16 +32,23 @@ class BugInfo(object):
 
 	def getTestDir(self):
 		return str(os.path.join(d4jHome, self.testDir))
-	
-	def ensureVersionAreCheckedOut(self):
-		if(not os.path.exists(self.getBugPath())):
-			self.checkout(self.getBugPath(), "b")
-		if(not os.path.exists(self.getFixPath())):
-			self.checkout(self.getFixPath(), "f")
 
-	def checkout(self, folderToCheckout, vers):
-		cmd = defects4jCommand + " checkout -p " + self.project + " -v " + self.bugNum + vers + " -w " +folderToCheckout
-		p = subprocess.call(cmd, shell=True) #, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	def getSrcPath(self):
+		return str(self.srcPath)
+
+	#this needs to be called after the buggy folder has been checked out
+	def setScrPath(self):
+		cmd = defects4jCommand + " export -p dir.src.classes"
+		p = subprocess.Popen(cmd, shell=True, cwd=self.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		for i in p.stdout:
+			self.srcPath = i
+
+	def setPatch(self,patch):
+		self.patch=patch #this is the path from d4jHome + the patch name
+
+	def getPatch(self):
+		return str(os.path.join(d4jHome,"/"+self.patch))
+	
 		
 def computeCoverage(listOfChangedLines, coverageFile):
 #	if(not (args.coverage is None)):
@@ -114,29 +121,12 @@ def getEditedFiles(bug):
 
 
 def getADiff(pathToFile, bug):
-	cmd = defects4jCommand + " export -p dir.src.classes"
-	p = subprocess.Popen(cmd, shell=True, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	pathToSource=bug.getSrcPath()
+	cmd = "diff --unchanged-line-format=\"\"  --old-line-format=\"%dn \" --new-line-format=\"%dn \" " + bug.getBugPath()+"/"+pathToSource+"/"+pathToFile +" " + bug.getFixPath()+"/"+pathToSource+"/"+pathToFile
+	p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 	for line in p.stdout:
-		pathToSource=line
-
-        cmd = "diff --unchanged-line-format=\"\"  --old-line-format=\"%dn \" --new-line-format=\"%dn \" " + bug.getBugPath()+"/"+pathToSource+"/"+pathToFile +" " + bug.getFixPath()+"/"+pathToSource+"/"+pathToFile
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        for line in p.stdout:
-			diffLines = line
+		diffLines = line
 	return diffLines.split()
-	
-
-def getOptions():
-	parser = argparse.ArgumentParser(description="This script checks if a test suite is covering the human changes. Example of usage: python getCoverage.py ExamplesCheckedOut generatedTestSuites/Evosuite30MinsPAR/testSuites/ --project Closure --bug 38")
-	parser.add_argument("wd", help="working directory to check out project versions, starting from the the D4J_HOME folder")
-	parser.add_argument("testDir", help="the path where the test suite is located, starting from the the D4J_HOME folder (Example: generatedTestSuites)")
-	parser.add_argument("--project", help="the project in upper case (ex: Lang, Chart, Closure, Math, Time)")
-	parser.add_argument("--bug", help="the bug number (ex: 1,2,3,4,...)")
-	parser.add_argument("--many", help="file listing bugs to process: project,bugNum (one per line). Lines starting with # are skipped")
-	parser.add_argument("--tool", help="the generation tool (Randoop or Evosuite)", default="Evosuite")
-	parser.add_argument("--seed", help="the seed the test suite was created with", default="1")
-	parser.add_argument("--coverage", help="a coverage file")
-	return parser.parse_args()
 
 #args.many is assumed to be not None
 def getAllBugs(bugs,args):
@@ -148,21 +138,78 @@ def getAllBugs(bugs,args):
 			for pair in pairs:
 				bug = BugInfo(pair[0], int(pair[1]), args.wd, args.testDir)
 				bugs.append(bug)
+
+def getBugsFromPatchNames(bugs,args):
+	cmd = "ls -d *.diff"
+	p = subprocess.Popen(cmd, shell=True, cwd=d4jHome+args.patches, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	for line in p.stdout:
+		defect=line.split('_')[0]
+		bug=int(filter(str.isdigit, defect))
+		project=str(filter(str.isalpha, defect)).title()
+		bug = BugInfo(project, int(bug), args.wd, args.testDir)
+		bug.setPatch(args.patches+"/"+line)
+		bugs.append(bug)
+
+def patchFixedFile(bug):
+	pathToSource=bug.getSrcPath()
+
+	if(not os.path.exists(bug.getFixPath())):
+		os.remove(bug.getFixPath())
+	checkout(bug.getFixPath(),bug.getProject(), bug.getBugNum(), "b")
+		
+	whereToCallPatch=str(bug.getFixPath())+"/"+str(pathToSource)
+	cmd ="patch -p10 -i "+d4jHome+"/"+bug.getPatch()
+	p = subprocess.Popen(cmd, shell=True, cwd=whereToCallPatch, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+
+def ensureVersionAreCheckedOut(bug):
+	if(not os.path.exists(bug.getBugPath())):
+		checkout(bug.getBugPath(), bug.getProject(), bug.getBugNum(), "b")
+	if(not os.path.exists(bug.getFixPath())):
+		checkout(bug.getFixPath(), bug.getProject(), bug.getBugNum(), "f")
+
+def checkout(folderToCheckout, project, bugNum, vers):
+	cmd = defects4jCommand + " checkout -p " + str(project) + " -v " + str(bugNum) + str(vers) + " -w " + str(folderToCheckout)
+	p = subprocess.call(cmd, shell=True) #, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	
+
+def getOptions():
+	parser = argparse.ArgumentParser(description="This script checks if a test suite is covering the human changes. Example of usage: python getCoverage.py ExamplesCheckedOut generatedTestSuites/Evosuite30MinsPAR/testSuites/ --project Closure --bug 38")
+	parser.add_argument("wd", help="working directory to check out project versions, starting from the the D4J_HOME folder")
+	parser.add_argument("testDir", help="the path where the test suite is located, starting from the the D4J_HOME folder (Example: generatedTestSuites)")
+	parser.add_argument("--project", help="the project in upper case (ex: Lang, Chart, Closure, Math, Time)")
+	parser.add_argument("--bug", help="the bug number (ex: 1,2,3,4,...)")
+	parser.add_argument("--many", help="file listing bugs to process: project,bugNum (one per line). Lines starting with # are skipped")
+	parser.add_argument("--patches", help="the folder where the patches are located, starting from the the D4J_HOME folder")
+	parser.add_argument("--tool", help="the generation tool (Randoop or Evosuite)", default="Evosuite")
+	parser.add_argument("--seed", help="the seed the test suite was created with", default="1")
+	parser.add_argument("--coverage", help="a coverage file")
+	return parser.parse_args()
+
+
 def main():
 	args=getOptions()
 	if(os.environ['D4J_HOME'] is None):
 		sys.exit("Environment variable D4J_HOME is not set")
 	if(not os.path.isdir(os.path.join(d4jHome, args.wd))):
-		sys.exit("The folder " + str(args.wd) + " does not exist")
+		sys.exit("The folder " + str(os.path.join(d4jHome, args.wd)) + " does not exist")
 	if(not os.path.isdir(os.path.join(d4jHome, args.testDir))):
-		sys.exit("The folder " + str(args.testDir) + " does not exist")
-	if(args.many is None and (args.project is None or args.bug is None)):
-		sys.exit("Either a file with a list of bugs should be provided with the --many parameter, or a particular bug with the --project and --bug parameters")
+		sys.exit("The folder " + str(os.path.join(d4jHome, args.testDir)) + " does not exist")
+	if(not(args.many is None) and ((not(args.project is None) or not(args.bug is None) or not(args.patch is None)))):
+		sys.exit("There should be just one of these three options: 1) A file with a list of bugs should be provided with the --many parameter, 2) a particular bug with the --project and --bug parameters, 3) A location with patches with the --patches parameter")
+	if(not(args.patches is None) and ((not(args.project is None) or not(args.bug is None) or not(args.many is None)))):
+		sys.exit("There should be just one of these three options: 1) A file with a list of bugs should be provided with the --many parameter, 2) a particular bug with the --project and --bug parameters, 3) A location with patches with the --patches parameter")
+	if((not(args.project is None) and not(args.bug is None)) and (not(args.patches is None)  or not(args.many is None))):
+		sys.exit("There should be just one of these three options: 1) A file with a list of bugs should be provided with the --many parameter, 2) a particular bug with the --project and --bug parameters, 3) A location with patches with the --patches parameter")
+	if(args.project is None and args.bug is None and args.patches is None and args.many is None):
+		sys.exit("There should be one of these three options: 1) A file with a list of bugs should be provided with the --many parameter, 2) a particular bug with the --project and --bug parameters, 3) A location with patches with the --patches parameter")
 	if(not(args.tool is None)):
 		if(args.tool != "Randoop" and args.tool != "Evosuite"):	
 			sys.exit("tool should be Randoop or Evosuite")
 	if(not(args.seed is None) and (not (args.seed.isdigit()))):
 		sys.exit("Seed should be an integer")
+	if(not(args.patches is None) and (not os.path.isdir(os.path.join(d4jHome, args.patches)))):
+		sys.exit("The folder " + str(os.path.join(d4jHome, args.patches)) + " does not exist")
 	if(not(args.coverage is None) and (not os.path.isfile(args.coverage))):
 		sys.exit("The file " + str(args.coverage) + " does not exist")
 	# TODO: line wrap this file at 80 characters or so	
@@ -172,12 +219,20 @@ def main():
 	if(os.path.isfile(outputFile)):
 		os.remove(outputFile)
 	
+	#fill bug list
 	bugs = []
-	if(args.many == None):
+	if(not(args.project is None)):
 		bugs.append(BugInfo(args.project, args.bug, args.wd, args.testDir))
-	else:
+	elif(not(args.many is None)):
 		getAllBugs(bugs, args)
+	elif(not(args.patches is None)):
+		getBugsFromPatchNames(bugs,args)
+
 	for bug in bugs:
+		ensureVersionAreCheckedOut(bug)
+		bug.setScrPath()
+		if not args.patches is None:
+			patchFixedFile(bug)
 		if((args.coverage == None) and (not os.path.exists(bug.getFixPath()+"/coverage.xml"))):
 			generateCovXML(bug,args.tool, args.seed)
 		for f in getEditedFiles(bug):
