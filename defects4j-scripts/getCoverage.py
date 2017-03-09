@@ -76,9 +76,6 @@ def computeCoverage(listOfChangedLines, coverageFile):
 	percentageLinesCovered=round(linesCovered*100/linesChanged,2)
 	
 	#Class coverage
-	classLineCoverage=99999
-	classConditionCoverage=99999
-
 	classLineCoverage=round(float(e.attrib['line-rate'])*100,2)
 	classConditionCoverage=round(float(e.attrib['branch-rate'])*100,2)
 	
