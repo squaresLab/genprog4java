@@ -5,6 +5,7 @@ import os
 import xml.etree.ElementTree
 import subprocess
 import sys
+import shutil
 
 d4jHome = os.environ['D4J_HOME']
 defects4jCommand = d4jHome + "/framework/bin/defects4j"
@@ -44,7 +45,7 @@ class BugInfo(object):
 			self.srcPath = i
 
 	def setPatch(self,patch):
-		self.patch=patch #this is the path from d4jHome + the patch name
+		self.patch=patch #this is the path from d4jHome + where it is + the patch name
 
 	def getPatch(self):
 		return str(os.path.join(d4jHome,"/"+self.patch))
@@ -111,7 +112,7 @@ def generateCovXML(bug, tool, seed):
 	suitePath =  os.path.join(bug.getTestDir(), bug.getProject()+"-"+bug.getBugNum()+"f-"+testSuiteName+"."+str(seed)+".tar.bz2")
 	if(os.path.isfile(suitePath)):
 		cmd = defects4jCommand + " coverage -w " + bug.getFixPath() + " -s " + str(suitePath)
-		subprocess.call(cmd, shell=True) # this doesn't save the log or do any kind of error checking (yet!)
+		subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
 	else:
 		sys.exit("The script did not find a test suite: " + str(suitePath))
 def getEditedFiles(bug):
@@ -123,7 +124,7 @@ def getEditedFiles(bug):
 def getADiff(pathToFile, bug):
 	pathToSource=bug.getSrcPath()
 	cmd = "diff --unchanged-line-format=\"\"  --old-line-format=\"%dn \" --new-line-format=\"%dn \" " + bug.getBugPath()+"/"+pathToSource+"/"+pathToFile +" " + bug.getFixPath()+"/"+pathToSource+"/"+pathToFile
-	p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+	p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	for line in p.stdout:
 		diffLines = line
 	return diffLines.split()
@@ -153,10 +154,11 @@ def getBugsFromPatchNames(bugs,args):
 def patchFixedFile(bug):
 	pathToSource=bug.getSrcPath()
 
-	if(not os.path.exists(bug.getFixPath())):
-		os.remove(bug.getFixPath())
+	#Removing the fixed file
+	shutil.rmtree(bug.getFixPath())
 	checkout(bug.getFixPath(),bug.getProject(), bug.getBugNum(), "b")
 		
+	#Patching the fixed file
 	whereToCallPatch=str(bug.getFixPath())+"/"+str(pathToSource)
 	cmd ="patch -p10 -i "+d4jHome+"/"+bug.getPatch()
 	p = subprocess.Popen(cmd, shell=True, cwd=whereToCallPatch, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -170,7 +172,7 @@ def ensureVersionAreCheckedOut(bug):
 
 def checkout(folderToCheckout, project, bugNum, vers):
 	cmd = defects4jCommand + " checkout -p " + str(project) + " -v " + str(bugNum) + str(vers) + " -w " + str(folderToCheckout)
-	p = subprocess.call(cmd, shell=True) #, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	p = subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	
 
 def getOptions():
@@ -229,18 +231,31 @@ def main():
 		getBugsFromPatchNames(bugs,args)
 
 	for bug in bugs:
+		print "Defect: "+bug.project + " " + str(bug.bugNum)
 		ensureVersionAreCheckedOut(bug)
 		bug.setScrPath()
+
+		#if we are doing the patches flag, patch the fixed version
 		if not args.patches is None:
 			patchFixedFile(bug)
+
+		#creating xml file
 		if((args.coverage == None) and (not os.path.exists(bug.getFixPath()+"/coverage.xml"))):
 			generateCovXML(bug,args.tool, args.seed)
+		if not os.path.exists(bug.getFixPath()+"/coverage.xml"):
+			sys.exit("There is no coverage file in "+bug.getFixPath()+"/coverage.xml")
+		
 		for f in getEditedFiles(bug):
+			print "Working on file "+f
 			listOfChangedLines = getADiff(f, bug)
 			allCoverageMetrics=computeCoverage(listOfChangedLines, bug.getFixPath()+"/coverage.xml")
 			#pipes the result to a csv file
+			if not args.patches is None:
+				patchName=str(bug.getPatch().split('/')[-1].strip())
+				allCoverageMetrics=patchName+","+allCoverageMetrics
+				print allCoverageMetrics
 			cmd = "echo "+str(allCoverageMetrics)+ " >> "+ outputFile
 			p = subprocess.call(cmd, shell=True)#, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-			
+			print ""
 	print "Results in "+outputFile
 main()
