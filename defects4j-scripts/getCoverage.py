@@ -73,20 +73,14 @@ def computeCoverage(listOfChangedLines, coverageFile):
 
 
 	linesChanged=len(realLines)
-	percentageLinesCovered=linesCovered*100/linesChanged
-	#print "Lines modified: " + str(linesChanged) 
-	#print "Percentage of modified lines covered: " + str(percentageLinesCovered) + "%"
-	#print "Methods changed and corresponding Line/Branch coverage: " + str(methodsChanged)
+	percentageLinesCovered=round(linesCovered*100/linesChanged,2)
+	
+	#Class coverage
+	classLineCoverage=99999
+	classConditionCoverage=99999
 
-	classLineCoverage=0
-	classConditionCoverage=0
-
-	for coverage in e.findall("coverage"):
-		classLineCoverage=coverage.attrib['line-rate']
-		classConditionCoverage=coverage.attrib['branch-rate']
-
-	classLineCoverage*=100
-	classConditionCoverage*=100
+	classLineCoverage=round(float(e.attrib['line-rate'])*100,2)
+	classConditionCoverage=round(float(e.attrib['branch-rate'])*100,2)
 	
 	ret = str(classLineCoverage) + "%," + str(classConditionCoverage) + "%," +  str(linesChanged) + "," + str(percentageLinesCovered)+"%,"
 	for m in methodsChanged:
@@ -99,8 +93,8 @@ def printMethodCorrespondingToLine(lineNum, tree):
 		lines = method.find("lines")
 		for line in lines:
 			if(line.attrib['number'] == lineNum):
-				methodLineCov= float(method.attrib['line-rate'])*100
-				methodBranchCov=float(method.attrib['branch-rate'])*100
+				methodLineCov= round(float(method.attrib['line-rate'])*100,2)
+				methodBranchCov=round(float(method.attrib['branch-rate'])*100,2)
 				methodsChanged.append(method.attrib['name']+":{Line:" + str(methodLineCov) + "%" + " Branch:" + str(methodBranchCov) + "%}" )
 	return methodsChanged
 
@@ -112,7 +106,7 @@ def generateCovXML(bug, tool, seed):
 	suitePath =  os.path.join(bug.getTestDir(), bug.getProject()+"-"+bug.getBugNum()+"f-"+testSuiteName+"."+str(seed)+".tar.bz2")
 	if(os.path.isfile(suitePath)):
 		cmd = defects4jCommand + " coverage -w " + bug.getFixPath() + " -s " + str(suitePath)
-		subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
+		subprocess.call(cmd, shell=True)#, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
 	else:
 		sys.exit("The script did not find a test suite: " + str(suitePath))
 def getEditedFiles(bug):
@@ -125,6 +119,7 @@ def getADiff(pathToFile, bug):
 	pathToSource=bug.getSrcPath()
 	cmd = "diff --unchanged-line-format=\"\"  --old-line-format=\"%dn \" --new-line-format=\"%dn \" " + bug.getBugPath()+"/"+pathToSource+"/"+pathToFile +" " + bug.getFixPath()+"/"+pathToSource+"/"+pathToFile
 	p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	diffLines=""
 	for line in p.stdout:
 		diffLines = line
 	return diffLines.split()
@@ -136,6 +131,8 @@ def getAllBugs(bugs,args):
 	else:
 		with open(args.many) as f:
 			pairs = [x.strip().split(',') for x in f.readlines() if x[0] != '#']
+			if pairs is None:
+				sys.exit("There has been a problem reading the file with the bugs")
 			for pair in pairs:
 				bug = BugInfo(pair[0], int(pair[1]), args.wd, args.testDir)
 				bugs.append(bug)
@@ -165,15 +162,17 @@ def patchFixedFile(bug):
 
 
 def ensureVersionAreCheckedOut(bug):
+	#Remove and re clone versions
 	if(not os.path.exists(bug.getBugPath())):
-		checkout(bug.getBugPath(), bug.getProject(), bug.getBugNum(), "b")
+		shutil.rmtree(bug.getBugPath())
+	checkout(bug.getBugPath(), bug.getProject(), bug.getBugNum(), "b")
 	if(not os.path.exists(bug.getFixPath())):
-		checkout(bug.getFixPath(), bug.getProject(), bug.getBugNum(), "f")
+		shutil.rmtree(bug.getFixPath())
+	checkout(bug.getFixPath(), bug.getProject(), bug.getBugNum(), "f")
 
 def checkout(folderToCheckout, project, bugNum, vers):
 	cmd = defects4jCommand + " checkout -p " + str(project) + " -v " + str(bugNum) + str(vers) + " -w " + str(folderToCheckout)
 	p = subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	
 
 def getOptions():
 	parser = argparse.ArgumentParser(description="This script checks if a test suite is covering the human changes. Example of usage: python getCoverage.py ExamplesCheckedOut generatedTestSuites/Evosuite30MinsPAR/testSuites/ --project Closure --bug 38")
@@ -181,39 +180,44 @@ def getOptions():
 	parser.add_argument("testDir", help="the path where the test suite is located, starting from the the D4J_HOME folder (Example: generatedTestSuites)")
 	parser.add_argument("--project", help="the project in upper case (ex: Lang, Chart, Closure, Math, Time)")
 	parser.add_argument("--bug", help="the bug number (ex: 1,2,3,4,...)")
-	parser.add_argument("--many", help="file listing bugs to process: project,bugNum (one per line). Lines starting with # are skipped")
+	parser.add_argument("--many", help="Absolute path, the file listing bugs to process: project,bugNum (one per line). Lines starting with # are skipped")
 	parser.add_argument("--patches", help="the folder where the patches are located, starting from the the D4J_HOME folder")
 	parser.add_argument("--tool", help="the generation tool (Randoop or Evosuite)", default="Evosuite")
 	parser.add_argument("--seed", help="the seed the test suite was created with", default="1")
 	parser.add_argument("--coverage", help="a coverage file")
 	return parser.parse_args()
 
+def errorHandling(args):
+	if os.environ['D4J_HOME'] is None:
+		sys.exit("Environment variable D4J_HOME is not set")
+	if not os.path.isdir(os.path.join(d4jHome, args.wd)):
+		sys.exit("The folder " + str(os.path.join(d4jHome, args.wd)) + " does not exist")
+	if not os.path.isdir(os.path.join(d4jHome, args.testDir)):
+		sys.exit("The folder " + str(os.path.join(d4jHome, args.testDir)) + " does not exist")
+	if not(args.many is None) and not os.path.exists(args.many):
+		sys.exit("The file " + str(args.many) + " does not exist")
+	if not(args.many is None) and (not(args.project is None) or not(args.bug is None) or not(args.patches is None)):
+		sys.exit("There should be just one of these three options: 1) A file with a list of bugs should be provided with the --many parameter, 2) a particular bug with the --project and --bug parameters, 3) A location with patches with the --patches parameter")
+	if not(args.patches is None) and (not(args.project is None) or not(args.bug is None) or not(args.many is None)):
+		sys.exit("There should be just one of these three options: 1) A file with a list of bugs should be provided with the --many parameter, 2) a particular bug with the --project and --bug parameters, 3) A location with patches with the --patches parameter")
+	if (not(args.project is None) and not(args.bug is None)) and (not(args.patches is None)  or not(args.many is None)):
+		sys.exit("There should be just one of these three options: 1) A file with a list of bugs should be provided with the --many parameter, 2) a particular bug with the --project and --bug parameters, 3) A location with patches with the --patches parameter")
+	if args.project is None and args.bug is None and args.patches is None and args.many is None:
+		sys.exit("There should be one of these three options: 1) A file with a list of bugs should be provided with the --many parameter, 2) a particular bug with the --project and --bug parameters, 3) A location with patches with the --patches parameter")
+	if not(args.tool is None):
+		if args.tool != "Randoop" and args.tool != "Evosuite":	
+			sys.exit("tool should be Randoop or Evosuite")
+	if not(args.seed is None) and (not (args.seed.isdigit())):
+		sys.exit("Seed should be an integer")
+	if not(args.patches is None) and (not os.path.isdir(os.path.join(d4jHome, args.patches))):
+		sys.exit("The folder " + str(os.path.join(d4jHome, args.patches)) + " does not exist")
+	if not(args.coverage is None) and (not os.path.isfile(args.coverage)):
+		sys.exit("The file " + str(args.coverage) + " does not exist")
+
 
 def main():
 	args=getOptions()
-	if(os.environ['D4J_HOME'] is None):
-		sys.exit("Environment variable D4J_HOME is not set")
-	if(not os.path.isdir(os.path.join(d4jHome, args.wd))):
-		sys.exit("The folder " + str(os.path.join(d4jHome, args.wd)) + " does not exist")
-	if(not os.path.isdir(os.path.join(d4jHome, args.testDir))):
-		sys.exit("The folder " + str(os.path.join(d4jHome, args.testDir)) + " does not exist")
-	if(not(args.many is None) and ((not(args.project is None) or not(args.bug is None) or not(args.patch is None)))):
-		sys.exit("There should be just one of these three options: 1) A file with a list of bugs should be provided with the --many parameter, 2) a particular bug with the --project and --bug parameters, 3) A location with patches with the --patches parameter")
-	if(not(args.patches is None) and ((not(args.project is None) or not(args.bug is None) or not(args.many is None)))):
-		sys.exit("There should be just one of these three options: 1) A file with a list of bugs should be provided with the --many parameter, 2) a particular bug with the --project and --bug parameters, 3) A location with patches with the --patches parameter")
-	if((not(args.project is None) and not(args.bug is None)) and (not(args.patches is None)  or not(args.many is None))):
-		sys.exit("There should be just one of these three options: 1) A file with a list of bugs should be provided with the --many parameter, 2) a particular bug with the --project and --bug parameters, 3) A location with patches with the --patches parameter")
-	if(args.project is None and args.bug is None and args.patches is None and args.many is None):
-		sys.exit("There should be one of these three options: 1) A file with a list of bugs should be provided with the --many parameter, 2) a particular bug with the --project and --bug parameters, 3) A location with patches with the --patches parameter")
-	if(not(args.tool is None)):
-		if(args.tool != "Randoop" and args.tool != "Evosuite"):	
-			sys.exit("tool should be Randoop or Evosuite")
-	if(not(args.seed is None) and (not (args.seed.isdigit()))):
-		sys.exit("Seed should be an integer")
-	if(not(args.patches is None) and (not os.path.isdir(os.path.join(d4jHome, args.patches)))):
-		sys.exit("The folder " + str(os.path.join(d4jHome, args.patches)) + " does not exist")
-	if(not(args.coverage is None) and (not os.path.isfile(args.coverage))):
-		sys.exit("The file " + str(args.coverage) + " does not exist")
+	errorHandling(args)
 	# TODO: line wrap this file at 80 characters or so	
 
 	#removes outputfile if exists
@@ -232,7 +236,7 @@ def main():
 
 	for bug in bugs:
 		print "Defect: "+bug.project + " " + str(bug.bugNum)
-		ensureVersionAreCheckedOut(bug)
+		#ensureVersionAreCheckedOut(bug)
 		bug.setScrPath()
 
 		#if we are doing the patches flag, patch the fixed version
@@ -240,7 +244,7 @@ def main():
 			patchFixedFile(bug)
 
 		#creating xml file
-		if((args.coverage == None) and (not os.path.exists(bug.getFixPath()+"/coverage.xml"))):
+		if((args.coverage != None) or (not os.path.exists(bug.getFixPath()+"/coverage.xml"))):
 			generateCovXML(bug,args.tool, args.seed)
 		if not os.path.exists(bug.getFixPath()+"/coverage.xml"):
 			sys.exit("There is no coverage file in "+bug.getFixPath()+"/coverage.xml")
@@ -253,7 +257,10 @@ def main():
 			if not args.patches is None:
 				patchName=str(bug.getPatch().split('/')[-1].strip())
 				allCoverageMetrics=patchName+","+allCoverageMetrics
-				print allCoverageMetrics
+			if not args.many is None or not args.project is None:
+				patchName=str(bug.getProject() + bug.getBugNum() + "HumanGeneratedPatch")
+				allCoverageMetrics=patchName+","+allCoverageMetrics
+			print allCoverageMetrics
 			cmd = "echo "+str(allCoverageMetrics)+ " >> "+ outputFile
 			p = subprocess.call(cmd, shell=True)#, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			print ""
