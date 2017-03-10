@@ -79,7 +79,7 @@ def computeCoverage(listOfChangedLines, coverageFile):
 	classLineCoverage=round(float(e.attrib['line-rate'])*100,2)
 	classConditionCoverage=round(float(e.attrib['branch-rate'])*100,2)
 	
-	ret = str(classLineCoverage) + "%," + str(classConditionCoverage) + "%," +  str(linesChanged) + "," + str(percentageLinesCovered)+"%,"
+	ret = str(classLineCoverage) + "," + str(classConditionCoverage) + "," +  str(linesChanged) + "," + str(percentageLinesCovered)+","
 	for m in methodsChanged:
 		ret = ret+str(m)+" " 
 	return ret
@@ -92,7 +92,7 @@ def printMethodCorrespondingToLine(lineNum, tree):
 			if(line.attrib['number'] == lineNum):
 				methodLineCov= round(float(method.attrib['line-rate'])*100,2)
 				methodBranchCov=round(float(method.attrib['branch-rate'])*100,2)
-				methodsChanged.append(method.attrib['name']+":{Line:" + str(methodLineCov) + "%" + " Branch:" + str(methodBranchCov) + "%}" )
+				methodsChanged.append(method.attrib['name']+"," + str(methodLineCov) +"," + str(methodBranchCov) )
 	return methodsChanged
 
 def generateCovXML(bug, tool, seed):
@@ -103,7 +103,7 @@ def generateCovXML(bug, tool, seed):
 	suitePath =  os.path.join(bug.getTestDir(), bug.getProject()+"-"+bug.getBugNum()+"f-"+testSuiteName+"."+str(seed)+".tar.bz2")
 	if(os.path.isfile(suitePath)):
 		cmd = defects4jCommand + " coverage -w " + bug.getFixPath() + " -s " + str(suitePath)
-		subprocess.call(cmd, shell=True)#, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
+		subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
 	else:
 		sys.exit("The script did not find a test suite: " + str(suitePath))
 def getEditedFiles(bug):
@@ -221,6 +221,10 @@ def main():
 	outputFile= str(d4jHome)+ str(args.wd) + "/coverageOfBugs.csv"
 	if(os.path.isfile(outputFile)):
 		os.remove(outputFile)
+	cmd = "echo \"Project,Bug,Seed,Edits,Variant,Class line cov,Class condition cov,Num of lines edited,Percentage of edited lines covered,Methods changed,Method line coverage,Method Branch coverage\" >> "+ outputFile
+	p = subprocess.call(cmd, shell=True)#, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				
+
 	
 	#fill bug list
 	bugs = []
@@ -251,14 +255,25 @@ def main():
 			listOfChangedLines = getADiff(f, bug)
 			allCoverageMetrics=computeCoverage(listOfChangedLines, bug.getFixPath()+"/coverage.xml")
 			#pipes the result to a csv file
+			#Generated patch
 			if not args.patches is None:
-				patchName=str(bug.getPatch().split('/')[-1].strip())
-				allCoverageMetrics=patchName+","+allCoverageMetrics
+				#patchName=str(bug.getPatch().split('/')[-1].strip())
+				diffName=str(bug.getPatch().split('/')[-1].strip())
+				defect=diffName.split('_')[0]
+				bug=int(filter(str.isdigit, defect))
+				project=str(filter(str.isalpha, defect)).title()
+				seed=int(filter(str.isdigit, diffName.split('_')[1]))
+				edits=diffName.split('_')[2:-1]
+				edits=str(edits).replace("['","").replace("']",")").replace("', '","(")
+				variant=int(filter(str.isdigit, diffName.split('_')[-1]))
+
+				allCoverageMetrics=str(project)+","+str(bug)+","+str(seed)+","+str(edits)+","+str(variant)+","+str(allCoverageMetrics)
+			#Human made patch
 			if not args.many is None or not args.project is None:
 				patchName=str(bug.getProject() + bug.getBugNum() + "HumanGeneratedPatch")
 				allCoverageMetrics=patchName+","+allCoverageMetrics
 			print allCoverageMetrics
-			cmd = "echo "+str(allCoverageMetrics)+ " >> "+ outputFile
+			cmd = "echo \""+str(allCoverageMetrics)+ "\" >> "+ outputFile
 			p = subprocess.call(cmd, shell=True)#, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			print ""
 	print "Results in "+outputFile
