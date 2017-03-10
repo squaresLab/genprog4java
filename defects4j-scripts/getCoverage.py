@@ -184,6 +184,17 @@ def getOptions():
 	parser.add_argument("--coverage", help="a coverage file")
 	return parser.parse_args()
 
+#args.many is assumed to be not None
+def getAllBugs(bugs,args):
+	if(not os.path.isfile(args.many)):
+		# MAU TODO: ADD GRACEFUL ERROR HANDLING/MESSAGE HERE
+		return
+	else: 
+		with open(args.many) as f:
+			pairs = [x.strip().split(',') for x in f.readlines() if x[0] != '#']
+			for pair in pairs:
+				bug = BugInfo(pair[0], int(pair[1]), args.wd, args.testDir)
+				bugs.append(bug)
 def errorHandling(args):
 	if os.environ['D4J_HOME'] is None:
 		sys.exit("Environment variable D4J_HOME is not set")
