@@ -17,7 +17,7 @@ class BugInfo(object):
 		self.buggyFolder = wd + "/" + project.lower() + str(bugNum) + "Buggy"
 		self.fixedFolder = wd + "/" + project.lower() + str(bugNum) + "Fixed"
 		self.testDir = testDir
-		
+
 
 	def getProject(self):
 		return str(self.project)
@@ -42,7 +42,7 @@ class BugInfo(object):
 		cmd = defects4jCommand + " export -p dir.src.classes"
 		p = subprocess.Popen(cmd, shell=True, cwd=self.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		for i in p.stdout:
-			self.srcPath = i
+			self.srcPath = str(i).split("2>&1")[-1].strip()
 
 	def setPatch(self,patch):
 		self.patch=patch #this is the path from d4jHome + where it is + the patch name
@@ -55,44 +55,68 @@ def computeCoverage(listOfChangedLines, coverageFile):
 #	if(not (args.coverage is None)):
 	e = xml.etree.ElementTree.parse(coverageFile).getroot()
 	lines = e.findall(".//line")
-	realLines = []
+	changedLinesInXML = []
 	lineNumbersCoveredAlready = []
 	for line in lines:
 		if(line.attrib['number'] in listOfChangedLines):
 			if(not (line.attrib['number'] in lineNumbersCoveredAlready)):
-				realLines.append(line)
+				changedLinesInXML.append(line)
 				lineNumbersCoveredAlready.append(line.attrib['number'])
 
 	linesCovered=0
-	for realLine in realLines:
+	methodsChanged=[]
+	for realLine in changedLinesInXML:
 		# check if covered
 		if(int(realLine.attrib['hits']) != 0):
 			linesCovered += 1
 
-		methodsChanged = printMethodCorrespondingToLine(realLine.attrib['number'], e)
+	methodsForThisLine=[]
+	for changedLine in listOfChangedLines:
+		#print "Changed Lines: "+ str(listOfChangedLines)
+		#print "Changed line: "+ str(changedLine)
+		for m in printMethodCorrespondingToLine(changedLine, e):
+			methodsForThisLine.append(m)
+	
+	methodsChanged= list(set(methodsForThisLine))
 
 
-	linesChanged=len(realLines)
+	linesChanged=len(listOfChangedLines)
 	percentageLinesCovered=round(linesCovered*100/linesChanged,2)
 	
 	#Class coverage
 	classLineCoverage=round(float(e.attrib['line-rate'])*100,2)
 	classConditionCoverage=round(float(e.attrib['branch-rate'])*100,2)
 	
-	ret = str(classLineCoverage) + "," + str(classConditionCoverage) + "," +  str(linesChanged) + "," + str(percentageLinesCovered)+","
+	ret = str(classLineCoverage) + "," + str(classConditionCoverage) + "," +  str(linesChanged) + "," + str(percentageLinesCovered)+","+str(len(methodsChanged))
 	for m in methodsChanged:
-		ret = ret+str(m)+" " 
+		methodLineCov= round(float(m.attrib['line-rate'])*100,2)
+		methodBranchCov=round(float(m.attrib['branch-rate'])*100,2)
+		ret = ret+","+m.attrib['name']+"," + str(methodLineCov) +"," + str(methodBranchCov)
 	return ret
 
 def printMethodCorrespondingToLine(lineNum, tree):
 	methodsChanged=[]
 	for method in tree.findall(".//method"):
 		lines = method.find("lines")
-		for line in lines:
-			if(line.attrib['number'] == lineNum):
-				methodLineCov= round(float(method.attrib['line-rate'])*100,2)
-				methodBranchCov=round(float(method.attrib['branch-rate'])*100,2)
-				methodsChanged.append(method.attrib['name']+"," + str(methodLineCov) +"," + str(methodBranchCov) )
+		if int(len(lines)) > 0:
+			firstLineOfMethod = lines[0]
+#			print str(firstLineOfMethod.attrib['number'])
+			highestLineNum=0
+			for l in lines:
+				if int(l.attrib['number']) > highestLineNum:
+					highestLineNum= int(l.attrib['number'])
+#			lastLineOfMethod = highestLineNum
+#			print str(highestLineNum)
+#			print "line number: "+ str(lineNum)
+#			print "line num: " + str(lineNum) + " first: "+str(int(firstLineOfMethod.attrib['number']))+ " last: "+str(highestLineNum)
+			if int(lineNum) >= int(firstLineOfMethod.attrib['number']) and int(lineNum) <= highestLineNum:
+#				print "got in!"
+				methodsChanged.append(method)
+
+#			for line in lines:
+#				if(line.attrib['number'] == lineNum and not method in methodsChanged):
+#					methodsChanged.append(method)
+				
 	return methodsChanged
 
 def generateCovXML(bug, tool, seed):
@@ -104,12 +128,14 @@ def generateCovXML(bug, tool, seed):
 	if(os.path.isfile(suitePath)):
 		cmd = defects4jCommand + " coverage -w " + bug.getFixPath() + " -s " + str(suitePath)
 		subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
+		cmd = defects4jCommand + " coverage -w " + bug.getBugPath() + " -s " + str(suitePath)
+		subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
 	else:
 		sys.exit("The script did not find a test suite: " + str(suitePath))
 def getEditedFiles(bug):
 	cmd = defects4jCommand + " export -p classes.modified"
 	p = subprocess.Popen(cmd, shell=True, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	return [ line.strip().replace(".", "/") + ".java" for line in p.stdout ]
+	return [ line.split("2>&1")[-1].strip().replace(".", "/") + ".java" for line in p.stdout ]
 
 
 def getADiff(pathToFile, bug):
@@ -119,7 +145,8 @@ def getADiff(pathToFile, bug):
 	diffLines=""
 	for line in p.stdout:
 		diffLines = line
-	return diffLines.split()
+	diffLines=diffLines.strip().split(" ")
+	return list(set(diffLines))
 
 #args.many is assumed to be not None
 def getAllBugs(bugs,args):
@@ -155,6 +182,7 @@ def patchFixedFile(bug):
 	#Patching the fixed file
 	whereToCallPatch=str(bug.getFixPath())+"/"+str(pathToSource)
 	cmd ="patch -p10 -i "+d4jHome+"/"+bug.getPatch()
+#	print whereToCallPatch
 	p = subprocess.Popen(cmd, shell=True, cwd=whereToCallPatch, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
@@ -221,7 +249,7 @@ def main():
 	outputFile= str(d4jHome)+ str(args.wd) + "/coverageOfBugs.csv"
 	if(os.path.isfile(outputFile)):
 		os.remove(outputFile)
-	cmd = "echo \"Project,Bug,Seed,Edits,Variant,Class line cov,Class condition cov,Num of lines edited,Percentage of edited lines covered,Methods changed,Method line coverage,Method Branch coverage\" >> "+ outputFile
+	cmd = "echo \"Project,Bug,Seed,Edits,Variant,Class line cov,Class condition cov,Num of lines edited,Percentage of edited lines covered,Number of methods changed, Methods changed,Method line coverage,Method Branch coverage\" >> "+ outputFile
 	p = subprocess.call(cmd, shell=True)#, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				
 
@@ -265,8 +293,9 @@ def main():
 				seed=int(filter(str.isdigit, diffName.split('_')[1]))
 				edits=diffName.split('_')[2:-1]
 				edits=str(edits).replace("['","").replace("']",")").replace("', '","(")
-				variant=int(filter(str.isdigit, diffName.split('_')[-1]))
-
+				#print "diffName: "+diffName
+				#variant=int(filter(str.isdigit, diffName.split('_')[-1]))
+				variant=""
 				allCoverageMetrics=str(project)+","+str(bug)+","+str(seed)+","+str(edits)+","+str(variant)+","+str(allCoverageMetrics)
 			#Human made patch
 			if not args.many is None or not args.project is None:
