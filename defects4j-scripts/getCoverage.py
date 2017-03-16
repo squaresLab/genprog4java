@@ -53,6 +53,7 @@ class BugInfo(object):
 		
 def computeCoverage(listOfChangedLines, coverageFile):
 #	if(not (args.coverage is None)):
+	print [i for i in listOfChangedLines]
 	e = xml.etree.ElementTree.parse(coverageFile).getroot()
 	lines = e.findall(".//line")
 	changedLinesInXML = []
@@ -110,7 +111,6 @@ def printMethodCorrespondingToLine(lineNum, tree):
 #			print "line number: "+ str(lineNum)
 #			print "line num: " + str(lineNum) + " first: "+str(int(firstLineOfMethod.attrib['number']))+ " last: "+str(highestLineNum)
 			if int(lineNum) >= int(firstLineOfMethod.attrib['number']) and int(lineNum) <= highestLineNum:
-#				print "got in!"
 				methodsChanged.append(method)
 
 #			for line in lines:
@@ -141,11 +141,13 @@ def getEditedFiles(bug):
 def getADiff(pathToFile, bug):
 	pathToSource=bug.getSrcPath()
 	cmd = "diff --unchanged-line-format=\"\"  --old-line-format=\"%dn \" --new-line-format=\"%dn \" " + bug.getBugPath()+"/"+pathToSource+"/"+pathToFile +" " + bug.getFixPath()+"/"+pathToSource+"/"+pathToFile
+	print cmd
 	p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	diffLines=""
 	for line in p.stdout:
 		diffLines = line
 	diffLines=diffLines.strip().split(" ")
+	print [i for i in list(set(diffLines))]
 	return list(set(diffLines))
 
 #args.many is assumed to be not None
@@ -281,6 +283,7 @@ def main():
 		for f in getEditedFiles(bug):
 			print "Working on file "+f
 			listOfChangedLines = getADiff(f, bug)
+			print "before entereing computeCoverage"
 			allCoverageMetrics=computeCoverage(listOfChangedLines, bug.getFixPath()+"/coverage.xml")
 			#pipes the result to a csv file
 			#Generated patch
@@ -292,7 +295,7 @@ def main():
 				project=str(filter(str.isalpha, defect)).title()
 				seed=int(filter(str.isdigit, diffName.split('_')[1]))
 				edits=diffName.split('_')[2:-1]
-				edits=str(edits).replace("['","").replace("']",")").replace("', '","(")
+				edits=str(edits).replace("['","").replace("']","")#.replace("', '","(")
 				#print "diffName: "+diffName
 				#variant=int(filter(str.isdigit, diffName.split('_')[-1]))
 				variant=""
