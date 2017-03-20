@@ -6,6 +6,7 @@ import xml.etree.ElementTree
 import subprocess
 import sys
 import shutil
+import time
 
 d4jHome = os.environ['D4J_HOME']
 defects4jCommand = d4jHome + "/framework/bin/defects4j"
@@ -17,7 +18,7 @@ class BugInfo(object):
 		self.buggyFolder = wd + "/" + project.lower() + str(bugNum) + "Buggy"
 		self.fixedFolder = wd + "/" + project.lower() + str(bugNum) + "Fixed"
 		self.testDir = testDir
-
+		self.srcPath=""
 
 	def getProject(self):
 		return str(self.project)
@@ -49,24 +50,8 @@ class BugInfo(object):
 
 	def getPatch(self):
 		return str(os.path.join(d4jHome,"/"+self.patch))
-	
 
-class MethodInfo(object):
-	def __init__(self, name, branch, line):
-		self.name = name	
-		self.branchCov = b
-		self.lineCov = c
 		
-	def getName(self):
-		return self.name
-
-	def getBranchCov(self):
-		return self.branchCov
-
-	def getLineCov(self):
-		return self.lineCov
-		
-	
 def getNumberOfLinesCovered(changedLinesInXML):
 	#get number of lines covered
 	linesCovered=0
@@ -76,6 +61,17 @@ def getNumberOfLinesCovered(changedLinesInXML):
 		if(int(changedLineInXML.attrib['hits']) != 0):
 			linesCovered += 1
 	return linesCovered
+	
+def getCoveragesOfMethodsChanged(methodsChanged, coverageFile):
+	e = xml.etree.ElementTree.parse(coverageFile).getroot()
+	ret = ""	
+	for m in methodsChanged:
+		if m in [str(mxml.attrib['name'])+str(mxml.attrib['signature']) for mxml in e.findall(".//method")]:
+			methodLineCov= round(float(mxml.attrib['line-rate'])*100,2)
+			methodBranchCov=round(float(mxml.attrib['branch-rate'])*100,2)
+			ret +=ret+","+str(mxml.attrib['name'])+","+str(methodLineCov)+","+str(methodBranchCov)
+			break
+	return ret
 	
 def getInitialCoverageMetrics(coverageFile):
 	#Class coverage
@@ -115,18 +111,20 @@ def computeCoverage(listOfChangedLines, coverageFile):
 	linesChanged=len(listOfChangedLines)
 	percentageLinesCovered=round(numberOfLinesCovered*100/linesChanged,2)
 	
-	ret=[]
-	ret.append(str(linesChanged))
-	ret.append(str(percentageLinesCovered))
-	ret.append(str(len(methodsChanged)))
+	ret=","+str(linesChanged)
+	ret+=","+str(percentageLinesCovered)
+	ret+=","+str(len(methodsChanged))
 	
+	methods = []
 	for m in methodsChanged:
-		methodLineCov= round(float(m.attrib['line-rate'])*100,2)
-		methodBranchCov=round(float(m.attrib['branch-rate'])*100,2)
-		ret.append(str(m.attrib['name']))
-		ret.append(str(methodLineCov))
-		ret.append(str(methodBranchCov))
-	return ret
+		#methodLineCov= round(float(m.attrib['line-rate'])*100,2)
+		#methodBranchCov=round(float(m.attrib['branch-rate'])*100,2)
+		#mi = MethodInfo(str(m.attrib['name']),str(methodLineCov),str(methodBranchCov), m)
+		#methods.append(mi)
+		
+		id=str(m.attrib['name'])+str(m.attrib['signature'])
+		methods.append(id)
+	return [ret,methods]
 
 def printMethodCorrespondingToLine(lineNum, tree):
 	methodsChanged=[]
@@ -180,11 +178,11 @@ def getADiff(pathToFile, bug, new):
 	for line in p.stdout:
 		diffLines = line
 	diffLines=diffLines.strip().split(" ")
-	if new:
-		print "Added"
-	else:
-		print "Deleted"
-	print [i for i in diffLines]
+	#if new:
+	#	print "Added"
+	#else:
+	#	print "Deleted"
+	#print [i for i in diffLines]
 	return diffLines
 
 #args.many is assumed to be not None
@@ -285,10 +283,10 @@ def main():
 	# TODO: line wrap this file at 80 characters or so	
 
 	#removes outputfile if exists
-	outputFile= str(d4jHome)+ str(args.wd) + "/coverageOfBugs.csv"
+	outputFile= str(d4jHome)+ str(args.wd) + "/coverageOfBugs"+time.strftime("%Y%m%d%H%M%S")+".csv"
 	if(os.path.isfile(outputFile)):
 		os.remove(outputFile)
-	cmd = "echo \"Project,Bug,Seed,Edits,Variant,Class line cov,Class condition cov,Num of lines edited,Percentage of edited lines covered,Number of methods changed, Methods changed,Method line coverage,Method Branch coverage\" >> "+ outputFile
+	cmd = "echo \"Project,Bug,Seed,Edits,Variant,Class line cov,Class condition cov,Num of lines deleted,Percentage of deleted lines covered,Number of methods where a delete took place,Num of lines added,Percentage of added lines covered,Number of methods where an add took place, Method changed (by either add or delete),Method line coverage,Method Branch coverage\" >> "+ outputFile
 	p = subprocess.call(cmd, shell=True)#, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				
 	#fill bug list
@@ -302,7 +300,8 @@ def main():
 
 	for bug in bugs:
 		print "Defect: "+bug.project + " " + str(bug.bugNum)
-		ensureVersionAreCheckedOut(bug)
+		#REMOVE THIS COMMENTS IMMEDIATELY BELOW
+		#ensureVersionAreCheckedOut(bug)
 		bug.setScrPath()
 
 		#if we are doing the patches flag, patch the fixed version
@@ -321,11 +320,26 @@ def main():
 			listOfAddedLines = getADiff(f, bug, True)
 			listOfDeletedLines = getADiff(f, bug, False)
 			allCoverageMetrics=getInitialCoverageMetrics(bug.getFixPath()+"/coverage.xml")
-			print "allCoverageMetrics: "+str(allCoverageMetrics)
-			allCoverageMetrics+=computeCoverage(listOfAddedLines, bug.getFixPath()+"/coverage.xml")
-			print "allCoverageMetrics after added lines: "+str(allCoverageMetrics)
-			allCoverageMetrics+=computeCoverage(listOfDeletedLines, bug.getBugPath()+"/coverage.xml")
-			print "allCoverageMetrics after deleted lines: "+str(allCoverageMetrics)
+			
+			covInfoBuggy = computeCoverage(listOfDeletedLines, bug.getBugPath()+"/coverage.xml")
+			allCoverageMetrics+=covInfoBuggy[0] #index 0 has lines deleted, coverage of lines deleted and methods changed by lines deleted. Index 1 has a list methods changed
+			
+			covInfoPatched = computeCoverage(listOfAddedLines, bug.getFixPath()+"/coverage.xml")
+			allCoverageMetrics+=covInfoPatched[0]
+			methodsChanged = list(set(covInfoPatched[1]))
+			#print "Methods changed"
+			#print [m for m in methodsChanged]
+			for b in covInfoBuggy[1]:	
+			#	print "Checking if this is in the list above: "+ b 
+				if not (b in methodsChanged):
+			#		print "It wasnt!"
+					methodsChanged.append(b)
+			
+			#print "Methods changed after adding the others"
+			#print [m for m in methodsChanged]
+			#Get coverages of changed methods in coverage.xml from the patched version
+			allCoverageMetrics+=getCoveragesOfMethodsChanged(methodsChanged, bug.getFixPath()+"/coverage.xml")
+				
 			#pipes the result to a csv file
 			#Generated patch
 			if not args.patches is None:
@@ -336,7 +350,7 @@ def main():
 				project=str(filter(str.isalpha, defect)).title()
 				seed=int(filter(str.isdigit, diffName.split('_')[1]))
 				edits=diffName.split('_')[2:-1]
-				edits=str(edits).replace("['","").replace("']","")#.replace("', '","(")
+				edits=str(edits).replace("['","").replace("']",")").replace("r', '","r(").replace("d', '","d(").replace("a', '","a(").replace("e', '","e(").replace("', '","_").replace("zer)","zer")
 				#print "diffName: "+diffName
 				#variant=int(filter(str.isdigit, diffName.split('_')[-1]))
 				variant=""
