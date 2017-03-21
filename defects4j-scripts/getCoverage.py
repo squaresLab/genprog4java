@@ -286,7 +286,10 @@ def main():
 	outputFile= str(d4jHome)+ str(args.wd) + "/coverageOfBugs"+time.strftime("%Y%m%d%H%M%S")+".csv"
 	if(os.path.isfile(outputFile)):
 		os.remove(outputFile)
-	cmd = "echo \"Project,Bug,Seed,Edits,Variant,Class line cov,Class condition cov,Num of lines deleted,Percentage of deleted lines covered,Number of methods where a delete took place,Num of lines added,Percentage of added lines covered,Number of methods where an add took place, Method changed (by either add or delete),Method line coverage,Method Branch coverage\" >> "+ outputFile
+	if not(args.patches is None):
+		cmd = "echo \"Project,Bug,Seed,Edits,Variant,Class line cov,Class condition cov,Num of lines deleted,Percentage of deleted lines covered,Number of methods where a delete took place,Num of lines added,Percentage of added lines covered,Number of methods where an add took place, Method changed (by either add or delete),Method line coverage,Method Branch coverage\" >> "+ outputFile
+	elif not(args.many is None) or not(args.bug is None):
+		cmd = "echo \"Project,Bug,Class line cov,Class condition cov,Num of lines deleted,Percentage of deleted lines covered,Number of methods where a delete took place,Num of lines added,Percentage of added lines covered,Number of methods where an add took place, Method changed (by either add or delete),Method line coverage,Method Branch coverage\" >> "+ outputFile
 	p = subprocess.call(cmd, shell=True)#, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				
 	#fill bug list
@@ -301,7 +304,7 @@ def main():
 	for bug in bugs:
 		print "Defect: "+bug.project + " " + str(bug.bugNum)
 		#REMOVE THIS COMMENTS IMMEDIATELY BELOW
-		#ensureVersionAreCheckedOut(bug)
+		ensureVersionAreCheckedOut(bug)
 		bug.setScrPath()
 
 		#if we are doing the patches flag, patch the fixed version
@@ -309,7 +312,7 @@ def main():
 			patchFixedFile(bug)
 
 		#creating xml file
-		if((args.coverage != None) or (not os.path.exists(bug.getFixPath()+"/coverage.xml"))):
+		if(args.coverage != None) or (not os.path.exists(bug.getFixPath()+"/coverage.xml")) or (not os.path.exists(bug.getBugPath()+"/coverage.xml")):
 			generateCovXML(bug,args.tool, args.seed)
 		if not os.path.exists(bug.getFixPath()+"/coverage.xml"):
 			sys.exit("There is no coverage file in "+bug.getFixPath()+"/coverage.xml")
@@ -357,7 +360,7 @@ def main():
 				allCoverageMetrics=str(project)+","+str(bug)+","+str(seed)+","+str(edits)+","+str(variant)+","+str(allCoverageMetrics)
 			#Human made patch
 			if not args.many is None or not args.project is None:
-				patchName=str(bug.getProject() + bug.getBugNum() + "HumanGeneratedPatch")
+				patchName=str(bug.getProject() +","+ bug.getBugNum())
 				allCoverageMetrics=patchName+","+allCoverageMetrics
 			print allCoverageMetrics
 			cmd = "echo \""+str(allCoverageMetrics)+ "\" >> "+ outputFile
