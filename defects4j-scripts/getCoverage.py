@@ -188,10 +188,10 @@ def patchFixedFile(bug):
 
 def ensureVersionAreCheckedOut(bug):
 	#Remove and re clone versions
-	if(not os.path.exists(bug.getBugPath())):
+	if(os.path.exists(bug.getBugPath())):
 		shutil.rmtree(bug.getBugPath())
 	checkout(bug.getBugPath(), bug.getProject(), bug.getBugNum(), "b")
-	if(not os.path.exists(bug.getFixPath())):
+	if(os.path.exists(bug.getFixPath())):
 		shutil.rmtree(bug.getFixPath())
 	checkout(bug.getFixPath(), bug.getProject(), bug.getBugNum(), "f")
 
@@ -265,7 +265,7 @@ def main():
 
 	for bug in bugs:
 		print "Defect: "+bug.project + " " + str(bug.bugNum)
-		#ensureVersionAreCheckedOut(bug)
+		ensureVersionAreCheckedOut(bug)
 		bug.setScrPath()
 
 		#if we are doing the patches flag, patch the fixed version
