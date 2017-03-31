@@ -383,7 +383,7 @@ public class Fitness {
 				+ ((Fitness.numNegativeTests * fac));
 		double curFit = rep.getFitness();
 		if (curFit > -1.0) {
-			logger.info("\t passed" + curFit + " tests, " + rep.getName() + " (386stored at: " + rep.getVariantFolder() + ")");
+			logger.info("\t passed" + curFit + " tests, " + rep.getName() + " (stored at: " + rep.getVariantFolder() + ")");
 			logger.info("Total variants tried: " + ++totalVariantsTried);
 			return !(curFit < maxFitness);
 		}
@@ -403,7 +403,7 @@ public class Fitness {
 			}
 			if(foundFail) {
 				Collections.sort(testModel,Collections.reverseOrder());
-				logger.info("\t passed " + numPassed + " tests, " + rep.getName()+ " (406stored at: " + rep.getVariantFolder() + ")");
+				logger.info("\t passed " + numPassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 				logger.info("Total variants tried: " + ++totalVariantsTried);
 				return false;
 			}
@@ -411,19 +411,19 @@ public class Fitness {
 		} else {
 			int numNegativePassed = this.testPassCount(rep, true, Fitness.negativeTests);
 			if(numNegativePassed < Fitness.numNegativeTests) {
-				logger.info("\t passed " + numNegativePassed + " tests, " + rep.getName()+ " (414stored at: " + rep.getVariantFolder() + ")");
+				logger.info("\t passed " + numNegativePassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 				logger.info("Total variants tried: " + ++totalVariantsTried);
 				return false;
 			}
 			int numPositivePassed = this.testPassCount(rep,  true, Fitness.positiveTests);
 			if(numPositivePassed < Fitness.numPositiveTests) {
 				int totalPassed = numNegativePassed + numPositivePassed;
-				logger.info("\t passed " + totalPassed + " tests, " + rep.getName()+ " 421(stored at: " + rep.getVariantFolder() + ")");
+				logger.info("\t passed " + totalPassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 				logger.info("Total variants tried: " + ++totalVariantsTried);
 				return false;
 			}
 			int totalPassed = numNegativePassed + numPositivePassed;
-			logger.info("\t passed " + totalPassed + " (ALL) tests, " + rep.getName()+ " (426stored at: " + rep.getVariantFolder() + ")");
+			logger.info("\t passed " + totalPassed + " (ALL) tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 			logger.info("Total variants tried: " + ++totalVariantsTried);
 			return true;
 		}
@@ -499,7 +499,7 @@ public class Fitness {
 				+ ((Fitness.numNegativeTests * fac));
 		double curFit = rep.getFitness();
 		if (curFit > -1.0) {
-			logger.info("\t gen: " + generation + " " + curFit + " " + rep.getName() + " (502stored at: " + rep.getVariantFolder() + ")");
+			logger.info("\t gen: " + generation + " " + curFit + " " + rep.getName() + " (stored at: " + rep.getVariantFolder() + ")");
 			return !(curFit < maxFitness);
 		}
 		Pair<Double, Double> fitnessPair =  Pair.of(-1.0, -1.0);
@@ -513,7 +513,7 @@ public class Fitness {
 		} else {
 			fitnessPair = this.testFitnessFull(rep, fac);
 		}
-		logger.info("\t gen: " + generation + " " + fitnessPair.getLeft() + " " + rep.getName()+ " (516stored at: " + rep.getVariantFolder() + ")");
+		logger.info("\t gen: " + generation + " " + fitnessPair.getLeft() + " " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 		rep.setFitness(fitnessPair.getRight());
 		rep.cleanup();
 		return !(fitnessPair.getLeft() < maxFitness);
