@@ -249,7 +249,6 @@ public class DefaultLocalization extends Localization {
 		}
 		switch(faultLocStrategy.trim()) { // FIXME: push this to a subclass.
 		case "humanInjected":
-			break;
 		case "standardPathFile":
 		default:
 			computeFaultSpace(negativePath,positivePath);
