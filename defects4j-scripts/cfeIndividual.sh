@@ -23,7 +23,7 @@
 #./CFIndividual.sh Math 2 Randoop 180 CF September21 
 
 
-if [ "$#" -lt 6 ]; then
+if [ "$#" -lt 7 ]; then
     echo "This script should be run with 6 parameters: "
 	echo "1st param is the project in upper case (ex: Lang, Chart, Closure, Math, Time)"
 	echo "2nd param is the bug number (ex: 1,2,3,4,...)"
@@ -31,7 +31,8 @@ if [ "$#" -lt 6 ]; then
 	echo "4th param is the budget of time in seconds the tool has to generate the test suite"
 	echo "5th param is weather you want to run only sections of the script: C=create, F=fix. You can run: CF, F"
 	echo "6th param is the name of the folder the test suite will be stored in. This is located in $D4J_HOME/generatedTestSuites/. Example: September21"
-	echo "7th param is an optional patch file Example: /path/to/patch.txt"
+	echo "7th param is the seed: 1"
+	echo "8th param is an optional patch file Example: /path/to/patch.txt"
 
     exit 0
 fi
@@ -43,14 +44,13 @@ RANDOOPOREVOSUITE="$3"
 BUDGET="$4"
 CF="$5"
 IDENTIFIER="$6"
-PATCHFILE="$7"
+SEED="$7"
+PATCHFILE="$8"
 
 LOWERCASEPACKAGE=`echo $PROJECT | tr '[:upper:]' '[:lower:]'`
 
 export JRE_HOME=$JAVA_HOME/jre
 export PATH=$JAVA_HOME/bin/:$PATH
-
-SEED=1
 
 if [ $CF == "CF" ] || [ $CF == "C" ]; then
   echo ""
