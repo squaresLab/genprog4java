@@ -61,6 +61,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
+import org.junit.Test;
+import org.junit.runner.Request;
 
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.Mutation;
@@ -248,6 +250,7 @@ public class Fitness {
 
 		logger.debug("after explode, " + intermedPosTests.size() + " pos tests and " + intermedNegTests.size() + " neg tests.");
 		logger.debug("neg tests: " + intermedNegTests);
+		logger.debug("pos tests: " + intermedPosTests);
 
 		for(String posTest : intermedPosTests) {
 			positiveTests.add(new TestCase(TestCase.TestType.POSITIVE, posTest));
@@ -262,6 +265,7 @@ public class Fitness {
 		testSample = new ArrayList<TestCase>(Fitness.positiveTests);
 		restSample = new ArrayList<TestCase>();
 		Fitness.deserializeTestCache();
+
 		}
 
 
@@ -373,13 +377,16 @@ public class Fitness {
 			
 			// deal with the simple case: get all public methods from the 
 			// initially positive classes and I'm 90% sure this isn't going to work
-			// because of non-test public classes in JUnit tests but whatever. 
-			// FIXME by asking Rene how to handle that fact.
 			for(String clazzName : initialPosTests) {
 				if(!clazzName.contains("::")) {
 					Class<?> testClazz = Class.forName(clazzName, true, testLoader);
 					for(Method m : testClazz.getMethods()) {
-						realPosTests.add(clazzName + "::" + m.getName());
+						// this weird condition doesn't feel like the best way to do this.
+						// but the "isAnnotationPresent" (which I expect to work) doesn't seem
+						// to be for the one bug I've tried it on.  Hmmmmm.
+						if(m.isAnnotationPresent(Test.class) || m.getName().startsWith("test")) {
+							realPosTests.add(clazzName + "::" + m.getName());
+						}
 					}
 				} else {
 					realPosTests.add(clazzName);
@@ -394,7 +401,7 @@ public class Fitness {
 				Class<?> testClazz = Class.forName(clazzName, true, testLoader);
 				for(Method m : testClazz.getMethods()) {
 					String mName = m.getName();
-					if(!negMethods.contains(mName)) {
+					if(!negMethods.contains(mName) && (m.isAnnotationPresent(Test.class) || m.getName().startsWith("test"))) {
 						realPosTests.add(clazzName + "::" + mName);
 					}
 				}
