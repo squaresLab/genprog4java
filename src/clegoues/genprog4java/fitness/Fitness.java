@@ -69,6 +69,7 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
+import junit.framework.TestSuite;
 
 /**
  * This class manages fitness evaluation for a variant of an arbitrary {@link clegoues.genprog4java.rep.Representation}.
@@ -240,7 +241,15 @@ public class Fitness {
 			filterTestClasses(intermedNegTests, intermedPosTests);
 			break;
 		}
+		
+//		Class<?> testClazz = Class.forName(this.testClazz, true, testLoader);
+//		actualTest = (TestSuite) testClazz.getMethod("suite").invoke(testClazz);
+//		Test t = actualTest.testAt(0);
+//		System.out.println(actualTest);
+//		System.out.println(t);
+//		Runtime.getRuntime().exit(1);
 
+		
 		logger.debug("after explode, " + intermedPosTests.size() + " pos tests and " + intermedNegTests.size() + " neg tests.");
 		logger.debug("neg tests: " + intermedNegTests);
 		logger.debug("pos tests: " + intermedPosTests);
