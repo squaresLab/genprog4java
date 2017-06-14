@@ -47,10 +47,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -59,6 +61,7 @@ import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.Mutation;
+import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 
@@ -125,6 +128,28 @@ public class Fitness {
 			.withHelp("clear the test cache")
 			.inGroup("Fitness Parameters")
 			.build();
+
+	private enum TestGranularity {
+		METHOD, CLASS
+	};
+
+	public static TestGranularity granularity = new ConfigurationBuilder<TestGranularity>()
+			.withVarName("granularity")
+			.withFlag("testGranularity")
+			.withDefault("class")
+			.withHelp("Granularity at which to run JUnit tests.  Default: Class")
+			.inGroup("Fitness Parameters")
+			.withCast(new ConfigurationBuilder.LexicalCast<TestGranularity> () {
+				public TestGranularity parse(String value) {
+					switch(value.trim().toLowerCase()) {
+					case "method" : return TestGranularity.METHOD;
+					case "class":
+					default: return TestGranularity.CLASS;
+					}
+				}
+			}).build();
+
+
 
 	/** this is necessary because of the generational sample strategy, which
 	 *  resamples at generational boundaries.
@@ -199,8 +224,14 @@ public class Fitness {
 		intermedPosTests = getTests(posTestFile);
 		intermedNegTests = getTests(negTestFile);
 
-		filterTests(intermedPosTests, intermedNegTests);
-		filterTests(intermedNegTests, intermedPosTests);
+		// if granularity is method-level, filter the classes ANYWAY and then
+		// just add the positive tests from the class containing the negative tests
+		// back in.
+		filterTestClasses(intermedPosTests, intermedNegTests);
+		filterTestClasses(intermedNegTests, intermedPosTests);
+		if(Fitness.granularity == TestGranularity.METHOD) {
+			explodeTestClasses(intermedPosTests, intermedNegTests);
+		}
 
 		for(String posTest : intermedPosTests) {
 			positiveTests.add(new TestCase(TestCase.TestType.POSITIVE, posTest));
@@ -217,6 +248,7 @@ public class Fitness {
 		Fitness.deserializeTestCache();
 	}
 
+
 	/**
 	 * JUnit is annoying.  Basically, a junit test within a larger test class can be failing.
 	 * This method figures out if that's the way these tests are specified and, if so
@@ -231,7 +263,7 @@ public class Fitness {
 	 * @param toFilter list to filter
 	 * @param filterBy stuff to filter out of toFilter
 	 */
-	private void filterTests(ArrayList<String> toFilter, ArrayList<String> filterBy) {
+	private void filterTestClasses(ArrayList<String> toFilter, ArrayList<String> filterBy) {
 		ArrayList<String> clazzesInFilterSet = new ArrayList<String>();
 		ArrayList<String> removeFromFilterSet = new ArrayList<String>();
 
@@ -268,6 +300,75 @@ public class Fitness {
 		}
 	}
 
+	/** As mentioned: JUnit is annoying.  If test granularity is set to "method", then,
+	 * unlike the default behavior lo these many months, we actually run one method at a time.
+	 * However, specifying tests one method at a time is also annoying (and not what D4J, at
+	 * least, does by default for the passing tests). This method thus "explodes" the test classes
+	 * into their constituent methods.
+	 * 
+	 * @param intermedPosTests
+	 * @param intermedNegTests
+	 * @throws ClassNotFoundException 
+	 */
+
+	private Method[] getMethods(String clazzName) throws ClassNotFoundException {
+		Class<?>[] testClazz = new Class[1];
+		testClazz[0] = Class.forName(clazzName);
+		return testClazz[0].getMethods();
+	}
+	private void explodeTestClasses(ArrayList<String> initialPosTests, ArrayList<String> initialNegTests) {
+		ArrayList<String> realPosTests = new ArrayList<String>();
+		try {
+			// deal with the simple case: get all public methods from the 
+			// initially positive tests and I'm 90% sure this isn't going to work
+			// because of non-test public classes in JUnit tests but whatever. 
+			// FIXME by asking Rene how to handle that fact.
+			for(String clazzName : initialPosTests) {
+				if(!clazzName.contains("::")) {
+					for(Method m : getMethods(clazzName)) {
+						realPosTests.add(clazzName + "::" + m.getName());
+					}
+				} else {
+					realPosTests.add(clazzName);
+				}
+			}
+			
+			HashMap<String, List<String>> negClazzes = new HashMap<String, List<String>>(); 
+			// get all classes containing failing tests, as well as those failing tests
+			for(String testName : initialNegTests) {
+				if(testName.contains("::")) {
+					String[] split = testName.split("::");
+					String clazzName = split[0];
+					String methodName = split[1].trim();
+					List<String> methodList;
+					if(negClazzes.containsKey(clazzName)) {
+						methodList = negClazzes.get(clazzName);
+					} else {
+						methodList = new ArrayList<String>();
+						negClazzes.put(clazzName,methodList);
+					}
+					methodList.add(methodName);
+				}
+			}
+			
+			for(Map.Entry<String, List<String>> entry : negClazzes.entrySet()) {
+				String clazzName = entry.getKey();
+				List<String> negMethods = entry.getValue();
+				for(Method m : getMethods(clazzName)) {
+					String mName = m.getName();
+					if(!negMethods.contains(mName)) {
+						realPosTests.add(clazzName + "::" + mName);
+					}
+				}
+			}
+			
+			initialPosTests.clear();
+			initialPosTests.addAll(realPosTests);
+		} catch (ClassNotFoundException e) {
+			logger.error("failed to find test classfile, giving up in a profoundly ungraceful way.");
+			Runtime.getRuntime().exit(1);
+		}
+	}
 	/** load tests from a file.  Does not check that the tests are valid, just that the file exists.
 	 * If the file doesn't exist, kills the runtime to exit, because that means that things have gone VERY
 	 * weird.
