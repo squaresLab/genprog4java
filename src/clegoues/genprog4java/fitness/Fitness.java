@@ -48,6 +48,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -141,6 +144,7 @@ public class Fitness {
 			.inGroup("Fitness Parameters")
 			.withCast(new ConfigurationBuilder.LexicalCast<TestGranularity> () {
 				public TestGranularity parse(String value) {
+					logger.debug("parsing granularity, value: " + value);
 					switch(value.trim().toLowerCase()) {
 					case "method" : return TestGranularity.METHOD;
 					case "class":
@@ -224,14 +228,26 @@ public class Fitness {
 		intermedPosTests = getTests(posTestFile);
 		intermedNegTests = getTests(negTestFile);
 
+		logger.debug("initial intermed, " + intermedPosTests.size() + " pos tests and " + intermedNegTests.size() + " neg tests.");
+		logger.debug("pos tests" + intermedPosTests);
+		logger.debug("neg tests: " + intermedNegTests);
 		// if granularity is method-level, filter the classes ANYWAY and then
 		// just add the positive tests from the class containing the negative tests
 		// back in.
-		filterTestClasses(intermedPosTests, intermedNegTests);
-		filterTestClasses(intermedNegTests, intermedPosTests);
-		if(Fitness.granularity == TestGranularity.METHOD) {
+		switch(Fitness.granularity) {
+		case METHOD:
+			logger.debug("method granularity, about to explode...");
 			explodeTestClasses(intermedPosTests, intermedNegTests);
+		break;
+		case CLASS:
+		default:
+			filterTestClasses(intermedPosTests, intermedNegTests);
+			filterTestClasses(intermedNegTests, intermedPosTests);
+			break;
 		}
+
+		logger.debug("after explode, " + intermedPosTests.size() + " pos tests and " + intermedNegTests.size() + " neg tests.");
+		logger.debug("neg tests: " + intermedNegTests);
 
 		for(String posTest : intermedPosTests) {
 			positiveTests.add(new TestCase(TestCase.TestType.POSITIVE, posTest));
@@ -246,6 +262,8 @@ public class Fitness {
 		testSample = new ArrayList<TestCase>(Fitness.positiveTests);
 		restSample = new ArrayList<TestCase>();
 		Fitness.deserializeTestCache();
+		
+		Runtime.getRuntime().exit(1);	
 	}
 
 
@@ -308,31 +326,29 @@ public class Fitness {
 	 * 
 	 * @param intermedPosTests
 	 * @param intermedNegTests
+	 * @throws MalformedURLException 
 	 * @throws ClassNotFoundException 
 	 */
 
-	private Method[] getMethods(String clazzName) throws ClassNotFoundException {
-		Class<?>[] testClazz = new Class[1];
-		testClazz[0] = Class.forName(clazzName);
-		return testClazz[0].getMethods();
+	private URLClassLoader testLoader() throws MalformedURLException {
+		String[] split = Configuration.testClassPath.split(":");
+		URL[] urls = new URL[split.length];
+		for(int i = 0; i < split.length; i++) {
+			String s = split[i];
+			File f = new File(s);
+			URL url = f.toURI().toURL();
+			urls[i] = url;
+		}
+		return new URLClassLoader(urls);
 	}
+	
 	private void explodeTestClasses(ArrayList<String> initialPosTests, ArrayList<String> initialNegTests) {
 		ArrayList<String> realPosTests = new ArrayList<String>();
 		try {
-			// deal with the simple case: get all public methods from the 
-			// initially positive tests and I'm 90% sure this isn't going to work
-			// because of non-test public classes in JUnit tests but whatever. 
-			// FIXME by asking Rene how to handle that fact.
-			for(String clazzName : initialPosTests) {
-				if(!clazzName.contains("::")) {
-					for(Method m : getMethods(clazzName)) {
-						realPosTests.add(clazzName + "::" + m.getName());
-					}
-				} else {
-					realPosTests.add(clazzName);
-				}
-			}
-			
+			URLClassLoader testLoader = testLoader();
+			// First, get the negative classes.  
+			// need to do this to filter the positive classes, since
+			// we can't actually call filterTestClasses first
 			HashMap<String, List<String>> negClazzes = new HashMap<String, List<String>>(); 
 			// get all classes containing failing tests, as well as those failing tests
 			for(String testName : initialNegTests) {
@@ -351,10 +367,34 @@ public class Fitness {
 				}
 			}
 			
+			for(String clazzName : negClazzes.keySet()) {
+				if(initialPosTests.contains(clazzName)) {
+					initialPosTests.remove(clazzName);
+				}
+			}
+			
+			// deal with the simple case: get all public methods from the 
+			// initially positive classes and I'm 90% sure this isn't going to work
+			// because of non-test public classes in JUnit tests but whatever. 
+			// FIXME by asking Rene how to handle that fact.
+			for(String clazzName : initialPosTests) {
+				if(!clazzName.contains("::")) {
+					Class<?> testClazz = Class.forName(clazzName, true, testLoader);
+					for(Method m : testClazz.getMethods()) {
+						realPosTests.add(clazzName + "::" + m.getName());
+					}
+				} else {
+					realPosTests.add(clazzName);
+				}
+			}
+			
+
+			
 			for(Map.Entry<String, List<String>> entry : negClazzes.entrySet()) {
 				String clazzName = entry.getKey();
 				List<String> negMethods = entry.getValue();
-				for(Method m : getMethods(clazzName)) {
+				Class<?> testClazz = Class.forName(clazzName, true, testLoader);
+				for(Method m : testClazz.getMethods()) {
 					String mName = m.getName();
 					if(!negMethods.contains(mName)) {
 						realPosTests.add(clazzName + "::" + mName);
@@ -366,6 +406,9 @@ public class Fitness {
 			initialPosTests.addAll(realPosTests);
 		} catch (ClassNotFoundException e) {
 			logger.error("failed to find test classfile, giving up in a profoundly ungraceful way.");
+			Runtime.getRuntime().exit(1);
+		} catch (MalformedURLException e) {
+			logger.error("malformedURLException, giving up in a profoundly ungraceful way.");
 			Runtime.getRuntime().exit(1);
 		}
 	}
