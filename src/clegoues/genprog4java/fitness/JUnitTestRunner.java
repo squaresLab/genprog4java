@@ -60,7 +60,9 @@ public class JUnitTestRunner {
 	public static void main(String[] args) {
 		try {
 			String clazzName = args[0].trim();
+			Request testRequest = null;
 			String methodName = null;
+			
 			System.err.println("Test Class: " + clazzName);
 			if(clazzName.contains("::")) {
 				String[] intermed = clazzName.split("::");
@@ -69,7 +71,12 @@ public class JUnitTestRunner {
 			}
 			Class<?>[] testClazz = new Class[1];
 			testClazz[0] = Class.forName(clazzName);
-			Request testRequest = Request.classes(testClazz);
+			if(methodName == null) { 
+			testRequest = Request.classes(testClazz);
+			} else {
+				testRequest = Request.method(testClazz[0], methodName);
+			}
+			
 			System.out.println("Requested #: "
 					+ testRequest.getRunner().testCount());
 
