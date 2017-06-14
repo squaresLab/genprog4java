@@ -230,15 +230,8 @@ public class Fitness {
 		intermedPosTests = getTests(posTestFile);
 		intermedNegTests = getTests(negTestFile);
 
-		logger.debug("initial intermed, " + intermedPosTests.size() + " pos tests and " + intermedNegTests.size() + " neg tests.");
-		logger.debug("pos tests" + intermedPosTests);
-		logger.debug("neg tests: " + intermedNegTests);
-		// if granularity is method-level, filter the classes ANYWAY and then
-		// just add the positive tests from the class containing the negative tests
-		// back in.
 		switch(Fitness.granularity) {
 		case METHOD:
-			logger.debug("method granularity, about to explode...");
 			explodeTestClasses(intermedPosTests, intermedNegTests);
 		break;
 		case CLASS:
