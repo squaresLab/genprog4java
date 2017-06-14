@@ -262,9 +262,7 @@ public class Fitness {
 		testSample = new ArrayList<TestCase>(Fitness.positiveTests);
 		restSample = new ArrayList<TestCase>();
 		Fitness.deserializeTestCache();
-		
-		Runtime.getRuntime().exit(1);	
-	}
+		}
 
 
 	/**
