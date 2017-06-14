@@ -1,0 +1,10 @@
+syntax:glob
+*.class
+bin/*
+tmp/
+*~
+.*\.orig$
+*.log
+syntax: regexp
+defects4j-scripts/Flow123d-python-utils/
+^target$
