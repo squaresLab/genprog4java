@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -58,10 +59,10 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
-import org.junit.Test;
 import org.junit.runner.Request;
 
 import clegoues.genprog4java.main.Configuration;
@@ -69,6 +70,7 @@ import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
+import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
@@ -241,15 +243,7 @@ public class Fitness {
 			filterTestClasses(intermedNegTests, intermedPosTests);
 			break;
 		}
-		
-//		Class<?> testClazz = Class.forName(this.testClazz, true, testLoader);
-//		actualTest = (TestSuite) testClazz.getMethod("suite").invoke(testClazz);
-//		Test t = actualTest.testAt(0);
-//		System.out.println(actualTest);
-//		System.out.println(t);
-//		Runtime.getRuntime().exit(1);
-
-		
+			
 		logger.debug("after explode, " + intermedPosTests.size() + " pos tests and " + intermedNegTests.size() + " neg tests.");
 		logger.debug("neg tests: " + intermedNegTests);
 		logger.debug("pos tests: " + intermedPosTests);
@@ -377,18 +371,28 @@ public class Fitness {
 				}
 			}
 			
+
+//			Class<?> testClazz = Class.forName(this.testClazz, true, testLoader);
+//			actualTest = (TestSuite) testClazz.getMethod("suite").invoke(testClazz);
+//			Test t = actualTest.testAt(0);
+//			System.out.println(actualTest);
+//			System.out.println(t);
+//			Runtime.getRuntime().exit(1);
+
+		
 			// deal with the simple case: get all public methods from the 
 			// initially positive classes and I'm 90% sure this isn't going to work
 			for(String clazzName : initialPosTests) {
 				if(!clazzName.contains("::")) {
 					Class<?> testClazz = Class.forName(clazzName, true, testLoader);
-					for(Method m : testClazz.getMethods()) {
-						// this weird condition doesn't feel like the best way to do this.
-						// but the "isAnnotationPresent" (which I expect to work) doesn't seem
-						// to be for the one bug I've tried it on.  Hmmmmm.
-						if(m.isAnnotationPresent(Test.class) || m.getName().startsWith("test")) {
-							realPosTests.add(clazzName + "::" + m.getName());
-						}
+					TestSuite actualTest = (TestSuite) testClazz.getMethod("suite").invoke(testClazz);
+					int numTests = actualTest.countTestCases();
+					for(int i = 0; i < numTests; i++) {
+						Test t = actualTest.testAt(i);
+						String testName = t.toString();
+						String[] split = testName.split(Pattern.quote("("));
+						String methodName = split[0];
+						realPosTests.add(clazzName + "::" + methodName);
 					}
 				} else {
 					realPosTests.add(clazzName);
@@ -403,7 +407,7 @@ public class Fitness {
 				Class<?> testClazz = Class.forName(clazzName, true, testLoader);
 				for(Method m : testClazz.getMethods()) {
 					String mName = m.getName();
-					if(!negMethods.contains(mName) && (m.isAnnotationPresent(Test.class) || m.getName().startsWith("test"))) {
+					if(!negMethods.contains(mName) && m.getName().startsWith("test")) {
 						realPosTests.add(clazzName + "::" + mName);
 					}
 				}
@@ -417,6 +421,21 @@ public class Fitness {
 		} catch (MalformedURLException e) {
 			logger.error("malformedURLException, giving up in a profoundly ungraceful way.");
 			Runtime.getRuntime().exit(1);
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	/** load tests from a file.  Does not check that the tests are valid, just that the file exists.
