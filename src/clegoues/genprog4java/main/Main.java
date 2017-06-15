@@ -108,11 +108,6 @@ public class Main {
 		}
 		incomingPopulation = new Population<JavaEditOperation>(); 
 
-		// loads the class file into the representation.
-		// Does the Following:
-		// 1) If "yes" in sanity check in Configuration file, then does sanity
-		// check.
-		// 2)
 		try {
 			searchEngine.doSearch(baseRep, incomingPopulation);
 		} catch (CloneNotSupportedException e) {

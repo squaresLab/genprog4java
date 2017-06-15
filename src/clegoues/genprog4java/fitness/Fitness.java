@@ -682,7 +682,7 @@ public class Fitness {
 	 * @param passingTests
 	 */
 	public static void printTestsInScope(ArrayList<TestCase> passingTests){
-		String path = Fitness.posTestFile;
+		String path = Fitness.posTestFile + ".inscope";
 		//Set up to write to txt file
 		FileWriter write = null;
 		try {
