@@ -243,10 +243,6 @@ public class Fitness {
 			filterTestClasses(intermedNegTests, intermedPosTests);
 			break;
 		}
-			
-		logger.debug("after explode, " + intermedPosTests.size() + " pos tests and " + intermedNegTests.size() + " neg tests.");
-		logger.debug("neg tests: " + intermedNegTests);
-		logger.debug("pos tests: " + intermedPosTests);
 
 		for(String posTest : intermedPosTests) {
 			positiveTests.add(new TestCase(TestCase.TestType.POSITIVE, posTest));
@@ -370,15 +366,6 @@ public class Fitness {
 					initialPosTests.remove(clazzName);
 				}
 			}
-			
-
-//			Class<?> testClazz = Class.forName(this.testClazz, true, testLoader);
-//			actualTest = (TestSuite) testClazz.getMethod("suite").invoke(testClazz);
-//			Test t = actualTest.testAt(0);
-//			System.out.println(actualTest);
-//			System.out.println(t);
-//			Runtime.getRuntime().exit(1);
-
 		
 			// deal with the simple case: get all public methods from the 
 			// initially positive classes and I'm 90% sure this isn't going to work
