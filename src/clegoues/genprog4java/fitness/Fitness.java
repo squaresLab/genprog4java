@@ -49,6 +49,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -63,6 +64,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
+import org.junit.runner.Description;
 import org.junit.runner.Request;
 
 import clegoues.genprog4java.main.Configuration;
@@ -336,6 +338,54 @@ public class Fitness {
 		return new URLClassLoader(urls);
 	}
 	
+	private static boolean looksLikeATest(Method m) {
+		return (m.isAnnotationPresent(org.junit.Test.class) ||
+				(m.getParameterTypes().length == 0 &&
+				m.getReturnType().equals(Void.TYPE) &&
+				Modifier.isPublic(m.getModifiers()) &&
+				m.getName().startsWith("test")));
+	}
+    
+	private ArrayList<String> getTestMethodsFromClazz(String clazzName, URLClassLoader testLoader) {
+		ArrayList<String> realTests = new ArrayList<String>();
+		try {
+		Class<?> testClazz = Class.forName(clazzName, true, testLoader);
+		try {
+		TestSuite actualTest = (TestSuite) testClazz.getMethod("suite").invoke(testClazz);
+		int numTests = actualTest.countTestCases();
+		for(int i = 0; i < numTests; i++) {
+			Test t = actualTest.testAt(i);
+			String testName = t.toString();
+			String[] split = testName.split(Pattern.quote("("));
+			String methodName = split[0];
+			realTests.add(methodName);
+		}
+		} catch (NoSuchMethodException |IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
+			// invoke of "suite" likely failed.  Try something else.
+			  // Given a bunch of classes, find all of the JUnit test-methods defined by them.
+		      for (Description test : Request.aClass(testClazz).getRunner().getDescription().getChildren()) {
+		        // a parameterized atomic test case does not have a method name
+		        if (test.getMethodName() == null) {
+		          for (Method m : testClazz.getMethods()) {
+		            // JUnit 3: an atomic test case is "public", does not return anything ("void"), has 0
+		            // parameters and starts with the word "test"
+		            // JUnit 4: an atomic test case is annotated with @Test
+		            if (looksLikeATest(m)) {
+		              realTests.add(m.getName()); // test.getDisplayName()
+		            }
+		          }
+		        } else {
+		          // non-parameterized atomic test case
+		          realTests.add(test.getMethodName());
+		        }
+		      }
+		    }
+		} catch (ClassNotFoundException e) {
+			logger.error("Test class " + clazzName + " not found in ExplodeTests!");
+		}
+		return realTests;
+	}
+	
 	private void explodeTestClasses(ArrayList<String> initialPosTests, ArrayList<String> initialNegTests) {
 		ArrayList<String> realPosTests = new ArrayList<String>();
 		try {
@@ -371,60 +421,32 @@ public class Fitness {
 			// initially positive classes and I'm 90% sure this isn't going to work
 			for(String clazzName : initialPosTests) {
 				if(!clazzName.contains("::")) {
-					Class<?> testClazz = Class.forName(clazzName, true, testLoader);
-					TestSuite actualTest = (TestSuite) testClazz.getMethod("suite").invoke(testClazz);
-					int numTests = actualTest.countTestCases();
-					for(int i = 0; i < numTests; i++) {
-						Test t = actualTest.testAt(i);
-						String testName = t.toString();
-						String[] split = testName.split(Pattern.quote("("));
-						String methodName = split[0];
-						realPosTests.add(clazzName + "::" + methodName);
+					for(String m : getTestMethodsFromClazz(clazzName, testLoader)) {
+						realPosTests.add(clazzName + "::" + m);
 					}
 				} else {
 					realPosTests.add(clazzName);
 				}
 			}
 			
-
-			
 			for(Map.Entry<String, List<String>> entry : negClazzes.entrySet()) {
 				String clazzName = entry.getKey();
 				List<String> negMethods = entry.getValue();
-				Class<?> testClazz = Class.forName(clazzName, true, testLoader);
-				for(Method m : testClazz.getMethods()) {
-					String mName = m.getName();
-					if(!negMethods.contains(mName) && m.getName().startsWith("test")) {
-						realPosTests.add(clazzName + "::" + mName);
+				for(String m : getTestMethodsFromClazz(clazzName, testLoader)) {
+					if(!negMethods.contains(m)) {
+						realPosTests.add(clazzName + "::" + m);
 					}
 				}
 			}
 			
 			initialPosTests.clear();
 			initialPosTests.addAll(realPosTests);
-		} catch (ClassNotFoundException e) {
-			logger.error("failed to find test classfile, giving up in a profoundly ungraceful way.");
-			Runtime.getRuntime().exit(1);
 		} catch (MalformedURLException e) {
 			logger.error("malformedURLException, giving up in a profoundly ungraceful way.");
 			Runtime.getRuntime().exit(1);
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
+	
 	/** load tests from a file.  Does not check that the tests are valid, just that the file exists.
 	 * If the file doesn't exist, kills the runtime to exit, because that means that things have gone VERY
 	 * weird.
