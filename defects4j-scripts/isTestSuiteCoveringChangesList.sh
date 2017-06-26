@@ -38,7 +38,10 @@ rm -f $D4J_HOME/$PATHTOCHECKOUTFOLDERS/ChangesCovered.txt
 #declare -a bugs=("Chart 1" "Chart 3" "Chart 5" "Chart 13" "Chart 21" "Chart 25" "Chart 26" "Closure 13" "Closure 19" "Closure 21" "Closure 22" "Closure 46" "Closure 66" "Closure 83" "Closure 86" "Closure 107" "Closure 115" "Closure 125" "Closure 126" "Lang 7" "Lang 10" "Lang 22" "Lang 39" "Lang 43" "Lang 45" "Lang 59" "Lang 63" "Math 7" "Math 8" "Math 18" "Math 20" "Math 24" "Math 28" "Math 29" "Math 40" "Math 49" "Math 50" "Math 73" "Math 80" "Math 81" "Math 82" "Math 85" "Math 95" "Time 19")
 #sprecific ones
 #declare -a bugs=("Math 82")
-declare -a bugs=("Chart 3" "Chart 5" "Closure 102" "Closure 25" "Closure 35" "Closure 45" "Lang 24" "Lang 51" "Lang 7" "Math 53" "Math 84" "Math 8" "Lang 59" "Time 19" "Closure 83" "Math 24" "Closure 46" "Math 7" "Math 29" "Math 49" "Math 73" "Lang 39" "Closure 125" "Closure 66" "Lang 43" "Math 40" "Math 95" "Lang 63" "Math 18" "Math 20" "Chart 26" "Math 80" "Math 82" "Chart 1" "Closure 19" "Lang 10" "Lang 22" "Chart 25" "Chart 13" "Closure 13" "Closure 21" "Closure 22" "Closure 107" "Closure 115" "Closure 126" "Math 28" "Math 50" "Math 81" "Math 85")
+#declare -a bugs=("Chart 3" "Chart 5" "Closure 102" "Closure 25" "Closure 35" "Closure 45" "Lang 24" "Lang 51" "Lang 7" "Math 53" "Math 84" "Math 8" "Lang 59" "Time 19" "Closure 83" "Math 24" "Closure 46" "Math 7" "Math 29" "Math 49" "Math 73" "Lang 39" "Closure 125" "Closure 66" "Lang 43" "Math 40" "Math 95" "Lang 63" "Math 18" "Math 20" "Chart 26" "Math 80" "Math 82" "Chart 1" "Closure 19" "Lang 10" "Lang 22" "Chart 25" "Chart 13" "Closure 13" "Closure 21" "Closure 22" "Closure 107" "Closure 115" "Closure 126" "Math 28" "Math 50" "Math 81" "Math 85")
+#Genprog found patches
+declare -a bugs=("Chart 13" "Chart 1" "Chart 25" "Chart 26" "Chart 3" "Chart 5" "Closure 102" "Closure 107" "Closure 115" "Closure 125" "Closure 126" "Closure 13" "Closure 19" "Closure 21" "Closure 22" "Closure 25" "Closure 35" "Closure 45" "Closure 46" "Closure 66" "Closure 83" "Lang 10" "Lang 22" "Lang 24" "Lang 39" "Lang 43" "Lang 51" "Lang 59" "Lang 63" "Lang 7" "Math 18" "Math 20" "Math 24" "Math 28" "Math 29" "Math 40" "Math 49" "Math 50" "Math 53" "Math 73" "Math 7" "Math 80" "Math 81" "Math 82" "Math 84" "Math 85" "Math 8" "Math 95" "Time 19")
+
 
 ## now loop through the above array
 for i in "${bugs[@]}"
