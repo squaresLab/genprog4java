@@ -66,13 +66,14 @@ def getCoveragesOfMethodsChanged(methodsChanged, coverageFile):
 	e = xml.etree.ElementTree.parse(coverageFile).getroot()
 	ret = ""	
 	for m in methodsChanged:
-		#print "Line 69: "+ m
+		#print  str(m)
 		for mxml in e.findall(".//method"):
 			#print "line 71: "+ m +" "+str(mxml.attrib['name'])+str(mxml.attrib['signature'])
 			if (m == str(mxml.attrib['name'])+str(mxml.attrib['signature'])):
 				methodLineCov= round(float(mxml.attrib['line-rate'])*100,2)
 				methodBranchCov=round(float(mxml.attrib['branch-rate'])*100,2)
-				ret +=ret+","+str(mxml.attrib['name'])+","+str(methodLineCov)+","+str(methodBranchCov)
+				ret +=","+str(mxml.attrib['name'])+","+str(methodLineCov)+","+str(methodBranchCov)
+				#print "Added " + str(mxml.attrib['name'])
 				break
 	#print "ret "+ret
 	return ret
@@ -95,7 +96,7 @@ def getChangedLinesInXML(listOfChangedLines,coverageFile):
 			if(not (line.attrib['number'] in lineNumbersCoveredAlready)):
 				changedLinesInXML.append(line)
 				lineNumbersCoveredAlready.append(line.attrib['number'])
-	return changedLinesInXML
+	return list(set(changedLinesInXML))
 	
 def methodsAssociatedWithLines(listOfChangedLines, coverageFile):
 	#print "got into methodsAssociatedWithLines"
@@ -106,20 +107,20 @@ def methodsAssociatedWithLines(listOfChangedLines, coverageFile):
 		for m in printMethodCorrespondingToLine(changedLine, e):
 			methodsForThisLine.append(m)
 	methodsChanged= list(set(methodsForThisLine))
-	return methodsChanged
+	return list(set(methodsChanged))
 	
-def computeCoverage(listOfChangedLines, coverageFile):		
-	#print "got into computeCoverage"
-	changedLinesInXML=getChangedLinesInXML(listOfChangedLines,coverageFile)
-	numberOfLinesCovered=getNumberOfLinesCovered(changedLinesInXML)
+def getChangedMethods(listOfChangedLines, coverageFile):		
+	#print "got into getChangedMethods"
+	#changedLinesInXML=getChangedLinesInXML(listOfChangedLines,coverageFile)
+	#numberOfLinesCovered=getNumberOfLinesCovered(changedLinesInXML)
 	methodsChanged=methodsAssociatedWithLines(listOfChangedLines,coverageFile)
-	#print methodsChanged
-	linesChanged=len(listOfChangedLines)
-	percentageLinesCovered=round(numberOfLinesCovered*100/linesChanged,2)
+	##print methodsChanged
+	#linesChanged=len(listOfChangedLines)
+	#percentageLinesCovered=round(numberOfLinesCovered*100/linesChanged,2)
 	
-	ret=","+str(linesChanged)
-	ret+=","+str(percentageLinesCovered)
-	ret+=","+str(len(methodsChanged))
+	#ret=","+str(linesChanged)
+	#ret+=","+str(percentageLinesCovered)
+	#ret+=","+str(len(methodsChanged))
 	
 	methods = []
 	for m in methodsChanged:
@@ -129,8 +130,10 @@ def computeCoverage(listOfChangedLines, coverageFile):
 		#methods.append(mi)
 		
 		id=str(m.attrib['name'])+str(m.attrib['signature'])
+		#print id
 		methods.append(id)
-	return [ret,methods]
+	#return [ret,methods]
+	return list(set(methods))
 
 def printMethodCorrespondingToLine(lineNum, tree):
 	#print "Looking for method from line "+ lineNum
@@ -138,6 +141,11 @@ def printMethodCorrespondingToLine(lineNum, tree):
 	for method in tree.findall(".//method"):
 		lines = method.find("lines")
 		if int(len(lines)) > 0:
+			for line in lines:
+				if(line.attrib['number'] == lineNum and not method in methodsChanged):
+					#print "Added "+ str(method)
+					methodsChanged.append(method)
+
 #			firstLineOfMethod = lines[0]
 #			highestLineNum=0
 #			for l in lines:
@@ -145,28 +153,22 @@ def printMethodCorrespondingToLine(lineNum, tree):
 #					highestLineNum= int(l.attrib['number'])
 #			if int(lineNum) >= int(firstLineOfMethod.attrib['number']) and int(lineNum) <= highestLineNum:
 #				methodsChanged.append(method)
-
-			for line in lines:
-				
-				if(line.attrib['number'] == lineNum and not method in methodsChanged):
-					#print "Added "+ method.attrib['name']
-					methodsChanged.append(method)
 					
-	return methodsChanged
+	return list(set(methodsChanged))
 
-def generateCovXML(bug, tool, seed):
+def generateCovXML(bug, tool, tsseed):
 	if(tool.lower() == "evosuite"):
 		testSuiteName="evosuite-branch"
 	elif(tool.lower() == "randoop"):
 		testSuiteName="randoop"
-	suitePath =  os.path.join(bug.getTestDir(), bug.getProject()+"-"+bug.getBugNum()+"f-"+testSuiteName+"."+str(seed)+".tar.bz2")
+	suitePath =  os.path.join(bug.getTestDir(), bug.getProject()+"-"+bug.getBugNum()+"f-"+testSuiteName+"."+str(tsseed)+".tar.bz2")
 	if(os.path.isfile(suitePath)):
 		cmd = defects4jCommand + " coverage -w " + bug.getFixPath() + " -s " + str(suitePath)
 		subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
-		print "ran coverage on fixed folder: " + cmd
+		#print "ran coverage on fixed folder: " + cmd
 		cmd = defects4jCommand + " coverage -w " + bug.getBugPath() + " -s " + str(suitePath)
 		subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
-		print "ran coverage on fixed folder: " + cmd
+		#print "ran coverage on buggy folder: " + cmd
 	else:
 		print "The script did not find a test suite: " + str(suitePath)
 		
@@ -265,6 +267,7 @@ def getOptions():
 	parser = argparse.ArgumentParser(description="This script checks if a test suite is covering the human changes. Example of usage: python getCoverage.py ExamplesCheckedOut /home/mausoto/QualityEvaluationDefects4jGenProg/Evosuite30MinGenProgFixesEvosuite103Comparison/testSuites/ --patches patchesGenerated/GenProgPatches --seed 1")
 	parser.add_argument("wd", help="working directory to check out project versions, starting from the the D4J_HOME folder")
 	parser.add_argument("testDir", help="the absolute path where the test suite is located (Example: /home/mausoto/defects4j/generatedTestSuites)")
+	parser.add_argument("outputName", help="a descriptive name for the outputFile (Example: human)")
 	parser.add_argument("--project", help="the project in upper case (ex: Lang, Chart, Closure, Math, Time)")
 	parser.add_argument("--bug", help="the bug number (ex: 1,2,3,4,...)")
 	parser.add_argument("--many", help="Absolute path, the file listing bugs to process: project,bugNum (one per line). Lines starting with # are skipped")
@@ -305,16 +308,24 @@ def errorHandling(args):
 def main():
 	args=getOptions()
 	errorHandling(args)
-	# TODO: line wrap this file at 80 characters or so	
-
-	#removes outputfile if exists
-	outputFile= str(d4jHome)+ str(args.wd) + "/coverageOfBugs"+time.strftime("%Y%m%d%H%M%S")+".csv"
-	if(os.path.isfile(outputFile)):
-		os.remove(outputFile)
+	
+	
+	date=time.strftime("%d%H%M%S")
+	
+	
 	if not(args.patches is None):
-		cmd = "echo \"Project,Bug,Seed,Edits,Class line cov,Class condition cov,Num of lines deleted,Percentage of deleted lines covered,Number of methods where a delete took place,Num of lines added,Percentage of added lines covered,Number of methods where an add took place, Method changed (by either add or delete),Method line coverage,Method Branch coverage\" >> "+ outputFile
+		outputFolder= str(d4jHome)+ str(args.wd) + "/" + str(args.outputName) + "Date"+date+ "TSSeed"+ str(args.seed) + "Generated/"
+		outputFile=outputFolder + str(args.outputName) + "Date"+date+ "TSSeed"+ str(args.seed) + "Generated.csv"
+		cmd = "echo \"Project,Bug,PatchSeed,Edits,Class line cov,Class condition cov, Method changed,Method line coverage,Method Branch coverage\" >> "+ outputFile
 	elif not(args.many is None) or not(args.bug is None):
-		cmd = "echo \"Project,Bug,Class line cov,Class condition cov,Num of lines deleted,Percentage of deleted lines covered,Number of methods where a delete took place,Num of lines added,Percentage of added lines covered,Number of methods where an add took place, Method changed (by either add or delete),Method line coverage,Method Branch coverage\" >> "+ outputFile
+		outputFolder= str(d4jHome)+ str(args.wd) + "/" + str(args.outputName) + "Date"+date+ "TSSeed"+ str(args.seed) + "Human/"
+		outputFile=outputFolder + str(args.outputName) + "Date"+date+ "TSSeed"+ str(args.seed) + "Human.csv"
+		cmd = "echo \"Project,Bug,Class line cov,Class condition cov,Method changed ,Method line coverage,Method Branch coverage\" >> "+ outputFile
+	#removes outputfolder if exists
+	if(os.path.isfile(outputFolder)):
+		os.remove(outputFolder)
+	#creates new folder to output all the useful outputs
+	p = subprocess.call("mkdir " + str(outputFolder), shell=True)
 	p = subprocess.call(cmd, shell=True)#, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				
 	#fill bug list
@@ -341,31 +352,34 @@ def main():
 		if os.path.exists(bug.getFixPath()+"/coverage.xml"):
 			allCoverageMetrics=""
 			for f in getEditedFiles(bug):
-				print "Working on file "+f
+				#print "Working on file "+f
 				listOfAddedLines = getADiff(f, bug, True)
-				#print "Added lines: "+ str(listOfAddedLines)
+				##print "Added lines: "+ str(listOfAddedLines)
 				listOfDeletedLines = getADiff(f, bug, False)
-				#print "Deleted lines: "+ str(listOfDeletedLines) + " Length: " + str(len(listOfDeletedLines))
+				##print "Deleted lines: "+ str(listOfDeletedLines) + " Length: " + str(len(listOfDeletedLines))
 				allCoverageMetrics=getInitialCoverageMetrics(bug.getFixPath()+"/coverage.xml")
 				
-				
+				listOfMethodsDel=[]
 				if len(listOfDeletedLines) > 0:
-					[covInfoBuggy,listOfMethodsDel] = computeCoverage(listOfDeletedLines, bug.getBugPath()+"/coverage.xml")
-					#print listOfMethodsDel
-					allCoverageMetrics+=covInfoBuggy #index 0 has lines deleted, coverage of lines deleted and methods changed by lines deleted. Index 1 has a list methods changed
-				else:
-					#print "Nothing deleted"
-					allCoverageMetrics+=",0,-,0"
-					listOfMethodsDel=[]
+					listOfMethodsDel = getChangedMethods(listOfDeletedLines, bug.getBugPath()+"/coverage.xml")
+				#	[covInfoBuggy,listOfMethodsDel] = computeCoverage(listOfDeletedLines, bug.getBugPath()+"/coverage.xml")
+				#	#print listOfMethodsDel
+				#	allCoverageMetrics+=covInfoBuggy #index 0 has lines deleted, coverage of lines deleted and methods changed by lines deleted. Index 1 has a list methods changed
+				#else:
+				#	#print "Nothing deleted"
+				#	allCoverageMetrics+=",0,-,0"
+				#	listOfMethodsDel=[]
 				
+				listOfMethodsAdd=[]
 				if len(listOfAddedLines) > 0:
-					[covInfoPatched,listOfMethodsAdd] = computeCoverage(listOfAddedLines, bug.getFixPath()+"/coverage.xml")
-					#print listOfMethodsAdd
-					allCoverageMetrics+=covInfoPatched
-				else:
-					#print "Nothing added"
-					allCoverageMetrics+=",0,-,0"
-					listOfMethodsAdd=[]
+					listOfMethodsAdd = getChangedMethods(listOfAddedLines, bug.getFixPath()+"/coverage.xml")
+				#	[covInfoPatched,listOfMethodsAdd] = computeCoverage(listOfAddedLines, bug.getFixPath()+"/coverage.xml")
+				#	#print listOfMethodsAdd
+				#	allCoverageMetrics+=covInfoPatched
+				#else:
+				#	#print "Nothing added"
+				#	allCoverageMetrics+=",0,-,0"
+				#	listOfMethodsAdd=[]
 					
 				methodsChanged = list(set(listOfMethodsAdd))
 				#print "Methods changed"
@@ -375,28 +389,29 @@ def main():
 					if not (b in methodsChanged):
 						#print "It wasnt!"
 						methodsChanged.append(b)
+			
 				
 				#print "Methods changed after adding the others"
 				#print [m for m in methodsChanged]
 				#Get coverages of changed methods in coverage.xml from the patched version
 				allCoverageMetrics+=getCoveragesOfMethodsChanged(methodsChanged, bug.getFixPath()+"/coverage.xml")
-					
 				#pipes the result to a csv file
+				patchSeed = ""
 				#Generated patch
 				if not args.patches is None:
 					#patchName=str(bug.getPatch().split('/')[-1].strip())
 					diffName=str(bug.getPatch().split('/')[-1].strip())
 					defect=diffName.split('_')[0]
-					bug=int(filter(str.isdigit, defect))
+					bugN=int(filter(str.isdigit, defect))
 					project=str(filter(str.isalpha, defect)).title()
-					seed=int(filter(str.isdigit, diffName.split('_')[1]))
+					patchSeed=int(filter(str.isdigit, diffName.split('_')[1]))
 					edits=diffName.split('_')[2:-1]
 					edits=str(edits).replace("['","").replace("']",")").replace("r', '","r(").replace("d', '","d(").replace("a', '","a(").replace("e', '","e(").replace("', '","_").replace("zer)","zer")
 					#print "diffName: "+diffName
 					#variant=int(filter(str.isdigit, diffName.split('_')[-1]))
 					#variant=""
-					allCoverageMetrics=str(project)+","+str(bug)+","+str(seed)+","+str(edits)+","+str(allCoverageMetrics)
-					#allCoverageMetrics=str(project)+","+str(bug)+","+str(seed)+","+str(edits)+","+str(variant)+","+str(allCoverageMetrics)
+					allCoverageMetrics=str(project)+","+str(bugN)+","+str(patchSeed)+","+str(edits)+","+str(allCoverageMetrics)
+					#allCoverageMetrics=str(project)+","+str(bugN)+","+str(patchSeed)+","+str(edits)+","+str(variant)+","+str(allCoverageMetrics)
 				#Human made patch
 				if not args.many is None or not args.project is None:
 					patchName=str(bug.getProject() +","+ bug.getBugNum())
@@ -405,10 +420,21 @@ def main():
 				cmd = "echo \""+str(allCoverageMetrics)+ "\" >> "+ outputFile
 				p = subprocess.call(cmd, shell=True)#, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				print ""
+				
+				#Move and rename coverage file
+				xmlFileName=str(outputFolder) + str(bug.getProject()) + str(bug.getBugNum()) 
+				if not patchSeed == "":
+					xmlFileName += "PatchSeed"+str(patchSeed)
+				cmd = "mv " + str(bug.getFixPath()) +"/coverage.xml " + xmlFileName + ".xml"
+				p = subprocess.call(cmd, shell=True)#, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				cmd = "mv " + str(bug.getFixPath()) +"/cobertura.ser " + xmlFileName+ ".ser"
+				p = subprocess.call(cmd, shell=True)#, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				
 		else: 
 			print "There is no coverage file in "+bug.getFixPath()+"/coverage.xml"
-			allCoverageMetrics=str(project)+","+str(bug)+","+str(seed)+","+str(edits)
+			allCoverageMetrics=str(bug.getProject()) + str(bug.getBugNum())
 			cmd = "echo \""+str(allCoverageMetrics)+ "\" >> "+ outputFile
 			p = subprocess.call(cmd, shell=True)#, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		
 	print "Results in "+outputFile
 main()
