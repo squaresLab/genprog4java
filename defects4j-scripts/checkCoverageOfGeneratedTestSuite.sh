@@ -50,11 +50,11 @@ rm -fr $D4J_HOME/$PATHOFFIXEDFOLDER/build/gen-tests/
 rm -fr $D4J_HOME/$PATHOFFIXEDFOLDER/gen-tests/
 rm -fr $D4J_HOME/$PATHOFFIXEDFOLDER/target/gen-tests/
 
-OUTPUTFILE="$D4J_HOME/$PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"CoverageLog.txt"
+OUTPUTFILE="$PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"CoverageLog.txt"
 if [ $RANDOOPOREVOSUITE == "Randoop" ]; then
-  COM="./defects4j coverage -w $D4J_HOME/$PATHOFFIXEDFOLDER/ -s $D4J_HOME/$PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 &>> $OUTPUTFILE" 
+  COM="./defects4j coverage -w $D4J_HOME/$PATHOFFIXEDFOLDER/ -s $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 &>> $OUTPUTFILE" 
 elif [ $RANDOOPOREVOSUITE == "Evosuite" ]; then
-  COM="./defects4j coverage -w $D4J_HOME/$PATHOFFIXEDFOLDER/ -s $D4J_HOME/$PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2 &>> $OUTPUTFILE" 
+  COM="./defects4j coverage -w $D4J_HOME/$PATHOFFIXEDFOLDER/ -s $PATHOFSUITEFOLDER/"$PROJECT"-"$BUGNUMBER"f-evosuite-branch."$SEED".tar.bz2 &>> $OUTPUTFILE" 
 fi
 
 echo "$COM"
