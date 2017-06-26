@@ -18,7 +18,7 @@
 # 4th param is the name of the folder the test suite will be stored in. This is located in $D4J_HOME/generatedTestSuites/ . Example: September21
 
 #Example of usage:
-#./cfeIndividualList.sh Evosuite 1800 CF Evosuite30MinGenProgFixesEvosuite103Seed1
+#./cfeIndividualList.sh Evosuite 1800 CF Evosuite30MinGenProgFixesEvosuite103 
 
 
 RANDOOPOREVOSUITE="$1"
@@ -48,7 +48,12 @@ touch $D4J_HOME/generatedTestSuites/$IDENTIFIER/resultsEvaluatingSeveralTestSuit
 #Change this list to the Bugs you want to evaluate
 #Allbugs with a fix found (GenProg) Remaining from the list above:
 #GENPROG
-declare -a bugs=("Math 40" "Math 49" "Math 50" "Math 53" "Math 73" "Math 80" "Math 81" "Math 82" "Math 84" "Math 85" "Math 95" "Time 19")
+#declare -a bugs=("Math 40" "Math 49" "Math 50" "Math 53" "Math 73" "Math 80" "Math 81" "Math 82" "Math 84" "Math 85" "Math 95" "Time 19")
+#PAR and TRP
+declare -a bugs=("Chart 7" "Closure 11" "Closure 31" "Closure 38" "Closure 62" "Closure 63" "Closure 64" "Lang 33" "Lang 44" "Lang 51" "Lang 58" "Math 2" "Math 5" "Math 62" "Math 75" "Math 78" "Time 7" "Chart 21" "Closure 86" "Lang 45")
+#PAR and TRP
+#declare -a bugs=("Lang 45" "Closure 86" "Chart 21" "Time 7" "Math 78" "Math 75" "Math 62" "Math 5" "Math 2" "Lang 58" "Lang 51" "Lang 44" "Lang 33" "Closure 64" "Closure 63" "Closure 62" "Closure 38" "Closure 31" "Closure 11" "Chart 7")
+
 
 ## now loop through the above array
 for i in "${bugs[@]}"

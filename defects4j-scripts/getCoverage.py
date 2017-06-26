@@ -33,7 +33,7 @@ class BugInfo(object):
 		return str(os.path.join(d4jHome, self.buggyFolder))
 
 	def getTestDir(self):
-		return str(os.path.join(d4jHome, self.testDir))
+		return str(self.testDir)
 
 	def getSrcPath(self):
 		return str(self.srcPath)
@@ -168,7 +168,8 @@ def generateCovXML(bug, tool, seed):
 		subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
 		print "ran coverage on fixed folder: " + cmd
 	else:
-		sys.exit("The script did not find a test suite: " + str(suitePath))
+		print "The script did not find a test suite: " + str(suitePath)
+		
 def getEditedFiles(bug):
 	cmd = defects4jCommand + " export -p classes.modified"
 	p = subprocess.Popen(cmd, shell=True, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -261,9 +262,9 @@ def checkout(folderToCheckout, project, bugNum, vers):
 	p = subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 def getOptions():
-	parser = argparse.ArgumentParser(description="This script checks if a test suite is covering the human changes. Example of usage: python getCoverage.py ExamplesCheckedOut generatedTestSuites/Evosuite30MinsPAR/testSuites/ --project Closure --bug 38")
+	parser = argparse.ArgumentParser(description="This script checks if a test suite is covering the human changes. Example of usage: python getCoverage.py ExamplesCheckedOut /home/mausoto/QualityEvaluationDefects4jGenProg/Evosuite30MinGenProgFixesEvosuite103Comparison/testSuites/ --patches patchesGenerated/GenProgPatches --seed 1")
 	parser.add_argument("wd", help="working directory to check out project versions, starting from the the D4J_HOME folder")
-	parser.add_argument("testDir", help="the path where the test suite is located, starting from the the D4J_HOME folder (Example: generatedTestSuites)")
+	parser.add_argument("testDir", help="the absolute path where the test suite is located (Example: /home/mausoto/defects4j/generatedTestSuites)")
 	parser.add_argument("--project", help="the project in upper case (ex: Lang, Chart, Closure, Math, Time)")
 	parser.add_argument("--bug", help="the bug number (ex: 1,2,3,4,...)")
 	parser.add_argument("--many", help="Absolute path, the file listing bugs to process: project,bugNum (one per line). Lines starting with # are skipped")
@@ -278,8 +279,8 @@ def errorHandling(args):
 		sys.exit("Environment variable D4J_HOME is not set")
 	if not os.path.isdir(os.path.join(d4jHome, args.wd)):
 		sys.exit("The folder " + str(os.path.join(d4jHome, args.wd)) + " does not exist")
-	if not os.path.isdir(os.path.join(d4jHome, args.testDir)):
-		sys.exit("The folder " + str(os.path.join(d4jHome, args.testDir)) + " does not exist")
+	if not os.path.isdir(args.testDir):
+		sys.exit("The folder " + str(args.testDir) + " does not exist")
 	if not(args.many is None) and not os.path.exists(args.many):
 		sys.exit("The file " + str(args.many) + " does not exist")
 	if not(args.many is None) and (not(args.project is None) or not(args.bug is None) or not(args.patches is None)):
@@ -337,74 +338,77 @@ def main():
 		#creating xml file
 		if(args.coverage != None) or (not os.path.exists(bug.getFixPath()+"/coverage.xml")) or (not os.path.exists(bug.getBugPath()+"/coverage.xml")):
 			generateCovXML(bug,args.tool, args.seed)
-		if not os.path.exists(bug.getFixPath()+"/coverage.xml"):
-			sys.exit("There is no coverage file in "+bug.getFixPath()+"/coverage.xml")
-		
-		allCoverageMetrics=""
-		for f in getEditedFiles(bug):
-			print "Working on file "+f
-			listOfAddedLines = getADiff(f, bug, True)
-			#print "Added lines: "+ str(listOfAddedLines)
-			listOfDeletedLines = getADiff(f, bug, False)
-			#print "Deleted lines: "+ str(listOfDeletedLines) + " Length: " + str(len(listOfDeletedLines))
-			allCoverageMetrics=getInitialCoverageMetrics(bug.getFixPath()+"/coverage.xml")
-			
-			
-			if len(listOfDeletedLines) > 0:
-				[covInfoBuggy,listOfMethodsDel] = computeCoverage(listOfDeletedLines, bug.getBugPath()+"/coverage.xml")
-				#print listOfMethodsDel
-				allCoverageMetrics+=covInfoBuggy #index 0 has lines deleted, coverage of lines deleted and methods changed by lines deleted. Index 1 has a list methods changed
-			else:
-				#print "Nothing deleted"
-				allCoverageMetrics+=",0,-,0"
-				listOfMethodsDel=[]
-			
-			if len(listOfAddedLines) > 0:
-				[covInfoPatched,listOfMethodsAdd] = computeCoverage(listOfAddedLines, bug.getFixPath()+"/coverage.xml")
-				#print listOfMethodsAdd
-				allCoverageMetrics+=covInfoPatched
-			else:
-				#print "Nothing added"
-				allCoverageMetrics+=",0,-,0"
-				listOfMethodsAdd=[]
+		if os.path.exists(bug.getFixPath()+"/coverage.xml"):
+			allCoverageMetrics=""
+			for f in getEditedFiles(bug):
+				print "Working on file "+f
+				listOfAddedLines = getADiff(f, bug, True)
+				#print "Added lines: "+ str(listOfAddedLines)
+				listOfDeletedLines = getADiff(f, bug, False)
+				#print "Deleted lines: "+ str(listOfDeletedLines) + " Length: " + str(len(listOfDeletedLines))
+				allCoverageMetrics=getInitialCoverageMetrics(bug.getFixPath()+"/coverage.xml")
 				
-			methodsChanged = list(set(listOfMethodsAdd))
-			#print "Methods changed"
-			#print [m for m in methodsChanged]
-			for b in listOfMethodsDel:	
-				#print "Checking if this is in the list above: "+ b 
-				if not (b in methodsChanged):
-					#print "It wasnt!"
-					methodsChanged.append(b)
-			
-			#print "Methods changed after adding the others"
-			#print [m for m in methodsChanged]
-			#Get coverages of changed methods in coverage.xml from the patched version
-			allCoverageMetrics+=getCoveragesOfMethodsChanged(methodsChanged, bug.getFixPath()+"/coverage.xml")
 				
-			#pipes the result to a csv file
-			#Generated patch
-			if not args.patches is None:
-				#patchName=str(bug.getPatch().split('/')[-1].strip())
-				diffName=str(bug.getPatch().split('/')[-1].strip())
-				defect=diffName.split('_')[0]
-				bug=int(filter(str.isdigit, defect))
-				project=str(filter(str.isalpha, defect)).title()
-				seed=int(filter(str.isdigit, diffName.split('_')[1]))
-				edits=diffName.split('_')[2:-1]
-				edits=str(edits).replace("['","").replace("']",")").replace("r', '","r(").replace("d', '","d(").replace("a', '","a(").replace("e', '","e(").replace("', '","_").replace("zer)","zer")
-				#print "diffName: "+diffName
-				#variant=int(filter(str.isdigit, diffName.split('_')[-1]))
-				#variant=""
-				allCoverageMetrics=str(project)+","+str(bug)+","+str(seed)+","+str(edits)+","+str(allCoverageMetrics)
-				#allCoverageMetrics=str(project)+","+str(bug)+","+str(seed)+","+str(edits)+","+str(variant)+","+str(allCoverageMetrics)
-			#Human made patch
-			if not args.many is None or not args.project is None:
-				patchName=str(bug.getProject() +","+ bug.getBugNum())
-				allCoverageMetrics=patchName+","+allCoverageMetrics
-			print allCoverageMetrics
+				if len(listOfDeletedLines) > 0:
+					[covInfoBuggy,listOfMethodsDel] = computeCoverage(listOfDeletedLines, bug.getBugPath()+"/coverage.xml")
+					#print listOfMethodsDel
+					allCoverageMetrics+=covInfoBuggy #index 0 has lines deleted, coverage of lines deleted and methods changed by lines deleted. Index 1 has a list methods changed
+				else:
+					#print "Nothing deleted"
+					allCoverageMetrics+=",0,-,0"
+					listOfMethodsDel=[]
+				
+				if len(listOfAddedLines) > 0:
+					[covInfoPatched,listOfMethodsAdd] = computeCoverage(listOfAddedLines, bug.getFixPath()+"/coverage.xml")
+					#print listOfMethodsAdd
+					allCoverageMetrics+=covInfoPatched
+				else:
+					#print "Nothing added"
+					allCoverageMetrics+=",0,-,0"
+					listOfMethodsAdd=[]
+					
+				methodsChanged = list(set(listOfMethodsAdd))
+				#print "Methods changed"
+				#print [m for m in methodsChanged]
+				for b in listOfMethodsDel:	
+					#print "Checking if this is in the list above: "+ b 
+					if not (b in methodsChanged):
+						#print "It wasnt!"
+						methodsChanged.append(b)
+				
+				#print "Methods changed after adding the others"
+				#print [m for m in methodsChanged]
+				#Get coverages of changed methods in coverage.xml from the patched version
+				allCoverageMetrics+=getCoveragesOfMethodsChanged(methodsChanged, bug.getFixPath()+"/coverage.xml")
+					
+				#pipes the result to a csv file
+				#Generated patch
+				if not args.patches is None:
+					#patchName=str(bug.getPatch().split('/')[-1].strip())
+					diffName=str(bug.getPatch().split('/')[-1].strip())
+					defect=diffName.split('_')[0]
+					bug=int(filter(str.isdigit, defect))
+					project=str(filter(str.isalpha, defect)).title()
+					seed=int(filter(str.isdigit, diffName.split('_')[1]))
+					edits=diffName.split('_')[2:-1]
+					edits=str(edits).replace("['","").replace("']",")").replace("r', '","r(").replace("d', '","d(").replace("a', '","a(").replace("e', '","e(").replace("', '","_").replace("zer)","zer")
+					#print "diffName: "+diffName
+					#variant=int(filter(str.isdigit, diffName.split('_')[-1]))
+					#variant=""
+					allCoverageMetrics=str(project)+","+str(bug)+","+str(seed)+","+str(edits)+","+str(allCoverageMetrics)
+					#allCoverageMetrics=str(project)+","+str(bug)+","+str(seed)+","+str(edits)+","+str(variant)+","+str(allCoverageMetrics)
+				#Human made patch
+				if not args.many is None or not args.project is None:
+					patchName=str(bug.getProject() +","+ bug.getBugNum())
+					allCoverageMetrics=patchName+","+allCoverageMetrics
+				print allCoverageMetrics
+				cmd = "echo \""+str(allCoverageMetrics)+ "\" >> "+ outputFile
+				p = subprocess.call(cmd, shell=True)#, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				print ""
+		else: 
+			print "There is no coverage file in "+bug.getFixPath()+"/coverage.xml"
+			allCoverageMetrics=str(project)+","+str(bug)+","+str(seed)+","+str(edits)
 			cmd = "echo \""+str(allCoverageMetrics)+ "\" >> "+ outputFile
 			p = subprocess.call(cmd, shell=True)#, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-			print ""
 	print "Results in "+outputFile
 main()
