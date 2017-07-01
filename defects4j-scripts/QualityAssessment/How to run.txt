@@ -1,0 +1,17 @@
+First you create the individual coverage files.
+Individaul because it calculates on individual test suite seeds.
+This step can be done paralelized in the different seeds this way:
+python getCoverage.py ExamplesCheckedOut1 /home/mausoto/QualityEvaluationDefects4jGenProg/Evosuite30MinGenProgFixesEvosuite103Comparison/allTestSuites/ GP --patches patchesGenerated/GenProgPatches --seed 1
+or
+python getCoverage.py ExamplesCheckedOut1 /home/mausoto/QualityEvaluationDefects4jGenProg/Evosuite30MinGenProgFixesEvosuite103Comparison/allTestSuites/ HUMAN --many /home/mausoto/QualityEvaluationDefects4jGenProg/GenProgFixesList.csv --seed 1
+
+Then you merge all these individuals into a single merged file per each patch if it is generated, or a single bug if it is the human one:
+./mergeSeveralSeedsCovFiles.sh G /home/mausoto/defects4j/patchesGenerated/JavaRepair-results/GenProgPatches/ GP
+or
+./mergeSeveralSeedsCovFiles.sh H /home/mausoto/QualityEvaluationDefects4jGenProg/AllBugsFixedByAllApproaches.csv HUMAN
+
+Last, get the method coverages from a list gathered in script one, and compare to the coverage of the merged:
+python methodCoverageFromMergedXML.py /home/mausoto/defects4jJava8/defects4j/MergedCoverages/GP/ /home/mausoto/defects4jJava8/defects4j/MergedCoverages/GP/GPTSSeed1/GPTSSeed1Generated.csv /home/mausoto/defects4jJava8/defects4j/MergedCoverages/GP/GPMergedCovsReport.csv 
+or
+python methodCoverageFromMergedXML.py /home/mausoto/defects4jJava8/defects4j/MergedCoverages/HUMAN/ /home/mausoto/defects4jJava8/defects4j/MergedCoverages/HUMAN/HUMANTSSeed1/HUMANTSSeed1Human.csv /home/mausoto/defects4jJava8/defects4j/MergedCoverages/HUMAN/HUMANMergedCovsReport.csv --human y
+ 
