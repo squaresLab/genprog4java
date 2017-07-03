@@ -24,9 +24,10 @@ def getMethodCoverage(path,coverageFile,methodName, minimumLCov, minimumBCov):
 			methodLineCoverage=round(float(mxml.attrib['line-rate'])*100,2)
 			methodConditionCoverage=round(float(mxml.attrib['branch-rate'])*100,2)
 			if float(minimumLCov) > methodLineCoverage or float(minimumBCov) > methodConditionCoverage:
-				print "Check this case: "+ coverageFile
-				methodLineCoverage=minimumLCov
-				methodConditionCoverage=minimumBCov
+				#print "Check this case: "+ coverageFile
+				continue
+				#methodLineCoverage=minimumLCov
+				#methodConditionCoverage=minimumBCov
 			#print str(methodLineCoverage) + "," + str(methodConditionCoverage)
 			ret += ","+methodName+","+str(methodLineCoverage) + "," + str(methodConditionCoverage)
 			break
@@ -47,7 +48,7 @@ def main():
 	if args.human is None:
 		cmd = "echo \"Project,Bug, Patch Seed, Mutation, Class Line Cov, Class Branch Cov, Method changed, Method Line Cov, Method Branch Cov\" >> "+ args.destinationFile
 	else:
-		cmd = "echo \"Project,Bug, Class Line Cov, Class Branch Cov, Method changed, Method Line Cov, Method Branch Cov, Method changed, Method Line Cov, Method Branch Cov, Method changed, Method Line Cov, Method Branch Cov, Method changed, Method Line Cov, Method Branch Cov\" >> "+ args.destinationFile
+		cmd = "echo \"Project,Bug, Class Line Cov, Class Branch Cov, Method changed, Method Line Cov, Method Branch Cov\" >> "+ args.destinationFile
 	p = subprocess.call(cmd, shell=True) #, cwd=bug.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	
 	with open(args.individualCovList) as f:
