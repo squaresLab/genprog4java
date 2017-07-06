@@ -285,7 +285,7 @@ Representation<G>  {
 		
 		CommandLine command = this.internalTestCaseCommand(sanityExename,
 				sanityFilename, thisTest, doingCoverage);
-		// System.out.println("command: " + command.toString());
+		//System.err.println("command: " + command.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(96000);
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");

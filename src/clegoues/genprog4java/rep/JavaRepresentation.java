@@ -351,7 +351,7 @@ CachingRepresentation<JavaEditOperation> {
 			outputDir += Configuration.outputDir + File.separator + exeName + "/";
 		}
 		String classPath = outputDir + System.getProperty("path.separator")
-		+ Configuration.libs + System.getProperty("path.separator") 
+		+ Configuration.genProgDir + Configuration.libs + System.getProperty("path.separator") 
 		+ Configuration.testClassPath + System.getProperty("path.separator") 
 		+ Configuration.srcClassPath;
 		//; 

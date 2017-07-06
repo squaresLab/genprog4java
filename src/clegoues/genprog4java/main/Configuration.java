@@ -72,6 +72,11 @@ public class Configuration {
 		.withDefault( "./tmp/" )
 		.withHelp( "directory to contain generated files" )
 		.build();
+	public static String genProgDir = ConfigurationBuilder.of( STRING )
+			.withVarName( "genProgDir" )
+			.withDefault( "./" )
+			.withHelp( "directory to GenProg" )
+			.build();
 	public static String libs = ConfigurationBuilder.of( STRING )
 		.withVarName( "libs" )
 		.withHelp( "classpath to compile the project" )
