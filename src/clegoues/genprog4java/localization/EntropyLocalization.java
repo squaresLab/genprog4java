@@ -6,32 +6,46 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.Stack;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+
+import com.google.common.collect.Multiset;
 
 import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaLMSymbolTable;
 import clegoues.genprog4java.java.JavaSemanticInfo;
+import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.holes.java.JavaASTNodeLocation;
 import clegoues.genprog4java.mut.holes.java.JavaLocation;
+import clegoues.genprog4java.mut.holes.java.JavaStatementLocation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.treelm.EclipseTSG;
 import clegoues.genprog4java.treelm.EclipseTSG.ParseException;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
 import clegoues.util.ConfigurationBuilder.LexicalCast;
+import codemining.ast.TreeNode;
+import codemining.ast.java.AbstractJavaTreeExtractor;
 import codemining.lm.tsg.FormattedTSGrammar;
+import codemining.lm.tsg.TSGNode;
+import codemining.lm.tsg.TSGrammar;
+import codemining.lm.tsg.TreeProbabilityComputer;
 import codemining.util.serialization.ISerializationStrategy.SerializationException;
 import codemining.util.serialization.Serializer;
 
@@ -47,9 +61,9 @@ public class EntropyLocalization extends DefaultLocalization {
 					if ( value.equals( "" ) )
 						return null;
 					try {
-						FormattedTSGrammar grammar =
-								(FormattedTSGrammar) Serializer.getSerializer().deserializeFrom( value );
-						return new EclipseTSG( grammar );
+						TSGrammar<TSGNode> model =
+								(TSGrammar<TSGNode>) Serializer.getSerializer().deserializeFrom( value );
+						return new EclipseTSG( model );
 					} catch (SerializationException e) {
 						logger.error( e.getMessage() );
 						return null;
@@ -58,10 +72,10 @@ public class EntropyLocalization extends DefaultLocalization {
 			}
 			)
 			.inGroup( "Entropy Parameters" )
-			.withFlag( "grammar" )
+			.withFlag( "model" )
 			.withVarName( "babbler" )
 			.withDefault( "" )
-			.withHelp( "grammar to use for babbling repairs" )
+			.withHelp( "model to use for babbling repairs" )
 			.build();
 
 
@@ -87,36 +101,36 @@ public class EntropyLocalization extends DefaultLocalization {
 
 	@Override
 	public Location getRandomLocation(double weight) {
-		JavaLocation startingStmt = (JavaLocation) GlobalUtils.chooseOneWeighted(new ArrayList(this.getFaultLocalization()), weight);
-		ASTNode actualCode = startingStmt.getCodeElement();
-		List<ASTNode> decomposed = ASTUtils.decomposeASTNode(actualCode);
-		decomposed.add(actualCode);
-		Collections.shuffle(decomposed, Configuration.randomizer);
-		ASTNode selected = decomposed.get(0);
-		System.err.println("SELECTED: " + selected);
-		return new JavaASTNodeLocation(startingStmt, selected.getParent());
-		//		double maxProb = Double.NEGATIVE_INFINITY;
-		//		ASTNode biggestSoFar = actualCode;
-		//		for(ASTNode node : decomposed) {
-		//			TreeNode< TSGNode > asTlm = babbler.eclipseToTreeLm(node);
-		//			double prob = babbler.grammar.computeRulePosteriorLog2Probability(asTlm);
-		//			double entropy = -prob * Math.exp(prob);
-		//			System.err.println(node);
-		//			System.err.println(prob);
-		//			System.err.println("entropy:" + entropy);
-		//			System.err.println();
-		//
-		//			if(prob > maxProb) {
-		//				maxProb = prob;
-		//				biggestSoFar = node;
-		//			}
-		//		}
-		//
-		//		System.err.println("biggest found:");
-		//		System.err.println(biggestSoFar);
-		//		System.err.println(maxProb);
-		//
-		//		return new JavaASTNodeLocation(biggestSoFar.getParent());
+		ArrayList fault = new ArrayList(this.getFaultLocalization());
+		try {
+			TSGrammar<TSGNode> model =
+					(TSGrammar<TSGNode>) Serializer.getSerializer().deserializeFrom(Configuration.grammarPath);
+			final TreeProbabilityComputer<TSGNode> probabilityComputer = 
+					new TreeProbabilityComputer<TSGNode>(model, false, TreeProbabilityComputer.TSGNODE_MATCHER);
+			//Creates sorted list of exp. by prob
+			TreeMap<Double,ASTNode> rankedFaults = new TreeMap<Double, ASTNode>();
+			
+			for(int i=0; i<fault.size();i++) {
+				JavaLocation locate = (JavaLocation) fault.get(i);
+				List<ASTNode> faults = ASTUtils.decomposeASTNode(locate.getCodeElement());
+				//Iterates all subtrees. Original tree in included in decomposeASTNode
+				for(int sub=0;sub<faults.size();sub++){
+					final TreeNode<TSGNode> tsgTree = TSGNode.convertTree(((AbstractJavaTreeExtractor) model.getTreeExtractor()).getTree(faults.get(sub)), 0);
+					double prob = probabilityComputer.getLog2ProbabilityOf(tsgTree);
+					
+					//System.err.println("Subtree: "  + sub);
+					//System.err.println("Exp: " + faults.get(sub));
+					//System.err.println("Subtree Prob: " + "" + prob);
+					
+					rankedFaults.put(prob, faults.get(sub));
+				}
+			}
+			return new JavaASTNodeLocation(rankedFaults.firstEntry().getValue());
+			
+		} catch (SerializationException e) {
+			new Throwable().getStackTrace();
+		}
+		return null;	
 	}
 
 

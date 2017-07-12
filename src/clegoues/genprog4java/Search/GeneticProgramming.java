@@ -5,6 +5,7 @@ import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
+import codemining.util.serialization.ISerializationStrategy.SerializationException;
 
 public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 	private int generationsRun = 0;
@@ -48,7 +49,12 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		}
 		for (int i = 0; i < stillNeed; i++) {
 			Representation<G> newItem = original.copy();
-			this.mutate(newItem);
+			try {
+				this.mutate(newItem);
+			} catch (SerializationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			initialPopulation.add(newItem);
 		}
 
@@ -107,7 +113,12 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			// step 3: mutation
 			for (Representation<G> item : incomingPopulation) {
 				Representation<G> newItem = original.copy();
-				this.mutate(item);
+				try {
+					this.mutate(item);
+				} catch (SerializationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 
 			// step 4: fitness

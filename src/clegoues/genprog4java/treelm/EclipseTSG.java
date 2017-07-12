@@ -22,10 +22,12 @@ import com.google.common.collect.Multiset;
 
 import codemining.ast.AstNodeSymbol;
 import codemining.ast.TreeNode;
+import codemining.ast.java.AbstractJavaTreeExtractor;
 import codemining.lm.tsg.ITsgPosteriorProbabilityComputer;
 import codemining.lm.tsg.TSGNode;
 import codemining.lm.tsg.TSGrammar;
 import codemining.math.random.SampleUtils;
+import codemining.util.serialization.Serializer;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.Probability;
 
@@ -533,7 +535,8 @@ public class EclipseTSG {
 		}
 	}
 
-	private final Map< TSGNode, ? extends Multiset< TreeNode< TSGNode > > > grammar;
+	public final Map< TSGNode, ? extends Multiset< TreeNode< TSGNode > > > grammar;
 	private final ChainedJavaTreeExtractor tsgExtractor;
 	private final ITsgPosteriorProbabilityComputer< TSGNode > posterior;
+
 }

@@ -77,6 +77,11 @@ public class Configuration {
 			.withDefault( "./" )
 			.withHelp( "directory to GenProg" )
 			.build();
+	public static String grammarPath = ConfigurationBuilder.of( STRING )
+			.withVarName( "grammarPath" )
+			.withDefault( "./" )
+			.withHelp( "path to Probabilistic Model" )
+			.build();
 	public static String libs = ConfigurationBuilder.of( STRING )
 		.withVarName( "libs" )
 		.withHelp( "classpath to compile the project" )

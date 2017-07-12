@@ -7,6 +7,7 @@ import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
+import codemining.util.serialization.ISerializationStrategy.SerializationException;
 
 public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 
@@ -39,7 +40,12 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 		int numVariantsConsidered = 0;
 		while(numVariantsConsidered < RandomSingleEdit.maxVariants) {
 			Representation<G> variant = original.copy();
-			mutate(variant);
+			try {
+				mutate(variant);
+			} catch (SerializationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			if (fitnessEngine.testToFirstFailure(variant, true)) { 
 				this.noteSuccess(variant, original, 0);
 				if(!continueSearch) 
