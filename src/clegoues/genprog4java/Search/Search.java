@@ -65,6 +65,7 @@ import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
+import codemining.util.serialization.ISerializationStrategy.SerializationException;
 
 @SuppressWarnings("rawtypes")
 public abstract class Search<G extends EditOperation> {
@@ -256,7 +257,7 @@ public abstract class Search<G extends EditOperation> {
 	 * 
 	 * @return variant' modified/potentially mutated variant
 	 */
-	public void mutate(Representation<G> variant) throws GiveUpException {
+	public void mutate(Representation<G> variant) throws GiveUpException, SerializationException {
 		Localization localization = variant.getLocalization();
 		ArrayList<Location> faultyAtoms = localization.getFaultLocalization();
 		ArrayList<Location> proMutList = new ArrayList<Location>();
