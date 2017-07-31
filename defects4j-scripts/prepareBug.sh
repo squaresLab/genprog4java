@@ -20,7 +20,7 @@
 # Example usage, VM:
 #./prepareBug.sh Math 2 allHuman 100 ExamplesCheckedOut /usr/lib/jvm/java-7-oracle/ /usr/lib/jvm/java-8-oracle/
 
-if [ "$#" -ne 7 ]; then
+if [ "$#" -ne 9 ]; then
     echo "This script should be run with 7 parameters:"
 	echo "1st param: project name, sentence case (ex: Lang, Chart, Closure, Math, Time)"
 	echo "2nd param: bug number (ex: 1,2,3,4,...)"
@@ -29,6 +29,8 @@ if [ "$#" -ne 7 ]; then
 	echo "5th param is the folder where the bug files will be cloned to. Starting from $D4J_HOME"
 	echo "6th param is the folder where the java 7 instalation is located"
 	echo "7th param is the folder where the java 8 instalation is located"
+	echo "8th param is the folder where GenProg4Java is located"
+	echo "9th param is the path to the probabilistic model"
     exit 0
 fi
 
@@ -39,6 +41,8 @@ TESTSUITESAMPLE="$4"
 BUGSFOLDER="$5"
 DIROFJAVA7="$6"
 DIROFJAVA8="$7"
+GENPROG="$8"
+GRAMMARPATH="$9"
 
 #Add the path of defects4j so the defects4j's commands run 
 export PATH=$PATH:"$D4J_HOME"/framework/bin/
@@ -103,7 +107,7 @@ cd $BUGWD
 FILE=$D4J_HOME/$BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/defects4j.config
 /bin/cat <<EOM >$FILE
 seed = 0
-sanity = yes
+sanity = no
 popsize = 40
 javaVM = $DIROFJAVA7/jre/bin/java
 workingDir = $D4J_HOME/$BUGSFOLDER/$LOWERCASEPACKAGE$2Buggy/
@@ -123,6 +127,9 @@ targetClassName = $BUGWD/bugfiles.txt
 #edits=append;replace;delete
 #model=probabilistic
 #modelPath=/home/mausoto/probGenProg/genprog4java/overallModel.txt
+faultStrategy = entropy
+grammarPath = $GRAMMARPATH
+genProgDir = $GENPROG
 EOM
 
 #  get passing and failing tests as well as files

@@ -154,7 +154,7 @@ public class DefaultLocalization extends Localization {
 
 	
 	@Override
-	public Location getRandomLocation(double weight) {
+	public Location getRandomLocation(double weight) throws Exception {
 		return (Location) GlobalUtils.chooseOneWeighted(new ArrayList(this.getFaultLocalization()), weight);
 	}
 

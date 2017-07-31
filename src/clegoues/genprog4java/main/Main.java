@@ -35,6 +35,7 @@ package clegoues.genprog4java.main;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -61,8 +62,8 @@ public class Main {
 
 	protected static Logger logger = Logger.getLogger(Main.class);
 
-	public static void main(String[] args) throws IOException,
-	UnexpectedCoverageResultException {
+	@SuppressWarnings("unchecked")
+	public static void main(String[] args) throws Exception {
 		Search searchEngine = null;
 		Representation baseRep = null;
 		Localization localization = null;
@@ -97,7 +98,11 @@ public class Main {
 		fitnessEngine = new Fitness(); // Fitness must be created before rep!
 		baseRep = (Representation) new JavaRepresentation();
 		baseRep.load(Configuration.targetClassNames);
-
+		
+		//Debugging line statements from defects4j
+		//System.err.println("Bug found in atom(s): " + baseRep.atomIDofSourceLine(Integer.parseInt(args[1])));
+		//System.err.println("Bug found from file: " + baseRep.getFileFromStmt(Integer.parseInt(args[1])).pathToJavaFile());
+		
 		switch(Localization.faultStrategy.trim()) {
 		case "entropy": localization = new EntropyLocalization(baseRep);
 		break;

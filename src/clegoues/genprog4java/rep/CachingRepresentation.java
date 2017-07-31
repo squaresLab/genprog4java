@@ -115,7 +115,7 @@ Representation<G>  {
 		// FIXME: deserialize properly
 		for (ClassInfo base : bases) {
 			this.fromSource(base);
-			logger.info("loaded from source " + base);
+			logger.info("loaded from source " + base.getClassName());
 		}
 		if (Configuration.doSanity) {
 			if (!this.sanityCheck()) {

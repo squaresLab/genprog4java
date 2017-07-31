@@ -36,7 +36,7 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 
 	@Override
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
-			throws RepairFoundException, GiveUpException {
+			throws Exception {
 		int numVariantsConsidered = 0;
 		while(numVariantsConsidered < RandomSingleEdit.maxVariants) {
 			Representation<G> variant = original.copy();

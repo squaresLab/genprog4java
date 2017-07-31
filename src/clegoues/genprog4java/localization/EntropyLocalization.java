@@ -61,9 +61,9 @@ public class EntropyLocalization extends DefaultLocalization {
 					if ( value.equals( "" ) )
 						return null;
 					try {
-						TSGrammar<TSGNode> model =
+						TSGrammar<TSGNode> grammar =
 								(TSGrammar<TSGNode>) Serializer.getSerializer().deserializeFrom( value );
-						return new EclipseTSG( model );
+						return new EclipseTSG( grammar );
 					} catch (SerializationException e) {
 						logger.error( e.getMessage() );
 						return null;
@@ -72,7 +72,7 @@ public class EntropyLocalization extends DefaultLocalization {
 			}
 			)
 			.inGroup( "Entropy Parameters" )
-			.withFlag( "model" )
+			.withFlag( "grammar" )
 			.withVarName( "babbler" )
 			.withDefault( "" )
 			.withHelp( "model to use for babbling repairs" )
@@ -100,7 +100,8 @@ public class EntropyLocalization extends DefaultLocalization {
 	}
 
 	@Override
-	public Location getRandomLocation(double weight) {
+	public Location getRandomLocation(double weight) throws Exception {
+		@SuppressWarnings("unchecked")
 		ArrayList fault = new ArrayList(this.getFaultLocalization());
 		try {
 			TSGrammar<TSGNode> model =
@@ -113,22 +114,26 @@ public class EntropyLocalization extends DefaultLocalization {
 			for(int i=0; i<fault.size();i++) {
 				JavaLocation locate = (JavaLocation) fault.get(i);
 				List<ASTNode> faults = ASTUtils.decomposeASTNode(locate.getCodeElement());
+				
 				//Iterates all subtrees. Original tree in included in decomposeASTNode
 				for(int sub=0;sub<faults.size();sub++){
 					final TreeNode<TSGNode> tsgTree = TSGNode.convertTree(((AbstractJavaTreeExtractor) model.getTreeExtractor()).getTree(faults.get(sub)), 0);
 					double prob = probabilityComputer.getLog2ProbabilityOf(tsgTree);
+					double entropy = -prob * Math.exp(prob);
+					//Print statements for creating expression txt file
+					System.out.println("Tree: " + i+1 + " " + sub);
+					System.out.println("    Exp: " + faults.get(sub));
 					
-					//System.err.println("Subtree: "  + sub);
-					//System.err.println("Exp: " + faults.get(sub));
-					//System.err.println("Subtree Prob: " + "" + prob);
-					
+					//Print statment for creating file for R
+					//System.out.println(i+1 + " " + sub + ", " + prob + ", " + entropy);
 					rankedFaults.put(prob, faults.get(sub));
 				}
 			}
-			return new JavaASTNodeLocation(rankedFaults.firstEntry().getValue());
+			throw new Exception();
+			//return new JavaASTNodeLocation(rankedFaults.lastEntry().getValue());
 			
 		} catch (SerializationException e) {
-			new Throwable().getStackTrace();
+			System.err.println(e);
 		}
 		return null;	
 	}
