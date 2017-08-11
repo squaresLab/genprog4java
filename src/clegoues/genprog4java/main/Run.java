@@ -9,26 +9,27 @@ import clegoues.genprog4java.localization.UnexpectedCoverageResultException;
 
 public class Run {
 	
-	public static void main( String [] args) throws Exception{
-		executeFiles();
-	}
-	
-	public static void executeFiles() throws FileNotFoundException{
-		String projectName = "Mockito";
-		int limit = 38;
-		//HARD-CODED Statements:
+	public static void main(String[] args) throws FileNotFoundException{
+		if (args.length < 4) {
+			System.err.println(
+					"<projectName> <iteration in projectID> <Path to defect4j projects> <Path to where output will be stored>");
+			return;
+		}
+		String projectName = args[0];
+		int limit = Integer.parseInt(args[1]);
 		//examplePath goes to the directory with projects checked out by Defects4j
 		//outputPath goes to the directory where output results are appended
-		String examplePath = "/Users/ashleychen/Desktop/REUSE/defects4j/ExamplesCheckOut";
-		String outputPath = "/Users/ashleychen/Desktop/EntropyLocalization/";
+		String examplePath = args[2];
+		String outputPath = args[3]; 
 		
-		for(int i=1;i<limit+1;i++){
+		int i = limit;
+		//for(int i=1;i<limit+1;i++){
 			String[] arg = {examplePath + "/"+ projectName.toLowerCase()+ Integer.toString(i)+"Buggy/defects4j.config"};
 			PrintStream out = new PrintStream(new FileOutputStream(outputPath+ "/" +
 																	projectName + Integer.toString(i) + "_Probability.txt"));
 			
 			//Saves results from EntropyLocalization into txt file
-			System.setOut(out); //Can be commented when debugging
+			//System.setOut(out); //Can be commented when debugging
 			try {
 				Main.main(arg);
 			} catch (Exception e) {
@@ -36,10 +37,9 @@ public class Run {
 			}
 			System.err.println("Finished iter: " + Integer.toString(i));
 			System.err.println(limit+1);
-		}
+		//}
 	}
 }
-
 
 
 
