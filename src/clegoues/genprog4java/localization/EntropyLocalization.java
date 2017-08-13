@@ -88,8 +88,10 @@ public class EntropyLocalization extends DefaultLocalization {
 	protected void computeLocalization() throws UnexpectedCoverageResultException, IOException {
 		logger.info("Start Fault Localization");
 		TreeSet<Integer> negativePath = getPathInfo(DefaultLocalization.negCoverageFile, Fitness.negativeTests, false);
-
+		System.err.println(DefaultLocalization.negCoverageFile);
+		System.err.println("Size: " + negativePath.size());
 		for (Integer i : negativePath) {
+			System.err.println(i);
 			faultLocalization.add(original.instantiateLocation(i, 1.0));
 		}
 	}
@@ -101,8 +103,15 @@ public class EntropyLocalization extends DefaultLocalization {
 
 	@Override
 	public Location getRandomLocation(double weight) throws Exception {
+		return null;
+	}
+	
+	public ArrayList<ArrayList<String>> rankFaults() throws Exception {
 		@SuppressWarnings("unchecked")
 		ArrayList fault = new ArrayList(this.getFaultLocalization());
+		ArrayList<String> probOutput = new ArrayList<String>();
+		ArrayList<String> nameOutput = new ArrayList<String>();
+		
 		try {
 			TSGrammar<TSGNode> model =
 					(TSGrammar<TSGNode>) Serializer.getSerializer().deserializeFrom(Configuration.grammarPath);
@@ -121,17 +130,19 @@ public class EntropyLocalization extends DefaultLocalization {
 					double prob = probabilityComputer.getLog2ProbabilityOf(tsgTree);
 					double entropy = -prob * Math.exp(prob);
 					//Print statements for creating expression txt file
-					System.out.println("Tree: " + i+1 + " " + sub);
-					System.out.println("    Exp: " + faults.get(sub));
+					nameOutput.add("Tree: " + i+1 + " " + sub);
+					nameOutput.add("    Exp: " + faults.get(sub));
 					
-					//Print statment for creating file for R
-					//System.out.println(i+1 + " " + sub + ", " + prob + ", " + entropy);
+					//Print statement for creating file for R
+					probOutput.add(i+1 + " " + sub + ", " + prob + ", " + entropy);
 					rankedFaults.put(prob, faults.get(sub));
 				}
 			}
-			throw new Exception();
-			//return new JavaASTNodeLocation(rankedFaults.lastEntry().getValue());
 			
+			ArrayList<ArrayList<String>> faultOutput = new ArrayList<ArrayList<String>>();
+			faultOutput.add(probOutput);
+			faultOutput.add(nameOutput);
+			return faultOutput;
 		} catch (SerializationException e) {
 			System.err.println(e);
 		}

@@ -531,4 +531,10 @@ public class DefaultLocalization extends Localization {
 	}
 
 
+	@Override
+	public ArrayList<ArrayList<String>> rankFaults() throws Exception {
+		return null;
+	}
+
+
 }
