@@ -39,4 +39,6 @@ public abstract class Localization {
 	public abstract void setAllPossibleStmtsToFixLocalization();
 
 	protected abstract void computeLocalization() throws IOException, UnexpectedCoverageResultException;
+
+	public abstract ArrayList<ArrayList<String>> rankFaults() throws Exception;
 }
