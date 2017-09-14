@@ -237,7 +237,7 @@ public class Fitness {
 
 		switch(Fitness.granularity) {
 		case METHOD:
-			explodeTestClasses(intermedPosTests, intermedNegTests);
+	//		explodeTestClasses(intermedPosTests, intermedNegTests);
 		break;
 		case CLASS:
 		default:
