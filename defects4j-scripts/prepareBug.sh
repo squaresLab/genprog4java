@@ -121,7 +121,7 @@ targetClassName = $BUGWD/bugfiles.txt
 #sample=0.1
 #edits=append;replace;delete;FUNREP;PARREP;PARADD;PARREM;EXPREP;EXPADD;EXPREM;NULLCHECK;OBJINIT;RANGECHECK;SIZECHECK;CASTCHECK;LBOUNDSET;UBOUNDSET;OFFBYONE;SEQEXCH;CASTERMUT;CASTEEMUT
 #edits=append;replace;delete
-edits=FUNREP;PARREP;PARADD;PARREM;EXPREP;EXPADD;EXPREM;NULLCHECK;OBJINIT;RANGECHECK;SIZECHECK;CASTCHECK
+#edits=FUNREP;PARREP;PARADD;PARREM;EXPREP;EXPADD;EXPREM;NULLCHECK;OBJINIT;RANGECHECK;SIZECHECK;CASTCHECK
 #model=probabilistic
 #modelPath=/home/mausoto/probGenProg/genprog4java/overallModel.txt
 EOM
@@ -143,37 +143,6 @@ case "$OPTION" in
 "onlyRelevant" ) 
         defects4j export -p tests.relevant > $BUGWD/pos.tests
         ;;
-
-"generated" )
-
-  JAVALOCATION=$(which java)
-
-  #Create the new test suite
-  echo Creating new test suite...
-  SEED=1
-  cd "$D4J_HOME"/framework/bin/
-  perl run_randoop.pl -p "$PROJECT" -v "$BUGNUMBER"f -n "$SEED" -o $BUGWD/"$TESTWD"/outputOfRandoop/ -b 1800
-  perl "$D4J_HOME"/framework/util/fix_test_suite.pl -p "$PROJECT" -d $BUGWD/"$TESTWD"/outputOfRandoop/$PROJECT/randoop/$SEED/
-  OUTPUT=$(defects4j test -s $BUGWD/"$TESTWD"/outputOfRandoop/$PROJECT/randoop/"$SEED"/"$PROJECT"-"$BUGNUMBER"f-randoop."$SEED".tar.bz2 -w $BUGWD)
-  TOTALEXECUTED=$(wc -l < "$D4J_HOME/totalTestsExecuted.txt")
-  FAILEDTESTS=$(echo ${OUTPUT:(15)} | awk '{print $1;}')
-  echo "$PROJECT $BUGNUMBER $TOTALEXECUTED $FAILEDTESTS" >> $D4J_HOME/ResultsFromRunningGenereatedTestSuites.txt
-  echo "$FAILEDTESTS: tests failed from $TOTALEXECUTED in $PROJECT $BUGNUMBER"
-  rm "$D4J_HOME/totalTestsExecuted.txt"
-
-
-
-  #PRINT=$(echo "${OUTPUT:(15)}")
-  #echo "This is what happened after the substitution: $PRINT"
-
-  #Untar the generated test into the tests folder
-  cd $BUGWD/"$TESTWD"/
-  tar xvjf outputOfRandoop/$PROJECT/randoop/1/"$PROJECT"-"$BUGNUMBER"f-randoop.1.tar.bz2
-
-  find . -maxdepth 1 -name "*.java" -exec basename \{} .java \; > $BUGWD/pos.tests
-  rm $BUGWD/"$TESTWD"/*.java
-
-;;
 esac
 
 
