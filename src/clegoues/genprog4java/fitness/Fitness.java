@@ -237,7 +237,6 @@ public class Fitness {
 
 		switch(Fitness.granularity) {
 		case METHOD:
-	//		explodeTestClasses(intermedPosTests, intermedNegTests);
 		break;
 		case CLASS:
 		default:
@@ -385,68 +384,7 @@ public class Fitness {
 		}
 		return realTests;
 	}
-	
-	private void explodeTestClasses(ArrayList<String> initialPosTests, ArrayList<String> initialNegTests) {
-		ArrayList<String> realPosTests = new ArrayList<String>();
-		try {
-			URLClassLoader testLoader = testLoader();
-			// First, get the negative classes.  
-			// need to do this to filter the positive classes, since
-			// we can't actually call filterTestClasses first
-			HashMap<String, List<String>> negClazzes = new HashMap<String, List<String>>(); 
-			// get all classes containing failing tests, as well as those failing tests
-			for(String testName : initialNegTests) {
-				if(testName.contains("::")) {
-					String[] split = testName.split("::");
-					String clazzName = split[0];
-					String methodName = split[1].trim();
-					List<String> methodList;
-					if(negClazzes.containsKey(clazzName)) {
-						methodList = negClazzes.get(clazzName);
-					} else {
-						methodList = new ArrayList<String>();
-						negClazzes.put(clazzName,methodList);
-					}
-					methodList.add(methodName);
-				}
-			}
-			
-			for(String clazzName : negClazzes.keySet()) {
-				if(initialPosTests.contains(clazzName)) {
-					initialPosTests.remove(clazzName);
-				}
-			}
 		
-			// deal with the simple case: get all public methods from the 
-			// initially positive classes and I'm 90% sure this isn't going to work
-			for(String clazzName : initialPosTests) {
-				if(!clazzName.contains("::")) {
-					for(String m : getTestMethodsFromClazz(clazzName, testLoader)) {
-						realPosTests.add(clazzName + "::" + m);
-					}
-				} else {
-					realPosTests.add(clazzName);
-				}
-			}
-			
-			for(Map.Entry<String, List<String>> entry : negClazzes.entrySet()) {
-				String clazzName = entry.getKey();
-				List<String> negMethods = entry.getValue();
-				for(String m : getTestMethodsFromClazz(clazzName, testLoader)) {
-					if(!negMethods.contains(m)) {
-						realPosTests.add(clazzName + "::" + m);
-					}
-				}
-			}
-			
-			initialPosTests.clear();
-			initialPosTests.addAll(realPosTests);
-		} catch (MalformedURLException e) {
-			logger.error("malformedURLException, giving up in a profoundly ungraceful way.");
-			Runtime.getRuntime().exit(1);
-		}
-	}
-	
 	/** load tests from a file.  Does not check that the tests are valid, just that the file exists.
 	 * If the file doesn't exist, kills the runtime to exit, because that means that things have gone VERY
 	 * weird.
@@ -469,7 +407,7 @@ public class Fitness {
 		return allLines;
 	}
 
-	/** testModel is used for certain kinds of search, namely RSRepair; it tracks
+	/** testModel is used for certain kinds of search, namely TrpAutoRepair; it tracks
 	 *  how "useful" tests have been in the past in terms of number of patches "killed"
 	 *  and thus governs the order in which tests are run (when the feature is being used).
 	 *  initializeModel needs to be called before it's used.
@@ -547,7 +485,7 @@ public class Fitness {
 
 	/**
 	 * Test a variant sequentially on all tests, starting with the negative tests.
-	 * Quits as soon as a failed test is found.  Uses the test model @see {@link clegoues.genprog4java.Search.RSRepair}
+	 * Quits as soon as a failed test is found.  Uses the test model @see {@link clegoues.genprog4java.Search.TrpAutoRepair}
 	 * if specified. Does not sample.
 	 * @param rep variant to be tested
 	 * @param withModel whether to use the testModel
