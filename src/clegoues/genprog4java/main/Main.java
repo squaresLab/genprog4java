@@ -98,7 +98,7 @@ public class Main {
 
 		case "brute": searchEngine = new BruteForce<JavaEditOperation>(fitnessEngine);
 		break;
-		case "rsrepair": searchEngine = new RandomSingleEdit<JavaEditOperation>(fitnessEngine);
+		case "trp": searchEngine = new RandomSingleEdit<JavaEditOperation>(fitnessEngine);
 		break;
 		case "oracle": searchEngine = new OracleSearch<JavaEditOperation>(fitnessEngine);
 		break;
