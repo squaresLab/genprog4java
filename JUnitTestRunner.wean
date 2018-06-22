@@ -1,0 +1,96 @@
+===========================================================================
+com.sun.proxy.$Proxy2:::CLASS
+com.sun.proxy.$Proxy2.m1 != null
+com.sun.proxy.$Proxy2.m3 != null
+com.sun.proxy.$Proxy2.m4 != null
+com.sun.proxy.$Proxy2.m2 != null
+com.sun.proxy.$Proxy2.m5 != null
+com.sun.proxy.$Proxy2.m0 != null
+===========================================================================
+com.sun.proxy.$Proxy2:::OBJECT
+this != null
+===========================================================================
+com.sun.proxy.$Proxy2.$Proxy2(java.lang.reflect.InvocationHandler):::ENTER
+arg0 != null
+arg0.getClass().getName() == sun.reflect.annotation.AnnotationInvocationHandler.class.getName()
+===========================================================================
+com.sun.proxy.$Proxy2.$Proxy2(java.lang.reflect.InvocationHandler):::EXIT
+===========================================================================
+com.sun.proxy.$Proxy2.annotationType():::ENTER
+===========================================================================
+com.sun.proxy.$Proxy2.annotationType():::EXIT
+com.sun.proxy.$Proxy2.m1 == \old(com.sun.proxy.$Proxy2.m1)
+com.sun.proxy.$Proxy2.m3 == \old(com.sun.proxy.$Proxy2.m3)
+com.sun.proxy.$Proxy2.m4 == \old(com.sun.proxy.$Proxy2.m4)
+com.sun.proxy.$Proxy2.m2 == \old(com.sun.proxy.$Proxy2.m2)
+com.sun.proxy.$Proxy2.m5 == \old(com.sun.proxy.$Proxy2.m5)
+com.sun.proxy.$Proxy2.m0 == \old(com.sun.proxy.$Proxy2.m0)
+\result != null
+===========================================================================
+com.sun.proxy.$Proxy2.expected():::ENTER
+===========================================================================
+com.sun.proxy.$Proxy2.expected():::EXIT
+com.sun.proxy.$Proxy2.m1 == \old(com.sun.proxy.$Proxy2.m1)
+com.sun.proxy.$Proxy2.m3 == \old(com.sun.proxy.$Proxy2.m3)
+com.sun.proxy.$Proxy2.m4 == \old(com.sun.proxy.$Proxy2.m4)
+com.sun.proxy.$Proxy2.m2 == \old(com.sun.proxy.$Proxy2.m2)
+com.sun.proxy.$Proxy2.m5 == \old(com.sun.proxy.$Proxy2.m5)
+com.sun.proxy.$Proxy2.m0 == \old(com.sun.proxy.$Proxy2.m0)
+\result != null
+===========================================================================
+com.sun.proxy.$Proxy2.timeout():::ENTER
+===========================================================================
+com.sun.proxy.$Proxy2.timeout():::EXIT
+com.sun.proxy.$Proxy2.m1 == \old(com.sun.proxy.$Proxy2.m1)
+com.sun.proxy.$Proxy2.m3 == \old(com.sun.proxy.$Proxy2.m3)
+com.sun.proxy.$Proxy2.m4 == \old(com.sun.proxy.$Proxy2.m4)
+com.sun.proxy.$Proxy2.m2 == \old(com.sun.proxy.$Proxy2.m2)
+com.sun.proxy.$Proxy2.m5 == \old(com.sun.proxy.$Proxy2.m5)
+com.sun.proxy.$Proxy2.m0 == \old(com.sun.proxy.$Proxy2.m0)
+\result == 0
+===========================================================================
+com.sun.proxy.$Proxy4:::CLASS
+com.sun.proxy.$Proxy4.m1 != null
+com.sun.proxy.$Proxy4.m2 != null
+com.sun.proxy.$Proxy4.m3 != null
+com.sun.proxy.$Proxy4.m0 != null
+===========================================================================
+com.sun.proxy.$Proxy4:::OBJECT
+this != null
+===========================================================================
+com.sun.proxy.$Proxy4.$Proxy4(java.lang.reflect.InvocationHandler):::ENTER
+arg0 != null
+arg0.getClass().getName() == sun.reflect.annotation.AnnotationInvocationHandler.class.getName()
+===========================================================================
+com.sun.proxy.$Proxy4.$Proxy4(java.lang.reflect.InvocationHandler):::EXIT
+===========================================================================
+com.sun.proxy.$Proxy4.annotationType():::ENTER
+===========================================================================
+com.sun.proxy.$Proxy4.annotationType():::EXIT
+com.sun.proxy.$Proxy4.m1 == \old(com.sun.proxy.$Proxy4.m1)
+com.sun.proxy.$Proxy4.m2 == \old(com.sun.proxy.$Proxy4.m2)
+com.sun.proxy.$Proxy4.m3 == \old(com.sun.proxy.$Proxy4.m3)
+com.sun.proxy.$Proxy4.m0 == \old(com.sun.proxy.$Proxy4.m0)
+\result != null
+===========================================================================
+packageSimpleExample.SimpleExample:::OBJECT
+this != null
+===========================================================================
+packageSimpleExample.SimpleExample.SimpleExample():::EXIT
+===========================================================================
+packageSimpleExample.SimpleExample.mid(int, int, int):::ENTER
+arg0 == 1 || arg0 == 2 || arg0 == 3
+arg1 == 1 || arg1 == 2 || arg1 == 3
+arg2 == 1 || arg2 == 2 || arg2 == 3
+===========================================================================
+packageSimpleExample.SimpleExample.mid(int, int, int):::EXIT
+\result == 1 || \result == 2
+===========================================================================
+tests.SimpleExampleTestsPos:::OBJECT
+this != null
+===========================================================================
+tests.SimpleExampleTestsPos.SimpleExampleTestsPos():::EXIT
+===========================================================================
+tests.SimpleExampleTestsPos.severalTestCasesToTestMid():::ENTER
+===========================================================================
+tests.SimpleExampleTestsPos.severalTestCasesToTestMid():::EXIT

@@ -106,6 +106,9 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 				Representation<G> newItem = original.copy();
 				this.mutate(item);
 			}
+			
+			// step 3.5 test invariant
+			
 
 			// step 4: fitness
 			for (Representation<G> item : incomingPopulation) {
