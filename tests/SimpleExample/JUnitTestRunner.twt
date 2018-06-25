@@ -1,0 +1,30 @@
+Method: packageSimpleExample.SimpleExample
+Location: OBJECT
+this != null
+
+Method: packageSimpleExample.SimpleExample.SimpleExample()
+Location: EXIT
+
+Method: packageSimpleExample.SimpleExample.mid(int, int, int)
+Location: ENTER
+arg0 == 1 || arg0 == 2 || arg0 == 3
+arg1 == 1 || arg1 == 2 || arg1 == 3
+arg2 == 1 || arg2 == 2 || arg2 == 3
+
+Method: packageSimpleExample.SimpleExample.mid(int, int, int)
+Location: EXIT
+\result == 1 || \result == 2
+
+Method: tests.SimpleExampleTestsPos
+Location: OBJECT
+this != null
+
+Method: tests.SimpleExampleTestsPos.SimpleExampleTestsPos()
+Location: EXIT
+
+Method: tests.SimpleExampleTestsPos.severalTestCasesToTestMid()
+Location: ENTER
+
+Method: tests.SimpleExampleTestsPos.severalTestCasesToTestMid()
+Location: EXIT
+

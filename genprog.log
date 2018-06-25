@@ -57,3 +57,55 @@ INFO	2018-06-22 11:39:16,020	21256	clegoues.genprog4java.fitness.Fitness	[main]	
 INFO	2018-06-22 11:39:16,020	21256	clegoues.genprog4java.main.Main	[main]	
 Total elapsed time: 21
 
+DEBUG	2018-06-25 10:04:26,919	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-25 10:04:27,642	723	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-25 10:04:29,816	2897	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2018-06-25 10:04:29,817	2898	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-25 10:04:30,371	3452	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-25 10:04:30,438	3519	clegoues.genprog4java.rep.CachingRepresentation	[main]	1 tests out of scope so far, out of 1
+INFO	2018-06-25 10:04:30,438	3519	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+ERROR	2018-06-25 10:04:30,438	3519	clegoues.genprog4java.rep.CachingRepresentation	[main]	cacheRep: sanity: repair.sanity failed positive test tests.SimpleExampleTestsPos
+INFO	2018-06-25 10:04:30,438	3519	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+ERROR	2018-06-25 10:04:30,438	3519	clegoues.genprog4java.rep.CachingRepresentation	[main]	no positive tests pass.
+ERROR	2018-06-25 10:04:30,438	3519	clegoues.genprog4java.rep.CachingRepresentation	[main]	Sanity check failed, giving up
+DEBUG	2018-06-25 10:06:23,148	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-25 10:06:23,757	609	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-25 10:06:26,033	2885	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2018-06-25 10:06:26,035	2887	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-25 10:06:26,984	3836	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-25 10:06:27,295	4147	clegoues.genprog4java.rep.CachingRepresentation	[main]	1 tests out of scope so far, out of 1
+INFO	2018-06-25 10:06:27,295	4147	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+ERROR	2018-06-25 10:06:27,295	4147	clegoues.genprog4java.rep.CachingRepresentation	[main]	cacheRep: sanity: repair.sanity failed positive test tests.SimpleExampleTestsPos
+INFO	2018-06-25 10:06:27,295	4147	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+ERROR	2018-06-25 10:06:27,295	4147	clegoues.genprog4java.rep.CachingRepresentation	[main]	no positive tests pass.
+ERROR	2018-06-25 10:06:27,295	4147	clegoues.genprog4java.rep.CachingRepresentation	[main]	Sanity check failed, giving up
+DEBUG	2018-06-25 10:08:48,947	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-25 10:08:49,762	815	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-25 10:08:51,832	2885	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2018-06-25 10:08:51,833	2886	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-25 10:08:52,261	3314	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-25 10:08:52,338	3391	clegoues.genprog4java.rep.CachingRepresentation	[main]	1 tests out of scope so far, out of 1
+INFO	2018-06-25 10:08:52,339	3392	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+ERROR	2018-06-25 10:08:52,342	3395	clegoues.genprog4java.rep.CachingRepresentation	[main]	cacheRep: sanity: repair.sanity failed positive test tests.SimpleExampleTestsPos
+INFO	2018-06-25 10:08:52,343	3396	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+ERROR	2018-06-25 10:08:52,343	3396	clegoues.genprog4java.rep.CachingRepresentation	[main]	no positive tests pass.
+ERROR	2018-06-25 10:08:52,343	3396	clegoues.genprog4java.rep.CachingRepresentation	[main]	Sanity check failed, giving up
+DEBUG	2018-06-25 10:09:58,545	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-25 10:09:59,319	774	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-25 10:10:01,475	2930	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2018-06-25 10:10:01,476	2931	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-25 10:10:01,924	3379	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-25 10:10:01,993	3448	clegoues.genprog4java.rep.CachingRepresentation	[main]	1 tests out of scope so far, out of 1
+INFO	2018-06-25 10:10:01,993	3448	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+ERROR	2018-06-25 10:10:01,993	3448	clegoues.genprog4java.rep.CachingRepresentation	[main]	cacheRep: sanity: repair.sanity failed positive test tests.SimpleExampleTestsPos
+INFO	2018-06-25 10:10:01,993	3448	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+ERROR	2018-06-25 10:10:01,993	3448	clegoues.genprog4java.rep.CachingRepresentation	[main]	no positive tests pass.
+ERROR	2018-06-25 10:10:01,993	3448	clegoues.genprog4java.rep.CachingRepresentation	[main]	Sanity check failed, giving up

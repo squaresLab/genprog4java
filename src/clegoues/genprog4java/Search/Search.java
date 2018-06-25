@@ -351,7 +351,8 @@ public abstract class Search<G extends EditOperation> {
 	public void doSearch(Representation<G> original,
 			Population<G> incomingPopulation) throws
 	CloneNotSupportedException {
-
+		
+		//normal
 		try {
 			this.runAlgorithm(original, incomingPopulation);
 			Fitness.serializeTestCache();

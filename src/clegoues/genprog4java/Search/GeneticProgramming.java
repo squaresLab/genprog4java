@@ -4,6 +4,7 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
+import ylyu1.wean.VariantCheckerMain;
 
 public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 	private int generationsRun = 0;
@@ -88,10 +89,17 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		 */
 		logger.info("search: genetic algorithm begins\n");
 
+		// Step 0: run daikon
+		System.out.println("Here we are");
+		VariantCheckerMain.runDaikon();
+		
 		assert (Search.generations >= 0);
 		Population<G> incomingPopulation = this.initialize(original,
 				initialPopulation);
 		int gen = 1;
+		
+		
+		
 		while (gen < Search.generations) {
 			logger.info("search: generation" + gen);
 			generationsRun++;

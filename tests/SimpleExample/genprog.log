@@ -1,0 +1,629 @@
+DEBUG	2018-06-25 10:15:21,479	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-25 10:15:22,316	837	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-25 10:15:23,553	2074	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2018-06-25 10:15:23,554	2075	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-25 10:15:24,383	2904	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-25 10:15:24,739	3260	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2018-06-25 10:15:24,740	3261	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2018-06-25 10:15:24,970	3491	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2018-06-25 10:15:24,970	3491	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 1416)
+INFO	2018-06-25 10:15:24,971	3492	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2018-06-25 10:15:25,008	3529	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2018-06-25 10:15:25,466	3987	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2018-06-25 10:15:25,873	4394	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2018-06-25 10:15:25,874	4395	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2018-06-25 10:15:26,360	4881	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: variant0)
+INFO	2018-06-25 10:15:26,919	5440	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,7) (stored at: variant1)
+INFO	2018-06-25 10:15:27,359	5880	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: variant2)
+INFO	2018-06-25 10:15:27,813	6334	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,14) (stored at: variant3)
+INFO	2018-06-25 10:15:28,272	6793	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(17,7) (stored at: variant4)
+INFO	2018-06-25 10:15:28,721	7242	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(5,5) (stored at: variant5)
+INFO	2018-06-25 10:15:29,190	7711	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(4) (stored at: variant6)
+INFO	2018-06-25 10:15:29,663	8184	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,4) (stored at: variant7)
+INFO	2018-06-25 10:15:30,127	8648	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,13) (stored at: variant8)
+INFO	2018-06-25 10:15:30,746	9267	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: variant9)
+INFO	2018-06-25 10:15:31,222	9743	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 2.0 StmtAppend(5,17) (stored at: variant10)
+INFO	2018-06-25 10:15:31,687	10208	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,7) (stored at: variant11)
+INFO	2018-06-25 10:15:32,126	10647	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,5) (stored at: variant12)
+INFO	2018-06-25 10:15:32,127	10648	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:15:32,611	11132	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(15) (stored at: variant13)
+INFO	2018-06-25 10:15:33,054	11575	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(7,4) (stored at: variant14)
+INFO	2018-06-25 10:15:33,498	12019	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,9) (stored at: variant15)
+INFO	2018-06-25 10:15:33,946	12467	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(7,16) (stored at: variant16)
+ERROR	2018-06-25 10:15:33,980	12501	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageSimpleExample/SimpleExample.java:23: error: variable ret might not have been initialized
+	return ret;
+	       ^
+1 error
+1 warning
+
+INFO	2018-06-25 10:15:33,982	12503	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtDelete(2) at variant17 fails to compile
+
+INFO	2018-06-25 10:15:33,983	12504	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(2) (stored at: variant17)
+INFO	2018-06-25 10:15:34,554	13075	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,15) (stored at: variant18)
+INFO	2018-06-25 10:15:34,815	13336	clegoues.genprog4java.Search.Search	[main]	search: generation1
+INFO	2018-06-25 10:15:34,889	13410	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:15:35,383	13904	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,8) (stored at: variant19)
+INFO	2018-06-25 10:15:35,838	14359	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(6,16) (stored at: variant20)
+INFO	2018-06-25 10:15:36,294	14815	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(14,9) (stored at: variant21)
+INFO	2018-06-25 10:15:36,741	15262	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 3.0 StmtAppend(9,16) (stored at: variant22)
+INFO	2018-06-25 10:15:36,741	15262	clegoues.genprog4java.Search.Search	[main]	
+Repair Found: StmtAppend(9,16) (in variant22)
+
+INFO	2018-06-25 10:15:36,755	15276	clegoues.genprog4java.fitness.Fitness	[main]	Serialized test cache to file testcache.ser
+INFO	2018-06-25 10:15:36,755	15276	clegoues.genprog4java.main.Main	[main]	
+Total elapsed time: 15
+
+DEBUG	2018-06-25 10:17:54,195	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-25 10:17:54,767	572	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-25 10:17:56,836	2641	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2018-06-25 10:17:56,836	2641	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-25 10:17:57,269	3074	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-25 10:17:57,531	3336	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2018-06-25 10:17:57,534	3339	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2018-06-25 10:17:57,987	3792	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2018-06-25 10:17:57,991	3796	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 1155)
+INFO	2018-06-25 10:17:57,992	3797	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2018-06-25 10:17:58,110	3915	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2018-06-25 10:17:58,659	4464	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2018-06-25 10:17:59,213	5018	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2018-06-25 10:17:59,213	5018	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2018-06-25 10:17:59,241	5046	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: )
+INFO	2018-06-25 10:17:59,460	5265	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,7) (stored at: )
+INFO	2018-06-25 10:17:59,466	5271	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:17:59,484	5289	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,14) (stored at: )
+INFO	2018-06-25 10:17:59,496	5301	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(17,7) (stored at: )
+INFO	2018-06-25 10:17:59,515	5320	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(5,5) (stored at: )
+INFO	2018-06-25 10:17:59,528	5333	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(4) (stored at: )
+INFO	2018-06-25 10:17:59,555	5360	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,4) (stored at: )
+INFO	2018-06-25 10:17:59,559	5364	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,13) (stored at: )
+INFO	2018-06-25 10:17:59,570	5375	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: )
+INFO	2018-06-25 10:17:59,587	5392	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 2.0 StmtAppend(5,17) (stored at: )
+INFO	2018-06-25 10:17:59,594	5399	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,7) (stored at: )
+INFO	2018-06-25 10:17:59,605	5410	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,5) (stored at: )
+INFO	2018-06-25 10:17:59,622	5427	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:17:59,626	5431	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(15) (stored at: )
+INFO	2018-06-25 10:17:59,640	5445	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(7,4) (stored at: )
+INFO	2018-06-25 10:17:59,643	5448	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,9) (stored at: )
+INFO	2018-06-25 10:17:59,655	5460	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(7,16) (stored at: )
+INFO	2018-06-25 10:17:59,669	5474	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(2) (stored at: )
+INFO	2018-06-25 10:17:59,687	5492	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,15) (stored at: )
+INFO	2018-06-25 10:18:00,044	5849	clegoues.genprog4java.Search.Search	[main]	search: generation1
+ERROR	2018-06-25 10:18:00,548	6353	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageSimpleExample/SimpleExample.java:23: error: variable ret might not have been initialized
+	return ret;
+	       ^
+1 error
+1 warning
+
+INFO	2018-06-25 10:18:00,584	6389	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:18:00,594	6399	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,8) (stored at: )
+INFO	2018-06-25 10:18:00,596	6401	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(6,16) (stored at: )
+INFO	2018-06-25 10:18:00,604	6409	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(14,9) (stored at: )
+INFO	2018-06-25 10:18:00,608	6413	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 3.0 StmtAppend(9,16) (stored at: )
+INFO	2018-06-25 10:18:00,614	6419	clegoues.genprog4java.Search.Search	[main]	
+Repair Found: StmtAppend(9,16) (in )
+
+INFO	2018-06-25 10:18:00,631	6436	clegoues.genprog4java.fitness.Fitness	[main]	Serialized test cache to file testcache.ser
+INFO	2018-06-25 10:18:00,634	6439	clegoues.genprog4java.main.Main	[main]	
+Total elapsed time: 6
+
+DEBUG	2018-06-25 10:20:12,487	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-25 10:20:13,344	857	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-25 10:20:15,181	2694	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2018-06-25 10:20:15,183	2696	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-25 10:20:16,218	3731	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-25 10:20:16,498	4011	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2018-06-25 10:20:16,498	4011	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2018-06-25 10:20:16,712	4225	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2018-06-25 10:20:16,712	4225	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 1529)
+INFO	2018-06-25 10:20:16,713	4226	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2018-06-25 10:20:16,750	4263	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2018-06-25 10:20:17,187	4700	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2018-06-25 10:20:17,570	5083	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2018-06-25 10:20:17,571	5084	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2018-06-25 10:20:17,586	5099	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: )
+INFO	2018-06-25 10:20:17,694	5207	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,7) (stored at: )
+INFO	2018-06-25 10:20:17,707	5220	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:20:17,719	5232	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,14) (stored at: )
+INFO	2018-06-25 10:20:17,724	5237	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(17,7) (stored at: )
+INFO	2018-06-25 10:20:17,727	5240	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(5,5) (stored at: )
+INFO	2018-06-25 10:20:17,729	5242	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(4) (stored at: )
+INFO	2018-06-25 10:20:17,739	5252	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,4) (stored at: )
+INFO	2018-06-25 10:20:17,744	5257	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,13) (stored at: )
+INFO	2018-06-25 10:20:17,761	5274	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: )
+INFO	2018-06-25 10:20:17,781	5294	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 2.0 StmtAppend(5,17) (stored at: )
+INFO	2018-06-25 10:20:17,793	5306	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,7) (stored at: )
+INFO	2018-06-25 10:20:17,797	5310	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,5) (stored at: )
+INFO	2018-06-25 10:20:17,806	5319	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:20:17,822	5335	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(15) (stored at: )
+INFO	2018-06-25 10:20:17,839	5352	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(7,4) (stored at: )
+INFO	2018-06-25 10:20:17,860	5373	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,9) (stored at: )
+INFO	2018-06-25 10:20:17,863	5376	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(7,16) (stored at: )
+INFO	2018-06-25 10:20:17,880	5393	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(2) (stored at: )
+INFO	2018-06-25 10:20:17,900	5413	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,15) (stored at: )
+INFO	2018-06-25 10:20:18,168	5681	clegoues.genprog4java.Search.Search	[main]	search: generation1
+ERROR	2018-06-25 10:20:18,878	6391	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageSimpleExample/SimpleExample.java:23: error: variable ret might not have been initialized
+	return ret;
+	       ^
+1 error
+1 warning
+
+INFO	2018-06-25 10:20:18,950	6463	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:20:18,960	6473	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,8) (stored at: )
+INFO	2018-06-25 10:20:18,976	6489	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(6,16) (stored at: )
+INFO	2018-06-25 10:20:18,985	6498	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(14,9) (stored at: )
+INFO	2018-06-25 10:20:19,012	6525	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 3.0 StmtAppend(9,16) (stored at: )
+INFO	2018-06-25 10:20:19,012	6525	clegoues.genprog4java.Search.Search	[main]	
+Repair Found: StmtAppend(9,16) (in )
+
+INFO	2018-06-25 10:20:19,029	6542	clegoues.genprog4java.fitness.Fitness	[main]	Serialized test cache to file testcache.ser
+INFO	2018-06-25 10:20:19,029	6542	clegoues.genprog4java.main.Main	[main]	
+Total elapsed time: 6
+
+DEBUG	2018-06-25 10:23:18,071	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-25 10:23:18,560	489	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-25 10:23:20,560	2489	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2018-06-25 10:23:20,562	2491	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-25 10:23:21,029	2958	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-25 10:23:21,244	3173	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2018-06-25 10:23:21,245	3174	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2018-06-25 10:23:21,490	3419	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2018-06-25 10:23:21,491	3420	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 929)
+INFO	2018-06-25 10:23:21,491	3420	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2018-06-25 10:23:21,530	3459	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2018-06-25 10:23:22,003	3932	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2018-06-25 10:23:22,430	4359	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2018-06-25 10:23:22,431	4360	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2018-06-25 10:23:22,442	4371	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: )
+INFO	2018-06-25 10:23:22,537	4466	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,7) (stored at: )
+INFO	2018-06-25 10:23:22,543	4472	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:23:22,550	4479	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,14) (stored at: )
+INFO	2018-06-25 10:23:22,562	4491	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(17,7) (stored at: )
+INFO	2018-06-25 10:23:22,573	4502	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(5,5) (stored at: )
+INFO	2018-06-25 10:23:22,580	4509	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(4) (stored at: )
+INFO	2018-06-25 10:23:22,597	4526	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,4) (stored at: )
+INFO	2018-06-25 10:23:22,641	4570	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,13) (stored at: )
+INFO	2018-06-25 10:23:22,655	4584	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: )
+INFO	2018-06-25 10:23:22,678	4607	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 2.0 StmtAppend(5,17) (stored at: )
+INFO	2018-06-25 10:23:22,694	4623	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,7) (stored at: )
+INFO	2018-06-25 10:23:22,699	4628	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,5) (stored at: )
+INFO	2018-06-25 10:23:22,700	4629	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:23:22,707	4636	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(15) (stored at: )
+INFO	2018-06-25 10:23:22,719	4648	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(7,4) (stored at: )
+INFO	2018-06-25 10:23:22,734	4663	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,9) (stored at: )
+INFO	2018-06-25 10:23:22,737	4666	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(7,16) (stored at: )
+INFO	2018-06-25 10:23:22,743	4672	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(2) (stored at: )
+INFO	2018-06-25 10:23:22,752	4681	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,15) (stored at: )
+INFO	2018-06-25 10:23:23,012	4941	clegoues.genprog4java.Search.Search	[main]	search: generation1
+ERROR	2018-06-25 10:23:23,837	5766	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageSimpleExample/SimpleExample.java:23: error: variable ret might not have been initialized
+	return ret;
+	       ^
+1 error
+1 warning
+
+INFO	2018-06-25 10:23:23,954	5883	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:23:23,959	5888	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,8) (stored at: )
+INFO	2018-06-25 10:23:23,977	5906	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(6,16) (stored at: )
+INFO	2018-06-25 10:23:23,980	5909	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(14,9) (stored at: )
+INFO	2018-06-25 10:23:24,001	5930	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 3.0 StmtAppend(9,16) (stored at: )
+INFO	2018-06-25 10:23:24,011	5940	clegoues.genprog4java.Search.Search	[main]	
+Repair Found: StmtAppend(9,16) (in )
+
+INFO	2018-06-25 10:23:24,039	5968	clegoues.genprog4java.fitness.Fitness	[main]	Serialized test cache to file testcache.ser
+INFO	2018-06-25 10:23:24,044	5973	clegoues.genprog4java.main.Main	[main]	
+Total elapsed time: 6
+
+DEBUG	2018-06-25 10:25:38,970	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-25 10:25:39,498	528	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-25 10:25:41,520	2550	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2018-06-25 10:25:41,520	2550	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-25 10:25:41,961	2991	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-25 10:25:42,184	3214	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2018-06-25 10:25:42,189	3219	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2018-06-25 10:25:42,414	3444	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2018-06-25 10:25:42,414	3444	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 894)
+INFO	2018-06-25 10:25:42,414	3444	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2018-06-25 10:25:42,453	3483	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2018-06-25 10:25:42,921	3951	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2018-06-25 10:25:43,330	4360	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2018-06-25 10:25:43,330	4360	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2018-06-25 10:25:43,342	4372	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: )
+INFO	2018-06-25 10:25:43,466	4496	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,7) (stored at: )
+INFO	2018-06-25 10:25:43,469	4499	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:25:43,479	4509	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,14) (stored at: )
+INFO	2018-06-25 10:25:43,480	4510	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(17,7) (stored at: )
+INFO	2018-06-25 10:25:43,488	4518	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(5,5) (stored at: )
+INFO	2018-06-25 10:25:43,500	4530	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(4) (stored at: )
+INFO	2018-06-25 10:25:43,508	4538	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,4) (stored at: )
+INFO	2018-06-25 10:25:43,515	4545	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,13) (stored at: )
+INFO	2018-06-25 10:25:43,522	4552	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: )
+INFO	2018-06-25 10:25:43,540	4570	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 2.0 StmtAppend(5,17) (stored at: )
+INFO	2018-06-25 10:25:43,543	4573	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,7) (stored at: )
+INFO	2018-06-25 10:25:43,550	4580	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,5) (stored at: )
+INFO	2018-06-25 10:25:43,560	4590	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:25:43,565	4595	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(15) (stored at: )
+INFO	2018-06-25 10:25:43,579	4609	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(7,4) (stored at: )
+INFO	2018-06-25 10:25:43,589	4619	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,9) (stored at: )
+INFO	2018-06-25 10:25:43,594	4624	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(7,16) (stored at: )
+INFO	2018-06-25 10:25:43,605	4635	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(2) (stored at: )
+INFO	2018-06-25 10:25:43,615	4645	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,15) (stored at: )
+INFO	2018-06-25 10:25:43,894	4924	clegoues.genprog4java.Search.Search	[main]	search: generation1
+ERROR	2018-06-25 10:25:44,400	5430	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageSimpleExample/SimpleExample.java:23: error: variable ret might not have been initialized
+	return ret;
+	       ^
+1 error
+1 warning
+
+INFO	2018-06-25 10:25:44,432	5462	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:25:44,442	5472	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,8) (stored at: )
+INFO	2018-06-25 10:25:44,444	5474	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(6,16) (stored at: )
+INFO	2018-06-25 10:25:44,445	5475	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(14,9) (stored at: )
+INFO	2018-06-25 10:25:44,447	5477	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 3.0 StmtAppend(9,16) (stored at: )
+INFO	2018-06-25 10:25:44,449	5479	clegoues.genprog4java.Search.Search	[main]	
+Repair Found: StmtAppend(9,16) (in )
+
+INFO	2018-06-25 10:25:44,470	5500	clegoues.genprog4java.fitness.Fitness	[main]	Serialized test cache to file testcache.ser
+INFO	2018-06-25 10:25:44,473	5503	clegoues.genprog4java.main.Main	[main]	
+Total elapsed time: 5
+
+DEBUG	2018-06-25 10:27:24,157	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-25 10:27:24,558	401	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-25 10:27:26,620	2463	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2018-06-25 10:27:26,621	2464	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-25 10:27:27,427	3270	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-25 10:27:27,801	3644	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2018-06-25 10:27:27,802	3645	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2018-06-25 10:27:28,023	3866	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2018-06-25 10:27:28,023	3866	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 1402)
+INFO	2018-06-25 10:27:28,023	3866	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2018-06-25 10:27:28,064	3907	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2018-06-25 10:27:28,533	4376	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2018-06-25 10:27:28,954	4797	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2018-06-25 10:27:28,955	4798	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2018-06-25 10:27:28,967	4810	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: )
+INFO	2018-06-25 10:27:29,082	4925	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,7) (stored at: )
+INFO	2018-06-25 10:27:29,092	4935	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:27:29,105	4948	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,14) (stored at: )
+INFO	2018-06-25 10:27:29,107	4950	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(17,7) (stored at: )
+INFO	2018-06-25 10:27:29,111	4954	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(5,5) (stored at: )
+INFO	2018-06-25 10:27:29,116	4959	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(4) (stored at: )
+INFO	2018-06-25 10:27:29,126	4969	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,4) (stored at: )
+INFO	2018-06-25 10:27:29,128	4971	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,13) (stored at: )
+INFO	2018-06-25 10:27:29,138	4981	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: )
+INFO	2018-06-25 10:27:29,155	4998	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 2.0 StmtAppend(5,17) (stored at: )
+INFO	2018-06-25 10:27:29,176	5019	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,7) (stored at: )
+INFO	2018-06-25 10:27:29,193	5036	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,5) (stored at: )
+INFO	2018-06-25 10:27:29,211	5054	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:27:29,227	5070	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(15) (stored at: )
+INFO	2018-06-25 10:27:29,235	5078	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(7,4) (stored at: )
+INFO	2018-06-25 10:27:29,243	5086	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,9) (stored at: )
+INFO	2018-06-25 10:27:29,244	5087	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(7,16) (stored at: )
+INFO	2018-06-25 10:27:29,249	5092	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(2) (stored at: )
+INFO	2018-06-25 10:27:29,282	5125	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,15) (stored at: )
+INFO	2018-06-25 10:27:29,540	5383	clegoues.genprog4java.Search.Search	[main]	search: generation1
+ERROR	2018-06-25 10:27:30,063	5906	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageSimpleExample/SimpleExample.java:23: error: variable ret might not have been initialized
+	return ret;
+	       ^
+1 error
+1 warning
+
+INFO	2018-06-25 10:27:30,094	5937	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:27:30,097	5940	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,8) (stored at: )
+INFO	2018-06-25 10:27:30,104	5947	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(6,16) (stored at: )
+INFO	2018-06-25 10:27:30,106	5949	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(14,9) (stored at: )
+INFO	2018-06-25 10:27:30,111	5954	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 3.0 StmtAppend(9,16) (stored at: )
+INFO	2018-06-25 10:27:30,114	5957	clegoues.genprog4java.Search.Search	[main]	
+Repair Found: StmtAppend(9,16) (in )
+
+INFO	2018-06-25 10:27:30,119	5962	clegoues.genprog4java.fitness.Fitness	[main]	Serialized test cache to file testcache.ser
+INFO	2018-06-25 10:27:30,119	5962	clegoues.genprog4java.main.Main	[main]	
+Total elapsed time: 6
+
+DEBUG	2018-06-25 10:34:49,647	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-25 10:34:50,222	575	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-25 10:34:52,722	3075	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2018-06-25 10:34:52,723	3076	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-25 10:34:53,190	3543	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-25 10:34:53,393	3746	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2018-06-25 10:34:53,394	3747	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2018-06-25 10:34:53,622	3975	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2018-06-25 10:34:53,622	3975	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 899)
+INFO	2018-06-25 10:34:53,622	3975	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2018-06-25 10:34:53,661	4014	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2018-06-25 10:34:54,840	5193	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2018-06-25 10:34:55,360	5713	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2018-06-25 10:34:55,361	5714	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2018-06-25 10:34:55,372	5725	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: )
+INFO	2018-06-25 10:34:55,479	5832	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,7) (stored at: )
+INFO	2018-06-25 10:34:55,482	5835	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:34:55,490	5843	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,14) (stored at: )
+INFO	2018-06-25 10:34:55,500	5853	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(17,7) (stored at: )
+INFO	2018-06-25 10:34:55,508	5861	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(5,5) (stored at: )
+INFO	2018-06-25 10:34:55,518	5871	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(4) (stored at: )
+INFO	2018-06-25 10:34:55,528	5881	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,4) (stored at: )
+INFO	2018-06-25 10:34:55,538	5891	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,13) (stored at: )
+INFO	2018-06-25 10:34:55,540	5893	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: )
+INFO	2018-06-25 10:34:55,574	5927	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 2.0 StmtAppend(5,17) (stored at: )
+INFO	2018-06-25 10:34:55,575	5928	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,7) (stored at: )
+INFO	2018-06-25 10:34:55,594	5947	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,5) (stored at: )
+INFO	2018-06-25 10:34:55,616	5969	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:34:55,628	5981	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(15) (stored at: )
+INFO	2018-06-25 10:34:55,635	5988	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(7,4) (stored at: )
+INFO	2018-06-25 10:34:55,638	5991	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,9) (stored at: )
+INFO	2018-06-25 10:34:55,639	5992	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(7,16) (stored at: )
+INFO	2018-06-25 10:34:55,649	6002	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(2) (stored at: )
+INFO	2018-06-25 10:34:55,652	6005	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,15) (stored at: )
+INFO	2018-06-25 10:34:55,924	6277	clegoues.genprog4java.Search.Search	[main]	search: generation1
+ERROR	2018-06-25 10:34:56,443	6796	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageSimpleExample/SimpleExample.java:23: error: variable ret might not have been initialized
+	return ret;
+	       ^
+1 error
+1 warning
+
+INFO	2018-06-25 10:34:56,471	6824	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:34:56,474	6827	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,8) (stored at: )
+INFO	2018-06-25 10:34:56,485	6838	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(6,16) (stored at: )
+INFO	2018-06-25 10:34:56,487	6840	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(14,9) (stored at: )
+INFO	2018-06-25 10:34:56,489	6842	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 3.0 StmtAppend(9,16) (stored at: )
+INFO	2018-06-25 10:34:56,493	6846	clegoues.genprog4java.Search.Search	[main]	
+Repair Found: StmtAppend(9,16) (in )
+
+INFO	2018-06-25 10:34:56,505	6858	clegoues.genprog4java.fitness.Fitness	[main]	Serialized test cache to file testcache.ser
+INFO	2018-06-25 10:34:56,506	6859	clegoues.genprog4java.main.Main	[main]	
+Total elapsed time: 6
+
+DEBUG	2018-06-25 10:37:29,311	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-25 10:37:29,800	489	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-25 10:37:32,764	3453	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2018-06-25 10:37:32,765	3454	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-25 10:37:33,403	4092	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-25 10:37:33,834	4523	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2018-06-25 10:37:33,838	4527	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2018-06-25 10:37:34,261	4950	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2018-06-25 10:37:34,261	4950	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 1496)
+INFO	2018-06-25 10:37:34,262	4951	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2018-06-25 10:37:34,348	5037	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2018-06-25 10:37:34,940	5629	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2018-06-25 10:37:35,354	6043	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2018-06-25 10:37:35,355	6044	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2018-06-25 10:37:35,368	6057	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: )
+INFO	2018-06-25 10:37:35,454	6143	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,7) (stored at: )
+INFO	2018-06-25 10:37:35,462	6151	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:37:35,469	6158	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,14) (stored at: )
+INFO	2018-06-25 10:37:35,473	6162	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(17,7) (stored at: )
+INFO	2018-06-25 10:37:35,484	6173	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(5,5) (stored at: )
+INFO	2018-06-25 10:37:35,496	6185	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(4) (stored at: )
+INFO	2018-06-25 10:37:35,500	6189	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,4) (stored at: )
+INFO	2018-06-25 10:37:35,507	6196	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,13) (stored at: )
+INFO	2018-06-25 10:37:35,523	6212	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: )
+INFO	2018-06-25 10:37:35,548	6237	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 2.0 StmtAppend(5,17) (stored at: )
+INFO	2018-06-25 10:37:35,552	6241	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,7) (stored at: )
+INFO	2018-06-25 10:37:35,581	6270	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,5) (stored at: )
+INFO	2018-06-25 10:37:35,583	6272	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:37:35,599	6288	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(15) (stored at: )
+INFO	2018-06-25 10:37:35,601	6290	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(7,4) (stored at: )
+INFO	2018-06-25 10:37:35,604	6293	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,9) (stored at: )
+INFO	2018-06-25 10:37:35,605	6294	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(7,16) (stored at: )
+INFO	2018-06-25 10:37:35,623	6312	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(2) (stored at: )
+INFO	2018-06-25 10:37:35,628	6317	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,15) (stored at: )
+INFO	2018-06-25 10:37:37,206	7895	clegoues.genprog4java.Search.Search	[main]	search: generation1
+ERROR	2018-06-25 10:37:37,726	8415	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageSimpleExample/SimpleExample.java:23: error: variable ret might not have been initialized
+	return ret;
+	       ^
+1 error
+1 warning
+
+INFO	2018-06-25 10:37:37,770	8459	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:37:37,777	8466	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,8) (stored at: )
+INFO	2018-06-25 10:37:37,785	8474	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(6,16) (stored at: )
+INFO	2018-06-25 10:37:37,786	8475	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(14,9) (stored at: )
+INFO	2018-06-25 10:37:37,803	8492	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 3.0 StmtAppend(9,16) (stored at: )
+INFO	2018-06-25 10:37:37,808	8497	clegoues.genprog4java.Search.Search	[main]	
+Repair Found: StmtAppend(9,16) (in )
+
+INFO	2018-06-25 10:37:37,828	8517	clegoues.genprog4java.fitness.Fitness	[main]	Serialized test cache to file testcache.ser
+INFO	2018-06-25 10:37:37,833	8522	clegoues.genprog4java.main.Main	[main]	
+Total elapsed time: 8
+
+DEBUG	2018-06-25 10:40:20,979	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-25 10:40:21,889	910	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-25 10:40:23,621	2642	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2018-06-25 10:40:23,621	2642	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-25 10:40:24,071	3092	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-25 10:40:24,279	3300	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2018-06-25 10:40:24,279	3300	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2018-06-25 10:40:24,497	3518	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2018-06-25 10:40:24,497	3518	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 876)
+INFO	2018-06-25 10:40:24,498	3519	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2018-06-25 10:40:24,530	3551	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2018-06-25 10:40:25,067	4088	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2018-06-25 10:40:25,768	4789	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2018-06-25 10:40:25,768	4789	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2018-06-25 10:40:25,796	4817	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: )
+INFO	2018-06-25 10:40:25,935	4956	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,7) (stored at: )
+INFO	2018-06-25 10:40:25,939	4960	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:40:25,948	4969	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,14) (stored at: )
+INFO	2018-06-25 10:40:25,949	4970	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(17,7) (stored at: )
+INFO	2018-06-25 10:40:25,952	4973	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(5,5) (stored at: )
+INFO	2018-06-25 10:40:25,960	4981	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(4) (stored at: )
+INFO	2018-06-25 10:40:25,964	4985	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,4) (stored at: )
+INFO	2018-06-25 10:40:25,974	4995	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,13) (stored at: )
+INFO	2018-06-25 10:40:25,980	5001	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: )
+INFO	2018-06-25 10:40:25,985	5006	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 2.0 StmtAppend(5,17) (stored at: )
+INFO	2018-06-25 10:40:26,003	5024	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,7) (stored at: )
+INFO	2018-06-25 10:40:26,008	5029	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,5) (stored at: )
+INFO	2018-06-25 10:40:26,019	5040	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:40:26,024	5045	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(15) (stored at: )
+INFO	2018-06-25 10:40:26,034	5055	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(7,4) (stored at: )
+INFO	2018-06-25 10:40:26,039	5060	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,9) (stored at: )
+INFO	2018-06-25 10:40:26,047	5068	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(7,16) (stored at: )
+INFO	2018-06-25 10:40:26,058	5079	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(2) (stored at: )
+INFO	2018-06-25 10:40:26,091	5112	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,15) (stored at: )
+INFO	2018-06-25 10:40:28,366	7387	clegoues.genprog4java.Search.Search	[main]	search: generation1
+ERROR	2018-06-25 10:40:29,418	8439	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageSimpleExample/SimpleExample.java:23: error: variable ret might not have been initialized
+	return ret;
+	       ^
+1 error
+1 warning
+
+INFO	2018-06-25 10:40:29,498	8519	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:40:29,505	8526	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,8) (stored at: )
+INFO	2018-06-25 10:40:29,519	8540	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(6,16) (stored at: )
+INFO	2018-06-25 10:40:29,522	8543	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(14,9) (stored at: )
+INFO	2018-06-25 10:40:29,538	8559	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 3.0 StmtAppend(9,16) (stored at: )
+INFO	2018-06-25 10:40:29,562	8583	clegoues.genprog4java.Search.Search	[main]	
+Repair Found: StmtAppend(9,16) (in )
+
+INFO	2018-06-25 10:40:29,590	8611	clegoues.genprog4java.fitness.Fitness	[main]	Serialized test cache to file testcache.ser
+INFO	2018-06-25 10:40:29,593	8614	clegoues.genprog4java.main.Main	[main]	
+Total elapsed time: 8
+
+DEBUG	2018-06-25 10:43:41,300	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-25 10:43:42,281	981	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-25 10:43:44,672	3372	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2018-06-25 10:43:44,673	3373	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-25 10:43:45,110	3810	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-25 10:43:45,323	4023	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2018-06-25 10:43:45,324	4024	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2018-06-25 10:43:45,536	4236	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2018-06-25 10:43:45,537	4237	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 864)
+INFO	2018-06-25 10:43:45,537	4237	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2018-06-25 10:43:45,567	4267	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2018-06-25 10:43:45,944	4644	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2018-06-25 10:43:46,492	5192	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2018-06-25 10:43:46,494	5194	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2018-06-25 10:43:46,524	5224	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: )
+INFO	2018-06-25 10:43:46,724	5424	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,7) (stored at: )
+INFO	2018-06-25 10:43:46,733	5433	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:43:46,742	5442	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,14) (stored at: )
+INFO	2018-06-25 10:43:46,752	5452	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(17,7) (stored at: )
+INFO	2018-06-25 10:43:46,769	5469	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(5,5) (stored at: )
+INFO	2018-06-25 10:43:46,780	5480	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(4) (stored at: )
+INFO	2018-06-25 10:43:46,791	5491	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,4) (stored at: )
+INFO	2018-06-25 10:43:46,811	5511	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,13) (stored at: )
+INFO	2018-06-25 10:43:46,813	5513	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: )
+INFO	2018-06-25 10:43:46,831	5531	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 2.0 StmtAppend(5,17) (stored at: )
+INFO	2018-06-25 10:43:46,853	5553	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,7) (stored at: )
+INFO	2018-06-25 10:43:46,857	5557	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,5) (stored at: )
+INFO	2018-06-25 10:43:46,874	5574	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:43:46,886	5586	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(15) (stored at: )
+INFO	2018-06-25 10:43:46,891	5591	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(7,4) (stored at: )
+INFO	2018-06-25 10:43:46,909	5609	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,9) (stored at: )
+INFO	2018-06-25 10:43:46,930	5630	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(7,16) (stored at: )
+INFO	2018-06-25 10:43:46,945	5645	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(2) (stored at: )
+INFO	2018-06-25 10:43:46,967	5667	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,15) (stored at: )
+INFO	2018-06-25 10:43:51,084	9784	clegoues.genprog4java.Search.Search	[main]	search: generation1
+ERROR	2018-06-25 10:43:52,227	10927	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageSimpleExample/SimpleExample.java:23: error: variable ret might not have been initialized
+	return ret;
+	       ^
+1 error
+1 warning
+
+INFO	2018-06-25 10:43:52,341	11041	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:43:52,344	11044	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,8) (stored at: )
+INFO	2018-06-25 10:43:52,372	11072	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(6,16) (stored at: )
+INFO	2018-06-25 10:43:52,376	11076	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(14,9) (stored at: )
+INFO	2018-06-25 10:43:52,388	11088	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 3.0 StmtAppend(9,16) (stored at: )
+INFO	2018-06-25 10:43:52,389	11089	clegoues.genprog4java.Search.Search	[main]	
+Repair Found: StmtAppend(9,16) (in )
+
+INFO	2018-06-25 10:43:52,415	11115	clegoues.genprog4java.fitness.Fitness	[main]	Serialized test cache to file testcache.ser
+INFO	2018-06-25 10:43:52,424	11124	clegoues.genprog4java.main.Main	[main]	
+Total elapsed time: 11
+
+DEBUG	2018-06-25 10:45:51,395	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-25 10:45:52,198	803	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-25 10:45:54,733	3338	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2018-06-25 10:45:54,735	3340	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-25 10:45:56,173	4778	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-25 10:45:56,557	5162	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2018-06-25 10:45:56,563	5168	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2018-06-25 10:45:56,910	5515	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2018-06-25 10:45:56,910	5515	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 2175)
+INFO	2018-06-25 10:45:56,910	5515	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2018-06-25 10:45:56,946	5551	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2018-06-25 10:45:57,366	5971	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2018-06-25 10:45:57,750	6355	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2018-06-25 10:45:57,751	6356	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2018-06-25 10:46:02,268	10873	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: )
+INFO	2018-06-25 10:46:02,452	11057	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,7) (stored at: )
+INFO	2018-06-25 10:46:02,455	11060	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:46:02,463	11068	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,14) (stored at: )
+INFO	2018-06-25 10:46:02,466	11071	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(17,7) (stored at: )
+INFO	2018-06-25 10:46:02,469	11074	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(5,5) (stored at: )
+INFO	2018-06-25 10:46:02,478	11083	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(4) (stored at: )
+INFO	2018-06-25 10:46:02,490	11095	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,4) (stored at: )
+INFO	2018-06-25 10:46:02,491	11096	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,13) (stored at: )
+INFO	2018-06-25 10:46:02,494	11099	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: )
+INFO	2018-06-25 10:46:02,500	11105	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 2.0 StmtAppend(5,17) (stored at: )
+INFO	2018-06-25 10:46:02,505	11110	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,7) (stored at: )
+INFO	2018-06-25 10:46:02,512	11117	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,5) (stored at: )
+INFO	2018-06-25 10:46:02,519	11124	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:46:02,524	11129	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(15) (stored at: )
+INFO	2018-06-25 10:46:02,528	11133	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(7,4) (stored at: )
+INFO	2018-06-25 10:46:02,538	11143	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,9) (stored at: )
+INFO	2018-06-25 10:46:02,539	11144	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(7,16) (stored at: )
+INFO	2018-06-25 10:46:02,541	11146	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(2) (stored at: )
+INFO	2018-06-25 10:46:02,544	11149	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,15) (stored at: )
+INFO	2018-06-25 10:46:02,548	11153	clegoues.genprog4java.Search.Search	[main]	search: generation1
+ERROR	2018-06-25 10:46:03,045	11650	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageSimpleExample/SimpleExample.java:23: error: variable ret might not have been initialized
+	return ret;
+	       ^
+1 error
+1 warning
+
+INFO	2018-06-25 10:46:03,076	11681	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(10) (stored at: )
+INFO	2018-06-25 10:46:03,090	11695	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,8) (stored at: )
+INFO	2018-06-25 10:46:03,097	11702	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(6,16) (stored at: )
+INFO	2018-06-25 10:46:03,098	11703	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(14,9) (stored at: )
+INFO	2018-06-25 10:46:03,102	11707	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 3.0 StmtAppend(9,16) (stored at: )
+INFO	2018-06-25 10:46:03,103	11708	clegoues.genprog4java.Search.Search	[main]	
+Repair Found: StmtAppend(9,16) (in )
+
+INFO	2018-06-25 10:46:03,110	11715	clegoues.genprog4java.fitness.Fitness	[main]	Serialized test cache to file testcache.ser
+INFO	2018-06-25 10:46:03,110	11715	clegoues.genprog4java.main.Main	[main]	
+Total elapsed time: 11
+
