@@ -5,36 +5,6 @@ Line: -1
 Predicate: $_ == 1 || $_ == 2
 Covered_By_Positive_Tests: false
 Covered_By_Negative_Tests: false
-Evaluated: 3
-Passed: 2
-
-Class: packageSimpleExample.SimpleExample
-Method: mid
-Location: ENTER
-Line: -1
-Predicate: $3 == 1 || $3 == 2 || $3 == 3
-Covered_By_Positive_Tests: false
-Covered_By_Negative_Tests: false
-Evaluated: 3
-Passed: 3
-
-Class: packageSimpleExample.SimpleExample
-Method: mid
-Location: ENTER
-Line: -1
-Predicate: $2 == 1 || $2 == 2 || $2 == 3
-Covered_By_Positive_Tests: false
-Covered_By_Negative_Tests: false
-Evaluated: 3
-Passed: 3
-
-Class: packageSimpleExample.SimpleExample
-Method: mid
-Location: ENTER
-Line: -1
-Predicate: $1 == 1 || $1 == 2 || $1 == 3
-Covered_By_Positive_Tests: false
-Covered_By_Negative_Tests: false
-Evaluated: 3
-Passed: 3
+Evaluated: 16
+Passed: 16
 

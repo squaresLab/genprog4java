@@ -1,11 +1,3 @@
-Daikon version 5.6.5, released April 3, 2018; http://plse.cs.washington.edu/daikon.
-Reading declaration files Processing trace data; reading 1 dtrace file:
-
-No return from procedure observed 1 time.  Unmatched entries are ignored!
-Unterminated calls:
-  clegoues.genprog4java.fitness.JUnitTestRunner.main(java.lang.String[]) : 1 invocation
-End of report for procedures not returned from.  Unmatched entries are ignored!
-
 ===========================================================================
 packageSimpleExample.SimpleExample:::OBJECT
 this != null
@@ -28,4 +20,3 @@ tests.SimpleExampleTestsPos.SimpleExampleTestsPos():::EXIT
 tests.SimpleExampleTestsPos.severalTestCasesToTestMid():::ENTER
 ===========================================================================
 tests.SimpleExampleTestsPos.severalTestCasesToTestMid():::EXIT
-Exiting Daikon.

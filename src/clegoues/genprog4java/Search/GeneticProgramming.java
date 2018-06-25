@@ -97,13 +97,14 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		Population<G> incomingPopulation = this.initialize(original,
 				initialPopulation);
 		int gen = 1;
-		
-		
+		int checked = 0;
 		
 		while (gen < Search.generations) {
 			logger.info("search: generation" + gen);
 			generationsRun++;
 			assert (initialPopulation.getPopsize() > 0);
+			// Step 0.5: Check Invariant
+			checked = VariantCheckerMain.checkInvariant(checked);
 			// Step 1: selection
 			incomingPopulation.selection(incomingPopulation.getPopsize());
 			// step 2: crossover
@@ -114,9 +115,6 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 				Representation<G> newItem = original.copy();
 				this.mutate(item);
 			}
-			
-			// step 3.5 test invariant
-			
 
 			// step 4: fitness
 			for (Representation<G> item : incomingPopulation) {
