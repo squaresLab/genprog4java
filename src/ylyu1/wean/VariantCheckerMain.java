@@ -8,6 +8,8 @@ import clegoues.genprog4java.main.Configuration;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Hashtable;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -95,10 +97,67 @@ public class VariantCheckerMain
 			}
 			checked++;
 		}
-		//analyzeResults(begin,checked);
+		try{System.out.println(Arrays.toString(analyzeResults(begin,checked)));}catch(Exception e) {}
 		return checked;
 	}
 	
+	public static int[] analyzeResults(int begin, int end) throws Exception
+	{
+		ArrayList<byte[]> templist = new ArrayList<byte[]>();
+		int max = 0;
+		byte[] b = tnsFetcher("origPos");
+		templist.add(b);
+		if(b.length>max)max=b.length;
+		b = tnsFetcher("origNeg");
+		templist.add(b);
+		if(b.length>max)max=b.length;
+		for(int i = begin; i < end; i++)
+		{
+			if(goodVariant.get(i))
+			{
+				b = tnsFetcher("variant"+i+"pos");
+				templist.add(b);
+				if(b.length>max)max=b.length;
+				b = tnsFetcher("variant"+i+"neg");
+				templist.add(b);
+				if(b.length>max)max=b.length;
+			}
+		}
+		ArrayList<byte[]> list = new ArrayList<byte[]>();
+		for(int i = 0; i < templist.size(); i+=2)
+		{
+			b = newByteArray2(2*max);
+			for(int j = 0; j < templist.get(i).length; j++)
+			{
+				b[2*j]=templist.get(i)[j];
+			}
+			for(int j = 0; j < templist.get(i+1).length; j++)
+			{
+				b[2*j+1]=templist.get(i+1)[j];
+			}
+			System.out.println(Arrays.toString(b));
+			list.add(b);
+		}
+		return Fitness.getStringDiffScore(list);
+	}
+	
+	public static byte[] newByteArray2(int size)
+	{
+		byte[] b = new byte[size];
+		for(int i = 0; i < size; i++)
+		{
+			b[i]=2;
+		}
+		return b;
+	}
+	
+	public static byte[] tnsFetcher(String s) throws Exception
+	{
+		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(s+".tns"));
+		byte[] b = (byte[]) ois.readObject();
+		ois.close();
+		return b;
+	}
 	
 	
 	public static void checkInvariantOrig()

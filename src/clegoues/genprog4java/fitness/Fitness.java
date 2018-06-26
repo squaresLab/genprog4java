@@ -667,7 +667,7 @@ public class Fitness {
 	 * 							representing predicate evaluation results
 	 * @return An array of diversity metrics, with the nth element of the returned array being the diversity metric of the nth ternary string
 	 */
-	private static int[] getStringDiffScore(List<byte[]> ternaryStrings)
+	public static int[] getStringDiffScore(List<byte[]> ternaryStrings)
 	{
 		int base = 3; //the base of the numerical strings being processed, in the case of ternary strings: 3
 		int n = ternaryStrings.size();
@@ -695,7 +695,7 @@ public class Fitness {
 			{
 				charSimilarity += charSimilarityMatrix[j][ternaryStr[j]];
 			}
-			diversityMetrics[i] = n - charSimilarity;
+			diversityMetrics[i] = n*lenOfStr - charSimilarity;
 		}
 		
 		return diversityMetrics;
