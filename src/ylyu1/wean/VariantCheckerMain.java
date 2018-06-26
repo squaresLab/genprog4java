@@ -7,6 +7,7 @@ import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.main.Configuration;
 
 import java.io.*;
+import java.util.ArrayList;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -16,6 +17,7 @@ import org.apache.commons.exec.PumpStreamHandler;
 
 public class VariantCheckerMain
 {
+	public static ArrayList<Boolean> goodVariant = new ArrayList<Boolean>();
 	public static void main(String [] args) throws Exception
 	{
 		/*int n = Integer.parseInt(args[0]);
@@ -39,14 +41,73 @@ public class VariantCheckerMain
 	
 	public static int checkInvariant(int checked)
 	{
-		while(true)
+		int begin = checked;
+		while(checked<CachingRepresentation.sequence)
 		{
 			try
 			{
 				String libtrunc = Configuration.libs.substring(0, Configuration.libs.lastIndexOf(":"));
 				CommandLine command1 = CommandLine.parse("cp -r "+Configuration.classTestFolder+"tests .");
-				CommandLine command2 = CommandLine.parse("sh checker.sh "+Fitness.positiveTests.get(0)+" "+libtrunc+":.:tmp/variant"+checked+"/:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ variant"+checked+"pos");
-				CommandLine command3 = CommandLine.parse("sh checker.sh "+Fitness.negativeTests.get(0)+" "+libtrunc+":.:tmp/variant"+checked+"/:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ variant"+checked+"neg");
+				CommandLine command2 = CommandLine.parse("sh checker.sh "+Fitness.positiveTests.get(0)+" "+libtrunc+":.:tmp/variant"+checked+"/:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ variant"+checked+"pos NOTORIG");
+				CommandLine command3 = CommandLine.parse("sh checker.sh "+Fitness.negativeTests.get(0)+" "+libtrunc+":.:tmp/variant"+checked+"/:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ variant"+checked+"neg NOTORIG");
+				
+				//System.out.println("command: " + command2.toString());
+				ExecuteWatchdog watchdog = new ExecuteWatchdog(1000000);
+				DefaultExecutor executor = new DefaultExecutor();
+				String workingDirectory = System.getProperty("user.dir");
+				executor.setWorkingDirectory(new File(workingDirectory));
+				executor.setWatchdog(watchdog);
+
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				executor.setExitValue(0);
+
+				executor.setStreamHandler(new PumpStreamHandler(out));
+				FitnessValue posFit = new FitnessValue();
+
+				try {
+					executor.execute(command1);
+					executor.execute(command2);
+					executor.execute(command3);
+					out.flush();
+					String output = out.toString();
+					System.out.println(output);
+					out.reset();
+					goodVariant.add(true);
+				} catch (ExecuteException exception) {
+					//posFit.setAllPassed(false);
+					out.flush();
+					System.out.println(out.toString());
+					throw exception;
+					
+				} catch (Exception e) {
+				} finally {
+					if (out != null)
+						try {
+							out.close();
+						} catch (IOException e) {
+						}
+				}
+			}
+			catch(Exception e)
+			{
+				System.out.println("ERROR!!!!!! "+checked);
+				goodVariant.add(false);
+			}
+			checked++;
+		}
+		//analyzeResults(begin,checked);
+		return checked;
+	}
+	
+	
+	
+	public static void checkInvariantOrig()
+	{
+		try
+			{
+				CommandLine command1 = CommandLine.parse("cp -r "+Configuration.classTestFolder+"tests .");
+				CommandLine command2 = CommandLine.parse("sh checker.sh "+Fitness.positiveTests.get(0)+" "+Configuration.libs+":.:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ origPos ORIGPOS");
+				CommandLine command3 = CommandLine.parse("sh checker.sh "+Fitness.negativeTests.get(0)+" "+Configuration.libs+":.:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ origNeg ORIGNEG");
 				
 				//System.out.println("command: " + command2.toString());
 				ExecuteWatchdog watchdog = new ExecuteWatchdog(1000000);
@@ -87,11 +148,10 @@ public class VariantCheckerMain
 			}
 			catch(Exception e)
 			{
-				break;
+				
 			}
-			checked++;
-		}
-		return checked;
+		
+		
 	}
 	
 	public static void runDaikon()

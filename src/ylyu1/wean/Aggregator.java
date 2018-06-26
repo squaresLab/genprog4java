@@ -5,6 +5,7 @@ import java.util.*;
 
 public class Aggregator
 {
+	
 	public static void main(String [] args) throws Exception
 	{
 		String fn = args[0];
@@ -47,10 +48,33 @@ public class Aggregator
 			
 		}
 		Collection<PredSerial> coll = serials.values();
+		int max = -1;
 		for(PredSerial ps : coll)
 		{
+			if(ps.serial>max)max=ps.serial;
 			System.out.println("Class: "+ps.className+"\nMethod: "+ps.method+"\nLocation: "+ps.location+"\nLine: "+ps.line+"\nPredicate: "+ps.predicate+"\nCovered_By_Positive_Tests: "+ps.posCover+"\nCovered_By_Negative_Tests: "+ps.negCover+"\nEvaluated: "+ps.total+"\nPassed: "+ps.passed+"\n");
 		}
+		byte[] b = new byte[max+1];
+	    for(int i = 0; i < b.length; i++)
+	    {
+	    	b[i]=2;
+	    }
+	    for(PredSerial ps : coll)
+	    {
+	    	if(ps.total!=0)
+			{
+				if(ps.total==ps.passed)
+				{
+					b[ps.serial]=1;
+				}
+				else b[ps.serial]=0;
+			}
+	    }
+	    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fn+".tns"));
+		oos.writeObject(b);
+		oos.flush();
+		oos.close();
 	}
+	
 }
 

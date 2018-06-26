@@ -92,6 +92,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		// Step 0: run daikon
 		System.out.println("Here we are");
 		VariantCheckerMain.runDaikon();
+		VariantCheckerMain.checkInvariantOrig();
 		
 		assert (Search.generations >= 0);
 		Population<G> incomingPopulation = this.initialize(original,
