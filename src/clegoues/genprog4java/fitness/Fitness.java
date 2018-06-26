@@ -237,7 +237,7 @@ public class Fitness {
 
 		switch(Fitness.granularity) {
 		case METHOD:
-		break;
+			break;
 		case CLASS:
 		default:
 			filterTestClasses(intermedPosTests, intermedNegTests);
@@ -659,5 +659,45 @@ public class Fitness {
 		}
 		printer.close();
 	}
-
+	
+	/**
+	 * Given a list of predicate evaluations represented as ternary strings,
+	 * use the pairwise difference method to compute a diversity metric for mutant programs.
+	 * @param ternaryStrings A list of ternary strings (in the form of a byte array) of identical length
+	 * 							representing predicate evaluation results
+	 * @return An array of diversity metrics, with the nth element of the returned array being the diversity metric of the nth ternary string
+	 */
+	private static int[] getStringDiffScore(List<byte[]> ternaryStrings)
+	{
+		int base = 3; //the base of the numerical strings being processed, in the case of ternary strings: 3
+		int n = ternaryStrings.size();
+		int lenOfStr = ternaryStrings.get(0).length;
+		int[][] charSimilarityMatrix = new int[lenOfStr][base];
+		int[] diversityMetrics = new int[n];
+		for(int i = 0; i < n; i++)
+		{
+			byte[] ternaryStr = ternaryStrings.get(i);
+			if (ternaryStr.length != lenOfStr)
+				throw new IllegalArgumentException("All strings in ternaryStrings must be of equal length.");
+			for(int j = 0; j < lenOfStr; j++)
+			{
+				if (ternaryStr[j] < 0 || ternaryStr[j] >= base)
+					throw new IllegalArgumentException("A non-ternary string was found");
+				charSimilarityMatrix[j][ternaryStr[j]]++;
+			}
+		}
+		
+		for(int i = 0; i < n; i++)
+		{
+			byte[] ternaryStr = ternaryStrings.get(i);
+			int charSimilarity = 0;
+			for(int j = 0; j < lenOfStr; j++)
+			{
+				charSimilarity += charSimilarityMatrix[j][ternaryStr[j]];
+			}
+			diversityMetrics[i] = n - charSimilarity;
+		}
+		
+		return diversityMetrics;
+	}
 }
