@@ -1,0 +1,3 @@
+good: daikon.Quant.subsetOf($_, new long[] { 0, 1 })
+good: ("oneOf.java.jpp: SEQUENCE unimplemented" != null)
+good: daikon.Quant.size($_) == 1 || daikon.Quant.size($_) == 2 || daikon.Quant.size($_) == 3

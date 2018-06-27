@@ -1,0 +1,30 @@
+Class: packageOffByOne.OffByOne
+Method: createFibonnaciArray
+Location: EXIT
+Line: -1
+Predicate: daikon.Quant.size($_) == 1 || daikon.Quant.size($_) == 2 || daikon.Quant.size($_) == 3
+Covered_By_Positive_Tests: false
+Covered_By_Negative_Tests: false
+Evaluated: 4
+Passed: 4
+
+Class: packageOffByOne.OffByOne
+Method: createFibonnaciArray
+Location: EXIT
+Line: -1
+Predicate: ("oneOf.java.jpp: SEQUENCE unimplemented" != null)
+Covered_By_Positive_Tests: false
+Covered_By_Negative_Tests: false
+Evaluated: 4
+Passed: 4
+
+Class: packageOffByOne.OffByOne
+Method: createFibonnaciArray
+Location: EXIT
+Line: -1
+Predicate: daikon.Quant.subsetOf($_, new long[] { 0, 1 })
+Covered_By_Positive_Tests: false
+Covered_By_Negative_Tests: false
+Evaluated: 4
+Passed: 4
+

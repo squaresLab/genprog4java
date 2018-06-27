@@ -39,7 +39,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			initialPopulation = incomingPopulation.firstN(incomingPopulation
 					.getPopsize());
 		} 
-		int stillNeed = initialPopulation.getPopsize()
+		int stillNeed = initialPopulation.getPopsize()*2
 				- initialPopulation.size();
 		if (stillNeed > 0) {
 			initialPopulation.add(original.copy());
@@ -89,10 +89,14 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		 */
 		logger.info("search: genetic algorithm begins\n");
 
+		
+		
 		// Step 0: run daikon
 		System.out.println("Here we are");
 		VariantCheckerMain.runDaikon();
 		VariantCheckerMain.checkInvariantOrig();
+		
+		
 		
 		assert (Search.generations >= 0);
 		Population<G> incomingPopulation = this.initialize(original,
@@ -104,8 +108,14 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			logger.info("search: generation" + gen);
 			generationsRun++;
 			assert (initialPopulation.getPopsize() > 0);
+			
+			
+			if(gen==1) {
 			// Step 0.5: Check Invariant
-			VariantCheckerMain.checkInvariant(incomingPopulation);
+			VariantCheckerMain.checkInvariant(incomingPopulation);}
+			
+			
+			
 			// Step 1: selection
 			incomingPopulation.selection(incomingPopulation.getPopsize());
 			// step 2: crossover

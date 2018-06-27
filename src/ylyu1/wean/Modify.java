@@ -20,6 +20,7 @@ public class Modify
 		for(PredGroup w : classes)
 		{
 			if(w.location.equals("OBJECT"))continue;
+			if(w.line>=0)continue;
 			int paren = w.method.indexOf('(');
 			String argf = w.method.substring(paren+1,w.method.length()-1);
 			String[] argfs = parseargs(argf); 
@@ -42,7 +43,7 @@ public class Modify
 			//runs through each statement
 			for(String ss : w.statements)
 			{
-				if(ss.indexOf("daikon.Quant")>=0)continue;
+				//if(ss.indexOf("daikon.Quant")>=0)continue;
 				if(ss.indexOf("Abstract")>=0)continue;
 				prednum++;
 				//statement conversions
@@ -75,11 +76,11 @@ public class Modify
 						varnum++;
 						int origend = finder(s.substring(origloc+5))+origloc+5;
 						String var = s.substring(origloc+5,origend);
-						m.addLocalVariable("mts"+varnum,pool.get("MultiTypeStorer"));
+						m.addLocalVariable("mts"+varnum,pool.get("ylyu1.wean.MultiTypeStorer"));
 						String rep = "";
 						try
 						{
-							m.insertBefore("try{mts"+varnum+"=new MultiTypeStorer("+var+");}");
+							m.insertBefore("try{mts"+varnum+"=new ylyu1.wean.MultiTypeStorer("+var+");}");
 							rep = replacer(s, var, varnum);
 							m.insertAfter("try{System.out.print(\"\\n417417417 \");System.out.print("+rep+");System.out.print(\" "+prednum+" \");}catch(Throwable e){System.out.print(\"\\n417417417 \");System.out.print(\"false\");System.out.print(\" "+prednum+" \");}");
 							System.out.println("good: "+s);serials.put(prednum, new PredSerial(prednum,c.getName(),m.getName(),"EXIT",s,w.posCover,w.negCover,w.line));

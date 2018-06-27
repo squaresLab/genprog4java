@@ -1,0 +1,52 @@
+Daikon version 5.6.5, released April 3, 2018; http://plse.cs.washington.edu/daikon.
+Reading declaration files Processing trace data; reading 1 dtrace file:
+
+No return from procedure observed 1 time.  Unmatched entries are ignored!
+Unterminated calls:
+  clegoues.genprog4java.fitness.JUnitTestRunner.main(java.lang.String[]) : 1 invocation
+End of report for procedures not returned from.  Unmatched entries are ignored!
+
+===========================================================================
+packageOffByOne.OffByOne:::OBJECT
+this != null
+===========================================================================
+packageOffByOne.OffByOne.OffByOne():::EXIT
+===========================================================================
+packageOffByOne.OffByOne.createFibonnaciArray(int):::ENTER
+===========================================================================
+packageOffByOne.OffByOne.createFibonnaciArray(int):::EXIT10
+("oneOf.java.jpp: SEQUENCE unimplemented" != null)
+daikon.Quant.eltsEqual(\result, 0)
+\old(arg0) == 0 || \old(arg0) == 1
+daikon.Quant.size(\result) == 1
+daikon.Quant.eltsEqual(\result, daikon.Quant.size(\result)-1)
+daikon.Quant.memberOf(daikon.Quant.size(\result)-1 , \result )
+===========================================================================
+packageOffByOne.OffByOne.createFibonnaciArray(int):::EXIT15
+\old(arg0) == daikon.Quant.size(\result)
+daikon.Quant.size(\result)-1 == daikon.Quant.getElement_int(\result, \old(arg0)-1)
+\result != null
+("oneOf.java.jpp: SEQUENCE unimplemented" != null)
+\old(arg0) == 2
+===========================================================================
+packageOffByOne.OffByOne.createFibonnaciArray(int):::EXIT32
+\old(arg0) == daikon.Quant.size(\result)
+\result != null
+("oneOf.java.jpp: SEQUENCE unimplemented" != null)
+\old(arg0) == 3
+daikon.Quant.getElement_int(\result, \old(arg0)-1) == 1
+===========================================================================
+packageOffByOne.OffByOne.createFibonnaciArray(int):::EXIT
+daikon.Quant.subsetOf(\result, new long[] { 0, 1 })
+("oneOf.java.jpp: SEQUENCE unimplemented" != null)
+daikon.Quant.size(\result) == 1 || daikon.Quant.size(\result) == 2 || daikon.Quant.size(\result) == 3
+===========================================================================
+tests.OffByOneTestsPos:::OBJECT
+this != null
+===========================================================================
+tests.OffByOneTestsPos.OffByOneTestsPos():::EXIT
+===========================================================================
+tests.OffByOneTestsPos.severalTestCasesToTestcreateFibonnaciArray():::ENTER
+===========================================================================
+tests.OffByOneTestsPos.severalTestCasesToTestcreateFibonnaciArray():::EXIT
+Exiting Daikon.

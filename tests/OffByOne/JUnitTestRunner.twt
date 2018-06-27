@@ -1,0 +1,54 @@
+Method: packageOffByOne.OffByOne
+Location: OBJECT
+this != null
+
+Method: packageOffByOne.OffByOne.OffByOne()
+Location: EXIT
+
+Method: packageOffByOne.OffByOne.createFibonnaciArray(int)
+Location: ENTER
+
+Method: packageOffByOne.OffByOne.createFibonnaciArray(int)
+Location: EXIT
+("oneOf.java.jpp: SEQUENCE unimplemented" != null)
+daikon.Quant.eltsEqual(\result, 0)
+\old(arg0) == 0 || \old(arg0) == 1
+daikon.Quant.size(\result) == 1
+daikon.Quant.eltsEqual(\result, daikon.Quant.size(\result)-1)
+daikon.Quant.memberOf(daikon.Quant.size(\result)-1 , \result )
+
+Method: packageOffByOne.OffByOne.createFibonnaciArray(int)
+Location: EXIT
+\old(arg0) == daikon.Quant.size(\result)
+daikon.Quant.size(\result)-1 == daikon.Quant.getElement_int(\result, \old(arg0)-1)
+\result != null
+("oneOf.java.jpp: SEQUENCE unimplemented" != null)
+\old(arg0) == 2
+
+Method: packageOffByOne.OffByOne.createFibonnaciArray(int)
+Location: EXIT
+\old(arg0) == daikon.Quant.size(\result)
+\result != null
+("oneOf.java.jpp: SEQUENCE unimplemented" != null)
+\old(arg0) == 3
+daikon.Quant.getElement_int(\result, \old(arg0)-1) == 1
+
+Method: packageOffByOne.OffByOne.createFibonnaciArray(int)
+Location: EXIT
+daikon.Quant.subsetOf(\result, new long[] { 0, 1 })
+("oneOf.java.jpp: SEQUENCE unimplemented" != null)
+daikon.Quant.size(\result) == 1 || daikon.Quant.size(\result) == 2 || daikon.Quant.size(\result) == 3
+
+Method: tests.OffByOneTestsPos
+Location: OBJECT
+this != null
+
+Method: tests.OffByOneTestsPos.OffByOneTestsPos()
+Location: EXIT
+
+Method: tests.OffByOneTestsPos.severalTestCasesToTestcreateFibonnaciArray()
+Location: ENTER
+
+Method: tests.OffByOneTestsPos.severalTestCasesToTestcreateFibonnaciArray()
+Location: EXIT
+
