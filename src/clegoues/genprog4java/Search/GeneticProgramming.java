@@ -105,7 +105,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			generationsRun++;
 			assert (initialPopulation.getPopsize() > 0);
 			// Step 0.5: Check Invariant
-			checked = VariantCheckerMain.checkInvariant(checked);
+			VariantCheckerMain.checkInvariant(incomingPopulation);
 			// Step 1: selection
 			incomingPopulation.selection(incomingPopulation.getPopsize());
 			// step 2: crossover

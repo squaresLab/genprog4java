@@ -4,7 +4,10 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.FitnessValue;
 import clegoues.genprog4java.fitness.JUnitTestRunner;
 import clegoues.genprog4java.rep.CachingRepresentation;
+import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.mut.EditOperation;
+import clegoues.genprog4java.Search.Population;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -19,7 +22,7 @@ import org.apache.commons.exec.PumpStreamHandler;
 
 public class VariantCheckerMain
 {
-	public static ArrayList<Boolean> goodVariant = new ArrayList<Boolean>();
+	//public static ArrayList<Boolean> goodVariant = new ArrayList<Boolean>();
 	public static void main(String [] args) throws Exception
 	{
 		/*int n = Integer.parseInt(args[0]);
@@ -41,17 +44,17 @@ public class VariantCheckerMain
 		}*/
 	}
 	
-	public static int checkInvariant(int checked)
+	public static void checkInvariant(Population<? extends EditOperation> pop)
 	{
-		int begin = checked;
-		while(checked<CachingRepresentation.sequence)
+		for(Representation<? extends EditOperation> rep : pop)
 		{
+			if(rep.getVariantFolder().equals(""))continue;
 			try
 			{
 				String libtrunc = Configuration.libs.substring(0, Configuration.libs.lastIndexOf(":"));
 				CommandLine command1 = CommandLine.parse("cp -r "+Configuration.classTestFolder+"tests .");
-				CommandLine command2 = CommandLine.parse("sh checker.sh "+Fitness.positiveTests.get(0)+" "+libtrunc+":.:tmp/variant"+checked+"/:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ variant"+checked+"pos NOTORIG");
-				CommandLine command3 = CommandLine.parse("sh checker.sh "+Fitness.negativeTests.get(0)+" "+libtrunc+":.:tmp/variant"+checked+"/:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ variant"+checked+"neg NOTORIG");
+				CommandLine command2 = CommandLine.parse("sh checker.sh "+Fitness.positiveTests.get(0)+" "+libtrunc+":.:tmp/"+rep.getVariantFolder()+"/:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ "+rep.getVariantFolder()+"pos NOTORIG");
+				CommandLine command3 = CommandLine.parse("sh checker.sh "+Fitness.negativeTests.get(0)+" "+libtrunc+":.:tmp/"+rep.getVariantFolder()+"/:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ "+rep.getVariantFolder()+"neg NOTORIG");
 				
 				//System.out.println("command: " + command2.toString());
 				ExecuteWatchdog watchdog = new ExecuteWatchdog(1000000);
@@ -74,7 +77,8 @@ public class VariantCheckerMain
 					String output = out.toString();
 					System.out.println(output);
 					out.reset();
-					goodVariant.add(true);
+					//goodVariant.add(true);
+					rep.isGoodForCheck=true;
 				} catch (ExecuteException exception) {
 					//posFit.setAllPassed(false);
 					out.flush();
@@ -92,18 +96,19 @@ public class VariantCheckerMain
 			}
 			catch(Exception e)
 			{
-				System.out.println("ERROR!!!!!! "+checked);
-				goodVariant.add(false);
+				System.out.println("ERROR!!!!!! "+rep.getVariantFolder());
+				//goodVariant.add(false);
+				rep.isGoodForCheck=false;
 			}
-			checked++;
 		}
-		try{System.out.println(Arrays.toString(analyzeResults(begin,checked)));}catch(Exception e) {}
-		return checked;
+		try{System.out.println(Arrays.toString(analyzeResults(pop)));}catch(Exception e) {System.out.println(e.toString());}
+		//return checked;
 	}
 	
-	public static int[] analyzeResults(int begin, int end) throws Exception
+	public static int[] analyzeResults(Population<? extends EditOperation> pop) throws Exception
 	{
 		ArrayList<byte[]> templist = new ArrayList<byte[]>();
+		ArrayList<Representation<? extends EditOperation>> repstorer = new ArrayList<Representation<? extends EditOperation>>();
 		int max = 0;
 		byte[] b = tnsFetcher("origPos");
 		templist.add(b);
@@ -111,16 +116,21 @@ public class VariantCheckerMain
 		b = tnsFetcher("origNeg");
 		templist.add(b);
 		if(b.length>max)max=b.length;
-		for(int i = begin; i < end; i++)
+		for(Representation<? extends EditOperation> rep : pop)
 		{
-			if(goodVariant.get(i))
+			if((!rep.getVariantFolder().equals(""))&&rep.isGoodForCheck)
 			{
-				b = tnsFetcher("variant"+i+"pos");
+				b = tnsFetcher(rep.getVariantFolder()+"pos");
 				templist.add(b);
 				if(b.length>max)max=b.length;
-				b = tnsFetcher("variant"+i+"neg");
+				b = tnsFetcher(rep.getVariantFolder()+"neg");
 				templist.add(b);
 				if(b.length>max)max=b.length;
+				repstorer.add(rep);
+			}
+			else
+			{
+				rep.setFitness(0.0);
 			}
 		}
 		ArrayList<byte[]> list = new ArrayList<byte[]>();
@@ -138,7 +148,18 @@ public class VariantCheckerMain
 			System.out.println(Arrays.toString(b));
 			list.add(b);
 		}
-		return Fitness.getStringDiffScore(list);
+		int[] diffScores =  Fitness.getStringDiffScore(list);
+		int max1 = 0;
+		for(int a: diffScores)
+		{
+			if(a>max1)max1=a;
+		}
+		if(max1==0)return diffScores;
+		for(int i = 0; i < repstorer.size();i++)
+		{
+			repstorer.get(i).setFitness(((double)diffScores[i+1])/((double)max1)); 
+		}
+		return diffScores;
 	}
 	
 	public static byte[] newByteArray2(int size)

@@ -226,6 +226,10 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		return population.get(0).copy(); // FIXME: this should never happen, right?
 	}
 	private ArrayList<Representation<G>> tournamentSelection(int desired) {
+		for(Representation<G> rep : this.getPopulation())
+		{
+			System.out.println(rep.getVariantFolder()+" "+rep.getFitness());
+		}
 		assert(desired >= 0);
 		assert(tournamentK >= 1);
 		assert(this.tournamentP >= 0.0);
@@ -412,7 +416,9 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	}
 
 	public void selection(int popsize) {
+		System.out.println("Beginning pop: "+this.population.size());
 		this.population = this.tournamentSelection(popsize);
+		System.out.println("Ending pop: "+this.population.size());
 
 	}
 

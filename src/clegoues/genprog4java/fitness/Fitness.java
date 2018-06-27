@@ -616,7 +616,7 @@ public class Fitness {
 				+ ((Fitness.numNegativeTests * fac));
 		double curFit = rep.getFitness();
 		if (curFit > -1.0) {
-			logger.info("\t gen: " + generation + " " + curFit + " " + rep.getName() + " (stored at: " + rep.getVariantFolder() + ")");
+			logger.info("\t gen: " + generation + " " + curFit + " " + rep.getName() + " (stored at: " + rep.getVariantFolder() + ") ");
 			return !(curFit < maxFitness);
 		}
 		Pair<Double, Double> fitnessPair =  Pair.of(-1.0, -1.0);
@@ -630,7 +630,7 @@ public class Fitness {
 		} else {
 			fitnessPair = this.testFitnessFull(rep, fac);
 		}
-		logger.info("\t gen: " + generation + " " + fitnessPair.getLeft() + " " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
+		logger.info("\t gen: " + generation + " " + fitnessPair.getLeft() + " " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ") ");
 		rep.setFitness(fitnessPair.getRight());
 		rep.cleanup();
 		return !(fitnessPair.getLeft() < maxFitness);

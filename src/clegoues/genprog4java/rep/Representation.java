@@ -124,6 +124,8 @@ Comparable<Representation<G>> {
 
 	public abstract void cleanup();
 
+	public boolean isGoodForCheck=false;
+	
 	public abstract double getFitness();
 
 	public abstract boolean compile(String sourceName, String exeName);
