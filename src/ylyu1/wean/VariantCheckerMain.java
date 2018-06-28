@@ -237,7 +237,7 @@ public class VariantCheckerMain
 	public static void runDaikon()
 	{
 		CommandLine command1 = CommandLine.parse("cp /home/lvyiwei1/genprog4java-branch/genprog4java/runDaikon.sh .");
-		CommandLine command2 = CommandLine.parse("sh runDaikon.sh "+Fitness.positiveTests.get(0)+" "+Configuration.libs+":"+Configuration.classTestFolder+":"+Configuration.classSourceFolder+":/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/");
+		CommandLine command2 = CommandLine.parse("sh runDaikon.sh "+Fitness.positiveTests.get(0)+" "+Configuration.libs+":"+Configuration.classTestFolder+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/");
 		CommandLine command3 = CommandLine.parse("cp /home/lvyiwei1/genprog4java-branch/genprog4java/checker.sh .");
 		
 		//System.out.println("command: " + command2.toString());

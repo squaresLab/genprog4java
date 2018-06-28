@@ -1,0 +1,27 @@
+Method: packageZuneBug.ZuneBug
+Location: OBJECT
+this != null
+
+Method: packageZuneBug.ZuneBug.CurrentYear(int)
+Location: ENTER
+
+Method: packageZuneBug.ZuneBug.CurrentYear(int)
+Location: EXIT
+\result != \old(arg0)
+
+Method: packageZuneBug.ZuneBug.ZuneBug()
+Location: EXIT
+
+Method: tests.ZuneBugTestsPos
+Location: OBJECT
+this != null
+
+Method: tests.ZuneBugTestsPos.ZuneBugTestsPos()
+Location: EXIT
+
+Method: tests.ZuneBugTestsPos.severalTestCasesToTestCurrentYear()
+Location: ENTER
+
+Method: tests.ZuneBugTestsPos.severalTestCasesToTestCurrentYear()
+Location: EXIT
+

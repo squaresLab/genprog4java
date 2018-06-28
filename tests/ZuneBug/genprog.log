@@ -1,0 +1,1595 @@
+DEBUG	2018-06-28 08:07:36,470	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-28 08:07:37,943	1473	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-28 08:07:40,383	3913	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@66c05fd7
+INFO	2018-06-28 08:07:40,383	3913	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-28 08:07:41,775	5305	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-28 08:07:42,164	5694	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2018-06-28 08:07:42,166	5696	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2018-06-28 08:07:42,551	6081	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2018-06-28 08:07:42,554	6084	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 2171)
+INFO	2018-06-28 08:07:42,555	6085	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2018-06-28 08:07:42,591	6121	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.ZuneBugTestsPos
+INFO	2018-06-28 08:07:43,099	6629	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.ZuneBugTestsNeg
+INFO	2018-06-28 08:07:43,648	7178	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2018-06-28 08:07:43,648	7178	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2018-06-28 08:07:49,260	12790	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: variant0) 
+INFO	2018-06-28 08:07:50,008	13538	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(9,5) (stored at: variant1) 
+INFO	2018-06-28 08:07:50,663	14193	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(7) (stored at: variant2) 
+INFO	2018-06-28 08:07:51,111	14641	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(5,9) (stored at: variant3) 
+INFO	2018-06-28 08:07:51,668	15198	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(4,5) (stored at: variant4) 
+ERROR	2018-06-28 08:07:51,712	15242	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:07:51,715	15245	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtDelete(1) at variant5 fails to compile
+
+INFO	2018-06-28 08:07:51,715	15245	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: variant5) 
+INFO	2018-06-28 08:07:52,157	15687	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(2) (stored at: variant6) 
+INFO	2018-06-28 08:07:52,799	16329	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(11,12) (stored at: variant7) 
+INFO	2018-06-28 08:07:53,249	16779	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(9,8) (stored at: variant8) 
+INFO	2018-06-28 08:07:53,692	17222	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(12) (stored at: variant9) 
+INFO	2018-06-28 08:07:54,272	17802	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(2,12) (stored at: variant10) 
+INFO	2018-06-28 08:07:54,742	18272	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(9,5) (stored at: variant11) 
+INFO	2018-06-28 08:07:55,299	18829	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(6,4) (stored at: variant12) 
+INFO	2018-06-28 08:07:55,956	19486	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(5) (stored at: variant13) 
+INFO	2018-06-28 08:07:55,957	19487	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(12) (stored at: ) 
+INFO	2018-06-28 08:07:56,528	20058	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(3,3) (stored at: variant14) 
+INFO	2018-06-28 08:07:56,981	20511	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(9,6) (stored at: variant15) 
+INFO	2018-06-28 08:07:57,634	21164	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(3,12) (stored at: variant16) 
+INFO	2018-06-28 08:07:57,640	21170	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:07:57,644	21174	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(11,9) (stored at: ) 
+INFO	2018-06-28 08:07:58,117	21647	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(3,7) (stored at: variant17) 
+INFO	2018-06-28 08:07:58,539	22069	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(9,11) (stored at: variant18) 
+INFO	2018-06-28 08:07:59,070	22600	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(6,3) (stored at: variant19) 
+INFO	2018-06-28 08:07:59,708	23238	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(5,4) (stored at: variant20) 
+INFO	2018-06-28 08:07:59,711	23241	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:08:00,151	23681	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(11) (stored at: variant21) 
+INFO	2018-06-28 08:08:00,692	24222	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,3) (stored at: variant22) 
+INFO	2018-06-28 08:08:00,693	24223	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:08:01,155	24685	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,8) (stored at: variant23) 
+INFO	2018-06-28 08:08:01,727	25257	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(7,7) (stored at: variant24) 
+INFO	2018-06-28 08:08:01,728	25258	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(12) (stored at: ) 
+INFO	2018-06-28 08:08:01,731	25261	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:08:01,733	25263	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(7) (stored at: ) 
+INFO	2018-06-28 08:08:02,168	25698	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(6,8) (stored at: variant25) 
+ERROR	2018-06-28 08:08:02,194	25724	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:9: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:16: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:08:02,195	25725	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtReplace(1,8) at variant26 fails to compile
+
+INFO	2018-06-28 08:08:02,195	25725	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(1,8) (stored at: variant26) 
+INFO	2018-06-28 08:08:02,695	26225	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(8,11) (stored at: variant27) 
+INFO	2018-06-28 08:08:03,235	26765	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,3) (stored at: variant28) 
+INFO	2018-06-28 08:08:03,681	27211	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(4,8) (stored at: variant29) 
+INFO	2018-06-28 08:08:04,107	27637	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(6,11) (stored at: variant30) 
+INFO	2018-06-28 08:08:04,535	28065	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(5,7) (stored at: variant31) 
+INFO	2018-06-28 08:08:04,535	28065	clegoues.genprog4java.Search.Search	[main]	search: generation1
+DEBUG	2018-06-28 08:09:54,686	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-28 08:09:55,127	441	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-28 08:09:57,219	2533	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@66c05fd7
+INFO	2018-06-28 08:09:57,219	2533	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-28 08:09:57,673	2987	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-28 08:09:57,902	3216	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2018-06-28 08:09:57,903	3217	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2018-06-28 08:09:58,223	3537	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2018-06-28 08:09:58,227	3541	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 1008)
+INFO	2018-06-28 08:09:58,227	3541	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2018-06-28 08:09:58,263	3577	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.ZuneBugTestsPos
+INFO	2018-06-28 08:09:58,694	4008	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.ZuneBugTestsNeg
+INFO	2018-06-28 08:09:59,228	4542	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2018-06-28 08:09:59,229	4543	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2018-06-28 08:10:04,050	9364	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: variant0) 
+INFO	2018-06-28 08:10:04,792	10106	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(9,5) (stored at: variant1) 
+INFO	2018-06-28 08:10:05,456	10770	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(7) (stored at: variant2) 
+INFO	2018-06-28 08:10:05,902	11216	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(5,9) (stored at: variant3) 
+INFO	2018-06-28 08:10:06,444	11758	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(4,5) (stored at: variant4) 
+ERROR	2018-06-28 08:10:06,489	11803	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:10:06,499	11813	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtDelete(1) at variant5 fails to compile
+
+INFO	2018-06-28 08:10:06,499	11813	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: variant5) 
+INFO	2018-06-28 08:10:06,936	12250	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(2) (stored at: variant6) 
+INFO	2018-06-28 08:10:07,617	12931	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(11,12) (stored at: variant7) 
+INFO	2018-06-28 08:10:08,044	13358	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(9,8) (stored at: variant8) 
+INFO	2018-06-28 08:10:08,497	13811	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(12) (stored at: variant9) 
+INFO	2018-06-28 08:10:09,064	14378	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(2,12) (stored at: variant10) 
+INFO	2018-06-28 08:10:09,516	14830	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(9,5) (stored at: variant11) 
+INFO	2018-06-28 08:10:10,060	15374	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(6,4) (stored at: variant12) 
+INFO	2018-06-28 08:10:10,703	16017	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(5) (stored at: variant13) 
+INFO	2018-06-28 08:10:10,704	16018	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(12) (stored at: ) 
+INFO	2018-06-28 08:10:11,257	16571	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(3,3) (stored at: variant14) 
+INFO	2018-06-28 08:10:11,680	16994	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(9,6) (stored at: variant15) 
+INFO	2018-06-28 08:10:12,329	17643	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(3,12) (stored at: variant16) 
+INFO	2018-06-28 08:10:12,336	17650	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:10:12,339	17653	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(11,9) (stored at: ) 
+INFO	2018-06-28 08:10:12,780	18094	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(3,7) (stored at: variant17) 
+INFO	2018-06-28 08:10:13,219	18533	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(9,11) (stored at: variant18) 
+INFO	2018-06-28 08:10:13,875	19189	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(6,3) (stored at: variant19) 
+INFO	2018-06-28 08:10:14,595	19909	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(5,4) (stored at: variant20) 
+INFO	2018-06-28 08:10:14,597	19911	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:10:15,034	20348	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(11) (stored at: variant21) 
+INFO	2018-06-28 08:10:15,555	20869	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,3) (stored at: variant22) 
+INFO	2018-06-28 08:10:15,561	20875	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:10:16,003	21317	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,8) (stored at: variant23) 
+INFO	2018-06-28 08:10:16,588	21902	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(7,7) (stored at: variant24) 
+INFO	2018-06-28 08:10:16,590	21904	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(12) (stored at: ) 
+INFO	2018-06-28 08:10:16,594	21908	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:10:16,598	21912	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(7) (stored at: ) 
+INFO	2018-06-28 08:10:17,023	22337	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(6,8) (stored at: variant25) 
+ERROR	2018-06-28 08:10:17,043	22357	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:9: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:16: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:10:17,051	22365	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtReplace(1,8) at variant26 fails to compile
+
+INFO	2018-06-28 08:10:17,051	22365	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(1,8) (stored at: variant26) 
+INFO	2018-06-28 08:10:17,536	22850	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(8,11) (stored at: variant27) 
+INFO	2018-06-28 08:10:18,099	23413	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,3) (stored at: variant28) 
+INFO	2018-06-28 08:10:18,531	23845	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(4,8) (stored at: variant29) 
+INFO	2018-06-28 08:10:18,957	24271	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(6,11) (stored at: variant30) 
+INFO	2018-06-28 08:10:19,379	24693	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(5,7) (stored at: variant31) 
+INFO	2018-06-28 08:10:19,380	24694	clegoues.genprog4java.Search.Search	[main]	search: generation1
+ERROR	2018-06-28 08:11:36,274	101588	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:11:36,311	101625	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:11:36,328	101642	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:11:36,378	101692	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:11:37,028	102342	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(8) (stored at: variant32) 
+INFO	2018-06-28 08:11:37,440	102754	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(7,8) (stored at: variant33) 
+INFO	2018-06-28 08:11:37,891	103205	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(11,7) (stored at: variant34) 
+INFO	2018-06-28 08:11:37,894	103208	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:11:38,365	103679	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(3,7) (stored at: variant35) 
+INFO	2018-06-28 08:11:39,019	104333	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(6) (stored at: variant36) 
+INFO	2018-06-28 08:11:39,448	104762	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(2,8) (stored at: variant37) 
+INFO	2018-06-28 08:11:39,909	105223	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(9,7) (stored at: variant38) 
+INFO	2018-06-28 08:11:40,324	105638	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(9,12) (stored at: variant39) 
+INFO	2018-06-28 08:11:40,759	106073	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,3) (stored at: variant40) 
+INFO	2018-06-28 08:11:40,761	106075	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:11:40,764	106078	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:11:41,292	106606	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(5,5) (stored at: variant41) 
+INFO	2018-06-28 08:11:41,293	106607	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(12) (stored at: ) 
+INFO	2018-06-28 08:11:41,296	106610	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,3) (stored at: ) 
+INFO	2018-06-28 08:11:41,774	107088	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(6,7) (stored at: variant42) 
+INFO	2018-06-28 08:11:42,209	107523	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(3,11) (stored at: variant43) 
+INFO	2018-06-28 08:11:42,210	107524	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(2) (stored at: ) 
+INFO	2018-06-28 08:11:42,214	107528	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:11:42,731	108045	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(7,3) (stored at: variant44) 
+INFO	2018-06-28 08:11:43,160	108474	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(9,8) (stored at: variant45) 
+INFO	2018-06-28 08:11:43,165	108479	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(6,7) (stored at: ) 
+INFO	2018-06-28 08:11:43,722	109036	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(11,11) (stored at: variant46) 
+INFO	2018-06-28 08:11:44,167	109481	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(5,7) (stored at: variant47) 
+INFO	2018-06-28 08:11:44,593	109907	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(4,11) (stored at: variant48) 
+INFO	2018-06-28 08:11:45,232	110546	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(3) (stored at: variant49) 
+INFO	2018-06-28 08:11:45,665	110979	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(2,4) (stored at: variant50) 
+INFO	2018-06-28 08:11:45,666	110980	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(2,8) (stored at: ) 
+INFO	2018-06-28 08:11:45,673	110987	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,3) (stored at: ) 
+INFO	2018-06-28 08:11:45,674	110988	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(9,8) (stored at: ) 
+INFO	2018-06-28 08:11:46,127	111441	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(11,9) (stored at: variant51) 
+INFO	2018-06-28 08:11:46,131	111445	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:11:46,131	111445	clegoues.genprog4java.Search.Search	[main]	search: generation2
+ERROR	2018-06-28 08:11:46,153	111467	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:11:46,166	111480	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:11:46,290	111604	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:11:46,751	112065	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(12,11) (stored at: variant52) 
+INFO	2018-06-28 08:11:46,754	112068	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(5) (stored at: ) 
+ERROR	2018-06-28 08:11:46,766	112080	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:9: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:16: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:11:46,766	112080	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtReplace(1,11) at variant53 fails to compile
+
+INFO	2018-06-28 08:11:46,766	112080	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(1,11) (stored at: variant53) 
+INFO	2018-06-28 08:11:47,199	112513	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(9) (stored at: variant54) 
+INFO	2018-06-28 08:11:47,736	113050	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(3,5) (stored at: variant55) 
+INFO	2018-06-28 08:11:47,738	113052	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(5,9) (stored at: ) 
+INFO	2018-06-28 08:11:48,468	113782	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(4) (stored at: variant56) 
+INFO	2018-06-28 08:11:48,890	114204	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(5,8) (stored at: variant57) 
+ERROR	2018-06-28 08:11:48,908	114222	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:15: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:22: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:11:48,910	114224	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtAppend(1,11) at variant58 fails to compile
+
+INFO	2018-06-28 08:11:48,910	114224	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(1,11) (stored at: variant58) 
+INFO	2018-06-28 08:11:49,570	114884	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(6,9) (stored at: variant59) 
+INFO	2018-06-28 08:11:49,571	114885	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(4,8) (stored at: ) 
+INFO	2018-06-28 08:11:49,579	114893	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(11) (stored at: ) 
+INFO	2018-06-28 08:11:50,496	115810	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(4,3) (stored at: variant60) 
+INFO	2018-06-28 08:11:50,498	115812	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(4,5) (stored at: ) 
+INFO	2018-06-28 08:11:51,170	116484	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(11,6) (stored at: variant61) 
+INFO	2018-06-28 08:11:51,172	116486	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(1,11) (stored at: ) 
+INFO	2018-06-28 08:11:52,051	117365	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(7,5) (stored at: variant62) 
+INFO	2018-06-28 08:11:52,814	118128	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(12,6) (stored at: variant63) 
+INFO	2018-06-28 08:11:52,816	118130	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(2,8) (stored at: ) 
+INFO	2018-06-28 08:11:52,818	118132	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(7) (stored at: ) 
+INFO	2018-06-28 08:11:53,423	118737	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(5,6) (stored at: variant64) 
+INFO	2018-06-28 08:11:53,937	119251	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.0 StmtReplace(5,4) (stored at: variant65) 
+INFO	2018-06-28 08:11:53,939	119253	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(12) (stored at: ) 
+INFO	2018-06-28 08:11:53,941	119255	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.0 StmtReplace(6,3) (stored at: ) 
+INFO	2018-06-28 08:11:54,402	119716	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(2,11) (stored at: variant66) 
+INFO	2018-06-28 08:11:54,404	119718	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:11:54,407	119721	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(2) (stored at: ) 
+ERROR	2018-06-28 08:11:54,425	119739	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:15: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:22: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:11:54,425	119739	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtAppend(1,8) at variant67 fails to compile
+
+INFO	2018-06-28 08:11:54,425	119739	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(1,8) (stored at: variant67) 
+INFO	2018-06-28 08:11:54,431	119745	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(5,7) (stored at: ) 
+INFO	2018-06-28 08:11:54,436	119750	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:11:54,436	119750	clegoues.genprog4java.Search.Search	[main]	search: generation3
+ERROR	2018-06-28 08:11:54,548	119862	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:9: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:16: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:11:54,644	119958	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:11:54,741	120055	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(2) (stored at: ) 
+INFO	2018-06-28 08:11:55,359	120673	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(9,4) (stored at: variant68) 
+INFO	2018-06-28 08:11:55,361	120675	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(3) (stored at: ) 
+INFO	2018-06-28 08:11:56,033	121347	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(6,5) (stored at: variant69) 
+INFO	2018-06-28 08:11:56,659	121973	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(8,5) (stored at: variant70) 
+INFO	2018-06-28 08:11:56,661	121975	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(9,6) (stored at: ) 
+INFO	2018-06-28 08:11:56,662	121976	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(2,8) (stored at: ) 
+INFO	2018-06-28 08:11:56,663	121977	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(9) (stored at: ) 
+INFO	2018-06-28 08:11:56,664	121978	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(9) (stored at: ) 
+INFO	2018-06-28 08:11:56,668	121982	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(11,6) (stored at: ) 
+INFO	2018-06-28 08:11:56,669	121983	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(9) (stored at: ) 
+INFO	2018-06-28 08:11:57,145	122459	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(6,9) (stored at: variant71) 
+INFO	2018-06-28 08:11:57,706	123020	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(4,6) (stored at: variant72) 
+INFO	2018-06-28 08:11:58,241	123555	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.0 StmtReplace(6,4) (stored at: variant73) 
+INFO	2018-06-28 08:11:58,674	123988	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(8,4) (stored at: variant74) 
+INFO	2018-06-28 08:11:58,675	123989	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(11,6) (stored at: ) 
+INFO	2018-06-28 08:11:58,677	123991	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(1,11) (stored at: ) 
+INFO	2018-06-28 08:11:58,679	123993	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.0 StmtReplace(12,9) (stored at: ) 
+INFO	2018-06-28 08:11:59,097	124411	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(5,11) (stored at: variant75) 
+INFO	2018-06-28 08:11:59,099	124413	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(8) (stored at: ) 
+INFO	2018-06-28 08:11:59,100	124414	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(9,8) (stored at: ) 
+INFO	2018-06-28 08:11:59,101	124415	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(1,11) (stored at: ) 
+INFO	2018-06-28 08:11:59,620	124934	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(6,3) (stored at: variant76) 
+INFO	2018-06-28 08:12:00,287	125601	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(5,6) (stored at: variant77) 
+INFO	2018-06-28 08:12:00,796	126110	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(8,7) (stored at: variant78) 
+INFO	2018-06-28 08:12:00,799	126113	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(1,11) (stored at: ) 
+INFO	2018-06-28 08:12:00,800	126114	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(8,5) (stored at: ) 
+INFO	2018-06-28 08:12:01,407	126721	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(4,5) (stored at: variant79) 
+INFO	2018-06-28 08:12:01,409	126723	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(8) (stored at: ) 
+INFO	2018-06-28 08:12:01,412	126726	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.0 StmtReplace(5,5) (stored at: ) 
+INFO	2018-06-28 08:12:01,413	126727	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(3,12) (stored at: ) 
+INFO	2018-06-28 08:12:01,414	126728	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(4) (stored at: ) 
+INFO	2018-06-28 08:12:01,414	126728	clegoues.genprog4java.Search.Search	[main]	search: generation4
+ERROR	2018-06-28 08:12:01,546	126860	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:9: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:16: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:12:01,595	126909	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:15: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:22: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:12:01,622	126936	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:15: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:22: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:12:01,687	127001	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtAppend(11,11) (stored at: ) 
+INFO	2018-06-28 08:12:01,708	127022	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtAppend(3,5) (stored at: ) 
+INFO	2018-06-28 08:12:01,709	127023	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:12:02,195	127509	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtAppend(7,12) (stored at: variant80) 
+INFO	2018-06-28 08:12:02,197	127511	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:12:02,198	127512	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtReplace(1,8) (stored at: ) 
+INFO	2018-06-28 08:12:02,199	127513	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtReplace(11,9) (stored at: ) 
+INFO	2018-06-28 08:12:02,199	127513	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtReplace(1,8) (stored at: ) 
+INFO	2018-06-28 08:12:02,200	127514	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtDelete(12) (stored at: ) 
+INFO	2018-06-28 08:12:02,202	127516	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtReplace(12,11) (stored at: ) 
+INFO	2018-06-28 08:12:02,203	127517	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtReplace(4,5) (stored at: ) 
+INFO	2018-06-28 08:12:02,204	127518	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtAppend(1,11) (stored at: ) 
+INFO	2018-06-28 08:12:02,631	127945	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtAppend(12,12) (stored at: variant81) 
+INFO	2018-06-28 08:12:02,632	127946	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtAppend(12,9) (stored at: ) 
+INFO	2018-06-28 08:12:02,633	127947	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtAppend(6,7) (stored at: ) 
+INFO	2018-06-28 08:12:02,637	127951	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtDelete(8) (stored at: ) 
+INFO	2018-06-28 08:12:02,638	127952	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtAppend(12,8) (stored at: ) 
+INFO	2018-06-28 08:12:02,640	127954	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtDelete(3) (stored at: ) 
+INFO	2018-06-28 08:12:02,644	127958	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtAppend(6,4) (stored at: ) 
+INFO	2018-06-28 08:12:02,649	127963	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtDelete(6) (stored at: ) 
+INFO	2018-06-28 08:12:03,075	128389	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtReplace(2,6) (stored at: variant82) 
+INFO	2018-06-28 08:12:03,077	128391	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtDelete(3) (stored at: ) 
+INFO	2018-06-28 08:12:03,080	128394	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtDelete(6) (stored at: ) 
+INFO	2018-06-28 08:12:03,629	128943	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtAppend(2,4) (stored at: variant83) 
+INFO	2018-06-28 08:12:03,630	128944	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:12:03,632	128946	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 4 0.0 StmtDelete(7) (stored at: ) 
+INFO	2018-06-28 08:12:03,632	128946	clegoues.genprog4java.Search.Search	[main]	search: generation5
+ERROR	2018-06-28 08:12:03,666	128980	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:9: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:16: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:12:03,675	128989	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:9: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:16: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:12:03,719	129033	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:15: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:22: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:12:03,851	129165	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:12:03,904	129218	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtDelete(3) (stored at: ) 
+INFO	2018-06-28 08:12:03,913	129227	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtDelete(2) (stored at: ) 
+INFO	2018-06-28 08:12:03,914	129228	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:12:03,924	129238	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtAppend(12,3) (stored at: ) 
+INFO	2018-06-28 08:12:04,487	129801	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtReplace(8,11) (stored at: variant84) 
+INFO	2018-06-28 08:12:04,488	129802	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtReplace(1,11) (stored at: ) 
+INFO	2018-06-28 08:12:04,493	129807	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtReplace(5,11) (stored at: ) 
+INFO	2018-06-28 08:12:05,144	130458	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtAppend(11,6) (stored at: variant85) 
+INFO	2018-06-28 08:12:05,146	130460	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtDelete(6) (stored at: ) 
+INFO	2018-06-28 08:12:05,152	130466	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtDelete(2) (stored at: ) 
+INFO	2018-06-28 08:12:05,695	131009	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 1.0 StmtReplace(3,4) (stored at: variant86) 
+INFO	2018-06-28 08:12:06,110	131424	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 1.0 StmtReplace(6,7) (stored at: variant87) 
+INFO	2018-06-28 08:12:06,112	131426	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:12:06,114	131428	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtReplace(5,8) (stored at: ) 
+INFO	2018-06-28 08:12:06,115	131429	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtDelete(8) (stored at: ) 
+INFO	2018-06-28 08:12:06,116	131430	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtDelete(6) (stored at: ) 
+INFO	2018-06-28 08:12:06,558	131872	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtAppend(4,9) (stored at: variant88) 
+INFO	2018-06-28 08:12:06,982	132296	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtReplace(3,8) (stored at: variant89) 
+INFO	2018-06-28 08:12:06,983	132297	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtDelete(6) (stored at: ) 
+INFO	2018-06-28 08:12:06,984	132298	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 1.0 StmtReplace(6,7) (stored at: ) 
+INFO	2018-06-28 08:12:06,985	132299	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtDelete(2) (stored at: ) 
+INFO	2018-06-28 08:12:06,986	132300	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtAppend(4,3) (stored at: ) 
+INFO	2018-06-28 08:12:06,987	132301	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtDelete(8) (stored at: ) 
+INFO	2018-06-28 08:12:06,992	132306	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 5 0.0 StmtAppend(11,9) (stored at: ) 
+INFO	2018-06-28 08:12:06,992	132306	clegoues.genprog4java.Search.Search	[main]	search: generation6
+ERROR	2018-06-28 08:12:07,057	132371	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:9: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:16: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:12:07,094	132408	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:12:07,261	132575	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtReplace(2,4) (stored at: ) 
+INFO	2018-06-28 08:12:07,819	133133	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtReplace(8,6) (stored at: variant90) 
+INFO	2018-06-28 08:12:08,340	133654	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 1.0 StmtReplace(7,6) (stored at: variant91) 
+INFO	2018-06-28 08:12:08,856	134170	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtAppend(12,4) (stored at: variant92) 
+INFO	2018-06-28 08:12:08,857	134171	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtDelete(12) (stored at: ) 
+INFO	2018-06-28 08:12:08,860	134174	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:12:08,862	134176	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtReplace(3,8) (stored at: ) 
+INFO	2018-06-28 08:12:09,476	134790	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtReplace(4,7) (stored at: variant93) 
+INFO	2018-06-28 08:12:10,120	135434	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtReplace(4,12) (stored at: variant94) 
+INFO	2018-06-28 08:12:10,123	135437	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtAppend(3,7) (stored at: ) 
+INFO	2018-06-28 08:12:10,631	135945	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 1.0 StmtReplace(7,5) (stored at: variant95) 
+INFO	2018-06-28 08:12:10,632	135946	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtAppend(6,7) (stored at: ) 
+INFO	2018-06-28 08:12:11,043	136357	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtReplace(2,7) (stored at: variant96) 
+INFO	2018-06-28 08:12:11,044	136358	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtDelete(4) (stored at: ) 
+INFO	2018-06-28 08:12:11,514	136828	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtAppend(7,11) (stored at: variant97) 
+INFO	2018-06-28 08:12:11,515	136829	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 1.0 StmtReplace(12,12) (stored at: ) 
+INFO	2018-06-28 08:12:11,516	136830	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtDelete(2) (stored at: ) 
+INFO	2018-06-28 08:12:11,519	136833	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtDelete(9) (stored at: ) 
+INFO	2018-06-28 08:12:11,520	136834	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtDelete(11) (stored at: ) 
+INFO	2018-06-28 08:12:11,522	136836	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtDelete(2) (stored at: ) 
+INFO	2018-06-28 08:12:11,523	136837	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtDelete(7) (stored at: ) 
+INFO	2018-06-28 08:12:11,527	136841	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtDelete(4) (stored at: ) 
+INFO	2018-06-28 08:12:11,528	136842	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtReplace(1,11) (stored at: ) 
+INFO	2018-06-28 08:12:11,530	136844	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtAppend(1,11) (stored at: ) 
+INFO	2018-06-28 08:12:11,543	136857	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtAppend(11,9) (stored at: ) 
+INFO	2018-06-28 08:12:11,544	136858	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtAppend(7,12) (stored at: ) 
+INFO	2018-06-28 08:12:11,545	136859	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtDelete(7) (stored at: ) 
+INFO	2018-06-28 08:12:11,546	136860	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtDelete(9) (stored at: ) 
+INFO	2018-06-28 08:12:11,552	136866	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 1.0 StmtReplace(7,7) (stored at: ) 
+INFO	2018-06-28 08:12:11,552	136866	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 6 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:12:11,553	136867	clegoues.genprog4java.Search.Search	[main]	search: generation7
+ERROR	2018-06-28 08:12:11,732	137046	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:9: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:16: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:12:11,781	137095	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:12:11,804	137118	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtAppend(4,6) (stored at: ) 
+INFO	2018-06-28 08:12:11,812	137126	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtDelete(4) (stored at: ) 
+INFO	2018-06-28 08:12:12,458	137772	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtAppend(9,7) (stored at: variant98) 
+INFO	2018-06-28 08:12:12,459	137773	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtDelete(6) (stored at: ) 
+INFO	2018-06-28 08:12:12,462	137776	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:12:12,463	137777	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtDelete(3) (stored at: ) 
+INFO	2018-06-28 08:12:12,877	138191	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtReplace(7,9) (stored at: variant99) 
+INFO	2018-06-28 08:12:12,878	138192	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtReplace(1,8) (stored at: ) 
+INFO	2018-06-28 08:12:12,879	138193	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:12:12,884	138198	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtAppend(7,5) (stored at: ) 
+INFO	2018-06-28 08:12:13,315	138629	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtReplace(2,12) (stored at: variant100) 
+INFO	2018-06-28 08:12:13,950	139264	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtAppend(12,5) (stored at: variant101) 
+INFO	2018-06-28 08:12:14,478	139792	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtAppend(3,3) (stored at: variant102) 
+INFO	2018-06-28 08:12:14,886	140200	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtReplace(12,4) (stored at: variant103) 
+INFO	2018-06-28 08:12:14,887	140201	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtDelete(9) (stored at: ) 
+INFO	2018-06-28 08:12:15,492	140806	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtAppend(2,7) (stored at: variant104) 
+INFO	2018-06-28 08:12:16,112	141426	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtAppend(5,5) (stored at: variant105) 
+INFO	2018-06-28 08:12:16,552	141866	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtAppend(3,9) (stored at: variant106) 
+INFO	2018-06-28 08:12:17,002	142316	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtAppend(5,9) (stored at: variant107) 
+INFO	2018-06-28 08:12:17,004	142318	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtReplace(11,6) (stored at: ) 
+INFO	2018-06-28 08:12:17,004	142318	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtAppend(12,8) (stored at: ) 
+INFO	2018-06-28 08:12:17,519	142833	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtAppend(3,6) (stored at: variant108) 
+INFO	2018-06-28 08:12:18,049	143363	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 1.0 StmtAppend(2,11) (stored at: variant109) 
+INFO	2018-06-28 08:12:18,050	143364	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtReplace(6,8) (stored at: ) 
+INFO	2018-06-28 08:12:18,055	143369	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtDelete(11) (stored at: ) 
+INFO	2018-06-28 08:12:18,059	143373	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtAppend(5,12) (stored at: ) 
+INFO	2018-06-28 08:12:18,061	143375	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtAppend(4,3) (stored at: ) 
+INFO	2018-06-28 08:12:18,586	143900	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtAppend(2,3) (stored at: variant110) 
+INFO	2018-06-28 08:12:18,587	143901	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtReplace(1,11) (stored at: ) 
+INFO	2018-06-28 08:12:18,591	143905	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 7 0.0 StmtAppend(1,11) (stored at: ) 
+INFO	2018-06-28 08:12:18,591	143905	clegoues.genprog4java.Search.Search	[main]	search: generation8
+ERROR	2018-06-28 08:12:18,669	143983	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:9: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:16: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:12:18,805	144119	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:9: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:16: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:12:18,840	144154	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtDelete(6) (stored at: ) 
+INFO	2018-06-28 08:12:18,841	144155	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtDelete(3) (stored at: ) 
+INFO	2018-06-28 08:12:18,842	144156	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtAppend(11,12) (stored at: ) 
+INFO	2018-06-28 08:12:18,847	144161	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:12:18,855	144169	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtDelete(11) (stored at: ) 
+INFO	2018-06-28 08:12:18,856	144170	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtReplace(4,7) (stored at: ) 
+INFO	2018-06-28 08:12:18,857	144171	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 1.0 StmtReplace(7,3) (stored at: ) 
+INFO	2018-06-28 08:12:18,857	144171	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtDelete(9) (stored at: ) 
+INFO	2018-06-28 08:12:18,859	144173	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtReplace(6,11) (stored at: ) 
+INFO	2018-06-28 08:12:19,412	144726	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtAppend(5,8) (stored at: variant111) 
+INFO	2018-06-28 08:12:19,413	144727	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtDelete(2) (stored at: ) 
+INFO	2018-06-28 08:12:19,416	144730	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtAppend(4,6) (stored at: ) 
+INFO	2018-06-28 08:12:19,832	145146	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtReplace(2,5) (stored at: variant112) 
+INFO	2018-06-28 08:12:19,833	145147	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtAppend(4,6) (stored at: ) 
+INFO	2018-06-28 08:12:19,834	145148	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtDelete(7) (stored at: ) 
+INFO	2018-06-28 08:12:19,836	145150	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtReplace(5,9) (stored at: ) 
+INFO	2018-06-28 08:12:19,839	145153	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtReplace(8,6) (stored at: ) 
+INFO	2018-06-28 08:12:20,459	145773	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtAppend(9,6) (stored at: variant113) 
+INFO	2018-06-28 08:12:20,461	145775	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtAppend(6,12) (stored at: ) 
+INFO	2018-06-28 08:12:20,463	145777	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtAppend(3,9) (stored at: ) 
+INFO	2018-06-28 08:12:21,060	146374	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtAppend(8,6) (stored at: variant114) 
+INFO	2018-06-28 08:12:21,061	146375	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 1.0 StmtReplace(7,5) (stored at: ) 
+INFO	2018-06-28 08:12:21,062	146376	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtDelete(9) (stored at: ) 
+INFO	2018-06-28 08:12:21,067	146381	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtDelete(7) (stored at: ) 
+INFO	2018-06-28 08:12:21,068	146382	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtDelete(8) (stored at: ) 
+INFO	2018-06-28 08:12:21,070	146384	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtReplace(2,8) (stored at: ) 
+INFO	2018-06-28 08:12:21,071	146385	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtAppend(6,9) (stored at: ) 
+INFO	2018-06-28 08:12:21,499	146813	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtAppend(6,8) (stored at: variant115) 
+INFO	2018-06-28 08:12:21,500	146814	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtReplace(2,11) (stored at: ) 
+INFO	2018-06-28 08:12:21,501	146815	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:12:21,511	146825	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 0.0 StmtAppend(3,9) (stored at: ) 
+INFO	2018-06-28 08:12:21,512	146826	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 8 1.0 StmtReplace(8,8) (stored at: ) 
+INFO	2018-06-28 08:12:21,512	146826	clegoues.genprog4java.Search.Search	[main]	search: generation9
+INFO	2018-06-28 08:12:22,320	147634	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtReplace(8,9) (stored at: variant116) 
+INFO	2018-06-28 08:12:22,321	147635	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 1.0 StmtReplace(8,8) (stored at: ) 
+INFO	2018-06-28 08:12:22,725	148039	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtAppend(8,8) (stored at: variant117) 
+INFO	2018-06-28 08:12:22,726	148040	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:12:22,730	148044	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtAppend(4,11) (stored at: ) 
+INFO	2018-06-28 08:12:22,733	148047	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtReplace(5,11) (stored at: ) 
+INFO	2018-06-28 08:12:22,734	148048	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtDelete(4) (stored at: ) 
+INFO	2018-06-28 08:12:22,734	148048	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtDelete(12) (stored at: ) 
+INFO	2018-06-28 08:12:23,146	148460	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtReplace(12,8) (stored at: variant118) 
+INFO	2018-06-28 08:12:23,147	148461	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtAppend(12,12) (stored at: ) 
+INFO	2018-06-28 08:12:23,559	148873	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtAppend(11,4) (stored at: variant119) 
+INFO	2018-06-28 08:12:23,982	149296	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtReplace(11,3) (stored at: variant120) 
+INFO	2018-06-28 08:12:23,983	149297	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtAppend(9,7) (stored at: ) 
+INFO	2018-06-28 08:12:23,984	149298	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtAppend(11,9) (stored at: ) 
+INFO	2018-06-28 08:12:23,989	149303	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 1.0 StmtAppend(2,11) (stored at: ) 
+INFO	2018-06-28 08:12:23,990	149304	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtDelete(11) (stored at: ) 
+INFO	2018-06-28 08:12:23,991	149305	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtReplace(5,11) (stored at: ) 
+INFO	2018-06-28 08:12:23,992	149306	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtDelete(6) (stored at: ) 
+INFO	2018-06-28 08:12:23,994	149308	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:12:23,997	149311	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtDelete(2) (stored at: ) 
+INFO	2018-06-28 08:12:24,585	149899	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtAppend(5,3) (stored at: variant121) 
+INFO	2018-06-28 08:12:24,586	149900	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtDelete(2) (stored at: ) 
+INFO	2018-06-28 08:12:24,591	149905	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtAppend(1,11) (stored at: ) 
+INFO	2018-06-28 08:12:24,593	149907	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtDelete(3) (stored at: ) 
+INFO	2018-06-28 08:12:24,599	149913	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtDelete(12) (stored at: ) 
+INFO	2018-06-28 08:12:24,601	149915	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtReplace(4,12) (stored at: ) 
+INFO	2018-06-28 08:12:24,603	149917	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:12:24,604	149918	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtDelete(3) (stored at: ) 
+INFO	2018-06-28 08:12:24,605	149919	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtDelete(8) (stored at: ) 
+INFO	2018-06-28 08:12:24,611	149925	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 9 0.0 StmtDelete(9) (stored at: ) 
+INFO	2018-06-28 08:12:24,667	149981	clegoues.genprog4java.fitness.Fitness	[main]	Serialized test cache to file testcache.ser
+INFO	2018-06-28 08:12:24,668	149982	clegoues.genprog4java.main.Main	[main]	
+Total elapsed time: 150
+
+DEBUG	2018-06-28 08:57:29,319	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2018-06-28 08:57:30,061	742	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2018-06-28 08:57:32,400	3081	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@66c05fd7
+INFO	2018-06-28 08:57:32,400	3081	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2018-06-28 08:57:33,100	3781	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2018-06-28 08:57:33,605	4286	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2018-06-28 08:57:33,606	4287	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2018-06-28 08:57:34,194	4875	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2018-06-28 08:57:34,194	4875	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 1794)
+INFO	2018-06-28 08:57:34,195	4876	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2018-06-28 08:57:34,280	4961	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.ZuneBugTestsPos
+INFO	2018-06-28 08:57:35,242	5923	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.ZuneBugTestsNeg
+INFO	2018-06-28 08:57:35,875	6556	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2018-06-28 08:57:35,875	6556	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2018-06-28 08:57:41,305	11986	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: ) 
+INFO	2018-06-28 08:57:41,444	12125	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(9,5) (stored at: ) 
+INFO	2018-06-28 08:57:41,477	12158	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(7) (stored at: ) 
+INFO	2018-06-28 08:57:41,487	12168	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(5,9) (stored at: ) 
+INFO	2018-06-28 08:57:41,511	12192	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(4,5) (stored at: ) 
+INFO	2018-06-28 08:57:41,534	12215	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:57:41,548	12229	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(2) (stored at: ) 
+INFO	2018-06-28 08:57:41,550	12231	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(11,12) (stored at: ) 
+INFO	2018-06-28 08:57:41,576	12257	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(9,8) (stored at: ) 
+INFO	2018-06-28 08:57:41,577	12258	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(12) (stored at: ) 
+INFO	2018-06-28 08:57:41,600	12281	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(2,12) (stored at: ) 
+INFO	2018-06-28 08:57:41,602	12283	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(9,5) (stored at: ) 
+INFO	2018-06-28 08:57:41,629	12310	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(6,4) (stored at: ) 
+INFO	2018-06-28 08:57:41,651	12332	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:57:41,653	12334	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(12) (stored at: ) 
+INFO	2018-06-28 08:57:41,685	12366	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(3,3) (stored at: ) 
+INFO	2018-06-28 08:57:41,697	12378	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(9,6) (stored at: ) 
+INFO	2018-06-28 08:57:41,731	12412	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(3,12) (stored at: ) 
+INFO	2018-06-28 08:57:41,733	12414	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:57:41,753	12434	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(11,9) (stored at: ) 
+INFO	2018-06-28 08:57:41,765	12446	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(3,7) (stored at: ) 
+INFO	2018-06-28 08:57:41,776	12457	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(9,11) (stored at: ) 
+INFO	2018-06-28 08:57:41,801	12482	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(6,3) (stored at: ) 
+INFO	2018-06-28 08:57:41,833	12514	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(5,4) (stored at: ) 
+INFO	2018-06-28 08:57:41,841	12522	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:57:41,846	12527	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(11) (stored at: ) 
+INFO	2018-06-28 08:57:41,879	12560	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,3) (stored at: ) 
+INFO	2018-06-28 08:57:41,890	12571	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:57:41,892	12573	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,8) (stored at: ) 
+INFO	2018-06-28 08:57:41,910	12591	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(7,7) (stored at: ) 
+INFO	2018-06-28 08:57:41,915	12596	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(12) (stored at: ) 
+INFO	2018-06-28 08:57:41,935	12616	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:57:41,953	12634	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(7) (stored at: ) 
+INFO	2018-06-28 08:57:41,959	12640	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(6,8) (stored at: ) 
+INFO	2018-06-28 08:57:41,968	12649	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(1,8) (stored at: ) 
+INFO	2018-06-28 08:57:41,977	12658	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(8,11) (stored at: ) 
+INFO	2018-06-28 08:57:42,004	12685	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,3) (stored at: ) 
+INFO	2018-06-28 08:57:42,021	12702	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(4,8) (stored at: ) 
+INFO	2018-06-28 08:57:42,038	12719	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(6,11) (stored at: ) 
+INFO	2018-06-28 08:57:42,060	12741	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(5,7) (stored at: ) 
+INFO	2018-06-28 08:57:42,060	12741	clegoues.genprog4java.Search.Search	[main]	search: generation1
+ERROR	2018-06-28 08:57:42,548	13229	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:57:43,278	13959	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:57:43,422	14103	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:57:43,479	14160	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:57:43,561	14242	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:57:43,608	14289	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:9: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:16: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:57:43,824	14505	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(8) (stored at: ) 
+INFO	2018-06-28 08:57:43,833	14514	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(7,8) (stored at: ) 
+INFO	2018-06-28 08:57:43,837	14518	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(11,7) (stored at: ) 
+INFO	2018-06-28 08:57:43,841	14522	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:57:43,855	14536	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(3,7) (stored at: ) 
+INFO	2018-06-28 08:57:43,859	14540	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(6) (stored at: ) 
+INFO	2018-06-28 08:57:43,862	14543	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(2,8) (stored at: ) 
+INFO	2018-06-28 08:57:43,863	14544	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(9,7) (stored at: ) 
+INFO	2018-06-28 08:57:43,870	14551	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(9,12) (stored at: ) 
+INFO	2018-06-28 08:57:43,873	14554	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,3) (stored at: ) 
+INFO	2018-06-28 08:57:43,875	14556	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:57:43,881	14562	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:57:43,886	14567	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(5,5) (stored at: ) 
+INFO	2018-06-28 08:57:43,890	14571	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(12) (stored at: ) 
+INFO	2018-06-28 08:57:43,895	14576	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,3) (stored at: ) 
+INFO	2018-06-28 08:57:43,902	14583	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(6,7) (stored at: ) 
+INFO	2018-06-28 08:57:43,911	14592	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(3,11) (stored at: ) 
+INFO	2018-06-28 08:57:43,915	14596	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(2) (stored at: ) 
+INFO	2018-06-28 08:57:43,924	14605	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:57:43,945	14626	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(7,3) (stored at: ) 
+INFO	2018-06-28 08:57:43,947	14628	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(9,8) (stored at: ) 
+INFO	2018-06-28 08:57:43,953	14634	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(6,7) (stored at: ) 
+INFO	2018-06-28 08:57:43,955	14636	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(11,11) (stored at: ) 
+INFO	2018-06-28 08:57:43,962	14643	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(5,7) (stored at: ) 
+INFO	2018-06-28 08:57:43,971	14652	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(4,11) (stored at: ) 
+INFO	2018-06-28 08:57:43,975	14656	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(3) (stored at: ) 
+INFO	2018-06-28 08:57:43,980	14661	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(2,4) (stored at: ) 
+INFO	2018-06-28 08:57:43,982	14663	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(2,8) (stored at: ) 
+INFO	2018-06-28 08:57:43,992	14673	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(12,3) (stored at: ) 
+INFO	2018-06-28 08:57:43,993	14674	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(9,8) (stored at: ) 
+INFO	2018-06-28 08:57:44,000	14681	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(11,9) (stored at: ) 
+INFO	2018-06-28 08:57:44,009	14690	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:57:44,009	14690	clegoues.genprog4java.Search.Search	[main]	search: generation2
+ERROR	2018-06-28 08:57:44,121	14802	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:57:44,238	14919	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:57:44,862	15543	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:57:44,968	15649	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(12,11) (stored at: ) 
+INFO	2018-06-28 08:57:44,980	15661	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:57:44,984	15665	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(1,11) (stored at: ) 
+INFO	2018-06-28 08:57:44,994	15675	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(9) (stored at: ) 
+INFO	2018-06-28 08:57:45,020	15701	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(3,5) (stored at: ) 
+INFO	2018-06-28 08:57:45,033	15714	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(5,9) (stored at: ) 
+INFO	2018-06-28 08:57:45,035	15716	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(4) (stored at: ) 
+INFO	2018-06-28 08:57:45,051	15732	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(5,8) (stored at: ) 
+INFO	2018-06-28 08:57:45,068	15749	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(1,11) (stored at: ) 
+INFO	2018-06-28 08:57:45,069	15750	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(6,9) (stored at: ) 
+INFO	2018-06-28 08:57:45,070	15751	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(4,8) (stored at: ) 
+INFO	2018-06-28 08:57:45,079	15760	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(11) (stored at: ) 
+INFO	2018-06-28 08:57:45,102	15783	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(4,3) (stored at: ) 
+INFO	2018-06-28 08:57:45,116	15797	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(4,5) (stored at: ) 
+INFO	2018-06-28 08:57:45,127	15808	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(11,6) (stored at: ) 
+INFO	2018-06-28 08:57:45,133	15814	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(1,11) (stored at: ) 
+INFO	2018-06-28 08:57:45,152	15833	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(7,5) (stored at: ) 
+INFO	2018-06-28 08:57:45,160	15841	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(12,6) (stored at: ) 
+INFO	2018-06-28 08:57:45,166	15847	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(2,8) (stored at: ) 
+INFO	2018-06-28 08:57:45,168	15849	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(7) (stored at: ) 
+INFO	2018-06-28 08:57:45,185	15866	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(5,6) (stored at: ) 
+INFO	2018-06-28 08:57:45,211	15892	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.0 StmtReplace(5,4) (stored at: ) 
+INFO	2018-06-28 08:57:45,217	15898	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(12) (stored at: ) 
+INFO	2018-06-28 08:57:45,222	15903	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.0 StmtReplace(6,3) (stored at: ) 
+INFO	2018-06-28 08:57:45,243	15924	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtReplace(2,11) (stored at: ) 
+INFO	2018-06-28 08:57:45,256	15937	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(5) (stored at: ) 
+INFO	2018-06-28 08:57:45,276	15957	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(2) (stored at: ) 
+INFO	2018-06-28 08:57:45,287	15968	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(1,8) (stored at: ) 
+INFO	2018-06-28 08:57:45,300	15981	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(5,7) (stored at: ) 
+INFO	2018-06-28 08:57:45,331	16012	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(1) (stored at: ) 
+INFO	2018-06-28 08:57:45,332	16013	clegoues.genprog4java.Search.Search	[main]	search: generation3
+ERROR	2018-06-28 08:57:45,404	16085	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:9: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:16: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:57:45,519	16200	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:15: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:22: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:57:45,616	16297	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:9: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:16: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:57:45,902	16583	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:12: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:15: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:19: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:22: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+ERROR	2018-06-28 08:57:45,954	16635	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageZuneBug/ZuneBug.java:10: error: cannot find symbol
+    		if (year%4 == 0){
+    		    ^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:13: error: cannot find symbol
+    				year += 1;
+    				^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:17: error: cannot find symbol
+    			year += 1;
+    			^
+  symbol:   variable year
+  location: class ZuneBug
+packageZuneBug/ZuneBug.java:20: error: cannot find symbol
+    	return year;
+    	       ^
+  symbol:   variable year
+  location: class ZuneBug
+4 errors
+1 warning
+
+INFO	2018-06-28 08:57:46,131	16812	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(2) (stored at: ) 
+INFO	2018-06-28 08:57:46,136	16817	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(9,4) (stored at: ) 
+INFO	2018-06-28 08:57:46,152	16833	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(3) (stored at: ) 
+INFO	2018-06-28 08:57:46,188	16869	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(6,5) (stored at: ) 
+INFO	2018-06-28 08:57:46,200	16881	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(8,5) (stored at: ) 
+INFO	2018-06-28 08:57:46,204	16885	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(9,6) (stored at: ) 
+INFO	2018-06-28 08:57:46,215	16896	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(2,8) (stored at: ) 
+INFO	2018-06-28 08:57:46,216	16897	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(9) (stored at: ) 
+INFO	2018-06-28 08:57:46,221	16902	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(9) (stored at: ) 
+INFO	2018-06-28 08:57:46,233	16914	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(11,6) (stored at: ) 
+INFO	2018-06-28 08:57:46,247	16928	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(9) (stored at: ) 
+INFO	2018-06-28 08:57:46,251	16932	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(6,9) (stored at: ) 
+INFO	2018-06-28 08:57:46,270	16951	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(4,6) (stored at: ) 
+INFO	2018-06-28 08:57:46,278	16959	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.0 StmtReplace(6,4) (stored at: ) 
+INFO	2018-06-28 08:57:46,281	16962	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(8,4) (stored at: ) 
+INFO	2018-06-28 08:57:46,287	16968	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(11,6) (stored at: ) 
+INFO	2018-06-28 08:57:46,297	16978	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(1,11) (stored at: ) 
+INFO	2018-06-28 08:57:46,304	16985	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.0 StmtReplace(12,9) (stored at: ) 
+INFO	2018-06-28 08:57:46,320	17001	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(5,11) (stored at: ) 
+INFO	2018-06-28 08:57:46,334	17015	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(8) (stored at: ) 
+INFO	2018-06-28 08:57:46,358	17039	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(9,8) (stored at: ) 
+INFO	2018-06-28 08:57:46,365	17046	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(1,11) (stored at: ) 
+INFO	2018-06-28 08:57:46,400	17081	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(6,3) (stored at: ) 
+INFO	2018-06-28 08:57:46,403	17084	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(5,6) (stored at: ) 
+INFO	2018-06-28 08:57:46,410	17091	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(8,7) (stored at: ) 
+INFO	2018-06-28 08:57:46,419	17100	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(1,11) (stored at: ) 
+INFO	2018-06-28 08:57:46,427	17108	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtAppend(8,5) (stored at: ) 
+INFO	2018-06-28 08:57:46,434	17115	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(4,5) (stored at: ) 
+INFO	2018-06-28 08:57:46,435	17116	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(8) (stored at: ) 
+INFO	2018-06-28 08:57:46,448	17129	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.0 StmtReplace(5,5) (stored at: ) 
+INFO	2018-06-28 08:57:46,460	17141	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtReplace(3,12) (stored at: ) 
+INFO	2018-06-28 08:57:46,468	17149	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 0.0 StmtDelete(4) (stored at: ) 
+INFO	2018-06-28 08:57:46,469	17150	clegoues.genprog4java.Search.Search	[main]	search: generation4

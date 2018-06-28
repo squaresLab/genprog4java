@@ -1,0 +1,28 @@
+Daikon version 5.6.5, released April 3, 2018; http://plse.cs.washington.edu/daikon.
+Reading declaration files Processing trace data; reading 1 dtrace file:
+
+No return from procedure observed 1 time.  Unmatched entries are ignored!
+Unterminated calls:
+  clegoues.genprog4java.fitness.JUnitTestRunner.main(java.lang.String[]) : 1 invocation
+End of report for procedures not returned from.  Unmatched entries are ignored!
+
+===========================================================================
+packageZuneBug.ZuneBug:::OBJECT
+this != null
+===========================================================================
+packageZuneBug.ZuneBug.CurrentYear(int):::ENTER
+===========================================================================
+packageZuneBug.ZuneBug.CurrentYear(int):::EXIT
+\result != \old(arg0)
+===========================================================================
+packageZuneBug.ZuneBug.ZuneBug():::EXIT
+===========================================================================
+tests.ZuneBugTestsPos:::OBJECT
+this != null
+===========================================================================
+tests.ZuneBugTestsPos.ZuneBugTestsPos():::EXIT
+===========================================================================
+tests.ZuneBugTestsPos.severalTestCasesToTestCurrentYear():::ENTER
+===========================================================================
+tests.ZuneBugTestsPos.severalTestCasesToTestCurrentYear():::EXIT
+Exiting Daikon.

@@ -1,0 +1,102 @@
+Location:
+int year=1980;
+Weight:
+0.1
+
+Location:
+while (days > 365) {
+  if (year % 4 == 0) {
+    if (days > 366) {
+      days-=366;
+      year+=1;
+    }
+  }
+ else {
+    days-=365;
+    year+=1;
+  }
+}
+Weight:
+0.1
+
+Location:
+{
+  if (year % 4 == 0) {
+    if (days > 366) {
+      days-=366;
+      year+=1;
+    }
+  }
+ else {
+    days-=365;
+    year+=1;
+  }
+}
+Weight:
+0.1
+
+Location:
+if (year % 4 == 0) {
+  if (days > 366) {
+    days-=366;
+    year+=1;
+  }
+}
+ else {
+  days-=365;
+  year+=1;
+}
+Weight:
+0.1
+
+Location:
+{
+  if (days > 366) {
+    days-=366;
+    year+=1;
+  }
+}
+Weight:
+0.1
+
+Location:
+if (days > 366) {
+  days-=366;
+  year+=1;
+}
+Weight:
+0.1
+
+Location:
+{
+  days-=366;
+  year+=1;
+}
+Weight:
+0.1
+
+Location:
+days-=366;
+Weight:
+0.1
+
+Location:
+year+=1;
+Weight:
+0.1
+
+Location:
+days-=365;
+Weight:
+0.1
+
+Location:
+year+=1;
+Weight:
+0.1
+
+Location:
+return year;
+Weight:
+0.1
+
