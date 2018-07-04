@@ -144,6 +144,7 @@ CachingRepresentation<JavaEditOperation> {
 	public JavaRepresentation(ArrayList<JavaEditOperation> genome2, Localization localizationInfo) {
 		super(genome2);
 		this.localization = localizationInfo; // FIXME make a legit copy of this for copy?
+		this.setGenome(genome2);
 	}
 
 	public JavaRepresentation() {
