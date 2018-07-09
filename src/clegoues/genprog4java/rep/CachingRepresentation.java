@@ -107,6 +107,11 @@ Representation<G>  {
 	}
 
 	private Pair<Boolean, String> alreadyCompiled = null;
+	
+	public Pair<Boolean, String> getAlreadyCompiled()
+	{
+		return alreadyCompiled;
+	}
 
 	public boolean getVariableLength() {
 		return true;

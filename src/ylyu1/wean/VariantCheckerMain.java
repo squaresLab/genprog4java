@@ -22,6 +22,8 @@ import org.apache.commons.exec.PumpStreamHandler;
 
 public class VariantCheckerMain
 {
+	public static int turn = 0;
+	public final static boolean cinnamon = true;
 	//public static ArrayList<Boolean> goodVariant = new ArrayList<Boolean>();
 	public static void main(String [] args) throws Exception
 	{
@@ -48,13 +50,18 @@ public class VariantCheckerMain
 	{
 		for(Representation<? extends EditOperation> rep : pop)
 		{
-			if(rep.getVariantFolder().equals(""))continue;
+			rep.vf = rep.getVariantFolder();
 			try
 			{
+				
+				if(rep.vf.equals(""))rep.vf=rep.getAlreadyCompiled().getValue();
+				System.out.println("VF Value: "+rep.vf);
+				
 				String libtrunc = Configuration.libs.substring(0, Configuration.libs.lastIndexOf(":"));
+				
 				CommandLine command1 = CommandLine.parse("cp -r "+Configuration.classTestFolder+"tests .");
-				CommandLine command2 = CommandLine.parse("sh checker.sh "+Fitness.positiveTests.get(0)+" "+libtrunc+":.:tmp/"+rep.getVariantFolder()+"/:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ "+rep.getVariantFolder()+"pos NOTORIG");
-				CommandLine command3 = CommandLine.parse("sh checker.sh "+Fitness.negativeTests.get(0)+" "+libtrunc+":.:tmp/"+rep.getVariantFolder()+"/:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ "+rep.getVariantFolder()+"neg NOTORIG");
+				CommandLine command2 = CommandLine.parse("sh checker.sh "+Fitness.positiveTests.get(0)+" "+libtrunc+":.:tmp/"+rep.vf+"/:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ "+rep.getVariantFolder()+"pos NOTORIG");
+				CommandLine command3 = CommandLine.parse("sh checker.sh "+Fitness.negativeTests.get(0)+" "+libtrunc+":.:tmp/"+rep.vf+"/:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ "+rep.getVariantFolder()+"neg NOTORIG");
 				
 				//System.out.println("command: " + command2.toString());
 				ExecuteWatchdog watchdog = new ExecuteWatchdog(1000000);
@@ -96,11 +103,13 @@ public class VariantCheckerMain
 			}
 			catch(Exception e)
 			{
-				System.out.println("ERROR!!!!!! "+rep.getVariantFolder());
+				System.out.println("ERROR!!!!!! "+rep.vf);
 				//goodVariant.add(false);
 				rep.isGoodForCheck=false;
+				if(!rep.vf.equals(""))Fitness.invariantCache.put(rep.hashCode(), null);
 			}
 		}
+		
 		try{System.out.println(Arrays.toString(analyzeResults(pop)));}catch(Exception e) {System.out.println(e.toString());}
 		//return checked;
 	}
@@ -110,20 +119,16 @@ public class VariantCheckerMain
 		ArrayList<byte[]> templist = new ArrayList<byte[]>();
 		ArrayList<Representation<? extends EditOperation>> repstorer = new ArrayList<Representation<? extends EditOperation>>();
 		int max = 0;
-		byte[] b = tnsFetcher("origPos");
-		templist.add(b);
-		if(b.length>max)max=b.length;
-		b = tnsFetcher("origNeg");
-		templist.add(b);
-		if(b.length>max)max=b.length;
+		byte[] b = null;
+		System.out.println("Entering first loop");
 		for(Representation<? extends EditOperation> rep : pop)
 		{
 			if((!rep.getVariantFolder().equals(""))&&rep.isGoodForCheck)
 			{
-				b = tnsFetcher(rep.getVariantFolder()+"pos");
+				try{b = tnsFetcher(rep.vf+"pos");}catch(Exception e) {System.out.println("BAD: "+rep.vf);}
 				templist.add(b);
 				if(b.length>max)max=b.length;
-				b = tnsFetcher(rep.getVariantFolder()+"neg");
+				try{b = tnsFetcher(rep.vf+"neg");}catch(Exception e) {System.out.println("BAD: "+rep.vf);}
 				templist.add(b);
 				if(b.length>max)max=b.length;
 				repstorer.add(rep);
@@ -134,6 +139,7 @@ public class VariantCheckerMain
 			}
 		}
 		ArrayList<byte[]> list = new ArrayList<byte[]>();
+		System.out.println("Entering second loop: templist length: " + templist.size()+" max: "+max);
 		for(int i = 0; i < templist.size(); i+=2)
 		{
 			b = newByteArray2(2*max);
@@ -145,8 +151,28 @@ public class VariantCheckerMain
 			{
 				b[2*j+1]=templist.get(i+1)[j];
 			}
-			System.out.println(Arrays.toString(b));
-			list.add(b);
+			
+			Fitness.invariantCache.put(repstorer.get(i/2).hashCode(),b);
+		}
+		repstorer = new ArrayList<Representation<? extends EditOperation>>();
+		System.out.println("Entering third loop");
+		for(Representation<? extends EditOperation> rep : pop)
+		{
+			if(Fitness.invariantCache.containsKey(rep.hashCode()))
+			{
+				b=Fitness.invariantCache.get(rep.hashCode());
+				
+				if(b!=null)
+				{
+					repstorer.add(rep);
+					System.out.println(Arrays.toString(b));
+					list.add(b);
+				}
+			}
+			else
+			{
+				System.out.println("Should not happen");
+			}
 		}
 		int[] diffScores =  Fitness.getStringDiffScore(list);
 		int max1 = 0;
@@ -157,7 +183,7 @@ public class VariantCheckerMain
 		if(max1==0)return diffScores;
 		for(int i = 0; i < repstorer.size();i++)
 		{
-			repstorer.get(i).setFitness(((double)diffScores[i+1])/((double)max1)); 
+			repstorer.get(i).setFitness(((double)diffScores[i])/((double)max1)/10*(11-turn)+repstorer.get(i).getFitness()/10*(turn-1)); 
 		}
 		return diffScores;
 	}

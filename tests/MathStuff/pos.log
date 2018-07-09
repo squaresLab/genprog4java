@@ -1,0 +1,4 @@
+good: $_ >= 1
+good: \old($1) % $_ == 0
+good: $_ <= \old($1)
+good: \old($2) % $_ == 0

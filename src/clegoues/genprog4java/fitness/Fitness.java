@@ -60,6 +60,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -67,6 +68,7 @@ import org.apache.log4j.Logger;
 import org.junit.runner.Description;
 import org.junit.runner.Request;
 
+import clegoues.genprog4java.Search.GeneticProgramming;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedMutation;
@@ -182,7 +184,7 @@ public class Fitness {
 
 	// persistent test cache
 	private static HashMap<Integer, HashMap<TestCase, FitnessValue>> fitnessCache = new HashMap<Integer, HashMap<TestCase, FitnessValue>>();
-
+	public static HashMap<Integer, byte[]> invariantCache = new HashMap<Integer, byte[]>();
 	// FIXME: add some kind of runtime hook to serialize if the process gets killed prematurely.
 	public static void serializeTestCache() {
 		try {
@@ -602,6 +604,7 @@ public class Fitness {
 	 */
 	public boolean testFitness(int generation, Representation rep) {
 
+		
 		/*
 		 * Find the relative weight of positive and negative tests If
 		 * negative_test_weight is 2 (the default), then the negative tests are
@@ -609,6 +612,7 @@ public class Fitness {
 		 * ICSE'09 behavior, where there were 5 positives tests (worth 1 each)
 		 * and 1 negative test (worth 10 points). 10:5 == 2:1.
 		 */
+		
 		double fac = Fitness.numPositiveTests * Fitness.negativeTestWeight
 				/ Fitness.numNegativeTests;
 
@@ -616,7 +620,7 @@ public class Fitness {
 				+ ((Fitness.numNegativeTests * fac));
 		double curFit = rep.getFitness();
 		if (curFit > -1.0) {
-			logger.info("\t gen: " + generation + " " + curFit + " " + rep.getName() + " (stored at: " + rep.getVariantFolder() + ") ");
+			logger.info("\t gen: " + generation + " " + curFit + " " + rep.getName() + " (stored at: " + rep.getVariantFolder() + ") Hash: "+rep.hashCode());
 			return !(curFit < maxFitness);
 		}
 		Pair<Double, Double> fitnessPair =  Pair.of(-1.0, -1.0);
@@ -630,8 +634,10 @@ public class Fitness {
 		} else {
 			fitnessPair = this.testFitnessFull(rep, fac);
 		}
-		logger.info("\t gen: " + generation + " " + fitnessPair.getLeft() + " " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ") ");
 		rep.setFitness(fitnessPair.getRight());
+		//Random rand = new Random();
+		//rep.setFitness(rand.nextDouble());
+		logger.info("\t gen: " + generation + " " + fitnessPair.getLeft() + " " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ") Hash: "+rep.hashCode());
 		rep.cleanup();
 		return !(fitnessPair.getLeft() < maxFitness);
 

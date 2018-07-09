@@ -1,5 +1,7 @@
 package clegoues.genprog4java.Search;
 
+import java.util.ArrayList;
+
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
@@ -8,7 +10,7 @@ import ylyu1.wean.VariantCheckerMain;
 
 public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 	private int generationsRun = 0;
-
+	public static final boolean invariants = true;
 	public GeneticProgramming(Fitness engine) {
 		super(engine);
 	}
@@ -92,10 +94,12 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		
 		
 		// Step 0: run daikon
+		if(invariants)
+		{
 		System.out.println("Here we are");
 		VariantCheckerMain.runDaikon();
 		VariantCheckerMain.checkInvariantOrig();
-		
+		}
 		
 		
 		assert (Search.generations >= 0);
@@ -105,27 +109,39 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		int checked = 0;
 		
 		while (gen < Search.generations) {
+			VariantCheckerMain.turn=gen;
 			logger.info("search: generation" + gen);
 			generationsRun++;
 			assert (initialPopulation.getPopsize() > 0);
 			
 			
-			if(gen==1) {
+			if(invariants)
+			{
+			//if(gen==1) {
 			// Step 0.5: Check Invariant
-			VariantCheckerMain.checkInvariant(incomingPopulation);}
-			
+			VariantCheckerMain.checkInvariant(incomingPopulation);//}
+			}
 			
 			
 			// Step 1: selection
 			incomingPopulation.selection(incomingPopulation.getPopsize());
+			
+			for(Representation<G> item : incomingPopulation)
+			{
+				System.out.println(item.hashCode());
+			}
 			// step 2: crossover
 			incomingPopulation.crossover(original);
 
 			// step 3: mutation
+			ArrayList<Representation<G>> newlist = new ArrayList<Representation<G>>();
 			for (Representation<G> item : incomingPopulation) {
-				Representation<G> newItem = original.copy();
-				this.mutate(item);
+				
+				Representation<G> newItem =item.copy();
+				this.mutate(newItem);
+				newlist.add(newItem);
 			}
+			incomingPopulation.getPopulation().addAll(newlist);
 
 			// step 4: fitness
 			for (Representation<G> item : incomingPopulation) {

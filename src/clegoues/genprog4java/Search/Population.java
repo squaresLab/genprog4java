@@ -188,7 +188,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 			      end
 		 */
 	}
-
+	
 	/* {b tournament_selection} variant_comparison_function population
     desired_pop_size uses tournament selction to select desired_pop_size
     variants from population using variant_comparison_function to compare
@@ -206,7 +206,10 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		TreeSet<Representation<G>> sorted = new TreeSet<Representation<G>>(myComp);
 		sorted.addAll(pool);
 		double step = 0.0;
+		System.out.println("Enter selecting for loop");
+		for(Representation<G> indiv : sorted)System.out.println(indiv.getVariantFolder()+" "+indiv.getFitness());
 		for(Representation<G> indiv : sorted) {
+			
 			boolean taken = false;
 			if(this.tournamentP >= 1.0) {
 				taken = true;
@@ -218,6 +221,8 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 				}
 			}
 			if(taken) {
+				System.out.println("Selected: "+indiv.getVariantFolder()+" hash: "+indiv.hashCode());
+				//System.out.println("But: "+indiv.copy().hashCode());
 				return indiv.copy();	
 			} else {
 				step += 1.0;
@@ -225,6 +230,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		}
 		return population.get(0).copy(); // FIXME: this should never happen, right?
 	}
+	
 	private ArrayList<Representation<G>> tournamentSelection(int desired) {
 		for(Representation<G> rep : this.getPopulation())
 		{

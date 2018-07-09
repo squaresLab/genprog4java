@@ -207,6 +207,10 @@ Comparable<Representation<G>> {
 	
 	public abstract ClassInfo getFileFromStmt(int stmtId);
 
+	public abstract Pair<Boolean, String> getAlreadyCompiled();
+	
+	public String vf = "";
+
 	
 
 }

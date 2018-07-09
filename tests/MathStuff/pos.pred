@@ -1,0 +1,40 @@
+Class: org.MathStuff
+Method: gcd
+Location: EXIT
+Line: -1
+Predicate: \old($2) % $_ == 0
+Covered_By_Positive_Tests: false
+Covered_By_Negative_Tests: false
+Evaluated: 12
+Passed: 12
+
+Class: org.MathStuff
+Method: gcd
+Location: EXIT
+Line: -1
+Predicate: $_ <= \old($1)
+Covered_By_Positive_Tests: false
+Covered_By_Negative_Tests: false
+Evaluated: 12
+Passed: 12
+
+Class: org.MathStuff
+Method: gcd
+Location: EXIT
+Line: -1
+Predicate: \old($1) % $_ == 0
+Covered_By_Positive_Tests: false
+Covered_By_Negative_Tests: false
+Evaluated: 12
+Passed: 12
+
+Class: org.MathStuff
+Method: gcd
+Location: EXIT
+Line: -1
+Predicate: $_ >= 1
+Covered_By_Positive_Tests: false
+Covered_By_Negative_Tests: false
+Evaluated: 12
+Passed: 12
+

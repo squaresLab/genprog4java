@@ -1,0 +1,30 @@
+Method: org.MathStuff
+Location: OBJECT
+this != null
+
+Method: org.MathStuff.MathStuff()
+Location: EXIT
+
+Method: org.MathStuff.gcd(int, int)
+Location: ENTER
+
+Method: org.MathStuff.gcd(int, int)
+Location: EXIT
+\result >= 1
+\old(arg0) % \result == 0
+\result <= \old(arg0)
+\old(arg1) % \result == 0
+
+Method: tests.pos
+Location: OBJECT
+this != null
+
+Method: tests.pos.pos()
+Location: EXIT
+
+Method: tests.pos.postest()
+Location: ENTER
+
+Method: tests.pos.postest()
+Location: EXIT
+

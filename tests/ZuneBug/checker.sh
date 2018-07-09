@@ -11,4 +11,4 @@ java -cp .:$CLASSP:$CLASSPATH:/home/lvyiwei1/daikon-master/daikon.jar:/usr/lib/j
 
 java -cp .:$CLASSP:/home/lvyiwei1/genprog4java-branch/genprog4java/lib/javassist.jar ylyu1.wean.Aggregator $VARNAME $ORIGORNOT > $VARNAME.pred
 
-rm -r packageZuneBug
+rm -r org

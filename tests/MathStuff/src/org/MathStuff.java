@@ -11,6 +11,10 @@ public class MathStuff
 		if (a == 0) {
 			result= b;
 		}
+		else
+		{
+			result=a;
+		}
 		{
 			while (b != 0) {
 				if (a > b) {
@@ -21,6 +25,6 @@ public class MathStuff
 			}
 			result=a;
 		}
-		return a;
+		return result;
 	}
 }
