@@ -9,6 +9,7 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.Search.GeneticProgramming;
 import clegoues.genprog4java.Search.Population;
+import clegoues.genprog4java.main.Main;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -60,9 +61,11 @@ public class VariantCheckerMain
 				
 				String libtrunc = Configuration.libs.substring(0, Configuration.libs.lastIndexOf(":"));
 				
-				CommandLine command1 = CommandLine.parse("cp -r "+Configuration.classTestFolder+"tests .");
-				CommandLine command2 = CommandLine.parse("sh checker.sh "+Fitness.positiveTests.get(0)+" "+libtrunc+":.:tmp/"+rep.vf+"/:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ "+rep.getVariantFolder()+"pos NOTORIG");
-				CommandLine command3 = CommandLine.parse("sh checker.sh "+Fitness.negativeTests.get(0)+" "+libtrunc+":.:tmp/"+rep.vf+"/:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ "+rep.getVariantFolder()+"neg NOTORIG");
+				CommandLine command1 = CommandLine.parse("cp -r "+Configuration.classTestFolder+" .");
+				CommandLine command2 = CommandLine.parse("sh checker.sh "+Fitness.positiveTests.get(0)+" "+libtrunc+":.:tmp/"+rep.vf+"/:"+Main.GP4J_HOME+"/target/classes/ "+rep.getVariantFolder()+"pos NOTORIG" + " " 
+							+ Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
+				CommandLine command3 = CommandLine.parse("sh checker.sh "+Fitness.negativeTests.get(0)+" "+libtrunc+":.:tmp/"+rep.vf+"/:"+Main.GP4J_HOME+"/target/classes/ "+rep.getVariantFolder()+"neg NOTORIG" + " " 
+							+ Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
 				
 				//System.out.println("command: " + command2.toString());
 				ExecuteWatchdog watchdog = new ExecuteWatchdog(1000000);
@@ -219,9 +222,11 @@ public class VariantCheckerMain
 	{
 		try
 			{
-				CommandLine command1 = CommandLine.parse("cp -r "+Configuration.classTestFolder+"tests .");
-				CommandLine command2 = CommandLine.parse("sh checker.sh "+Fitness.positiveTests.get(0)+" "+Configuration.libs+":.:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ origPos ORIGPOS");
-				CommandLine command3 = CommandLine.parse("sh checker.sh "+Fitness.negativeTests.get(0)+" "+Configuration.libs+":.:/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/ origNeg ORIGNEG");
+				CommandLine command1 = CommandLine.parse("cp -r "+Configuration.classTestFolder+" .");
+				CommandLine command2 = CommandLine.parse("sh checker.sh "+Fitness.positiveTests.get(0)+" "+Configuration.libs+":.:"+Main.GP4J_HOME+"/target/classes/ origPos ORIGPOS"
+							+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
+				CommandLine command3 = CommandLine.parse("sh checker.sh "+Fitness.negativeTests.get(0)+" "+Configuration.libs+":.:"+Main.GP4J_HOME+"/target/classes/ origNeg ORIGNEG"
+						 	+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
 				
 				//System.out.println("command: " + command2.toString());
 				ExecuteWatchdog watchdog = new ExecuteWatchdog(1000000);
@@ -270,9 +275,12 @@ public class VariantCheckerMain
 	
 	public static void runDaikon()
 	{
-		CommandLine command1 = CommandLine.parse("cp /home/lvyiwei1/genprog4java-branch/genprog4java/runDaikon.sh .");
-		CommandLine command2 = CommandLine.parse("sh runDaikon.sh "+Fitness.positiveTests.get(0)+" "+Configuration.libs+":"+Configuration.classTestFolder+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":/home/lvyiwei1/genprog4java-branch/genprog4java/target/classes/");
-		CommandLine command3 = CommandLine.parse("cp /home/lvyiwei1/genprog4java-branch/genprog4java/checker.sh .");
+		CommandLine command1 = CommandLine.parse("cp "+Main.GP4J_HOME+"/runDaikon.sh .");
+		System.out.println("sh runDaikon.sh "+Fitness.positiveTests.get(0)+" "+Configuration.libs+":"+Configuration.classTestFolder+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
+					+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
+		CommandLine command2 = CommandLine.parse("sh runDaikon.sh "+Fitness.positiveTests.get(0)+" "+Configuration.libs+":"+Configuration.classTestFolder+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
+					+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
+		CommandLine command3 = CommandLine.parse("cp "+Main.GP4J_HOME+"/checker.sh .");
 		
 		//System.out.println("command: " + command2.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(1000000);
@@ -304,6 +312,7 @@ public class VariantCheckerMain
 		} finally {
 			if (out != null)
 				try {
+					out.flush();
 					out.close();
 				} catch (IOException e) {
 				}

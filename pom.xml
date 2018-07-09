@@ -7,7 +7,7 @@
   <description>Main genprog4java build</description>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>  
+  </properties>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <resources>
@@ -54,7 +54,7 @@
 			</plugin>
     </plugins>
   </build>
-   
+
   <dependencies>
   	<dependency>
   		<groupId>org.eclipse.tycho</groupId>
@@ -112,6 +112,11 @@
   	<groupId>org.junit</groupId>
   	<artifactId>junit4-runner</artifactId>
   	<version>5.0.0-ALPHA</version>
+  </dependency>
+  <dependency>
+    <groupId>org.javassist</groupId>
+    <artifactId>javassist</artifactId>
+    <version>3.23.1-GA</version>
   </dependency>
   </dependencies>
 </project>

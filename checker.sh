@@ -4,11 +4,27 @@ FILENAME=$1
 CLASSP=$2
 VARNAME=$3
 ORIGORNOT=$4
+GP4JHOME=$5
+#variable is deliberately named differently from GP4J_HOME
+JAVA8HOME=$6
+#variable is deliberately named differently from JAVA_HOME
+DAIKONHOME=$7
 
-java -cp .:$CLASSP:$CLASSPATH:/home/lvyiwei1/daikon-master/daikon.jar:/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/lib/rt.jar:/usr/lib/jvm/java-1.8.0-openjdk-amd64/lib/tools.jar:/home/lvyiwei1/genprog4java-branch/genprog4java/lib/javassist.jar ylyu1.wean.Modify JUnitTestRunner $VARNAME > $VARNAME.log
+#if [ $# -ne 7 ]; then
+#	echo "Wrong number of arguments"
+#	exit 59294
+#else
 
-java -cp .:$CLASSP:$CLASSPATH:/home/lvyiwei1/daikon-master/daikon.jar:/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/lib/rt.jar:/usr/lib/jvm/java-1.8.0-openjdk-amd64/lib/tools.jar clegoues.genprog4java.fitness.JUnitTestRunner $FILENAME > $VARNAME.tuo
+#daikon setup
+DAIKONDIR=$DAIKONHOME
+JAVA_HOME=$JAVA8HOME
+source $DAIKONDIR/scripts/daikon.bashrc
 
-java -cp .:$CLASSP:/home/lvyiwei1/genprog4java-branch/genprog4java/lib/javassist.jar ylyu1.wean.Aggregator $VARNAME $ORIGORNOT > $VARNAME.pred
+java -cp .:$CLASSP:$CLASSPATH:$DAIKONHOME/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar:$GP4JHOME/lib/javassist.jar ylyu1.wean.Modify JUnitTestRunner $VARNAME > $VARNAME.log
 
-rm -r org
+java -cp .:$CLASSP:$CLASSPATH:$DAIKONHOME/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar:$GP4JHOME/lib/javassist.jar clegoues.genprog4java.fitness.JUnitTestRunner $FILENAME > $VARNAME.tuo
+
+java -cp .:$CLASSP:$GP4JHOME/lib/javassist.jar ylyu1.wean.Aggregator $VARNAME $ORIGORNOT > $VARNAME.pred
+
+rm -r packageSimpleExample
+#TODO: generalize this...

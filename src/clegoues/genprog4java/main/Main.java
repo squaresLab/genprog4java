@@ -35,6 +35,7 @@ package clegoues.genprog4java.main;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -58,16 +59,42 @@ import clegoues.util.ConfigurationBuilder;
 public class Main {
 
 	protected static Logger logger = Logger.getLogger(Main.class);
+	public static String GP4J_HOME = null; //guaranteed to NOT have a slash at the end
+	public static String JAVA8_HOME = null; //guaranteed to NOT have a slash at the end
+	public static String DAIKON_HOME = null; //guaranteed to NOT have a slash at the end
 
+	/**
+	 * Change from the original main method:
+	 * the 0th argument is where genprog4java is installed
+	 * the 1st argument is the directory where the java 8 installation is located
+	 * the 2nd argument is where daikon is installed
+	 * All other arguments are now shifted to the right by one position.
+	 * @param args
+	 * @throws IOException
+	 * @throws UnexpectedCoverageResultException
+	 */
 	public static void main(String[] args) throws IOException,
 	UnexpectedCoverageResultException {
 		Search searchEngine = null;
 		Representation baseRep = null;
 		Fitness fitnessEngine = null;
 		Population incomingPopulation = null;
-		assert (args.length > 0);
+		assert (args.length > 3); //changed from args.length > 0, as now there exists 3 new arguments
 		long startTime = System.currentTimeMillis();
 		BasicConfigurator.configure();
+		
+		GP4J_HOME = args[0];
+		//if there's a slash at the end of GP4J_HOME, get rid of it
+		if(GP4J_HOME.endsWith(File.separator))
+			GP4J_HOME = GP4J_HOME.substring(0, GP4J_HOME.length()-1);
+		JAVA8_HOME = args[1];
+		if(JAVA8_HOME.endsWith(File.separator))
+			JAVA8_HOME = JAVA8_HOME.substring(0, JAVA8_HOME.length()-1);
+		DAIKON_HOME = args[2];
+		if(DAIKON_HOME.endsWith(File.separator))
+			DAIKON_HOME = DAIKON_HOME.substring(0, DAIKON_HOME.length()-1);
+		
+		String[] origArgs = Arrays.<String>copyOfRange(args, 3, args.length);
 
 		ConfigurationBuilder.register( Configuration.token );
 		ConfigurationBuilder.register( Fitness.token );
@@ -79,7 +106,7 @@ public class Main {
 		ConfigurationBuilder.register( RandomSingleEdit.token );
 		ConfigurationBuilder.register( DefaultLocalization.token );
 
-		ConfigurationBuilder.parseArgs( args );
+		ConfigurationBuilder.parseArgs( origArgs );
 		Configuration.saveOrLoadTargetFiles();
 		ConfigurationBuilder.storeProperties();
 
