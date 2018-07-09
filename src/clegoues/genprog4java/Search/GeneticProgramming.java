@@ -10,7 +10,7 @@ import ylyu1.wean.VariantCheckerMain;
 
 public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 	private int generationsRun = 0;
-	public static final boolean invariants = true;
+	public static int mode = 3;
 	public GeneticProgramming(Fitness engine) {
 		super(engine);
 	}
@@ -94,7 +94,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		
 		
 		// Step 0: run daikon
-		if(invariants)
+		if(mode>0)
 		{
 		System.out.println("Here we are");
 		VariantCheckerMain.runDaikon();
@@ -115,7 +115,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			assert (initialPopulation.getPopsize() > 0);
 			
 			
-			if(invariants)
+			if(mode>1||(mode==1&&gen==1))
 			{
 			//if(gen==1) {
 			// Step 0.5: Check Invariant
