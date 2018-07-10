@@ -1,8 +1,17 @@
 package clegoues.genprog4java.Search;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.commons.exec.PumpStreamHandler;
+
 import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
@@ -60,6 +69,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 					throw new RepairFoundException();
 				}
 			}
+			copyClassFilesIntoOutputDir(item); //relies on testFitness compiling the Representation item
 		}
 		return initialPopulation;
 	}
@@ -98,7 +108,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		{
 		System.out.println("Here we are");
 		VariantCheckerMain.runDaikon();
-		VariantCheckerMain.checkInvariantOrig();
+		//VariantCheckerMain.checkInvariantOrig();
 		}
 		
 		
@@ -117,9 +127,9 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			
 			if(mode>1||(mode==1&&gen==1))
 			{
-			//if(gen==1) {
-			// Step 0.5: Check Invariant
-			VariantCheckerMain.checkInvariant(incomingPopulation);//}
+				//if(gen==1) {
+				// Step 0.5: Check Invariant
+				VariantCheckerMain.checkInvariant(incomingPopulation);//}
 			}
 			
 			
@@ -150,8 +160,73 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 					if(!continueSearch) 
 						return;
 				}
+				copyClassFilesIntoOutputDir(item); //relies on testFitness compiling the Representation item
 			}
 			gen++;
+		}
+	}
+	
+	/**
+	 * Copies the compiled source files (from classSourceFolder, as defined in the .config file) to the outputDir (default for experiments: the tmp folder)
+	 * @param item
+	 */
+	private void copyClassFilesIntoOutputDir(Representation<G> item)
+	{
+		if (item.getVariantFolder().equals(""))
+		{
+			//if there's no variant folder name, do nothing
+			return;
+		}
+		
+		String copyDestination = Configuration.outputDir + //no space added
+				(Configuration.outputDir.endsWith(File.separator) ? "" : File.separator) + //add a separator if necessary
+				"d_" + item.getVariantFolder();
+		
+		File dFolder = new File(copyDestination);
+		if(!dFolder.exists())
+			dFolder.mkdirs();
+		
+		File classSourceFolderFile = new File(Configuration.classSourceFolder);
+		if(!classSourceFolderFile.exists())
+			System.err.println("classSourceFolder does not exist");
+		
+		CommandLine cpCommand = CommandLine.parse(
+				//"mkdir -p " +
+				//copyDestination + " " +
+				//"&& " +
+				"cp -R " +
+				Configuration.classSourceFolder + //no space added
+				(Configuration.classSourceFolder.endsWith(File.separator) ? "" : File.separator) + //add a separator if necessary
+				" " +
+				copyDestination
+				);
+		
+		System.err.println("cp command: " + cpCommand);
+		
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(1000000);
+		DefaultExecutor executor = new DefaultExecutor();
+		String workingDirectory = System.getProperty("user.dir");
+		executor.setWorkingDirectory(new File(workingDirectory));
+		executor.setWatchdog(watchdog);
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		executor.setExitValue(0);
+
+		executor.setStreamHandler(new PumpStreamHandler(out));
+		
+		try
+		{
+			executor.execute(cpCommand);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try
+			{
+				out.flush();
+				out.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

@@ -177,7 +177,7 @@ public class Configuration {
 	public static String classTestFolder = ConfigurationBuilder.of( STRING )
 		.withVarName( "classTestFolder" )
 		.withDefault( "" )
-		.withHelp( "unused" )
+		.withHelp( "directory to contain compiled tests" )
 		.build();
 	//public static String compileCommand = "";
 	public static String compileCommand = ConfigurationBuilder.of( STRING )
