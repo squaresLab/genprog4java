@@ -62,6 +62,7 @@ public class Main {
 	public static String GP4J_HOME = null; //guaranteed to NOT have a slash at the end
 	public static String JAVA8_HOME = null; //guaranteed to NOT have a slash at the end
 	public static String DAIKON_HOME = null; //guaranteed to NOT have a slash at the end
+	public static String JUNIT_AND_HAMCREST_PATH = null;
 
 	/**
 	 * Change from the original main method:
@@ -93,6 +94,8 @@ public class Main {
 		DAIKON_HOME = args[2];
 		if(DAIKON_HOME.endsWith(File.separator))
 			DAIKON_HOME = DAIKON_HOME.substring(0, DAIKON_HOME.length()-1);
+		
+		JUNIT_AND_HAMCREST_PATH = GP4J_HOME+"/lib/junit-4.12.jar" + ":" + GP4J_HOME+"/lib/hamcrest-core-1.3.jar";
 		
 		String[] origArgs = Arrays.<String>copyOfRange(args, 3, args.length);
 

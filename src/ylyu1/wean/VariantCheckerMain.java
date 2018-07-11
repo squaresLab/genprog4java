@@ -65,12 +65,20 @@ public class VariantCheckerMain
 				String libtrunc = Configuration.libs; //no truncation for now
 				
 				CommandLine command1 = CommandLine.parse("cp -r "+Configuration.classTestFolder+" .");
-				System.err.println("THIS IS COMMAND 2: " + "sh checker.sh "+Fitness.positiveTests.get(0)+" "+libtrunc+":.:tmp/"+rep.vf+"/:"+Main.GP4J_HOME+"/target/classes/ "+ "d_" + rep.getVariantFolder()+"pos NOTORIG" + " " 
+				System.err.println("THIS IS COMMAND 2: " + "sh checker.sh "+Fitness.positiveTests.get(0)+" "+libtrunc+":.:tmp/d_"+rep.vf+"/:"+Main.GP4J_HOME+"/target/classes/ "+ "d_" + rep.getVariantFolder()+"pos NOTORIG" + " " 
 							+ Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
-				CommandLine command2 = CommandLine.parse("sh checker.sh "+Fitness.positiveTests.get(0)+" "+libtrunc+":.:tmp/"+rep.vf+"/:"+Main.GP4J_HOME+"/target/classes/ "+ "d_" + rep.getVariantFolder()+"pos NOTORIG" + " " 
+				CommandLine command2 = CommandLine.parse("sh checker.sh "
+							+Fitness.positiveTests.get(0)+" "
+							+libtrunc+":.:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH + " "
+							+ rep.getVariantFolder()+"pos" + " " + 
+							"NOTORIG" + " " 
 							+ Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
-				CommandLine command3 = CommandLine.parse("sh checker.sh "+Fitness.negativeTests.get(0)+" "+libtrunc+":.:tmp/"+rep.vf+"/:"+Main.GP4J_HOME+"/target/classes/ "+ "d_" +rep.getVariantFolder()+"neg NOTORIG" + " " 
-							+ Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
+				CommandLine command3 = CommandLine.parse("sh checker.sh "
+						+Fitness.positiveTests.get(0)+" "
+						+libtrunc+":.:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH + " "
+						+ rep.getVariantFolder()+"neg" + " " + 
+						"NOTORIG" + " " 
+						+ Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
 				
 				//System.out.println("command: " + command2.toString());
 				ExecuteWatchdog watchdog = new ExecuteWatchdog(1000000);
