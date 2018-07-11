@@ -35,7 +35,12 @@ package clegoues.genprog4java.main;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -47,6 +52,8 @@ import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.RandomSingleEdit;
 import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.fitness.TestCase;
+import clegoues.genprog4java.fitness.TestCase.TestType;
 import clegoues.genprog4java.localization.DefaultLocalization;
 import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.localization.UnexpectedCoverageResultException;
@@ -117,6 +124,12 @@ public class Main {
 		if (!workDir.exists())
 			workDir.mkdir();
 		logger.info("Configuration file loaded");
+		
+		List<String> allModifiedTestClasses = Files.readAllLines(Paths.get(Configuration.modifiedTestClasses), Charset.defaultCharset());
+		for(String modTestClass : allModifiedTestClasses)
+		{
+			Fitness.modifiedTests.add(new TestCase(TestType.POSITIVE, modTestClass)); //modified test classes contain only positive tests, since the negative tests are removed from them during preprocessing
+		}
 
 		fitnessEngine = new Fitness();  // Fitness must be created before rep!
 		baseRep = (Representation) new JavaRepresentation();

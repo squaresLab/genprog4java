@@ -185,6 +185,12 @@ public class Configuration {
 		.withDefault( "" )
 		.withHelp( "command for compiling the program" )
 		.build();
+	
+	public static String modifiedTestClasses = ConfigurationBuilder.of( STRING )
+		.withVarName("modifiedTestClasses")
+		.withDefault("")
+		.withHelp("path to a file containing a list of test classes whose failing test cases were removed during the passing/failing test case separation preprocessing step.")
+		.build();
 
 	private Configuration() {}
 

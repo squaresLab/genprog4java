@@ -178,6 +178,8 @@ public class Fitness {
 	 */
 	public static ArrayList<TestCase> positiveTests = new ArrayList<TestCase>();
 	public static ArrayList<TestCase> negativeTests = new ArrayList<TestCase>();
+	
+	public static ArrayList<TestCase> modifiedTests = new ArrayList<TestCase>(); //will be filled by clegoues.genprog4java.main.Main
 
 	private static int numPositiveTests;
 	private static int numNegativeTests;

@@ -55,8 +55,16 @@ public class VariantCheckerMain
 			rep.vf = rep.getVariantFolder();
 			try
 			{
-				
-				if(rep.vf.equals(""))rep.vf=rep.getAlreadyCompiled().getValue();
+				if(rep==null)
+					throw new RuntimeException("why is rep null???");
+				if(rep.vf==null)
+				{
+					System.err.println("Warning: rep.vf is null for some reason");
+				}
+				if(rep.vf==null || rep.vf.equals(""))
+					if (rep.getAlreadyCompiled() == null)
+						continue; //if rep is not already compiled, don't touch it and go on to the next representation
+					rep.vf=rep.getAlreadyCompiled().getValue();
 				System.out.println("VF Value: "+rep.vf);
 				
 				//String libtrunc = Configuration.libs.substring(0, Configuration.libs.lastIndexOf(":")); //this line is causing problems: Configuration.libs.lastIndexOf(":") is returning -1, : isn't always in the string
@@ -65,14 +73,13 @@ public class VariantCheckerMain
 				String libtrunc = Configuration.libs; //no truncation for now
 				
 				CommandLine command1 = CommandLine.parse("cp -r "+Configuration.classTestFolder+" .");
-				System.err.println("THIS IS COMMAND 2: " + "sh checker.sh "+Fitness.positiveTests.get(0)+" "+libtrunc+":.:tmp/d_"+rep.vf+"/:"+Main.GP4J_HOME+"/target/classes/ "+ "d_" + rep.getVariantFolder()+"pos NOTORIG" + " " 
-							+ Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
 				CommandLine command2 = CommandLine.parse("sh checker.sh "
 							+Fitness.positiveTests.get(0)+" "
 							+libtrunc+":.:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH + " "
 							+ rep.getVariantFolder()+"pos" + " " + 
 							"NOTORIG" + " " 
 							+ Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
+				System.err.println(command2.toString());
 				CommandLine command3 = CommandLine.parse("sh checker.sh "
 						+Fitness.positiveTests.get(0)+" "
 						+libtrunc+":.:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH + " "
