@@ -18,8 +18,8 @@ DAIKONDIR=$DAIKONHOME
 JAVA_HOME=$JAVA8HOME
 source $DAIKONDIR/scripts/daikon.bashrc
 
-java -cp .:$CLASSPATH:$CLASSP:$GP4JHOME/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar daikon.Chicory --ppt-omit-pattern=junit\. --ppt-omit-pattern=proxy\. clegoues.genprog4java.fitness.JUnitTestRunner $FILENAME
+java -cp .:$CLASSPATH:$CLASSP:$GP4JHOME/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar daikon.Chicory --ppt-omit-pattern=junit\. --ppt-omit-pattern=proxy\. ylyu1.wean.MultiTestRunner $FILENAME
 
-java -cp $DAIKONHOME/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar daikon.Daikon --format=java JUnitTestRunner.dtrace.gz > JUnitTestRunner.wean
+java -cp $DAIKONHOME/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar daikon.Daikon --format=java MultiTestRunner.dtrace.gz > MultiTestRunner.wean
 
-java -cp .:$CLASSP ylyu1.wean.WeanParse JUnitTestRunner DEBUG
+java -cp .:$CLASSP ylyu1.wean.WeanParse MultiTestRunner DEBUG

@@ -3,6 +3,7 @@ package ylyu1.wean;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.FitnessValue;
 import clegoues.genprog4java.fitness.JUnitTestRunner;
+import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.main.Configuration;
@@ -27,31 +28,41 @@ public class VariantCheckerMain
 	public static int turn = 0;
 	public final static boolean cinnamon = true;
 	//public static ArrayList<Boolean> goodVariant = new ArrayList<Boolean>();
+	
+	//these will be initialized by main()
+	public static String positiveTestsDaikonSampleArgForm = null;
+	public static String negativeTestsArgForm = null;
+	
 	public static void main(String [] args) throws Exception
 	{
-		/*int n = Integer.parseInt(args[0]);
-		String orig = args[1];
-		boolean daikon = false;
-		if(args[2].equals("DAIKON"))daikon=true;
-		String postest = args[3];
-		String negtest = args[4];*/
 		Runtime rt = Runtime.getRuntime();
 		Process pr = rt.exec("mkdir opopop");
 		pr.waitFor();
-		/*if(daikon)
+	}
+	
+	private static void setupArgForms()
+	{
+		positiveTestsDaikonSampleArgForm = "";
+		for (TestCase posTest : Fitness.positiveTestsDaikonSample)
 		{
-			rt.exec("java -cp .:$CLASSPATH daikon.DynComp ");
+			positiveTestsDaikonSampleArgForm = positiveTestsDaikonSampleArgForm + posTest.getTestName() + MultiTestRunner.SEPARATOR;
+			//the addition of an extra SEPARATOR at the end should not cause a problem for String.split()
 		}
-		for(int i = 0; i < n; i++)
+		
+		negativeTestsArgForm = "";
+		for (TestCase negTest : Fitness.negativeTests)
 		{
-			
-		}*/
+			negativeTestsArgForm = negativeTestsArgForm + negTest.getTestName() + MultiTestRunner.SEPARATOR;
+		}
 	}
 	
 	public static void checkInvariant(Population<? extends EditOperation> pop)
 	{
 		for(Representation<? extends EditOperation> rep : pop)
 		{
+			if (rep.getAlreadyCompiled() == null || !rep.getAlreadyCompiled().getLeft())
+				continue; //if rep is not already compiled, don't touch it and go on to the next representation
+			
 			rep.vf = rep.getVariantFolder();
 			try
 			{
@@ -61,28 +72,29 @@ public class VariantCheckerMain
 				{
 					System.err.println("Warning: rep.vf is null for some reason");
 				}
-				if(rep.vf==null || rep.vf.equals(""))
-					if (rep.getAlreadyCompiled() == null)
-						continue; //if rep is not already compiled, don't touch it and go on to the next representation
+				if(rep.vf==null || rep.vf.equals(""))	
 					rep.vf=rep.getAlreadyCompiled().getValue();
 				System.out.println("VF Value: "+rep.vf);
 				
 				//String libtrunc = Configuration.libs.substring(0, Configuration.libs.lastIndexOf(":")); //this line is causing problems: Configuration.libs.lastIndexOf(":") is returning -1, : isn't always in the string
 				int lastIndexOfColonInLibs = Configuration.libs.lastIndexOf(":");
 				//String libtrunc = lastIndexOfColonInLibs == -1 ? Configuration.libs : Configuration.libs.substring(0, lastIndexOfColonInLibs);
-				String libtrunc = Configuration.libs; //no truncation for now
+				//String libtrunc = Configuration.libs; //no truncation for now
+				
+				if (positiveTestsDaikonSampleArgForm == null || negativeTestsArgForm == null)
+					setupArgForms();
 				
 				CommandLine command1 = CommandLine.parse("cp -r "+Configuration.classTestFolder+" .");
 				CommandLine command2 = CommandLine.parse("sh checker.sh "
-							+Fitness.positiveTests.get(0)+" "
-							+libtrunc+":.:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH + " "
+							+positiveTestsDaikonSampleArgForm+" "
+							+".:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH + " "
 							+ rep.getVariantFolder()+"pos" + " " + 
 							"NOTORIG" + " " 
 							+ Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
 				System.err.println(command2.toString());
 				CommandLine command3 = CommandLine.parse("sh checker.sh "
-						+Fitness.positiveTests.get(0)+" "
-						+libtrunc+":.:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH + " "
+						+negativeTestsArgForm+" "
+						+".:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH + " "
 						+ rep.getVariantFolder()+"neg" + " " + 
 						"NOTORIG" + " " 
 						+ Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
@@ -190,7 +202,7 @@ public class VariantCheckerMain
 				if(b!=null)
 				{
 					repstorer.add(rep);
-					System.out.println(Arrays.toString(b));
+					//System.out.println(Arrays.toString(b));
 					list.add(b);
 				}
 			}
@@ -243,10 +255,13 @@ public class VariantCheckerMain
 	{
 		try
 			{
+				if (positiveTestsDaikonSampleArgForm == null || negativeTestsArgForm == null)
+					setupArgForms();
+				
 				CommandLine command1 = CommandLine.parse("cp -r "+Configuration.classTestFolder+" .");
-				CommandLine command2 = CommandLine.parse("sh checker.sh "+Fitness.positiveTests.get(0)+" "+Configuration.libs+":.:"+Main.GP4J_HOME+"/target/classes/ origPos ORIGPOS"
+				CommandLine command2 = CommandLine.parse("sh checker.sh "+positiveTestsDaikonSampleArgForm+" "+Configuration.libs+":.:"+Main.GP4J_HOME+"/target/classes/ origPos ORIGPOS"
 							+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
-				CommandLine command3 = CommandLine.parse("sh checker.sh "+Fitness.negativeTests.get(0)+" "+Configuration.libs+":.:"+Main.GP4J_HOME+"/target/classes/ origNeg ORIGNEG"
+				CommandLine command3 = CommandLine.parse("sh checker.sh "+negativeTestsArgForm+" "+Configuration.libs+":.:"+Main.GP4J_HOME+"/target/classes/ origNeg ORIGNEG"
 						 	+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
 				
 				//System.out.println("command: " + command2.toString());
@@ -296,10 +311,11 @@ public class VariantCheckerMain
 	
 	public static void runDaikon()
 	{
+		if (positiveTestsDaikonSampleArgForm == null || negativeTestsArgForm == null)
+			setupArgForms();
+		
 		CommandLine command1 = CommandLine.parse("cp "+Main.GP4J_HOME+"/runDaikon.sh .");
-		System.out.println("sh runDaikon.sh "+Fitness.positiveTests.get(0)+" "+Configuration.libs+":"+Configuration.classTestFolder+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
-					+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
-		CommandLine command2 = CommandLine.parse("sh runDaikon.sh "+Fitness.positiveTests.get(0)+" "+Configuration.libs+":"+Configuration.classTestFolder+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
+		CommandLine command2 = CommandLine.parse("sh runDaikon.sh "+positiveTestsDaikonSampleArgForm+" "+Configuration.classTestFolder+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
 					+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
 		CommandLine command3 = CommandLine.parse("cp "+Main.GP4J_HOME+"/checker.sh .");
 		

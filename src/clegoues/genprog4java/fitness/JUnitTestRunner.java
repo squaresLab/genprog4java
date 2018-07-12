@@ -99,7 +99,49 @@ public class JUnitTestRunner {
 		}
 		Runtime.getRuntime().exit(0);
 	}
+	
+	public static void mainNoHardExit(String[] args)
+	{
+		try {
+			String clazzName = args[0].trim();
+			Request testRequest = null;
+			String methodName = null;
+			
+			System.err.println("Test Class: " + clazzName);
+			if(clazzName.contains("::")) {
+				String[] intermed = clazzName.split("::");
+				clazzName = intermed[0];
+				methodName = intermed[1];
+			}
+			Class<?>[] testClazz = new Class[1];
+			testClazz[0] = Class.forName(clazzName);
+			if(methodName == null) { 
+			testRequest = Request.classes(testClazz);
+			} else {
+				testRequest = Request.method(testClazz[0], methodName);
+			}
+			
+			System.out.println("Requested #: "
+					+ testRequest.getRunner().testCount());
 
+			JUnitCore runner = new JUnitCore();
+			Result r = runner.run(testRequest);
+
+			System.out.println("[SUCCESS]:" + r.wasSuccessful());
+			System.out.println("[TOTAL]:" + r.getRunCount());
+			System.out.println("[FAILURE]:" + r.getFailureCount());
+
+			for (Failure f : r.getFailures()) {
+				System.out.println(f.toString());
+				System.out.println(f.getTrace());
+			}
+
+			System.out.println("\n" + r.getFailures().toString());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
 
 class Listener extends RunListener {

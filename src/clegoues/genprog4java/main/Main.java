@@ -125,10 +125,18 @@ public class Main {
 			workDir.mkdir();
 		logger.info("Configuration file loaded");
 		
-		List<String> allModifiedTestClasses = Files.readAllLines(Paths.get(Configuration.modifiedTestClasses), Charset.defaultCharset());
-		for(String modTestClass : allModifiedTestClasses)
+		if (Configuration.positiveTestClassesDaikonSample == "")
 		{
-			Fitness.modifiedTests.add(new TestCase(TestType.POSITIVE, modTestClass)); //modified test classes contain only positive tests, since the negative tests are removed from them during preprocessing
+			System.err.println("Daikon will run on all of the positive tests!");
+			Fitness.positiveTestsDaikonSample = Fitness.positiveTests;
+		}
+		else
+		{
+			List<String> allModifiedTestClasses = Files.readAllLines(Paths.get(Configuration.positiveTestClassesDaikonSample), Charset.defaultCharset());
+			for(String modTestClass : allModifiedTestClasses)
+			{
+				Fitness.positiveTestsDaikonSample.add(new TestCase(TestType.POSITIVE, modTestClass)); //modified test classes contain only positive tests, since the negative tests are removed from them during preprocessing
+			}
 		}
 
 		fitnessEngine = new Fitness();  // Fitness must be created before rep!
