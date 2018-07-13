@@ -27,4 +27,5 @@ java -cp .:$CLASSP:$CLASSPATH:$DAIKONHOME/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$
 java -cp .:$CLASSP:$GP4JHOME/lib/javassist.jar ylyu1.wean.Aggregator $VARNAME $ORIGORNOT > $VARNAME.pred
 
 rm -r org
+
 #TODO: generalize this rm line...

@@ -33,6 +33,8 @@
 
 package clegoues.genprog4java.fitness;
 
+import java.util.Arrays;
+
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Request;
@@ -140,6 +142,24 @@ public class JUnitTestRunner {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	/** for debugging purposes only
+	 * A long process for debugging
+	 */
+	public static void foo()
+	{
+		for(int reps = 0; reps < 10; reps++)
+		{
+			int[] arr = new int[100000000]; //100 million
+			
+			for (int i = 0; i < arr.length; i++)
+			{
+				arr[i] = arr.length-i;
+			}
+			
+			Arrays.sort(arr);
 		}
 	}
 }
