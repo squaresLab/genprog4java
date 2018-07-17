@@ -100,7 +100,9 @@ public class VariantCheckerMain
 						+ Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
 				
 				//System.out.println("command: " + command2.toString());
-				ExecuteWatchdog watchdog = new ExecuteWatchdog(1000000);
+				ExecuteWatchdog watchdog = new ExecuteWatchdog(10*60000);
+				//timeout after 10 minutes, shouldn't be needed as there's timeouts in the JUnit tests. This hard timeout should be avoided as it can create zombie JUnit processes
+				//thus, this timeout should be short
 				DefaultExecutor executor = new DefaultExecutor();
 				String workingDirectory = System.getProperty("user.dir");
 				executor.setWorkingDirectory(new File(workingDirectory));
@@ -315,7 +317,7 @@ public class VariantCheckerMain
 			setupArgForms();
 		
 		CommandLine command1 = CommandLine.parse("cp "+Main.GP4J_HOME+"/runDaikon.sh .");
-		CommandLine command2 = CommandLine.parse("sh runDaikon.sh "+positiveTestsDaikonSampleArgForm+" "+Configuration.classTestFolder+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
+		CommandLine command2 = CommandLine.parse("sh runDaikon.sh "+positiveTestsDaikonSampleArgForm+" "+Configuration.pathToNoTimeoutTests+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
 					+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
 		CommandLine command3 = CommandLine.parse("cp "+Main.GP4J_HOME+"/checker.sh .");
 		

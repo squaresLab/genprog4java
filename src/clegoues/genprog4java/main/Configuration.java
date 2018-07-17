@@ -191,6 +191,12 @@ public class Configuration {
 		.withDefault("")
 		.withHelp("path to a file containing a list of test classes whose failing test cases were removed during the passing/failing test case separation preprocessing step.")
 		.build();
+	
+	public static String pathToNoTimeoutTests = ConfigurationBuilder.of( STRING )
+		.withVarName("pathToNoTimeoutTests")
+		.withDefault(classTestFolder)
+		.withHelp("directory to contain compiled test classes where there's no timeout mechanism (used by runDaikon for invariant analysis)")
+		.build();
 
 	private Configuration() {}
 

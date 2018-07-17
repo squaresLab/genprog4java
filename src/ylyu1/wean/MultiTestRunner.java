@@ -12,33 +12,17 @@ public class MultiTestRunner
 {
 	public static final String SEPARATOR = "`";
 	
-	/*
-	public static void main(String[] args)
-	{
-
-		String[] tests = args[0].split(SEPARATOR);
-		
-		//System.err.println("Number of tests: " + tests.length);
-		
-		for(String s : tests)
-		{
-			if (s.equals(""))
-				continue; //ignore the empty string
-			
-			//System.err.println("Now attempting to run test: " + s);
-			String[] ss = new String[1];
-			ss[0]=s;
-			//JUnitTestRunner.mainNoHardExit(ss);
-			JUnitTestRunner.foo();
-		}
-		
-		Runtime.getRuntime().exit(0);
-	}
-	*/
-	
 	/*Only works for classes, doesn't work for method level granularity (yet)*/
 	public static void main(String[] args)
 	{
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run()
+			{
+				//Runtime.getRuntime().halt(0); //i think this sends a sigkill, so this should avoid the infinite loop of shutdown hooks
+			}
+		});
+		
 		try
 		{
 			String[] testsRaw = args[0].split(SEPARATOR);
