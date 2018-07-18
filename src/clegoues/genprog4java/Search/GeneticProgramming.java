@@ -209,7 +209,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 				"cp -R " +
 				Configuration.classSourceFolder + //no space added
 				(Configuration.classSourceFolder.endsWith(File.separator) ? "" : File.separator) + //add a separator if necessary
-				" " +
+				"* " +
 				copyDestination
 				);
 		
