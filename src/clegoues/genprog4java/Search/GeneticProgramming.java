@@ -1,5 +1,7 @@
 package clegoues.genprog4java.Search;
 
+import static clegoues.util.ConfigurationBuilder.INT;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -15,11 +17,21 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
+import clegoues.util.ConfigurationBuilder;
 import ylyu1.wean.VariantCheckerMain;
 
 public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 	private int generationsRun = 0;
-	public static int mode = 3;
+	//public static int mode = 3;
+	public static int mode = ConfigurationBuilder.of( INT )
+			.withVarName("invariantCheckerMode")
+			.withDefault("0")
+			.withHelp("0 - no invariant checking; "
+					+ "1 - invariant checking after the 0th generation only; "
+					+ "2 - use a linear combination of invariant checking results and fitness scores in all generations, influence of invariant checking decreases linearly after each generation;"
+					+ "3 - only use invariant checking results in the fitness function")
+			.build();
+	
 	public GeneticProgramming(Fitness engine) {
 		super(engine);
 	}
