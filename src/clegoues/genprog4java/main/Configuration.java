@@ -34,6 +34,7 @@
 package clegoues.genprog4java.main;
 
 import static clegoues.util.ConfigurationBuilder.BOOL_ARG;
+import static clegoues.util.ConfigurationBuilder.INT;
 import static clegoues.util.ConfigurationBuilder.LONG;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
@@ -197,6 +198,16 @@ public class Configuration {
 		.withDefault(classTestFolder)
 		.withHelp("directory to contain compiled test classes where there's no timeout mechanism (used by runDaikon for invariant analysis)")
 		.build();
+
+	//public static int mode = 3;
+	public static int invariantCheckerMode = ConfigurationBuilder.of( INT )
+			.withVarName("invariantCheckerMode")
+			.withDefault("0")
+			.withHelp("0 - no invariant checking; "
+					+ "1 - invariant checking after the 0th generation only; "
+					+ "2 - use a linear combination of invariant checking results and fitness scores in all generations, influence of invariant checking decreases linearly after each generation; "
+					+ "3 - only use invariant checking results in the fitness function")
+			.build();
 
 	private Configuration() {}
 

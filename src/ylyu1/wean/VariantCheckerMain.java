@@ -8,7 +8,6 @@ import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
-import clegoues.genprog4java.Search.GeneticProgramming;
 import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.main.Main;
 
@@ -222,7 +221,7 @@ public class VariantCheckerMain
 		if(max1==0)return diffScores;
 		for(int i = 0; i < repstorer.size();i++)
 		{
-			if(GeneticProgramming.mode==2)
+			if(Configuration.invariantCheckerMode==2)
 			{	
 				repstorer.get(i).setFitness(((double)diffScores[i])/((double)max1)/10*(11-turn)+repstorer.get(i).getFitness()/10*(turn-1)); 
 			}
