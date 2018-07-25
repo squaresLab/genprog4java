@@ -165,7 +165,10 @@ public class Main {
 			e.printStackTrace();
 		}
 		int elapsed = getElapsedTime(startTime);
+		
+		
 		logger.info("\nTotal elapsed time: " + elapsed + "\n");
+		
 		Runtime.getRuntime().exit(0);
 	}
 

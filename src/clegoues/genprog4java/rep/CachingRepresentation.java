@@ -61,6 +61,7 @@ import clegoues.genprog4java.java.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.util.ConfigurationBuilder;
+import ylyu1.wean.DataProcessor;
 
 @SuppressWarnings("rawtypes")
 public abstract class CachingRepresentation<G extends EditOperation> extends
@@ -126,6 +127,7 @@ Representation<G>  {
 		if (Configuration.doSanity) {
 			if (!this.sanityCheck()) {
 				logger.error("Sanity check failed, giving up");
+				DataProcessor.storeError("sanity");
 				Runtime.getRuntime().exit(1);
 			}
 		}

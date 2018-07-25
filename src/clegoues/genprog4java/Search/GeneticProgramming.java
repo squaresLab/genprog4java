@@ -17,6 +17,7 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
+import ylyu1.wean.DataProcessor;
 import ylyu1.wean.VariantCheckerMain;
 
 public class GeneticProgramming<G extends EditOperation> extends Search<G>{
@@ -135,14 +136,16 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 				VariantCheckerMain.checkInvariant(incomingPopulation);//}
 			}
 			
+			ArrayList<Double> fitscores = new ArrayList<Double>();
+			for(Representation<G> item : incomingPopulation)
+			{
+				fitscores.add(item.getFitness());
+			}
+			DataProcessor.fitscores.add(fitscores);
 			
 			// Step 1: selection
 			incomingPopulation.selection(incomingPopulation.getPopsize());
 			
-			for(Representation<G> item : incomingPopulation)
-			{
-				System.out.println(item.hashCode());
-			}
 			// step 2: crossover
 			incomingPopulation.crossover(original);
 

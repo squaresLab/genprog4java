@@ -345,7 +345,8 @@ public class VariantCheckerMain
 		} catch (ExecuteException exception) {
 			//posFit.setAllPassed(false);
 			System.out.println(exception.toString());
-			
+			DataProcessor.storeError("rundaikon");
+			Runtime.getRuntime().exit(1);
 		} catch (Exception e) {
 		} finally {
 			if (out != null)
@@ -354,6 +355,12 @@ public class VariantCheckerMain
 					out.close();
 				} catch (IOException e) {
 				}
+		}
+		File f = new File("MultiTestRunner.wean");
+		if(f.length()<=15)
+		{
+			DataProcessor.storeError("weirddaikon");
+			Runtime.getRuntime().exit(1);
 		}
 	}
 
