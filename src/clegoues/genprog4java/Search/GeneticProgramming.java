@@ -108,6 +108,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		
 		
 		// Step 0: run daikon
+		System.out.println("mode: "+Configuration.invariantCheckerMode);
 		if(Configuration.invariantCheckerMode>0)
 		{
 		System.out.println("Here we are");
@@ -170,6 +171,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			}
 			gen++;
 		}
+                System.out.println("Variant number: "+JavaRepresentation.sequence);
 	}
 	
 	/**
