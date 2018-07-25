@@ -25,12 +25,12 @@ public class DataProcessor
 	public static void store(DataStorer ds)
 	{
 		try {
-		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("ResultOfSeed"+Configuration.seed+".res"));
+		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("ResultOfSeed"+Configuration.seed+".results"));
 		oos.writeObject(ds);
 		oos.flush();
 		oos.close();
 		}
-		catch(Exception e) {System.out.println("Weird error occuring in data storage");}
+		catch(Exception e) {System.out.println("Weird error occuring in data storage\n"+e.getMessage());}
 	}
 	public static void main(String[] args) throws Exception
 	{
@@ -39,7 +39,7 @@ public class DataProcessor
 		int modenum = Integer.parseInt(args[2]);
 		int seednum = Integer.parseInt(args[3]);
 		String pathToBugs = args[4];
-		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(pathToBugs+modenum+"/"+dataset+bugnum+"Buggy/ResultOfSeed"+seednum+".res"));
+		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(pathToBugs+modenum+"/"+dataset+bugnum+"Buggy/ResultOfSeed"+seednum+".results"));
 		DataStorer result = (DataStorer) ois.readObject();
 		ois.close();
 		//plateau score: higher better, lower means more plateau
