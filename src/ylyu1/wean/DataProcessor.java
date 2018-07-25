@@ -53,7 +53,7 @@ public class DataProcessor
 				int valid = 0;
 				for(int i = 0; i < fitscore.size(); i++)
 				{
-					if(fitscore.get(i)<0)continue;
+					if(fitscore.get(i)<0.00000001)continue;
 					boolean hasequal = false;
 					for(int j = 0; j < i; j++)
 					{
