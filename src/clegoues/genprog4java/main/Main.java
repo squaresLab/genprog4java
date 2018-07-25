@@ -62,6 +62,7 @@ import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
+import ylyu1.wean.DataProcessor;
 
 public class Main {
 
@@ -166,7 +167,7 @@ public class Main {
 		}
 		int elapsed = getElapsedTime(startTime);
 		
-		
+		DataProcessor.storeNormal();
 		logger.info("\nTotal elapsed time: " + elapsed + "\n");
 		
 		Runtime.getRuntime().exit(0);
