@@ -65,6 +65,7 @@ import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
+import ylyu1.wean.DataProcessor;
 
 @SuppressWarnings("rawtypes")
 public abstract class Search<G extends EditOperation> {
@@ -358,6 +359,7 @@ public abstract class Search<G extends EditOperation> {
 			Fitness.serializeTestCache();
 		} catch(RepairFoundException e) {
 			Fitness.serializeTestCache();
+			DataProcessor.repair=true;
 			return;
 		} catch (GiveUpException e) {
 			Fitness.serializeTestCache();

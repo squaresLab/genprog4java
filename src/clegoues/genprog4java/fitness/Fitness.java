@@ -636,7 +636,7 @@ public class Fitness {
 		} else {
 			fitnessPair = this.testFitnessFull(rep, fac);
 		}
-		rep.setFitness(fitnessPair.getRight());
+		rep.setFitness(fitnessPair.getRight()/maxFitness);
 		//Random rand = new Random();
 		//rep.setFitness(rand.nextDouble());
 		logger.info("\t gen: " + generation + " " + fitnessPair.getLeft() + " " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ") Hash: "+rep.hashCode());
