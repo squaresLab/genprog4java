@@ -111,9 +111,11 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		System.out.println("mode: "+Configuration.invariantCheckerMode);
 		if(Configuration.invariantCheckerMode>0)
 		{
+		if(!(new File("MultiTestRunner.ywl")).exists())
+		{
 		System.out.println("Here we are");
 		VariantCheckerMain.runDaikon();
-		//VariantCheckerMain.checkInvariantOrig();
+		}//VariantCheckerMain.checkInvariantOrig();
 		}
 		
 		
