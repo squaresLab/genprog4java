@@ -26,11 +26,12 @@ public class DataProcessor
 	{
 		try {
 		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("ResultOfSeed"+Configuration.seed+".results"));
+		System.out.println("Hi Hi");
 		oos.writeObject(ds);
 		oos.flush();
 		oos.close();
 		}
-		catch(Exception e) {System.out.println("Weird error occuring in data storage\n"+e.getMessage());}
+		catch(Exception e) {System.out.println("Weird error occuring in data storage\n"+e.getMessage());e.printStackTrace();}
 	}
 	public static void main(String[] args) throws Exception
 	{
