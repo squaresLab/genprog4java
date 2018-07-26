@@ -1,8 +1,9 @@
 package ylyu1.wean;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class DataStorer {
+public class DataStorer implements Serializable{
 	
 	public boolean repair;
 	public boolean good;
