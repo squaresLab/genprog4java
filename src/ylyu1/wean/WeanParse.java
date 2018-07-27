@@ -63,12 +63,13 @@ public class WeanParse
 			}
 			writer.close();
 		}
-		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fn+".ywl"));
-		out.writeObject(classes);
-		out.flush();
-		out.close();
-
-
+		if(!classes.isEmpty())
+		{
+			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fn+".ywl"));
+			out.writeObject(classes);
+			out.flush();
+			out.close();
+		}
 
 
 	}

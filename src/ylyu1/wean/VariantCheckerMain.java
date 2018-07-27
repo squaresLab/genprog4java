@@ -356,12 +356,7 @@ public class VariantCheckerMain
 				} catch (IOException e) {
 				}
 		}
-		File f = new File("MultiTestRunner.wean");
-		if(f.length()<=15)
-		{
-			DataProcessor.storeError("weirddaikon");
-			Runtime.getRuntime().exit(1);
-		}
+		
 	}
 
 }
