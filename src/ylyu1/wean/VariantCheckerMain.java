@@ -321,7 +321,7 @@ public class VariantCheckerMain
 		CommandLine command3 = CommandLine.parse("cp "+Main.GP4J_HOME+"/checker.sh .");
 		
 		//System.out.println("command: " + command2.toString());
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(Math.max(Fitness.positiveTestsDaikonSample.size()*2*60000, 20*60000)); //set a timeout of 2 minutes per test case, or 20 minutes, whichever is longer
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(Math.max(Fitness.positiveTestsDaikonSample.size()*5*60000, 60*60000)); //set a timeout of 5 minutes per test case, or 60 minutes, whichever is longer
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");
 		executor.setWorkingDirectory(new File(workingDirectory));
