@@ -1,5 +1,7 @@
 # README #
 
+Note that the wiki has rather more information than this README: https://github.com/squaresLab/genprog4java/wiki
+
 ### Disclaimer ###
 
 GenProg4Java is in active early development and changes a lot.
