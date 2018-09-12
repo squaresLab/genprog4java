@@ -6,8 +6,7 @@ GenProg4Java is in active early development and changes a lot.
 
 ### What is this repository for? ###
 
-* Quick summary
-This is a java-based version of GenProg, a software for automatically fixing bugs.
+This is a java-based version of GenProg, software for automatically fixing bugs.
 
 * https://squareslab.github.io/genprog-code/
 
