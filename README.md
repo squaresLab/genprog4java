@@ -17,19 +17,27 @@ least one test case should be failing; it encodes the bug to be repaired.  At
 least one should be passing; it encodes desired functionality that should be
 maintained.
 
-At sea level, GenProg4Java takes a configuration file as input.  You can see
-what flags are available (and their defaults, when applicable) in
-clegoues.genprog4java.main.Configuration
+At sea level, GenProg4Java takes a configuration file as input.  Below, we provide a 
+minimal set that should allow G4J to run using the default genetic programming 
+heuristic on a buggy program taken from the IntroClassJava dataset 
+(https://github.com/Spirals-Team/IntroClassJava) other options are available 
+(comments below are explanatory; I'm not sure  they work in actual config files...).  
+You can see what flags are available (and their defaults, when applicable) in
+clegoues.genprog4java.main.Configuration.  However, to illustrate:
 
-You must, at minimum, provide:
-
-* javaVM - path to java
-
-* libs - classpath to compile the project
-
-* targetClassName - fully-qualified class name (with package), no .java at the
-end, OR a .txt file with a list of such class names (when multiple files are to
-be considered for repair), one per line
+```
+javaVM = /usr/bin/java 
+classTestFolder = bin/ # where to find test classes
+workingDir = /path/to/IntroClassJava/dataset/median/testmedian/000/ #top level directory
+outputDir = /path/to/IntroClassJava/dataset/median/testmedian/000/tmp/ #where temporary files should be stored
+libs=/path/to/genprog4java/lib/hamcrest-core-1.3.jar:/path/to/genprog4java/lib/junit-4.12.jar:/path/to/genprog4java/lib/junittestrunner.jar: # to run the program under repair
+sourceDir = src/main/java # relative to workingDir; path to top of package-level source for class under repair
+positiveTests = /path/to/IntroClassJava/dataset/median/testmedian/000/pos.tests # file listing test classes or methods that should initially pass, one per line
+negativeTests = /path/to/IntroClassJava/dataset/median/testmedian/000/neg.tests # file listing test classes or methods that should initially fail, one per line
+jacocoPath = /path/to/genprog4java/lib/jacocoagent.jar # path to jacoco; g4j ships with a jar that should work
+testClassPath=/path/to/IntroClassJava/dataset/median/testmedian/000/bin/ #classpath for tests, possibly redundant with classTestFolder, I should check
+targetClassName = introclassJava.median_d4aae191_000 # class under repair, or file listing classes under repair, one per line
+```
 
 Although the other options are, well, optional, you probably want to set a large
 number of them, like seed.
