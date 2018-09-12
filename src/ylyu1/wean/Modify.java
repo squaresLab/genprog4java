@@ -12,11 +12,10 @@ public class Modify
 		int prednum = 0;
 		String fn = args[0];
 		String vn = args[1];
+		boolean debug = args[2].equals("DEBUG");
 		ClassPool pool = ClassPool.getDefault();
-		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fn+".ywl"));
-		ArrayList<PredGroup> classes = (ArrayList<PredGroup>) ois.readObject();
+		ArrayList<PredGroup> classes = WeanParse.allInvariants;
 		Hashtable<Integer,PredSerial> serials = new Hashtable<Integer,PredSerial>();
-		ois.close();
 		for(PredGroup w : classes)
 		{
 			if(w.location.equals("OBJECT"))continue;
@@ -39,7 +38,7 @@ public class Modify
 				else m = c.getDeclaredMethod(w.method.substring(id+1,paren),pool.get(argfs));
 				if(w.line>-1){m.insertAt(w.line,"System.out.print(\"\\n124124124 \"+"+w.line+"+\" \");");
  				/*m.insertAt(w.line+1,"System.out.print(\"\\n124124125 \"+"+(w.line+1)+"+\" \");");*/}
-			}catch(Exception e){System.out.println("Skipped by invalid name: "+w.method+"  "+e.getMessage());/*System.out.println(argfs[0]);*/continue;}
+			}catch(Exception e){if(debug)System.out.println("Skipped by invalid name: "+w.method+"  "+e.getMessage());/*System.out.println(argfs[0]);*/continue;}
 			//runs through each statement
 			for(String ss : w.statements)
 			{
@@ -54,10 +53,10 @@ public class Modify
 				if(w.location.equals("ENTER"))
 				{
 
-					try{m.insertBefore("try{System.out.print(\"\\n417417417 \");System.out.print("+s+");System.out.print(\" "+prednum+" \");}catch(Throwable e){System.out.print(\"\\n417417417 \");System.out.print(\"false\");System.out.print(\" "+prednum+" \");}");
+					try{m.insertBefore("try{ylyu1.wean.Flusher.flushIn("+prednum+","+s+");}catch(Throwable e){ylyu1.wean.Flusher.flushIn("+prednum+",false);}");
 					//try{m.insertBefore("{System.out.print(\"\\n417417417 \");System.out.print("+s+");System.out.print(\" "+prednum+" \");}");
-						System.out.println("good: "+s);serials.put(prednum, new PredSerial(prednum,c.getName(),m.getName(),"ENTER",s,w.posCover,w.negCover,w.line));}
-					catch(Exception e){System.out.println("Skipped by invalid syntax: "+s+" "+e.getMessage());}
+						if(debug)System.out.println("good: "+s);serials.put(prednum, new PredSerial(prednum,c.getName(),m.getName(),"ENTER",s,w.posCover,w.negCover,w.line));}
+					catch(Exception e){if(debug)System.out.println("Skipped by invalid syntax: "+s+" "+e.getMessage());}
 				}
 				//Exit location
 				else
@@ -65,10 +64,10 @@ public class Modify
 					int origloc = s.indexOf("\\old(");
 					//Without orig
 					if(origloc<0){
-					try{m.insertAfter("try{System.out.print(\"\\n417417417 \");System.out.print("+s+");System.out.print(\" "+prednum+" \");}catch(Throwable e){System.out.print(\"\\n417417417 \");System.out.print(\"false\");System.out.print(\" "+prednum+" \");}");
+					try{m.insertAfter("try{ylyu1.wean.Flusher.flushIn("+prednum+","+s+");}catch(Throwable e){ylyu1.wean.Flusher.flushIn("+prednum+",false);}");
 						//try{m.insertAfter("{System.out.print(\"\\n417417417 \");System.out.print("+s+");System.out.print(\" "+prednum+" \");}");
-							System.out.println("good: "+s);serials.put(prednum, new PredSerial(prednum,c.getName(),m.getName(),"EXIT",s,w.posCover,w.negCover,w.line));}
-						catch(Exception e){System.out.println("Skipped by invalid syntax: "+s+" "+e.getMessage());}
+							if(debug)System.out.println("good: "+s);serials.put(prednum, new PredSerial(prednum,c.getName(),m.getName(),"EXIT",s,w.posCover,w.negCover,w.line));}
+						catch(Exception e){if(debug)System.out.println("Skipped by invalid syntax: "+s+" "+e.getMessage());}
 					}
 					//With orig
 					else
@@ -82,10 +81,10 @@ public class Modify
 						{
 							m.insertBefore("try{mts"+varnum+"=new ylyu1.wean.MultiTypeStorer("+var+");}");
 							rep = replacer(s, var, varnum);
-							m.insertAfter("try{System.out.print(\"\\n417417417 \");System.out.print("+rep+");System.out.print(\" "+prednum+" \");}catch(Throwable e){System.out.print(\"\\n417417417 \");System.out.print(\"false\");System.out.print(\" "+prednum+" \");}");
-							System.out.println("good: "+s);serials.put(prednum, new PredSerial(prednum,c.getName(),m.getName(),"EXIT",s,w.posCover,w.negCover,w.line));
+							m.insertAfter("try{ylyu1.wean.Flusher.flushIn("+prednum+","+rep+");}catch(Throwable e){ylyu1.wean.Flusher.flushIn("+prednum+",false);}");
+							if(debug)System.out.println("good: "+s);serials.put(prednum, new PredSerial(prednum,c.getName(),m.getName(),"EXIT",s,w.posCover,w.negCover,w.line));
 						}
-						catch(Exception e){System.out.println("Skipped by invalid syntax: "+s+" "+e.getMessage());}
+						catch(Exception e){if(debug)System.out.println("Skipped by invalid syntax: "+s+" "+e.getMessage());}
 						
 					}
 				}
@@ -93,11 +92,15 @@ public class Modify
 			c.writeFile();
 			c.defrost();
 		}
+		/*
 		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(vn+".pse"));
 		oos.writeObject(serials);
 		oos.flush();
-		oos.close();
+		oos.close();*/
+		allSerials=serials;
 	}
+	
+	public static Hashtable<Integer,PredSerial> allSerials = null;
 
 
 	public static String[] parseargs(String s)

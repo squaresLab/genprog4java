@@ -37,6 +37,7 @@ public class MultiTestRunner
 				}
 			}
 			
+			
 			JUnitCore runner = new JUnitCore();
 			Result r = runner.run(clazzes);
 			

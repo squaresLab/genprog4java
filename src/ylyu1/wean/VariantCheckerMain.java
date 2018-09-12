@@ -25,7 +25,8 @@ import org.apache.commons.exec.PumpStreamHandler;
 public class VariantCheckerMain
 {
 	public static int turn = 0;
-	public final static boolean cinnamon = true;
+	public static String debug = "NOTDEBUG"; 
+	//public final static boolean cinnamon = true;
 	//public static ArrayList<Boolean> goodVariant = new ArrayList<Boolean>();
 	
 	//these will be initialized by main()
@@ -251,7 +252,7 @@ public class VariantCheckerMain
 		return b;
 	}
 	
-	
+	//Deprecated
 	public static void checkInvariantOrig()
 	{
 		try
@@ -318,7 +319,6 @@ public class VariantCheckerMain
 		CommandLine command1 = CommandLine.parse("cp "+Main.GP4J_HOME+"/runDaikon.sh .");
 		CommandLine command2 = CommandLine.parse("sh runDaikon.sh "+positiveTestsDaikonSampleArgForm+" "+Configuration.pathToNoTimeoutTests+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
 					+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
-		CommandLine command3 = CommandLine.parse("cp "+Main.GP4J_HOME+"/checker.sh .");
 		
 		//System.out.println("command: " + command2.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(Math.max(Fitness.positiveTestsDaikonSample.size()*5*60000, 60*60000)); //set a timeout of 5 minutes per test case, or 60 minutes, whichever is longer
@@ -336,11 +336,12 @@ public class VariantCheckerMain
 		try {
 			executor.execute(command1);
 			executor.execute(command2);
-			executor.execute(command3);
 			out.flush();
 			String output = out.toString();
 			System.out.println(output);
 			out.reset();
+			String[] weanParserConfig = {"MultiTestRunner", "NOTDEBUG"};
+			WeanParse.main(weanParserConfig);
 
 		} catch (ExecuteException exception) {
 			//posFit.setAllPassed(false);

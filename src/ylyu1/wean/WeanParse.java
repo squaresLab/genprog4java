@@ -5,6 +5,7 @@ import java.util.*;
 
 public class WeanParse
 {
+	public static ArrayList<PredGroup> allInvariants = null;
 	public static void main(String[] args) throws IOException
 	{
 		String fn = args[0];
@@ -65,10 +66,7 @@ public class WeanParse
 		}
 		if(!classes.isEmpty())
 		{
-			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fn+".ywl"));
-			out.writeObject(classes);
-			out.flush();
-			out.close();
+			allInvariants = classes;
 		}
 
 
