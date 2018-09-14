@@ -99,6 +99,8 @@ public class VariantCheckerMain
 						"NOTORIG" + " " 
 						+ Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
 				
+				
+				
 				//System.out.println("command: " + command2.toString());
 				ExecuteWatchdog watchdog = new ExecuteWatchdog(10*60000);
 				//timeout after 10 minutes, shouldn't be needed as there's timeouts in the JUnit tests. This hard timeout should be avoided as it can create zombie JUnit processes
@@ -115,9 +117,12 @@ public class VariantCheckerMain
 				FitnessValue posFit = new FitnessValue();
 
 				try {
-					executor.execute(command1);
-					executor.execute(command2);
-					executor.execute(command3);
+					//executor.execute(command1);
+					//executor.execute(command2);
+					//executor.execute(command3);
+					String[] modifyArgs = {"MultiTestRunner", rep.getVariantFolder()+"pos"};
+					Modify.main(modifyArgs);
+					executor.execute(CommandLine.parse("java -cp "+".:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH+" ylyu1.wean.MultiTestRunner "+positiveTestsDaikonSampleArgForm));
 					out.flush();
 					String output = out.toString();
 					System.out.println(output);
@@ -266,7 +271,8 @@ public class VariantCheckerMain
 				CommandLine command3 = CommandLine.parse("sh checker.sh "+negativeTestsArgForm+" "+Configuration.libs+":.:"+Main.GP4J_HOME+"/target/classes/ origNeg ORIGNEG"
 						 	+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
 				
-				//System.out.println("command: " + command2.toString());
+				System.out.println("command: " + command2.toString());
+				
 				ExecuteWatchdog watchdog = new ExecuteWatchdog(1000000);
 				DefaultExecutor executor = new DefaultExecutor();
 				String workingDirectory = System.getProperty("user.dir");

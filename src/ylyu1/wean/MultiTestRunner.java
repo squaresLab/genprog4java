@@ -1,6 +1,9 @@
 package ylyu1.wean;
 
 import clegoues.genprog4java.fitness.JUnitTestRunner;
+
+import java.io.IOException;
+
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Request;
@@ -37,6 +40,7 @@ public class MultiTestRunner
 				}
 			}
 			
+			Flusher.initialize();
 			
 			JUnitCore runner = new JUnitCore();
 			Result r = runner.run(clazzes);
@@ -44,15 +48,27 @@ public class MultiTestRunner
 			System.out.println("[SUCCESS]:" + r.wasSuccessful());
 			System.out.println("[TOTAL]:" + r.getRunCount());
 			System.out.println("[FAILURE]:" + r.getFailureCount());
-	
+			
+			try {
+				Flusher.flushOut();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
 			for (Failure f : r.getFailures()) {
 				System.out.println(f.toString());
 				System.out.println(f.getTrace());
 			}
 	
 			System.out.println("\n" + r.getFailures().toString());
-		} finally {
+		} catch(Throwable e)
+		{
+			e.printStackTrace();
+		}
+		finally {
 			Runtime.getRuntime().exit(0);
 		}
+		
+		
 	}
 }

@@ -14,6 +14,7 @@ public class Aggregator
 		//Hashtable<Integer,PredSerial> serials = (Hashtable<Integer,PredSerial>) ois.readObject();
 		ois.close();
 		Hashtable<Integer,PredSerial> serials = Modify.allSerials;
+		System.out.println(flush.size());
 		//Scanner input = new Scanner(new File(fn+".tuo"));
 		//int lnum = 0;
 		//int lineat = -1;
@@ -85,6 +86,10 @@ public class Aggregator
 				}
 				else b[ps.serial]=0;
 			}*/
+	    }
+	    for(Byte by : b)
+	    {
+	    	System.out.println(by);
 	    }
 	    /*
 	    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fn+".tns"));

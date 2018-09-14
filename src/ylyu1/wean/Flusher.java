@@ -4,20 +4,23 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Hashtable;
 
-public class Flusher {
+public class Flusher implements Serializable {
 
-	public static HashMap<Integer, Flusher> counter = null;
+	public static Hashtable<Integer, Flusher> counter = null;
 	public static int count = 0;
 	public static boolean changed = false;
 	public static void initialize()
 	{
-		counter = new HashMap<Integer, Flusher>();
+		counter = new Hashtable<Integer, Flusher>();
 		count = 0;
 	}
 	public static void flushIn(Integer i, boolean b)
 	{
+		//System.out.println("HA!");
 		if (!counter.containsKey(i))
 		{
 			counter.put(i, new Flusher());
@@ -33,6 +36,7 @@ public class Flusher {
 	}
 	public static void flushOut() throws FileNotFoundException, IOException
 	{
+		//System.out.println("OK, should be dumping..");;
 		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("Temp.all"));
 		oos.writeObject(counter);
 		oos.flush();

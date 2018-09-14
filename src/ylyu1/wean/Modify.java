@@ -53,7 +53,7 @@ public class Modify
 				if(w.location.equals("ENTER"))
 				{
 
-					try{m.insertBefore("try{ylyu1.wean.Flusher.flushIn("+prednum+","+s+");}catch(Throwable e){ylyu1.wean.Flusher.flushIn("+prednum+",false);}");
+					try{m.insertBefore("try{ylyu1.wean.Flusher.flushIn(new Integer("+prednum+"),"+s+");}catch(Throwable e){ylyu1.wean.Flusher.flushIn(new Integer("+prednum+"),false);}");
 					//try{m.insertBefore("{System.out.print(\"\\n417417417 \");System.out.print("+s+");System.out.print(\" "+prednum+" \");}");
 						if(debug)System.out.println("good: "+s);serials.put(prednum, new PredSerial(prednum,c.getName(),m.getName(),"ENTER",s,w.posCover,w.negCover,w.line));}
 					catch(Exception e){if(debug)System.out.println("Skipped by invalid syntax: "+s+" "+e.getMessage());}
@@ -64,7 +64,7 @@ public class Modify
 					int origloc = s.indexOf("\\old(");
 					//Without orig
 					if(origloc<0){
-					try{m.insertAfter("try{ylyu1.wean.Flusher.flushIn("+prednum+","+s+");}catch(Throwable e){ylyu1.wean.Flusher.flushIn("+prednum+",false);}");
+					try{m.insertAfter("try{ylyu1.wean.Flusher.flushIn(new Integer("+prednum+"),"+s+");}catch(Throwable e){ylyu1.wean.Flusher.flushIn(new Integer("+prednum+"),false);}");
 						//try{m.insertAfter("{System.out.print(\"\\n417417417 \");System.out.print("+s+");System.out.print(\" "+prednum+" \");}");
 							if(debug)System.out.println("good: "+s);serials.put(prednum, new PredSerial(prednum,c.getName(),m.getName(),"EXIT",s,w.posCover,w.negCover,w.line));}
 						catch(Exception e){if(debug)System.out.println("Skipped by invalid syntax: "+s+" "+e.getMessage());}
@@ -81,7 +81,7 @@ public class Modify
 						{
 							m.insertBefore("try{mts"+varnum+"=new ylyu1.wean.MultiTypeStorer("+var+");}");
 							rep = replacer(s, var, varnum);
-							m.insertAfter("try{ylyu1.wean.Flusher.flushIn("+prednum+","+rep+");}catch(Throwable e){ylyu1.wean.Flusher.flushIn("+prednum+",false);}");
+							m.insertAfter("try{ylyu1.wean.Flusher.flushIn(new Integer("+prednum+"),"+rep+");}catch(Throwable e){ylyu1.wean.Flusher.flushIn(new Integer("+prednum+"),false);}");
 							if(debug)System.out.println("good: "+s);serials.put(prednum, new PredSerial(prednum,c.getName(),m.getName(),"EXIT",s,w.posCover,w.negCover,w.line));
 						}
 						catch(Exception e){if(debug)System.out.println("Skipped by invalid syntax: "+s+" "+e.getMessage());}
