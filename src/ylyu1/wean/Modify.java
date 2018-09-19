@@ -14,8 +14,12 @@ public class Modify
 		String vn = args[1];
 		boolean debug = args[2].equals("DEBUG");
 		ClassPool pool = ClassPool.getDefault();
-		ArrayList<PredGroup> classes = WeanParse.allInvariants;
+		ObjectInputStream ois = new ObjectInputStream(new FileInputStream("JUSTUSE.ywl"));
+        ArrayList<PredGroup> classes = (ArrayList<PredGroup>)ois.readObject();
+        ois.close();
 		Hashtable<Integer,PredSerial> serials = new Hashtable<Integer,PredSerial>();
+		CtClass c = null;
+		String fullName = null;
 		for(PredGroup w : classes)
 		{
 			if(w.location.equals("OBJECT"))continue;
@@ -25,12 +29,20 @@ public class Modify
 			String[] argfs = parseargs(argf); 
 			int id = w.method.substring(0,paren).lastIndexOf('.');
 			if(id<0)continue;
-			CtClass c = null;
 			CtBehavior m = null;
 			//prepares class and method
 			try{
-				if(w.method.substring(0,id).equals(fn))c = pool.get(vn);
-				else c = pool.get(w.method.substring(0,id));
+				if(c==null || w.method.substring(0,id) != fullName )
+				{
+				fullName = w.method.substring(0,id);
+				if(c!=null)
+				{
+				c.writeFile();
+				c.defrost();
+				}
+				if(fullName.equals(fn))c = pool.get(vn);
+				else c = pool.get(fullName);
+				}
 				String properName = c.getName();
 				int lastDot = properName.lastIndexOf('.');
 				if(lastDot>=0){properName=properName.substring(lastDot+1);}
@@ -89,14 +101,17 @@ public class Modify
 					}
 				}
 			}
-			c.writeFile();
-			c.defrost();
 		}
-		/*
+		if(c!=null)
+		{
+			if(debug) {System.out.println("bla");}
+		c.writeFile();
+		c.defrost();
+		}
 		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(vn+".pse"));
-		oos.writeObject(serials);
+		oos.writeObject(new Integer(prednum));
 		oos.flush();
-		oos.close();*/
+		oos.close();
 		allSerials=serials;
 	}
 	

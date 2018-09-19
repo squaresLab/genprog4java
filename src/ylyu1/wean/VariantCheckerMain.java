@@ -117,12 +117,12 @@ public class VariantCheckerMain
 				FitnessValue posFit = new FitnessValue();
 
 				try {
-					//executor.execute(command1);
-					//executor.execute(command2);
-					//executor.execute(command3);
-					String[] modifyArgs = {"MultiTestRunner", rep.getVariantFolder()+"pos"};
-					Modify.main(modifyArgs);
-					executor.execute(CommandLine.parse("java -cp "+".:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH+" ylyu1.wean.MultiTestRunner "+positiveTestsDaikonSampleArgForm));
+					executor.execute(command1);
+					executor.execute(command2);
+					executor.execute(command3);
+					//String[] modifyArgs = {"MultiTestRunner", rep.getVariantFolder()+"pos"};
+					//Modify.main(modifyArgs);
+					//executor.execute(CommandLine.parse("java -cp "+".:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH+" ylyu1.wean.MultiTestRunner "+positiveTestsDaikonSampleArgForm));
 					out.flush();
 					String output = out.toString();
 					System.out.println(output);

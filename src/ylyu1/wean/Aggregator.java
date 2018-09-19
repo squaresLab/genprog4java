@@ -5,7 +5,7 @@ import java.util.*;
 
 public class Aggregator
 {
-	
+	public static ByteStrings bs = new ByteStrings();
 	public static void main(String [] args) throws Exception
 	{
 		String fn = args[0];
@@ -13,7 +13,11 @@ public class Aggregator
 		Hashtable<Integer, Flusher> flush = (Hashtable<Integer, Flusher>) ois.readObject();
 		//Hashtable<Integer,PredSerial> serials = (Hashtable<Integer,PredSerial>) ois.readObject();
 		ois.close();
-		Hashtable<Integer,PredSerial> serials = Modify.allSerials;
+		//Hashtable<Integer,PredSerial> serials = Modify.allSerials;
+		ObjectInputStream oiss = new ObjectInputStream(new FileInputStream(fn+".pse"));
+		int max = (Integer)oiss.readObject();
+		oiss.close();
+		//int max = 100;
 		System.out.println(flush.size());
 		//Scanner input = new Scanner(new File(fn+".tuo"));
 		//int lnum = 0;
@@ -51,32 +55,16 @@ public class Aggregator
 			}
 			
 		}*/
-		Collection<PredSerial> coll = serials.values();
-		int max = -1;
-		for(PredSerial ps : coll)
-		{
-			if(ps.serial>max)max=ps.serial;
-			//System.out.println("Class: "+ps.className+"\nMethod: "+ps.method+"\nLocation: "+ps.location+"\nLine: "+ps.line+"\nPredicate: "+ps.predicate+"\nCovered_By_Positive_Tests: "+ps.posCover+"\nCovered_By_Negative_Tests: "+ps.negCover+"\nEvaluated: "+ps.total+"\nPassed: "+ps.passed+"\n");
-		}
+		//Collection<PredSerial> coll = serials.values();
 		byte[] b = new byte[max+1];
 	    for(int i = 0; i < b.length; i++)
 	    {
 	    	b[i]=2;
 	    }
 	    
-	    for(PredSerial ps : coll)
+	    for(Integer i : flush.keySet())
 	    {
-	    	if(flush.containsKey(ps.serial))
-	    	{
-	    		if(flush.get(ps.serial).passing)
-	    		{
-	    			b[ps.serial]=1;
-	    		}
-	    		else
-	    		{
-	    			b[ps.serial]=0;
-	    		}
-	    	}
+	    	if(flush.get(i).passing)b[i]=1;else b[i]=0;
 	    	/*
 	    	if(ps.total!=0)
 			{
@@ -87,10 +75,7 @@ public class Aggregator
 				else b[ps.serial]=0;
 			}*/
 	    }
-	    for(Byte by : b)
-	    {
-	    	System.out.println(by);
-	    }
+	    bs.insert(b);
 	    /*
 	    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fn+".tns"));
 		oos.writeObject(b);

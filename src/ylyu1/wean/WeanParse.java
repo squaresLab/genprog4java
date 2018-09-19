@@ -67,6 +67,10 @@ public class WeanParse
 		if(!classes.isEmpty())
 		{
 			allInvariants = classes;
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("JUSTUSE.ywl"));
+			oos.writeObject(allInvariants);
+			oos.flush();
+			oos.close();
 		}
 
 
