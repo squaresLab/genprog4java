@@ -6,6 +6,10 @@ import java.util.*;
 public class Aggregator
 {
 	public static ByteStrings bs = new ByteStrings();
+	public static void clear()
+	{
+		bs = new ByteStrings();
+	}
 	public static void main(String [] args) throws Exception
 	{
 		String fn = args[0];

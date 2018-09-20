@@ -58,11 +58,17 @@ public class VariantCheckerMain
 	
 	public static void checkInvariant(Population<? extends EditOperation> pop)
 	{
+		Aggregator.clear();
+		ArrayList<Representation<? extends EditOperation>> goodRepsForCheck = new ArrayList<Representation<? extends EditOperation>>();
+		ArrayList<Representation<? extends EditOperation>> notRepsForCheck = new ArrayList<Representation<? extends EditOperation>>();
+
 		for(Representation<? extends EditOperation> rep : pop)
 		{
 			if (rep.getAlreadyCompiled() == null || !rep.getAlreadyCompiled().getLeft())
+			{
+				notRepsForCheck.add(rep);
 				continue; //if rep is not already compiled, don't touch it and go on to the next representation
-			
+			}
 			rep.vf = rep.getVariantFolder();
 			try
 			{
@@ -119,7 +125,11 @@ public class VariantCheckerMain
 				try {
 					executor.execute(command1);
 					executor.execute(command2);
+					String[] args = {rep.getVariantFolder()+"pos"};
+					Aggregator.main(args);
 					executor.execute(command3);
+					args[0] = rep.getVariantFolder()+"neg";
+					Aggregator.main(args);
 					//String[] modifyArgs = {"MultiTestRunner", rep.getVariantFolder()+"pos"};
 					//Modify.main(modifyArgs);
 					//executor.execute(CommandLine.parse("java -cp "+".:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH+" ylyu1.wean.MultiTestRunner "+positiveTestsDaikonSampleArgForm));
@@ -129,6 +139,7 @@ public class VariantCheckerMain
 					out.reset();
 					//goodVariant.add(true);
 					rep.isGoodForCheck=true;
+					goodRepsForCheck.add(rep);
 				} catch (ExecuteException exception) {
 					//posFit.setAllPassed(false);
 					out.flush();
@@ -154,12 +165,59 @@ public class VariantCheckerMain
 			}
 		}
 		
-		try{System.out.println(Arrays.toString(analyzeResults(pop)));}catch(Exception e) {System.out.println(e.toString());}
+		Aggregator.bs.resizeAll();
+		Aggregator.bs.doubleUp();
+		
+		for(int i = 0; i < goodRepsForCheck.size(); i++)
+		{
+			Fitness.invariantCache.put(goodRepsForCheck.get(i).hashCode(), Aggregator.bs.grid.get(i));
+		}
+		
+		for(Representation<? extends EditOperation> r : notRepsForCheck)
+		{
+			Aggregator.bs.grid.add(Fitness.invariantCache.get(r.hashCode()));
+		}
+		
+		Aggregator.bs.resizeAll();
+		
+		double[] scores = Aggregator.bs.getScores();
+		
+		for(int i = 0; i < goodRepsForCheck.size(); i++)
+		{
+			if(Configuration.invariantCheckerMode==2)
+			{
+				goodRepsForCheck.get(i).setFitness(scores[i]/10*(11-turn)+goodRepsForCheck.get(i).getFitness()/10*(turn-1));
+			}
+			else 
+			{
+				goodRepsForCheck.get(i).setFitness(scores[i]);
+			}
+		}
+		
+		for(int i = 0; i < notRepsForCheck.size(); i++)
+		{
+			if(Configuration.invariantCheckerMode==2)
+			{
+				notRepsForCheck.get(i).setFitness(scores[goodRepsForCheck.size()+i]/10*(11-turn)+notRepsForCheck.get(i).getFitness()/10*(turn-1));
+			}
+			else 
+			{
+				notRepsForCheck.get(i).setFitness(scores[goodRepsForCheck.size()+i]);
+			}
+				
+		}
+		
+		System.out.println(scores.toString());
+		//try{System.out.println(Arrays.toString(analyzeResults(pop)));}catch(Exception e) {System.out.println(e.toString());}
 		//return checked;
+		
 	}
+	
+	
 	
 	public static int[] analyzeResults(Population<? extends EditOperation> pop) throws Exception
 	{
+		
 		ArrayList<byte[]> templist = new ArrayList<byte[]>();
 		ArrayList<Representation<? extends EditOperation>> repstorer = new ArrayList<Representation<? extends EditOperation>>();
 		int max = 0;

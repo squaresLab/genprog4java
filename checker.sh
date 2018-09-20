@@ -16,9 +16,6 @@ DAIKONHOME=$7
 #else
 
 #daikon setup
-DAIKONDIR=$DAIKONHOME
-JAVA_HOME=$JAVA8HOME
-source $DAIKONDIR/scripts/daikon.bashrc
 
 java -cp .:$CLASSP:$CLASSPATH:$DAIKONHOME/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar:$GP4JHOME/lib/javassist.jar ylyu1.wean.Modify MultiTestRunner $VARNAME NOTDEBUG
 

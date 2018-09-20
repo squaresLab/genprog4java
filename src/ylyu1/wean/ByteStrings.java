@@ -16,7 +16,7 @@ public class ByteStrings {
 		{
 			maxSize=size;
 		}
-		grid.set(currloc, b);
+		grid.add(b);
 		currloc++;
 	}
 	public void resizeAll()
@@ -63,5 +63,20 @@ public class ByteStrings {
 	    	}
 	    }
 	    return ret;
+	}
+	public void doubleUp()
+	{
+		ArrayList<byte[]> arr = new ArrayList<byte[]>();
+		for(int i = 0; i < grid.size(); i += 2)
+		{
+			byte[] b = new byte[maxSize*2];
+			for(int j = 0; j < maxSize; j++)
+			{
+				b[2*j] = grid.get(i)[j];
+				b[2*j+1]= grid.get(i+1)[j];
+			}
+			arr.add(b);
+		}
+		grid = arr;
 	}
 }
