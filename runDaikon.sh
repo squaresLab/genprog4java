@@ -22,3 +22,4 @@ java -cp .:$CLASSPATH:$CLASSP:$GP4JHOME/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JA
 
 java -cp $DAIKONHOME/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar daikon.Daikon --format=java MultiTestRunner.dtrace.gz > MultiTestRunner.wean
 
+java -cp .:$CLASSP ylyu1.wean.WeanParse MultiTestRunner NOTDEBUG
