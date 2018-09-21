@@ -48,8 +48,8 @@ public class Modify
 				if(lastDot>=0){properName=properName.substring(lastDot+1);}
 				if(w.method.substring(id+1,paren).equals(properName))m=c.getDeclaredConstructor(pool.get(argfs));
 				else m = c.getDeclaredMethod(w.method.substring(id+1,paren),pool.get(argfs));
-				if(w.line>-1){m.insertAt(w.line,"System.out.print(\"\\n124124124 \"+"+w.line+"+\" \");");
- 				/*m.insertAt(w.line+1,"System.out.print(\"\\n124124125 \"+"+(w.line+1)+"+\" \");");*/}
+			    //if(w.line>-1){m.insertAt(w.line,"System.out.print(\"\\n124124124 \"+"+w.line+"+\" \");");
+ 				//m.insertAt(w.line+1,"System.out.print(\"\\n124124125 \"+"+(w.line+1)+"+\" \");");*/}
 			}catch(Exception e){if(debug)System.out.println("Skipped by invalid name: "+w.method+"  "+e.getMessage());/*System.out.println(argfs[0]);*/continue;}
 			//runs through each statement
 			for(String ss : w.statements)
