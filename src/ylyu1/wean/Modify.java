@@ -40,6 +40,7 @@ public class Modify
 				c.writeFile();
 				c.defrost();
 				}
+				if(fullName.indexOf("ylyu1.wean")>=0)continue;
 				if(fullName.equals(fn))c = pool.get(vn);
 				else c = pool.get(fullName);
 				}
