@@ -142,7 +142,8 @@ public class VariantCheckerMain
 					goodRepsForCheck.add(rep);
 				} catch (ExecuteException exception) {
 					//posFit.setAllPassed(false);
-					out.flush();
+					System.out.println(exception.toString());
+					//out.flush();
 					System.out.println(out.toString());
 					throw exception;
 					
@@ -322,7 +323,7 @@ public class VariantCheckerMain
 			{
 				if (positiveTestsDaikonSampleArgForm == null || negativeTestsArgForm == null)
 					setupArgForms();
-				
+			
 				CommandLine command1 = CommandLine.parse("cp -r "+Configuration.classTestFolder+" .");
 				CommandLine command2 = CommandLine.parse("sh checker.sh "+positiveTestsDaikonSampleArgForm+" "+Configuration.libs+":.:"+Main.GP4J_HOME+"/target/classes/ origPos ORIGPOS"
 							+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
@@ -379,7 +380,7 @@ public class VariantCheckerMain
 	{
 		if (positiveTestsDaikonSampleArgForm == null || negativeTestsArgForm == null)
 			setupArgForms();
-		
+		CommandLine command0 = CommandLine.parse("cp "+Main.GP4J_HOME+"/checker.sh .");
 		CommandLine command1 = CommandLine.parse("cp "+Main.GP4J_HOME+"/runDaikon.sh .");
 		CommandLine command2 = CommandLine.parse("sh runDaikon.sh "+positiveTestsDaikonSampleArgForm+" "+Configuration.pathToNoTimeoutTests+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
 					+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
@@ -398,6 +399,7 @@ public class VariantCheckerMain
 		FitnessValue posFit = new FitnessValue();
 
 		try {
+			executor.execute(command0);
 			executor.execute(command1);
 			executor.execute(command2);
 			out.flush();
