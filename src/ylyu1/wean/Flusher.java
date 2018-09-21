@@ -15,6 +15,7 @@ public class Flusher implements Serializable {
 	public static boolean changed = false;
 	public static void initialize()
 	{
+		System.out.println("initializing...");
 		counter = new Hashtable<Integer, Flusher>();
 		count = 0;
 		System.out.println("initialized!");

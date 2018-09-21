@@ -39,7 +39,7 @@ public class MultiTestRunner
 					e.printStackTrace();
 				}
 			}
-			
+		        System.out.println("Should initialize");	
 			Flusher.initialize();
 			
 			JUnitCore runner = new JUnitCore();
