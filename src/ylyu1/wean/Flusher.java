@@ -17,10 +17,12 @@ public class Flusher implements Serializable {
 	{
 		counter = new Hashtable<Integer, Flusher>();
 		count = 0;
+		System.out.println("initialized!");
 	}
 	public static void flushIn(Integer i, boolean b)
 	{
-		//System.out.println("HA!");
+		if(counter==null)System.out.println("counter is null??");
+		System.out.println("HA!");
 		if (!counter.containsKey(i))
 		{
 			counter.put(i, new Flusher());

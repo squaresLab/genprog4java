@@ -127,6 +127,7 @@ public class VariantCheckerMain
 					executor.execute(command2);
 					String[] args = {rep.getVariantFolder()+"pos"};
 					Aggregator.main(args);
+					
 					executor.execute(command3);
 					args[0] = rep.getVariantFolder()+"neg";
 					Aggregator.main(args);
