@@ -112,13 +112,13 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		if(Configuration.invariantCheckerMode>0)
 		{
 			int trials = 0;
-			while((trials<5)&&(!(new File(Configuration.workingDir+"/MultiTestRunner.ywl")).exists()))
+			while((trials<5)&&(!(new File(Configuration.workingDir+"/JUSTUSE.ywl")).exists()))
 			{
 				System.out.println("Here we are");
 				VariantCheckerMain.runDaikon();
 				trials++;
 			}//VariantCheckerMain.checkInvariantOrig();
-			if(!(new File(Configuration.workingDir+"/MultiTestRunner.ywl")).exists())
+			if(!(new File(Configuration.workingDir+"/JUSTUSE.ywl")).exists())
 			{
 				DataProcessor.storeError("weirddaikon");
 				Runtime.getRuntime().exit(1);
