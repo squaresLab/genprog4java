@@ -15,6 +15,7 @@ public class Flusher implements Serializable {
 	public static boolean changed = false;
 	public static void initialize()
 	{
+		System.out.println("initializing...");
 		counter = new Hashtable<Integer, Flusher>();
 		count = 0;
 		System.out.println("initialized!");
@@ -22,7 +23,7 @@ public class Flusher implements Serializable {
 	public static void flushIn(Integer i, boolean b)
 	{
 		if(counter==null)System.out.println("counter is null??");
-		System.out.println("HA!");
+		//System.out.println("HA!");
 		if (!counter.containsKey(i))
 		{
 			counter.put(i, new Flusher());
