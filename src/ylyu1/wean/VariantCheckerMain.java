@@ -149,6 +149,8 @@ public class VariantCheckerMain
 					throw exception;
 					
 				} catch (Exception e) {
+					System.out.println(e.toString());
+					System.out.println(out.toString());
 				} finally {
 					if (out != null)
 						try {
