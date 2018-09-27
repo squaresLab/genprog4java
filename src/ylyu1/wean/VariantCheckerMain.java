@@ -61,12 +61,13 @@ public class VariantCheckerMain
 		Aggregator.clear();
 		ArrayList<Representation<? extends EditOperation>> goodRepsForCheck = new ArrayList<Representation<? extends EditOperation>>();
 		ArrayList<Representation<? extends EditOperation>> notRepsForCheck = new ArrayList<Representation<? extends EditOperation>>();
+		ArrayList<Representation<? extends EditOperation>> allothers = new ArrayList<Representation<? extends EditOperation>>();
 
 		for(Representation<? extends EditOperation> rep : pop)
 		{
 			if (rep.getAlreadyCompiled() == null || !rep.getAlreadyCompiled().getLeft())
 			{
-				notRepsForCheck.add(rep);
+				if(Fitness.invariantCache.get(rep.hashCode())!=null) {notRepsForCheck.add(rep);} else {allothers.add(rep);}
 				continue; //if rep is not already compiled, don't touch it and go on to the next representation
 			}
 			rep.vf = rep.getVariantFolder();
@@ -207,6 +208,19 @@ public class VariantCheckerMain
 			else 
 			{
 				notRepsForCheck.get(i).setFitness(scores[goodRepsForCheck.size()+i]);
+			}
+				
+		}
+		
+		for(int i = 0; i < allothers.size(); i++)
+		{
+			if(Configuration.invariantCheckerMode==2)
+			{
+				allothers.get(i).setFitness(allothers.get(i).getFitness()/10*(turn-1));
+			}
+			else 
+			{
+				allothers.get(i).setFitness(0.0);
 			}
 				
 		}

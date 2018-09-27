@@ -3,6 +3,7 @@ package ylyu1.wean;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
@@ -30,7 +31,7 @@ public class Testing {
 		Result r = runner.run(claz);
 		System.out.println(count);
 	}*/
-	
+	/*
 	public static void main(String [] args) throws Exception
 	{
 		String[] argg = {"JUnitTestRunner","DEBUG"};
@@ -38,6 +39,13 @@ public class Testing {
 		String[] aargg = {"egg","egg","DEBUG"};
 		Modify.main(aargg);
 		
+	}*/
+	public static void main(String[] args)
+	{
+		ArrayList<int[]> arr = new ArrayList<int[]>();
+		int[] a = {5,6,7,8,9};
+		arr.add(a);
+		System.out.println(arr.toString());
 	}
 
 }
