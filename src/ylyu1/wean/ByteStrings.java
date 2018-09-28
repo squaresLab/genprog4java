@@ -21,7 +21,8 @@ public class ByteStrings {
 	}
 	public void resizeAll()
 	{
-		for(int i = 0; i < currloc; i++)
+		System.out.println(grid);
+		for(int i = 0; i < grid.size(); i++)
 		{
 			byte[] newb = new byte[maxSize];
 			for(int j = 0; j < maxSize; j++)
