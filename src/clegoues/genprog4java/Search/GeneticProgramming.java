@@ -2,7 +2,9 @@ package clegoues.genprog4java.Search;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -138,6 +140,13 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			generationsRun++;
 			assert (initialPopulation.getPopsize() > 0);
 			
+			try {
+			
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("DATAOFSEED"+Configuration.seed+"Gen"+gen+".ddd"));
+			oos.writeObject(incomingPopulation);
+			oos.flush();
+			oos.close();
+			}catch(IOException e) {}
 			
 			if(Configuration.invariantCheckerMode>1||(Configuration.invariantCheckerMode==1&&gen==1))
 			{

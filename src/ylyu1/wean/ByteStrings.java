@@ -43,6 +43,9 @@ public class ByteStrings {
 		}
 		return ret;
 	}
+	public int[] getRaw() {
+		return Fitness.getStringDiffScore(grid);
+	}
 	public double[] getScores() 
 	{
 		int[] raw = Fitness.getStringDiffScore(grid);

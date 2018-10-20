@@ -186,17 +186,20 @@ public class VariantCheckerMain
 		Aggregator.bs.resizeAll();
 		
 		double[] scores = Aggregator.bs.getScores();
+		int[] raw = Aggregator.bs.getRaw();
 		
 		for(int i = 0; i < goodRepsForCheck.size(); i++)
 		{
+			
 			if(Configuration.invariantCheckerMode==2)
 			{
 				goodRepsForCheck.get(i).setFitness(scores[i]/10*(11-turn)+goodRepsForCheck.get(i).getFitness()/10*(turn-1));
 			}
-			else 
+			else if(Configuration.invariantCheckerMode==3)
 			{
 				goodRepsForCheck.get(i).setFitness(scores[i]);
 			}
+			goodRepsForCheck.get(i).diversity = raw[i]; 
 		}
 		
 		for(int i = 0; i < notRepsForCheck.size(); i++)
@@ -205,23 +208,26 @@ public class VariantCheckerMain
 			{
 				notRepsForCheck.get(i).setFitness(scores[goodRepsForCheck.size()+i]/10*(11-turn)+notRepsForCheck.get(i).getFitness()/10*(turn-1));
 			}
-			else 
+			else if(Configuration.invariantCheckerMode==3)
 			{
 				notRepsForCheck.get(i).setFitness(scores[goodRepsForCheck.size()+i]);
 			}
+			notRepsForCheck.get(i).diversity = raw[goodRepsForCheck.size()+i];
 				
 		}
 		
 		for(int i = 0; i < allothers.size(); i++)
 		{
+			
 			if(Configuration.invariantCheckerMode==2)
 			{
 				allothers.get(i).setFitness(allothers.get(i).getFitness()/10*(turn-1));
 			}
-			else 
+			else if(Configuration.invariantCheckerMode==3)
 			{
 				allothers.get(i).setFitness(0.0);
 			}
+			allothers.get(i).diversity = 0;
 				
 		}
 		
@@ -399,7 +405,7 @@ public class VariantCheckerMain
 			setupArgForms();
 		CommandLine command0 = CommandLine.parse("cp "+Main.GP4J_HOME+"/checker.sh .");
 		CommandLine command1 = CommandLine.parse("cp "+Main.GP4J_HOME+"/runDaikon.sh .");
-		CommandLine command2 = CommandLine.parse("sh runDaikon.sh "+positiveTestsDaikonSampleArgForm+" "+Configuration.pathToNoTimeoutTests+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
+		CommandLine command2 = CommandLine.parse("bash runDaikon.sh "+positiveTestsDaikonSampleArgForm+" "+Configuration.pathToNoTimeoutTests+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
 					+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
 		
 		//System.out.println("command: " + command2.toString());

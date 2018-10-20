@@ -16,6 +16,9 @@ DAIKONHOME=$5
 #daikon setup
 DAIKONDIR=$DAIKONHOME
 JAVA_HOME=$JAVA8HOME
+
+echo $DAIKONDIR
+
 source $DAIKONDIR/scripts/daikon.bashrc
 
 java -cp .:$CLASSPATH:$CLASSP:$GP4JHOME/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar daikon.Chicory --ppt-omit-pattern=junit\. --ppt-omit-pattern=proxy\. ylyu1.wean.MultiTestRunner $FILENAME

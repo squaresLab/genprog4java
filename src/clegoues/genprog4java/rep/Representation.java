@@ -71,6 +71,8 @@ Comparable<Representation<G>> {
 	protected transient Logger logger = Logger.getLogger(Representation.class);
 
 	protected Localization localization = null;
+	
+	public int diversity;
 
 	protected String variantFolder = "";
 

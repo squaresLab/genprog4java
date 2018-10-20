@@ -37,6 +37,7 @@ import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.INT;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -54,7 +55,7 @@ import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
 
-public class Population<G extends EditOperation> implements Iterable<Representation<G>>{
+public class Population<G extends EditOperation> implements Iterable<Representation<G>>, Serializable{
 
 	protected static Logger logger = Logger.getLogger(Fitness.class);
 	
