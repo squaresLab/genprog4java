@@ -111,7 +111,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		
 		// Step 0: run daikon
 		System.out.println("mode: "+Configuration.invariantCheckerMode);
-		if(Configuration.invariantCheckerMode>0)
+		if(/*Configuration.invariantCheckerMode>0*/true)
 		{
 			int trials = 0;
 			while((trials<5)&&(!(new File(Configuration.workingDir+"/JUSTUSE.ywl")).exists()))
@@ -148,12 +148,12 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			oos.close();
 			}catch(IOException e) {}
 			
-			if(Configuration.invariantCheckerMode>1||(Configuration.invariantCheckerMode==1&&gen==1))
-			{
+			//if(Configuration.invariantCheckerMode>1||(Configuration.invariantCheckerMode==1&&gen==1))
+			//{
 				//if(gen==1) {
 				// Step 0.5: Check Invariant
 				VariantCheckerMain.checkInvariant(incomingPopulation);//}
-			}
+			//}
 			
 			ArrayList<Double> fitscores = new ArrayList<Double>();
 			for(Representation<G> item : incomingPopulation)
