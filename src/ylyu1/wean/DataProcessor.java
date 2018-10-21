@@ -73,7 +73,7 @@ public class DataProcessor
 						valid++;
 					}
 				}
-				plateau+=((double)score)/((double)valid);
+				plateau+=((double)score)/((double)valid+0.000000001);
 			}
 			plateau/=result.fitscores.size();
 			System.out.println(dataset+" "+bugnum+" "+modenum+" "+seednum+" "+result.repair+" "+result.variant+" "+plateau);
