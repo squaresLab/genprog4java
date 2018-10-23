@@ -2,7 +2,9 @@ package clegoues.genprog4java.Search;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -109,7 +111,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		
 		// Step 0: run daikon
 		System.out.println("mode: "+Configuration.invariantCheckerMode);
-		if(Configuration.invariantCheckerMode>0)
+		if(/*Configuration.invariantCheckerMode>0*/true)
 		{
 			int trials = 0;
 			while((trials<5)&&(!(new File(Configuration.workingDir+"/JUSTUSE.ywl")).exists()))
@@ -138,13 +140,20 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			generationsRun++;
 			assert (initialPopulation.getPopsize() > 0);
 			
+			try {
 			
-			if(Configuration.invariantCheckerMode>1||(Configuration.invariantCheckerMode==1&&gen==1))
-			{
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("DATAOFSEED"+Configuration.seed+"Gen"+gen+".ddd"));
+			oos.writeObject(incomingPopulation);
+			oos.flush();
+			oos.close();
+			}catch(IOException e) {}
+			
+			//if(Configuration.invariantCheckerMode>1||(Configuration.invariantCheckerMode==1&&gen==1))
+			//{
 				//if(gen==1) {
 				// Step 0.5: Check Invariant
 				VariantCheckerMain.checkInvariant(incomingPopulation);//}
-			}
+			//}
 			
 			ArrayList<Double> fitscores = new ArrayList<Double>();
 			for(Representation<G> item : incomingPopulation)

@@ -37,7 +37,9 @@ import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.INT;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -54,7 +56,7 @@ import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
 
-public class Population<G extends EditOperation> implements Iterable<Representation<G>>{
+public class Population<G extends EditOperation> implements Iterable<Representation<G>>, Serializable{
 
 	protected static Logger logger = Logger.getLogger(Fitness.class);
 	
@@ -266,6 +268,12 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	public void add (Representation<G> newItem) {
 		population.add(newItem);
 	}
+	
+	public void addAll (Collection<Representation<G>> newItems)
+	{
+		for(Representation<G> r : newItems)
+			add(r);
+	}
 
 	/* Crossover is an operation on more than one variant, which is why it
 			appears here.  We currently have one-point crossover implemented on
@@ -427,7 +435,22 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		System.out.println("Ending pop: "+this.population.size());
 
 	}
+	
+	public Population<G> copy()
+	{
+		ArrayList<Representation<G>> newPop = new ArrayList<Representation<G>>(this.size());
+		for(Representation<G> r : this.population)
+			newPop.add(r.copy());
+		return new Population<G>(newPop);
+	}
 
-
-
+	public static <G extends EditOperation> Population<G> union(Population<G> a, Population<G> b)
+	{
+		ArrayList<Representation<G>> newPop = new ArrayList<Representation<G>>(a.size() + b.size());
+		for(Representation<G> r : a.population)
+			newPop.add(r.copy());
+		for(Representation<G> r : b.population)
+			newPop.add(r.copy());
+		return new Population<G>(newPop);
+	}
 }

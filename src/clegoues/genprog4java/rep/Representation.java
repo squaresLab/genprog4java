@@ -71,8 +71,13 @@ Comparable<Representation<G>> {
 	protected transient Logger logger = Logger.getLogger(Representation.class);
 
 	protected Localization localization = null;
+	
+	public int diversity;
 
 	protected String variantFolder = "";
+	
+	private int dominationRank = -1; //used for NSGAII
+	private double crowdingDistance = -1; //used for NSGAII
 
 	public Representation() {
 	}
@@ -80,6 +85,14 @@ Comparable<Representation<G>> {
 	public Representation(ArrayList<G> genome2) {
 		this.setGenome(new ArrayList<G>(((List<G>) genome2)));
 	}
+	
+	public int getDominationRank() { return dominationRank; } //used for NSGAII
+	
+	public void setDominationRank(int rank) { dominationRank = rank; } //used for NSGAII
+	
+	public double getCrowdingDistance() { return crowdingDistance; } //used for NSGAII
+	
+	public void setCrowdingDistance(double dist) { crowdingDistance = dist; } //used for NSGAII
 
 	public String getName() {
 		String result = "";

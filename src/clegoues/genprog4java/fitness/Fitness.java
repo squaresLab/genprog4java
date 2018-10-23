@@ -185,7 +185,7 @@ public class Fitness {
 	private static int numNegativeTests;
 
 	// persistent test cache
-	private static HashMap<Integer, HashMap<TestCase, FitnessValue>> fitnessCache = new HashMap<Integer, HashMap<TestCase, FitnessValue>>();
+	public static HashMap<Integer, HashMap<TestCase, FitnessValue>> fitnessCache = new HashMap<Integer, HashMap<TestCase, FitnessValue>>();
 	public static HashMap<Integer, byte[]> invariantCache = new HashMap<Integer, byte[]>();
 	// FIXME: add some kind of runtime hook to serialize if the process gets killed prematurely.
 	public static void serializeTestCache() {
@@ -263,7 +263,7 @@ public class Fitness {
 		restSample = new ArrayList<TestCase>();
 		Fitness.deserializeTestCache();
 
-		}
+	}
 
 
 	/**
