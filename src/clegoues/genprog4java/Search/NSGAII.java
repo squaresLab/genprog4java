@@ -1,6 +1,7 @@
 package clegoues.genprog4java.Search;
 
 import java.io.ByteArrayOutputStream;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 import ylyu1.wean.VariantCheckerMain;
+import ylyu1.wean.DataProcessor;
 
 public class NSGAII<G extends EditOperation> extends Search<G> {
 	private static final int P_DOMINATES_Q = -1;
