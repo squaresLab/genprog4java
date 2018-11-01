@@ -78,6 +78,8 @@ Comparable<Representation<G>> {
 	
 	private int dominationRank = -1; //used for NSGAII
 	private double crowdingDistance = -1; //used for NSGAII
+	private int numNegTestsPassed = -1; //used for NSGAII
+	private int numSampledPosTestsPassed = -1; //used for NSGAII
 
 	public Representation() {
 	}
@@ -93,6 +95,14 @@ Comparable<Representation<G>> {
 	public double getCrowdingDistance() { return crowdingDistance; } //used for NSGAII
 	
 	public void setCrowdingDistance(double dist) { crowdingDistance = dist; } //used for NSGAII
+
+	public int getNumNegTestsPassed() {return numNegTestsPassed;}
+
+	public void setNumNegTestsPassed(int numNegTestsPassed) {this.numNegTestsPassed = numNegTestsPassed;}
+
+	public int getNumSampledPosTestsPassed() {return numSampledPosTestsPassed;}
+
+	public void setNumSampledPosTestsPassed(int numSampledPosTestsPassed) {this.numSampledPosTestsPassed = numSampledPosTestsPassed;}
 
 	public String getName() {
 		String result = "";

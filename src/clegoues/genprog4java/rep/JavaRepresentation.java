@@ -506,6 +506,12 @@ CachingRepresentation<JavaEditOperation> {
 	public JavaRepresentation copy() {
 		JavaRepresentation copy = new JavaRepresentation(
 				this.getGenome(), this.localization);
+		copy.diversity = this.diversity;
+		copy.setDominationRank(getDominationRank());
+		copy.setCrowdingDistance(getCrowdingDistance());
+		copy.setNumSampledPosTestsPassed(getNumSampledPosTestsPassed());
+		copy.setNumNegTestsPassed(getNumNegTestsPassed());
+		//copy.setFitness(this.getFitness()); //don't copy fitness, will cause problems, as -1 is used as a sentinel value
 		return copy;
 	}
 
