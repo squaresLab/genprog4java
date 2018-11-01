@@ -42,7 +42,6 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 	}
 	
 	
-	//copied from GeneticProgramming
 	/*
 	 * prepares for GA by registering available mutations (including templates
 	 * if applicable) and reducing the search space, and then generates the
@@ -80,24 +79,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 			initialPopulation.add(newItem);
 		}
 
-		//i'm keeping this for the sake of compiling & moving mutants & determining # of test cases passed
-		for (Representation<G> item : initialPopulation) {
-			if (fitnessEngine.testFitness(0, item)) {
-				this.noteSuccess(item, original, 0);
-				if(!continueSearch) {
-					throw new RepairFoundException();
-				}
-			}
-			copyClassFilesIntoOutputDir(item); //relies on testFitness compiling the Representation item
-		}
-		
-		//set each mutant's fitness equal to the reverse of its domination rank
-		List<List<Representation<G>>> nonDomFronts = fastNonDominatedSort(initialPopulation, objectivesToTest, 0);
-		int numFronts = nonDomFronts.size();
-		for(Representation<G> r : initialPopulation)
-		{
-			r.setFitness(numFronts - r.getDominationRank());
-		}
+		setupPopulation(initialPopulation, original); //compile mutants & check invariants
 		
 		return initialPopulation;
 	}
@@ -129,40 +111,36 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		
 		Population<G> parentPopulation = this.initialize(original, initialPopulation);
 		
-		int gen = 1;
 		/* for gen=1, assign each representation a fitness score based on the
 		 * nondomination level of each representation, then use tournament
 		 * selection, recombination, & mutation to create an initial offspring population
 		 */
-
-		while(true) //condition used to be gen < Search.generations
-		{
-			Population<G> offspringPopulation = parentPopulation.copy();
-			offspringPopulation.selection(offspringPopulation.getPopsize());
-			offspringPopulation.crossover(original);
-			ArrayList<Representation<G>> newlist = new ArrayList<Representation<G>>();
-			for (Representation<G> item : offspringPopulation) {
-				
-				Representation<G> newItem =item.copy();
-				this.mutate(newItem);
-				newlist.add(newItem);
-			}
-			offspringPopulation.getPopulation().addAll(newlist);
-			//i'm keeping this for the sake of compiling & moving mutants & determining # of test cases passed
-			for (Representation<G> item : initialPopulation) {
-				if (fitnessEngine.testFitness(0, item)) {
-					this.noteSuccess(item, original, 0);
-					if(!continueSearch) {
-						throw new RepairFoundException();
-					}
-				}
-				copyClassFilesIntoOutputDir(item); //relies on testFitness compiling the Representation item
-			}
-			//offspring population is now prepared
 		
-			gen++;
-			if(gen == Search.generations) break;
+		Population<G> offspringPopulation = parentPopulation.copy();
+		offspringPopulation.selection(offspringPopulation.getPopsize(),
+				(rep1, rep2) -> (new Integer(rep1.getDominationRank())).compareTo(rep2.getDominationRank()), //remember with domination ranks, lower is preferred, so we want to sort from low to high rank
+				(rep) -> rep.getVariantFolder() + " Domination Rank: " + rep.getDominationRank() 
+				+ " (Sampled) Positive Tests: " + rep.getNumSampledPosTestsPassed() 
+				+ " Negative Tests: " + rep.getNumNegTestsPassed() 
+				+ " Invariant Diversity: " + rep.diversity
+				);
+		offspringPopulation.crossover(original);
+		ArrayList<Representation<G>> newlist = new ArrayList<Representation<G>>();
+		for (Representation<G> item : offspringPopulation) {
 			
+			Representation<G> newItem =item.copy();
+			this.mutate(newItem);
+			newlist.add(newItem);
+		}
+		offspringPopulation.getPopulation().addAll(newlist);
+		
+		setupPopulation(offspringPopulation, original);
+		//offspring population is now prepared
+		
+		int gen = 1;
+		
+		while(gen < Search.generations)
+		{	
 			Population<G> mergedPop = Population.union(parentPopulation, offspringPopulation);
 			List<List<Representation<G>>> nonDomFronts = fastNonDominatedSort(mergedPop, objectivesToTest, gen);
 			Population<G> nextGenParentPop = new Population<G>();
@@ -193,6 +171,32 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 				nextGenParentPop.addAll(nextFront.subList(nextFront.size() - stillNeed, nextFront.size()));
 			}
 			parentPopulation = nextGenParentPop;
+			
+			
+			offspringPopulation = parentPopulation.copy();
+			offspringPopulation.selection(offspringPopulation.getPopsize(),
+					(rep1, rep2) -> { //high preference comes first
+						int dominationComparison = (new Integer(rep1.getDominationRank())).compareTo(rep2.getDominationRank()); //for domination rank, lower should come first
+						if (dominationComparison != 0) return dominationComparison;
+						else return -1 * (new Double(rep1.getCrowdingDistance())).compareTo(rep2.getCrowdingDistance()); //for crowding distance, higher should come first
+					},
+					(rep) -> rep.getVariantFolder() + " Domination Rank: " + rep.getDominationRank() 
+					+ " Crowding Distance: " + rep.getCrowdingDistance()
+					+ " (Sampled) Positive Tests: " + rep.getNumSampledPosTestsPassed() 
+					+ " Negative Tests: " + rep.getNumNegTestsPassed() 
+					+ " Invariant Diversity: " + rep.diversity
+					);
+			offspringPopulation.crossover(original);
+			newlist = new ArrayList<Representation<G>>();
+			for (Representation<G> item : offspringPopulation) {
+				
+				Representation<G> newItem =item.copy();
+				this.mutate(newItem);
+				newlist.add(newItem);
+			}
+			offspringPopulation.getPopulation().addAll(newlist);
+			setupPopulation(offspringPopulation, original);
+			gen++;
 		}
 	}
 	
@@ -374,5 +378,23 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	
+	private void setupPopulation(Population<G> population, Representation<G> original) throws RepairFoundException
+	{
+		//compile mutants, move them into the output directory, and records num of passing test cases
+		for (Representation<G> item : population) {
+			if (fitnessEngine.testFitness(0, item)) {
+				this.noteSuccess(item, original, 0);
+				if(!continueSearch) {
+					throw new RepairFoundException();
+				}
+			}
+			copyClassFilesIntoOutputDir(item); //relies on testFitness compiling the Representation item
+		}
+		
+		//check invariants
+		VariantCheckerMain.checkInvariant(population);
 	}
 }

@@ -53,6 +53,7 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
+import clegoues.genprog4java.rep.RepMessageGenerator;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
 
@@ -233,6 +234,47 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		return population.get(0).copy(); // FIXME: this should never happen, right?
 	}
 	
+	/**
+	 * A generalized version of the selectOne function with support for a custom comparator
+	 * Originally written for NSGAII
+	 * @param comparator a comparator that will sort representations in descending order of fitness/favorability.
+	 * The comparator should return a positive value if the second representation is more favorable than the first representation, and vice versa.
+	 * @return A selected element
+	 */
+	private Representation<G> selectOne(Comparator<Representation<G>> comparator, RepMessageGenerator<G> messageGen)
+	{
+		Collections.shuffle(population);
+		List<Representation<G>> pool = population.subList(0, tournamentK);
+		Comparator<Representation<G>> myComp = comparator; // we sort in descending order by fitness
+		TreeSet<Representation<G>> sorted = new TreeSet<Representation<G>>(myComp);
+		sorted.addAll(pool);
+		double step = 0.0;
+		System.out.println("Enter selecting for loop");
+		for(Representation<G> indiv : sorted)System.out.println(messageGen.getMessage(indiv));
+		for(Representation<G> indiv : sorted) {
+			
+			boolean taken = false;
+			if(this.tournamentP >= 1.0) {
+				taken = true;
+			} else {
+				double requiredProb = this.tournamentP * Math.pow((1.0 - this.tournamentP), step);
+				double random = Configuration.randomizer.nextDouble();
+				if(random <= requiredProb) {
+					taken = true;
+				}
+			}
+			if(taken) {
+				System.out.println("Selected: "+indiv.getVariantFolder()+" hash: "+indiv.hashCode());
+				//System.out.println("But: "+indiv.copy().hashCode());
+				return indiv.copy();	
+			} else {
+				step += 1.0;
+			}
+		}
+		return population.get(0).copy(); // FIXME: this should never happen, right?
+	}
+	
+	
 	private ArrayList<Representation<G>> tournamentSelection(int desired) {
 		for(Representation<G> rep : this.getPopulation())
 		{
@@ -260,6 +302,38 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 
 		for(int i = 0 ; i < desired; i++) {
 			result.add(selectOne());
+		}
+		return result; 
+	}
+	
+	
+	private ArrayList<Representation<G>> tournamentSelection(int desired, Comparator<Representation<G>> comparator, RepMessageGenerator<G> messageGen) {
+		for(Representation<G> rep : this.getPopulation())
+		{
+			System.out.println(messageGen.getMessage(rep));
+		}
+		assert(desired >= 0);
+		assert(tournamentK >= 1);
+		assert(this.tournamentP >= 0.0);
+		assert(this.tournamentP <= 1.0) ;
+		assert(population.size() >= 0);
+		ArrayList<Representation<G>> result = new ArrayList<Representation<G>>();
+
+		//remove the uncompiling ones from the population
+		for(int i = 0; i< population.size(); ++i) {
+			Representation<G> indiv = population.get(i);
+			boolean successfullyCompiled = indiv.compile(indiv.getName(), indiv.getVariantFolder());
+			if(!successfullyCompiled){
+				//replace that variant with the original
+				population.remove(indiv);
+				//first element of the population should be the original, which should always compile
+				Representation<G> toInsert = population.get(0).copy();
+				population.add(toInsert);
+			}
+		}
+
+		for(int i = 0 ; i < desired; i++) {
+			result.add(selectOne(comparator, messageGen));
 		}
 		return result; 
 	}
@@ -432,6 +506,13 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	public void selection(int popsize) {
 		System.out.println("Beginning pop: "+this.population.size());
 		this.population = this.tournamentSelection(popsize);
+		System.out.println("Ending pop: "+this.population.size());
+
+	}
+	
+	public void selection(int popsize, Comparator<Representation<G>> comparator, RepMessageGenerator<G> messageGen) {
+		System.out.println("Beginning pop: "+this.population.size());
+		this.population = this.tournamentSelection(popsize, comparator, messageGen);
 		System.out.println("Ending pop: "+this.population.size());
 
 	}
