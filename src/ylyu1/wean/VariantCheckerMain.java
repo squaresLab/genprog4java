@@ -110,13 +110,13 @@ public class VariantCheckerMain
 				
 				
 				//System.out.println("command: " + command2.toString());
-				ExecuteWatchdog watchdog = new ExecuteWatchdog(10*60000);
+				ExecuteWatchdog watchdog = new ExecuteWatchdog(600);
 				//timeout after 10 minutes, shouldn't be needed as there's timeouts in the JUnit tests. This hard timeout should be avoided as it can create zombie JUnit processes
 				//thus, this timeout should be short
 				DefaultExecutor executor = new DefaultExecutor();
 				String workingDirectory = System.getProperty("user.dir");
 				executor.setWorkingDirectory(new File(workingDirectory));
-				executor.setWatchdog(watchdog);
+				//executor.setWatchdog(watchdog);
 
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
 				executor.setExitValue(0);
@@ -126,6 +126,7 @@ public class VariantCheckerMain
 
 				try {
 					executor.execute(command1);
+					executor.setWatchdog(watchdog);
 					executor.execute(command2);
 					String[] args = {rep.getVariantFolder()+"pos"};
 					Aggregator.main(args);

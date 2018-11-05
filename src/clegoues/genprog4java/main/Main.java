@@ -84,6 +84,7 @@ public class Main {
 	 */
 	public static void main(String[] args) throws IOException,
 	UnexpectedCoverageResultException {
+                for(int i = 0; i < 20; i++) System.out.println("Testing...");
 		Search searchEngine = null;
 		Representation baseRep = null;
 		Fitness fitnessEngine = null;
