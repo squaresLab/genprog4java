@@ -57,7 +57,7 @@ public class MultiTestRunner
 			
 			for (Failure f : r.getFailures()) {
 				System.out.println(f.toString());
-				//System.out.println(f.getTrace());
+				System.out.println(f.getTrace());
 			}
 	
 			System.out.println("\n" + r.getFailures().toString());
