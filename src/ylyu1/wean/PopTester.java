@@ -12,7 +12,7 @@ import clegoues.genprog4java.Search.Population;
 
 public class PopTester {
 	public static void main(String [] args) throws FileNotFoundException, IOException, ClassNotFoundException {
-		ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Temp.all"));
+		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(args[0]));
 		Population<EditOperation> pop = (Population<EditOperation>) ois.readObject();
 		ois.close();
 		for(Representation<EditOperation> rep : pop) {
