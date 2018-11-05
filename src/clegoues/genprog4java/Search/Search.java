@@ -147,6 +147,9 @@ public abstract class Search<G extends EditOperation> {
 			.withHelp( "the search strategy to employ" )
 			.inGroup( "Search Parameters" )
 			.build();
+	
+	
+	
 	protected Fitness fitnessEngine = null;
 
 	public Search(Fitness engine) {

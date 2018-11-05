@@ -185,7 +185,7 @@ public class Fitness {
 	private static int numNegativeTests;
 
 	// persistent test cache
-	private static HashMap<Integer, HashMap<TestCase, FitnessValue>> fitnessCache = new HashMap<Integer, HashMap<TestCase, FitnessValue>>();
+	public static HashMap<Integer, HashMap<TestCase, FitnessValue>> fitnessCache = new HashMap<Integer, HashMap<TestCase, FitnessValue>>();
 	public static HashMap<Integer, byte[]> invariantCache = new HashMap<Integer, byte[]>();
 	// FIXME: add some kind of runtime hook to serialize if the process gets killed prematurely.
 	public static void serializeTestCache() {
@@ -263,7 +263,7 @@ public class Fitness {
 		restSample = new ArrayList<TestCase>();
 		Fitness.deserializeTestCache();
 
-		}
+	}
 
 
 	/**
@@ -560,7 +560,9 @@ public class Fitness {
 	 */
 	private Pair<Double,Double> testFitnessSample(Representation rep, double fac) {
 		int numNegPassed = this.testPassCount(rep,false, Fitness.negativeTests);
+		rep.setNumNegTestsPassed(numNegPassed);
 		int numPosPassed = this.testPassCount(rep,false, Fitness.testSample);
+		rep.setNumSampledPosTestsPassed(numPosPassed);
 		int numRestPassed = 0;
 		if((numNegPassed == Fitness.numNegativeTests) &&
 				(numPosPassed == testSample.size())) {
@@ -582,16 +584,22 @@ public class Fitness {
 	private Pair<Double, Double> testFitnessFull(Representation rep,
 			double fac) {
 		double fitness = 0.0;
+		int numPosTestsPassed = 0;
 		for (TestCase thisTest : Fitness.positiveTests) {
 			if (singleTestCasePass(rep, thisTest)) {
 				fitness += 1.0;
+				numPosTestsPassed++;
 			}
 		}
+		rep.setNumSampledPosTestsPassed(numPosTestsPassed);
+		int numNegTestsPassed = 0;
 		for (TestCase thisTest : Fitness.negativeTests) {
 			if (singleTestCasePass(rep, thisTest)) {
 				fitness += fac;
+				numNegTestsPassed++;
 			}
 		}
+		rep.setNumNegTestsPassed(numNegTestsPassed);
 		return  Pair.of(fitness, fitness);
 	}
 
