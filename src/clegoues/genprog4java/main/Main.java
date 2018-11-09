@@ -89,6 +89,7 @@ public class Main {
 	 */
 	public static void main(String[] args) throws IOException,
 	UnexpectedCoverageResultException {
+		
 		Search searchEngine = null;
 		Representation baseRep = null;
 		Fitness fitnessEngine = null;
@@ -125,6 +126,11 @@ public class Main {
 		ConfigurationBuilder.parseArgs( origArgs );
 		Configuration.saveOrLoadTargetFiles();
 		ConfigurationBuilder.storeProperties();
+		
+		if(Configuration.invariantCheckerMode == 4)
+		{
+			Search.searchStrategy = "nsgaii";
+		}
 
 		File workDir = new File(Configuration.outputDir);
 		if (!workDir.exists())

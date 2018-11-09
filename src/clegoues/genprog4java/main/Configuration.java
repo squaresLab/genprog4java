@@ -212,14 +212,6 @@ public class Configuration {
 					+ "4 - use NSGA-II: internally equivalent to using mode 0 and setting the search strategy to nsgaii")
 			.build();
 	
-	static
-	{
-		if(invariantCheckerMode == 4)
-		{
-			Search.searchStrategy = "nsgaii";
-			invariantCheckerMode = 0;
-		}
-	}
 
 	private Configuration() {}
 
