@@ -71,6 +71,7 @@ public class VariantCheckerMain
 				continue; //if rep is not already compiled, don't touch it and go on to the next representation
 			}
 			rep.vf = rep.getVariantFolder();
+			long startTime = System.currentTimeMillis();
 			try
 			{
 				if(rep==null)
@@ -164,6 +165,7 @@ public class VariantCheckerMain
 			{
 				System.out.println("ERROR!!!!!! "+rep.vf);
 				e.printStackTrace();
+				System.out.println("TIME: "+(System.currentTimeMillis()-startTime));
 				//goodVariant.add(false);
 				rep.isGoodForCheck=false;
 				if(!rep.vf.equals(""))Fitness.invariantCache.put(rep.hashCode(), null);
