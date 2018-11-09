@@ -140,6 +140,7 @@ public abstract class Search<G extends EditOperation> {
 
 
 	//public static String searchStrategy = "ga";
+	//If invariantCheckerMode is set to 4, searchStrategy will be overridden and set to "nsgaii"
 	public static String searchStrategy = ConfigurationBuilder.of( STRING )
 			.withVarName( "searchStrategy" )
 			.withFlag( "search" )
