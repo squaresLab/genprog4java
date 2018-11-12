@@ -117,6 +117,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		 */
 		
 		Population<G> offspringPopulation = parentPopulation.copy();
+		fastNonDominatedSort(offspringPopulation, objectivesToTest, 0); //just need to set domination ranks for representations, no need to actually use the fronts
 		offspringPopulation.selection(offspringPopulation.getPopsize(),
 				(rep1, rep2) -> (new Integer(rep1.getDominationRank())).compareTo(rep2.getDominationRank()), //remember with domination ranks, lower is preferred, so we want to sort from low to high rank
 				(rep) -> rep.getVariantName() + " Domination Rank: " + rep.getDominationRank() 
