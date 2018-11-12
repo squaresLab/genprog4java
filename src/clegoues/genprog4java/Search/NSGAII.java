@@ -119,7 +119,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		Population<G> offspringPopulation = parentPopulation.copy();
 		offspringPopulation.selection(offspringPopulation.getPopsize(),
 				(rep1, rep2) -> (new Integer(rep1.getDominationRank())).compareTo(rep2.getDominationRank()), //remember with domination ranks, lower is preferred, so we want to sort from low to high rank
-				(rep) -> rep.getVariantFolder() + " Domination Rank: " + rep.getDominationRank() 
+				(rep) -> rep.getVariantName() + " Domination Rank: " + rep.getDominationRank() 
 				+ " (Sampled) Positive Tests: " + rep.getNumSampledPosTestsPassed() 
 				+ " Negative Tests: " + rep.getNumNegTestsPassed() 
 				+ " Invariant Diversity: " + rep.diversity
@@ -180,7 +180,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 						if (dominationComparison != 0) return dominationComparison;
 						else return -1 * (new Double(rep1.getCrowdingDistance())).compareTo(rep2.getCrowdingDistance()); //for crowding distance, higher should come first
 					},
-					(rep) -> rep.getVariantFolder() + " Domination Rank: " + rep.getDominationRank() 
+					(rep) -> rep.getVariantName() + " Domination Rank: " + rep.getDominationRank() 
 					+ " Crowding Distance: " + rep.getCrowdingDistance()
 					+ " (Sampled) Positive Tests: " + rep.getNumSampledPosTestsPassed() 
 					+ " Negative Tests: " + rep.getNumNegTestsPassed() 
