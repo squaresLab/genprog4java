@@ -47,6 +47,7 @@ import org.apache.log4j.Logger;
 
 import clegoues.genprog4java.Search.BruteForce;
 import clegoues.genprog4java.Search.GeneticProgramming;
+import clegoues.genprog4java.Search.NSGAII;
 import clegoues.genprog4java.Search.OracleSearch;
 import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.RandomSingleEdit;
@@ -54,6 +55,10 @@ import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.fitness.TestCase.TestType;
+import clegoues.genprog4java.fitness.Objective;
+import clegoues.genprog4java.fitness.PositiveTestCasesObjective;
+import clegoues.genprog4java.fitness.NegativeTestCasesObjective;
+import clegoues.genprog4java.fitness.InvariantDiversityObjective;
 import clegoues.genprog4java.localization.DefaultLocalization;
 import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.localization.UnexpectedCoverageResultException;
@@ -84,7 +89,6 @@ public class Main {
 	 */
 	public static void main(String[] args) throws IOException,
 	UnexpectedCoverageResultException {
-                for(int i = 0; i < 20; i++) System.out.println("Testing...");
 		Search searchEngine = null;
 		Representation baseRep = null;
 		Fitness fitnessEngine = null;
@@ -121,6 +125,11 @@ public class Main {
 		ConfigurationBuilder.parseArgs( origArgs );
 		Configuration.saveOrLoadTargetFiles();
 		ConfigurationBuilder.storeProperties();
+		
+		if(Configuration.invariantCheckerMode == 4)
+		{
+			Search.searchStrategy = "nsgaii";
+		}
 
 		File workDir = new File(Configuration.outputDir);
 		if (!workDir.exists())
@@ -155,9 +164,16 @@ public class Main {
 		break;
 		case "oracle": searchEngine = new OracleSearch<JavaEditOperation>(fitnessEngine);
 		break;
+		case "nsgaii": searchEngine = new NSGAII<JavaEditOperation>(fitnessEngine, new Objective[]{
+				new PositiveTestCasesObjective(),
+				new NegativeTestCasesObjective(),
+				new InvariantDiversityObjective()
+		});
+		break;
 		case "ga":
 		default: searchEngine = new GeneticProgramming<JavaEditOperation>(fitnessEngine);
 		break;
+			
 		}
 		incomingPopulation = new Population<JavaEditOperation>(); 
 

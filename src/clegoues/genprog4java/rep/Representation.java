@@ -75,6 +75,7 @@ Comparable<Representation<G>> {
 	public int diversity;
 
 	protected String variantFolder = "";
+	private String variantName = ""; //used for NSGAII, can be empty, see getVariantName()
 	
 	private int dominationRank = -1; //used for NSGAII
 	private double crowdingDistance = -1; //used for NSGAII
@@ -122,6 +123,21 @@ Comparable<Representation<G>> {
 	public String getVariantFolder() {
 		return this.variantFolder;
 	}
+	
+	public String getVariantName() 
+	{
+		String variantFolder = this.getVariantFolder();
+		if(variantFolder.equals(""))
+			return this.variantName;
+		else
+			return variantFolder;
+	}
+	public void setVariantName(String varName)
+	{
+		this.variantName = varName;
+	}
+	
+	
 	public abstract Representation<G> copy();
 
 	public abstract boolean getVariableLength();

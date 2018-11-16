@@ -117,9 +117,10 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		 */
 		
 		Population<G> offspringPopulation = parentPopulation.copy();
+		fastNonDominatedSort(offspringPopulation, objectivesToTest, 0); //just need to set domination ranks for representations, no need to actually use the fronts
 		offspringPopulation.selection(offspringPopulation.getPopsize(),
 				(rep1, rep2) -> (new Integer(rep1.getDominationRank())).compareTo(rep2.getDominationRank()), //remember with domination ranks, lower is preferred, so we want to sort from low to high rank
-				(rep) -> rep.getVariantFolder() + " Domination Rank: " + rep.getDominationRank() 
+				(rep) -> rep.getVariantName() + " Domination Rank: " + rep.getDominationRank() 
 				+ " (Sampled) Positive Tests: " + rep.getNumSampledPosTestsPassed() 
 				+ " Negative Tests: " + rep.getNumNegTestsPassed() 
 				+ " Invariant Diversity: " + rep.diversity
@@ -180,7 +181,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 						if (dominationComparison != 0) return dominationComparison;
 						else return -1 * (new Double(rep1.getCrowdingDistance())).compareTo(rep2.getCrowdingDistance()); //for crowding distance, higher should come first
 					},
-					(rep) -> rep.getVariantFolder() + " Domination Rank: " + rep.getDominationRank() 
+					(rep) -> rep.getVariantName() + " Domination Rank: " + rep.getDominationRank() 
 					+ " Crowding Distance: " + rep.getCrowdingDistance()
 					+ " (Sampled) Positive Tests: " + rep.getNumSampledPosTestsPassed() 
 					+ " Negative Tests: " + rep.getNumNegTestsPassed() 
@@ -218,15 +219,19 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 			orderedSolutions.get(0).setCrowdingDistance(Double.POSITIVE_INFINITY);
 			orderedSolutions.get(len-1).setCrowdingDistance(Double.POSITIVE_INFINITY);
 			double objMinVal = o.getScore(orderedSolutions.get(0), generation);
-			double objMaxVal = o.getScore(orderedSolutions.get(len-1), generation);
-			for(int i = 1; i <= len-2; i++)
+			double objMaxVal = o.getScore(orderedSolutions.get(len-1), generation);	
+			//objective o only contributes to the crowding distance if there's deviation in the objective score among the population, avoids divide by zero
+			if(objMinVal != objMaxVal)
 			{
-				Representation<G> soln = orderedSolutions.get(i);
-				Representation<G> prevSoln = orderedSolutions.get(i-1);
-				Representation<G> nextSoln = orderedSolutions.get(i+1);
-				double normObjDist = (o.getScore(nextSoln, generation) - o.getScore(prevSoln, generation)) / (objMaxVal - objMinVal);
-				double newDist = soln.getCrowdingDistance() + normObjDist;
-				soln.setCrowdingDistance(newDist);
+				for(int i = 1; i <= len-2; i++)
+				{
+					Representation<G> soln = orderedSolutions.get(i);
+					Representation<G> prevSoln = orderedSolutions.get(i-1);
+					Representation<G> nextSoln = orderedSolutions.get(i+1);
+					double normObjDist = (o.getScore(nextSoln, generation) - o.getScore(prevSoln, generation)) / (objMaxVal - objMinVal);
+					double newDist = soln.getCrowdingDistance() + normObjDist;
+					soln.setCrowdingDistance(newDist);
+				}
 			}
 		}
 	}

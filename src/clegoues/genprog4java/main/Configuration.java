@@ -51,6 +51,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jdt.core.JavaCore;
 
+import clegoues.genprog4java.Search.Search;
 import clegoues.genprog4java.java.ClassInfo;
 import clegoues.util.ConfigurationBuilder;
 import clegoues.util.GlobalUtils;
@@ -200,14 +201,17 @@ public class Configuration {
 		.build();
 
 	//public static int mode = 3;
+	//consider refactoring
 	public static int invariantCheckerMode = ConfigurationBuilder.of( INT )
 			.withVarName("invariantCheckerMode")
 			.withDefault("0")
-			.withHelp("0 - no invariant checking; "
+			.withHelp("0 - check invariants, but do not use them in the fitness function; "
 					+ "1 - invariant checking after the 0th generation only; "
 					+ "2 - use a linear combination of invariant checking results and fitness scores in all generations, influence of invariant checking decreases linearly after each generation; "
-					+ "3 - only use invariant checking results in the fitness function")
+					+ "3 - only use invariant checking results in the fitness function"
+					+ "4 - use NSGA-II: internally equivalent to using mode 0 and setting the search strategy to nsgaii")
 			.build();
+	
 
 	private Configuration() {}
 
