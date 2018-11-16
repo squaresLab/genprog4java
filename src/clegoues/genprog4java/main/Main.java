@@ -89,7 +89,6 @@ public class Main {
 	 */
 	public static void main(String[] args) throws IOException,
 	UnexpectedCoverageResultException {
-		
 		Search searchEngine = null;
 		Representation baseRep = null;
 		Fitness fitnessEngine = null;

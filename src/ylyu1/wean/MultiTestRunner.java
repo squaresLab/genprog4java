@@ -56,7 +56,7 @@ public class MultiTestRunner
 			}
 			
 			for (Failure f : r.getFailures()) {
-				System.out.println(f.toString());
+				//System.out.println(f.toString());
 				//System.out.println(f.getTrace());
 			}
 	
@@ -64,6 +64,7 @@ public class MultiTestRunner
 		} catch(Throwable e)
 		{
 			e.printStackTrace();
+			Runtime.getRuntime().exit(1);
 		}
 		finally {
 			Runtime.getRuntime().exit(0);

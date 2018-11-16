@@ -687,6 +687,7 @@ public class Fitness {
 	{
 		int base = 3; //the base of the numerical strings being processed, in the case of ternary strings: 3
 		int n = ternaryStrings.size();
+		if(n==0) return new int[0];
 		int lenOfStr = ternaryStrings.get(0).length;
 		int[][] charSimilarityMatrix = new int[lenOfStr][base];
 		int[] diversityMetrics = new int[n];
