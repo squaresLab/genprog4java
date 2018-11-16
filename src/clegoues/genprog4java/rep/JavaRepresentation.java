@@ -511,7 +511,7 @@ CachingRepresentation<JavaEditOperation> {
 		copy.setCrowdingDistance(getCrowdingDistance());
 		copy.setNumSampledPosTestsPassed(getNumSampledPosTestsPassed());
 		copy.setNumNegTestsPassed(getNumNegTestsPassed());
-		copy.setVariantName(getVariantName());
+		copy.setVariantID(getVariantID());
 		//copy.setFitness(this.getFitness()); //don't copy fitness, will cause problems, as -1 is used as a sentinel value
 		return copy;
 	}
