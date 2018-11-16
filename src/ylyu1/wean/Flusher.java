@@ -30,7 +30,7 @@ public class Flusher implements Serializable {
 		}
 		counter.get(i).in(b);
 		count++;
-		if((count== 10 || count == 100 || count == 1000 || count == 10000 || count % 25000 == 0)&&changed)
+		if((count== 10 || count == 100 || count == 1000 || count == 10000 || count % 500000 == 0)&&changed)
 		{
 			try {
 				flushOut();

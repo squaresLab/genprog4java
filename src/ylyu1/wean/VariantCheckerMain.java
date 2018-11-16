@@ -24,6 +24,7 @@ import org.apache.commons.exec.PumpStreamHandler;
 
 public class VariantCheckerMain
 {
+	public static String removeString = "org";
 	public static int turn = 0;
 	public static String debug = "NOTDEBUG"; 
 	//public final static boolean cinnamon = true;
@@ -65,6 +66,7 @@ public class VariantCheckerMain
 
 		for(Representation<? extends EditOperation> rep : pop)
 		{
+			rep.diversity=0;
 			if (rep.getAlreadyCompiled() == null || !rep.getAlreadyCompiled().getLeft())
 			{
 				if(Fitness.invariantCache.get(rep.hashCode())!=null) {notRepsForCheck.add(rep);} else {allothers.add(rep);}
@@ -90,7 +92,7 @@ public class VariantCheckerMain
 				
 				if (positiveTestsDaikonSampleArgForm == null || negativeTestsArgForm == null)
 					setupArgForms();
-				
+				/*
 				CommandLine command1 = CommandLine.parse("cp -r "+Configuration.classTestFolder+" .");
 				CommandLine command2 = CommandLine.parse("sh checker.sh "
 							+positiveTestsDaikonSampleArgForm+" "
@@ -104,34 +106,50 @@ public class VariantCheckerMain
 						+".:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH + " "
 						+ rep.getVariantFolder()+"neg" + " " + 
 						"NOTORIG" + " " 
-						+ Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
+						+ Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);*/
+
+				String classp = ".:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH;
+				String varname1 = rep.getVariantFolder()+"pos";
+				String varname2 = rep.getVariantFolder()+"neg";
 				
-				
+				CommandLine command1 = CommandLine.parse("java -cp .:"+classp+":$CLASSPATH:"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar:"+Main.GP4J_HOME+"/lib/javassist.jar ylyu1.wean.Modify MultiTestRunner "+varname1+" NOTDEBUG");				
+				CommandLine command2 = CommandLine.parse("java -cp .:"+classp+":$CLASSPATH:"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar:"+Main.GP4J_HOME+"/lib/javassist.jar ylyu1.wean.MultiTestRunner "+positiveTestsDaikonSampleArgForm);				
+				CommandLine command3 = CommandLine.parse("rm -rf "+removeString);
+				CommandLine command4 = CommandLine.parse("java -cp .:"+classp+":$CLASSPATH:"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar:"+Main.GP4J_HOME+"/lib/javassist.jar ylyu1.wean.Modify MultiTestRunner "+varname2+" NOTDEBUG");				
+				CommandLine command5 = CommandLine.parse("java -cp .:"+classp+":$CLASSPATH:"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar:"+Main.GP4J_HOME+"/lib/javassist.jar ylyu1.wean.MultiTestRunner "+negativeTestsArgForm);				
+
+				CommandLine command6 = CommandLine.parse("rm -rf "+removeString);
 				
 				//System.out.println("command: " + command2.toString());
-				ExecuteWatchdog watchdog = new ExecuteWatchdog(600);
+				ExecuteWatchdog watchdog = new ExecuteWatchdog(300000);
 				//timeout after 10 minutes, shouldn't be needed as there's timeouts in the JUnit tests. This hard timeout should be avoided as it can create zombie JUnit processes
 				//thus, this timeout should be short
 				DefaultExecutor executor = new DefaultExecutor();
 				String workingDirectory = System.getProperty("user.dir");
 				executor.setWorkingDirectory(new File(workingDirectory));
-				//executor.setWatchdog(watchdog);
+				executor.setWatchdog(watchdog);
 
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
 				executor.setExitValue(0);
+				long starttime = System.currentTimeMillis();
 
 				executor.setStreamHandler(new PumpStreamHandler(out));
 				FitnessValue posFit = new FitnessValue();
 
 				try {
 					executor.execute(command1);
-					executor.setWatchdog(watchdog);
 					executor.execute(command2);
-					String[] args = {rep.getVariantFolder()+"pos"};
-					Aggregator.main(args);
-					
 					executor.execute(command3);
-					args[0] = rep.getVariantFolder()+"neg";
+					executor.execute(CommandLine.parse("mv Temp.all Temp.temp"));
+					
+					executor.execute(command4);
+					executor.execute(command5);
+					executor.execute(command6);
+					String[] args = {rep.getVariantFolder()+"neg"};
+					Aggregator.main(args);
+					executor.execute(CommandLine.parse("rm Temp.all"));
+					executor.execute(CommandLine.parse("mv Temp.temp Temp.all"));
+					args[0] = rep.getVariantFolder()+"pos";
 					Aggregator.main(args);
 					//String[] modifyArgs = {"MultiTestRunner", rep.getVariantFolder()+"pos"};
 					//Modify.main(modifyArgs);
@@ -144,6 +162,7 @@ public class VariantCheckerMain
 					rep.isGoodForCheck=true;
 					goodRepsForCheck.add(rep);
 				} catch (ExecuteException exception) {
+					System.out.println("ERRORTIME: "+(System.currentTimeMillis()-starttime));
 					//posFit.setAllPassed(false);
 					System.out.println(exception.toString());
 					//out.flush();
