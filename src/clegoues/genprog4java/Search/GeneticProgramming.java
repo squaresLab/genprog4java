@@ -140,14 +140,6 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			generationsRun++;
 			assert (initialPopulation.getPopsize() > 0);
 			
-			try {
-			
-			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("DATAOFSEED"+Configuration.seed+"Gen"+gen+".ddd"));
-			oos.writeObject(incomingPopulation);
-			oos.flush();
-			oos.close();
-			}catch(IOException e) {}
-			
 			//if(Configuration.invariantCheckerMode>1||(Configuration.invariantCheckerMode==1&&gen==1))
 			//{
 				//if(gen==1) {
@@ -156,11 +148,14 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			//}
 			
 			ArrayList<Double> fitscores = new ArrayList<Double>();
+			ArrayList<Integer> diversities = new ArrayList<Integer>();
 			for(Representation<G> item : incomingPopulation)
 			{
 				fitscores.add(item.getFitness());
+				diversities.add(item.diversity);
 			}
 			DataProcessor.fitscores.add(fitscores);
+			DataProcessor.diversityScores.add(diversities);
 			
 			// Step 1: selection
 			incomingPopulation.selection(incomingPopulation.getPopsize());

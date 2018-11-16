@@ -13,14 +13,15 @@ import clegoues.genprog4java.rep.CachingRepresentation;
 public class DataProcessor 
 {
 	public static ArrayList<ArrayList<Double>> fitscores = new ArrayList<ArrayList<Double>>();
+	public static ArrayList<ArrayList<Integer>> diversityScores = new ArrayList<ArrayList<Integer>>();
 	public static boolean repair = false;
 	public static void storeError(String err)
 	{
-		store(new DataStorer(false,false,0,err,null));
+		store(new DataStorer(false,false,0,err,null,null));
 	}
 	public static void storeNormal()
 	{
-		store(new DataStorer(true, repair, CachingRepresentation.sequence, null, fitscores));
+		store(new DataStorer(true, repair, CachingRepresentation.sequence, null, fitscores,diversityScores));
 	}
 	public static void store(DataStorer ds)
 	{
@@ -75,8 +76,16 @@ public class DataProcessor
 				}
 				plateau+=((double)score)/((double)valid+0.000000001);
 			}
+			double total = 0;
+			double totalcount = 0;
+			for(ArrayList<Integer> divscore: result.divscores) {
+				for(Integer i : divscore) {
+					total += i;
+				}
+				totalcount += divscore.size();
+			}
 			plateau/=result.fitscores.size();
-			System.out.println(dataset+" "+bugnum+" "+modenum+" "+seednum+" "+result.repair+" "+result.variant+" "+plateau);
+			System.out.println(dataset+" "+bugnum+" "+modenum+" "+seednum+" "+result.repair+" "+result.variant+" "+plateau+" "+(total/totalcount));
 		}
 		else
 		{
