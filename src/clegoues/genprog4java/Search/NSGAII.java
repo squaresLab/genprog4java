@@ -79,7 +79,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 			initialPopulation.add(newItem);
 		}
 
-		setupPopulation(initialPopulation, original); //compile mutants & check invariants
+		setupPopulation(initialPopulation, original, 0); //compile mutants & check invariants
 		
 		return initialPopulation;
 	}
@@ -135,10 +135,9 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		}
 		offspringPopulation.getPopulation().addAll(newlist);
 		
-		setupPopulation(offspringPopulation, original);
-		//offspring population is now prepared
-		
 		int gen = 1;
+		setupPopulation(offspringPopulation, original, gen);
+		//offspring population is now prepared
 		
 		while(gen < Search.generations)
 		{	
@@ -196,8 +195,8 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 				newlist.add(newItem);
 			}
 			offspringPopulation.getPopulation().addAll(newlist);
-			setupPopulation(offspringPopulation, original);
 			gen++;
+			setupPopulation(offspringPopulation, original, gen);
 		}
 	}
 	
@@ -386,11 +385,11 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 	}
 	
 	
-	private void setupPopulation(Population<G> population, Representation<G> original) throws RepairFoundException
+	private void setupPopulation(Population<G> population, Representation<G> original, int generation) throws RepairFoundException
 	{
 		//compile mutants, move them into the output directory, and records num of passing test cases
 		for (Representation<G> item : population) {
-			if (fitnessEngine.testFitness(0, item)) {
+			if (fitnessEngine.testFitness(generation, item)) {
 				this.noteSuccess(item, original, 0);
 				if(!continueSearch) {
 					throw new RepairFoundException();
