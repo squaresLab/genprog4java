@@ -1,6 +1,0 @@
-<The Explanation in this file explains how ylyu1.wean package works before major code refactoring in September, 2018>
-First, daikon is ran and its output in java format is redirected towards the wean file
-Next, WeanParse is called to parse the wean file to produce the ywl file, which stores a java object of ArrayList<PredGroup> which contains all the invariant information. If DEBUG is on for WeanParse, it will also produce a twt file which is the human-readable text version of the ywl file.
-Next, Modify reads in the ywl file and starts to do byte-code level instrumentation into the program for invariant checking. The details of which instrumentations succeeded and which ones failed are recorded in the log file. It produces a pse file that stores information of all information that had been successfully instrumented using PredSerial classes.
-Next, we run the instrumented program and redirect its output to a tuo file for further analysis.
-Finally, Aggregator takes in the tuo file and parses the invariant checking result from it using information from the pse file. It stores the results in both text verion (the pred file) and the object version (the tns file). Note that the tns file contains a arraylist of integers of 0,1,2s.  
