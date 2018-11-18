@@ -155,6 +155,7 @@ public class Main {
 		baseRep.load(Configuration.targetClassNames);
 		Localization localization = new DefaultLocalization(baseRep);
 		baseRep.setLocalization(localization);
+		baseRep.setVariantID("baseRepVariantID"); //included for debugging reasons
 		
 		switch(Search.searchStrategy.trim()) {
 
