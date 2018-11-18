@@ -139,7 +139,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		setupPopulation(offspringPopulation, original, gen);
 		//offspring population is now prepared
 		
-		while(gen < Search.generations)
+		while(gen < Search.generations - 1) //the (gen+1)-th generation is generated in this loop
 		{	
 			Population<G> mergedPop = Population.union(parentPopulation, offspringPopulation);
 			List<List<Representation<G>>> nonDomFronts = fastNonDominatedSort(mergedPop, objectivesToTest, gen);
