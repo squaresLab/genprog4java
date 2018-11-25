@@ -167,11 +167,21 @@ public class VariantCheckerMain
 					System.out.println(exception.toString());
 					//out.flush();
 					System.out.println(out.toString());
+					try{
+						executor.execute(command6);
+					}catch(Exception ee){
+						System.out.println("already removed");
+					}
 					throw exception;
 					
 				} catch (Exception e) {
-					System.out.println(e.toString());
+					e.printStackTrace();
 					System.out.println(out.toString());
+					try{
+						executor.execute(command6);
+					}catch(Exception ee){
+						System.out.println("already removed");
+					}
 				} finally {
 					if (out != null)
 						try {
