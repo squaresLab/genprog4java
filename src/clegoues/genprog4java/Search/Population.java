@@ -264,7 +264,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 				}
 			}
 			if(taken) {
-				System.out.println("Selected: "+indiv.getVariantName()+" hash: "+indiv.hashCode());
+				System.out.println("Selected: "+indiv.getVariantID()+" hash: "+indiv.hashCode());
 				//System.out.println("But: "+indiv.copy().hashCode());
 				return indiv.copy();	
 			} else {

@@ -120,7 +120,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		fastNonDominatedSort(offspringPopulation, objectivesToTest, 0); //just need to set domination ranks for representations, no need to actually use the fronts
 		offspringPopulation.selection(offspringPopulation.getPopsize(),
 				(rep1, rep2) -> (new Integer(rep1.getDominationRank())).compareTo(rep2.getDominationRank()), //remember with domination ranks, lower is preferred, so we want to sort from low to high rank
-				(rep) -> rep.getVariantName() + " Domination Rank: " + rep.getDominationRank() 
+				(rep) -> rep.getVariantID() + " Domination Rank: " + rep.getDominationRank() 
 				+ " (Sampled) Positive Tests: " + rep.getNumSampledPosTestsPassed() 
 				+ " Negative Tests: " + rep.getNumNegTestsPassed() 
 				+ " Invariant Diversity: " + rep.diversity
@@ -139,7 +139,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		setupPopulation(offspringPopulation, original, gen);
 		//offspring population is now prepared
 		
-		while(gen < Search.generations)
+		while(gen < Search.generations - 1) //the (gen+1)-th generation is generated in this loop
 		{	
 			Population<G> mergedPop = Population.union(parentPopulation, offspringPopulation);
 			List<List<Representation<G>>> nonDomFronts = fastNonDominatedSort(mergedPop, objectivesToTest, gen);
@@ -180,7 +180,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 						if (dominationComparison != 0) return dominationComparison;
 						else return -1 * (new Double(rep1.getCrowdingDistance())).compareTo(rep2.getCrowdingDistance()); //for crowding distance, higher should come first
 					},
-					(rep) -> rep.getVariantName() + " Domination Rank: " + rep.getDominationRank() 
+					(rep) -> rep.getVariantID() + " Domination Rank: " + rep.getDominationRank() 
 					+ " Crowding Distance: " + rep.getCrowdingDistance()
 					+ " (Sampled) Positive Tests: " + rep.getNumSampledPosTestsPassed() 
 					+ " Negative Tests: " + rep.getNumNegTestsPassed() 
