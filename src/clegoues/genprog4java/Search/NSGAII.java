@@ -117,6 +117,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		 */
 		
 		Population<G> offspringPopulation = parentPopulation.copy();
+		VariantCheckerMain.checkInvariant(offspringPopulation);
 		fastNonDominatedSort(offspringPopulation, objectivesToTest, 0); //just need to set domination ranks for representations, no need to actually use the fronts
 		offspringPopulation.selection(offspringPopulation.getPopsize(),
 				(rep1, rep2) -> (new Integer(rep1.getDominationRank())).compareTo(rep2.getDominationRank()), //remember with domination ranks, lower is preferred, so we want to sort from low to high rank
@@ -142,6 +143,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		while(gen < Search.generations - 1) //the (gen+1)-th generation is generated in this loop
 		{	
 			Population<G> mergedPop = Population.union(parentPopulation, offspringPopulation);
+			VariantCheckerMain.checkInvariant(mergedPop);
 			List<List<Representation<G>>> nonDomFronts = fastNonDominatedSort(mergedPop, objectivesToTest, gen);
 			Population<G> nextGenParentPop = new Population<G>();
 			int i = 0;
@@ -398,7 +400,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 			copyClassFilesIntoOutputDir(item); //relies on testFitness compiling the Representation item
 		}
 		
-		//check invariants
-		VariantCheckerMain.checkInvariant(population);
+		//don't check invariants
+		//VariantCheckerMain.checkInvariant(population);
 	}
 }
