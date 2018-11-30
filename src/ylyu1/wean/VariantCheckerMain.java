@@ -67,7 +67,7 @@ public class VariantCheckerMain
 		for(Representation<? extends EditOperation> rep : pop)
 		{
 			rep.diversity=0;
-			if (rep.getAlreadyCompiled() == null || !rep.getAlreadyCompiled().getLeft())
+			if (rep.getAlreadyCompiled() == null || !rep.getAlreadyCompiled().getLeft() || Fitness.invariantCache.get(rep.hashCode())!=null)
 			{
 				if(Fitness.invariantCache.get(rep.hashCode())!=null) {notRepsForCheck.add(rep);} else {allothers.add(rep);}
 				continue; //if rep is not already compiled, don't touch it and go on to the next representation
@@ -203,15 +203,16 @@ public class VariantCheckerMain
 		Aggregator.bs.resizeAll();
 		Aggregator.bs.doubleUp();
 		
+		for(Representation<? extends EditOperation> r : notRepsForCheck)
+		{
+			Aggregator.bs.grid.add(Fitness.invariantCache.get(r.hashCode()));
+		}
+
 		for(int i = 0; i < goodRepsForCheck.size(); i++)
 		{
 			Fitness.invariantCache.put(goodRepsForCheck.get(i).hashCode(), Aggregator.bs.grid.get(i));
 		}
 		
-		for(Representation<? extends EditOperation> r : notRepsForCheck)
-		{
-			Aggregator.bs.grid.add(Fitness.invariantCache.get(r.hashCode()));
-		}
 		
 		Aggregator.bs.resizeAll();
 		
