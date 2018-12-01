@@ -217,13 +217,14 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 					return diff < 0 ? -1 : diff == 0 ? 0 : 1;
 				}
 			});
-			orderedSolutions.get(0).setCrowdingDistance(Double.POSITIVE_INFINITY);
-			orderedSolutions.get(len-1).setCrowdingDistance(Double.POSITIVE_INFINITY);
+			
 			double objMinVal = o.getScore(orderedSolutions.get(0), generation);
 			double objMaxVal = o.getScore(orderedSolutions.get(len-1), generation);	
 			//objective o only contributes to the crowding distance if there's deviation in the objective score among the population, avoids divide by zero
 			if(objMinVal != objMaxVal)
 			{
+				orderedSolutions.get(0).setCrowdingDistance(Double.POSITIVE_INFINITY);
+				orderedSolutions.get(len-1).setCrowdingDistance(Double.POSITIVE_INFINITY);
 				for(int i = 1; i <= len-2; i++)
 				{
 					Representation<G> soln = orderedSolutions.get(i);
