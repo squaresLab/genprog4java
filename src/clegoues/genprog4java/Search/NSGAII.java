@@ -143,7 +143,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		while(gen < Search.generations - 1) //the (gen+1)-th generation is generated in this loop
 		{	
 			Population<G> mergedPop = Population.union(parentPopulation, offspringPopulation);
-			VariantCheckerMain.checkInvariant(mergedPop);
+			VariantCheckerMain.checkInvariant(mergedPop); //check invariants on the merged population to get diversity scores relative to the merged pop
 			List<List<Representation<G>>> nonDomFronts = fastNonDominatedSort(mergedPop, objectivesToTest, gen);
 			Population<G> nextGenParentPop = new Population<G>();
 			int i = 0;
