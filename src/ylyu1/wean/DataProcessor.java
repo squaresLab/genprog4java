@@ -1,97 +1,81 @@
 package ylyu1.wean;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.Hashtable;
-
-import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.rep.CachingRepresentation;
 
 
-
-
-public class DataProcessor 
-{
-	public static ArrayList<ArrayList<Double>> fitscores = new ArrayList<ArrayList<Double>>();
-	public static ArrayList<ArrayList<Integer>> diversityScores = new ArrayList<ArrayList<Integer>>();
-	public static boolean repair = false;
-	public static void storeError(String err)
-	{
-		store(new DataStorer(false,false,0,err,null,null));
-	}
-	public static void storeNormal()
-	{
-		store(new DataStorer(true, repair, CachingRepresentation.sequence, null, fitscores,diversityScores));
-	}
-	public static void store(DataStorer ds)
-	{
-		try {
-		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("ResultOfSeed"+Configuration.seed+".results"));
-		System.out.println("Hi Hi");
-		oos.writeObject(ds);
-		oos.flush();
-		oos.close();
-		}
-		catch(Exception e) {System.out.println("Weird error occuring in data storage\n"+e.getMessage());e.printStackTrace();}
-	}
+public class DataProcessor {
+	//TODO: make this conform with refactor
 	public static void main(String[] args) throws Exception
 	{
+		/*
+		 * Compute anti-plateau score
+		 * Compute average diversity
+		 */
 		String dataset = args[0];
 		int bugnum = Integer.parseInt(args[1]);
 		int modenum = Integer.parseInt(args[2]);
 		int seednum = Integer.parseInt(args[3]);
 		String pathToBugs = args[4];
 		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(pathToBugs+modenum+"/"+dataset+bugnum+"Buggy/ResultOfSeed"+seednum+".results"));
-		DataStorer result = (DataStorer) ois.readObject();
+		Object resultObj = ois.readObject();
 		ois.close();
 		//plateau score: higher better, lower means more plateau
 		double plateau = 0;
-		if(result.good)
+		if (resultObj instanceof GPDataStorer)
 		{
-			ArrayList<Double> plateaus = new ArrayList<Double>();
-			for(ArrayList<Double> fitscore: result.fitscores)
+			GPDataStorer result = (GPDataStorer) resultObj;
+			if(result.good)
 			{
-				int score = 0;
-				int valid = 0;
-				for(int i = 0; i < fitscore.size(); i++)
+				ArrayList<Double> plateaus = new ArrayList<Double>();
+				for(ArrayList<Double> fitscore: result.fitscores)
 				{
-					if(fitscore.get(i)<0.00000001)continue;
-					boolean hasequal = false;
-					for(int j = 0; j < i; j++)
+					int score = 0;
+					int valid = 0;
+					for(int i = 0; i < fitscore.size(); i++)
 					{
-						if(Math.abs(fitscore.get(i)-fitscore.get(j))<0.00000001)
+						if(fitscore.get(i)<0.00000001)continue;
+						boolean hasequal = false;
+						for(int j = 0; j < i; j++)
 						{
-							hasequal=true;
+							if(Math.abs(fitscore.get(i)-fitscore.get(j))<0.00000001)
+							{
+								hasequal=true;
+							}
+						}
+						if(hasequal)
+						{
+							valid++;
+						}
+						else
+						{
+							score++;
+							valid++;
 						}
 					}
-					if(hasequal)
-					{
-						valid++;
-					}
-					else
-					{
-						score++;
-						valid++;
-					}
+					plateau+=((double)score)/((double)valid+0.000000001);
 				}
-				plateau+=((double)score)/((double)valid+0.000000001);
-			}
-			double total = 0;
-			double totalcount = 0;
-			for(ArrayList<Integer> divscore: result.divscores) {
-				for(Integer i : divscore) {
-					total += i;
+				double total = 0;
+				double totalcount = 0;
+				for(ArrayList<Integer> divscore: result.divscores) {
+					for(Integer i : divscore) {
+						total += i;
+					}
+					totalcount += divscore.size();
 				}
-				totalcount += divscore.size();
+				plateau/=result.fitscores.size();
+				System.out.println(dataset+" "+bugnum+" "+modenum+" "+seednum+" "+result.repair+" "+result.variant+" "+plateau+" "+(total/totalcount));
 			}
-			plateau/=result.fitscores.size();
-			System.out.println(dataset+" "+bugnum+" "+modenum+" "+seednum+" "+result.repair+" "+result.variant+" "+plateau+" "+(total/totalcount));
+			else
+			{
+				System.out.println(dataset+" "+bugnum+" "+modenum+" "+seednum+" "+result.errorMessage);		    
+			}
 		}
-		else
+		else if (resultObj instanceof NSGAIIDataStorer)
 		{
-			System.out.println(dataset+" "+bugnum+" "+modenum+" "+seednum+" "+result.errorMessage);		    
+			throw new UnsupportedOperationException("Zhen hasn't implemented this portion yet");
 		}
 		
 	}
-
 }

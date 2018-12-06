@@ -468,7 +468,7 @@ public class VariantCheckerMain
 			System.out.println(exception.toString());
 			String output = out.toString();
 			System.out.println(output);
-			DataProcessor.storeError("rundaikon");
+			GPDataProcessor.storeError("rundaikon");
 			Runtime.getRuntime().exit(1);
 		} catch (Exception e) {
 		} finally {

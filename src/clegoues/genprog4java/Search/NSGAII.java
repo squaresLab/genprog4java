@@ -17,6 +17,7 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.lang3.tuple.Pair;
 
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.Objective;
@@ -24,7 +25,7 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 import ylyu1.wean.VariantCheckerMain;
-import ylyu1.wean.DataProcessor;
+import ylyu1.wean.NSGAIIDataProcessor;
 
 public class NSGAII<G extends EditOperation> extends Search<G> {
 	private static final int P_DOMINATES_Q = -1;
@@ -36,9 +37,12 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 	
 	protected Objective[] objectivesToTest;
 	
-	public NSGAII(Fitness engine, Objective[] objectives) {
+	NSGAIIDataProcessor dp;
+	
+	public NSGAII(Fitness engine, Objective[] objectives, NSGAIIDataProcessor dataProc) {
 		super(engine);
 		objectivesToTest = objectives;
+		dp = dataProc;
 	}
 	
 	
@@ -104,14 +108,14 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 			}//VariantCheckerMain.checkInvariantOrig();
 			if(!(new File(Configuration.workingDir+"/JUSTUSE.ywl")).exists())
 			{
-				DataProcessor.storeError("weirddaikon");
+				dp.storeError("weirddaikon");
 				Runtime.getRuntime().exit(1);
 			}
 		}
 		
 		Population<G> parentPopulation = this.initialize(original, initialPopulation);
 		
-		/* for gen=1, assign each representation a fitness score based on the
+		/* for gen=0, assign each representation a fitness score based on the
 		 * nondomination level of each representation, then use tournament
 		 * selection, recombination, & mutation to create an initial offspring population
 		 */
@@ -119,6 +123,25 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		Population<G> offspringPopulation = parentPopulation.copy();
 		VariantCheckerMain.checkInvariant(offspringPopulation);
 		fastNonDominatedSort(offspringPopulation, objectivesToTest, 0); //just need to set domination ranks for representations, no need to actually use the fronts
+		
+		//serialze gen 0 data
+		{	//separate block for scope restriction
+			ArrayList<Pair<Integer, Double>> gen0Fits = new ArrayList<>();
+			ArrayList<Map<Class<?>, Double>> gen0Objs = new ArrayList<>();
+			for(Representation<G> r : offspringPopulation)
+			{
+				gen0Fits.add(Pair.of(r.getDominationRank(), -1.0)); //use crowding dist of -1.0 as sentinel value meaning it's not used
+				Map<Class<?>, Double> objVals = new HashMap<>();
+				for(Objective o : objectivesToTest)
+				{
+					objVals.put(o.getClass(), o.getScore(r, 0));
+				}
+				gen0Objs.add(objVals);
+			}
+			dp.nsgaiiFitnesses.add(gen0Fits);
+			dp.objectiveValues.add(gen0Objs);
+		}
+		
 		offspringPopulation.selection(offspringPopulation.getPopsize(),
 				(rep1, rep2) -> (new Integer(rep1.getDominationRank())).compareTo(rep2.getDominationRank()), //remember with domination ranks, lower is preferred, so we want to sort from low to high rank
 				(rep) -> rep.getVariantID() + " Domination Rank: " + rep.getDominationRank() 
@@ -126,6 +149,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 				+ " Negative Tests: " + rep.getNumNegTestsPassed() 
 				+ " Invariant Diversity: " + rep.diversity
 				);
+		
 		offspringPopulation.crossover(original);
 		ArrayList<Representation<G>> newlist = new ArrayList<Representation<G>>();
 		for (Representation<G> item : offspringPopulation) {
@@ -176,6 +200,25 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 			
 			
 			offspringPopulation = parentPopulation.copy();
+			
+			{	//separate block for scope restriction
+				ArrayList<Pair<Integer, Double>> genNFits = new ArrayList<>();
+				ArrayList<Map<Class<?>, Double>> genNObjs = new ArrayList<>();
+				for(Representation<G> r : offspringPopulation)
+				{
+					genNFits.add(Pair.of(r.getDominationRank(), r.getCrowdingDistance()));
+					Map<Class<?>, Double> objVals = new HashMap<>();
+					for(Objective o : objectivesToTest)
+					{
+						objVals.put(o.getClass(), o.getScore(r, 0));
+					}
+					genNObjs.add(objVals);
+				}
+				dp.nsgaiiFitnesses.add(genNFits);
+				dp.objectiveValues.add(genNObjs);
+			}
+			
+			
 			offspringPopulation.selection(offspringPopulation.getPopsize(),
 					(rep1, rep2) -> { //high preference comes first
 						int dominationComparison = (new Integer(rep1.getDominationRank())).compareTo(rep2.getDominationRank()); //for domination rank, lower should come first
@@ -340,16 +383,6 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		if(!classSourceFolderFile.exists())
 			System.err.println("classSourceFolder does not exist");
 		
-		
-		/*
-		CommandLine cpCommand = CommandLine.parse(
-				"cp -R " +
-				Configuration.classSourceFolder + //no space added
-				(Configuration.classSourceFolder.endsWith(File.separator) ? "" : File.separator) + //add a separator if necessary
-				"* " + //a wildcard char may or may not be needed
-				copyDestination
-				);
-		*/
 		CommandLine cpCommand = CommandLine.parse(
 				"rsync -r " +
 				Configuration.classSourceFolder + //no space added
@@ -358,7 +391,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 				copyDestination
 				);
 		
-		System.err.println("cp command: " + cpCommand);
+		//System.err.println("cp command: " + cpCommand);
 		
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(1000000);
 		DefaultExecutor executor = new DefaultExecutor();

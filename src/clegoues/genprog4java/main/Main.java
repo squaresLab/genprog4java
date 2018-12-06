@@ -67,7 +67,9 @@ import clegoues.genprog4java.rep.CachingRepresentation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
-import ylyu1.wean.DataProcessor;
+import ylyu1.wean.AbstractDataProcessor;
+import ylyu1.wean.GPDataProcessor;
+import ylyu1.wean.NSGAIIDataProcessor;
 
 public class Main {
 
@@ -157,6 +159,8 @@ public class Main {
 		baseRep.setLocalization(localization);
 		baseRep.setVariantID("baseRepVariantID"); //included for debugging reasons
 		
+		AbstractDataProcessor dp = null;
+		
 		switch(Search.searchStrategy.trim()) {
 
 		case "brute": searchEngine = new BruteForce<JavaEditOperation>(fitnessEngine);
@@ -165,14 +169,18 @@ public class Main {
 		break;
 		case "oracle": searchEngine = new OracleSearch<JavaEditOperation>(fitnessEngine);
 		break;
-		case "nsgaii": searchEngine = new NSGAII<JavaEditOperation>(fitnessEngine, new Objective[]{
-				new PositiveTestCasesObjective(),
-				new NegativeTestCasesObjective(),
-				new InvariantDiversityObjective()
-		});
+		case "nsgaii": 
+			dp = new NSGAIIDataProcessor();
+			searchEngine = new NSGAII<JavaEditOperation>(fitnessEngine, new Objective[]{
+					new PositiveTestCasesObjective(),
+					new NegativeTestCasesObjective(),
+					new InvariantDiversityObjective()
+			}, (NSGAIIDataProcessor) dp);
 		break;
 		case "ga":
-		default: searchEngine = new GeneticProgramming<JavaEditOperation>(fitnessEngine);
+		default: 
+			dp = new GPDataProcessor();
+			searchEngine = new GeneticProgramming<JavaEditOperation>(fitnessEngine, (GPDataProcessor) dp);
 		break;
 			
 		}
@@ -185,7 +193,7 @@ public class Main {
 		}
 		int elapsed = getElapsedTime(startTime);
 		
-		DataProcessor.storeNormal();
+		if(dp != null) dp.storeNormal();
 		logger.info("\nTotal elapsed time: " + elapsed + "\n");
 		
 		Runtime.getRuntime().exit(0);

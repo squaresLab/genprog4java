@@ -19,15 +19,17 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
-import ylyu1.wean.DataProcessor;
+import ylyu1.wean.GPDataProcessor;
 import ylyu1.wean.VariantCheckerMain;
 
 public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 	//invariant checker mode got refactored into Configuration
+	GPDataProcessor dp;
 	
 	private int generationsRun = 0;
-	public GeneticProgramming(Fitness engine) {
+	public GeneticProgramming(Fitness engine, GPDataProcessor dataProc) {
 		super(engine);
+		dp = dataProc;
 	}
 
 
@@ -122,7 +124,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			}//VariantCheckerMain.checkInvariantOrig();
 			if(!(new File(Configuration.workingDir+"/JUSTUSE.ywl")).exists())
 			{
-				DataProcessor.storeError("weirddaikon");
+				dp.storeError("weirddaikon");
 				Runtime.getRuntime().exit(1);
 			}
 		}
@@ -154,8 +156,8 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 				fitscores.add(item.getFitness());
 				diversities.add(item.diversity);
 			}
-			DataProcessor.fitscores.add(fitscores);
-			DataProcessor.diversityScores.add(diversities);
+			dp.fitscores.add(fitscores);
+			dp.diversityScores.add(diversities);
 			
 			// Step 1: selection
 			incomingPopulation.selection(incomingPopulation.getPopsize());
