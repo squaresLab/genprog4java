@@ -122,15 +122,13 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		 * selection, recombination, & mutation to create an initial offspring population
 		 */
 		
-		Population<G> offspringPopulation = parentPopulation.copy();
-		
-		fastNonDominatedSort(offspringPopulation, objectivesToTest, 0); //just need to set domination ranks for representations, no need to actually use the fronts
+		fastNonDominatedSort(parentPopulation, objectivesToTest, 0); //just need to set domination ranks for representations, no need to actually use the fronts
 		
 		//serialze gen 0 data
 		{	//separate block for scope restriction
 			ArrayList<Pair<Integer, Double>> gen0Fits = new ArrayList<>();
 			ArrayList<Map<Class<?>, Double>> gen0Objs = new ArrayList<>();
-			for(Representation<G> r : offspringPopulation)
+			for(Representation<G> r : parentPopulation)
 			{
 				gen0Fits.add(Pair.of(r.getDominationRank(), -1.0)); //use crowding dist of -1.0 as sentinel value meaning it's not used
 				Map<Class<?>, Double> objVals = new HashMap<>();
@@ -143,6 +141,8 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 			dp.nsgaiiFitnesses.add(gen0Fits);
 			dp.objectiveValues.add(gen0Objs);
 		}
+		
+		Population<G> offspringPopulation = parentPopulation.copy();
 		
 		offspringPopulation.selection(offspringPopulation.getPopsize(),
 				(rep1, rep2) -> (new Integer(rep1.getDominationRank())).compareTo(rep2.getDominationRank()), //remember with domination ranks, lower is preferred, so we want to sort from low to high rank
