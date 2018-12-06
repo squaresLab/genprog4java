@@ -83,7 +83,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 			initialPopulation.add(newItem);
 		}
 
-		setupPopulation(initialPopulation, original, 0); //compile mutants & check invariants
+		setupPopulation(initialPopulation, original, 0); //compile mutants
 		
 		return initialPopulation;
 	}
@@ -115,13 +115,15 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		
 		Population<G> parentPopulation = this.initialize(original, initialPopulation);
 		
+		VariantCheckerMain.checkInvariant(parentPopulation);
+		
 		/* for gen=0, assign each representation a fitness score based on the
 		 * nondomination level of each representation, then use tournament
 		 * selection, recombination, & mutation to create an initial offspring population
 		 */
 		
 		Population<G> offspringPopulation = parentPopulation.copy();
-		VariantCheckerMain.checkInvariant(offspringPopulation);
+		
 		fastNonDominatedSort(offspringPopulation, objectivesToTest, 0); //just need to set domination ranks for representations, no need to actually use the fronts
 		
 		//serialze gen 0 data
