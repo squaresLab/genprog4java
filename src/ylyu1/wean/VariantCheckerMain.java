@@ -430,7 +430,7 @@ public class VariantCheckerMain
 		
 	}
 	
-	public static void runDaikon()
+	public static void runDaikon(AbstractDataProcessor dp)
 	{
 		if (positiveTestsDaikonSampleArgForm == null || negativeTestsArgForm == null)
 			setupArgForms();
@@ -468,7 +468,7 @@ public class VariantCheckerMain
 			System.out.println(exception.toString());
 			String output = out.toString();
 			System.out.println(output);
-			GPDataProcessor.storeError("rundaikon");
+			dp.storeError("rundaikon");
 			Runtime.getRuntime().exit(1);
 		} catch (Exception e) {
 		} finally {
