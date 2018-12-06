@@ -529,9 +529,9 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	{
 		ArrayList<Representation<G>> newPop = new ArrayList<Representation<G>>(a.size() + b.size());
 		for(Representation<G> r : a.population)
-			newPop.add(r.copy());
+			newPop.add(r);
 		for(Representation<G> r : b.population)
-			newPop.add(r.copy());
+			newPop.add(r);
 		return new Population<G>(newPop);
 	}
 }
