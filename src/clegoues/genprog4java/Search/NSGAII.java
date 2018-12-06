@@ -103,7 +103,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 			while((trials<5)&&(!(new File(Configuration.workingDir+"/JUSTUSE.ywl")).exists()))
 			{
 				System.out.println("Here we are");
-				VariantCheckerMain.runDaikon();
+				VariantCheckerMain.runDaikon(dp);
 				trials++;
 			}//VariantCheckerMain.checkInvariantOrig();
 			if(!(new File(Configuration.workingDir+"/JUSTUSE.ywl")).exists())

@@ -127,7 +127,7 @@ Representation<G>  {
 		if (Configuration.doSanity) {
 			if (!this.sanityCheck()) {
 				logger.error("Sanity check failed, giving up");
-				GPDataProcessor.storeError("sanity");
+				(new GPDataProcessor()).storeError("sanity"); //if GenProg fails, we don't actually need to use the AbstractDataProcessor that Main uses.
 				Runtime.getRuntime().exit(1);
 			}
 		}
