@@ -107,7 +107,7 @@ Representation<G>  {
 		return this.fitness;
 	}
 
-	private Pair<Boolean, String> alreadyCompiled = null;
+	protected Pair<Boolean, String> alreadyCompiled = null;
 	
 	public Pair<Boolean, String> getAlreadyCompiled()
 	{
