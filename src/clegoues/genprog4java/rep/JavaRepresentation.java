@@ -514,7 +514,7 @@ CachingRepresentation<JavaEditOperation> {
 		copy.setVariantID(getVariantID());
 		//copy.setFitness(this.getFitness()); //don't copy fitness, will cause problems, as -1 is used as a sentinel value
 		
-		copy.alreadyCompiled = this.alreadyCompiled; //hope this satisfies VariantCheckerMain.checkInvariant
+		//copy.alreadyCompiled = this.alreadyCompiled; //hope this satisfies VariantCheckerMain.checkInvariant
 		return copy;
 	}
 
