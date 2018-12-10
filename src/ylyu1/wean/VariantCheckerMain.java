@@ -196,6 +196,7 @@ public class VariantCheckerMain
 				e.printStackTrace();
 				//goodVariant.add(false);
 				rep.isGoodForCheck=false;
+				allothers.add(rep);
 				if(!rep.vf.equals(""))Fitness.invariantCache.put(rep.hashCode(), null);
 			}
 		}
