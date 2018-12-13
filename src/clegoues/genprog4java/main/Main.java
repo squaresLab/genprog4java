@@ -130,7 +130,12 @@ public class Main {
 		
 		if(Configuration.invariantCheckerMode == 4)
 		{
-			Search.searchStrategy = "nsgaii";
+			Search.searchStrategy = "nsgaii-diversity";
+		}
+		
+		if(Configuration.invariantCheckerMode == 5)
+		{
+			Search.searchStrategy = "nsgaii-tests-only";
 		}
 
 		File workDir = new File(Configuration.outputDir);
@@ -169,14 +174,22 @@ public class Main {
 		break;
 		case "oracle": searchEngine = new OracleSearch<JavaEditOperation>(fitnessEngine);
 		break;
-		case "nsgaii": 
+		case "nsgaii":
+		case "nsgaii-diversity":
 			dp = new NSGAIIDataProcessor();
 			searchEngine = new NSGAII<JavaEditOperation>(fitnessEngine, new Objective[]{
 					new PositiveTestCasesObjective(),
 					new NegativeTestCasesObjective(),
 					new InvariantDiversityObjective()
 			}, (NSGAIIDataProcessor) dp);
-		break;
+			break;
+		case "nsgaii-tests-only":
+			dp = new NSGAIIDataProcessor();
+			searchEngine = new NSGAII<JavaEditOperation>(fitnessEngine, new Objective[]{
+					new PositiveTestCasesObjective(),
+					new NegativeTestCasesObjective()
+			}, (NSGAIIDataProcessor) dp);
+			break;
 		case "ga":
 		default: 
 			dp = new GPDataProcessor();

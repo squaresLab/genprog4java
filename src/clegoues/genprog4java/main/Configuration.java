@@ -209,7 +209,8 @@ public class Configuration {
 					+ "1 - invariant checking after the 0th generation only; "
 					+ "2 - use a linear combination of invariant checking results and fitness scores in all generations, influence of invariant checking decreases linearly after each generation; "
 					+ "3 - only use invariant checking results in the fitness function"
-					+ "4 - use NSGA-II: internally equivalent to using mode 0 and setting the search strategy to nsgaii")
+					+ "4 - use NSGA-II w/ invariant diversity: internally equivalent to setting the search strategy to nsgaii-diversity"
+					+ "5 - use NSGA-II w/ tests only: internally equivalent to setting the search strategy to nsgaii-tests-only")
 			.build();
 	
 
