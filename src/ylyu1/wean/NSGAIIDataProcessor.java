@@ -13,15 +13,16 @@ import clegoues.genprog4java.rep.CachingRepresentation;
 public class NSGAIIDataProcessor extends AbstractDataProcessor {
 	public ArrayList<ArrayList<Pair<Integer, Double>>> nsgaiiFitnesses = new ArrayList<>(); //nsgaii, left elem of Pair is domination rank, right elem of Pair is crowding distance
 	public ArrayList<ArrayList<Map<Class<?>, Double>>> objectiveValues = new ArrayList<>(); //nsgaii, maps Objective class -> Objective value
-	
+	public ArrayList<ArrayList<Integer>> divscores; //collected even if diversity is not an objective
+
 	@Override
 	public void storeError(String err) {
-		store(new NSGAIIDataStorer(false,false,0,err,null,null));
+		store(new NSGAIIDataStorer(false,false,0,err,null,null,null));
 	}
 
 	@Override
 	public void storeNormal() {
-		store(new NSGAIIDataStorer(true, super.repair, CachingRepresentation.sequence, null, nsgaiiFitnesses, objectiveValues));
+		store(new NSGAIIDataStorer(true, super.repair, CachingRepresentation.sequence, null, divscores, nsgaiiFitnesses, objectiveValues));
 	}
 	
 	private void store(NSGAIIDataStorer ds)

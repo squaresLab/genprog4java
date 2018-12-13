@@ -128,6 +128,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 		{	//separate block for scope restriction
 			ArrayList<Pair<Integer, Double>> gen0Fits = new ArrayList<>();
 			ArrayList<Map<Class<?>, Double>> gen0Objs = new ArrayList<>();
+			ArrayList<Integer> gen0Divs = new ArrayList<>();
 			for(Representation<G> r : parentPopulation)
 			{
 				gen0Fits.add(Pair.of(r.getDominationRank(), -1.0)); //use crowding dist of -1.0 as sentinel value meaning it's not used
@@ -137,9 +138,11 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 					objVals.put(o.getClass(), o.getScore(r, 0));
 				}
 				gen0Objs.add(objVals);
+				gen0Divs.add(r.diversity);
 			}
 			dp.nsgaiiFitnesses.add(gen0Fits);
 			dp.objectiveValues.add(gen0Objs);
+			dp.divscores.add(gen0Divs);
 		}
 		
 		Population<G> offspringPopulation = parentPopulation.copy();
@@ -206,6 +209,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 			{	//separate block for scope restriction
 				ArrayList<Pair<Integer, Double>> genNFits = new ArrayList<>();
 				ArrayList<Map<Class<?>, Double>> genNObjs = new ArrayList<>();
+				ArrayList<Integer> genNDivs = new ArrayList<>();
 				for(Representation<G> r : offspringPopulation)
 				{
 					genNFits.add(Pair.of(r.getDominationRank(), r.getCrowdingDistance()));
@@ -215,9 +219,11 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 						objVals.put(o.getClass(), o.getScore(r, 0));
 					}
 					genNObjs.add(objVals);
+					genNDivs.add(r.diversity);
 				}
 				dp.nsgaiiFitnesses.add(genNFits);
 				dp.objectiveValues.add(genNObjs);
+				dp.divscores.add(genNDivs);
 			}
 			
 			
