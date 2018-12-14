@@ -251,6 +251,29 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 			gen++;
 			setupPopulation(offspringPopulation, original, gen);
 		}
+		//check invariants & record data of the very last generation
+		VariantCheckerMain.checkInvariant(offspringPopulation);
+		fastNonDominatedSort(offspringPopulation, objectivesToTest, gen);
+		crowdingDistanceAssignment(offspringPopulation.getPopulation(), objectivesToTest, gen);
+		{	//separate block for scope restriction
+			ArrayList<Pair<Integer, Double>> genNFits = new ArrayList<>();
+			ArrayList<Map<Class<?>, Double>> genNObjs = new ArrayList<>();
+			ArrayList<Integer> genNDivs = new ArrayList<>();
+			for(Representation<G> r : offspringPopulation)
+			{
+				genNFits.add(Pair.of(r.getDominationRank(), r.getCrowdingDistance()));
+				Map<Class<?>, Double> objVals = new HashMap<>();
+				for(Objective o : objectivesToTest)
+				{
+					objVals.put(o.getClass(), o.getScore(r, 0));
+				}
+				genNObjs.add(objVals);
+				genNDivs.add(r.diversity);
+			}
+			dp.nsgaiiFitnesses.add(genNFits);
+			dp.objectiveValues.add(genNObjs);
+			dp.divscores.add(genNDivs);
+		}
 	}
 	
 	private static <G extends EditOperation> void crowdingDistanceAssignment(List<Representation<G>> solutions, Objective[] objectives, int generation)
