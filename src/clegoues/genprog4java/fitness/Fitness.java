@@ -177,8 +177,8 @@ public class Fitness {
 	public static ArrayList<TestCase> positiveTests = new ArrayList<TestCase>();
 	public static ArrayList<TestCase> negativeTests = new ArrayList<TestCase>();
 
-	private static int numPositiveTests;
-	private static int numNegativeTests;
+	public static int numPositiveTests;
+	public static int numNegativeTests;
 
 	// persistent test cache
 	private static HashMap<Integer, HashMap<TestCase, FitnessValue>> fitnessCache = new HashMap<Integer, HashMap<TestCase, FitnessValue>>();
