@@ -166,14 +166,14 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			incomingPopulation.crossover(original);
 
 			// step 3: mutation
-			ArrayList<Representation<G>> newlist = new ArrayList<Representation<G>>();
+			//ArrayList<Representation<G>> newlist = new ArrayList<Representation<G>>();
 			for (Representation<G> item : incomingPopulation) {
 				
 				Representation<G> newItem =item.copy();
 				this.mutate(newItem);
-				newlist.add(newItem);
+				//newlist.add(newItem);
 			}
-			incomingPopulation.getPopulation().addAll(newlist);
+			//incomingPopulation.getPopulation().addAll(newlist);
 
 			// step 4: fitness
 			for (Representation<G> item : incomingPopulation) {
