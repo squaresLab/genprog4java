@@ -71,7 +71,7 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 			initialPopulation = incomingPopulation.firstN(incomingPopulation
 					.getPopsize());
 		} 
-		int stillNeed = initialPopulation.getPopsize()*2
+		int stillNeed = initialPopulation.getPopsize()
 				- initialPopulation.size();
 		if (stillNeed > 0) {
 			initialPopulation.add(original.copy());
