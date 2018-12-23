@@ -227,7 +227,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 				copyDestination
 				);
 		
-		System.err.println("cp command: " + cpCommand);
+		//System.err.println("cp command: " + cpCommand);
 		
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(1000000);
 		DefaultExecutor executor = new DefaultExecutor();
