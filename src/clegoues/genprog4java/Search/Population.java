@@ -476,6 +476,8 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 			variants */
 
 	public void crossover(Representation<G> original) {
+		System.out.println("Size of population before crossover: " + this.population.size());
+		
 		Collections.shuffle(population,Configuration.randomizer);
 		ArrayList<Representation<G>> output = new ArrayList<Representation<G>>(this.population);
 		int half = population.size() / 2;
@@ -488,6 +490,8 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 			}
 		}
 		this.population = output; 
+		
+		System.out.println("Size of population before crossover: " + this.population.size());
 	}
 
 	public Population<G> firstN(int desiredSize) {
