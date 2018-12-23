@@ -156,14 +156,10 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 				);
 		
 		offspringPopulation.crossover(original);
-		//ArrayList<Representation<G>> newlist = new ArrayList<Representation<G>>();
+		
 		for (Representation<G> item : offspringPopulation) {
-			
-			Representation<G> newItem =item.copy();
-			this.mutate(newItem);
-			//newlist.add(newItem);
+			this.mutate(item);
 		}
-		//offspringPopulation.getPopulation().addAll(newlist);
 		
 		int gen = 1;
 		setupPopulation(offspringPopulation, original, gen);
@@ -240,14 +236,11 @@ public class NSGAII<G extends EditOperation> extends Search<G> {
 					+ " Invariant Diversity: " + rep.diversity
 					);
 			offspringPopulation.crossover(original);
-			//newlist = new ArrayList<Representation<G>>();
+			
 			for (Representation<G> item : offspringPopulation) {
-				
-				Representation<G> newItem =item.copy();
-				this.mutate(newItem);
-				//newlist.add(newItem);
+				this.mutate(item);
 			}
-			//offspringPopulation.getPopulation().addAll(newlist);
+
 			gen++;
 			setupPopulation(offspringPopulation, original, gen);
 		}
