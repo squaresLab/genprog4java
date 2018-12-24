@@ -387,7 +387,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		Collections.shuffle(population,Configuration.randomizer);
 		ArrayList<Representation<G>> output = new ArrayList<Representation<G>>(this.population);
 		int half = population.size() / 2;
-		for(int it = 0 ; it < half-1; it++) {
+		for(int it = 0 ; it < half; it++) {
 			Representation<G> parent1 = population.get(it); //copy?
 			Representation<G> parent2 = population.get(it + half); //copy?
 			if(GlobalUtils.probability(crossp)) {
