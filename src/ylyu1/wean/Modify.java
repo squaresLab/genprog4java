@@ -62,6 +62,7 @@ public class Modify
 				String s = changereturn(ss);
  				s=changearg(s);
 				if(s.indexOf("getName()")>=0)continue;
+				if(s.indexOf("Flusher")>=0)continue;
 				//Enter location
 				if(w.location.equals("ENTER"))
 				{

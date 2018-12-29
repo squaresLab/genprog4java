@@ -121,7 +121,7 @@ public class VariantCheckerMain
 				CommandLine command6 = CommandLine.parse("rm -rf "+removeString);
 				
 				//System.out.println("command: " + command2.toString());
-				ExecuteWatchdog watchdog = new ExecuteWatchdog(300000);
+				ExecuteWatchdog watchdog = new ExecuteWatchdog(100000);
 				//timeout after 10 minutes, shouldn't be needed as there's timeouts in the JUnit tests. This hard timeout should be avoided as it can create zombie JUnit processes
 				//thus, this timeout should be short
 				DefaultExecutor executor = new DefaultExecutor();
@@ -165,7 +165,7 @@ public class VariantCheckerMain
 					System.out.println("ERRORTIME: "+(System.currentTimeMillis()-starttime));
 					//posFit.setAllPassed(false);
 					System.out.println(exception.toString());
-					//out.flush();
+					out.flush();
 					System.out.println(out.toString());
 					try{
 						executor.execute(command6);

@@ -3,6 +3,7 @@ package ylyu1.wean;
 import clegoues.genprog4java.fitness.JUnitTestRunner;
 
 import java.io.IOException;
+import java.util.*;
 
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
@@ -28,22 +29,30 @@ public class MultiTestRunner
 		
 		try
 		{
+
+		        System.out.println("Should initialize");	
+			Flusher.initialize();
 			String[] testsRaw = args[0].split(SEPARATOR);
-			Class<?>[] clazzes = new Class<?>[testsRaw.length];
+			List<Class<?>> clazzes = new ArrayList<Class<?>>();
 			for(int i = 0; i < testsRaw.length; i++)
 			{
 				try {
-					clazzes[i] = Class.forName(testsRaw[i].trim());
+					Class<?> clazzz = Class.forName(testsRaw[i].trim());
+					clazzes.add(clazzz);
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				} catch (ExceptionInInitializerError e){
+					e.printStackTrace();
 				}
 			}
-		        System.out.println("Should initialize");	
-			Flusher.initialize();
+			Class<?>[] clazzess = new Class<?>[clazzes.size()];
+			for(int i = 0; i < clazzes.size(); i++){
+				clazzess[i]=clazzes.get(i);
+			} 
 			
 			JUnitCore runner = new JUnitCore();
-			Result r = runner.run(clazzes);
+			Result r = runner.run(clazzess);
 			
 			System.out.println("[SUCCESS]:" + r.wasSuccessful());
 			System.out.println("[TOTAL]:" + r.getRunCount());
