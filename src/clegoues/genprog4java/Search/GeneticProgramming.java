@@ -160,7 +160,7 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			dp.diversityScores.add(diversities);
 			
 			// Step 1: selection
-			incomingPopulation.selection(incomingPopulation.getPopsize() / 2);
+			incomingPopulation.selection(incomingPopulation.getPopsize());
 			
 			// step 2: crossover
 			incomingPopulation.crossover(original);
