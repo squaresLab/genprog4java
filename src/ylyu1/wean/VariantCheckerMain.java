@@ -14,6 +14,7 @@ import clegoues.genprog4java.main.Main;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Hashtable;
 
 import org.apache.commons.exec.CommandLine;
@@ -24,7 +25,7 @@ import org.apache.commons.exec.PumpStreamHandler;
 
 public class VariantCheckerMain
 {
-	public static String removeString = "org";
+	public static String removeString = "introclassJava";
 	public static int turn = 0;
 	public static String debug = "NOTDEBUG"; 
 	//public final static boolean cinnamon = true;
@@ -41,20 +42,45 @@ public class VariantCheckerMain
 		pr.waitFor();
 	}
 	
+	//TODO: modify this to convert method level granularity to class level granularity
 	private static void setupArgForms()
 	{
+		Collection<String> posTestClasses = new ArrayList<>();
+		for(TestCase posTest : Fitness.positiveTestsDaikonSample)
+		{
+			String[] parts = posTest.getTestName().split("::");
+			if (parts.length > 0)
+			{
+				String className = parts[0];
+				if(!posTestClasses.contains(className))
+					posTestClasses.add(className);
+			}
+			else
+				System.err.println("VariantCheckerMain.setupArgForms: Unexpected test case name detected in processing positive tests: " 
+						+ posTest.getTestName());
+		}
 		positiveTestsDaikonSampleArgForm = "";
-		for (TestCase posTest : Fitness.positiveTestsDaikonSample)
-		{
-			positiveTestsDaikonSampleArgForm = positiveTestsDaikonSampleArgForm + posTest.getTestName() + MultiTestRunner.SEPARATOR;
-			//the addition of an extra SEPARATOR at the end should not cause a problem for String.split()
-		}
+		for(String clsName : posTestClasses)
+			positiveTestsDaikonSampleArgForm += clsName + MultiTestRunner.SEPARATOR;
 		
-		negativeTestsArgForm = "";
-		for (TestCase negTest : Fitness.negativeTests)
+
+		Collection<String> negTestClasses = new ArrayList<>();
+		for(TestCase negTest : Fitness.negativeTests)
 		{
-			negativeTestsArgForm = negativeTestsArgForm + negTest.getTestName() + MultiTestRunner.SEPARATOR;
+			String[] parts = negTest.getTestName().split("::");
+			if (parts.length > 0)
+			{
+				String className = parts[0];
+				if(!negTestClasses.contains(className))
+					negTestClasses.add(className);
+			}
+			else
+				System.err.println("VariantCheckerMain.setupArgForms: Unexpected test case name detected in processing negative tests: " 
+						+ negTest.getTestName());
 		}
+		negativeTestsArgForm = "";
+		for(String clsName : negTestClasses)
+			negativeTestsArgForm += clsName + MultiTestRunner.SEPARATOR;
 	}
 	
 	public static void checkInvariant(Population<? extends EditOperation> pop)
