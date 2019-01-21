@@ -27,6 +27,7 @@ public class DataProcessor {
 		if(args.length != 2)
 		{
 			System.out.println("Usage: java -cp GP4J_HOME/target/classes:GP4J_HOME/lib/commons-lang3-3.8.1.jar ylyu1.wean.DataProcessor bugDir seed");
+			System.out.println("bugDir is the directory where ResultOfSeed*.results are located.");
 			System.exit(1);
 		}
 		String bugDir = args[0];
