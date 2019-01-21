@@ -17,12 +17,21 @@ public class DataProcessor {
 		 * Compute anti-plateau score
 		 * Compute average diversity
 		 */
+		/*
 		String dataset = args[0];
 		int bugnum = Integer.parseInt(args[1]);
 		int modenum = Integer.parseInt(args[2]);
 		int seednum = Integer.parseInt(args[3]);
 		String pathToBugs = args[4];
-		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(pathToBugs+modenum+"/"+dataset+bugnum+"Buggy/ResultOfSeed"+seednum+".results"));
+		*/
+		if(args.length != 2)
+		{
+			System.out.println("Usage: java -cp GP4J_HOME/target/classes:GP4J_HOME/lib/commons-lang3-3.8.1.jar ylyu1.wean.DataProcessor bugDir seed");
+			System.exit(1);
+		}
+		String bugDir = args[0];
+		int seed = Integer.parseInt(args[1]);
+		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(bugDir+"/ResultOfSeed"+seed+".results"));
 		Object resultObj = ois.readObject();
 		ois.close();
 		//plateau score: higher better, lower means more plateau
@@ -69,11 +78,11 @@ public class DataProcessor {
 					totalcount += divscores.size();
 				}
 				plateau/=result.fitscores.size();
-				System.out.println(dataset+" "+bugnum+" "+modenum+" "+seednum+" "+result.repair+" "+result.variant+" "+plateau+" "+(total/totalcount));
+				System.out.println(bugDir+" "+seed+" "+result.repair+" "+result.variant+" "+plateau+" "+(total/totalcount));
 			}
 			else
 			{
-				System.out.println(dataset+" "+bugnum+" "+modenum+" "+seednum+" "+result.errorMessage);		    
+				System.out.println(bugDir+" "+seed+" "+result.errorMessage);		    
 			}
 		}
 		else if (resultObj instanceof NSGAIIDataStorer)
@@ -112,11 +121,11 @@ public class DataProcessor {
 					totalcount += divscores.size();
 				}
 				plateau /= numGenerations;
-				System.out.println(dataset+" "+bugnum+" "+modenum+" "+seednum+" "+result.repair+" "+result.variant+" "+plateau+" "+(total/totalcount));
+				System.out.println(bugDir+" "+seed+" "+result.repair+" "+result.variant+" "+plateau+" "+(total/totalcount));
 			}
 			else
 			{
-				System.out.println(dataset+" "+bugnum+" "+modenum+" "+seednum+" "+result.errorMessage);
+				System.out.println(bugDir+" "+seed+" "+result.errorMessage);
 			}
 		}
 		
