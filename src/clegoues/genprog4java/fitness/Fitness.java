@@ -196,6 +196,21 @@ public class Fitness {
 			oos.close();
 			fos.close();
 			logger.info("Serialized test cache to file testcache.ser");
+			
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+	}
+	
+	public static void serializeDivCache() {
+		try {
+			FileOutputStream fos = new FileOutputStream("divcache.ser");
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(Fitness.invariantCache);
+			oos.close();
+			fos.close();
+			logger.info("Serialized diversity cache to file divcache.ser");
+			
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
@@ -227,6 +242,34 @@ public class Fitness {
 		//System.out.println("hashmap is = " + testCache.entrySet().size() + "  " + testCache.toString());
 		fitnessCache.putAll(testCache);
 	}
+	
+	public static void deserializeDivCache(){
+		File fl = new File("divcache.ser");
+		HashMap<Integer, byte[]> divCache = null;
+		if(fl.isFile() && !clearTestCache){
+			try
+			{
+				FileInputStream fis = new FileInputStream("divcache.ser");
+				ObjectInputStream ois = new ObjectInputStream(fis);
+				divCache = (HashMap<Integer,byte[]>) ois.readObject();
+				ois.close();
+				fis.close();
+			}catch(IOException ioe)
+			{
+				ioe.printStackTrace();
+			}catch(ClassNotFoundException c)
+			{
+				System.out.println("Class not found");
+				c.printStackTrace();
+			}
+			System.out.println("Deserialized divCache HashMap");
+		} else {
+			divCache = new HashMap<Integer, byte[]>();
+		}
+		//System.out.println("hashmap is = " + testCache.entrySet().size() + "  " + testCache.toString());
+		invariantCache.putAll(divCache);
+	}
+	
 	/**
 	 * Loads the tests from specified files, initializes the sample vars to not be null.
 	 * Samples properly when the search actually begins.
@@ -262,6 +305,7 @@ public class Fitness {
 		testSample = new ArrayList<TestCase>(Fitness.positiveTests);
 		restSample = new ArrayList<TestCase>();
 		Fitness.deserializeTestCache();
+		Fitness.deserializeDivCache();
 
 	}
 

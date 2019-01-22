@@ -363,12 +363,15 @@ public abstract class Search<G extends EditOperation> {
 		try {
 			this.runAlgorithm(original, incomingPopulation);
 			Fitness.serializeTestCache();
+			Fitness.serializeDivCache();
 		} catch(RepairFoundException e) {
 			Fitness.serializeTestCache();
+			Fitness.serializeDivCache();
 			GPDataProcessor.repair=true;
 			return;
 		} catch (GiveUpException e) {
 			Fitness.serializeTestCache();
+			Fitness.serializeDivCache();
 			return;
 		}
 	}
