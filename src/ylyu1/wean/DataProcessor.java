@@ -24,15 +24,21 @@ public class DataProcessor {
 		int seednum = Integer.parseInt(args[3]);
 		String pathToBugs = args[4];
 		*/
-		if(args.length != 2)
+		if(args.length != 6)
 		{
-			System.out.println("Usage: java -cp GP4J_HOME/target/classes:GP4J_HOME/lib/commons-lang3-3.8.1.jar ylyu1.wean.DataProcessor bugDir seed");
+			System.out.println("Usage: java -cp GP4J_HOME/target/classes:GP4J_HOME/lib/commons-lang3-3.8.1.jar ylyu1.wean.DataProcessor bugDir seed (and a bunch of others)");
 			System.out.println("bugDir is the directory where ResultOfSeed*.results are located.");
 			System.exit(1);
 		}
-		String bugDir = args[0];
-		int seed = Integer.parseInt(args[1]);
-		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(bugDir+"/ResultOfSeed"+seed+".results"));
+		//String bugDir = args[0];
+		//int seed = Integer.parseInt(args[1]);
+		String name = args[0];
+		String hash = args[1];
+		String num = args[2];
+		String mode = args[3];
+		String seed = args[4];
+		String dir = args[5];
+		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dir+"/"+name+"_"+hash+"_"+num+"_mode"+mode+"_ResultOfSeed"+seed+".results"));
 		Object resultObj = ois.readObject();
 		ois.close();
 		//plateau score: higher better, lower means more plateau
@@ -79,11 +85,11 @@ public class DataProcessor {
 					totalcount += divscores.size();
 				}
 				plateau/=result.fitscores.size();
-				System.out.println(bugDir+" "+seed+" "+result.repair+" "+result.variant+" "+plateau+" "+(total/totalcount));
+				System.out.println(mode+" "+name+" "+hash+" "+num+" "+seed+" "+result.repair+" "+result.variant+" "+plateau+" "+(total/totalcount));
 			}
 			else
 			{
-				System.out.println(bugDir+" "+seed+" "+result.errorMessage);		    
+				System.out.println(mode+" "+name+" "+hash+" "+num+" "+seed+" "+result.errorMessage);		    
 			}
 		}
 		else if (resultObj instanceof NSGAIIDataStorer)
@@ -122,11 +128,11 @@ public class DataProcessor {
 					totalcount += divscores.size();
 				}
 				plateau /= numGenerations;
-				System.out.println(bugDir+" "+seed+" "+result.repair+" "+result.variant+" "+plateau+" "+(total/totalcount));
+				System.out.println(mode+" "+name+" "+hash+" "+num+" "+seed+" "+result.repair+" "+result.variant+" "+plateau+" "+(total/totalcount));
 			}
 			else
 			{
-				System.out.println(bugDir+" "+seed+" "+result.errorMessage);
+				System.out.println(mode+" "+name+" "+hash+" "+num+" "+seed+" "+result.errorMessage);		    
 			}
 		}
 		
