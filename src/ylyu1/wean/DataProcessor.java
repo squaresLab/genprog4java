@@ -138,12 +138,12 @@ public class DataProcessor {
 		
 	}
 	
-	private static boolean nsgaFitnessesAreEqual(Pair<Integer, Double> f1, Pair<Integer, Double> f2)
+	public static boolean nsgaFitnessesAreEqual(Pair<Integer, Double> f1, Pair<Integer, Double> f2)
 	{
 		return f1.getLeft().equals(f2.getLeft()) && f1.getRight().equals(f2.getRight());
 	}
 	
-	private static boolean nsgaIsValid(Map<Class<?>, Double> o)
+	public static boolean nsgaIsValid(Map<Class<?>, Double> o)
 	{
 		for(Double score : o.values())
 			if( ! score.equals(0)) return true;

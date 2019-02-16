@@ -200,7 +200,7 @@ public class VariantCheckerMain
 					}
 					throw exception;
 					
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					e.printStackTrace();
 					System.out.println(out.toString());
 					try{

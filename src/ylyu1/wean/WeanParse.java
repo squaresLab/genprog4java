@@ -8,6 +8,7 @@ public class WeanParse
 	public static ArrayList<PredGroup> allInvariants = null;
 	public static void main(String[] args) throws IOException
 	{
+	int total = 0;
 		String fn = args[0];
                 String debug = args[1];
 		Scanner input = new Scanner(new File(fn+".wean"));
@@ -27,12 +28,13 @@ public class WeanParse
 					current.location="EXIT";
 					current.method=line.substring(0,line.indexOf(":::EXIT"));
 					String s = line.substring(line.indexOf(":::EXIT")+7);
-					if(!s.equals(""))current.line=Integer.parseInt(s);
+					if(!s.equals(""))current.line=Integer.parseInt(s);else total++;
 				}
 				else if(line.substring(line.length()-8).equals(":::ENTER"))
 				{
 					current.location="ENTER";
 					current.method=line.substring(0,line.length()-8);
+total++;
 				}
 				else if(line.substring(line.length()-9).equals(":::OBJECT"))
 				{
@@ -47,6 +49,7 @@ public class WeanParse
 				current.statements.add(line);
 			}
 		}
+System.out.println(total);
 		if(current!=null)classes.add(current);
 		//System.out.println(classes.size());
 		if(debug.equals("DEBUG"))
