@@ -1,14 +1,47 @@
 Location:
-int result=0;
+int result=1;
 Weight:
 0.1
 
 Location:
 if (a == 0) {
-  result=b;
+  b=b - a;
 }
  else {
-  result=a;
+  while (b != 0) {
+    result=b;
+    if (a > b) {
+      a=a - b;
+    }
+ else {
+      b=b - a;
+    }
+  }
+}
+Weight:
+0.1
+
+Location:
+{
+  b=b - a;
+}
+Weight:
+0.1
+
+Location:
+b=b - a;
+Weight:
+1.0
+
+Location:
+while (b != 0) {
+  result=b;
+  if (a > b) {
+    a=a - b;
+  }
+ else {
+    b=b - a;
+  }
 }
 Weight:
 0.1
@@ -16,41 +49,18 @@ Weight:
 Location:
 {
   result=b;
+  if (a > b) {
+    a=a - b;
+  }
+ else {
+    b=b - a;
+  }
 }
 Weight:
 0.1
 
 Location:
 result=b;
-Weight:
-1.0
-
-Location:
-result=a;
-Weight:
-0.1
-
-Location:
-while (b != 0) {
-  if (a > b) {
-    a=a - b;
-  }
- else {
-    b=b - a;
-  }
-}
-Weight:
-0.1
-
-Location:
-{
-  if (a > b) {
-    a=a - b;
-  }
- else {
-    b=b - a;
-  }
-}
 Weight:
 0.1
 

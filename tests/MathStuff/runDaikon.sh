@@ -2,11 +2,27 @@
 
 FILENAME=$1
 CLASSP=$2
+GP4JHOME=$3
+#variable is deliberately named differently from GP4J_HOME
+JAVA8HOME=$4
+#variable is deliberately named differently from JAVA_HOME
+DAIKONHOME=$5
 
+#if [ $# -ne 5 ]; then
+#	echo "Wrong number of arguments"
+#	exit 59295
+#else
 
+#daikon setup
+DAIKONDIR=$DAIKONHOME
+JAVA_HOME=$JAVA8HOME
 
-java -cp .:$CLASSPATH:$CLASSP:/home/lvyiwei1/daikon-master/daikon.jar:/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/lib/rt.jar:/usr/lib/jvm/java-1.8.0-openjdk-amd64/lib/tools.jar daikon.Chicory --ppt-omit-pattern=junit\. --ppt-omit-pattern=proxy\. clegoues.genprog4java.fitness.JUnitTestRunner $FILENAME
+echo $DAIKONDIR
 
-java -cp /home/lvyiwei1/daikon-master/daikon.jar:/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/lib/rt.jar:/usr/lib/jvm/java-1.8.0-openjdk-amd64/lib/tools.jar daikon.Daikon --format=java JUnitTestRunner.dtrace.gz > JUnitTestRunner.wean
+source $DAIKONDIR/scripts/daikon.bashrc
 
-java -cp .:$CLASSP ylyu1.wean.WeanParse JUnitTestRunner DEBUG
+java -cp .:$CLASSPATH:$CLASSP:$DAIKONDIR/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar daikon.Chicory --ppt-omit-pattern=junit\. --ppt-omit-pattern=proxy\. ylyu1.wean.MultiTestRunner $FILENAME
+
+java -cp $DAIKONHOME/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar daikon.Daikon --format=java MultiTestRunner.dtrace.gz > MultiTestRunner.wean
+
+java -cp .:$CLASSP ylyu1.wean.WeanParse MultiTestRunner NOTDEBUG

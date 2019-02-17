@@ -40737,3 +40737,749 @@ INFO	2018-07-09 09:00:05,526	1154661	clegoues.genprog4java.fitness.Fitness	[main
 INFO	2018-07-09 09:00:05,526	1154661	clegoues.genprog4java.main.Main	[main]	
 Total elapsed time: 1154
 
+DEBUG	2019-01-26 11:46:53,981	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+ERROR	2019-01-26 11:46:54,544	563	clegoues.util.ConfigurationBuilder	[main]	java.io.FileNotFoundException: a (No such file or directory)
+	at java.io.FileInputStream.open0(Native Method)
+	at java.io.FileInputStream.open(FileInputStream.java:195)
+	at java.io.FileInputStream.<init>(FileInputStream.java:138)
+	at java.io.FileReader.<init>(FileReader.java:72)
+	at clegoues.util.ConfigurationBuilder.loadProperties(ConfigurationBuilder.java:618)
+	at clegoues.util.ConfigurationBuilder.parseArgs(ConfigurationBuilder.java:575)
+	at clegoues.genprog4java.main.Main.main(Main.java:127)
+
+ERROR	2019-01-26 11:46:54,544	563	clegoues.util.ConfigurationBuilder	[main]	missing required property javaVM
+ERROR	2019-01-26 11:46:54,544	563	clegoues.util.ConfigurationBuilder	[main]	missing required property libs
+DEBUG	2019-01-26 11:51:15,549	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2019-01-26 11:51:16,009	460	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2019-01-26 11:51:18,318	2769	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@a3b8fd89
+INFO	2019-01-26 11:51:18,318	2769	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2019-01-26 11:51:19,541	3992	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2019-01-26 11:51:20,721	5172	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2019-01-26 11:51:20,722	5173	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2019-01-26 11:51:21,977	6428	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2019-01-26 11:51:21,977	6428	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 3659)
+INFO	2019-01-26 11:51:21,977	6428	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2019-01-26 11:51:22,091	6542	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.pos
+INFO	2019-01-26 11:51:23,951	8402	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.neg
+INFO	2019-01-26 11:51:26,539	10990	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2019-01-26 11:51:26,540	10991	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2019-01-26 11:51:35,516	19967	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: variant0) Hash: 1547385327
+INFO	2019-01-26 11:51:37,776	22227	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,8) (stored at: variant1) Hash: 1356394237
+DEBUG	2019-01-26 12:00:48,611	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2019-01-26 12:00:49,202	591	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2019-01-26 12:00:51,359	2748	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@a3b8fd89
+INFO	2019-01-26 12:00:51,361	2750	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2019-01-26 12:00:52,745	4134	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2019-01-26 12:00:53,120	4509	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2019-01-26 12:00:53,120	4509	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2019-01-26 12:00:54,475	5864	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2019-01-26 12:00:54,476	5865	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 3115)
+INFO	2019-01-26 12:00:54,476	5865	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2019-01-26 12:00:54,517	5906	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.pos
+INFO	2019-01-26 12:00:54,928	6317	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.neg
+INFO	2019-01-26 12:00:56,478	7867	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2019-01-26 12:00:56,479	7868	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2019-01-26 12:00:58,008	9397	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: variant0) Hash: 1547385327
+INFO	2019-01-26 12:00:59,736	11125	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,8) (stored at: variant1) Hash: 1356394237
+INFO	2019-01-26 12:01:01,285	12674	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(4) (stored at: variant2) Hash: 393021445
+INFO	2019-01-26 12:01:02,790	14179	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,12) (stored at: variant3) Hash: -706004613
+INFO	2019-01-26 12:01:04,288	15677	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(15,8) (stored at: variant4) Hash: 1354216870
+INFO	2019-01-26 12:01:06,184	17573	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(4,4) (stored at: variant5) Hash: 1739298671
+INFO	2019-01-26 12:01:07,996	19385	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(3) (stored at: variant6) Hash: 690677373
+INFO	2019-01-26 12:01:13,536	24925	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(11,3) (stored at: variant7) Hash: -1363731125
+INFO	2019-01-26 12:01:19,338	30727	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(10,11) (stored at: variant8) Hash: 1406722912
+INFO	2019-01-26 12:01:25,510	36899	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(12) (stored at: variant9) Hash: -1870476091
+INFO	2019-01-26 12:01:27,475	38864	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(3,15) (stored at: variant10) Hash: 2055503177
+INFO	2019-01-26 12:01:29,428	40817	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(9,8) (stored at: variant11) Hash: 1619231609
+INFO	2019-01-26 12:01:31,222	42611	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(4,6) (stored at: variant12) Hash: 1436411280
+INFO	2019-01-26 12:01:31,273	42662	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(4) (stored at: ) Hash: 393021445
+INFO	2019-01-26 12:01:36,991	48380	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: variant13) Hash: 1943831576
+INFO	2019-01-26 12:01:38,758	50147	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,3) (stored at: variant14) Hash: -2104798022
+INFO	2019-01-26 12:01:38,842	50231	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(9,9) (stored at: ) Hash: 1547385327
+INFO	2019-01-26 12:01:40,272	51661	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,14) (stored at: variant15) Hash: 718929596
+ERROR	2019-01-26 12:01:40,344	51733	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+org/MathStuff.java:13: error: cannot find symbol
+			result= b;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:17: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:27: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:29: error: cannot find symbol
+		return result;
+		       ^
+  symbol:   variable result
+  location: class MathStuff
+4 errors
+1 warning
+
+INFO	2019-01-26 12:01:40,345	51734	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtDelete(1) at variant16 fails to compile
+
+INFO	2019-01-26 12:01:40,345	51734	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: variant16) Hash: 1164068833
+INFO	2019-01-26 12:01:41,816	53205	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(11,12) (stored at: variant17) Hash: 661149303
+INFO	2019-01-26 12:01:41,862	53251	clegoues.genprog4java.Search.Search	[main]	search: generation1
+INFO	2019-01-26 12:02:19,422	90811	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(10,8) StmtAppend(2,12) (stored at: variant18) Hash: 1120293228
+INFO	2019-01-26 12:02:21,460	92849	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(2,3) (stored at: variant19) Hash: -547141140
+INFO	2019-01-26 12:02:23,576	94965	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(11,12) StmtDelete(4) (stored at: variant20) Hash: -1062166643
+INFO	2019-01-26 12:02:25,084	96473	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(4,4) StmtReplace(4,6) (stored at: variant21) Hash: -1383899930
+INFO	2019-01-26 12:02:26,625	98014	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(3) StmtAppend(14,8) (stored at: variant22) Hash: -1546688208
+INFO	2019-01-26 12:02:26,704	98093	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(4) StmtDelete(4) (stored at: ) Hash: 393021445
+INFO	2019-01-26 12:02:26,747	98136	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(3,15) StmtDelete(4) (stored at: ) Hash: 2055503177
+INFO	2019-01-26 12:02:28,357	99746	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(4,4) StmtAppend(4,9) (stored at: variant23) Hash: 1475390760
+INFO	2019-01-26 12:02:33,947	105336	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(11,12) StmtDelete(10) (stored at: variant24) Hash: -239451764
+INFO	2019-01-26 12:02:35,936	107325	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(4) StmtReplace(4,9) (stored at: variant25) Hash: 1088807206
+ERROR	2019-01-26 12:02:36,013	107402	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+org/MathStuff.java:16: error: cannot find symbol
+				result = b;
+				^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:17: error: cannot find symbol
+				result = a;
+				^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:22: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:32: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:34: error: cannot find symbol
+		return result;
+		       ^
+  symbol:   variable result
+  location: class MathStuff
+5 errors
+1 warning
+
+INFO	2019-01-26 12:02:36,014	107403	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtAppend(4,6) StmtAppend(1,12) at variant26 fails to compile
+
+INFO	2019-01-26 12:02:36,014	107403	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(4,6) StmtAppend(1,12) (stored at: variant26) Hash: -120483393
+INFO	2019-01-26 12:02:36,074	107463	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(9,9) StmtDelete(4) (stored at: ) Hash: 393021445
+INFO	2019-01-26 12:02:36,076	107465	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(4,3) StmtDelete(4) (stored at: ) Hash: 393021445
+INFO	2019-01-26 12:02:41,625	113014	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(4,3) StmtReplace(10,6) (stored at: variant27) Hash: -442364187
+INFO	2019-01-26 12:02:41,672	113061	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(4,4) (stored at: ) Hash: 1739298671
+INFO	2019-01-26 12:02:43,077	114466	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(4,14) StmtAppend(6,9) (stored at: variant28) Hash: -634693033
+INFO	2019-01-26 12:02:44,546	115935	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(10,8) StmtReplace(6,10) (stored at: variant29) Hash: 646492938
+INFO	2019-01-26 12:02:46,344	117733	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(4) StmtAppend(6,10) (stored at: variant30) Hash: -1358399337
+INFO	2019-01-26 12:02:46,392	117781	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(4,6) StmtAppend(4,9) (stored at: ) Hash: 1475390760
+INFO	2019-01-26 12:02:47,838	119227	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(4) StmtAppend(15,4) (stored at: variant31) Hash: 1573384175
+INFO	2019-01-26 12:02:49,694	121083	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(4,8) (stored at: variant32) Hash: 478564880
+INFO	2019-01-26 12:02:49,741	121130	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(4) (stored at: ) Hash: 393021445
+INFO	2019-01-26 12:02:51,173	122562	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(4,12) (stored at: variant33) Hash: 563294991
+INFO	2019-01-26 12:02:51,220	122609	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(4,6) (stored at: ) Hash: -1383899930
+INFO	2019-01-26 12:02:52,640	124029	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(4,11) (stored at: variant34) Hash: -1222275318
+INFO	2019-01-26 12:02:54,280	125669	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(10,6) (stored at: variant35) Hash: 2062062617
+INFO	2019-01-26 12:02:54,326	125715	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(14) (stored at: ) Hash: 1943831576
+INFO	2019-01-26 12:02:54,329	125718	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(4,9) (stored at: ) Hash: 1475390760
+INFO	2019-01-26 12:02:54,329	125718	clegoues.genprog4java.Search.Search	[main]	search: generation2
+ERROR	2019-01-26 12:03:30,891	162280	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+org/MathStuff.java:19: error: cannot find symbol
+				result = b;
+				^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:31: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:41: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:43: error: cannot find symbol
+		return result;
+		       ^
+  symbol:   variable result
+  location: class MathStuff
+4 errors
+1 warning
+
+INFO	2019-01-26 12:03:30,896	162285	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtAppend(4,4) StmtAppend(4,9) StmtReplace(1,9) at variant36 fails to compile
+
+INFO	2019-01-26 12:03:30,896	162285	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtAppend(4,4) StmtAppend(4,9) StmtReplace(1,9) (stored at: variant36) Hash: 880761690
+INFO	2019-01-26 12:03:30,950	162339	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.0 StmtAppend(4,8) StmtReplace(4,12) (stored at: ) Hash: -706004613
+INFO	2019-01-26 12:03:32,449	163838	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.0 StmtAppend(4,8) StmtReplace(4,4) (stored at: variant37) Hash: 1087880103
+INFO	2019-01-26 12:03:33,972	165361	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.0 StmtReplace(11,12) StmtDelete(4) StmtAppend(15,9) (stored at: variant38) Hash: -687668184
+INFO	2019-01-26 12:03:34,133	165522	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.0 StmtAppend(4,8) StmtAppend(4,15) (stored at: ) Hash: 1436411280
+INFO	2019-01-26 12:03:34,140	165529	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.0 StmtReplace(2,3) StmtAppend(4,11) (stored at: ) Hash: -547141140
+INFO	2019-01-26 12:03:34,144	165533	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.0 StmtAppend(4,4) StmtReplace(4,6) StmtReplace(4,14) (stored at: ) Hash: 718929596
+INFO	2019-01-26 12:03:39,955	171344	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 0.0 StmtDelete(4) StmtReplace(2,11) (stored at: variant39) Hash: 365053834
+INFO	2019-01-26 12:03:40,012	171401	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.0 StmtAppend(4,4) StmtReplace(4,6) StmtDelete(4) (stored at: ) Hash: 393021445
+DEBUG	2019-01-26 12:05:13,055	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2019-01-26 12:05:13,458	403	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2019-01-26 12:05:15,533	2478	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@a3b8fd89
+INFO	2019-01-26 12:05:15,533	2478	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2019-01-26 12:05:16,039	2984	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2019-01-26 12:05:16,243	3188	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2019-01-26 12:05:16,244	3189	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2019-01-26 12:05:17,502	4447	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2019-01-26 12:05:17,502	4447	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 1969)
+INFO	2019-01-26 12:05:17,502	4447	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2019-01-26 12:05:17,536	4481	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.pos
+INFO	2019-01-26 12:05:18,060	5005	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.neg
+INFO	2019-01-26 12:05:19,512	6457	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2019-01-26 12:05:19,512	6457	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2019-01-26 12:05:20,980	7925	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: variant0) Hash: 1547385327
+INFO	2019-01-26 12:05:22,559	9504	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,8) (stored at: variant1) Hash: 1356394237
+INFO	2019-01-26 12:05:24,047	10992	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(4) (stored at: variant2) Hash: 393021445
+INFO	2019-01-26 12:05:25,552	12497	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,12) (stored at: variant3) Hash: -706004613
+INFO	2019-01-26 12:05:27,063	14008	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(15,8) (stored at: variant4) Hash: 1354216870
+INFO	2019-01-26 12:05:28,749	15694	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(4,4) (stored at: variant5) Hash: 1739298671
+INFO	2019-01-26 12:05:30,378	17323	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(3) (stored at: variant6) Hash: 690677373
+INFO	2019-01-26 12:05:36,413	23358	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(11,3) (stored at: variant7) Hash: -1363731125
+INFO	2019-01-26 12:05:43,034	29979	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(10,11) (stored at: variant8) Hash: 1406722912
+INFO	2019-01-26 12:05:49,154	36099	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(12) (stored at: variant9) Hash: -1870476091
+INFO	2019-01-26 12:05:51,274	38219	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(3,15) (stored at: variant10) Hash: 2055503177
+INFO	2019-01-26 12:05:53,548	40493	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(9,8) (stored at: variant11) Hash: 1619231609
+INFO	2019-01-26 12:05:55,215	42160	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(4,6) (stored at: variant12) Hash: 1436411280
+INFO	2019-01-26 12:05:55,265	42210	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(4) (stored at: ) Hash: 393021445
+INFO	2019-01-26 12:06:00,731	47676	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: variant13) Hash: 1943831576
+INFO	2019-01-26 12:06:02,531	49476	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,3) (stored at: variant14) Hash: -2104798022
+INFO	2019-01-26 12:06:02,584	49529	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(9,9) (stored at: ) Hash: 1547385327
+INFO	2019-01-26 12:06:04,015	50960	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,14) (stored at: variant15) Hash: 718929596
+ERROR	2019-01-26 12:06:04,125	51070	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+org/MathStuff.java:13: error: cannot find symbol
+			result= b;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:17: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:27: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:29: error: cannot find symbol
+		return result;
+		       ^
+  symbol:   variable result
+  location: class MathStuff
+4 errors
+1 warning
+
+INFO	2019-01-26 12:06:04,127	51072	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtDelete(1) at variant16 fails to compile
+
+INFO	2019-01-26 12:06:04,127	51072	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: variant16) Hash: 1164068833
+INFO	2019-01-26 12:06:05,617	52562	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(11,12) (stored at: variant17) Hash: 661149303
+INFO	2019-01-26 12:06:05,663	52608	clegoues.genprog4java.Search.Search	[main]	search: generation1
+INFO	2019-01-26 12:06:41,392	88337	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(9,9) StmtAppend(4,11) (stored at: variant18) Hash: -1222275318
+INFO	2019-01-26 12:06:42,872	89817	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(4,4) StmtReplace(15,10) (stored at: variant19) Hash: 210450108
+INFO	2019-01-26 12:06:43,703	90648	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(9,11) (stored at: variant20) Hash: -192834212
+INFO	2019-01-26 12:06:45,227	92172	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(4,3) StmtReplace(15,4) (stored at: variant21) Hash: 485368853
+INFO	2019-01-26 12:06:45,277	92222	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(3,15) StmtReplace(4,12) (stored at: ) Hash: 2055503177
+INFO	2019-01-26 12:06:46,833	93778	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(10,8) StmtDelete(4) (stored at: variant22) Hash: 1861867539
+INFO	2019-01-26 12:06:46,883	93828	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(4,14) StmtDelete(4) (stored at: ) Hash: 393021445
+INFO	2019-01-26 12:06:48,405	95350	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(9,8) StmtReplace(4,10) (stored at: variant23) Hash: -1666631345
+INFO	2019-01-26 12:06:54,717	101662	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(4,4) StmtDelete(10) (stored at: variant24) Hash: -1855906036
+INFO	2019-01-26 12:06:54,771	101716	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(3,15) StmtDelete(3) (stored at: ) Hash: 690677373
+INFO	2019-01-26 12:06:56,510	103455	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(9,9) StmtAppend(6,10) (stored at: variant25) Hash: -210409491
+INFO	2019-01-26 12:06:56,556	103501	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(4,4) StmtDelete(4) (stored at: ) Hash: 393021445
+INFO	2019-01-26 12:06:57,972	104917	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(4,14) StmtAppend(8,12) (stored at: variant26) Hash: 389765560
+INFO	2019-01-26 12:07:03,482	110427	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(4) StmtReplace(12,3) (stored at: variant27) Hash: -367645594
+INFO	2019-01-26 12:07:03,529	110474	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(1) (stored at: ) Hash: 1164068833
+ERROR	2019-01-26 12:07:03,550	110495	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+org/MathStuff.java:13: error: cannot find symbol
+			result= b;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:17: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:27: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:29: error: cannot find symbol
+		return result;
+		       ^
+  symbol:   variable result
+  location: class MathStuff
+4 errors
+1 warning
+
+INFO	2019-01-26 12:07:03,551	110496	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtReplace(11,12) StmtDelete(1) at variant28 fails to compile
+
+INFO	2019-01-26 12:07:03,551	110496	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(11,12) StmtDelete(1) (stored at: variant28) Hash: -1424478871
+INFO	2019-01-26 12:07:04,976	111921	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(4,14) StmtAppend(8,15) (stored at: variant29) Hash: 1693646951
+INFO	2019-01-26 12:07:06,469	113414	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(15,8) StmtDelete(4) (stored at: variant30) Hash: 223190608
+ERROR	2019-01-26 12:07:06,543	113488	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+org/MathStuff.java:17: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:27: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:29: error: cannot find symbol
+		return result;
+		       ^
+  symbol:   variable result
+  location: class MathStuff
+3 errors
+1 warning
+
+INFO	2019-01-26 12:07:06,543	113488	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtReplace(4,14) StmtDelete(1) at variant31 fails to compile
+
+INFO	2019-01-26 12:07:06,543	113488	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(4,14) StmtDelete(1) (stored at: variant31) Hash: 335613102
+INFO	2019-01-26 12:07:08,039	114984	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(11,12) StmtDelete(4) (stored at: variant32) Hash: -1062166643
+INFO	2019-01-26 12:07:08,085	115030	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(1) (stored at: ) Hash: 1164068833
+INFO	2019-01-26 12:07:08,088	115033	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(11,3) (stored at: ) Hash: -1363731125
+INFO	2019-01-26 12:07:08,090	115035	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(4,6) (stored at: ) Hash: 1436411280
+INFO	2019-01-26 12:07:09,525	116470	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(4,12) (stored at: variant33) Hash: 563294991
+INFO	2019-01-26 12:07:09,572	116517	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(4) (stored at: ) Hash: 393021445
+INFO	2019-01-26 12:07:11,073	118018	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(2,9) (stored at: variant34) Hash: 168114953
+INFO	2019-01-26 12:07:16,565	123510	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(11,14) (stored at: variant35) Hash: -204511786
+INFO	2019-01-26 12:07:18,148	125093	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(10,9) (stored at: variant36) Hash: -242372052
+INFO	2019-01-26 12:07:23,638	130583	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(14,3) (stored at: variant37) Hash: 290168813
+INFO	2019-01-26 12:07:23,685	130630	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(1) (stored at: ) Hash: 1164068833
+INFO	2019-01-26 12:07:23,686	130631	clegoues.genprog4java.Search.Search	[main]	search: generation2
+DEBUG	2019-01-26 12:08:08,008	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2019-01-26 12:08:08,451	443	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2019-01-26 12:08:10,696	2688	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@a3b8fd89
+INFO	2019-01-26 12:08:10,701	2693	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2019-01-26 12:08:11,165	3157	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2019-01-26 12:08:11,371	3363	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2019-01-26 12:08:11,373	3365	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2019-01-26 12:08:12,624	4616	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2019-01-26 12:08:12,624	4616	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 1923)
+INFO	2019-01-26 12:08:12,624	4616	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2019-01-26 12:08:12,661	4653	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.pos
+INFO	2019-01-26 12:08:13,133	5125	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.neg
+INFO	2019-01-26 12:08:14,586	6578	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2019-01-26 12:08:14,587	6579	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2019-01-26 12:08:16,088	8080	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: variant0) Hash: 1547385327
+INFO	2019-01-26 12:08:17,658	9650	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,8) (stored at: variant1) Hash: 1356394237
+INFO	2019-01-26 12:08:19,157	11149	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(4) (stored at: variant2) Hash: 393021445
+INFO	2019-01-26 12:08:20,660	12652	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,12) (stored at: variant3) Hash: -706004613
+INFO	2019-01-26 12:08:22,177	14169	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(15,8) (stored at: variant4) Hash: 1354216870
+INFO	2019-01-26 12:08:23,676	15668	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(4,4) (stored at: variant5) Hash: 1739298671
+INFO	2019-01-26 12:08:25,187	17179	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(3) (stored at: variant6) Hash: 690677373
+INFO	2019-01-26 12:08:30,748	22740	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(11,3) (stored at: variant7) Hash: -1363731125
+INFO	2019-01-26 12:08:36,373	28365	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(10,11) (stored at: variant8) Hash: 1406722912
+INFO	2019-01-26 12:08:42,088	34080	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(12) (stored at: variant9) Hash: -1870476091
+INFO	2019-01-26 12:08:44,094	36086	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(3,15) (stored at: variant10) Hash: 2055503177
+INFO	2019-01-26 12:08:45,610	37602	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(9,8) (stored at: variant11) Hash: 1619231609
+INFO	2019-01-26 12:08:47,192	39184	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(4,6) (stored at: variant12) Hash: 1436411280
+INFO	2019-01-26 12:08:47,240	39232	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(4) (stored at: ) Hash: 393021445
+INFO	2019-01-26 12:08:52,695	44687	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: variant13) Hash: 1943831576
+INFO	2019-01-26 12:08:54,580	46572	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,3) (stored at: variant14) Hash: -2104798022
+INFO	2019-01-26 12:08:54,632	46624	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(9,9) (stored at: ) Hash: 1547385327
+INFO	2019-01-26 12:08:56,066	48058	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,14) (stored at: variant15) Hash: 718929596
+ERROR	2019-01-26 12:08:56,137	48129	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+org/MathStuff.java:13: error: cannot find symbol
+			result= b;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:17: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:27: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:29: error: cannot find symbol
+		return result;
+		       ^
+  symbol:   variable result
+  location: class MathStuff
+4 errors
+1 warning
+
+INFO	2019-01-26 12:08:56,137	48129	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtDelete(1) at variant16 fails to compile
+
+INFO	2019-01-26 12:08:56,138	48130	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: variant16) Hash: 1164068833
+INFO	2019-01-26 12:08:57,617	49609	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(11,12) (stored at: variant17) Hash: 661149303
+INFO	2019-01-26 12:08:57,663	49655	clegoues.genprog4java.Search.Search	[main]	search: generation1
+DEBUG	2019-01-26 12:12:51,477	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2019-01-26 12:12:53,107	1630	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2019-01-26 12:12:54,993	3516	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@a3b8fd89
+INFO	2019-01-26 12:12:54,994	3517	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2019-01-26 12:12:55,495	4018	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2019-01-26 12:12:55,718	4241	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2019-01-26 12:12:55,720	4243	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2019-01-26 12:12:56,955	5478	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2019-01-26 12:12:56,955	5478	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 1961)
+INFO	2019-01-26 12:12:56,955	5478	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2019-01-26 12:12:56,998	5521	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.pos
+INFO	2019-01-26 12:12:57,642	6165	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.neg
+INFO	2019-01-26 12:12:59,119	7642	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2019-01-26 12:12:59,119	7642	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2019-01-26 12:13:04,756	13279	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: variant0) Hash: 1547385327
+INFO	2019-01-26 12:13:07,014	15537	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,8) (stored at: variant1) Hash: 1356394237
+INFO	2019-01-26 12:13:09,656	18179	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(4) (stored at: variant2) Hash: 393021445
+INFO	2019-01-26 12:13:12,106	20629	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,12) (stored at: variant3) Hash: -706004613
+INFO	2019-01-26 12:13:14,474	22997	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(15,8) (stored at: variant4) Hash: 1354216870
+INFO	2019-01-26 12:13:16,675	25198	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(4,4) (stored at: variant5) Hash: 1739298671
+INFO	2019-01-26 12:13:18,708	27231	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(3) (stored at: variant6) Hash: 690677373
+INFO	2019-01-26 12:13:24,536	33059	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(11,3) (stored at: variant7) Hash: -1363731125
+INFO	2019-01-26 12:13:30,214	38737	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(10,11) (stored at: variant8) Hash: 1406722912
+INFO	2019-01-26 12:13:35,816	44339	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(12) (stored at: variant9) Hash: -1870476091
+INFO	2019-01-26 12:13:37,844	46367	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(3,15) (stored at: variant10) Hash: 2055503177
+INFO	2019-01-26 12:13:39,857	48380	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(9,8) (stored at: variant11) Hash: 1619231609
+INFO	2019-01-26 12:13:41,363	49886	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(4,6) (stored at: variant12) Hash: 1436411280
+INFO	2019-01-26 12:13:41,413	49936	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(4) (stored at: ) Hash: 393021445
+INFO	2019-01-26 12:13:46,863	55386	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: variant13) Hash: 1943831576
+INFO	2019-01-26 12:13:48,704	57227	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,3) (stored at: variant14) Hash: -2104798022
+INFO	2019-01-26 12:13:48,754	57277	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(9,9) (stored at: ) Hash: 1547385327
+INFO	2019-01-26 12:13:50,196	58719	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,14) (stored at: variant15) Hash: 718929596
+ERROR	2019-01-26 12:13:50,295	58818	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+org/MathStuff.java:13: error: cannot find symbol
+			result= b;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:17: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:27: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:29: error: cannot find symbol
+		return result;
+		       ^
+  symbol:   variable result
+  location: class MathStuff
+4 errors
+1 warning
+
+INFO	2019-01-26 12:13:50,298	58821	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtDelete(1) at variant16 fails to compile
+
+INFO	2019-01-26 12:13:50,298	58821	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: variant16) Hash: 1164068833
+INFO	2019-01-26 12:13:51,836	60359	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(11,12) (stored at: variant17) Hash: 661149303
+INFO	2019-01-26 12:13:51,887	60410	clegoues.genprog4java.Search.Search	[main]	search: generation1
+DEBUG	2019-01-26 12:34:43,304	1	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2019-01-26 12:34:43,916	613	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2019-01-26 12:34:46,608	3305	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@a3b8fd89
+INFO	2019-01-26 12:34:46,614	3311	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2019-01-26 12:34:48,512	5209	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2019-01-26 12:34:49,374	6071	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2019-01-26 12:34:49,374	6071	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2019-01-26 12:34:50,859	7556	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2019-01-26 12:34:50,860	7557	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 4246)
+INFO	2019-01-26 12:34:50,862	7559	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2019-01-26 12:34:50,926	7623	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.pos
+INFO	2019-01-26 12:34:51,914	8611	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.neg
+INFO	2019-01-26 12:34:53,384	10081	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2019-01-26 12:34:53,384	10081	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2019-01-26 12:35:04,877	21574	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: variant0) Hash: 1547385327
+INFO	2019-01-26 12:35:07,041	23738	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,8) (stored at: variant1) Hash: 1356394237
+INFO	2019-01-26 12:35:08,557	25254	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(4) (stored at: variant2) Hash: 393021445
+INFO	2019-01-26 12:35:10,073	26770	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,12) (stored at: variant3) Hash: -706004613
+INFO	2019-01-26 12:35:11,605	28302	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(15,8) (stored at: variant4) Hash: 1354216870
+INFO	2019-01-26 12:35:13,141	29838	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(4,4) (stored at: variant5) Hash: 1739298671
+INFO	2019-01-26 12:35:14,655	31352	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(3) (stored at: variant6) Hash: 690677373
+INFO	2019-01-26 12:35:20,222	36919	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(11,3) (stored at: variant7) Hash: -1363731125
+INFO	2019-01-26 12:35:26,534	43231	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(10,11) (stored at: variant8) Hash: 1406722912
+INFO	2019-01-26 12:35:32,288	48985	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(12) (stored at: variant9) Hash: -1870476091
+INFO	2019-01-26 12:35:34,299	50996	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(3,15) (stored at: variant10) Hash: 2055503177
+INFO	2019-01-26 12:35:36,228	52925	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(9,8) (stored at: variant11) Hash: 1619231609
+INFO	2019-01-26 12:35:37,731	54428	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(4,6) (stored at: variant12) Hash: 1436411280
+INFO	2019-01-26 12:35:37,780	54477	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(4) (stored at: ) Hash: 393021445
+INFO	2019-01-26 12:35:43,385	60082	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: variant13) Hash: 1943831576
+INFO	2019-01-26 12:35:45,092	61789	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,3) (stored at: variant14) Hash: -2104798022
+INFO	2019-01-26 12:35:45,151	61848	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(9,9) (stored at: ) Hash: 1547385327
+INFO	2019-01-26 12:35:46,589	63286	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,14) (stored at: variant15) Hash: 718929596
+ERROR	2019-01-26 12:35:46,659	63356	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+org/MathStuff.java:13: error: cannot find symbol
+			result= b;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:17: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:27: error: cannot find symbol
+			result=a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:29: error: cannot find symbol
+		return result;
+		       ^
+  symbol:   variable result
+  location: class MathStuff
+4 errors
+1 warning
+
+INFO	2019-01-26 12:35:46,659	63356	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtDelete(1) at variant16 fails to compile
+
+INFO	2019-01-26 12:35:46,660	63357	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: variant16) Hash: 1164068833
+INFO	2019-01-26 12:35:48,144	64841	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(11,12) (stored at: variant17) Hash: 661149303
+INFO	2019-01-26 12:35:48,209	64906	clegoues.genprog4java.Search.Search	[main]	search: generation1
+DEBUG	2019-01-26 13:00:53,045	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2019-01-26 13:00:53,536	491	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+DEBUG	2019-01-26 13:04:03,646	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2019-01-26 13:04:04,094	448	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2019-01-26 13:04:06,029	2383	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@a3b8fd89
+INFO	2019-01-26 13:04:06,030	2384	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2019-01-26 13:04:06,810	3164	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2019-01-26 13:04:07,201	3555	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2019-01-26 13:04:07,205	3559	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2019-01-26 13:04:07,490	3844	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2019-01-26 13:04:07,490	3844	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 1460)
+INFO	2019-01-26 13:04:07,491	3845	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2019-01-26 13:04:07,529	3883	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.pos
+INFO	2019-01-26 13:04:08,044	4398	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.neg
+INFO	2019-01-26 13:04:08,513	4867	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2019-01-26 13:04:08,514	4868	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2019-01-26 13:04:09,038	5392	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: variant0) Hash: 478181825
+INFO	2019-01-26 13:04:09,656	6010	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(9,6) (stored at: variant1) Hash: -114692252
+INFO	2019-01-26 13:04:10,195	6549	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(4) (stored at: variant2) Hash: -1980232104
+INFO	2019-01-26 13:04:10,736	7090	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,10) (stored at: variant3) Hash: 881833211
+INFO	2019-01-26 13:04:11,248	7602	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 2.0 StmtAppend(14,7) (stored at: variant4) Hash: -818086280
+INFO	2019-01-26 13:04:11,788	8142	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(4,4) (stored at: variant5) Hash: -1428272680
+INFO	2019-01-26 13:04:12,309	8663	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(3) (stored at: variant6) Hash: -1094280352
+INFO	2019-01-26 13:04:17,308	13662	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(10,3) (stored at: variant7) Hash: 1801530720
+INFO	2019-01-26 13:04:17,357	13711	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(9,9) (stored at: ) Hash: 478181825
+INFO	2019-01-26 13:04:22,155	18509	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(11) (stored at: variant8) Hash: -44419305
+INFO	2019-01-26 13:04:23,063	19417	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(3,13) (stored at: variant9) Hash: -908934159
+INFO	2019-01-26 13:04:23,690	20044	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(8,7) (stored at: variant10) Hash: 41171300
+INFO	2019-01-26 13:04:25,676	22030	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(4,6) (stored at: variant11) Hash: -748773054
+INFO	2019-01-26 13:04:25,753	22107	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(4) (stored at: ) Hash: -1980232104
+INFO	2019-01-26 13:04:31,175	27529	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(13) (stored at: variant12) Hash: -525078934
+INFO	2019-01-26 13:04:31,721	28075	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,3) (stored at: variant13) Hash: -1988199876
+INFO	2019-01-26 13:04:31,769	28123	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(8,8) (stored at: ) Hash: 478181825
+INFO	2019-01-26 13:04:31,772	28126	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,13) (stored at: ) Hash: 478181825
+ERROR	2019-01-26 13:04:31,841	28195	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+org/MathStuff.java:18: error: cannot find symbol
+				result = b;
+				^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:26: error: cannot find symbol
+		result=a;	
+		^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:27: error: cannot find symbol
+		return result;
+		       ^
+  symbol:   variable result
+  location: class MathStuff
+3 errors
+1 warning
+
+INFO	2019-01-26 13:04:31,844	28198	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtDelete(1) at variant14 fails to compile
+
+INFO	2019-01-26 13:04:31,844	28198	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: variant14) Hash: 1616375856
+INFO	2019-01-26 13:04:32,360	28714	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,11) (stored at: variant15) Hash: -598045879
+INFO	2019-01-26 13:04:32,406	28760	clegoues.genprog4java.Search.Search	[main]	search: generation1
+DEBUG	2019-01-26 13:05:05,483	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2019-01-26 13:05:06,039	556	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2019-01-26 13:05:07,660	2177	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@a3b8fd89
+INFO	2019-01-26 13:05:07,664	2181	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2019-01-26 13:05:08,185	2702	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2019-01-26 13:05:08,446	2963	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2019-01-26 13:05:08,446	2963	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2019-01-26 13:05:08,699	3216	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2019-01-26 13:05:08,700	3217	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 1036)
+INFO	2019-01-26 13:05:08,700	3217	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2019-01-26 13:05:08,743	3260	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.pos
+INFO	2019-01-26 13:05:09,253	3770	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.neg
+INFO	2019-01-26 13:05:09,708	4225	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2019-01-26 13:05:09,709	4226	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2019-01-26 13:05:14,338	8855	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: variant0) Hash: 478181825
+INFO	2019-01-26 13:05:14,967	9484	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(9,6) (stored at: variant1) Hash: -114692252
+INFO	2019-01-26 13:05:15,768	10285	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(4) (stored at: variant2) Hash: -1980232104
+INFO	2019-01-26 13:05:16,390	10907	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,10) (stored at: variant3) Hash: 881833211
+INFO	2019-01-26 13:05:16,921	11438	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 2.0 StmtAppend(14,7) (stored at: variant4) Hash: -818086280
+INFO	2019-01-26 13:05:17,448	11965	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(4,4) (stored at: variant5) Hash: -1428272680
+INFO	2019-01-26 13:05:18,252	12769	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(3) (stored at: variant6) Hash: -1094280352
+INFO	2019-01-26 13:05:23,109	17626	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(10,3) (stored at: variant7) Hash: 1801530720
+INFO	2019-01-26 13:05:23,172	17689	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(9,9) (stored at: ) Hash: 478181825
+INFO	2019-01-26 13:05:27,917	22434	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(11) (stored at: variant8) Hash: -44419305
+INFO	2019-01-26 13:05:29,109	23626	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(3,13) (stored at: variant9) Hash: -908934159
+INFO	2019-01-26 13:05:29,629	24146	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(8,7) (stored at: variant10) Hash: 41171300
+INFO	2019-01-26 13:05:31,172	25689	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(4,6) (stored at: variant11) Hash: -748773054
+INFO	2019-01-26 13:05:31,237	25754	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(4) (stored at: ) Hash: -1980232104
+INFO	2019-01-26 13:05:35,948	30465	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(13) (stored at: variant12) Hash: -525078934
+INFO	2019-01-26 13:05:36,751	31268	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,3) (stored at: variant13) Hash: -1988199876
+INFO	2019-01-26 13:05:36,809	31326	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(8,8) (stored at: ) Hash: 478181825
+INFO	2019-01-26 13:05:36,816	31333	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(4,13) (stored at: ) Hash: 478181825
+ERROR	2019-01-26 13:05:36,907	31424	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+org/MathStuff.java:18: error: cannot find symbol
+				result = b;
+				^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:26: error: cannot find symbol
+		result=a;	
+		^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:27: error: cannot find symbol
+		return result;
+		       ^
+  symbol:   variable result
+  location: class MathStuff
+3 errors
+1 warning
+
+INFO	2019-01-26 13:05:36,912	31429	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtDelete(1) at variant14 fails to compile
+
+INFO	2019-01-26 13:05:36,912	31429	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(1) (stored at: variant14) Hash: 1616375856
+INFO	2019-01-26 13:05:37,620	32137	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,11) (stored at: variant15) Hash: -598045879
+INFO	2019-01-26 13:05:37,666	32183	clegoues.genprog4java.Search.Search	[main]	search: generation1
+INFO	2019-01-26 13:06:04,070	58587	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(3) StmtAppend(4,10) (stored at: ) Hash: -1094280352
+ERROR	2019-01-26 13:06:04,186	58703	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+org/MathStuff.java:23: error: cannot find symbol
+				result = b;
+				^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:31: error: cannot find symbol
+		result=a;	
+		^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:32: error: cannot find symbol
+		return result;
+		       ^
+  symbol:   variable result
+  location: class MathStuff
+3 errors
+1 warning
+
+INFO	2019-01-26 13:06:04,191	58708	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtDelete(4) StmtAppend(1,3) at variant16 fails to compile
+
+INFO	2019-01-26 13:06:04,192	58709	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(4) StmtAppend(1,3) (stored at: variant16) Hash: 648464715
+INFO	2019-01-26 13:06:04,677	59194	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(3,13) StmtAppend(14,10) (stored at: variant17) Hash: 1562155303
+INFO	2019-01-26 13:06:05,199	59716	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 2.0 StmtAppend(14,7) StmtReplace(6,3) (stored at: variant18) Hash: -1265082308
+INFO	2019-01-26 13:06:09,711	64228	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(4,13) StmtDelete(7) (stored at: variant19) Hash: -1709218729
+INFO	2019-01-26 13:06:09,777	64294	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(4) (stored at: ) Hash: -1980232104
+INFO	2019-01-26 13:06:10,985	65502	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(4,4) StmtAppend(8,3) (stored at: variant20) Hash: 516377765
+INFO	2019-01-26 13:06:11,483	66000	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 2.0 StmtAppend(14,7) StmtReplace(8,6) (stored at: variant21) Hash: -1129093887
+INFO	2019-01-26 13:06:12,003	66520	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 2.0 StmtAppend(14,7) StmtDelete(4) (stored at: variant22) Hash: 1411348417
+INFO	2019-01-26 13:06:12,513	67030	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(8,8) StmtAppend(4,9) (stored at: variant23) Hash: 1070169851
+INFO	2019-01-26 13:06:17,030	71547	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtDelete(3) StmtAppend(13,13) (stored at: variant24) Hash: -910243959
+INFO	2019-01-26 13:06:17,771	72288	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(10,11) StmtDelete(8) (stored at: variant25) Hash: -909241990
+INFO	2019-01-26 13:06:22,440	76957	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(4,4) StmtReplace(7,11) (stored at: variant26) Hash: 30867682
+INFO	2019-01-26 13:06:22,486	77003	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(4) StmtDelete(4) (stored at: ) Hash: -1980232104
+INFO	2019-01-26 13:06:22,516	77033	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(3,13) StmtReplace(4,6) (stored at: ) Hash: -908934159
+ERROR	2019-01-26 13:06:22,603	77120	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+org/MathStuff.java:17: error: cannot find symbol
+				result = b;
+				^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:26: error: cannot find symbol
+			result = a;
+			^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:28: error: cannot find symbol
+				result = b;
+				^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:36: error: cannot find symbol
+		return result;
+		       ^
+  symbol:   variable result
+  location: class MathStuff
+4 errors
+1 warning
+
+INFO	2019-01-26 13:06:22,610	77127	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtAppend(14,7) StmtReplace(1,4) at variant27 fails to compile
+
+INFO	2019-01-26 13:06:22,610	77127	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(14,7) StmtReplace(1,4) (stored at: variant27) Hash: 1605702399
+INFO	2019-01-26 13:06:24,536	79053	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(4,6) StmtReplace(10,6) (stored at: variant28) Hash: -794020146
+INFO	2019-01-26 13:06:25,034	79551	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(9,6) StmtReplace(4,8) (stored at: variant29) Hash: 477129339
+INFO	2019-01-26 13:06:25,533	80050	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 2.0 StmtAppend(14,7) StmtReplace(3,11) (stored at: variant30) Hash: -951955547
+INFO	2019-01-26 13:06:26,025	80542	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(10,11) StmtDelete(4) (stored at: variant31) Hash: -1660288160
+INFO	2019-01-26 13:06:26,526	81043	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(3,11) (stored at: variant32) Hash: -200518156
+INFO	2019-01-26 13:06:27,068	81585	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(6,4) (stored at: variant33) Hash: -353189006
+INFO	2019-01-26 13:06:27,120	81637	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtDelete(4) (stored at: ) Hash: -1980232104
+INFO	2019-01-26 13:06:27,600	82117	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(9,9) (stored at: variant34) Hash: -24208162
+INFO	2019-01-26 13:06:28,109	82626	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(4,8) (stored at: variant35) Hash: -239310233
+INFO	2019-01-26 13:06:28,593	83110	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(2,11) (stored at: variant36) Hash: 852404915
+INFO	2019-01-26 13:06:28,639	83156	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(4,4) (stored at: ) Hash: -1428272680
+INFO	2019-01-26 13:06:28,649	83166	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(2,11) (stored at: ) Hash: 852404915
+INFO	2019-01-26 13:06:28,672	83189	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(4,4) (stored at: ) Hash: 478181825
+INFO	2019-01-26 13:06:29,105	83622	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(6,3) (stored at: variant37) Hash: -1925964392
+INFO	2019-01-26 13:06:29,642	84159	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtAppend(14,11) (stored at: variant38) Hash: 287845464
+ERROR	2019-01-26 13:06:29,742	84259	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+org/MathStuff.java:24: error: cannot find symbol
+				result = b;
+				^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:32: error: cannot find symbol
+		result=a;	
+		^
+  symbol:   variable result
+  location: class MathStuff
+org/MathStuff.java:33: error: cannot find symbol
+		return result;
+		       ^
+  symbol:   variable result
+  location: class MathStuff
+3 errors
+1 warning
+
+INFO	2019-01-26 13:06:29,745	84262	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtAppend(1,9) at variant39 fails to compile
+
+INFO	2019-01-26 13:06:29,745	84262	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtAppend(1,9) (stored at: variant39) Hash: -362014818
+INFO	2019-01-26 13:06:29,811	84328	clegoues.genprog4java.Search.Search	[main]	search: generation2
+INFO	2019-01-26 13:07:16,772	131289	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.0 StmtDelete(4) StmtAppend(4,9) (stored at: ) Hash: 1070169851

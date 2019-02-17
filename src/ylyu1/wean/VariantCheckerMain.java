@@ -83,6 +83,28 @@ public class VariantCheckerMain
 			negativeTestsArgForm += clsName + MultiTestRunner.SEPARATOR;
 	}
 	
+	public static void checkModify() {				
+		String classp = ".:tmp/"+"original"+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH;
+		CommandLine command1 = CommandLine.parse("java -cp .:"+classp+":$CLASSPATH:"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar:"+Main.GP4J_HOME+"/lib/javassist.jar ylyu1.wean.ModifyCheck MultiTestRunner "+"Nope"+" NOTDEBUG");
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(500000);
+		
+		DefaultExecutor executor = new DefaultExecutor();
+		String workingDirectory = System.getProperty("user.dir");
+		executor.setWorkingDirectory(new File(workingDirectory));
+		executor.setWatchdog(watchdog);
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		executor.setExitValue(0);
+
+		executor.setStreamHandler(new PumpStreamHandler(out));
+		try{
+			executor.execute(command1);
+		}
+		catch(Throwable e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void checkInvariant(Population<? extends EditOperation> pop)
 	{
 		Aggregator.clear();

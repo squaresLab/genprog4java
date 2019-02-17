@@ -4,7 +4,7 @@ import javassist.*;
 import java.io.*;
 import java.util.*;
 
-public class Modify
+public class ModifyCheck
 {
 	public static void main(String[] args) throws Exception
 	{
@@ -17,9 +17,10 @@ public class Modify
 		ObjectInputStream ois = new ObjectInputStream(new FileInputStream("JUSTUSE.ywl"));
 		ArrayList<PredGroup> classes = (ArrayList<PredGroup>)ois.readObject();
 		ois.close();
-		Hashtable<Integer,PredSerial> serials = new Hashtable<Integer,PredSerial>();
+		//Hashtable<Integer,PredSerial> serials = new Hashtable<Integer,PredSerial>();
 		CtClass c = null;
 		String fullName = null;
+		Set<PredGroup> badgroups = new HashSet<PredGroup>();
 		for(PredGroup w : classes)
 		{
 			if(w.location.equals("OBJECT"))continue;
@@ -53,6 +54,7 @@ public class Modify
 				//m.insertAt(w.line+1,"System.out.print(\"\\n124124125 \"+"+(w.line+1)+"+\" \");");*/}
 			}catch(Exception e){if(debug)System.out.println("Skipped by invalid name: "+w.method+"  "+e.getMessage());/*System.out.println(argfs[0]);*/continue;}
 			//runs through each statement
+			Set<String> bad = new HashSet<String>();
 			for(String ss : w.statements)
 			{
 				//if(ss.indexOf("daikon.Quant")>=0)continue;
@@ -69,8 +71,10 @@ public class Modify
 
 					try{m.insertBefore("try{ylyu1.wean.Flusher.flushIn(new Integer("+prednum+"),"+s+");}catch(Throwable e){ylyu1.wean.Flusher.flushIn(new Integer("+prednum+"),false);}");
 						//try{m.insertBefore("{System.out.print(\"\\n417417417 \");System.out.print("+s+");System.out.print(\" "+prednum+" \");}");
-						if(debug)System.out.println("good: "+s);serials.put(prednum, new PredSerial(prednum,c.getName(),m.getName(),"ENTER",s,w.posCover,w.negCover,w.line));}
-					catch(Exception e){if(debug)System.out.println("Skipped by invalid syntax: "+s+" "+e.getMessage());}
+						if(debug)System.out.println("good: "+s);}
+					catch(Exception e){
+						bad.add(ss);
+						if(debug)System.out.println("Skipped by invalid syntax: "+s+" "+e.getMessage());}
 					}
 					//Exit location
 					else
@@ -80,12 +84,12 @@ public class Modify
 						if(origloc<0){
 							try{m.insertAfter("try{ylyu1.wean.Flusher.flushIn(new Integer("+prednum+"),"+s+");}catch(Throwable e){ylyu1.wean.Flusher.flushIn(new Integer("+prednum+"),false);}");
 								//try{m.insertAfter("{System.out.print(\"\\n417417417 \");System.out.print("+s+");System.out.print(\" "+prednum+" \");}");
-								if(debug)System.out.println("good: "+s);serials.put(prednum, new PredSerial(prednum,c.getName(),m.getName(),"EXIT",s,w.posCover,w.negCover,w.line));}
-							catch(Exception e){if(debug)System.out.println("Skipped by invalid syntax: "+s+" "+e.getMessage());}
-							}
+								if(debug)System.out.println("good: "+s);}
+							catch(Exception e){bad.add(ss);if(debug)System.out.println("Skipped by invalid syntax: "+s+" "+e.getMessage());}
+						}
 							//With orig
-							else
-							{
+						else
+						{
 								varnum++;
 								int origend = finder(s.substring(origloc+5))+origloc+5;
 								String var = s.substring(origloc+5,origend);
@@ -96,28 +100,38 @@ public class Modify
 									m.insertBefore("try{mts"+varnum+"=new ylyu1.wean.MultiTypeStorer("+var+");}");
 									rep = replacer(s, var, varnum);
 									m.insertAfter("try{ylyu1.wean.Flusher.flushIn(new Integer("+prednum+"),"+rep+");}catch(Throwable e){ylyu1.wean.Flusher.flushIn(new Integer("+prednum+"),false);}");
-									if(debug)System.out.println("good: "+s);serials.put(prednum, new PredSerial(prednum,c.getName(),m.getName(),"EXIT",s,w.posCover,w.negCover,w.line));
+									if(debug)System.out.println("good: "+s);
 								}
-								catch(Exception e){if(debug)System.out.println("Skipped by invalid syntax: "+s+" "+e.getMessage());}
+								catch(Exception e){bad.add(ss);if(debug)System.out.println("Skipped by invalid syntax: "+s+" "+e.getMessage());}
 
-							}
 						}
 					}
+					
 				}
+				for(String str : bad) {
+					w.statements.remove(str);
+				}
+				if(w.statements.isEmpty()) {
+					badgroups.add(w);
+				}
+			}
+			for(PredGroup pg : badgroups) {
+				classes.remove(pg);
+			}
 				if(c!=null)
 				{
 					if(debug) {System.out.println("bla");}
 					c.writeFile();
 					c.defrost();
 				}
-				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(vn+".pse"));
-				oos.writeObject(new Integer(prednum));
+				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("JUSTUSE.ywl"));
+				oos.writeObject(classes);
 				oos.flush();
 				oos.close();
-				allSerials=serials;
+				//allSerials=serials;
 			}
 
-			public static Hashtable<Integer,PredSerial> allSerials = null;
+			//public static Hashtable<Integer,PredSerial> allSerials = null;
 
 
 			public static String[] parseargs(String s)
