@@ -127,6 +127,9 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 				dp.storeError("weirddaikon");
 				Runtime.getRuntime().exit(1);
 			}
+			else {
+				VariantCheckerMain.checkModify();
+			}
 		}
 		
 		
