@@ -38,8 +38,8 @@ public class ModifyCheck
 					fullName = w.method.substring(0,id);
 					if(c!=null)
 					{
-						c.writeFile();
-						c.defrost();
+						//c.writeFile();
+						//c.defrost();
 					}
 					if(fullName.indexOf("ylyu1.wean")>=0)continue;
 					if(fullName.equals(fn))c = pool.get(vn);
@@ -121,8 +121,8 @@ public class ModifyCheck
 				if(c!=null)
 				{
 					if(debug) {System.out.println("bla");}
-					c.writeFile();
-					c.defrost();
+					//c.writeFile();
+					//c.defrost();
 				}
 				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("JUSTUSE.ywl"));
 				oos.writeObject(classes);
