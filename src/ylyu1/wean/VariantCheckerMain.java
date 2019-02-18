@@ -25,7 +25,12 @@ import org.apache.commons.exec.PumpStreamHandler;
 
 public class VariantCheckerMain
 {
+<<<<<<< Updated upstream
 	public static String removeString = "org";
+=======
+	//public static String removeString = "introclassJava";
+	//removeString is now defined as a local variable in checkInvariant
+>>>>>>> Stashed changes
 	public static int turn = 0;
 	public static String debug = "NOTDEBUG"; 
 	//public final static boolean cinnamon = true;
@@ -107,6 +112,8 @@ public class VariantCheckerMain
 	
 	public static void checkInvariant(Population<? extends EditOperation> pop)
 	{
+		String removeString = Fitness.negativeTests.get(0).getTestName().split("\\.")[0]; //should get the name of the outermost package
+		
 		Aggregator.clear();
 		ArrayList<Representation<? extends EditOperation>> goodRepsForCheck = new ArrayList<Representation<? extends EditOperation>>();
 		ArrayList<Representation<? extends EditOperation>> notRepsForCheck = new ArrayList<Representation<? extends EditOperation>>();
