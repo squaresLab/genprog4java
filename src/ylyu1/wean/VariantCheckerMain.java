@@ -25,7 +25,7 @@ import org.apache.commons.exec.PumpStreamHandler;
 
 public class VariantCheckerMain
 {
-	public static String removeString = "introclassJava";
+	public static String removeString = "org";
 	public static int turn = 0;
 	public static String debug = "NOTDEBUG"; 
 	//public final static boolean cinnamon = true;
@@ -185,13 +185,19 @@ public class VariantCheckerMain
 				FitnessValue posFit = new FitnessValue();
 
 				try {
+					long startt = System.currentTimeMillis();
 					executor.execute(command1);
+					executor.execute(CommandLine.parse("cp "+rep.getVariantFolder()+"pos.pse "+rep.getVariantFolder()+"neg.pse"));
+					long time1 = System.currentTimeMillis();
 					executor.execute(command2);
-					executor.execute(command3);
+					long time2 = System.currentTimeMillis();
+					//executor.execute(command3);
 					executor.execute(CommandLine.parse("mv Temp.all Temp.temp"));
 					
-					executor.execute(command4);
+					//executor.execute(command4);
+					long time3 = System.currentTimeMillis();
 					executor.execute(command5);
+					long time4 = System.currentTimeMillis();
 					executor.execute(command6);
 					String[] args = {rep.getVariantFolder()+"neg"};
 					Aggregator.main(args);
@@ -199,6 +205,12 @@ public class VariantCheckerMain
 					executor.execute(CommandLine.parse("mv Temp.temp Temp.all"));
 					args[0] = rep.getVariantFolder()+"pos";
 					Aggregator.main(args);
+					long time5 = System.currentTimeMillis();
+					System.out.println("Time1: "+(time1-startt));
+					System.out.println("Time2: "+(time2-startt));
+					System.out.println("Time3: "+(time3-startt));
+					System.out.println("Time4: "+(time4-startt));
+					System.out.println("Time5: "+(time5-startt));
 					//String[] modifyArgs = {"MultiTestRunner", rep.getVariantFolder()+"pos"};
 					//Modify.main(modifyArgs);
 					//executor.execute(CommandLine.parse("java -cp "+".:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH+" ylyu1.wean.MultiTestRunner "+positiveTestsDaikonSampleArgForm));
