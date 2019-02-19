@@ -25,12 +25,9 @@ import org.apache.commons.exec.PumpStreamHandler;
 
 public class VariantCheckerMain
 {
-<<<<<<< Updated upstream
-	public static String removeString = "org";
-=======
 	//public static String removeString = "introclassJava";
 	//removeString is now defined as a local variable in checkInvariant
->>>>>>> Stashed changes
+	
 	public static int turn = 0;
 	public static String debug = "NOTDEBUG"; 
 	//public final static boolean cinnamon = true;
