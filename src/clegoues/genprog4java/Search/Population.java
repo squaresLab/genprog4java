@@ -72,7 +72,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		.withCast( new ConfigurationBuilder.LexicalCast< Integer >(){
 			public Integer parse(String value) {
 				int size = Integer.parseInt( value );
-				tournamentK = size / 5;
+				//tournamentK = size / 5;
 				return size;
 			}
 		} )
@@ -85,7 +85,12 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		.inGroup( "Population Parameters" )
 		.build();
 	//tournament size, 20% of the population, set when popsize is updated
-	private static int tournamentK;
+	private static int tournamentK = ConfigurationBuilder.of( INT )
+		.withVarName( "tournamentK" )
+		.withDefault( "2" )
+		.withHelp( "tournament selection size" )
+		.inGroup( "Population Parameters" )
+		.build();
 	private double tournamentP = 1.0; //tournament probability
 	//private static String crossover = "onepoint";
 	private static String crossover = ConfigurationBuilder.of( STRING )
