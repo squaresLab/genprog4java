@@ -12,6 +12,7 @@ import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IClassCoverage;
 import org.jacoco.core.analysis.ICounter;
+import org.jacoco.core.analysis.IMethodCoverage;
 import org.jacoco.core.data.ExecutionData;
 import org.jacoco.core.data.ExecutionDataReader;
 import org.jacoco.core.data.ExecutionDataStore;
@@ -30,6 +31,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -399,7 +401,8 @@ public class DefaultLocalization extends Localization {
 						+ ++counterCoverageErrors);
 
 			}
-			TreeSet<Integer> thisTestResult = this.getCoverageInfo();
+			ylyu1.morewood.MethodTracker.mcov.put(test, new HashSet<String>());
+			TreeSet<Integer> thisTestResult = this.getCoverageInfo(test);
 			atoms.addAll(thisTestResult);
 		}
 
@@ -418,7 +421,7 @@ public class DefaultLocalization extends Localization {
 
 	private ExecutionDataStore executionData = null;
 
-	public TreeSet<Integer> getCoverageInfo() throws IOException {
+	public TreeSet<Integer> getCoverageInfo(TestCase test) throws IOException {
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
 
 		Map<ClassInfo,String> source = original.getOriginalSource();
@@ -478,6 +481,28 @@ public class DefaultLocalization extends Localization {
 					}
 					if (covered) {
 						coveredLines.add(i);
+					}
+				}
+				for(IMethodCoverage mc : cc.getMethods()) {
+					for (int i = cc.getFirstLine(); i <= cc.getLastLine(); i++) {
+						boolean covered = false;
+						switch (cc.getLine(i).getStatus()) {
+						case ICounter.PARTLY_COVERED:
+							covered = true;
+							break;
+						case ICounter.FULLY_COVERED:
+							covered = true;
+							break;
+						case ICounter.NOT_COVERED:
+							break;
+						case ICounter.EMPTY:
+							break;
+						default:
+							break;
+						}
+						if (covered) {
+							ylyu1.morewood.MethodTracker.mcov.get(test).add(mc.getName());
+						}
 					}
 				}
 			}
