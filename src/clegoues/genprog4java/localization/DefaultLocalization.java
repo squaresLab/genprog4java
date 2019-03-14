@@ -401,7 +401,8 @@ public class DefaultLocalization extends Localization {
 						+ ++counterCoverageErrors);
 
 			}
-			ylyu1.morewood.MethodTracker.mcov.put(test, new HashSet<String>());
+			if(!ylyu1.morewood.MethodTracker.mcov.containsKey(test))
+			  ylyu1.morewood.MethodTracker.mcov.put(test, new HashSet<String>());
 			TreeSet<Integer> thisTestResult = this.getCoverageInfo(test);
 			atoms.addAll(thisTestResult);
 		}
@@ -501,7 +502,7 @@ public class DefaultLocalization extends Localization {
 							break;
 						}
 						if (covered) {
-							ylyu1.morewood.MethodTracker.mcov.get(test).add(mc.getName());
+							ylyu1.morewood.MethodTracker.mcov.get(test).add(mc.getClass()+".."+mc.getName());
 						}
 					}
 				}
