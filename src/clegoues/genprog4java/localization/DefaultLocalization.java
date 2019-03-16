@@ -533,7 +533,7 @@ public class DefaultLocalization extends Localization {
 			final CoverageBuilder coverageBuilder = new CoverageBuilder();
 			final Analyzer analyzer = new Analyzer(executionData,
 					coverageBuilder);
-			analyzer.analyzeAll(new File(Configuration.classTestFolder));
+			analyzer.analyzeAll(new File(Configuration.classSourceFolder));
 
 			for (final IClassCoverage cc : coverageBuilder.getClasses()) {
 				for(IMethodCoverage mc : cc.getMethods()) {

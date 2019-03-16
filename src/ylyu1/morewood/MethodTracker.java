@@ -141,6 +141,7 @@ public class MethodTracker {
 	public static void printmcov() {
 		for(TestCase tc : mcov.keySet()) {
 			System.out.println("Test Case: "+ tc.getTestName());
+			System.out.println("MCOUNT: "+mcov.get(tc).size());
 			for(String s : mcov.get(tc)) {
 				System.out.println(s);
 			}
