@@ -148,16 +148,16 @@ public class Fitness {
 	public static TestGranularity granularity = new ConfigurationBuilder<TestGranularity>()
 			.withVarName("granularity")
 			.withFlag("testGranularity")
-			.withDefault("class")
-			.withHelp("Granularity at which to run JUnit tests.  Default: Class")
+			.withDefault("method")
+			.withHelp("Granularity at which to run JUnit tests.  Default: Method")
 			.inGroup("Fitness Parameters")
 			.withCast(new ConfigurationBuilder.LexicalCast<TestGranularity> () {
 				public TestGranularity parse(String value) {
 					logger.debug("parsing granularity, value: " + value);
 					switch(value.trim().toLowerCase()) {
 					case "method" : return TestGranularity.METHOD;
-					case "class":
-					default: return TestGranularity.CLASS;
+					case "class": return TestGranularity.CLASS;
+					default: return TestGranularity.METHOD;
 					}
 				}
 			}).build();
@@ -448,6 +448,17 @@ public class Fitness {
 				allLines.add(line);
 			}
 			br.close();
+			if(granularity==TestGranularity.METHOD) {
+				ArrayList<String> allm = new ArrayList<String>();
+				for(String s : allLines) {
+					URL[] l = {new URL("file://"+Configuration.classTestFolder)};
+					URLClassLoader u = new URLClassLoader(l);
+					for(String m : getTestMethodsFromClazz(s,u)) {
+						allm.add(s+"::"+m);
+					}
+				}
+				return allm;
+			}
 		} catch(IOException e) {
 			logger.error("failed to read " + filename + " giving up");
 			Runtime.getRuntime().exit(1);

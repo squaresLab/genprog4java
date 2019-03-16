@@ -502,7 +502,7 @@ public class DefaultLocalization extends Localization {
 							break;
 						}
 						if (covered) {
-							ylyu1.morewood.MethodTracker.mcov.get(test).add(mc.getClass()+".."+mc.getName());
+							ylyu1.morewood.MethodTracker.mcov.get(test).add(cc.getName()+".."+mc.getName());
 						}
 					}
 				}
