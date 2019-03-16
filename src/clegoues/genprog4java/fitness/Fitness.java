@@ -451,7 +451,7 @@ public class Fitness {
 			if(granularity==TestGranularity.METHOD) {
 				ArrayList<String> allm = new ArrayList<String>();
 				for(String s : allLines) {
-					URL[] l = {new URL("file://"+Configuration.classTestFolder)};
+					URL[] l = {new URL("file://"+Configuration.classTestFolder+"/"), new URL("file://"+Configuration.classSourceFolder+"/")};
 					URLClassLoader u = new URLClassLoader(l);
 					for(String m : getTestMethodsFromClazz(s,u)) {
 						allm.add(s+"::"+m);
