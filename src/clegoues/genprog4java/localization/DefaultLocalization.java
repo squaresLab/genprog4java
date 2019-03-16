@@ -423,6 +423,9 @@ public class DefaultLocalization extends Localization {
 	private ExecutionDataStore executionData = null;
 
 	public TreeSet<Integer> getCoverageInfo(TestCase test) throws IOException {
+		
+		getCoverageInfo2(test);
+		
 		TreeSet<Integer> atoms = new TreeSet<Integer>();
 
 		Map<ClassInfo,String> source = original.getOriginalSource();
@@ -484,6 +487,55 @@ public class DefaultLocalization extends Localization {
 						coveredLines.add(i);
 					}
 				}
+				
+			}
+			for (int line : coveredLines) {
+				ArrayList<Integer> atomIds = original.atomIDofSourceLine(line);
+				if (atomIds != null && atomIds.size() >= 0) {
+					atoms.addAll(atomIds);
+				}
+			}
+		}
+		return atoms;
+	}
+	
+	public void getCoverageInfo2(TestCase test) throws IOException {
+
+			//ClassInfo targetClassInfo = ele.getKey();
+			//String pathToCoverageClass = Configuration.outputDir + File.separator
+			//		+ "coverage/coverage.out" + File.separator + targetClassInfo.pathToClassFile();
+			//File compiledClass = new File(pathToCoverageClass);
+			//if(!compiledClass.exists()) {
+			//	pathToCoverageClass = Configuration.classSourceFolder + File.separator + targetClassInfo.pathToClassFile();
+				//compiledClass = new File(pathToCoverageClass);
+			//}
+
+			if (executionData == null) {
+				executionData = new ExecutionDataStore();
+			}
+
+			final FileInputStream in = new FileInputStream(new File(
+					"jacoco.exec"));
+			final ExecutionDataReader reader = new ExecutionDataReader(in);
+			reader.setSessionInfoVisitor(new ISessionInfoVisitor() {
+				public void visitSessionInfo(final SessionInfo info) {
+				}
+			});
+			reader.setExecutionDataVisitor(new IExecutionDataVisitor() {
+				public void visitClassExecution(final ExecutionData data) {
+					executionData.put(data);
+				}
+			});
+
+			reader.read();
+			in.close();
+
+			final CoverageBuilder coverageBuilder = new CoverageBuilder();
+			final Analyzer analyzer = new Analyzer(executionData,
+					coverageBuilder);
+			analyzer.analyzeAll(new File(Configuration.classTestFolder));
+
+			for (final IClassCoverage cc : coverageBuilder.getClasses()) {
 				for(IMethodCoverage mc : cc.getMethods()) {
 					for (int i = cc.getFirstLine(); i <= cc.getLastLine(); i++) {
 						boolean covered = false;
@@ -506,15 +558,8 @@ public class DefaultLocalization extends Localization {
 						}
 					}
 				}
+				
 			}
-			for (int line : coveredLines) {
-				ArrayList<Integer> atomIds = original.atomIDofSourceLine(line);
-				if (atomIds != null && atomIds.size() >= 0) {
-					atoms.addAll(atomIds);
-				}
-			}
-		}
-		return atoms;
 	}
 
 	private TreeSet<Integer> transformFileWithLineNumbersToStmtNumbers(String pathOfFileWithFaultyLineNumbers){
