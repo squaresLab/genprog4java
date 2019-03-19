@@ -19,6 +19,7 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
+import ylyu1.wean.VariantCheckerMain;
 
 public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 
@@ -48,6 +49,17 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 	@Override
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
 			throws RepairFoundException, GiveUpException {
+		
+		//under the new dataflow plan for mutation testing, Daikon is now run as a preprocessing step
+		if(!(new File(Configuration.workingDir+"/JUSTUSE.ywl")).exists())
+			throw new RuntimeException("Daikon output not found!");
+		else
+		{
+			VariantCheckerMain.checkModify();
+		}
+		
+		logger.info("begin variant generation");
+		
 		int numVariantsConsidered = 0;
 		while(numVariantsConsidered < RandomSingleEdit.maxVariants) {
 			Representation<G> variant = original.copy();
