@@ -5,13 +5,16 @@ import static clegoues.util.ConfigurationBuilder.INT;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.lang3.tuple.Pair;
 
 import clegoues.genprog4java.fitness.Fitness;
+import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
@@ -49,11 +52,15 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 		while(numVariantsConsidered < RandomSingleEdit.maxVariants) {
 			Representation<G> variant = original.copy();
 			mutate(variant);
+			/*
 			if (fitnessEngine.testToFirstFailure(variant, true)) { 
 				this.noteSuccess(variant, original, 0);
 				if(!continueSearch) 
 					return;
 			}
+			*/
+			Pair<List<TestCase>, List<TestCase>> posTestResults = fitnessEngine.testPosTests(variant);
+			Pair<List<TestCase>, List<TestCase>> negTestResults = fitnessEngine.testNegTests(variant);
 			numVariantsConsidered++;
 			copyClassFilesIntoOutputDir(variant);
 		}

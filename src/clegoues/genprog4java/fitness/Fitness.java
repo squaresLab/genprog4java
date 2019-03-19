@@ -54,6 +54,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -645,6 +646,42 @@ public class Fitness {
 		}
 		rep.setNumNegTestsPassed(numNegTestsPassed);
 		return  Pair.of(fitness, fitness);
+	}
+	
+	private Pair<List<TestCase>, List<TestCase>> getPassingAndFailingTests(Representation rep, Collection<TestCase> tests)
+	{
+		List<TestCase> passedTests = new ArrayList<>();
+		List<TestCase> failedTests = new ArrayList<>();
+		for(TestCase thisTest : tests)
+		{
+			if(singleTestCasePass(rep, thisTest))
+				passedTests.add(thisTest);
+			else
+				failedTests.add(thisTest);
+		}
+		return Pair.of(passedTests, failedTests);
+	}
+	
+	/**
+	 * Get lists of positive tests that rep passes & fails
+	 * @param rep variant to test
+	 * @return Pair, where the left elem is a list of positive tests that rep passes, and the 
+	 * 			right elem is a list of positive tests that rep fails.
+	 */
+	public Pair<List<TestCase>, List<TestCase>> testPosTests(Representation rep)
+	{
+		return getPassingAndFailingTests(rep, Fitness.positiveTests);
+	}
+	
+	/**
+	 * Get lists of negative tests that rep passes & fails
+	 * @param rep variant to test
+	 * @return Pair, where the left elem is a list of negative tests that rep passes, and the 
+	 * 			right elem is a list of negative tests that rep fails.
+	 */
+	public Pair<List<TestCase>, List<TestCase>> testNegTests(Representation rep)
+	{
+		return getPassingAndFailingTests(rep, Fitness.negativeTests);
 	}
 
 	/** computes fitness on a variant; only does so if the variant does not already
