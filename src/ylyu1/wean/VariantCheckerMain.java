@@ -333,6 +333,27 @@ public class VariantCheckerMain
 		
 	}
 	
+	/**
+	 * Build the invariant profile for a single variant.
+	 * This is seriously inefficient, and should be optimized.
+	 * @param rep the variant to build an invariant profile for.
+	 * @return the invariant profile of rep, or null if an invariant profile is not available for whatever reason
+	 */
+	public static byte[] checkInvariantForSingleRep(Representation<? extends EditOperation> rep)
+	{
+		Population singletonPop = new Population();
+		singletonPop.add(rep);
+		checkInvariant(singletonPop);
+		if(Fitness.invariantCache.containsKey(rep.hashCode()))
+		{
+			return Fitness.invariantCache.get(rep.hashCode());
+		}
+		else
+		{
+			return null;
+		}
+	}
+	
 	
 	
 	public static int[] analyzeResults(Population<? extends EditOperation> pop) throws Exception

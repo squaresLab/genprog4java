@@ -75,6 +75,7 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 			if(repairFound)
 				this.noteSuccess(variant, original, 0);
 				//continue the search, since we're doing mutation testing
+			byte[] invariantProfile = VariantCheckerMain.checkInvariantForSingleRep(variant);
 			numVariantsConsidered++;
 			copyClassFilesIntoOutputDir(variant);
 		}
