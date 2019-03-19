@@ -52,15 +52,17 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 		while(numVariantsConsidered < RandomSingleEdit.maxVariants) {
 			Representation<G> variant = original.copy();
 			mutate(variant);
-			/*
-			if (fitnessEngine.testToFirstFailure(variant, true)) { 
-				this.noteSuccess(variant, original, 0);
-				if(!continueSearch) 
-					return;
-			}
-			*/
+			
 			Pair<List<TestCase>, List<TestCase>> posTestResults = fitnessEngine.testPosTests(variant);
 			Pair<List<TestCase>, List<TestCase>> negTestResults = fitnessEngine.testNegTests(variant);
+			List<TestCase> passingPosTests = posTestResults.getLeft();
+			List<TestCase> passingNegTests = posTestResults.getRight();
+			List<TestCase> failingPosTests = negTestResults.getLeft();
+			List<TestCase> failingNegTests = negTestResults.getRight();
+			boolean repairFound = failingPosTests.size() == 0 && failingNegTests.size() == 0;
+			if(repairFound)
+				this.noteSuccess(variant, original, 0);
+				//continue the search, since we're doing mutation testing
 			numVariantsConsidered++;
 			copyClassFilesIntoOutputDir(variant);
 		}
