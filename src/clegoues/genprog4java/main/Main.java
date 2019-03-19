@@ -164,6 +164,8 @@ public class Main {
 		baseRep.setLocalization(localization);
 		baseRep.setVariantID("baseRepVariantID"); //included for debugging reasons
 		
+		ylyu1.morewood.MethodTracker.printmcov();
+		
 		AbstractDataProcessor dp = null;
 		
 		switch(Search.searchStrategy.trim()) {
