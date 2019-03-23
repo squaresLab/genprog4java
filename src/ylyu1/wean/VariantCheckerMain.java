@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Hashtable;
+import java.util.Set;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -497,6 +498,12 @@ public class VariantCheckerMain
 	
 	public static void runDaikon(AbstractDataProcessor dp)
 	{
+		Set<TestCase> stc = ylyu1.morewood.MethodTracker.selectTests(10, 1);
+		System.out.println("wowawowa "+stc.size());
+		for(TestCase tc : stc) {
+			System.out.println(tc.getTestName());
+		}
+		
 		if (positiveTestsDaikonSampleArgForm == null || negativeTestsArgForm == null)
 			setupArgForms();
 		CommandLine command0 = CommandLine.parse("cp "+Main.GP4J_HOME+"/checker.sh .");
