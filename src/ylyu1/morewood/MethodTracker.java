@@ -95,13 +95,12 @@ public class MethodTracker {
 		}
 		Instances dataa = new Instances("SOMENAME",att,vectors.keySet().size());
 		Map<Instance,String> positionmap = new HashMap<Instance, String>();
-		int count = 0;
 		for(String method : vectors.keySet()) {
-			Instance inst = dataa.get(count);
+			Instance inst = new DenseInstance(poslist.size());
 			for(int i = 0; i < poslist.size(); i++) {
 				inst.setValue(att.get(i), vectors.get(method).get(i));
 			}
-			count++;
+			dataa.add(inst);
 			positionmap.put(inst, method);
 		}
 		kmeans.buildClusterer(dataa);
