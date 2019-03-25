@@ -101,7 +101,7 @@ public class MethodTracker {
 				inst.setValue(att.get(i), vectors.get(method).get(i));
 			}
 			dataa.add(inst);
-			positionmap.put(inst, method);
+			positionmap.put(dataa.get(dataa.size()-1), method);
 		}
 		kmeans.buildClusterer(dataa);
 		

@@ -519,7 +519,7 @@ public class VariantCheckerMain
 	
 	public static void runDaikon(AbstractDataProcessor dp)
 	{
-		Set<TestCase> stc = ylyu1.morewood.MethodTracker.selectTests(10, 1);
+		Set<TestCase> stc = ylyu1.morewood.MethodTracker.selectTests(10, 10);
 		System.out.println("wowawowa "+stc.size());
 		for(TestCase tc : stc) {
 			System.out.println(tc.getTestName());
