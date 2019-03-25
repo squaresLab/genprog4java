@@ -1,31 +1,42 @@
+# JaRFly: Java Repair Framework #
+
+![JaRFly](https://github.com/squaresLab/genprog4java/blob/master/JaRFly.png)
+
 # README #
 
-Note that the wiki has rather more information than this README: https://github.com/squaresLab/genprog4java/wiki
+A more detailed user manual for JaRFly is located at https://github.com/squaresLab/genprog4java/wiki
 
 ### Disclaimer ###
 
-GenProg4Java is in active early development and changes a lot.
+JarFly is in active development and changes often.
 
 ### What is this repository for? ###
 
-This is a java-based version of GenProg, software for automatically fixing bugs.
+This repository contains JaRFly, a Java Repair Framework for implementing
+automated repair tools for Java programs, such as GenProg, Par,
+TrpAutoRepair, and so on. The project is called GenProg4Java because,
+originally, it only implemented the GenProg algorithm, but today, it is an
+entire framework for many algorithms.
 
-* https://squareslab.github.io/genprog-code/
+You can read more about GenProg and program repair here:
+https://squareslab.github.io/genprog-code/
 
-### Running GenProg4J ###
+### Running JaRFly ###
 
-At a high level, GenProg takes as input a program with a bug and test cases.  At
-least one test case should be failing; it encodes the bug to be repaired.  At
-least one should be passing; it encodes desired functionality that should be
-maintained.
+At a high level, JaRFly takes as input a program with a bug and test cases.
+At least one test case should be failing; it encodes the bug to be repaired.
+At least one should be passing; it encodes desired functionality that should
+be maintained.
 
-At sea level, GenProg4Java takes a configuration file as input.  Below, we provide a 
-minimal set that should allow G4J to run using the default genetic programming 
-heuristic on a buggy program taken from the IntroClassJava dataset 
-(https://github.com/Spirals-Team/IntroClassJava) other options are available 
-(comments below are explanatory; I'm not sure  they work in actual config files...).  
-You can see what flags are available (and their defaults, when applicable) in
-clegoues.genprog4java.main.Configuration.  However, to illustrate:
+At the sea level, JaRFly takes a configuration file as input. Below, we
+provide a minimal set that should allow JaRFly to run using the default
+genetic programming heuristic on a buggy program taken from the
+IntroClassJava dataset (https://github.com/Spirals-Team/IntroClassJava).
+There are other options available. The comments below are explanatory; they
+may not work in actual config files. You can see the avaialble flags and
+their defaults, when applicable in 
+(https://github.com/squaresLab/genprog4java/blob/master/src/clegoues/genprog4java/main/Configuration.java).
+However, to illustrate:
 
 ```
 javaVM = /usr/bin/java 
@@ -41,35 +52,40 @@ testClassPath=/path/to/IntroClassJava/dataset/median/testmedian/000/bin/ #classp
 targetClassName = introclassJava.median_d4aae191_000 # class under repair, or file listing classes under repair, one per line
 ```
 
-Although the other options are, well, optional, you probably want to set a large
-number of them, like seed.
+Although the other options are optional, you probably want to set a large
+number of them, such as the `seed`.
 
 Individual classes also have individual configure methods; you can search for
-them to find more options.  It is on The List to make this less ridiculous.
+them to find more options. We are working on creating a common place that
+lists them.
 
-In addition to the configuration file, you should specify log4j.properties to
+In addition to the configuration file, you should specify `log4j.properties` to
 the VM; my VM arguments in my run configuration in Eclipse looks like:
 
--ea -Dlog4j.configuration=file:${workspace_loc:GenProg4Java}/src/log4j.properties 
+`-ea -Dlog4j.configuration=file:${workspace_loc:GenProg4Java}/src/log4j.properties`
 
 I also set the working directory to be the base directory for the project I'm
-trying to repair.  Thus, for the Hello, World! example, the Working Directory is
-set as: 
+trying to repair. Thus, for the Hello, World! example, the Working Directory
+is set as:
 
-${workspace_loc:GenProg4Java/tests/mathTest}
+`${workspace_loc:GenProg4Java/tests/mathTest}`
 
 ### Hello, World! ###
 
-genprog4java/tests/mathTest serves as a reasonable Hello, World! example.  It
-has a miniTestConfiguration that should have flags close to what's necessary to
-get it to run, though we do change this file with some regularity so if it
-doesn't work out of the gate, double check that it doesn't look completely
-wacky.
+`genprog4java/tests/mathTest` serves as a reasonable Hello, World! example.
+It has a `miniTestConfiguration` that should have flags close to what is
+necessary to get it to run, though we do change this file with some
+regularity so if it doesn't work out of the gate, double check that it
+doesn't look completely wacky.
 
-### Who do I talk to? ###
+### License ###
+
+See [LICENSE](LICENSE.md)
+
+### Whom do I talk to? ###
 
 Repo owner or admin
 
-* Claire Le Goues (clegoues at cs dot cmu dot edu )
+* [Claire Le Goues](http://clairelegoues.com/)  (clegoues@cs.cmu.edu )
 
-* Mauricio Soto (mauriciosoto at cmu dot edu)
+* [Mauricio Soto](https://www.cs.cmu.edu/~msotogon/) (mauriciosoto@cmu.edu)
