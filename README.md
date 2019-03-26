@@ -1,6 +1,6 @@
 # JaRFly: Java Repair Framework #
 
-![JaRFly](https://github.com/squaresLab/genprog4java/blob/master/JaRFly.png)
+<img src="https://github.com/squaresLab/genprog4java/blob/master/JaRFly.png" width="200"/>
 
 # README #
 
