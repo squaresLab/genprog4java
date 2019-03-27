@@ -21,7 +21,7 @@ echo $DAIKONDIR
 
 source $DAIKONDIR/scripts/daikon.bashrc
 
-java -cp .:$CLASSPATH:$CLASSP:$DAIKONDIR/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar daikon.Chicory --ppt-omit-pattern=junit\. --ppt-omit-pattern=proxy\. ylyu1.wean.MultiTestRunner $FILENAME
+java -cp .:$CLASSPATH:$CLASSP:$DAIKONDIR/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar daikon.Chicory --ppt-omit-pattern=junit\. --ppt-omit-pattern=proxy\. ylyu1.morewood.MultiTestRunner $FILENAME
 
 java -cp $DAIKONHOME/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar daikon.Daikon --format=java MultiTestRunner.dtrace.gz > MultiTestRunner.wean
 

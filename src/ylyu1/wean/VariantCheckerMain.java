@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Hashtable;
+import java.util.Set;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -518,15 +519,22 @@ public class VariantCheckerMain
 	
 	public static void runDaikon(AbstractDataProcessor dp)
 	{
-		if (positiveTestsDaikonSampleArgForm == null || negativeTestsArgForm == null)
-			setupArgForms();
+		Set<TestCase> stc = ylyu1.morewood.MethodTracker.selectTests(10, 10);
+		System.out.println("Selected test case: "+stc.size());
+		String stcstring = "";
+		for(TestCase tc : stc) {
+			stcstring=stcstring+tc.getTestName()+MultiTestRunner.SEPARATOR;
+			System.out.println(tc.getTestName());
+		}
+		//if (positiveTestsDaikonSampleArgForm == null || negativeTestsArgForm == null)
+			//setupArgForms();
 		CommandLine command0 = CommandLine.parse("cp "+Main.GP4J_HOME+"/checker.sh .");
 		CommandLine command1 = CommandLine.parse("cp "+Main.GP4J_HOME+"/runDaikon.sh .");
-		CommandLine command2 = CommandLine.parse("bash runDaikon.sh "+positiveTestsDaikonSampleArgForm+" "+Configuration.pathToNoTimeoutTests+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
+		CommandLine command2 = CommandLine.parse("bash runDaikon.sh "+stcstring+" "+Configuration.pathToNoTimeoutTests+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
 					+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
 		
 		//System.out.println("command: " + command2.toString());
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(Math.max(Fitness.positiveTestsDaikonSample.size()*5*60000, 60*60000)); //set a timeout of 5 minutes per test case, or 60 minutes, whichever is longer
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(Math.max(stc.size()*5*60000, 60*60000)); //set a timeout of 5 minutes per test case, or 60 minutes, whichever is longer
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");
 		executor.setWorkingDirectory(new File(workingDirectory));
