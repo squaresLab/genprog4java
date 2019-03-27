@@ -104,7 +104,7 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 				this.noteSuccess(variant, original, 0);
 				//continue the search, since we're doing mutation testing
 			byte[] invariantProfile = VariantCheckerMain.checkInvariantForSingleRep(variant);
-			System.out.printf("%s %i %i %i %i %s\n", 
+			System.out.printf("%s %d %d %d %d %s\n", 
 					variant.getVariantID(), 
 					passingPosTests.size(),
 					passingNegTests.size(),
