@@ -50,12 +50,35 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
 			throws RepairFoundException, GiveUpException {
 		
+		/*
 		//under the new dataflow plan for mutation testing, Daikon is now run as a preprocessing step
 		if(!(new File(Configuration.workingDir+"/JUSTUSE.ywl")).exists())
 			throw new RuntimeException("Daikon output not found!");
 		else
 		{
 			VariantCheckerMain.checkModify();
+		}
+		*/
+		
+		//Using the full Daikon initialization process for debugging
+		System.out.println("mode: "+Configuration.invariantCheckerMode);
+		if(/*Configuration.invariantCheckerMode>0*/true)
+		{
+			int trials = 0;
+			while((trials<5)&&(!(new File(Configuration.workingDir+"/JUSTUSE.ywl")).exists()))
+			{
+				System.out.println("Here we are");
+				VariantCheckerMain.runDaikon(dp);
+				trials++;
+			}//VariantCheckerMain.checkInvariantOrig();
+			if(!(new File(Configuration.workingDir+"/JUSTUSE.ywl")).exists())
+			{
+				dp.storeError("weirddaikon");
+				Runtime.getRuntime().exit(1);
+			}
+			else {
+				VariantCheckerMain.checkModify();
+			}
 		}
 		
 		logger.info("begin variant generation");
