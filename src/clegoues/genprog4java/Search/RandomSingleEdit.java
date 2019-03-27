@@ -5,6 +5,7 @@ import static clegoues.util.ConfigurationBuilder.INT;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.exec.CommandLine;
@@ -103,6 +104,13 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 				this.noteSuccess(variant, original, 0);
 				//continue the search, since we're doing mutation testing
 			byte[] invariantProfile = VariantCheckerMain.checkInvariantForSingleRep(variant);
+			System.out.printf("%s %i %i %i %i %s\n", 
+					variant.getVariantID(), 
+					passingPosTests.size(),
+					passingNegTests.size(),
+					failingPosTests.size(),
+					failingNegTests.size(),
+					Arrays.toString(invariantProfile));
 			numVariantsConsidered++;
 			copyClassFilesIntoOutputDir(variant);
 		}
