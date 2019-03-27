@@ -19,10 +19,12 @@ import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
+import ylyu1.wean.AbstractDataProcessor;
 import ylyu1.wean.VariantCheckerMain;
 
 public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 
+	AbstractDataProcessor dp;
 
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
@@ -34,9 +36,10 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 			.inGroup( "Search Parameters" )
 			.build();
 
-	public RandomSingleEdit(Fitness engine) {
+	public RandomSingleEdit(Fitness engine, AbstractDataProcessor dataprocessor) {
 		super(engine);
 		engine.initializeModel();
+		dp = dataprocessor;
 	}
 
 	@Override
@@ -67,7 +70,7 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 			int trials = 0;
 			while((trials<5)&&(!(new File(Configuration.workingDir+"/JUSTUSE.ywl")).exists()))
 			{
-				System.out.println("Here we are");
+				System.out.println("Daikon output not present: running Daikon");
 				VariantCheckerMain.runDaikon(dp);
 				trials++;
 			}//VariantCheckerMain.checkInvariantOrig();
@@ -77,6 +80,7 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 				Runtime.getRuntime().exit(1);
 			}
 			else {
+				System.out.println("Daikon output found");
 				VariantCheckerMain.checkModify();
 			}
 		}
