@@ -153,6 +153,8 @@ public class MethodTracker {
 		return arr;
 	}
 	
+	public static Set<String> negMethods = null; 
+	
 	public static Map<String, List<Integer>> vectorize(){
 		Map<String, List<Integer>> vectors = new HashMap<String, List<Integer>>();
 		poslist = new ArrayList<TestCase>();
@@ -168,6 +170,7 @@ public class MethodTracker {
 				poslist.add(tc);
 			}
 		}
+		negMethods=vectors.keySet();
 		for(TestCase tc : poslist) {
 			for(String method : vectors.keySet()) {
 				if(mcov.get(tc).contains(method)) {

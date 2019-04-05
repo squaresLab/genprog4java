@@ -7,8 +7,9 @@ GP4JHOME=$3
 JAVA8HOME=$4
 #variable is deliberately named differently from JAVA_HOME
 DAIKONHOME=$5
+PPTSELECT=$6
 
-#if [ $# -ne 5 ]; then
+#if [ $# -ne 6 ]; then
 #	echo "Wrong number of arguments"
 #	exit 59295
 #else
@@ -21,7 +22,7 @@ echo $DAIKONDIR
 
 source $DAIKONDIR/scripts/daikon.bashrc
 
-java -cp .:$CLASSPATH:$CLASSP:$DAIKONDIR/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar daikon.Chicory --ppt-omit-pattern=junit\. --ppt-omit-pattern=proxy\. ylyu1.morewood.MultiTestRunner $FILENAME
+java -cp .:$CLASSPATH:$CLASSP:$DAIKONDIR/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar daikon.Chicory --ppt-select-pattern=$PPTSELECT ylyu1.morewood.MultiTestRunner $FILENAME
 
 java -cp $DAIKONHOME/daikon.jar:$JAVA8HOME/jre/lib/rt.jar:$JAVA8HOME/lib/tools.jar daikon.Daikon --format=java MultiTestRunner.dtrace.gz > MultiTestRunner.wean
 
