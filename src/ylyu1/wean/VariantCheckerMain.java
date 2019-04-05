@@ -520,6 +520,11 @@ public class VariantCheckerMain
 	public static void runDaikon(AbstractDataProcessor dp)
 	{
 		Set<TestCase> stc = ylyu1.morewood.MethodTracker.selectTests(10, 10);
+		String pptselect = "";
+		for(String s : ylyu1.morewood.MethodTracker.negMethods) {
+			pptselect = pptselect + s + " | ";
+		}
+		pptselect=pptselect.substring(0,pptselect.length()-3);
 		System.out.println("Selected test case: "+stc.size());
 		String stcstring = "";
 		for(TestCase tc : stc) {
@@ -531,7 +536,7 @@ public class VariantCheckerMain
 		CommandLine command0 = CommandLine.parse("cp "+Main.GP4J_HOME+"/checker.sh .");
 		CommandLine command1 = CommandLine.parse("cp "+Main.GP4J_HOME+"/runDaikon.sh .");
 		CommandLine command2 = CommandLine.parse("bash runDaikon.sh "+stcstring+" "+Configuration.pathToNoTimeoutTests+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
-					+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);
+					+ " " + Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME + " " + pptselect);
 		
 		//System.out.println("command: " + command2.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(Math.max(stc.size()*5*60000, 60*60000)); //set a timeout of 5 minutes per test case, or 60 minutes, whichever is longer
