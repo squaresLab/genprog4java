@@ -522,9 +522,10 @@ public class VariantCheckerMain
 		Set<TestCase> stc = ylyu1.morewood.MethodTracker.selectTests(10, 10);
 		String pptselect = "";
 		for(String s : ylyu1.morewood.MethodTracker.negMethods) {
-			pptselect = pptselect + s + " | ";
+			pptselect = pptselect + s + "\\(\\)" + "|";
 		}
-		pptselect=pptselect.substring(0,pptselect.length()-3);
+		pptselect=pptselect.substring(0,pptselect.length()-1);
+		System.out.println(pptselect));
 		System.out.println("Selected test case: "+stc.size());
 		String stcstring = "";
 		for(TestCase tc : stc) {
