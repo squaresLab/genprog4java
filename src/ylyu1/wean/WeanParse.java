@@ -49,7 +49,7 @@ total++;
 				current.statements.add(line);
 			}
 		}
-System.out.println(total);
+		System.out.println(total);
 		if(current!=null)classes.add(current);
 		//System.out.println(classes.size());
 		if(debug.equals("DEBUG"))
@@ -69,14 +69,19 @@ System.out.println(total);
 		}
 		if(!classes.isEmpty())
 		{
-			allInvariants = classes;
-			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("JUSTUSE.ywl"));
-			oos.writeObject(allInvariants);
-			oos.flush();
-			oos.close();
+			allInvariants.addAll(classes);
+			
 		}
 
 
+	}
+	
+	public static void make() {
+		try {
+		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("JUSTUSE.ywl"));
+		oos.writeObject(allInvariants);
+		oos.flush();
+		oos.close();}catch(Exception e) {}
 	}
 }
 
