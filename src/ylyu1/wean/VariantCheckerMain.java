@@ -557,6 +557,7 @@ public class VariantCheckerMain
 	}
 	
 	public static void runDaikonGroup(List<String> group, String tcs, int count) {
+                System.out.println("SIGCOUNT: "+count);
 		String pptselect = "";
 		for(String s : group) {
 			pptselect = pptselect + s + "|";
@@ -570,7 +571,7 @@ public class VariantCheckerMain
 		
 		
 		//System.out.println("command: " + command2.toString());
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(300000); //set a timeout of 5 minutes per test case, or 60 minutes, whichever is longer
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(3000000); //set a timeout of 5 minutes per test case, or 60 minutes, whichever is longer
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");
 		executor.setWorkingDirectory(new File(workingDirectory));
@@ -583,8 +584,11 @@ public class VariantCheckerMain
 		FitnessValue posFit = new FitnessValue();
 
 		try {
-			executor.execute(command0);
+			System.out.println("command0: "+command0.toString());
+			//executor.execute(command0);
+			System.out.println("command1: "+command1.toString());
 			executor.execute(command1);
+			System.out.println("command2: "+command2.toString());
 			executor.execute(command2);
 			out.flush();
 			String output = out.toString();
@@ -594,7 +598,10 @@ public class VariantCheckerMain
 			WeanParse.main(weanParserConfig);
 
 		} catch (ExecuteException exception) {
+			exception.printStackTrace();
 			try {
+			out.flush();
+                        System.out.println(out.toString());
 				executor.execute(CommandLine.parse("rm MultiTestRunner"+count+".wean"));
 			}catch(Exception e) {}
 			if(group.size()>1) {
