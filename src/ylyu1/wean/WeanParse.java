@@ -5,13 +5,14 @@ import java.util.*;
 
 public class WeanParse
 {
+	public static String stuffToBeProcessed = null;
 	public static ArrayList<PredGroup> allInvariants = null;
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args)
 	{
 	int total = 0;
 		String fn = args[0];
                 String debug = args[1];
-		Scanner input = new Scanner(new File(fn+".wean"));
+		Scanner input = new Scanner(stuffToBeProcessed);
 		ArrayList<PredGroup> classes = new ArrayList<PredGroup>();
 		PredGroup current = null;
 		while(input.hasNext())
@@ -52,6 +53,7 @@ total++;
 		System.out.println(total);
 		if(current!=null)classes.add(current);
 		//System.out.println(classes.size());
+		/*
 		if(debug.equals("DEBUG"))
 		{
 			PrintWriter writer = new PrintWriter( new BufferedWriter( new FileWriter( fn+".twt" )));
@@ -66,7 +68,7 @@ total++;
 				writer.println("");
 			}
 			writer.close();
-		}
+		}*/
 		if(!classes.isEmpty())
 		{
 			allInvariants.addAll(classes);

@@ -566,7 +566,7 @@ public class VariantCheckerMain
 		CommandLine command1 = CommandLine.parse("java -cp .:"+Configuration.pathToNoTimeoutTests+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
 				+":"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar daikon.Chicory --ppt-select-pattern="+pptselect+" ylyu1.morewood.MultiTestRunner "+tcs);
 		CommandLine command2 = CommandLine.parse("java -cp .:"+Configuration.pathToNoTimeoutTests+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
-				+":"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar daikon.Daikon --format=java MultiTestRunner.dtrace.gz > MultiTestRunner"+count+".wean");
+				+":"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar daikon.Daikon --format=java MultiTestRunner.dtrace.gz");
 		//CommandLine command3 = CommandLine.parse("java -cp .:"+Configuration.pathToNoTimeoutTests+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/ ylyu1.wean.WeanParse MultiTestRunner"+count+"NOTDEBUG");
 		
 		
@@ -578,6 +578,8 @@ public class VariantCheckerMain
 		executor.setWatchdog(watchdog);
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+		
 		executor.setExitValue(0);
 
 		executor.setStreamHandler(new PumpStreamHandler(out));
@@ -588,12 +590,15 @@ public class VariantCheckerMain
 			//executor.execute(command0);
 			System.out.println("command1: "+command1.toString());
 			executor.execute(command1);
-			System.out.println("command2: "+command2.toString());
-			executor.execute(command2);
 			out.flush();
 			String output = out.toString();
 			System.out.println(output);
 			out.reset();
+			executor.setStreamHandler(new PumpStreamHandler(out2));
+			System.out.println("command2: "+command2.toString());
+			executor.execute(command2);
+			WeanParse.stuffToBeProcessed=out2.toString();
+			System.out.println(WeanParse.stuffToBeProcessed);
 			String[] weanParserConfig = {"MultiTestRunner"+count, "NOTDEBUG"};
 			WeanParse.main(weanParserConfig);
 
