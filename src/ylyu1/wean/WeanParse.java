@@ -79,6 +79,7 @@ total++;
 	}
 	
 	public static void make() {
+		System.out.println("Made with "+allInvariants.size() +" PredGroups");
 		try {
 		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("JUSTUSE.ywl"));
 		oos.writeObject(allInvariants);

@@ -553,6 +553,8 @@ public class VariantCheckerMain
 				ret = ret + s.charAt(i);
 			}
 		}
+		int i = ret.indexOf("\\.\\.");
+                if(i>0)ret=ret.substring(0,i)+ret.substring(i+2);
 		return ret;
 	}
 	
@@ -562,6 +564,7 @@ public class VariantCheckerMain
 		for(String s : group) {
 			pptselect = pptselect + s + "|";
 		}
+		pptselect = pptselect.substring(0,pptselect.length()-1);
 		CommandLine command0 = CommandLine.parse("source "+Main.DAIKON_HOME+"/scripts/daikon.bashrc");
 		CommandLine command1 = CommandLine.parse("java -cp .:"+Configuration.pathToNoTimeoutTests+":"+Configuration.classSourceFolder+":"+Configuration.testClassPath+":"+Main.GP4J_HOME+"/target/classes/"
 				+":"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar daikon.Chicory --ppt-select-pattern="+pptselect+" ylyu1.morewood.MultiTestRunner "+tcs);
@@ -609,7 +612,7 @@ public class VariantCheckerMain
                         System.out.println(out.toString());
 				executor.execute(CommandLine.parse("rm MultiTestRunner"+count+".wean"));
 			}catch(Exception e) {}
-			if(group.size()>1) {
+			if(group.size()>1 && exception.getExitValue()==143) {
 				int c = 0;
 				for(String s : group) {
 					List<String> ss = new ArrayList<String>();
