@@ -6,7 +6,7 @@ import java.util.*;
 public class WeanParse
 {
 	public static String stuffToBeProcessed = null;
-	public static ArrayList<PredGroup> allInvariants = null;
+	public static ArrayList<PredGroup> allInvariants = new ArrayList<PredGroup>();;
 	public static void main(String[] args)
 	{
 	int total = 0;

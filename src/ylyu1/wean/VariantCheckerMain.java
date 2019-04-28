@@ -66,7 +66,7 @@ public class VariantCheckerMain
 		positiveTestsDaikonSampleArgForm = "";
 		for(String clsName : posTestClasses)
 			positiveTestsDaikonSampleArgForm += clsName + MultiTestRunner.SEPARATOR;
-		
+		System.out.println("SetupArgFormResult: "+positiveTestsDaikonSampleArgForm);	
 
 		Collection<String> negTestClasses = new ArrayList<>();
 		for(TestCase negTest : Fitness.negativeTests)
