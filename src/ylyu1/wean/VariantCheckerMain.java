@@ -162,12 +162,14 @@ public class VariantCheckerMain
 						"NOTORIG" + " " 
 						+ Main.GP4J_HOME + " " + Main.JAVA8_HOME + " " + Main.DAIKON_HOME);*/
 
-				String classp = ".:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH;
+				String classp = ".:tmp/d_"+rep.vf+"/:"+ Main.GP4J_HOME+"/target/classes/" + ":" +Configuration.classSourceFolder+":"+ Configuration.classTestFolder + ":" + Main.JUNIT_AND_HAMCREST_PATH;
 				String varname1 = rep.getVariantFolder()+"pos";
 				String varname2 = rep.getVariantFolder()+"neg";
 				
 				CommandLine command1 = CommandLine.parse("java -cp .:"+classp+":$CLASSPATH:"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar:"+Main.GP4J_HOME+"/lib/javassist.jar ylyu1.wean.Modify MultiTestRunner "+varname1+" NOTDEBUG");				
 				CommandLine command2 = CommandLine.parse("java -cp .:"+classp+":$CLASSPATH:"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar:"+Main.GP4J_HOME+"/lib/javassist.jar ylyu1.wean.MultiTestRunner "+positiveTestsDaikonSampleArgForm);				
+
+				System.out.println("Command2: "+command2.toString());
 				CommandLine command3 = CommandLine.parse("rm -rf "+removeString);
 				CommandLine command4 = CommandLine.parse("java -cp .:"+classp+":$CLASSPATH:"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar:"+Main.GP4J_HOME+"/lib/javassist.jar ylyu1.wean.Modify MultiTestRunner "+varname2+" NOTDEBUG");				
 				CommandLine command5 = CommandLine.parse("java -cp .:"+classp+":$CLASSPATH:"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar:"+Main.GP4J_HOME+"/lib/javassist.jar ylyu1.wean.MultiTestRunner "+negativeTestsArgForm);				
