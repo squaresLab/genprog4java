@@ -45,6 +45,13 @@ public class VariantCheckerMain
 		Process pr = rt.exec("mkdir opopop");
 		pr.waitFor();
 	}
+	private static void setupArgFormsSelectiveTests(){
+		setupArgForms();
+		positiveTestsDaikonSampleArgForm="";
+		for(TestCase tc : stc){
+			positiveTestsDaikonSampleArgForm+=tc.getTestName()+MultiTestRunner.SEPARATOR;
+		}
+ 	}
 	
 	//TODO: modify this to convert method level granularity to class level granularity
 	private static void setupArgForms()
@@ -145,7 +152,7 @@ public class VariantCheckerMain
 				//String libtrunc = Configuration.libs; //no truncation for now
 				
 				if (positiveTestsDaikonSampleArgForm == null || negativeTestsArgForm == null)
-					setupArgForms();
+					setupArgFormsSelectiveTests();
 				/*
 				CommandLine command1 = CommandLine.parse("cp -r "+Configuration.classTestFolder+" .");
 				CommandLine command2 = CommandLine.parse("sh checker.sh "
@@ -167,7 +174,7 @@ public class VariantCheckerMain
 				String varname2 = rep.getVariantFolder()+"neg";
 				
 				CommandLine command1 = CommandLine.parse("java -cp .:"+classp+":$CLASSPATH:"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar:"+Main.GP4J_HOME+"/lib/javassist.jar ylyu1.wean.Modify MultiTestRunner "+varname1+" NOTDEBUG");				
-				CommandLine command2 = CommandLine.parse("java -cp .:"+classp+":$CLASSPATH:"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar:"+Main.GP4J_HOME+"/lib/javassist.jar ylyu1.wean.MultiTestRunner "+positiveTestsDaikonSampleArgForm);				
+				CommandLine command2 = CommandLine.parse("java -cp .:"+classp+":$CLASSPATH:"+Main.DAIKON_HOME+"/daikon.jar:"+Main.JAVA8_HOME+"/jre/lib/rt.jar:"+Main.JAVA8_HOME+"/lib/tools.jar:"+Main.GP4J_HOME+"/lib/javassist.jar ylyu1.morewood.MultiTestRunner "+positiveTestsDaikonSampleArgForm);				
 
 				System.out.println("Command2: "+command2.toString());
 				CommandLine command3 = CommandLine.parse("rm -rf "+removeString);
@@ -519,10 +526,10 @@ public class VariantCheckerMain
 		
 		
 	}
-	
+	public static Set<TestCase> stc = null;
 	public static void runDaikon(AbstractDataProcessor dp)
 	{
-		Set<TestCase> stc = ylyu1.morewood.MethodTracker.selectTests(10, 10);
+		stc = ylyu1.morewood.MethodTracker.selectTests(10, 10);
 		String stcstring = "";
 		for(TestCase tc : stc) {
 			stcstring=stcstring+tc.getTestName()+MultiTestRunner.SEPARATOR;
