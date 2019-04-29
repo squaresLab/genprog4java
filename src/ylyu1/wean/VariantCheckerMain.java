@@ -583,7 +583,7 @@ public class VariantCheckerMain
 		
 		
 		//System.out.println("command: " + command2.toString());
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(3000000); //set a timeout of 5 minutes per test case, or 60 minutes, whichever is longer
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(300000); //set a timeout of 5 minutes per test case, or 60 minutes, whichever is longer
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");
 		executor.setWorkingDirectory(new File(workingDirectory));
