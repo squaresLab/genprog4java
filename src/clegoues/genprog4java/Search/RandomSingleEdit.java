@@ -96,8 +96,8 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 			Pair<List<TestCase>, List<TestCase>> posTestResults = fitnessEngine.testPosTests(variant);
 			Pair<List<TestCase>, List<TestCase>> negTestResults = fitnessEngine.testNegTests(variant);
 			List<TestCase> passingPosTests = posTestResults.getLeft();
-			List<TestCase> passingNegTests = posTestResults.getRight();
-			List<TestCase> failingPosTests = negTestResults.getLeft();
+			List<TestCase> passingNegTests = negTestResults.getLeft();
+			List<TestCase> failingPosTests = posTestResults.getRight();
 			List<TestCase> failingNegTests = negTestResults.getRight();
 			boolean repairFound = failingPosTests.size() == 0 && failingNegTests.size() == 0;
 			if(repairFound)
