@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2014-2015, 
+ * Copyright (c) 2014-2015,
  *  Claire Le Goues     <clegoues@cs.cmu.edu>
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
@@ -57,10 +57,10 @@ import clegoues.util.GlobalUtils;
 public class Population<G extends EditOperation> implements Iterable<Representation<G>>{
 
 	protected static Logger logger = Logger.getLogger(Fitness.class);
-	
+
 	public static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
-	
+
 	private static int popsize = ConfigurationBuilder.of( INT )
 		.withVarName( "popsize" )
 		.withDefault( "40" )
@@ -69,12 +69,12 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		.withCast( new ConfigurationBuilder.LexicalCast< Integer >(){
 			public Integer parse(String value) {
 				int size = Integer.parseInt( value );
-				tournamentK = size / 5;
+				//tournamentK = size / 5;
 				return size;
 			}
 		} )
 		.build();
-	//private static double crossp = 0.5; 
+	//private static double crossp = 0.5;
 	private static double crossp = ConfigurationBuilder.of( DOUBLE )
 		.withVarName( "crossp" )
 		.withDefault( "0.5" )
@@ -82,7 +82,12 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		.inGroup( "Population Parameters" )
 		.build();
 	//tournament size, 20% of the population, set when popsize is updated
-	private static int tournamentK;
+	private static int tournamentK = ConfigurationBuilder.of( INT )
+		.withVarName( "tournamentK" )
+		.withDefault( "2" )
+		.withHelp( "tournament selection size" )
+		.inGroup( "Population Parameters" )
+		.build();
 	private double tournamentP = 1.0; //tournament probability
 	//private static String crossover = "onepoint";
 	private static String crossover = ConfigurationBuilder.of( STRING )
@@ -119,18 +124,18 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 			  let serialize ?out_channel (population : ('a,'b) t) (filename : string) =
 			    match !output_format with
 			      "bin" | "binary" ->
-			        let fout = 
+			        let fout =
 			          match out_channel with
 			            Some(v) -> v
-			          | None -> open_out_bin filename 
+			          | None -> open_out_bin filename
 			        in
 			          Marshal.to_channel fout (population_version) [] ;
 			          liter (fun variant -> variant#serialize ?out_channel:(Some(fout)) ?global_info:(Some(false)) filename) population;
 			          if out_channel = None then close_out fout
 			    | "txt" ->
 			      debug "serializing population to txt; ?out_channel ignored\n";
-			      let fout = open_out filename in 
-			        liter (fun variant -> 
+			      let fout = open_out filename in
+			        liter (fun variant ->
 			          let name = variant#name () in
 			            output_string fout (name^"\n"))
 			          population;
@@ -149,20 +154,20 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	void deserialize(String filename) {
 		throw new UnsupportedOperationException();
 		/*
-			  let deserialize ?in_channel filename original = 
+			  let deserialize ?in_channel filename original =
 			    (* the original should have loaded the global state *)
-			    let fin = 
+			    let fin =
 			      match in_channel with
 			        Some(v) -> v
 			      | None -> open_in_bin filename in
 			    let pop = ref [original] in
 			      try
-			        if !output_format = "txt" then 
+			        if !output_format = "txt" then
 			          failwith "txt format, skipping binary attempt";
 			        let version = Marshal.from_channel fin in
 			          if version <> population_version then begin
 			            debug "population: %s has old version: %s\n" filename version;
-			            failwith "version mismatch" 
+			            failwith "version mismatch"
 			          end ;
 			          let attempt = ref 1 in
 			          try
@@ -177,7 +182,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 			        close_in fin;
 			        pop := [original];
 			        try
-			          let individuals = get_lines filename in 
+			          let individuals = get_lines filename in
 			            liter
 			              (fun genome ->
 			                let copy = original#copy() in
@@ -199,8 +204,8 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		List<Representation<G>> pool = population.subList(0, tournamentK);
 		Comparator<Representation<G>> myComp = new Comparator<Representation<G>>() {
 			@Override
-			public int compare(Representation<G> one, Representation<G> two) { 
-				return new Double(two.getFitness()).compareTo(new Double(one.getFitness())); 
+			public int compare(Representation<G> one, Representation<G> two) {
+				return new Double(two.getFitness()).compareTo(new Double(one.getFitness()));
 			}
 		}; // we sort in descending order by fitness
 		TreeSet<Representation<G>> sorted = new TreeSet<Representation<G>>(myComp);
@@ -218,7 +223,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 				}
 			}
 			if(taken) {
-				return indiv.copy();	
+				return indiv.copy();
 			} else {
 				step += 1.0;
 			}
@@ -249,7 +254,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		for(int i = 0 ; i < desired; i++) {
 			result.add(selectOne());
 		}
-		return result; 
+		return result;
 	}
 
 
@@ -336,13 +341,13 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 			point1 = Configuration.randomizer.nextInt(g1.size());
 			firstHalfG1 = new ArrayList<G>(g1.subList(0,point1));
 			secondHalfG1 = new ArrayList<G>(g1.subList(point1 + 1, g1.size()));
-		} 
+		}
 		if(g2.size() > 0) {
 			if(original.getVariableLength() || g1.size() == 0) {
 				point2 =  Configuration.randomizer.nextInt(g2.size());
 			} else if(g1.size() > 0) {
 				point2 = point1;
-			} 
+			}
 			firstHalfG2 = new ArrayList<G>(g2.subList(0, point2));
 			secondHalfG2 = new ArrayList<G>(g2.subList(point2 + 1,  g2.size()));
 		}
@@ -350,7 +355,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		newg1.addAll(firstHalfG1);
 		newg1.addAll(secondHalfG2);
 		newg2.addAll(firstHalfG2);
-		newg2.addAll(secondHalfG1); 
+		newg2.addAll(secondHalfG1);
 
 		// FIXME: add crossover to history?
 		child1.setGenome(newg1);
@@ -395,7 +400,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 				output.addAll(children); // I *think* this is OK, because we include all the parents in output above, so we don't need to add them here
 			}
 		}
-		this.population = output; 
+		this.population = output;
 	}
 
 	public Population<G> firstN(int desiredSize) {
@@ -408,7 +413,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	}
 	@Override
 	public Iterator<Representation<G>> iterator() {
-		return population.iterator(); 	
+		return population.iterator();
 	}
 
 	public void selection(int popsize) {
