@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.java.ClassInfo;
+import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
@@ -73,8 +74,11 @@ public class PatchDiversityEvaluation<G extends EditOperation> extends Search<G>
 		{
 			String seed = patch.getLeft();
 			String varNum = patch.getRight();
-			System.err.printf("Patch: %s\t%s", seed, varNum);
-			//String path = String.format("do something", seed, varNum);
+			System.err.printf("Patch: %s\t%s\n", seed, varNum);
+			
+			//path is hardcoded for the Docker containers that Zhen is using
+			String path = String.format("%s/__variantsSeed%s/%s/variant%s", Configuration.workingDir, seed, Configuration.outputDir, varNum);
+			System.err.println(path);
 		}
 		
 		return null;
