@@ -84,7 +84,7 @@ public class PatchDiversityEvaluation<G extends EditOperation> extends Search<G>
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
 			throws RepairFoundException, GiveUpException {
 		// TODO Auto-generated method stub
-		
+		initialize(null, null);
 	}
 	
 }
