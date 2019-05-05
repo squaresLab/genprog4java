@@ -1,6 +1,6 @@
 #this is a convenience script for using in Zhen's docker containers
 
-1=$BUGWD
+BUGWD = $1
 GP4J_PDE=/home/user/gp4j-patch-div-eval
 
 java -ea -Dlog4j.configurationFile=file:"$GP4J_PDE"/src/log4j.properties -Dfile.encoding=UTF-8 \
