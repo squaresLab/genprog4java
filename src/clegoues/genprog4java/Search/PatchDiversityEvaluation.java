@@ -12,6 +12,7 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.java.ClassInfo;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.EditOperation;
+import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 
@@ -74,21 +75,29 @@ public class PatchDiversityEvaluation<G extends EditOperation> extends Search<G>
 		{
 			String seed = patch.getLeft();
 			String varNum = patch.getRight();
-			System.err.printf("Patch: %s\t%s\n", seed, varNum);
 			
 			//path is hardcoded for the Docker containers that Zhen is using
 			String path = String.format("%s/__variantsSeed%s/%s/variant%s", Configuration.workingDir, seed, Configuration.outputDir, varNum);
-			System.err.println(path);
+			try {
+				JavaRepresentation patchRep = new JavaRepresentation();
+				patchRep.load(Configuration.targetClassNames, path);
+				patchRep.setVariantID(String.format("seed%s_variant%s", seed, varNum));;
+				patchesPop.add((Representation<G>) patchRep);
+				logger.info(String.format("Loaded %s\n", patchRep.getVariantID()));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
-		return null;
+		return patchesPop;
 	}
 
 	@Override
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
 			throws RepairFoundException, GiveUpException {
 		// TODO Auto-generated method stub
-		initialize(null, null);
+		Population<G> patches = initialize(null, null);
 	}
 	
 }

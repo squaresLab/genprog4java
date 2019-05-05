@@ -222,6 +222,16 @@ CachingRepresentation<JavaEditOperation> {
 		String path = Configuration.outputDir +  "/original/" + pair.pathToJavaFile();
 		this.fromSource(pair, path, new File(path));
 	}
+	
+	//used by PatchDiversityEvaluation to load patches
+	public void load(ArrayList<ClassInfo> bases, String pathToPatchDir) throws IOException 
+	{
+		for (ClassInfo base : bases) {
+			String pathToClass = String.format("%s/%s", pathToPatchDir, base.pathToJavaFile());
+			this.fromSource(base, pathToClass, new File(pathToClass));
+			logger.info("loaded from source " + base + " for patch in " + pathToPatchDir);
+		}
+	}
 
 
 	public static boolean canRepair(ASTNode node) { // FIXME: variable declarations that have bodies? Or; difference between "can repair" and "can move/delete/replace"
