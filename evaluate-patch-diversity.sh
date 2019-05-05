@@ -1,4 +1,7 @@
 #this is a convenience script for using in Zhen's docker containers
+if [ "$#" -ne 1 ]; then
+	echo "1st param is the path to the bug working directory"
+else
 
 BUGWD=$1
 GP4J_PDE=/home/user/gp4j-patch-div-eval
