@@ -49,6 +49,7 @@ import clegoues.genprog4java.Search.BruteForce;
 import clegoues.genprog4java.Search.GeneticProgramming;
 import clegoues.genprog4java.Search.NSGAII;
 import clegoues.genprog4java.Search.OracleSearch;
+import clegoues.genprog4java.Search.PatchDiversityEvaluation;
 import clegoues.genprog4java.Search.Population;
 import clegoues.genprog4java.Search.RandomSingleEdit;
 import clegoues.genprog4java.Search.Search;
@@ -123,6 +124,7 @@ public class Main {
 		ConfigurationBuilder.register( OracleSearch.token );
 		ConfigurationBuilder.register( RandomSingleEdit.token );
 		ConfigurationBuilder.register( DefaultLocalization.token );
+		ConfigurationBuilder.register( PatchDiversityEvaluation.token);
 
 		ConfigurationBuilder.parseArgs( origArgs );
 		Configuration.saveOrLoadTargetFiles();
@@ -166,37 +168,8 @@ public class Main {
 		
 		AbstractDataProcessor dp = null;
 		
-		switch(Search.searchStrategy.trim()) {
-
-		case "brute": searchEngine = new BruteForce<JavaEditOperation>(fitnessEngine);
-		break;
-		case "trp": searchEngine = new RandomSingleEdit<JavaEditOperation>(fitnessEngine);
-		break;
-		case "oracle": searchEngine = new OracleSearch<JavaEditOperation>(fitnessEngine);
-		break;
-		case "nsgaii":
-		case "nsgaii-diversity":
-			dp = new NSGAIIDataProcessor();
-			searchEngine = new NSGAII<JavaEditOperation>(fitnessEngine, new Objective[]{
-					new PositiveTestCasesObjective(),
-					new NegativeTestCasesObjective(),
-					new InvariantDiversityObjective()
-			}, (NSGAIIDataProcessor) dp);
-			break;
-		case "nsgaii-tests-only":
-			dp = new NSGAIIDataProcessor();
-			searchEngine = new NSGAII<JavaEditOperation>(fitnessEngine, new Objective[]{
-					new PositiveTestCasesObjective(),
-					new NegativeTestCasesObjective()
-			}, (NSGAIIDataProcessor) dp);
-			break;
-		case "ga":
-		default: 
-			dp = new GPDataProcessor();
-			searchEngine = new GeneticProgramming<JavaEditOperation>(fitnessEngine, (GPDataProcessor) dp);
-		break;
-			
-		}
+		searchEngine = new PatchDiversityEvaluation(fitnessEngine);
+		
 		incomingPopulation = new Population<JavaEditOperation>(); 
 
 		try {
