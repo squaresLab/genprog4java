@@ -101,7 +101,7 @@ public class PatchDiversityEvaluation<G extends EditOperation> extends Search<G>
 		Population<G> patches = initialize(null, null);
 		VariantCheckerMain.checkInvariant(patches);
 		for(Representation p : patches)
-			logger.info(String.format("The diversity score for %s is %f", p.getVariantID(), p.diversity));
+			logger.info(String.format("The diversity score for %s is %d", p.getVariantID(), p.diversity));
 	}
 	
 }
