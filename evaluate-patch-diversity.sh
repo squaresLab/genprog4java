@@ -13,3 +13,4 @@ java -ea -Dlog4j.configurationFile=file:"$GP4J_PDE"/src/log4j.properties -Dfile.
 	clegoues.genprog4java.main.Main \
 	$GP4J_PDE $JAVA_HOME $DAIKONDIR $BUGWD/introclass.config
 cd $BASEDIR
+fi
