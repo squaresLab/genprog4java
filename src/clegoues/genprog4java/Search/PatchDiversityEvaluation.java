@@ -104,18 +104,21 @@ public class PatchDiversityEvaluation<G extends EditOperation> extends Search<G>
 			logger.info(String.format("The diversity score for %s is %d", p.getVariantID(), p.diversity));
 		
 		//check invariants of the original program as well
+		/*
 		Population<G> origPop = new Population<>();
 		origPop.add(original);
 		VariantCheckerMain.checkInvariant(origPop);
 		
+		byte[] origInvProfile = Fitness.invariantCache.get(original.hashCode());
+		*/
+		
 		for(Representation p : patches)
 		{
-			byte[] pInvProfile = Fitness.invariantCache.get(p.hashCode());
-			byte[] origInvProfile = Fitness.invariantCache.get(original.hashCode());
-			List<byte[]> profiles = new ArrayList<>(2);
-			profiles.add(pInvProfile);
-			profiles.add(origInvProfile);
-			int semanticDiff = Fitness.getStringDiffScore(profiles)[0];
+			Population<G> pair = new Population<>();
+			pair.add(original);
+			pair.add(p);
+			VariantCheckerMain.checkInvariant(pair);
+			int semanticDiff = p.diversity;
 			logger.info(String.format("The semantic distance between the original program and %s is %d", 
 					p.getVariantID(), semanticDiff));
 		}
