@@ -98,11 +98,15 @@ public class PatchDiversityEvaluation<G extends EditOperation> extends Search<G>
 	@Override
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
 			throws RepairFoundException, GiveUpException {
-		// TODO Auto-generated method stub
 		Population<G> patches = initialize(null, null);
 		VariantCheckerMain.checkInvariant(patches);
 		for(Representation p : patches)
 			logger.info(String.format("The diversity score for %s is %d", p.getVariantID(), p.diversity));
+		
+		//check invariants of the original program as well
+		Population<G> origPop = new Population<>();
+		origPop.add(original);
+		VariantCheckerMain.checkInvariant(origPop);
 		
 		for(Representation p : patches)
 		{
