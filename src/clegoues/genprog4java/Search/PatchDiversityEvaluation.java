@@ -70,7 +70,7 @@ public class PatchDiversityEvaluation<G extends EditOperation> extends Search<G>
 	@Override
 	protected Population<G> initialize(Representation<G> original, Population<G> incomingPopulation)
 			throws RepairFoundException, GiveUpException {
-		// TODO Auto-generated method stub
+		
 		Population<G> patchesPop = new Population<>();
 		
 		for(Pair<String, String> patch : patches)
@@ -83,7 +83,8 @@ public class PatchDiversityEvaluation<G extends EditOperation> extends Search<G>
 			try {
 				JavaRepresentation patchRep = new JavaRepresentation();
 				patchRep.load(Configuration.targetClassNames, path);
-				patchRep.setVariantID(String.format("seed%s_variant%s", seed, varNum));;
+				patchRep.setVariantID(String.format("seed%s_variant%s", seed, varNum));
+				fitnessEngine.testFitness(0, patchRep);
 				patchesPop.add((Representation<G>) patchRep);
 				logger.info(String.format("Loaded %s\n", patchRep.getVariantID()));
 			} catch (IOException e) {
@@ -98,6 +99,9 @@ public class PatchDiversityEvaluation<G extends EditOperation> extends Search<G>
 	@Override
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
 			throws RepairFoundException, GiveUpException {
+		
+		fitnessEngine.testFitness(0, original);
+		
 		Population<G> patches = initialize(null, null);
 		VariantCheckerMain.checkInvariant(patches);
 		for(Representation p : patches)
