@@ -118,7 +118,6 @@ public class VariantCheckerMain
 
 		for(Representation<? extends EditOperation> rep : pop)
 		{
-			rep.diversity=0;
 			if (rep.getAlreadyCompiled() == null || !rep.getAlreadyCompiled().getLeft() || Fitness.invariantCache.get(rep.hashCode())!=null)
 			{
 				if(Fitness.invariantCache.get(rep.hashCode())!=null) {notRepsForCheck.add(rep);} else {allothers.add(rep);}
