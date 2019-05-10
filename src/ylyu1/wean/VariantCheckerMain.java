@@ -260,7 +260,11 @@ public class VariantCheckerMain
 				//goodVariant.add(false);
 				rep.isGoodForCheck=false;
 				allothers.add(rep);
-				if(!rep.vf.equals(""))Fitness.invariantCache.put(rep.hashCode(), null);
+				if(!rep.vf.equals(""))
+				{
+					Fitness.invariantCache.put(rep.hashCode(), null);
+					rep.invariantProfile = null;
+				}
 			}
 		}
 		
@@ -275,6 +279,7 @@ public class VariantCheckerMain
 		for(int i = 0; i < goodRepsForCheck.size(); i++)
 		{
 			Fitness.invariantCache.put(goodRepsForCheck.get(i).hashCode(), Aggregator.bs.grid.get(i));
+			goodRepsForCheck.get(i).invariantProfile = Aggregator.bs.grid.get(i);
 		}
 		
 		
@@ -374,6 +379,7 @@ public class VariantCheckerMain
 			}
 			
 			Fitness.invariantCache.put(repstorer.get(i/2).hashCode(),b);
+			repstorer.get(i/2).invariantProfile = b;
 		}
 		repstorer = new ArrayList<Representation<? extends EditOperation>>();
 		System.out.println("Entering third loop");

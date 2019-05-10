@@ -73,6 +73,7 @@ Comparable<Representation<G>> {
 	protected Localization localization = null;
 	
 	public int diversity = -1;
+	public byte[] invariantProfile = null;
 
 	protected String variantFolder = "";
 	private String variantID = ""; //used for NSGAII, can be empty, see getVariantID()
