@@ -157,12 +157,7 @@ public class Configuration {
 		} )
 		.build();
 	//public static boolean doSanity = true;
-	public static boolean doSanity = ConfigurationBuilder.of( BOOL_ARG )
-		.withVarName( "doSanity" )
-		.withFlag( "sanity" )
-		.withDefault( "true" )
-		.withHelp( "indicates whether to run sanity check" )
-		.build();
+	public static boolean doSanity = false;
 	//public static String workingDir = "./";
 	public static String workingDir = ConfigurationBuilder.of( STRING )
 		.withVarName( "workingDir" )
