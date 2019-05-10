@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -102,6 +103,18 @@ public class PatchDiversityEvaluation<G extends EditOperation> extends Search<G>
 		VariantCheckerMain.checkInvariant(patches);
 		for(Representation p : patches)
 			logger.info(String.format("The diversity score for %s is %d", p.getVariantID(), p.diversity));
+		
+		for(Representation p : patches)
+		{
+			byte[] pInvProfile = Fitness.invariantCache.get(p.hashCode());
+			byte[] origInvProfile = Fitness.invariantCache.get(original.hashCode());
+			List<byte[]> profiles = new ArrayList<>(2);
+			profiles.add(pInvProfile);
+			profiles.add(origInvProfile);
+			int semanticDiff = Fitness.getStringDiffScore(profiles)[0];
+			logger.info(String.format("The semantic distance between the original program and %s is %d", 
+					p.getVariantID(), semanticDiff));
+		}
 	}
 	
 }
