@@ -175,7 +175,7 @@ public class Main {
 		case "brute": searchEngine = new BruteForce<JavaEditOperation>(fitnessEngine);
 		break;
 		case "trp": 
-			dp = new GPDataProcessor();
+			dp = new YAMLDataProcessor();
 			searchEngine = new RandomSingleEdit<JavaEditOperation>(fitnessEngine, dp);
 		break;
 		case "oracle": searchEngine = new OracleSearch<JavaEditOperation>(fitnessEngine);

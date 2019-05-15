@@ -5,8 +5,12 @@ import static clegoues.util.ConfigurationBuilder.INT;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -22,10 +26,11 @@ import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 import ylyu1.wean.AbstractDataProcessor;
 import ylyu1.wean.VariantCheckerMain;
+import ylyu1.wean.YAMLDataProcessor;
 
 public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 
-	AbstractDataProcessor dp;
+	YAMLDataProcessor dp;
 
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
@@ -40,7 +45,10 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 	public RandomSingleEdit(Fitness engine, AbstractDataProcessor dataprocessor) {
 		super(engine);
 		engine.initializeModel();
-		dp = dataprocessor;
+		if(dataprocessor instanceof YAMLDataProcessor)
+			dp = (YAMLDataProcessor)dataprocessor;
+		else
+			throw new UnsupportedOperationException("Only YAMLDataProcessors supported for RandomSingleEdit");
 	}
 
 	@Override
@@ -94,25 +102,34 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 			mutate(variant);
 			
 			Pair<List<TestCase>, List<TestCase>> posTestResults = fitnessEngine.testPosTests(variant);
-			Pair<List<TestCase>, List<TestCase>> negTestResults = fitnessEngine.testNegTests(variant);
-			List<TestCase> passingPosTests = posTestResults.getLeft();
-			List<TestCase> passingNegTests = negTestResults.getLeft();
-			List<TestCase> failingPosTests = posTestResults.getRight();
-			List<TestCase> failingNegTests = negTestResults.getRight();
-			boolean repairFound = failingPosTests.size() == 0 && failingNegTests.size() == 0;
-			if(repairFound)
-				this.noteSuccess(variant, original, 0);
-				//continue the search, since we're doing mutation testing
-			byte[] invariantProfile = VariantCheckerMain.checkInvariantForSingleRep(variant);
-			System.out.printf("%s %d %d %d %d %s\n", 
-					variant.getVariantID(), 
-					passingPosTests.size(),
-					passingNegTests.size(),
-					failingPosTests.size(),
-					failingNegTests.size(),
-					Arrays.toString(invariantProfile));
-			numVariantsConsidered++;
-			copyClassFilesIntoOutputDir(variant);
+			//running tests would ensure compilation if the variant isn't cached.
+			if ( ! variant.getVariantFolder().equals(""))
+			{ //continue further analysis only if the variant isn't already seen before (and not cached).
+				Pair<List<TestCase>, List<TestCase>> negTestResults = fitnessEngine.testNegTests(variant);
+				List<TestCase> passingPosTests = posTestResults.getLeft();
+				List<TestCase> passingNegTests = negTestResults.getLeft();
+				List<TestCase> failingPosTests = posTestResults.getRight();
+				List<TestCase> failingNegTests = negTestResults.getRight();
+				boolean repairFound = failingPosTests.size() == 0 && failingNegTests.size() == 0;
+				if(repairFound)
+					this.noteSuccess(variant, original, 0);
+					//continue the search, since we're doing mutation testing
+				byte[] invariantProfile = VariantCheckerMain.checkInvariantForSingleRep(variant);
+				
+				//store info
+				Map<String, Object> info  = new LinkedHashMap<>(); //keys are sorted in order of insertion
+				info.put("Passing positive tests", passingPosTests);
+				info.put("Passing negative tests", passingNegTests);
+				info.put("Failing positive tests", failingPosTests);
+				info.put("Failing negative tests", failingNegTests);
+				info.put("Invariant profile", invariantProfile);
+				Map<String, Object> wrapper = new LinkedHashMap<>(1);
+				wrapper.put(variant.getVariantID(), info);
+				dp.dumpData(wrapper);
+				
+				copyClassFilesIntoOutputDir(variant);
+				numVariantsConsidered++;
+			}
 		}
 	}
 
