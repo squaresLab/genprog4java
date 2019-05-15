@@ -17,7 +17,7 @@ public class YAMLDataProcessor extends AbstractDataProcessor{
 	public static final ConfigurationBuilder.RegistryToken token =
 			ConfigurationBuilder.getToken();
 	
-	protected static String outputFileName = ConfigurationBuilder.of( STRING )
+	protected static String yamlOutputFile = ConfigurationBuilder.of( STRING )
 			.withVarName("yamlOutputFile")
 			.withDefault("out.yaml")
 			.build();
@@ -28,7 +28,7 @@ public class YAMLDataProcessor extends AbstractDataProcessor{
 	public YAMLDataProcessor()
 	{
 		try {
-			writer = new BufferedWriter(new FileWriter(Configuration.workingDir + "/" + outputFileName));
+			writer = new BufferedWriter(new FileWriter(Configuration.workingDir + "/" + yamlOutputFile));
 			yaml = new Yaml();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
