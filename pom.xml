@@ -55,6 +55,14 @@
     </plugins>
   </build>
 
+<repositories>
+	<repository>
+		<id>Sonatype-public</id>
+		<name>SnakeYAML repository</name>
+		<url>http://oss.sonatype.org/content/groups/public/</url>
+	</repository>
+</repositories>
+
   <dependencies>
   	<dependency>
   		<groupId>org.eclipse.tycho</groupId>
@@ -122,6 +130,11 @@
     <groupId>nz.ac.waikato.cms.weka</groupId>
     <artifactId>weka-stable</artifactId>
     <version>3.8.0</version>
+  </dependency>
+  <dependency>
+  	<groupId>org.yaml</groupId>
+  	<artifactId>snakeyaml</artifactId>
+  	<version>1.25-SNAPSHOT</version>
   </dependency>
   </dependencies>
 </project>

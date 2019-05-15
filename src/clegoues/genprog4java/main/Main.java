@@ -70,6 +70,7 @@ import clegoues.util.ConfigurationBuilder;
 import ylyu1.wean.AbstractDataProcessor;
 import ylyu1.wean.GPDataProcessor;
 import ylyu1.wean.NSGAIIDataProcessor;
+import ylyu1.wean.YAMLDataProcessor;
 
 public class Main {
 
@@ -123,6 +124,7 @@ public class Main {
 		ConfigurationBuilder.register( OracleSearch.token );
 		ConfigurationBuilder.register( RandomSingleEdit.token );
 		ConfigurationBuilder.register( DefaultLocalization.token );
+		ConfigurationBuilder.register( YAMLDataProcessor.token );
 
 		ConfigurationBuilder.parseArgs( origArgs );
 		Configuration.saveOrLoadTargetFiles();
