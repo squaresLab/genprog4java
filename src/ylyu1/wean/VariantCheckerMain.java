@@ -626,7 +626,7 @@ public class VariantCheckerMain
 				for(String s : group) {
 					List<String> ss = new ArrayList<String>();
 					ss.add(s);
-					runDaikonGroup(ss,tcs,count+c);
+					runDaikonGroup(ss,tcs,count-4+c);
 					c++;
 				}
 			}
