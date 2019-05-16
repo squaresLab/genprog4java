@@ -69,7 +69,7 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(Configuration.workingDir + "/JUSTUSE.ywl"))){
 			classes = (ArrayList<PredGroup>)ois.readObject();
 			invariants.put("Invariants", classes);
-		} catch (ClassNotFoundException | IOException e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 			invariants.put("Invariants", "Error encountered in producing invariants: " + e.getStackTrace());
 		}
@@ -80,6 +80,7 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 	//copies byte array into int array
 	private int[] convertInvariantProfile(byte[] invProfile)
 	{
+		if (invProfile == null) return null;
 		int[] copy = new int[invProfile.length];
 		for(int i = 0; i < copy.length; i++)
 			copy[i] = invProfile[i];
@@ -88,6 +89,7 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 	
 	private String[] convertTestCaseResults(List<TestCase> tests)
 	{
+		if (tests == null) return null;
 		String[] copy = new String[tests.size()];
 		for(int i = 0; i < copy.length; i++)
 			copy[i] = tests.get(i).getTestName();
