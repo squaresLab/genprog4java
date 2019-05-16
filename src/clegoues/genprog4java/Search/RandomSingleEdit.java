@@ -57,6 +57,23 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 		original.getLocalization().reduceSearchSpace();
 		return null;
 	}
+	
+	//copies byte array into int array
+	private int[] convertInvariantProfile(byte[] invProfile)
+	{
+		int[] copy = new int[invProfile.length];
+		for(int i = 0; i < copy.length; i++)
+			copy[i] = invProfile[i];
+		return copy;
+	}
+	
+	private String[] convertTestCaseResults(List<TestCase> tests)
+	{
+		String[] copy = new String[tests.size()];
+		for(int i = 0; i < copy.length; i++)
+			copy[i] = tests.get(i).getTestName();
+		return copy;
+	}
 
 	@Override
 	protected void runAlgorithm(Representation<G> original, Population<G> initialPopulation)
@@ -118,11 +135,11 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 				
 				//store info
 				Map<String, Object> info  = new LinkedHashMap<>(); //keys are sorted in order of insertion
-				info.put("Passing positive tests", passingPosTests);
-				info.put("Passing negative tests", passingNegTests);
-				info.put("Failing positive tests", failingPosTests);
-				info.put("Failing negative tests", failingNegTests);
-				info.put("Invariant profile", invariantProfile);
+				info.put("Passing positive tests", convertTestCaseResults(passingPosTests));
+				info.put("Passing negative tests", convertTestCaseResults(passingNegTests));
+				info.put("Failing positive tests", convertTestCaseResults(failingPosTests));
+				info.put("Failing negative tests", convertTestCaseResults(failingNegTests));
+				info.put("Invariant profile", convertInvariantProfile(invariantProfile));
 				Map<String, Object> wrapper = new LinkedHashMap<>(1);
 				wrapper.put(variant.getVariantID(), info);
 				dp.dumpData(wrapper);
