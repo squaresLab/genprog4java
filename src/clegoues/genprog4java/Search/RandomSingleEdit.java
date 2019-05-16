@@ -4,7 +4,9 @@ import static clegoues.util.ConfigurationBuilder.INT;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,6 +27,7 @@ import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 import ylyu1.wean.AbstractDataProcessor;
+import ylyu1.wean.PredGroup;
 import ylyu1.wean.VariantCheckerMain;
 import ylyu1.wean.YAMLDataProcessor;
 
@@ -56,6 +59,22 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 			throws RepairFoundException, GiveUpException {
 		original.getLocalization().reduceSearchSpace();
 		return null;
+	}
+	
+	protected void dumpInvariants()
+	{
+		Map<String, Object> invariants = new LinkedHashMap<>();
+		
+		ArrayList<PredGroup> classes;
+		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(Configuration.workingDir + "/JUSTUSE.ywl"))){
+			classes = (ArrayList<PredGroup>)ois.readObject();
+			invariants.put("Invariants", classes);
+		} catch (ClassNotFoundException | IOException e) {
+			e.printStackTrace();
+			invariants.put("Invariants", "Error encountered in producing invariants: " + e.getStackTrace());
+		}
+		
+		dp.dumpData(invariants);
 	}
 	
 	//copies byte array into int array
@@ -110,6 +129,8 @@ public class RandomSingleEdit<G extends EditOperation> extends Search<G>{
 				VariantCheckerMain.checkModify();
 			}
 		}
+		
+		dumpInvariants();
 		
 		logger.info("begin variant generation");
 		
