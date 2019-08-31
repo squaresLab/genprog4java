@@ -13,25 +13,12 @@ public class DataProcessor {
 	//TODO: make this conform with refactor
 	public static void main(String[] args) throws Exception
 	{
-		/*
-		 * Compute anti-plateau score
-		 * Compute average diversity
-		 */
-		/*
-		String dataset = args[0];
-		int bugnum = Integer.parseInt(args[1]);
-		int modenum = Integer.parseInt(args[2]);
-		int seednum = Integer.parseInt(args[3]);
-		String pathToBugs = args[4];
-		*/
 		if(args.length != 6)
 		{
 			System.out.println("Usage: java -cp GP4J_HOME/target/classes:GP4J_HOME/lib/commons-lang3-3.8.1.jar ylyu1.wean.DataProcessor bugDir seed (and a bunch of others)");
 			System.out.println("bugDir is the directory where ResultOfSeed*.results are located.");
 			System.exit(1);
 		}
-		//String bugDir = args[0];
-		//int seed = Integer.parseInt(args[1]);
 		String name = args[0];
 		String hash = args[1];
 		String num = args[2];

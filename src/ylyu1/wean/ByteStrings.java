@@ -6,7 +6,6 @@ import clegoues.genprog4java.fitness.Fitness;
 
 public class ByteStrings {
 	public ArrayList<byte[]> grid = new ArrayList<byte[]>();
-	//public String[] names = new String[1000];
 	public int currloc = 0;
 	public int maxSize = 0;
 	public void insert(byte[] b)

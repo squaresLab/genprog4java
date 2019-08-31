@@ -23,25 +23,15 @@ public class Flusher implements Serializable {
 	public static void flushIn(Integer i, boolean b)
 	{
 		if(counter==null)System.out.println("counter is null??");
-		//System.out.println("HA!");
 		if (!counter.containsKey(i))
 		{
 			counter.put(i, new Flusher());
 		}
 		counter.get(i).in(b);
 		count++;
-		/*
-		if((count== 10 || count == 100 || count == 1000 || count == 10000 || count % 500000 == 0)&&changed)
-		{
-			try {
-				flushOut();
-			}catch(IOException e) {System.out.println("No, this cannot happen");}
-		}
-		*/
 	}
 	public static void flushOut() throws FileNotFoundException, IOException
 	{
-		//System.out.println("OK, should be dumping..");;
 		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("Temp.all"));
 		oos.writeObject(counter);
 		oos.flush();
