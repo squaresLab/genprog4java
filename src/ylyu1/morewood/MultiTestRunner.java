@@ -17,14 +17,12 @@ public class MultiTestRunner
 {
 	public static final String SEPARATOR = "`";
 	
-	/*Only works for classes, doesn't work for method level granularity (yet)*/
 	public static void main(String[] args)
 	{
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run()
 			{
-				//Runtime.getRuntime().halt(0); //i think this sends a sigkill, so this should avoid the infinite loop of shutdown hooks
 			}
 		});
 		
@@ -34,20 +32,16 @@ public class MultiTestRunner
 		    System.out.println("Should initialize");	
 			Flusher.initialize();
 			String[] testsRaw = args[0].split(SEPARATOR);
-			//List<Class<?>> clazzes = new ArrayList<Class<?>>();
 			for(int i = 0; i < testsRaw.length; i++)
 			{
 				if(testsRaw[i].length()<3)continue;
-				//if(clazzName.contains("::")) {
-					String[] intermed = testsRaw[i].split("::");
-					String clazzName = intermed[0];
-					String methodName = intermed[1];
-				//}	
-					Class<?> clazzz = null;
+				String[] intermed = testsRaw[i].split("::");
+				String clazzName = intermed[0];
+				String methodName = intermed[1];
+				Class<?> clazzz = null;
 				try {
 					clazzz = Class.forName(clazzName);
 				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 					continue;
 				} catch (ExceptionInInitializerError e){
@@ -57,17 +51,12 @@ public class MultiTestRunner
 				
 				Request request = Request.method(clazzz, methodName);
 			
-			//Class<?>[] clazzess = new Class<?>[clazzes.size()];
-			//for(int i = 0; i < clazzes.size(); i++){
-				//clazzess[i]=clazzes.get(i);
-			//} 
+			    JUnitCore runner = new JUnitCore();
+			    Result r = runner.run(request);
 			
-			JUnitCore runner = new JUnitCore();
-			Result r = runner.run(request);
-			
-			System.out.println("[SUCCESS]:" + r.wasSuccessful());
-			System.out.println("[TOTAL]:" + r.getRunCount());
-			System.out.println("[FAILURE]:" + r.getFailureCount());
+			    System.out.println("[SUCCESS]:" + r.wasSuccessful());
+			    System.out.println("[TOTAL]:" + r.getRunCount());
+			    System.out.println("[FAILURE]:" + r.getFailureCount());
 			
 			}
 			
@@ -77,7 +66,6 @@ public class MultiTestRunner
 				e.printStackTrace();
 			}
 	
-			//.args.System.out.println("\n" + r.getFailures().toString());
 		} catch(Throwable e)
 		{
 			e.printStackTrace();

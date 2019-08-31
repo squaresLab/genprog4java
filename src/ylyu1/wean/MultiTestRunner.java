@@ -16,21 +16,18 @@ public class MultiTestRunner
 {
 	public static final String SEPARATOR = "`";
 	
-	/*Only works for classes, doesn't work for method level granularity (yet)*/
 	public static void main(String[] args)
 	{
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run()
 			{
-				//Runtime.getRuntime().halt(0); //i think this sends a sigkill, so this should avoid the infinite loop of shutdown hooks
 			}
 		});
 		
 		try
 		{
-
-		        System.out.println("Should initialize");	
+		    System.out.println("Should initialize");	
 			Flusher.initialize();
 			String[] testsRaw = args[0].split(SEPARATOR);
 			List<Class<?>> clazzes = new ArrayList<Class<?>>();
@@ -63,11 +60,6 @@ public class MultiTestRunner
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
-			for (Failure f : r.getFailures()) {
-				//System.out.println(f.toString());
-				//System.out.println(f.getTrace());
-			}
 	
 			System.out.println("\n" + r.getFailures().toString());
 		} catch(Throwable e)
@@ -78,7 +70,5 @@ public class MultiTestRunner
 		finally {
 			Runtime.getRuntime().exit(0);
 		}
-		
-		
 	}
 }
