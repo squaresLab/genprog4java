@@ -277,6 +277,7 @@ public abstract class Search<G extends EditOperation> {
 				if(proMutList.size()>=faultyAtoms.size()){ 
 					localization.setAllPossibleStmtsToFixLocalization();				
 					alreadySetAllStmtsToFixLoc = true;
+					faultyAtoms = localization.getFaultLocalization();
 				}
 
 				//only adds the random atom if it is different from the others already added & it has available mutations
