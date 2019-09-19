@@ -241,7 +241,7 @@ public class JavaEditFactory {
 				int atom = item.getAtom();
 				List<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getRight()), variant, editType);
 				for (WeightedAtom there : inScopeThere) {
-					if (there.getAtom() != location.getId()) { 
+					if (there.getAtom() == location.getId()) {
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
 						ASTNode fixAST = potentialFixStmt.getASTNode();
 						StatementHole stmtHole = new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId());
