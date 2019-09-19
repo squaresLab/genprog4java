@@ -140,8 +140,8 @@ public class DefaultLocalization extends Localization {
 		this.original = orig;
 		this.computeLocalization();
 
-		if(justTestingFaultLoc == true){
-			logger.info("Fault localization was peprformed successfully");
+		if(justTestingFaultLoc){
+			logger.info("Fault localization was performed successfully");
 			System.exit(0);
 		}
 	}

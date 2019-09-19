@@ -56,7 +56,7 @@ import clegoues.util.GlobalUtils;
 
 public class Population<G extends EditOperation> implements Iterable<Representation<G>>{
 
-	protected static Logger logger = Logger.getLogger(Fitness.class);
+	protected static Logger logger = Logger.getLogger(Population.class);
 	
 	public static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
