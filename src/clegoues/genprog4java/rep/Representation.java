@@ -137,6 +137,8 @@ Comparable<Representation<G>> {
 	public abstract List<WeightedMutation> availableMutations(
 			Location faultyLocation);
 
+	public abstract boolean hasAvailableMutations(Location faultyLocation);
+
 	protected transient int myHashCode = -1;
 	@Override
 	public int hashCode() {

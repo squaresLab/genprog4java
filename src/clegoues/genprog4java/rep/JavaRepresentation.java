@@ -156,11 +156,21 @@ CachingRepresentation<JavaEditOperation> {
 	public List<WeightedMutation> availableMutations(Location atomId) {
 		List<WeightedMutation> retVal = new LinkedList<WeightedMutation>();
 		for (WeightedMutation mutation : Search.availableMutations) {
-			if(this.doesEditApply(atomId, (Mutation) mutation.getKey())) {
-				retVal.add(new WeightedMutation((Mutation) mutation.getKey(), (Double) mutation.getValue()));
+			if(this.doesEditApply(atomId, mutation.getKey())) {
+				retVal.add(new WeightedMutation(mutation.getKey(), mutation.getValue()));
 			}
 		}
 		return retVal;
+	}
+
+	@Override
+	public boolean hasAvailableMutations(Location atomId) {
+		for (WeightedMutation mutation : Search.availableMutations) {
+			if(this.doesEditApply(atomId, mutation.getKey())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public ArrayList<Integer> atomIDofSourceLine(int lineno) {
