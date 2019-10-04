@@ -182,6 +182,14 @@ public class ASTUtils {
 		}
 		return hostAST.newNullLiteral();
 	}
+
+	public static boolean isVariableDeclaration(ASTNode node) {
+		if (node instanceof ExpressionStatement) {
+			ExpressionStatement es = (ExpressionStatement) node;
+			if (es.getExpression() instanceof VariableDeclarationExpression) return true;
+		}
+		return node instanceof VariableDeclarationStatement;
+	}
 }
 
 /** helper class for compiling from string */

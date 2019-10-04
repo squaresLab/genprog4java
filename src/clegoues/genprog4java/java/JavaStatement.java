@@ -817,13 +817,18 @@ if B include return statement
 	public boolean canBeDeleted() {
 		ASTNode faultyNode = this.getASTNode();
 		ASTNode parent = faultyNode.getParent();
-		//Heuristic: Don't remove returns from functions that have only one return statement.
-		if(faultyNode instanceof ReturnStatement){
+		// Heuristic: Don't remove returns from functions that have only one return statement.
+		if (faultyNode instanceof ReturnStatement){
 			parent = ASTUtils.getEnclosingMethod(this.getASTNode());
 			if(parent != null && parent instanceof MethodDeclaration) {
 				if(!hasMoreThanOneReturn((MethodDeclaration)parent))
 					return false;
 			}
+		}
+
+		// Heuristic: don't remove variable declarations, other things need that
+		if (ASTUtils.isVariableDeclaration(faultyNode)) {
+			return false;
 		}
 
 		return true;
