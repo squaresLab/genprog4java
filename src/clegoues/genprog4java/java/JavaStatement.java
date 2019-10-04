@@ -800,11 +800,6 @@ if B include return statement
 		return candidateMethodReplacements;
 	}
 
-
-	public ASTNode blockThatContainsThisStatement(){
-		return ASTUtils.getEnclosing(Block.class, this.astNode);
-	}
-
 	private static int howManyReturns = 0;
 
 	public static boolean hasMoreThanOneReturn(MethodDeclaration method){

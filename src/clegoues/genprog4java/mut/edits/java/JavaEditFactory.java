@@ -119,19 +119,7 @@ public class JavaEditFactory {
 				if (potentiallyBuggyStmt.parentMethodReturnsVoid() ||
 						potentiallyBuggyStmt.isLikelyAConstructor())
 					continue;
-
-				//Heuristic: Swapping, Appending or Replacing a return stmt to the middle of a block will make the code after it unreachable
-				ASTNode parentBlock = potentiallyBuggyStmt.blockThatContainsThisStatement();
-				if (parentBlock != null && parentBlock instanceof Block) {
-					List<ASTNode> statementsInBlock = ((Block)parentBlock).statements();
-					ASTNode lastStmtInTheBlock = statementsInBlock.get(statementsInBlock.size()-1);
-					if (!lastStmtInTheBlock.equals(faultAST)){
-						continue;
-					}
-				} else {
-					continue;
-				}
-
+				
 				//If we move a return statement into a function, the parameter in the return must match the function’s return type
 				ASTNode enclosingMethod = ASTUtils.getEnclosingMethod(faultAST);
 
@@ -149,13 +137,30 @@ public class JavaEditFactory {
 				}
 			}
 
+			//Heuristic: Don't replace/swap returns within functions that have only one return statement
+			// (unless the replacer is also a return statement); could also check if it's a block or
+			// other sequence of statements with a return within it, but I'm lazy
+			if ((!(fixAST instanceof ReturnStatement)) &&
+					faultAST instanceof ReturnStatement) {
+				ASTNode parent = ASTUtils.getEnclosingMethod(faultAST);
+				if(parent instanceof MethodDeclaration &&
+						!JavaStatement.hasMoreThanOneReturn((MethodDeclaration)parent)) {
+					continue;
+				}
+			}
+
+			//Heuristc: Don't throw or return in the middle of blocks, leaving unreachable statements
+			if (fixAST instanceof ReturnStatement || fixAST instanceof ThrowStatement) {
+				if (!potentiallyBuggyStmt.isLastStatementInControlFlow()) continue;
+			}
+
 			//Heuristic: Inserting methods like this() or super() somewhere that is not the First (or second, if super?) Stmt in the constructor, is wrong
 			if (fixAST instanceof ConstructorInvocation ||
 					fixAST instanceof SuperConstructorInvocation){
 				if (mut == Mutation.APPEND) continue;
 				ASTNode enclosingMethod = ASTUtils.getEnclosingMethod(faultAST);
 
-				if (enclosingMethod != null && 
+				if (enclosingMethod != null &&
 						enclosingMethod instanceof MethodDeclaration && 
 						((MethodDeclaration) enclosingMethod).isConstructor()) {
 					List<ASTNode> statementsInBlock = ((MethodDeclaration) enclosingMethod).getBody().statements();
@@ -176,22 +181,6 @@ public class JavaEditFactory {
 				else if (!potentiallyBuggyStmt.isLastStatementInControlFlow()) continue;
 			}
 
-			//Heuristic: Don't replace/swap returns within functions that have only one return statement
-			// (unless the replacer is also a return statement); could also check if it's a block or
-			// other sequence of statements with a return within it, but I'm lazy
-			if ((!(fixAST instanceof ReturnStatement)) &&
-					faultAST instanceof ReturnStatement) {
-				ASTNode parent = ASTUtils.getEnclosingMethod(faultAST);
-				if(parent instanceof MethodDeclaration && 
-						!JavaStatement.hasMoreThanOneReturn((MethodDeclaration)parent)) {
-					continue;
-				}
-			}
-			
-			//Heuristc: Don't throw or return in the middle of blocks, leaving unreachable statements
-			if (fixAST instanceof ReturnStatement || fixAST instanceof ThrowStatement) {
-				if (!potentiallyBuggyStmt.isLastStatementInControlFlow()) continue;
-			}
 
 			// if we made it this far without continuing, we're good to go.
 			retVal.add(potentialFixAtom);
