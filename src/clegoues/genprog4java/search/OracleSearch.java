@@ -1,8 +1,6 @@
-package clegoues.genprog4java.Search;
+package clegoues.genprog4java.search;
 
 import static clegoues.util.ConfigurationBuilder.STRING;
-
-import java.util.Properties;
 
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.EditOperation;

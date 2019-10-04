@@ -1,4 +1,4 @@
-package clegoues.genprog4java.Search;
+package clegoues.genprog4java.search;
 
 import static clegoues.util.ConfigurationBuilder.INT;
 

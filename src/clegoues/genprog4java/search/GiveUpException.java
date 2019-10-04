@@ -1,4 +1,4 @@
-package clegoues.genprog4java.Search;
+package clegoues.genprog4java.search;
 
 public class GiveUpException extends Exception{
 

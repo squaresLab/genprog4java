@@ -82,7 +82,7 @@ public class JavaParser
 	 */
 	private HashSet<String> availableMethodsAndFields;
 
-	public JavaParser(ScopeInfo scopeList)
+	public JavaParser(ScopeInfo scopeList, CFBlockInfo cfBlockInfo)
 	{
 		this.stmts = new LinkedList<ASTNode>();
 		this.methodReturnType = new HashMap<String,String>();
@@ -94,6 +94,7 @@ public class JavaParser
 		
 		this.visitor.setNodeSet(this.stmts);		
 		this.visitor.setScopeList(scopeList);
+		this.visitor.setCFBlockInfo(cfBlockInfo);
 		this.visitor.setMethodReturnType(methodReturnType);
 		this.visitor.setVariableType(variableTypes);
 		

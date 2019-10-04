@@ -31,9 +31,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package clegoues.genprog4java.Search;
+package clegoues.genprog4java.search;
 
-// oneday FIXME: lowercase the package name because it annoys me...
 import static clegoues.util.ConfigurationBuilder.BOOLEAN;
 import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.INT;
@@ -42,13 +41,8 @@ import static clegoues.util.ConfigurationBuilder.STRING;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
@@ -57,7 +51,6 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;

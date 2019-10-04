@@ -5,7 +5,7 @@ import static clegoues.util.ConfigurationBuilder.STRING;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import clegoues.genprog4java.Search.GiveUpException;
+import clegoues.genprog4java.search.GiveUpException;
 import clegoues.genprog4java.rep.WeightedAtom;
 import clegoues.util.ConfigurationBuilder;
 
