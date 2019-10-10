@@ -1,0 +1,297 @@
+DEBUG	2019-10-09 19:54:49,318	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2019-10-09 19:54:49,815	497	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2019-10-09 19:54:51,985	2667	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2019-10-09 19:54:51,986	2668	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2019-10-09 19:54:52,506	3188	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2019-10-09 19:54:52,771	3453	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2019-10-09 19:54:52,772	3454	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2019-10-09 19:54:53,316	3998	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2019-10-09 19:54:53,316	3998	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 1331)
+INFO	2019-10-09 19:54:53,317	3999	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2019-10-09 19:54:53,400	4082	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2019-10-09 19:54:53,998	4680	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2019-10-09 19:54:54,407	5089	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2019-10-09 19:54:54,408	5090	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2019-10-09 19:54:55,139	5821	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: variant0)
+INFO	2019-10-09 19:54:56,225	6907	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,7) (stored at: variant1)
+INFO	2019-10-09 19:54:56,930	7612	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: variant2)
+INFO	2019-10-09 19:54:57,876	8558	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,14) (stored at: variant3)
+INFO	2019-10-09 19:54:59,160	9842	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(17,7) (stored at: variant4)
+INFO	2019-10-09 19:55:00,420	11102	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(5,5) (stored at: variant5)
+INFO	2019-10-09 19:55:01,982	12664	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(4) (stored at: variant6)
+INFO	2019-10-09 19:55:03,488	14170	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,4) (stored at: variant7)
+INFO	2019-10-09 19:55:04,528	15210	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,13) (stored at: variant8)
+INFO	2019-10-09 19:55:05,554	16236	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: variant9)
+INFO	2019-10-09 19:55:06,516	17198	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(5,17) (stored at: variant10)
+INFO	2019-10-09 19:55:07,466	18148	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,7) (stored at: variant11)
+INFO	2019-10-09 19:55:08,755	19437	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(10,5) (stored at: variant12)
+INFO	2019-10-09 19:55:09,021	19703	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: )
+INFO	2019-10-09 19:55:09,962	20644	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(15) (stored at: variant13)
+INFO	2019-10-09 19:55:10,653	21335	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(7,4) (stored at: variant14)
+INFO	2019-10-09 19:55:11,316	21998	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,9) (stored at: variant15)
+INFO	2019-10-09 19:55:12,260	22942	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(7,16) (stored at: variant16)
+ERROR	2019-10-09 19:55:12,281	22963	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageSimpleExample/SimpleExample.java:23: error: variable ret might not have been initialized
+	return ret;
+	       ^
+1 error
+1 warning
+
+INFO	2019-10-09 19:55:12,287	22969	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtDelete(2) at variant17 fails to compile
+
+INFO	2019-10-09 19:55:13,216	23898	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(2) (stored at: variant17)
+INFO	2019-10-09 19:55:14,331	25013	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,15) (stored at: variant18)
+INFO	2019-10-09 19:55:14,332	25014	clegoues.genprog4java.Search.Search	[main]	search: generation1
+INFO	2019-10-09 19:55:15,335	26017	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.0 StmtReplace(10,14) StmtAppend(10,14) (stored at: variant19)
+INFO	2019-10-09 19:55:16,865	27547	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 0.0 StmtReplace(7,4) StmtAppend(2,5) (stored at: variant20)
+DEBUG	2019-10-09 19:55:49,326	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2019-10-09 19:55:50,117	791	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2019-10-09 19:55:51,958	2632	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2019-10-09 19:55:51,958	2632	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2019-10-09 19:55:52,398	3072	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2019-10-09 19:55:52,615	3289	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2019-10-09 19:55:52,615	3289	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2019-10-09 19:55:52,848	3522	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2019-10-09 19:55:52,848	3522	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 890)
+INFO	2019-10-09 19:55:52,848	3522	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2019-10-09 19:55:52,885	3559	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2019-10-09 19:55:53,355	4029	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2019-10-09 19:55:53,773	4447	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2019-10-09 19:55:53,773	4447	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2019-10-09 19:55:54,459	5133	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: variant0)
+INFO	2019-10-09 19:55:55,472	6146	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,7) (stored at: variant1)
+INFO	2019-10-09 19:55:56,152	6826	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: variant2)
+INFO	2019-10-09 19:55:56,820	7494	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,14) (stored at: variant3)
+INFO	2019-10-09 19:55:57,777	8451	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(17,7) (stored at: variant4)
+INFO	2019-10-09 19:55:58,468	9142	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtAppend(5,5) (stored at: variant5)
+INFO	2019-10-09 19:55:59,437	10111	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(4) (stored at: variant6)
+INFO	2019-10-09 19:56:00,393	11067	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(13,4) (stored at: variant7)
+INFO	2019-10-09 19:56:01,324	11998	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtReplace(12,13) (stored at: variant8)
+INFO	2019-10-09 19:56:02,974	13648	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtDelete(14) (stored at: variant9)
+DEBUG	2019-10-09 19:57:44,006	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2019-10-09 19:57:45,065	1059	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2019-10-09 19:57:46,955	2949	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2019-10-09 19:57:46,956	2950	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2019-10-09 19:57:47,411	3405	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2019-10-09 19:57:47,804	3798	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2019-10-09 19:57:47,805	3799	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2019-10-09 19:57:48,323	4317	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2019-10-09 19:57:48,323	4317	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 1367)
+INFO	2019-10-09 19:57:48,323	4317	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2019-10-09 19:57:48,422	4416	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2019-10-09 19:57:48,958	4952	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2019-10-09 19:57:49,375	5369	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2019-10-09 19:57:49,375	5369	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2019-10-09 19:57:50,076	6070	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 original (stored at: variant0)
+INFO	2019-10-09 19:57:51,133	7127	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 0.0 StmtAppend(12,7) (stored at: variant1)
+INFO	2019-10-09 19:57:51,806	7800	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtDelete(10) (stored at: variant2)
+INFO	2019-10-09 19:57:53,165	9159	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.0 StmtReplace(10,14) (stored at: variant3)
+DEBUG	2019-10-09 19:58:09,188	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2019-10-09 19:58:09,842	654	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2019-10-09 19:58:11,705	2517	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2019-10-09 19:58:11,705	2517	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2019-10-09 19:58:12,158	2970	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2019-10-09 19:58:12,378	3190	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2019-10-09 19:58:12,379	3191	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2019-10-09 19:58:12,626	3438	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2019-10-09 19:58:12,627	3439	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 922)
+INFO	2019-10-09 19:58:12,627	3439	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2019-10-09 19:58:12,666	3478	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2019-10-09 19:58:13,153	3965	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2019-10-09 19:58:13,572	4384	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2019-10-09 19:58:13,573	4385	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2019-10-09 19:58:14,309	5121	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 original (stored at: variant0)
+INFO	2019-10-09 19:58:15,351	6163	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.6488219117619125 StmtAppend(12,7) (stored at: variant1)
+INFO	2019-10-09 19:58:16,034	6846	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtDelete(10) (stored at: variant2)
+INFO	2019-10-09 19:58:16,724	7536	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtReplace(10,14) (stored at: variant3)
+INFO	2019-10-09 19:58:17,740	8552	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.71905752940953 StmtAppend(17,7) (stored at: variant4)
+INFO	2019-10-09 19:58:18,420	9232	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtAppend(5,5) (stored at: variant5)
+INFO	2019-10-09 19:58:19,412	10224	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.5083506764666774 StmtDelete(4) (stored at: variant6)
+INFO	2019-10-09 19:58:20,358	11170	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.71905752940953 StmtReplace(13,4) (stored at: variant7)
+INFO	2019-10-09 19:58:21,559	12371	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.6488219117619125 StmtReplace(12,13) (stored at: variant8)
+INFO	2019-10-09 19:58:22,938	13750	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.71905752940953 StmtDelete(14) (stored at: variant9)
+INFO	2019-10-09 19:58:24,495	15307	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.6488219117619125 StmtAppend(5,17) (stored at: variant10)
+INFO	2019-10-09 19:58:25,476	16288	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.6488219117619125 StmtReplace(12,7) (stored at: variant11)
+INFO	2019-10-09 19:58:26,710	17522	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtAppend(10,5) (stored at: variant12)
+INFO	2019-10-09 19:58:27,073	17885	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtDelete(10) (stored at: )
+INFO	2019-10-09 19:58:28,096	18908	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.6488219117619125 StmtDelete(15) (stored at: variant13)
+INFO	2019-10-09 19:58:29,331	20143	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtReplace(7,4) (stored at: variant14)
+INFO	2019-10-09 19:58:30,000	20812	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtReplace(10,9) (stored at: variant15)
+INFO	2019-10-09 19:58:30,978	21790	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.5083506764666774 StmtReplace(7,16) (stored at: variant16)
+ERROR	2019-10-09 19:58:30,997	21809	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageSimpleExample/SimpleExample.java:23: error: variable ret might not have been initialized
+	return ret;
+	       ^
+1 error
+1 warning
+
+INFO	2019-10-09 19:58:31,001	21813	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtDelete(2) at variant17 fails to compile
+
+INFO	2019-10-09 19:58:31,515	22327	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtDelete(2) (stored at: variant17)
+INFO	2019-10-09 19:58:32,479	23291	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.5083506764666774 StmtReplace(13,15) (stored at: variant18)
+INFO	2019-10-09 19:58:32,479	23291	clegoues.genprog4java.Search.Search	[main]	search: generation1
+INFO	2019-10-09 19:58:33,245	24057	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtAppend(10,5) StmtAppend(10,14) (stored at: variant19)
+INFO	2019-10-09 19:58:34,228	25040	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.71905752940953 StmtReplace(7,4) StmtAppend(2,5) (stored at: variant20)
+INFO	2019-10-09 19:58:35,228	26040	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.71905752940953 StmtAppend(5,5) StmtAppend(16,14) (stored at: variant21)
+INFO	2019-10-09 19:58:35,943	26755	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtReplace(10,14) StmtReplace(10,5) (stored at: variant22)
+INFO	2019-10-09 19:58:36,199	27011	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtDelete(10) StmtDelete(10) (stored at: )
+INFO	2019-10-09 19:58:37,475	28287	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtReplace(7,4) StmtDelete(10) (stored at: variant23)
+INFO	2019-10-09 19:58:38,149	28961	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtAppend(10,5) StmtAppend(10,4) (stored at: variant24)
+INFO	2019-10-09 19:58:38,590	29402	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtReplace(10,7) (stored at: )
+INFO	2019-10-09 19:58:39,931	30743	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.5083506764666774 StmtDelete(10) StmtDelete(7) (stored at: variant25)
+INFO	2019-10-09 19:58:40,604	31416	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtDelete(10) StmtAppend(6,12) (stored at: variant26)
+INFO	2019-10-09 19:58:41,297	32109	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtReplace(7,4) StmtAppend(16,16) (stored at: variant27)
+INFO	2019-10-09 19:58:41,561	32373	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtReplace(10,14) StmtDelete(10) (stored at: )
+INFO	2019-10-09 19:58:41,834	32646	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtAppend(5,5) StmtReplace(10,15) (stored at: )
+INFO	2019-10-09 19:58:42,098	32910	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtDelete(10) StmtDelete(10) (stored at: )
+INFO	2019-10-09 19:58:42,361	33173	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtDelete(10) StmtReplace(10,7) (stored at: )
+INFO	2019-10-09 19:58:43,354	34166	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.6488219117619125 StmtDelete(10) StmtReplace(2,7) (stored at: variant28)
+INFO	2019-10-09 19:58:43,627	34439	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtReplace(10,9) StmtReplace(14,7) (stored at: )
+INFO	2019-10-09 19:58:44,305	35117	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtAppend(10,5) StmtReplace(9,8) (stored at: variant29)
+INFO	2019-10-09 19:58:45,266	36078	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.6488219117619125 StmtReplace(7,4) StmtReplace(5,16) (stored at: variant30)
+INFO	2019-10-09 19:58:46,053	36865	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtReplace(10,9) StmtDelete(9) (stored at: variant31)
+INFO	2019-10-09 19:58:47,150	37962	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.2274082058762072 StmtReplace(4,15) (stored at: variant32)
+INFO	2019-10-09 19:58:47,418	38230	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtReplace(10,5) (stored at: )
+INFO	2019-10-09 19:58:48,392	39204	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.5083506764666774 StmtDelete(7) (stored at: variant33)
+INFO	2019-10-09 19:58:49,079	39891	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtAppend(12,12) (stored at: variant34)
+INFO	2019-10-09 19:58:50,042	40854	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.5083506764666774 StmtAppend(6,10) (stored at: variant35)
+INFO	2019-10-09 19:58:51,027	41839	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.5785862941142952 StmtAppend(3,15) (stored at: variant36)
+INFO	2019-10-09 19:58:51,289	42101	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtAppend(10,5) (stored at: )
+INFO	2019-10-09 19:58:51,833	42645	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtAppend(3,15) (stored at: )
+INFO	2019-10-09 19:58:52,538	43350	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtReplace(10,6) (stored at: variant37)
+INFO	2019-10-09 19:58:52,797	43609	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtAppend(10,4) (stored at: )
+INFO	2019-10-09 19:58:53,529	44341	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtAppend(17,15) (stored at: variant38)
+INFO	2019-10-09 19:58:54,224	45036	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtAppend(2,8) (stored at: variant39)
+INFO	2019-10-09 19:58:54,224	45036	clegoues.genprog4java.Search.Search	[main]	search: generation2
+INFO	2019-10-09 19:58:55,139	45951	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtAppend(2,8) StmtAppend(10,9) (stored at: variant40)
+INFO	2019-10-09 19:58:56,261	47073	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.6488219117619125 StmtAppend(10,4) StmtAppend(14,15) (stored at: variant41)
+INFO	2019-10-09 19:58:56,935	47747	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtAppend(17,15) StmtAppend(10,10) (stored at: variant42)
+INFO	2019-10-09 19:58:57,200	48012	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtAppend(5,5) StmtReplace(10,15) StmtAppend(9,16) (stored at: )
+INFO	2019-10-09 19:58:58,211	49023	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.5083506764666774 StmtDelete(10) StmtDelete(10) StmtDelete(6) (stored at: variant43)
+INFO	2019-10-09 19:58:59,290	50102	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.71905752940953 StmtReplace(7,4) StmtAppend(16,16) StmtReplace(5,6) (stored at: variant44)
+INFO	2019-10-09 19:59:00,331	51143	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.71905752940953 StmtReplace(10,14) StmtDelete(10) StmtReplace(5,13) (stored at: variant45)
+INFO	2019-10-09 19:59:01,314	52126	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.5785862941142952 StmtReplace(10,6) StmtReplace(15,5) (stored at: variant46)
+INFO	2019-10-09 19:59:01,610	52422	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtReplace(10,14) StmtReplace(10,5) StmtReplace(10,13) (stored at: )
+INFO	2019-10-09 19:59:02,133	52945	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtAppend(3,15) StmtAppend(14,15) (stored at: )
+ERROR	2019-10-09 19:59:02,159	52971	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageSimpleExample/SimpleExample.java:24: error: variable ret might not have been initialized
+	return ret;
+	       ^
+1 error
+1 warning
+
+INFO	2019-10-09 19:59:02,159	52971	clegoues.genprog4java.rep.CachingRepresentation	[main]	StmtReplace(10,14) StmtDelete(10) StmtDelete(2) at variant47 fails to compile
+
+INFO	2019-10-09 19:59:02,669	53481	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtReplace(10,14) StmtDelete(10) StmtDelete(2) (stored at: variant47)
+INFO	2019-10-09 19:59:03,328	54140	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtReplace(10,9) StmtReplace(14,7) StmtAppend(10,9) (stored at: variant48)
+INFO	2019-10-09 19:59:04,293	55105	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.5083506764666774 StmtDelete(10) StmtDelete(10) StmtReplace(4,9) (stored at: variant49)
+INFO	2019-10-09 19:59:05,280	56092	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.5785862941142947 StmtReplace(10,6) StmtDelete(12) (stored at: variant50)
+INFO	2019-10-09 19:59:05,915	56727	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtReplace(10,7) StmtReplace(9,13) (stored at: variant51)
+INFO	2019-10-09 19:59:06,593	57405	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtDelete(10) StmtDelete(10) StmtReplace(10,12) (stored at: variant52)
+INFO	2019-10-09 19:59:06,855	57667	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtReplace(7,4) StmtDelete(10) StmtDelete(10) (stored at: )
+INFO	2019-10-09 19:59:07,119	57931	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtAppend(10,5) StmtReplace(9,8) StmtAppend(10,15) (stored at: )
+INFO	2019-10-09 19:59:07,384	58196	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtReplace(10,7) StmtReplace(10,7) (stored at: )
+INFO	2019-10-09 19:59:08,050	58862	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtReplace(10,14) StmtReplace(10,5) StmtReplace(9,14) (stored at: variant53)
+INFO	2019-10-09 19:59:08,765	59577	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtReplace(10,8) (stored at: variant54)
+INFO	2019-10-09 19:59:09,732	60544	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.5083506764666774 StmtReplace(10,14) StmtDelete(5) (stored at: variant55)
+INFO	2019-10-09 19:59:09,998	60810	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtDelete(10) (stored at: )
+INFO	2019-10-09 19:59:10,956	61768	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.71905752940953 StmtDelete(10) StmtDelete(14) (stored at: variant56)
+INFO	2019-10-09 19:59:12,010	62822	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.6488219117619125 StmtDelete(16) (stored at: variant57)
+INFO	2019-10-09 19:59:12,271	63083	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtDelete(10) StmtReplace(10,8) (stored at: )
+INFO	2019-10-09 19:59:12,531	63343	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtReplace(10,14) StmtAppend(10,9) (stored at: )
+INFO	2019-10-09 19:59:13,182	63994	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtReplace(10,4) (stored at: variant58)
+INFO	2019-10-09 19:59:13,707	64519	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtReplace(12,14) (stored at: )
+INFO	2019-10-09 19:59:14,357	65169	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 2 1.7892931470571476 StmtReplace(10,14) StmtAppend(7,15) (stored at: variant59)
+INFO	2019-10-09 19:59:14,358	65170	clegoues.genprog4java.Search.Search	[main]	search: generation3
+INFO	2019-10-09 19:59:15,483	66295	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.6488219117619125 StmtAppend(17,15) StmtAppend(10,10) StmtDelete(16) (stored at: variant60)
+INFO	2019-10-09 19:59:15,740	66552	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.7892931470571476 StmtDelete(10) StmtReplace(10,8) StmtDelete(10) (stored at: )
+INFO	2019-10-09 19:59:16,431	67243	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.7892931470571476 StmtAppend(2,8) StmtAppend(10,9) StmtAppend(10,8) (stored at: variant61)
+INFO	2019-10-09 19:59:17,429	68241	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.6488219117619125 StmtAppend(2,8) StmtAppend(10,9) StmtReplace(12,15) (stored at: variant62)
+INFO	2019-10-09 19:59:17,682	68494	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.7892931470571476 StmtReplace(10,14) StmtReplace(10,5) StmtReplace(10,13) StmtAppend(10,7) (stored at: )
+INFO	2019-10-09 19:59:17,942	68754	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.7892931470571476 StmtReplace(10,14) StmtReplace(10,5) StmtReplace(10,13) StmtReplace(10,4) (stored at: )
+INFO	2019-10-09 19:59:18,196	69008	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.7892931470571476 StmtDelete(10) StmtDelete(10) StmtReplace(10,12) StmtDelete(10) (stored at: )
+INFO	2019-10-09 19:59:19,170	69982	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.5083506764666774 StmtReplace(10,7) StmtReplace(9,13) StmtReplace(3,4) (stored at: variant63)
+INFO	2019-10-09 19:59:20,175	70987	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.6488219117619125 StmtReplace(12,14) StmtDelete(10) (stored at: variant64)
+INFO	2019-10-09 19:59:21,243	72055	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 1.6488219117619125 StmtAppend(10,4) StmtAppend(14,15) StmtAppend(10,15) (stored at: variant65)
+INFO	2019-10-09 19:59:21,654	72466	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 3 3.0 StmtDelete(10) StmtReplace(10,8) StmtAppend(9,16) (stored at: variant66)
+INFO	2019-10-09 19:59:21,654	72466	clegoues.genprog4java.Search.Search	[main]	
+Repair Found: StmtDelete(10) StmtReplace(10,8) StmtAppend(9,16) (in variant66)
+
+INFO	2019-10-09 19:59:21,674	72486	clegoues.genprog4java.fitness.Fitness	[main]	Serialized test cache to file testcache.ser
+INFO	2019-10-09 19:59:21,674	72486	clegoues.genprog4java.main.Main	[main]	
+Total elapsed time: 72
+
+DEBUG	2019-10-09 20:07:37,363	0	clegoues.genprog4java.fitness.Fitness	[main]	parsing granularity, value: class
+INFO	2019-10-09 20:07:38,216	853	clegoues.genprog4java.main.Main	[main]	Configuration file loaded
+INFO	2019-10-09 20:07:40,205	2842	clegoues.genprog4java.rep.CachingRepresentation	[main]	loaded from source clegoues.genprog4java.java.ClassInfo@3cd7f7db
+INFO	2019-10-09 20:07:40,206	2843	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking begins
+INFO	2019-10-09 20:07:40,646	3283	clegoues.genprog4java.rep.CachingRepresentation	[main]	Checking test number 1 out of 1
+INFO	2019-10-09 20:07:40,860	3497	clegoues.genprog4java.rep.CachingRepresentation	[main]	true (1)
+
+INFO	2019-10-09 20:07:40,861	3498	clegoues.genprog4java.rep.CachingRepresentation	[main]		n1: 
+INFO	2019-10-09 20:07:41,095	3732	clegoues.genprog4java.rep.CachingRepresentation	[main]	false (0)
+
+INFO	2019-10-09 20:07:41,095	3732	clegoues.genprog4java.rep.CachingRepresentation	[main]	sanity checking completed (time taken = 889)
+INFO	2019-10-09 20:07:41,096	3733	clegoues.genprog4java.localization.DefaultLocalization	[main]	Start Fault Localization
+INFO	2019-10-09 20:07:41,133	3770	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsPos
+INFO	2019-10-09 20:07:41,612	4249	clegoues.genprog4java.localization.DefaultLocalization	[main]	tests.SimpleExampleTestsNeg
+INFO	2019-10-09 20:07:42,033	4670	clegoues.genprog4java.localization.DefaultLocalization	[main]	Finish Fault Localization
+INFO	2019-10-09 20:07:42,034	4671	clegoues.genprog4java.Search.Search	[main]	search: genetic algorithm begins
+
+INFO	2019-10-09 20:07:42,359	4996	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 original (stored at: )
+INFO	2019-10-09 20:07:43,142	5779	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtAppend(12,7) (stored at: )
+INFO	2019-10-09 20:07:43,479	6116	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtDelete(10) (stored at: )
+INFO	2019-10-09 20:07:43,816	6453	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtReplace(10,14) (stored at: )
+INFO	2019-10-09 20:07:44,485	7122	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtAppend(17,7) (stored at: )
+INFO	2019-10-09 20:07:44,833	7470	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtAppend(5,5) (stored at: )
+INFO	2019-10-09 20:07:45,509	8146	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtDelete(4) (stored at: )
+INFO	2019-10-09 20:07:46,211	8848	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtReplace(13,4) (stored at: )
+INFO	2019-10-09 20:07:46,893	9530	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtReplace(12,13) (stored at: )
+INFO	2019-10-09 20:07:47,561	10198	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtDelete(14) (stored at: )
+INFO	2019-10-09 20:07:48,259	10896	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtAppend(5,17) (stored at: )
+INFO	2019-10-09 20:07:48,946	11583	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtReplace(12,7) (stored at: )
+INFO	2019-10-09 20:07:49,289	11926	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtAppend(10,5) (stored at: )
+INFO	2019-10-09 20:07:49,621	12258	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtDelete(10) (stored at: )
+INFO	2019-10-09 20:07:50,302	12939	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtDelete(15) (stored at: )
+INFO	2019-10-09 20:07:50,633	13270	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtReplace(7,4) (stored at: )
+INFO	2019-10-09 20:07:50,983	13620	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtReplace(10,9) (stored at: )
+INFO	2019-10-09 20:07:51,635	14272	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtReplace(7,16) (stored at: )
+INFO	2019-10-09 20:07:52,297	14934	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtDelete(2) (stored at: )
+INFO	2019-10-09 20:07:53,430	16067	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 0 1.7892931470571476 StmtReplace(13,15) (stored at: )
+INFO	2019-10-09 20:07:53,430	16067	clegoues.genprog4java.Search.Search	[main]	search: generation1
+ERROR	2019-10-09 20:07:54,000	16637	clegoues.genprog4java.rep.JavaRepresentation	[main]	warning: [options] bootstrap class path not set in conjunction with -source 1.6
+packageSimpleExample/SimpleExample.java:23: error: variable ret might not have been initialized
+	return ret;
+	       ^
+1 error
+1 warning
+
+INFO	2019-10-09 20:07:55,715	18352	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.5785862941142952 StmtReplace(7,4) StmtAppend(3,14) (stored at: variant0)
+INFO	2019-10-09 20:07:57,356	19993	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.6488219117619125 StmtReplace(12,13) StmtReplace(4,4) (stored at: variant1)
+INFO	2019-10-09 20:07:58,691	21328	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.6488219117619125 StmtDelete(15) StmtDelete(9) (stored at: variant2)
+INFO	2019-10-09 20:08:00,201	22838	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.71905752940953 StmtReplace(10,14) StmtReplace(8,7) (stored at: variant3)
+INFO	2019-10-09 20:08:01,070	23707	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtReplace(7,4) StmtAppend(16,8) (stored at: variant4)
+INFO	2019-10-09 20:08:02,200	24837	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.71905752940953 StmtReplace(13,4) StmtDelete(10) (stored at: variant5)
+INFO	2019-10-09 20:08:03,334	25971	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.5083506764666774 StmtReplace(13,15) StmtDelete(10) (stored at: variant6)
+INFO	2019-10-09 20:08:04,475	27112	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.5083506764666774 StmtReplace(7,16) StmtAppend(10,9) (stored at: variant7)
+INFO	2019-10-09 20:08:05,604	28241	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.5785862941142947 StmtAppend(10,5) StmtDelete(12) (stored at: variant8)
+INFO	2019-10-09 20:08:06,736	29373	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.6488219117619125 StmtAppend(12,7) StmtReplace(10,8) (stored at: variant9)
+INFO	2019-10-09 20:08:07,852	30489	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.71905752940953 StmtAppend(2,15) (stored at: variant10)
+INFO	2019-10-09 20:08:08,970	31607	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.71905752940953 StmtDelete(14) StmtDelete(9) (stored at: variant11)
+INFO	2019-10-09 20:08:09,320	31957	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtDelete(10) (stored at: )
+INFO	2019-10-09 20:08:10,446	33083	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.6488219117619125 StmtReplace(10,14) StmtReplace(12,6) (stored at: variant12)
+INFO	2019-10-09 20:08:11,621	34258	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.6488219117619125 StmtReplace(12,7) StmtAppend(10,5) (stored at: variant13)
+INFO	2019-10-09 20:08:11,966	34603	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtAppend(10,9) (stored at: )
+INFO	2019-10-09 20:08:13,058	35695	clegoues.genprog4java.fitness.Fitness	[main]		 gen: 1 1.7892931470571476 StmtAppend(5,17) StmtReplace(10,10) (stored at: )

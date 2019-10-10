@@ -451,7 +451,7 @@ public class Fitness {
 	}
 	
 	public double assertDistance(Representation rep, TestCase test) {
-		String classp = ".:"+Configuration.fakeJunitDir+"/target/classes:tmp/"+rep.variantFolder+"/:"+ Configuration.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder+":"+Configuration.testClassPath+":"+Configuration.libs;
+		String classp = ".:"+Configuration.fakeJunitDir+"/target/classes:tmp/"+rep.variantFolder+"/:"+Configuration.GP4J_HOME+"/lib/hamcrest-core-1.3.jar:"+ Configuration.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder+":"+Configuration.testClassPath+":"+Configuration.libs;
 		CommandLine command2 = CommandLine.parse("java -cp .:"+classp+" org.junit.runner.JUnitCore " + test.getTestName());
 		System.out.println(command2.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(10000);
@@ -463,12 +463,16 @@ public class Fitness {
 		executor.setExitValue(0);
 		executor.setStreamHandler(new PumpStreamHandler(out));
 		try {
+			executor.execute(CommandLine.parse("rm Temp.arr"));
+		}catch(Throwable e) {}
+		try {
 			executor.execute(command2);
 		}catch(Throwable e) {
 			e.printStackTrace();
+			System.out.println(out.toString());
 		}
 		try {
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Temp.all"));
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Temp.arr"));
 			double d = (Double)ois.readObject();
 			ois.close();
 			return d;
