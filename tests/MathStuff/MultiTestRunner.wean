@@ -1,0 +1,93 @@
+Daikon version 5.6.5, released April 3, 2018; http://plse.cs.washington.edu/daikon.
+Reading declaration files Processing trace data; reading 1 dtrace file:
+
+No return from procedure observed 1 time.  Unmatched entries are ignored!
+Unterminated calls:
+  ylyu1.wean.MultiTestRunner.main(java.lang.String[]) : 1 invocation
+End of report for procedures not returned from.  Unmatched entries are ignored!
+
+===========================================================================
+org.MathStuff:::OBJECT
+this != null
+===========================================================================
+org.MathStuff.MathStuff():::EXIT
+===========================================================================
+org.MathStuff.gcd(int, int):::ENTER
+===========================================================================
+org.MathStuff.gcd(int, int):::EXIT
+\result >= 1
+\old($hidden$2) % \result == 0
+\result <= \old($hidden$2)
+\old(DaIkOnTeMp3) % \result == 0
+===========================================================================
+tests.pos:::OBJECT
+this != null
+===========================================================================
+tests.pos.pos():::EXIT
+===========================================================================
+tests.pos.postest():::ENTER
+===========================================================================
+tests.pos.postest():::EXIT
+===========================================================================
+ylyu1.wean.Flusher:::CLASS
+ylyu1.wean.Flusher.count >= 0
+ylyu1.wean.Flusher.changed == false
+===========================================================================
+ylyu1.wean.Flusher:::OBJECT
+this != null
+ylyu1.wean.Flusher.counter != null
+ylyu1.wean.Flusher.counter != null
+this.passing == true
+===========================================================================
+ylyu1.wean.Flusher.Flusher():::EXIT
+ylyu1.wean.Flusher.count == 0
+===========================================================================
+ylyu1.wean.Flusher.flushIn(java.lang.Integer, boolean):::ENTER
+ylyu1.wean.Flusher.counter != null
+ylyu1.wean.Flusher.counter != null
+i != null
+b == true
+===========================================================================
+ylyu1.wean.Flusher.flushIn(java.lang.Integer, boolean):::EXIT
+ylyu1.wean.Flusher.counter == \old(ylyu1.wean.Flusher.counter)
+ylyu1.wean.Flusher.changed == \old(ylyu1.wean.Flusher.changed)
+ylyu1.wean.Flusher.counter != null
+ylyu1.wean.Flusher.counter != null
+ylyu1.wean.Flusher.count - \old(ylyu1.wean.Flusher.count) - 1 == 0
+===========================================================================
+ylyu1.wean.Flusher.flushOut():::ENTER
+ylyu1.wean.Flusher.counter != null
+ylyu1.wean.Flusher.count == 72
+===========================================================================
+ylyu1.wean.Flusher.flushOut():::EXIT
+ylyu1.wean.Flusher.counter == \old(ylyu1.wean.Flusher.counter)
+ylyu1.wean.Flusher.count == \old(ylyu1.wean.Flusher.count)
+ylyu1.wean.Flusher.changed == \old(ylyu1.wean.Flusher.changed)
+ylyu1.wean.Flusher.counter != null
+ylyu1.wean.Flusher.count == 72
+===========================================================================
+ylyu1.wean.Flusher.in(boolean):::ENTER
+this.passing == passed
+===========================================================================
+ylyu1.wean.Flusher.in(boolean):::EXIT
+ylyu1.wean.Flusher.counter == \old(ylyu1.wean.Flusher.counter)
+ylyu1.wean.Flusher.count == \old(ylyu1.wean.Flusher.count)
+ylyu1.wean.Flusher.changed == \old(ylyu1.wean.Flusher.changed)
+this.passing == \old(this.passing)
+this.passing == \old(passed)
+===========================================================================
+ylyu1.wean.Flusher.initialize():::ENTER
+ylyu1.wean.Flusher.counter == null
+ylyu1.wean.Flusher.count == 0
+===========================================================================
+ylyu1.wean.Flusher.initialize():::EXIT
+ylyu1.wean.Flusher.count == \old(ylyu1.wean.Flusher.count)
+ylyu1.wean.Flusher.changed == \old(ylyu1.wean.Flusher.changed)
+ylyu1.wean.Flusher.counter != null
+ylyu1.wean.Flusher.count == 0
+===========================================================================
+ylyu1.wean.MultiTestRunner$1:::OBJECT
+this != null
+===========================================================================
+ylyu1.wean.MultiTestRunner$1.():::EXIT
+Exiting Daikon.

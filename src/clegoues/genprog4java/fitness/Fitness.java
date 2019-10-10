@@ -38,6 +38,7 @@ import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -62,12 +63,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.junit.runner.Description;
 import org.junit.runner.Request;
 
 import clegoues.genprog4java.main.Configuration;
+import clegoues.genprog4java.main.Main;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.Representation;
@@ -443,6 +449,34 @@ public class Fitness {
 		thisVariantsFitness.put(test, thisTest);
 		return thisTest.isAllPassed();
 	}
+	
+	public double assertDistance(Representation rep, TestCase test) {
+		String classp = ".:"+Configuration.fakeJunitDir+"/target/classes:tmp/"+rep.variantFolder+"/:"+ Configuration.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder+":"+Configuration.testClassPath+":"+Configuration.libs;
+		CommandLine command2 = CommandLine.parse("java -cp .:"+classp+" org.junit.runner.JUnitCore " + test.getTestName());
+		System.out.println(command2.toString());
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(10000);
+		DefaultExecutor executor = new DefaultExecutor();
+		String workingDirectory = System.getProperty("user.dir");
+		executor.setWorkingDirectory(new File(workingDirectory));
+		executor.setWatchdog(watchdog);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		executor.setExitValue(0);
+		executor.setStreamHandler(new PumpStreamHandler(out));
+		try {
+			executor.execute(command2);
+		}catch(Throwable e) {
+			e.printStackTrace();
+		}
+		try {
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Temp.all"));
+			double d = (Double)ois.readObject();
+			ois.close();
+			return d;
+		}catch(Exception io) {
+			return 0;
+		}
+		
+	}
 
 	/** generates a new random sample of the positive tests. */
 	private static void resample() {
@@ -468,16 +502,17 @@ public class Fitness {
 	 * @param tests tests to run
 	 * @return number of tests in the input test list that the variant passed
 	 */
-	private int testPassCount(Representation rep, boolean shortCircuit, List<TestCase> tests) {
+	private double testPassCount(Representation rep, boolean shortCircuit, List<TestCase> tests) {
 		int numPassed = 0;
 		for (TestCase thisTest : tests) {
 			if (!singleTestCasePass(rep, thisTest)) {
+				numPassed += assertDistance(rep,thisTest); 
 				rep.cleanup();
 				if(shortCircuit) {
 					return numPassed;
 				}
 			} else {
-				numPassed++;
+				numPassed+=1;
 			}
 		}
 		return numPassed;
@@ -526,20 +561,20 @@ public class Fitness {
 			}
 			return true;
 		} else {
-			int numNegativePassed = this.testPassCount(rep, true, Fitness.negativeTests);
+			double numNegativePassed = this.testPassCount(rep, true, Fitness.negativeTests);
 			if(numNegativePassed < Fitness.numNegativeTests) {
 				logger.info("\t passed " + numNegativePassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 				logger.info("Total variants tried: " + ++totalVariantsTried);
 				return false;
 			}
-			int numPositivePassed = this.testPassCount(rep,  true, Fitness.positiveTests);
+			double numPositivePassed = this.testPassCount(rep,  true, Fitness.positiveTests);
 			if(numPositivePassed < Fitness.numPositiveTests) {
-				int totalPassed = numNegativePassed + numPositivePassed;
+				double totalPassed = numNegativePassed + numPositivePassed;
 				logger.info("\t passed " + totalPassed + " tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 				logger.info("Total variants tried: " + ++totalVariantsTried);
 				return false;
 			}
-			int totalPassed = numNegativePassed + numPositivePassed;
+			double totalPassed = numNegativePassed + numPositivePassed;
 			logger.info("\t passed " + totalPassed + " (ALL) tests, " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 			logger.info("Total variants tried: " + ++totalVariantsTried);
 			return true;
@@ -555,9 +590,9 @@ public class Fitness {
 	 * behavior if desired.
 	 */
 	private Pair<Double,Double> testFitnessSample(Representation rep, double fac) {
-		int numNegPassed = this.testPassCount(rep,false, Fitness.negativeTests);
-		int numPosPassed = this.testPassCount(rep,false, Fitness.testSample);
-		int numRestPassed = 0;
+		double numNegPassed = this.testPassCount(rep,false, Fitness.negativeTests);
+		double numPosPassed = this.testPassCount(rep,false, Fitness.testSample);
+		double numRestPassed = 0;
 		if((numNegPassed == Fitness.numNegativeTests) &&
 				(numPosPassed == testSample.size())) {
 			if(Fitness.sample < 1.0) { // restSample won't be null by definition here
@@ -582,10 +617,16 @@ public class Fitness {
 			if (singleTestCasePass(rep, thisTest)) {
 				fitness += 1.0;
 			}
+			else {
+				fitness += assertDistance(rep, thisTest);
+			}
 		}
 		for (TestCase thisTest : Fitness.negativeTests) {
 			if (singleTestCasePass(rep, thisTest)) {
 				fitness += fac;
+			}
+			else {
+				fitness += assertDistance(rep, thisTest);
 			}
 		}
 		return  Pair.of(fitness, fitness);

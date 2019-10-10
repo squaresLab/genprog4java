@@ -60,6 +60,18 @@ public class Configuration {
 	public static final ConfigurationBuilder.RegistryToken token =
 		ConfigurationBuilder.getToken();
 
+	public static String fakeJunitDir = ConfigurationBuilder.of( STRING )
+			.withVarName( "fakeJunitDir" )
+			.withDefault( "./" )
+			.withHelp( "directory containing fake junit" )
+			.build();
+	
+	public static String GP4J_HOME = ConfigurationBuilder.of( STRING )
+			.withVarName( "GP4J_HOME" )
+			.withDefault( "./" )
+			.withHelp( "directory containing genprog4java" )
+			.build();
+	
 	//public static String sourceDir = "./";
 	public static String sourceDir = ConfigurationBuilder.of( STRING )
 		.withVarName( "sourceDir" )

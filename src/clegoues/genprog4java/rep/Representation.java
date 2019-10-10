@@ -72,7 +72,7 @@ Comparable<Representation<G>> {
 
 	protected Localization localization = null;
 
-	protected String variantFolder = "";
+	public String variantFolder = "";
 
 	public Representation() {
 	}
