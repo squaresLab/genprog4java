@@ -302,11 +302,12 @@ Representation<G>  {
 
 		executor.setStreamHandler(new PumpStreamHandler(out));
 		FitnessValue posFit = new FitnessValue();
-
+                System.out.println(command.toString());
 		try {
 			executor.execute(command);
 			out.flush();
 			String output = out.toString();
+                        System.out.println(output);
 			out.reset();
 			posFit = CachingRepresentation.parseTestResults(
 					thisTest.getTestName(), output);

@@ -63,7 +63,7 @@ public class JUnitTestRunner {
 			Request testRequest = null;
 			String methodName = null;
 			
-			System.err.println("Test Class: " + clazzName);
+			//System.err.println("Test Class: " + clazzName);
 			if(clazzName.contains("::")) {
 				String[] intermed = clazzName.split("::");
 				clazzName = intermed[0];

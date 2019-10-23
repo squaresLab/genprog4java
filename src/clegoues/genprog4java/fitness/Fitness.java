@@ -451,6 +451,7 @@ public class Fitness {
 	}
 	
 	public double assertDistance(Representation rep, TestCase test) {
+		if(!rep.compile(rep.variantFolder, rep.variantFolder))return 0;
 		String classp = ".:"+Configuration.fakeJunitDir+"/target/classes:tmp/"+rep.variantFolder+"/:"+Configuration.GP4J_HOME+"/lib/hamcrest-core-1.3.jar:"+ Configuration.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder+":"+Configuration.testClassPath+":"+Configuration.libs;
 		CommandLine command2 = CommandLine.parse("java -cp .:"+classp+" org.junit.runner.JUnitCore " + test.getTestName());
 		System.out.println(command2.toString());
@@ -471,9 +472,12 @@ public class Fitness {
 			e.printStackTrace();
 			System.out.println(out.toString());
 		}
+		System.out.println(out.toString());
 		try {
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Temp.arr"));
 			double d = (Double)ois.readObject();
+			if(Double.isNaN(d))d=0.0;
+			System.out.println("assert-Distance score: "+ d);
 			ois.close();
 			return d;
 		}catch(Exception io) {
@@ -507,7 +511,7 @@ public class Fitness {
 	 * @return number of tests in the input test list that the variant passed
 	 */
 	private double testPassCount(Representation rep, boolean shortCircuit, List<TestCase> tests) {
-		int numPassed = 0;
+		double numPassed = 0;
 		for (TestCase thisTest : tests) {
 			if (!singleTestCasePass(rep, thisTest)) {
 				numPassed += assertDistance(rep,thisTest); 
@@ -596,15 +600,19 @@ public class Fitness {
 	private Pair<Double,Double> testFitnessSample(Representation rep, double fac) {
 		double numNegPassed = this.testPassCount(rep,false, Fitness.negativeTests);
 		double numPosPassed = this.testPassCount(rep,false, Fitness.testSample);
+                System.out.println("NumNegPassed: "+numNegPassed +" NumPosPassed: "+numPosPassed);
 		double numRestPassed = 0;
-		if((numNegPassed == Fitness.numNegativeTests) &&
-				(numPosPassed == testSample.size())) {
+		if((numNegPassed == (double)Fitness.numNegativeTests) &&
+				(numPosPassed == (double)testSample.size())) {
 			if(Fitness.sample < 1.0) { // restSample won't be null by definition here
 				numRestPassed = this.testPassCount(rep, false, Fitness.restSample);
+				System.out.println("numRestPassed: "+numRestPassed);
 			}
 		}
 		double sampleFitness = fac * numNegPassed + numPosPassed;
 		double totalFitness = sampleFitness + numRestPassed;
+		System.out.println("Fac: "+fac);
+		System.out.println("S "+sampleFitness+" T "+totalFitness);
 		return Pair.of(totalFitness,sampleFitness);
 	}
 
@@ -656,7 +664,6 @@ public class Fitness {
 		 */
 		double fac = Fitness.numPositiveTests * Fitness.negativeTestWeight
 				/ Fitness.numNegativeTests;
-
 		double maxFitness = Fitness.numPositiveTests
 				+ ((Fitness.numNegativeTests * fac));
 		double curFit = rep.getFitness();

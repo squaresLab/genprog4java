@@ -103,7 +103,7 @@ public class GlobalUtils {
 	public static boolean runCommand(String commandToRun){
 		long maxTimeToRunCommandInMin = 5; 
 		Logger logger = Logger.getLogger(GlobalUtils.class);
-
+		System.out.println("Command To Run: "+ commandToRun);
 		try {
 			Process p = Runtime.getRuntime().exec(commandToRun);
 			int retValue = 0;
