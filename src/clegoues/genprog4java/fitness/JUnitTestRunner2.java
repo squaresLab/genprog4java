@@ -86,7 +86,7 @@ public class JUnitTestRunner2 {
 			Result r = runner.run(testRequest);
 
 			PrintWriter writer = new PrintWriter(new FileWriter(new File("fail.arr")));
-
+			writer.println(r.getRunCount());
 			for (Failure f : r.getFailures()) {
 				String s = f.toString();
 				int first = s.indexOf(s);
