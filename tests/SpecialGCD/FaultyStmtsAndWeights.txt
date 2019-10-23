@@ -1,0 +1,109 @@
+Location:
+int result=1;
+Weight:
+0.1
+
+Location:
+if (a == 0) {
+  b=b - a;
+}
+ else {
+  result=a;
+  while (b != 0) {
+    result=b;
+    if (a > b) {
+      a=a - b;
+    }
+ else {
+      b=b - a;
+    }
+  }
+}
+Weight:
+0.1
+
+Location:
+{
+  b=b - a;
+}
+Weight:
+0.1
+
+Location:
+b=b - a;
+Weight:
+0.1
+
+Location:
+result=a;
+Weight:
+0.1
+
+Location:
+while (b != 0) {
+  result=b;
+  if (a > b) {
+    a=a - b;
+  }
+ else {
+    b=b - a;
+  }
+}
+Weight:
+0.1
+
+Location:
+{
+  result=b;
+  if (a > b) {
+    a=a - b;
+  }
+ else {
+    b=b - a;
+  }
+}
+Weight:
+0.1
+
+Location:
+result=b;
+Weight:
+0.1
+
+Location:
+if (a > b) {
+  a=a - b;
+}
+ else {
+  b=b - a;
+}
+Weight:
+0.1
+
+Location:
+{
+  a=a - b;
+}
+Weight:
+0.1
+
+Location:
+a=a - b;
+Weight:
+0.1
+
+Location:
+b=b - a;
+Weight:
+0.1
+
+Location:
+result=a;
+Weight:
+0.1
+
+Location:
+return result;
+Weight:
+0.1
+

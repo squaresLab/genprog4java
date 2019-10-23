@@ -61,6 +61,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import org.apache.commons.exec.CommandLine;
@@ -450,10 +451,9 @@ public class Fitness {
 		return thisTest.isAllPassed();
 	}
 	
-	public double assertDistance(Representation rep, TestCase test) {
-		if(!rep.compile(rep.variantFolder, rep.variantFolder))return 0;
-		String classp = ".:"+Configuration.fakeJunitDir+"/target/classes:tmp/"+rep.variantFolder+"/:"+Configuration.GP4J_HOME+"/lib/hamcrest-core-1.3.jar:"+ Configuration.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder+":"+Configuration.testClassPath+":"+Configuration.libs;
-		CommandLine command2 = CommandLine.parse("java -cp .:"+classp+" org.junit.runner.JUnitCore " + test.getTestName());
+	public List<String> myowntest(Representation rep, TestCase test) {
+		String classp = ".:"+Configuration.GP4J_HOME+"/lib/hamcrest-core-1.3.jar:tmp/"+rep.variantFolder+"/:"+Configuration.GP4J_HOME+"/lib/hamcrest-core-1.3.jar:"+ Configuration.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder+":"+Configuration.testClassPath+":"+Configuration.libs;
+		CommandLine command2 = CommandLine.parse("java -cp .:"+classp+" clegoues.genprog4java.fitness.JUnitTestRunner2 " + test.getTestName());
 		System.out.println(command2.toString());
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(10000);
 		DefaultExecutor executor = new DefaultExecutor();
@@ -463,27 +463,69 @@ public class Fitness {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		executor.setExitValue(0);
 		executor.setStreamHandler(new PumpStreamHandler(out));
+		List<String> list = new ArrayList<String>();
 		try {
-			executor.execute(CommandLine.parse("rm Temp.arr"));
+			executor.execute(CommandLine.parse("rm fail.arr"));
 		}catch(Throwable e) {}
 		try {
 			executor.execute(command2);
+			Scanner input = new Scanner(new File("fail.arr"));
+			while(input.hasNext()) {
+				list.add(input.nextLine());
+			}
 		}catch(Throwable e) {
+			
 			e.printStackTrace();
 			System.out.println(out.toString());
+			return null;
 		}
-		System.out.println(out.toString());
-		try {
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Temp.arr"));
-			double d = (Double)ois.readObject();
-			if(Double.isNaN(d))d=0.0;
-			System.out.println("assert-Distance score: "+ d);
-			ois.close();
-			return d;
-		}catch(Exception io) {
-			return 0;
+		return list;
+	}
+	
+	public double assertDistance(Representation rep, TestCase test) {
+		if(!rep.compile(rep.variantFolder, rep.variantFolder))return 0;
+		
+		List<String> list = myowntest(rep, test);
+		if(list==null)return 0;
+		if(list.size()==0) {
+			System.out.println("weirdest thing ever");
+			throw new RuntimeException();
 		}
 		
+		double total = 0;
+		for(String testmethod : list) {
+			String classp = ".:"+Configuration.fakeJunitDir+"/target/classes:tmp/"+rep.variantFolder+"/:"+Configuration.GP4J_HOME+"/lib/hamcrest-core-1.3.jar:"+ Configuration.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder+":"+Configuration.testClassPath+":"+Configuration.libs;
+			CommandLine command2 = CommandLine.parse("java -cp .:"+classp+" org.junit.runner.JUnitCore " + test.getTestName()+"::"+testmethod);
+			System.out.println(command2.toString());
+			ExecuteWatchdog watchdog = new ExecuteWatchdog(10000);
+			DefaultExecutor executor = new DefaultExecutor();
+			String workingDirectory = System.getProperty("user.dir");
+			executor.setWorkingDirectory(new File(workingDirectory));
+			executor.setWatchdog(watchdog);
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			executor.setExitValue(0);
+			executor.setStreamHandler(new PumpStreamHandler(out));
+			try {
+				executor.execute(CommandLine.parse("rm Temp.arr"));
+			}catch(Throwable e) {}
+			try {
+				executor.execute(command2);
+			}catch(Throwable e) {
+				e.printStackTrace();
+				System.out.println(out.toString());
+			}
+			System.out.println(out.toString());
+			try {
+				ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Temp.arr"));
+				double d = (Double)ois.readObject();
+				if(Double.isNaN(d))d=0.0;
+				System.out.println("assert-Distance score: "+ testmethod+" "+ d);
+				ois.close();
+				total += d;
+			}catch(Exception io) {
+			}
+		}
+		return total / list.size();
 	}
 
 	/** generates a new random sample of the positive tests. */
