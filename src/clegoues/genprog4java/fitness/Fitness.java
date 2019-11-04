@@ -485,6 +485,7 @@ public class Fitness {
 	
 	public double assertDistance(Representation rep, TestCase test) {
 		if(!rep.compile(rep.variantFolder, rep.variantFolder))return 0;
+		if(Configuration.ASSERT_MODE==0)return 0;
 		
 		List<String> list = myowntest(rep, test);
 		if(list==null)return 0;

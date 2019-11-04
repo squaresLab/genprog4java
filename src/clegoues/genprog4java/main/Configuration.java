@@ -36,6 +36,7 @@ package clegoues.genprog4java.main;
 import static clegoues.util.ConfigurationBuilder.BOOL_ARG;
 import static clegoues.util.ConfigurationBuilder.LONG;
 import static clegoues.util.ConfigurationBuilder.STRING;
+import static clegoues.util.ConfigurationBuilder.INT;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -70,6 +71,12 @@ public class Configuration {
 			.withVarName( "GP4J_HOME" )
 			.withDefault( "./" )
 			.withHelp( "directory containing genprog4java" )
+			.build();
+	
+	public static int ASSERT_MODE = ConfigurationBuilder.of( INT )
+			.withVarName( "ASSERT_MODE" )
+			.withDefault( "0" )
+			.withHelp( "whether we do assertion distance or not" )
 			.build();
 	
 	//public static String sourceDir = "./";
