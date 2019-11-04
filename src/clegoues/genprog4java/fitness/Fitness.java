@@ -454,8 +454,8 @@ public class Fitness {
 	public List<String> myowntest(Representation rep, TestCase test) {
 		String classp = ".:"+Configuration.GP4J_HOME+"/lib/hamcrest-core-1.3.jar:tmp/"+rep.variantFolder+"/:"+Configuration.GP4J_HOME+"/lib/hamcrest-core-1.3.jar:"+ Configuration.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder+":"+Configuration.testClassPath+":"+Configuration.libs;
 		CommandLine command2 = CommandLine.parse("java -cp .:"+classp+" clegoues.genprog4java.fitness.JUnitTestRunner2 " + test.getTestName());
-		System.out.println(command2.toString());
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(100000);
+		//System.out.println(command2.toString());
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(200000);
 		DefaultExecutor executor = new DefaultExecutor();
 		String workingDirectory = System.getProperty("user.dir");
 		executor.setWorkingDirectory(new File(workingDirectory));
@@ -473,10 +473,11 @@ public class Fitness {
 			while(input.hasNext()) {
 				list.add(input.nextLine());
 			}
+			//System.out.println(out.toString());
 		}catch(Throwable e) {
 			
 			e.printStackTrace();
-			System.out.println(out.toString());
+			//System.out.println(out.toString());
 			return null;
 		}
 		return list;
@@ -487,19 +488,22 @@ public class Fitness {
 		
 		List<String> list = myowntest(rep, test);
 		if(list==null)return 0;
-		if(list.size()<=1) {
+		if(list.size()<1) {
 			System.out.println("weirdest thing ever");
 			throw new RuntimeException();
 		}
-		
+		if(list.size()==1){
+			System.out.println("Somehow passed here");
+			return 1;
+		}
 		int totaltests = Integer.parseInt(list.get(0));
-		
+		list.remove(0);
 		double total = 0;
 		for(String testmethod : list) {
 			String classp = ".:"+Configuration.fakeJunitDir+"/target/classes:tmp/"+rep.variantFolder+"/:"+Configuration.GP4J_HOME+"/lib/hamcrest-core-1.3.jar:"+ Configuration.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder+":"+Configuration.testClassPath+":"+Configuration.libs;
-			CommandLine command2 = CommandLine.parse("java -cp .:"+classp+" org.junit.runner.JUnitCore " + test.getTestName()+"::"+testmethod);
-			System.out.println(command2.toString());
-			ExecuteWatchdog watchdog = new ExecuteWatchdog(10000);
+			CommandLine command2 = CommandLine.parse("java -cp .:"+classp+" clegoues.genprog4java.fitness.JUnitTestRunner " + test.getTestName()+"::"+testmethod);
+			//System.out.println(command2.toString());
+			ExecuteWatchdog watchdog = new ExecuteWatchdog(100000);
 			DefaultExecutor executor = new DefaultExecutor();
 			String workingDirectory = System.getProperty("user.dir");
 			executor.setWorkingDirectory(new File(workingDirectory));
@@ -514,9 +518,9 @@ public class Fitness {
 				executor.execute(command2);
 			}catch(Throwable e) {
 				e.printStackTrace();
-				System.out.println(out.toString());
+				//System.out.println(out.toString());
 			}
-			System.out.println(out.toString());
+			//System.out.println(out.toString());
 			try {
 				ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Temp.arr"));
 				double d = (Double)ois.readObject();
@@ -527,7 +531,7 @@ public class Fitness {
 			}catch(Exception io) {
 			}
 		}
-		return total / totaltests;
+		return (total+(totaltests - list.size())) / totaltests;
 	}
 
 	/** generates a new random sample of the positive tests. */

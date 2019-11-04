@@ -85,11 +85,13 @@ public class JUnitTestRunner2 {
 			JUnitCore runner = new JUnitCore();
 			Result r = runner.run(testRequest);
 
+			System.out.println("Fail: "+r.getFailureCount());
+
 			PrintWriter writer = new PrintWriter(new FileWriter(new File("fail.arr")));
 			writer.println(r.getRunCount());
 			for (Failure f : r.getFailures()) {
 				String s = f.toString();
-				int first = s.indexOf(s);
+				int first = s.indexOf("(");
 				writer.println(s.substring(0,first));
 			}
 			
