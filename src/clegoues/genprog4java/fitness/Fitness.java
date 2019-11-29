@@ -534,6 +534,7 @@ public class Fitness {
 				assertionPassed.put(test.getTestName()+"::"+testmethod, dd.get(1));
 				partialAssertionPassed.put(test.getTestName()+"::"+testmethod, dd.get(0));
 			}catch(Exception io) {
+				System.out.println(io.toString());
 			}
 		}
 		
@@ -726,7 +727,8 @@ public class Fitness {
 			return !(curFit < maxFitness);
 		}
 		Pair<Double, Double> fitnessPair =  Pair.of(-1.0, -1.0);
-		if (Fitness.sample < 1.0) {
+		fitnessPair = this.testFitnessFull(rep, 1);
+		/*if (Fitness.sample < 1.0) {
 			if (((Fitness.sampleStrategy == "generation") && (Fitness.generation != generation)) ||
 					(Fitness.sampleStrategy == "variant")) {
 				Fitness.generation = generation;
@@ -735,7 +737,7 @@ public class Fitness {
 			fitnessPair = this.testFitnessSample(rep, fac);
 		} else {
 			fitnessPair = this.testFitnessFull(rep, fac);
-		}
+		}*/
 		logger.info("\t gen: " + generation + " " + fitnessPair.getLeft() + " " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
 		rep.setFitness(fitnessPair.getRight());
 		rep.cleanup();
