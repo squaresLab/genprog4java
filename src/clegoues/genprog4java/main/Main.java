@@ -91,8 +91,20 @@ public class Main {
 		fitnessEngine = new Fitness();  // Fitness must be created before rep!
 		baseRep = (Representation) new JavaRepresentation();
 		baseRep.load(Configuration.targetClassNames);
-		Localization localization = new DefaultLocalization(baseRep);
-		baseRep.setLocalization(localization);
+		//Localization localization = new DefaultLocalization(baseRep);
+		fitnessEngine.testFitness(0, baseRep);
+		System.out.println("Classes passed: ");
+		System.out.println(baseRep.getFitness());
+		for(String key : Fitness.methodPassed.keySet()) {
+			System.out.println(key+" "+Fitness.methodPassed.get(key));
+		}
+		for(String key : Fitness.assertionPassed.keySet()) {
+			System.out.println(key+" "+Fitness.assertionPassed.get(key));
+		}
+		for(String key : Fitness.partialAssertionPassed.keySet()) {
+			System.out.println(key+" "+Fitness.partialAssertionPassed.get(key));
+		}
+		System.exit(0);
 		
 		switch(Search.searchStrategy.trim()) {
 
