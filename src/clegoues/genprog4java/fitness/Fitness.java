@@ -690,6 +690,7 @@ public class Fitness {
 		}
 		for (TestCase thisTest : Fitness.negativeTests) {
 			if (singleTestCasePass(rep, thisTest)) {
+				
 				fitness += fac;
 			}
 			else {

@@ -75,7 +75,7 @@ public class Configuration {
 	
 	public static int ASSERT_MODE = ConfigurationBuilder.of( INT )
 			.withVarName( "ASSERT_MODE" )
-			.withDefault( "0" )
+			.withDefault( "1" )
 			.withHelp( "whether we do assertion distance or not" )
 			.build();
 	
