@@ -483,6 +483,10 @@ public class Fitness {
 		return list;
 	}
 	
+	public static Map<String, Integer> methodPassed = new HashMap<String, Integer>();
+	public static Map<String, Double> assertionPassed = new HashMap<String, Double>();
+	public static Map<String, Double> partialAssertionPassed = new HashMap<String, Double>();
+	
 	public double assertDistance(Representation rep, TestCase test) {
 		if(!rep.compile(rep.variantFolder, rep.variantFolder))return 0;
 		if(Configuration.ASSERT_MODE==0)return 0;
@@ -497,9 +501,10 @@ public class Fitness {
 			System.out.println("Somehow passed here");
 			return 1;
 		}
+		
 		int totaltests = Integer.parseInt(list.get(0));
 		list.remove(0);
-		double total = 0;
+		methodPassed.put(test.getTestName(), totaltests-list.size());
 		for(String testmethod : list) {
 			String classp = ".:"+Configuration.fakeJunitDir+"/target/classes:tmp/"+rep.variantFolder+"/:"+Configuration.GP4J_HOME+"/lib/hamcrest-core-1.3.jar:"+ Configuration.GP4J_HOME+"/target/classes/" + ":" + Configuration.classTestFolder+":"+Configuration.testClassPath+":"+Configuration.libs;
 			CommandLine command2 = CommandLine.parse("java -cp .:"+classp+" clegoues.genprog4java.fitness.JUnitTestRunner " + test.getTestName()+"::"+testmethod);
@@ -524,15 +529,15 @@ public class Fitness {
 			//System.out.println(out.toString());
 			try {
 				ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Temp.arr"));
-				double d = (Double)ois.readObject();
-				if(Double.isNaN(d))d=0.0;
-				System.out.println("assert-Distance score: "+ testmethod+" "+ d);
+				ArrayList<Double> dd = (ArrayList<Double>)ois.readObject();
 				ois.close();
-				total += d;
+				assertionPassed.put(test.getTestName()+"::"+testmethod, dd.get(1));
+				partialAssertionPassed.put(test.getTestName()+"::"+testmethod, dd.get(0));
 			}catch(Exception io) {
 			}
 		}
-		return (total+(totaltests - list.size())) / totaltests;
+		
+		return 0;
 	}
 
 	/** generates a new random sample of the positive tests. */

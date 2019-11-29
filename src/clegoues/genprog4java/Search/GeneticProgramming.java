@@ -57,6 +57,18 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 					throw new RepairFoundException();
 				}
 			}
+			System.out.println("Classes passed: ");
+			System.out.println(item.getFitness());
+			for(String key : Fitness.methodPassed.keySet()) {
+				System.out.println(key+" "+Fitness.methodPassed.get(key));
+			}
+			for(String key : Fitness.assertionPassed.keySet()) {
+				System.out.println(key+" "+Fitness.assertionPassed.get(key));
+			}
+			for(String key : Fitness.partialAssertionPassed.keySet()) {
+				System.out.println(key+" "+Fitness.partialAssertionPassed.get(key));
+			}
+			System.exit(0);
 		}
 		return initialPopulation;
 	}
