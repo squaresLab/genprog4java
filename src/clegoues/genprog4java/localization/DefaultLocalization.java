@@ -127,6 +127,12 @@ public class DefaultLocalization extends Localization {
 			.withDefault("fileHumanInjectedFaultLoc.txt")
 			.inGroup( "FaultLocRepresentation Parameters" )
 			.build();
+	protected static String faultSpaceSubSet = ConfigurationBuilder.of ( STRING )
+			.withVarName("faultSpaceSubSet")
+			.withHelp("Which subset should be used for fault location. It has the form x/y where y is the number of subsets and x is which of the subsets will be selected")
+			.withDefault("1/5")
+			.inGroup( "FaultLocRepresentation Parameters" )
+			.build();
 
 	protected Representation original = null;
 	protected ArrayList<Location> faultLocalization = new ArrayList<Location>();
@@ -239,7 +245,6 @@ public class DefaultLocalization extends Localization {
 		TreeSet<Integer> negativePath = null;
 
 		switch(faultLocStrategy.trim()) { // FIXME: push this to a subclass.
-
 		case "humanInjected":
 			negativePath = transformFileWithLineNumbersToStmtNumbers(pathToFileHumanInjectedFaultLoc);
 			break;
@@ -412,6 +417,28 @@ public class DefaultLocalization extends Localization {
 
 		out.flush();
 		out.close();
+
+		if(String.equals(faultLocStrategy.trim(),"slicingFaultLoc")){
+			System.out.println("TreeSet atoms: " + atoms);
+			int numberOfSubSets = Integer.parseInt(faultSpaceSubSet.substring(faultSpaceSubSet.indexOf("/")+1)); 
+			int whichSubSet = Integer.parseInt(faultSpaceSubSet.substring(0,faultSpaceSubSet.indexOf("/"))); 
+			int size = atoms.size();
+			int itemsPerSubSet = Math.ceil(size/numberOfSubSets);
+			int from = (whichSubSet - 1 ) * itemsPerSubSet;
+			int to = whichSubSet * itemsPerSubSet;
+			Iterator it = atoms.iterator();	
+ 			//get to first item of subset
+			for(int i = 0; i < from && it.hasNext(); ++i) {
+				it.next();
+			}
+			TreeSet<Integer> subSet = new TreeSet<Integer>();
+			//add elements in the range to subset			
+			for(int i = from; i < to && it.hasNext(); ++i){
+				subSet.add(it);
+			}
+			System.out.println("Subset ("+faultSpaceSubSet+") of TreeSet atoms: "+subSet);
+			atoms = subSet;
+		}
 
 		return atoms;
 	}
