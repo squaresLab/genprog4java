@@ -54,11 +54,20 @@ import clegoues.genprog4java.java.ClassInfo;
 import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.localization.UnexpectedCoverageResultException;
-import clegoues.genprog4java.mut.EditHole;
-import clegoues.genprog4java.mut.EditOperation;
-import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.mut.WeightedHole;
-import clegoues.genprog4java.mut.WeightedMutation;
+import clegoues.genprog4java.mut.*;
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.log4j.Logger;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 // it's not clear that this EditOperation thing is a good choice because 
 // it basically forces the patch representation.  Possibly it's flexible and the naming scheme is 
@@ -183,7 +192,7 @@ Comparable<Representation<G>> {
 
 	public abstract Boolean doesEditApply(Location location, Mutation editType);
 
-	public abstract ArrayList<Integer> atomIDofSourceLine(int line);
+	public abstract ArrayList<Integer> atomIDofSourceLine(ClassInfo cls, int line);
 
 	public abstract Location instantiateLocation(Integer i, double negWeight);
 

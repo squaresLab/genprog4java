@@ -509,7 +509,7 @@ public class DefaultLocalization extends Localization {
 				}
 			}
 			for (int line : coveredLines) {
-				ArrayList<Integer> atomIds = original.atomIDofSourceLine(line);
+				ArrayList<Integer> atomIds = original.atomIDofSourceLine(targetClassInfo, line);
 				if (atomIds != null && atomIds.size() >= 0) {
 					atoms.addAll(atomIds);
 				}
@@ -532,7 +532,7 @@ public class DefaultLocalization extends Localization {
 					className = className.contains(".")? className.split(".")[0] : className;
 					String lineNumberString = line.split(",")[2].trim();
 					int lineNumber = Integer.parseInt(lineNumberString);
-					ArrayList<Integer> atomIds = original.atomIDofSourceLine(lineNumber);
+					ArrayList<Integer> atomIds = original.atomIDofSourceLine(new ClassInfo(className, packageName), lineNumber);
 					if(atomIds!=null){
 						for(int atomId:atomIds){
 							ClassInfo ci = original.getFileFromStmt(atomId);
