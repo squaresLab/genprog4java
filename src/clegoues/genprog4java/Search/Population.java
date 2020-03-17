@@ -462,14 +462,12 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	}
 	
 	private Representation<G> selectBasedOnMultiObjective(int desired) {
-		
-
 		//Collections.shuffle(population);
 		//List<Representation<G>> pool = population;
 		for(Representation<G> indiv : population) {
 			
 			//TODO: MAKE THIS FITNESS WORK
-			int fitness = (diversityContribution * diversityScore()) + (correctnessContribution * correctnessScore()); 
+			int fitness = (diversityContribution * indiv.diversityScore()) + (correctnessContribution * indiv.correctnessScore()); 
 			indiv.setFitness(fitness);
 		}
 		Comparator<Representation<G>> myComp = new Comparator<Representation<G>>() {
@@ -486,22 +484,6 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 			if(toReturn.size() < desired){
 				toReturn.add(indiv.copy());
 			}
-			
-			/*boolean taken = false;
-			if(this.tournamentP >= 1.0) {
-				taken = true;
-			} else {
-				double requiredProb = this.tournamentP * Math.pow((1.0 - this.tournamentP), step);
-				double random = Configuration.randomizer.nextDouble();
-				if(random <= requiredProb) {
-					taken = true;
-				}
-			}
-			if(taken) {
-				return indiv.copy();	
-			} else {
-				step += 1.0;
-			}*/
 		}
 		//return population.get(0).copy(); // FIXME: this should never happen, right?
 		return toReturn;

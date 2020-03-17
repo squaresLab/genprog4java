@@ -370,4 +370,16 @@ Representation<G>  {
 			throws IOException {
 
 	}
+	
+	public int correctnessScore(){
+		
+		
+	}
+	
+	public int diversityScore(){
+		
+		
+	}
+	
+	
 }
