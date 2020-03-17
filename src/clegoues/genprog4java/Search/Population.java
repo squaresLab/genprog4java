@@ -91,6 +91,24 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		.withHelp( "crossover algorithm" )
 		.inGroup( "Population Parameters" )
 		.build();
+	private static boolean multiObjectiveFitness = ConfigurationBuilder.of( BOOLEAN )
+		.withVarName( "multiObjectiveFitness" )
+		.withDefault( "false" )
+		.withHelp( "true if multi objective fitness is desired" )
+		.inGroup( "Population Parameters" )
+		.build();
+	private static int diversityContribution = ConfigurationBuilder.of( INT )
+		.withVarName( "diversityContribution" )
+		.withDefault( "0" )
+		.withHelp( "the percentage that the diversity score contributes to fitness" )
+		.inGroup( "Population Parameters" )
+		.build();
+	private static int correctnessContribution = ConfigurationBuilder.of( INT )
+		.withVarName( "correctnessContribution" )
+		.withDefault( "100" )
+		.withHelp( "the percentage that the correctness score contributes to fitness" )
+		.inGroup( "Population Parameters" )
+		.build();
 	private ArrayList<Representation<G>> population = new ArrayList<Representation<G>>(this.popsize);
 
 	public Population() {
@@ -412,10 +430,81 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	}
 
 	public void selection(int popsize) {
-		this.population = this.tournamentSelection(popsize);
-
+		if(this.multiObjectiveFitness){
+			this.population = this.multiObjectiveSelection(popsize);
+		}else{
+			this.population = this.tournamentSelection(popsize);
+		}
 	}
+	
+	private ArrayList<Representation<G>> multiObjectiveSelection(int desired) {
+		assert(desired >= 0);
+		assert(population.size() >= 0);
+		ArrayList<Representation<G>> result = new ArrayList<Representation<G>>();
+		//remove the uncompiling ones from the population
+		for(int i = 0; i< population.size(); ++i) {
+			Representation<G> indiv = population.get(i);
+			boolean successfullyCompiled = indiv.compile(indiv.getName(), indiv.getVariantFolder());
+			if(!successfullyCompiled){
+				//replace that variant with the original
+				population.remove(indiv);
+				//first element of the population should be the original, which should always compile
+				Representation<G> toInsert = population.get(0).copy();
+				population.add(toInsert);
+			}
+		}
+		/*for(int i = 0 ; i < desired; i++) {
+			result.add(selectBasedOnMultiObjective());
+		}*/
+		result.addAll(selectBasedOnMultiObjective(desired));
+		
+		return result; 
+	}
+	
+	private Representation<G> selectBasedOnMultiObjective(int desired) {
+		
 
-
+		//Collections.shuffle(population);
+		//List<Representation<G>> pool = population;
+		for(Representation<G> indiv : population) {
+			
+			//TODO: MAKE THIS FITNESS WORK
+			int fitness = (diversityContribution * diversityScore()) + (correctnessContribution * correctnessScore()); 
+			indiv.setFitness(fitness);
+		}
+		Comparator<Representation<G>> myComp = new Comparator<Representation<G>>() {
+			@Override
+			public int compare(Representation<G> one, Representation<G> two) { 
+				return new Double(two.getFitness()).compareTo(new Double(one.getFitness()));
+			}
+		}; // we sort in descending order by fitness
+		TreeSet<Representation<G>> sorted = new TreeSet<Representation<G>>(myComp);
+		sorted.addAll(population);
+		
+		ArrayList<Representation<G>> toReturn = new ArrayList<Representation<G>>();
+		for(Representation<G> indiv : sorted) {
+			if(toReturn.size() < desired){
+				toReturn.add(indiv.copy());
+			}
+			
+			/*boolean taken = false;
+			if(this.tournamentP >= 1.0) {
+				taken = true;
+			} else {
+				double requiredProb = this.tournamentP * Math.pow((1.0 - this.tournamentP), step);
+				double random = Configuration.randomizer.nextDouble();
+				if(random <= requiredProb) {
+					taken = true;
+				}
+			}
+			if(taken) {
+				return indiv.copy();	
+			} else {
+				step += 1.0;
+			}*/
+		}
+		//return population.get(0).copy(); // FIXME: this should never happen, right?
+		return toReturn;
+	}
 
 }

@@ -179,6 +179,8 @@ public class Fitness {
 
 	public static int numPositiveTests;
 	public static int numNegativeTests;
+	
+	public static int diversityScore;
 
 	// persistent test cache
 	private static HashMap<Integer, HashMap<TestCase, FitnessValue>> fitnessCache = new HashMap<Integer, HashMap<TestCase, FitnessValue>>();
@@ -611,7 +613,7 @@ public class Fitness {
 		 */
 		double fac = Fitness.numPositiveTests * Fitness.negativeTestWeight
 				/ Fitness.numNegativeTests;
-
+				
 		double maxFitness = Fitness.numPositiveTests
 				+ ((Fitness.numNegativeTests * fac));
 		double curFit = rep.getFitness();
