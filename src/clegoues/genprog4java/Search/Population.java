@@ -464,10 +464,10 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	private Representation<G> selectBasedOnMultiObjective(int desired) {
 		//Collections.shuffle(population);
 		//List<Representation<G>> pool = population;
+		assert(correctnessContribution < 1);
+		assert(diversityContribution < 1);
 		for(Representation<G> indiv : population) {
-			
-			//TODO: MAKE THIS FITNESS WORK
-			int fitness = (diversityContribution * indiv.diversityScore()) + (correctnessContribution * indiv.correctnessScore()); 
+			double fitness =  (correctnessContribution * correctnessScore(indiv)) + (diversityContribution * diversityScore(indiv));
 			indiv.setFitness(fitness);
 		}
 		Comparator<Representation<G>> myComp = new Comparator<Representation<G>>() {
@@ -488,5 +488,23 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		//return population.get(0).copy(); // FIXME: this should never happen, right?
 		return toReturn;
 	}
+	
+	private int correctnessScore(Representation<G> indiv){
+		//If fitness here is calculated as number of passed test cases, then we are all good here. 
+		return indiv.getFitness();
+	}
+	
+	private int diversityScore(Representation<G> variant){
+		int overallScore = 0;
+		for(Representation<G> indiv : population) {
+			overallScore += indivDiversityScore(indiv, variant);
+		}
+		return overallScore;
+	}
+	
+	private int indivDiversityScore(Representation<G> indiv, Representation<G> variant){
+		
+	}
+	
 
 }

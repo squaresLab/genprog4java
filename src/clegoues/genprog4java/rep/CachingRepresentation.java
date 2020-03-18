@@ -82,6 +82,8 @@ Representation<G>  {
 	public static String sanityExename = "repair.sanity";
 
 	private double fitness = -1.0;
+	private double diversityScore = -1.0;
+	private double correctnessScore = -1.0;
 
 	public ArrayList<Pair<ClassInfo, String>> alreadySourceBuffers = null;
 
@@ -104,6 +106,16 @@ Representation<G>  {
 	@Override
 	public double getFitness() {
 		return this.fitness;
+	}
+	
+	@Override
+	public double getDiversityScore() {
+		return this.diversityScore;
+	}
+
+	@Override
+	public double getCorrectnessScore() {
+		return this.correctnessScore;
 	}
 
 	private Pair<Boolean, String> alreadyCompiled = null;
@@ -234,9 +246,7 @@ Representation<G>  {
 
 	public FitnessValue testCase(TestCase test) {
 		return this.testCase(test,false);
-
 	}
-
 
 	@Override
 	protected List<Pair<ClassInfo, String>> computeSourceBuffers() {
@@ -337,6 +347,16 @@ Representation<G>  {
 		this.fitness = fitness;
 	}
 
+	@Override
+	public void setDiversityScore(double div) {
+		this.diversityScore = div;
+	}
+
+	@Override
+	public void setCorrectnessScore(double cor) {
+		this.correctnessScore = cor;
+	}
+	
 	// while the OCaml implementation does compile in CachingRepresentation
 	// assuming that it's always a call to an external script, I'm leaving that
 	// off from here for the
@@ -370,16 +390,4 @@ Representation<G>  {
 			throws IOException {
 
 	}
-	
-	public int correctnessScore(){
-		
-		
-	}
-	
-	public int diversityScore(){
-		
-		
-	}
-	
-	
 }

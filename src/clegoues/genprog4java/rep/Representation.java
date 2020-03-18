@@ -125,6 +125,10 @@ Comparable<Representation<G>> {
 	public abstract void cleanup();
 
 	public abstract double getFitness();
+	
+	public abstract double getDiversityScore();
+
+	public abstract double getCorrectnessScore();
 
 	public abstract boolean compile(String sourceName, String exeName);
 
@@ -154,6 +158,10 @@ Comparable<Representation<G>> {
 	public abstract void performEdit(Mutation edit, Location dst, EditHole source); 
 
 	public abstract void setFitness(double fitness);
+
+	public abstract void setDiversityScore(double div);
+		
+	public abstract void setCorrectnessScore(double cor);
 
 	@Override
 	public int compareTo(Representation<G> o) {
