@@ -1,5 +1,7 @@
 package clegoues.genprog4java.Search;
 
+import java.util.ArrayList;
+
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.rep.JavaRepresentation;
@@ -92,7 +94,9 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 		Population<G> incomingPopulation = this.initialize(original,
 				initialPopulation);
 		int gen = 1;
+		ArrayList<Double> aps = new ArrayList<Double>();
 		while (gen < Search.generations) {
+			aps.add(antiplateauscore(incomingPopulation));
 			logger.info("search: generation" + gen);
 			generationsRun++;
 			assert (initialPopulation.getPopsize() > 0);
@@ -117,5 +121,36 @@ public class GeneticProgramming<G extends EditOperation> extends Search<G>{
 			}
 			gen++;
 		}
+		aps.add(antiplateauscore(incomingPopulation));
+		for(int i = 0; i < gen; i++) {
+			System.out.println("Round "+i+" APS: "+aps.get(i));
+		}
+	}
+	
+	public double antiplateauscore(Population<G> pop) {
+		ArrayList<Double> scores = new ArrayList<Double>();
+		for(Representation<G> rep : pop) {
+			scores.add(rep.getFitness());
+		}
+		int total = scores.size();
+		boolean cont = true;
+		while(cont) {
+			cont = false;
+			int rem = -1;
+			for(int i = 0; i < scores.size()-1; i++) {
+				for(int j = i + 1; j < scores.size(); j++) {
+					if(Math.abs(scores.get(i)-scores.get(j))<0.00000001) {
+						rem = j;
+						break;
+					}
+				}
+				if(rem>=0)break;
+			}
+			if(rem >= 0) {
+				scores.remove(rem);
+				cont=true;
+			}
+		}
+		return ((double)scores.size())/((double)total);
 	}
 }
