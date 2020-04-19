@@ -527,6 +527,7 @@ public class Fitness {
 				List<Double> dl = (List<Double>)ois.readObject();
 				double d = dl.get(2-Configuration.ASSERT_MODE);
 				if(Double.isNaN(d))d=0.0;
+				if(d>0.99)d=0.99;
 				System.out.println("assert-Distance score: "+ testmethod+" "+ d);
 				ois.close();
 				total += d;
