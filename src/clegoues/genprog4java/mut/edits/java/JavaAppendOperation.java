@@ -29,8 +29,8 @@ public class JavaAppendOperation extends JavaEditOperation {
 
 		Block newNode = locationNode.getAST().newBlock(); 
 		if(locationNode instanceof Statement && fixCodeNode instanceof Statement){
-			ASTNode stm1 = (Statement)locationNode;
-			ASTNode stm2 = (Statement)fixCodeNode;
+			ASTNode stm1 = locationNode;
+			ASTNode stm2 = fixCodeNode;
 
 			stm1 = ASTNode.copySubtree(locationNode.getAST(), stm1);
 			stm2 = ASTNode.copySubtree(fixCodeNode.getAST(), stm2);

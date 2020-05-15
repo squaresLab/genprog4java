@@ -1,8 +1,7 @@
-package clegoues.genprog4java.Search;
+package clegoues.genprog4java.search;
 
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.mut.EditOperation;
-import clegoues.genprog4java.rep.JavaRepresentation;
 import clegoues.genprog4java.rep.Representation;
 
 public class GeneticProgramming<G extends EditOperation> extends Search<G>{

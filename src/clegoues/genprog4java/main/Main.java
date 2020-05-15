@@ -39,12 +39,12 @@ import java.io.IOException;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import clegoues.genprog4java.Search.BruteForce;
-import clegoues.genprog4java.Search.GeneticProgramming;
-import clegoues.genprog4java.Search.OracleSearch;
-import clegoues.genprog4java.Search.Population;
-import clegoues.genprog4java.Search.RandomSingleEdit;
-import clegoues.genprog4java.Search.Search;
+import clegoues.genprog4java.search.BruteForce;
+import clegoues.genprog4java.search.GeneticProgramming;
+import clegoues.genprog4java.search.OracleSearch;
+import clegoues.genprog4java.search.Population;
+import clegoues.genprog4java.search.RandomSingleEdit;
+import clegoues.genprog4java.search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.localization.DefaultLocalization;
 import clegoues.genprog4java.localization.Localization;

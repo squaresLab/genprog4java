@@ -6,22 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BreakStatement;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.dom.ThrowStatement;
-import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.*;
 
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaStatement;
@@ -112,7 +99,7 @@ public class JavaEditFactory {
 			// I *believe* this is just variable names and doesn't check required
 			// types, which are also collected
 			// at parse time and thus could be considered here.
-			if(!JavaRepresentation.semanticInfo.scopeCheckOK(potentiallyBuggyStmt, potentialFixStmt)) {
+			if (!JavaRepresentation.semanticInfo.scopeCheckOK(potentiallyBuggyStmt, potentialFixStmt)) {
 				continue;
 			}
 
@@ -122,39 +109,27 @@ public class JavaEditFactory {
 			// different from what is now at that location.
 			// this comes down to our having overloaded statement IDs to mean both location and statement ID
 			// which is a problem I keep meaning to solve.
-			if(mut != Mutation.APPEND && faultAST.equals(fixAST)) {
+			if (mut != Mutation.APPEND && faultAST.equals(fixAST)) {
 				continue;
 			}
 
 			//Heuristic: Do not insert a return statement on a func whose return type is void
 			//Heuristic: Do not insert a return statement in a constructor
-			if(fixAST instanceof ReturnStatement){
-				if(potentiallyBuggyStmt.parentMethodReturnsVoid() ||
+			if (fixAST instanceof ReturnStatement){
+				if (potentiallyBuggyStmt.parentMethodReturnsVoid() ||
 						potentiallyBuggyStmt.isLikelyAConstructor())
 					continue;
-
-				//Heuristic: Swapping, Appending or Replacing a return stmt to the middle of a block will make the code after it unreachable
-				ASTNode parentBlock = potentiallyBuggyStmt.blockThatContainsThisStatement();
-				if(parentBlock != null && parentBlock instanceof Block) {
-					List<ASTNode> statementsInBlock = ((Block)parentBlock).statements();
-					ASTNode lastStmtInTheBlock = statementsInBlock.get(statementsInBlock.size()-1);
-					if(!lastStmtInTheBlock.equals(faultAST)){
-						continue;
-					}
-				} else {
-					continue;
-				}
-
+				
 				//If we move a return statement into a function, the parameter in the return must match the function’s return type
 				ASTNode enclosingMethod = ASTUtils.getEnclosingMethod(faultAST);
 
 				if (enclosingMethod instanceof MethodDeclaration) {
 					String returnType = JavaRepresentation.semanticInfo.returnTypeOfThisMethod(((MethodDeclaration)enclosingMethod).getName().toString());
-					if(returnType != null){
+					if (returnType != null){
 						ReturnStatement potFix = (ReturnStatement) fixAST;
-						if(potFix.getExpression() instanceof SimpleName){
+						if (potFix.getExpression() instanceof SimpleName){
 							String variableType = JavaRepresentation.semanticInfo.getVariableDataTypes().get(potFix.getExpression().toString());
-							if( !returnType.equalsIgnoreCase(variableType)){
+							if ( !returnType.equalsIgnoreCase(variableType)){
 								continue;
 							}
 						}
@@ -162,13 +137,30 @@ public class JavaEditFactory {
 				}
 			}
 
+			//Heuristic: Don't replace/swap returns within functions that have only one return statement
+			// (unless the replacer is also a return statement); could also check if it's a block or
+			// other sequence of statements with a return within it, but I'm lazy
+			if ((!(fixAST instanceof ReturnStatement)) &&
+					faultAST instanceof ReturnStatement) {
+				ASTNode parent = ASTUtils.getEnclosingMethod(faultAST);
+				if(parent instanceof MethodDeclaration &&
+						!JavaStatement.hasMoreThanOneReturn((MethodDeclaration)parent)) {
+					continue;
+				}
+			}
+
+			//Heuristc: Don't throw or return in the middle of blocks, leaving unreachable statements
+			if (fixAST instanceof ReturnStatement || fixAST instanceof ThrowStatement) {
+				if (!potentiallyBuggyStmt.isLastStatementInControlFlow()) continue;
+			}
+
 			//Heuristic: Inserting methods like this() or super() somewhere that is not the First (or second, if super?) Stmt in the constructor, is wrong
-			if(fixAST instanceof ConstructorInvocation || 
+			if (fixAST instanceof ConstructorInvocation ||
 					fixAST instanceof SuperConstructorInvocation){
-				if(mut == Mutation.APPEND) continue;
+				if (mut == Mutation.APPEND) continue;
 				ASTNode enclosingMethod = ASTUtils.getEnclosingMethod(faultAST);
 
-				if (enclosingMethod != null && 
+				if (enclosingMethod != null &&
 						enclosingMethod instanceof MethodDeclaration && 
 						((MethodDeclaration) enclosingMethod).isConstructor()) {
 					List<ASTNode> statementsInBlock = ((MethodDeclaration) enclosingMethod).getBody().statements();
@@ -181,27 +173,16 @@ public class JavaEditFactory {
 				}
 			}
 
-			//Heuristic: Don't allow to move breaks outside of switch stmts
+			//Heuristic: Don't allow to move breaks or continues outside of switch stmts
 			// OR loops!
-			// TODO: check for continues as well
-			if(fixAST instanceof BreakStatement && 
-					!potentiallyBuggyStmt.isWithinLoopOrCase()){
-				continue;
+			// and don't cause unreachable statements by moving breaks into the middle of a block
+			if ((fixAST instanceof BreakStatement || fixAST instanceof ContinueStatement)){
+				if (!potentiallyBuggyStmt.isWithinLoopOrCase())	continue;
+				else if (!potentiallyBuggyStmt.isLastStatementInControlFlow()) continue;
 			}
-			// FIXME: don't insert returns/throws into the middle of blocks, perhaps?
-			//Heuristic: Don't replace/swap returns within functions that have only one return statement
-			// (unless the replacer is also a return statement); could also check if it's a block or
-			// other sequence of statements with a return within it, but I'm lazy
-			if((!(fixAST instanceof ReturnStatement)) && 
-					faultAST instanceof ReturnStatement) {
-				ASTNode parent = ASTUtils.getEnclosingMethod(faultAST);
-				if(parent instanceof MethodDeclaration && 
-						!JavaStatement.hasMoreThanOneReturn((MethodDeclaration)parent)) {
-					continue;
-				}
-			}
-			// if we made it this far without continuing, we're good to go.
 
+
+			// if we made it this far without continuing, we're good to go.
 			retVal.add(potentialFixAtom);
 		}
 		JavaEditFactory.scopeSafeAtomMap.put(stmtId.getId(), retVal);
@@ -241,7 +222,7 @@ public class JavaEditFactory {
 				int atom = item.getAtom();
 				List<WeightedAtom> inScopeThere = this.scopeHelper(variant.instantiateLocation(atom, item.getRight()), variant, editType);
 				for (WeightedAtom there : inScopeThere) {
-					if (there.getAtom() != location.getId()) { 
+					if (there.getAtom() == location.getId()) {
 						JavaStatement potentialFixStmt = variant.getFromCodeBank(there.getAtom());
 						ASTNode fixAST = potentialFixStmt.getASTNode();
 						StatementHole stmtHole = new StatementHole((Statement) fixAST, potentialFixStmt.getStmtId());
@@ -266,10 +247,10 @@ public class JavaEditFactory {
 			List<WeightedHole> retVal = new LinkedList<WeightedHole>();
 			Map<ASTNode, List<IMethodBinding>> methodReplacements = locationStmt.getCandidateMethodReplacements();
 			for(Map.Entry<ASTNode,List<IMethodBinding>> entry : methodReplacements.entrySet()) {
-				ASTNode replacableMethod = entry.getKey();
+				ASTNode replaceableMethod = entry.getKey();
 				List<IMethodBinding> possibleReplacements = entry.getValue();
 				for(IMethodBinding possibleReplacement : possibleReplacements) {
-					MethodInfoHole thisHole = new MethodInfoHole(replacableMethod, locationStmt.getStmtId(), possibleReplacement);
+					MethodInfoHole thisHole = new MethodInfoHole(replaceableMethod, locationStmt.getStmtId(), possibleReplacement);
 					// method replacer chooses between multiple options uniformly at random
 					retVal.add(new WeightedHole(thisHole));
 				}

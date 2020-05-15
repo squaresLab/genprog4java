@@ -40,14 +40,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
-import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.fitness.FitnessValue;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.java.ClassInfo;
@@ -136,6 +134,8 @@ Comparable<Representation<G>> {
 
 	public abstract List<WeightedMutation> availableMutations(
 			Location faultyLocation);
+
+	public abstract boolean hasAvailableMutations(Location faultyLocation);
 
 	protected transient int myHashCode = -1;
 	@Override

@@ -56,10 +56,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -68,8 +65,6 @@ import org.junit.runner.Description;
 import org.junit.runner.Request;
 
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.mut.Mutation;
-import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.Representation;
 import clegoues.util.ConfigurationBuilder;
 import junit.framework.Test;
@@ -485,7 +480,7 @@ public class Fitness {
 
 	/**
 	 * Test a variant sequentially on all tests, starting with the negative tests.
-	 * Quits as soon as a failed test is found.  Uses the test model @see {@link clegoues.genprog4java.Search.TrpAutoRepair}
+	 * Quits as soon as a failed test is found.  Uses the test model @see {@link clegoues.genprog4java.search.TrpAutoRepair}
 	 * if specified. Does not sample.
 	 * @param rep variant to be tested
 	 * @param withModel whether to use the testModel
