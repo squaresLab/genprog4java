@@ -390,4 +390,13 @@ Representation<G>  {
 			throws IOException {
 
 	}
+	
+	//Creates a test suite for this representation and returns the path where it is located
+	public String createTS(){
+		
+	}
+	
+	public int numFailedTestsTS(){
+		
+	}
 }

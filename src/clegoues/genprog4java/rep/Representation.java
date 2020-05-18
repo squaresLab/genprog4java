@@ -213,6 +213,8 @@ Comparable<Representation<G>> {
 	
 	public abstract ClassInfo getFileFromStmt(int stmtId);
 
+	public abstract String createTS();
 	
+	public abstract int numFailedTestsTS();
 
 }

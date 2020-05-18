@@ -99,13 +99,13 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		.build();
 	private static int diversityContribution = ConfigurationBuilder.of( INT )
 		.withVarName( "diversityContribution" )
-		.withDefault( "0" )
+		.withDefault( "50" )
 		.withHelp( "the percentage that the diversity score contributes to fitness" )
 		.inGroup( "Population Parameters" )
 		.build();
 	private static int correctnessContribution = ConfigurationBuilder.of( INT )
 		.withVarName( "correctnessContribution" )
-		.withDefault( "100" )
+		.withDefault( "50" )
 		.withHelp( "the percentage that the correctness score contributes to fitness" )
 		.inGroup( "Population Parameters" )
 		.build();
@@ -467,6 +467,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		assert(correctnessContribution < 1);
 		assert(diversityContribution < 1);
 		for(Representation<G> indiv : population) {
+			//TODO: MAKE THIS FITNESS WORK
 			double fitness =  (correctnessContribution * correctnessScore(indiv)) + (diversityContribution * diversityScore(indiv));
 			indiv.setFitness(fitness);
 		}
@@ -502,9 +503,20 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		return overallScore;
 	}
 	
+	//How many tests behave differently between representations
 	private int indivDiversityScore(Representation<G> indiv, Representation<G> variant){
-		
+		tsIndiv = indiv.createTS();
+		tsVar = variant.createTS();
+		tsIndivNumTests = numberOfTests(tsIndiv);
+		tsVarNumTests = numberOfTests(tsVar);
+		numTestsFailedByIndiv = indiv.numFailedTestsTS(tsVar);
+		numTestsFailedByVar = variant.numFailedTestsTS(tsIndiv);
+		return (numTestsFailedByIndiv + numTestsFailedByVar) / (tsIndivNumTests + tsVarNumTests);
 	}
 	
+	//Returns the number of tests in the test suite indicated in the location
+	private int numberOfTests(String tsLocation){
+		
+	}
 
 }
