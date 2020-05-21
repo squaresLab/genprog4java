@@ -505,18 +505,35 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	
 	//How many tests behave differently between representations
 	private int indivDiversityScore(Representation<G> indiv, Representation<G> variant){
-		tsIndiv = indiv.createTS();
-		tsVar = variant.createTS();
-		tsIndivNumTests = numberOfTests(tsIndiv);
-		tsVarNumTests = numberOfTests(tsVar);
-		numTestsFailedByIndiv = indiv.numFailedTestsTS(tsVar);
-		numTestsFailedByVar = variant.numFailedTestsTS(tsIndiv);
-		return (numTestsFailedByIndiv + numTestsFailedByVar) / (tsIndivNumTests + tsVarNumTests);
+		
+		Runtime rt = Runtime.getRuntime();
+		String command = "/home/mausoto/diversityProject/DiversityGenProg/diversityScores.py "; 
+		command += d4jProject() + " ";
+		command += d4jBugNum() + " ";
+		command += indiv.getVariantFolder()+"/"+indiv.getName() + " ";
+		command += variant.getVariantFolder()+"/"+variant.getName();
+		Process pr = rt.exec(command); 
+		
+		
+		//tsIndiv = indiv.createTS();
+		//tsVar = variant.createTS();
+		//tsIndivNumTests = numberOfTests(tsIndiv);
+		//tsVarNumTests = numberOfTests(tsVar);
+		//numTestsFailedByIndiv = indiv.numFailedTestsTS(tsVar);
+		//numTestsFailedByVar = variant.numFailedTestsTS(tsIndiv);
+		//return (numTestsFailedByIndiv + numTestsFailedByVar) / (tsIndivNumTests + tsVarNumTests);
+	}
+	
+	private String d4jProject(){
+		
+	}
+	private String d4jBugNum(){
+		
 	}
 	
 	//Returns the number of tests in the test suite indicated in the location
-	private int numberOfTests(String tsLocation){
+	//private int numberOfTests(String tsLocation){
 		
-	}
+	//}
 
 }

@@ -392,11 +392,24 @@ Representation<G>  {
 	}
 	
 	//Creates a test suite for this representation and returns the path where it is located
-	public String createTS(){
+	//public String createTS(){
 		
-	}
+		//Runtime rt = Runtime.getRuntime();
+		//Process pr = rt.exec("/home/mausoto/diversityProject/DiversityGenProg/diversityScores.py addressCandidate1 addressCandidate2");
+		//Process pr = rt.exec("/home/mausoto/diversityProject/slicingFaultSpace/defects4j/framework/bin/gen_tests.pl -g evosuite -p Closure -v 1f -n 0 -o . -b 180");
+		//COM1="perl run_evosuite.pl -p $PROJECT -v "$BUGNUMBER"f -n $SEED -o $D4J_HOME/generatedTestSuites/$IDENTIFIER/ -c branch -b $BUDGET"
 	
-	public int numFailedTestsTS(){
+	
+		//Process pr = rt.exec("/home/mausoto/diversityProject/slicingFaultSpace/defects4j/defects4j test -p Closure -v 1f -w ");
+
+		//Process process; = Runtime.getRuntime().exec(String.format("sh -c ls %s", homeDirectory));
+		//StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), System.out::println);
+		//Executors.newSingleThreadExecutor().submit(streamGobbler);
+		//int exitCode = process.waitFor();
+		//assert exitCode == 0;
+	//}
+	
+	//public int numFailedTestsTS(){
 		
-	}
+	//}
 }
