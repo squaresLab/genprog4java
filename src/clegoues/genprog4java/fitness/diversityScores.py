@@ -35,6 +35,8 @@ class PatchInfo(object):
 		self.srcPath=""
 		self.patch=""
 		self.modifClass = ""
+		self.modifClassPath = ""
+		self.compiledSuccessful = 0
 
 	def getProject(self):
 		return str(self.project)
@@ -43,21 +45,38 @@ class PatchInfo(object):
 		return str(self.bugNum)
 
 	def getFixPath(self):
-		return str(os.path.join(d4jHome, self.fixedFolder))
+		return str(self.fixedFolder)
 
 	def getBugPath(self):
-		return str(os.path.join(d4jHome, self.buggyFolder))
+		return str(self.buggyFolder)
 
 	def getSrcPath(self):
 		return str(self.srcPath)
 
 	def getModifClass(self):
 		return str(self.modifClass)
+		
+	def getModifClassPath(self):
+		return str(self.modifClassPath)
 
+	def getCompiledSuccessful(self):
+		return str(self.compiledSuccessful)
+
+	def compile(self):
+		cmd = defects4jCommand + " compile"
+		#print("\n\n\n"+cmd+" ran in "+self.getBugPath()+"\n\n\n\n\n")
+		p = subprocess.Popen(cmd, shell=True, cwd=self.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		for i in p.stderr:
+			if "BUILD FAILED" in str(i):
+				self.compiledSuccessful = -1
+		if self.compiledSuccessful != -1:
+			self.compiledSuccessful = 1
+	
 	#this needs to be called after the buggy folder has been checked out
 	def setScrPath(self):
+		print "defects4jCommand:"+str(defects4jCommand)
 		cmd = defects4jCommand + " export -p dir.src.classes"
-		#print "bugpath:"+str(self.getBugPath())
+		print "bugpath:"+str(self.getBugPath())
 		p = subprocess.Popen(cmd, shell=True, cwd=self.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		for i in p.stdout:
 			self.srcPath = str(i).split("2>&1")[-1].strip().replace('.','/')	
@@ -67,7 +86,8 @@ class PatchInfo(object):
 		p = subprocess.Popen(cmd, shell=True, cwd=self.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		for i in p.stdout:
 			self.modifClass = str(i).split("2>&1")[-1].strip().replace('.','/')		
-
+			self.modifClassPath = str(self.modifClass).replace(str(self.modifClass).split("/")[-1] , '')
+						
 	def setPatch(self,patch):
 		self.patch=patch
 		self.buggyFolder = str(self.buggyFolder) + str(self.patch.split('.')[0])
@@ -82,7 +102,7 @@ def evaluateQuality(bug,combinedPatchFolderName,folderToKeep):
 		suitePath =  os.path.join(bug.getTestDir(), bug.getProject()+"-"+bug.getBugNum()+"f-evosuite-branch."+str(seed)+".tar.bz2")
 		#capture number of failing test cases
 		#print "When evaluating quality the test command is ran here: "+ combinedPatchFolderName
-		p = subprocess.call("rm all-tests.txt", shell=True, cwd=combinedPatchFolderName)
+		p = subprocess.call("rm all_tests", shell=True, cwd=combinedPatchFolderName)
 	
 		cmd = defects4jCommand+" test -s "+ suitePath
 		#print cmd
@@ -102,7 +122,7 @@ def evaluateQuality(bug,combinedPatchFolderName,folderToKeep):
 		p = subprocess.call(recordInOutputFile, shell=True)
 
 def getNumberOfTC(testSuite,whereToCall):
-	cmd="wc -l < all-tests.txt"
+	cmd="wc -l < all_tests"
 	#print whereToCall
 	p = subprocess.Popen(cmd, shell=True, cwd=whereToCall, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	out, err = p.communicate()
@@ -119,31 +139,31 @@ def saveFileAndRemoveFolder(folderToRemove, bug, whereToSave):
 	if(os.path.exists(folderToRemove)):
 		shutil.rmtree(folderToRemove)
 	
-def createSetOfPatchesFromDir(args):
-	patches = []	
-	defects = set()
-	cmd = "ls -d *.patch"
-	p = subprocess.Popen(cmd, shell=True, cwd=args.patches, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	for line in p.stdout:
-		#defects is project and bugNum: chart1, closure22, etc
-		defect=line.split('_')[0]
-		bug=int(filter(str.isdigit, defect))
-		project=str(filter(str.isalpha, defect)).title()
-		patch = PatchInfo(project, int(bug), args.wd)
-		patch.setPatch(str(line).strip())
-		patches.append(patch)
-		defects.add(defect)
-		
-		#patches = patchMap[defect]
-		#patches.add(bug)
-		#patchMap.update(defect:patches)
-	return [defects,patches]
+#def createSetOfPatchesFromDir(args):
+#	patches = []	
+#	defects = set()
+#	cmd = "ls -d *.patch"
+#	p = subprocess.Popen(cmd, shell=True, cwd=args.patches, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+#	for line in p.stdout:
+#		#defects is project and bugNum: chart1, closure22, etc
+#		defect=line.split('_')[0]
+#		bug=int(filter(str.isdigit, defect))
+#		project=str(filter(str.isalpha, defect)).title()
+#		patch = PatchInfo(project, int(bug), args.wd)
+#		patch.setPatch(str(line).strip())
+#		patches.append(patch)
+#		defects.add(defect)
+#		
+#		#patches = patchMap[defect]
+#		#patches.add(bug)
+#		#patchMap.update(defect:patches)
+#	return [defects,patches]
 
 def runD4jCommand(fixedFolder, d4jCommand):
 	cmd = defects4jCommand + d4jCommand
+	print(cmd)
 	p = subprocess.Popen(cmd, shell=True, cwd=fixedFolder, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	return [ line.split("2>&1")[-1].strip() for line in p.stdout ]
-
 
 def checkout(folderToCheckout, project, bugNum, vers):
 	cmd = defects4jCommand + " checkout -p " + str(project) + " -v " + str(bugNum) + str(vers) + " -w " + str(folderToCheckout)
@@ -162,11 +182,11 @@ def checkoutAndPatchFile(bug,args):
 		pathToSource=bug.getSrcPath()
 		
 		#Patching the fixed file
-		print("fixPath: "+str(bug.getFixPath())+ "  pathToSource: "+ str(pathToSource))
+		#print("fixPath: "+str(bug.getFixPath())+ "  pathToSource: "+ str(pathToSource))
 		whereToCallPatch=str(bug.getFixPath())+"/"+str(pathToSource)
 		cmd ="patch -p2 -i "+args.patches+"/"+bug.getPatch() 
 		#print "Creating version for patch: "+ str(bug.getPatch())
-		print(cmd +" called in "+ whereToCallPatch)
+		#print(cmd +" called in "+ whereToCallPatch)
 		p = subprocess.Popen(cmd, shell=True, cwd=whereToCallPatch, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		out, err = p.communicate()
 		#print out
@@ -174,22 +194,27 @@ def checkoutAndPatchFile(bug,args):
 		#	print line.strip()
 	
 def tsNameFromFolder(patchedFolder):
-	return str(patchedFolder.split("/")[-1])+".TSSeed0.tar.bz2"			
+	#print("!!!!patchedFolder"+str(patchedFolder))
+	laterHalf = str(patchedFolder.split("variant")[-1])
+	name = laterHalf[:laterHalf.find("/")]
+	name = "variant"+str(name)
+	#print("NAME:"+ name)
+	return str(name)+".TSSeed0.tar.bz2"			
 	
-def createTS(args,patchedFolder):
+def createTS(args,patchedFolder, testSuiteName):
 	targetClass = runD4jCommand(patchedFolder, " export -p classes.modified")[0]
 	pathToBinary = runD4jCommand(patchedFolder, " export -p cp.compile")[0]
-	cmd = "timeout 6s java -jar "+str(args.evosuite)+" -class "+str(targetClass)+" -projectCP "+str(pathToBinary)+" -criterion line -seed 0"#+str(tsSeed)#+" -Dsearch_budget=1800"		
+	#timeout 6s java -jar 
+	cmd = " java -jar "+str(args.evosuite)+" -class "+str(targetClass)+" -projectCP "+str(pathToBinary)+" -criterion line -seed 0 -Dsearch_budget=5"		
 	print(cmd)
-	print("Folder where it is being called: "+str(patchedFolder))		
+	#print("Folder where it is being called: "+str(patchedFolder))		
 	p = subprocess.call(cmd, shell=True, cwd=patchedFolder)			
-	testSuiteName = tsNameFromFolder(patchedFolder)			
 	cmd = "tar -cvjSf "+str(testSuiteName)+" "+str(targetClass).split('.')[0]+"/"
 	print(cmd)
 	p = subprocess.call(cmd, shell=True, cwd=str(patchedFolder)+"/evosuite-tests/")
-	defect = (testSuiteName.split(".")[0]).split("_")[0]
-	project = str(''.join(filter(str.isalpha, defect))).title()
-	bugNum = str(''.join(filter(str.isdigit, defect)))
+	#defect = (testSuiteName.split(".")[0]).split("_")[0]
+	project = str(args.project).title()
+	bugNum = str(args.bugNum)
 	fixTS(patchedFolder, testSuiteName, project, bugNum)
 	
 def fixTS(fixedFolder, testSuiteName, project, bugNum):
@@ -197,17 +222,17 @@ def fixTS(fixedFolder, testSuiteName, project, bugNum):
 	print(cmd)
 	p = subprocess.call(cmd, shell=True)
 	
-def crossEvaluateTS(patchedFolderFirst,patchedFolderSecond):
-	firstTSName = tsNameFromFolder(patchedFolderFirst)
-	secondTSName = tsNameFromFolder(patchedFolderSecond)
-	#print("\nfirstTSName: "+str(firstTSName)+ " secondTSName: " + str(secondTSName))
-	[numTestsInTSFromFirstPatch, numFailingTestsInTSFromFirstPatch] = evaluateTSOnPatch(patchedFolderFirst+"/"+firstTSName,patchedFolderSecond)
-	print("\nWhen evaluating test suite "+str(firstTSName)+" in folder "+str(patchedFolderSecond)+" there are "+ str(numTestsInTSFromFirstPatch)+" tests from which "+str(numFailingTestsInTSFromFirstPatch)+ " fail.")
-	
-	[numTestsInTSFromSecondPatch, numFailingTestsInTSFromSecondPatch] = evaluateTSOnPatch(patchedFolderSecond+"/"+secondTSName,patchedFolderFirst)
-	print("\nWhen evaluating test suite "+str(secondTSName)+" in folder "+str(patchedFolderFirst)+" there are "+ str(numTestsInTSFromSecondPatch)+" tests from which "+str(numFailingTestsInTSFromSecondPatch)+ " fail.")
-	
-	return [numTestsInTSFromFirstPatch, numFailingTestsInTSFromFirstPatch, numTestsInTSFromSecondPatch, numFailingTestsInTSFromSecondPatch]
+#def crossEvaluateTS(patchedFolderFirst,patchedFolderSecond):
+#	firstTSName = tsNameFromFolder(patchedFolderFirst)
+#	secondTSName = tsNameFromFolder(patchedFolderSecond)
+#	#print("\nfirstTSName: "+str(firstTSName)+ " secondTSName: " + str(secondTSName))
+#	[numTestsInTSFromFirstPatch, numFailingTestsInTSFromFirstPatch] = evaluateTSOnPatch(patchedFolderFirst+"/"+firstTSName,patchedFolderSecond)
+#	print("\nWhen evaluating test suite "+str(firstTSName)+" in folder "+str(patchedFolderSecond)+" there are "+ str(numTestsInTSFromFirstPatch)+" tests from which "+str(numFailingTestsInTSFromFirstPatch)+ " fail.")
+#	
+#	[numTestsInTSFromSecondPatch, numFailingTestsInTSFromSecondPatch] = evaluateTSOnPatch(patchedFolderSecond+"/"+secondTSName,patchedFolderFirst)
+#	print("\nWhen evaluating test suite "+str(secondTSName)+" in folder "+str(patchedFolderFirst)+" there are "+ str(numTestsInTSFromSecondPatch)+" tests from which "+str(numFailingTestsInTSFromSecondPatch)+ " fail.")
+#	
+#	return [numTestsInTSFromFirstPatch, numFailingTestsInTSFromFirstPatch, numTestsInTSFromSecondPatch, numFailingTestsInTSFromSecondPatch]
 	
 def evaluateTSOnPatch(testsuite,folderToEvaluate):
 	#os.environ["JAVA_HOME"] = Java8
@@ -215,7 +240,8 @@ def evaluateTSOnPatch(testsuite,folderToEvaluate):
 	seed = 0
 	#capture number of failing test cases
 	#print "When evaluating quality the test command is ran here: "+ combinedPatchFolderName
-	p = subprocess.call("rm -f all-tests.txt", shell=True, cwd=folderToEvaluate)
+	#print("folderToEvaluate: "+folderToEvaluate)
+	p = subprocess.call("rm -f all_tests", shell=True, cwd=folderToEvaluate)
 	
 	cmd = defects4jCommand+" test -s "+ testsuite
 	print(cmd+ " is being called in "+ str(folderToEvaluate))
@@ -237,7 +263,7 @@ def evaluateTSOnPatch(testsuite,folderToEvaluate):
 	return [numberOfTests, failingTests]
 
 def getNumberOfTC(testSuite,whereToCall):
-	cmd="wc -l < all-tests.txt"
+	cmd="wc -l < all_tests"
 	#print whereToCall
 	p = subprocess.Popen(cmd, shell=True, cwd=whereToCall, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	out, err = p.communicate()
@@ -248,13 +274,12 @@ def writeToFile(lineToStore, outputFile):
 	cmd = "echo \""+str(lineToStore)+"\" >> "+str(outputFile)
 	p = subprocess.call(cmd, shell=True)
 	
-def createAndMoveTS(workingDir,patchName,args):
-	patchFolder = str(workingDir+"/"+patchName)
-	if not os.path.exists(str(patchFolder+"/"+tsNameFromFolder(patchName))):
+def createAndMoveTS(variantFolder,tsName,args):
+	if not os.path.exists(str(args.output+"/"+tsName)):
 		#if the test suite doesnt exist
-		print(str(patchFolder+"/"+tsNameFromFolder(patchName))+ " doesnt exist, creating it now\n")
-		createTS(args,patchFolder)
-		subprocess.Popen("mv "+tsNameFromFolder(patchName)+" ../", shell=True, cwd=str(patchFolder)+"/evosuite-tests/")
+		print(str(variantFolder+"/"+tsName)+ " doesnt exist, creating it now\n")
+		createTS(args,variantFolder,tsName)
+		subprocess.Popen("mv "+tsName+" " +args.output+"/"+tsName, shell=True, cwd=str(variantFolder)+"/evosuite-tests/")
 	
 def setOutputFiles(output):
 	global summarizedFile 
@@ -266,98 +291,114 @@ def setOutputFiles(output):
 	writeToFile("Project,BugNum,TestSuite,FolderEvaluated,NumberOfTests,NumberOfFailingTests", detailedFile)
 	writeToFile("Patch1,Patch2,DiversityScore,SimilarityScore", summarizedFile)
 	
-def crossEvaluate(pair,patch,args):
-	firstPatch= str((pair[0].getPatch()).split('.')[0])
-	secondPatch = str((pair[1].getPatch()).split('.')[0])
-	patchDir=patch.getBugPath()
-	#print "patchDir:"+str(patchDir)
-	workingDir = str(patchDir[:patchDir.rindex("/")]) + "/"
-	patchedFolderFirst = str(workingDir+"/"+firstPatch)
-	patchedFolderSecond = str(workingDir+"/"+secondPatch)
+#def crossEvaluateOld(pair,patch,args):
+#	firstPatch= str((pair[0].getPatch()).split('.')[0])
+#	secondPatch = str((pair[1].getPatch()).split('.')[0])
+#	patchDir=patch.getBugPath()
+#	#print "patchDir:"+str(patchDir)
+#	workingDir = str(patchDir[:patchDir.rindex("/")]) + "/"
+#	patchedFolderFirst = str(workingDir+"/"+firstPatch)
+#	patchedFolderSecond = str(workingDir+"/"+secondPatch)
+#	
+#	firstTSName = tsNameFromFolder(patchedFolderFirst)
+#	secondTSName = tsNameFromFolder(patchedFolderSecond)
+#	
+#	#Create TS in Patch 1 and Evaluate in Patch 2
+#	createAndMoveTS(workingDir,firstPatch,args)
+#	[numTestsInTSFromFirstPatch, numFailingTestsInTSFromFirstPatch] = evaluateTSOnPatch(patchedFolderFirst+"/"+firstTSName,patchedFolderSecond)
+#	writeToFile(args.project+","+args.bugNum+","+str(firstTSName)+","+str(secondPatch)+","+str(numTestsInTSFromFirstPatch)+","+str(numFailingTestsInTSFromFirstPatch), detailedFile)
+#	print("\nWhen evaluating test suite "+str(firstTSName)+" in folder "+str(secondPatch)+" there are "+ str(numTestsInTSFromFirstPatch)+" tests from which "+str(numFailingTestsInTSFromFirstPatch)+ " fail.\n")
+#		
+#	#Create TS in Patch 2 and Evaluate in Patch 1
+#	createAndMoveTS(workingDir,secondPatch,args)
+#	[numTestsInTSFromSecondPatch, numFailingTestsInTSFromSecondPatch] = evaluateTSOnPatch(patchedFolderSecond+"/"+secondTSName,patchedFolderFirst)
+#	writeToFile(args.project+","+args.bugNum+","+str(secondTSName)+","+str(firstPatch)+","+str(numTestsInTSFromSecondPatch)+","+str(numFailingTestsInTSFromSecondPatch), detailedFile)
+#	print("\nWhen evaluating test suite "+str(secondTSName)+" in folder "+str(firstPatch)+" there are "+ str(numTestsInTSFromSecondPatch)+" tests from which "+str(numFailingTestsInTSFromSecondPatch)+ " fail.\n")
+#		
+#	#store results
+#	diversityScore = (float(numFailingTestsInTSFromFirstPatch)+float(numFailingTestsInTSFromSecondPatch))/(float(numTestsInTSFromFirstPatch)+float(numTestsInTSFromSecondPatch))
+#	similarityScore = (100.0 - diversityScore)
+#	writeToFile(str(firstPatch)+","+str(secondPatch)+","+str(diversityScore)+","+str(similarityScore), summarizedFile)
 	
-	firstTSName = tsNameFromFolder(patchedFolderFirst)
-	secondTSName = tsNameFromFolder(patchedFolderSecond)
+
+
+
+
+
+
+def crossEvaluate(args):
+	#patchDir=patch.getBugPath()
+	#workingDir = str(patchDir[:patchDir.rindex("/")]) + "/"
+	
+	variantFolderFirst = "/tmp/var1/"
+	variantFolderSecond = "/tmp/var2/"
+	
+	firstTSName = tsNameFromFolder(args.variant1Loc)
+	secondTSName = tsNameFromFolder(args.variant2Loc)
 	
 	#Create TS in Patch 1 and Evaluate in Patch 2
-	createAndMoveTS(workingDir,firstPatch,args)
-	[numTestsInTSFromFirstPatch, numFailingTestsInTSFromFirstPatch] = evaluateTSOnPatch(patchedFolderFirst+"/"+firstTSName,patchedFolderSecond)
-	writeToFile(patch.getProject()+","+patch.getBugNum()+","+str(firstTSName)+","+str(secondPatch)+","+str(numTestsInTSFromFirstPatch)+","+str(numFailingTestsInTSFromFirstPatch), detailedFile)
-	print("\nWhen evaluating test suite "+str(firstTSName)+" in folder "+str(secondPatch)+" there are "+ str(numTestsInTSFromFirstPatch)+" tests from which "+str(numFailingTestsInTSFromFirstPatch)+ " fail.\n")
+	createAndMoveTS(variantFolderFirst,firstTSName,args)
+	[numTestsInTSFromFirstPatch, numFailingTestsInTSFromFirstPatch] = evaluateTSOnPatch(args.output+"/"+firstTSName,variantFolderSecond)
+	writeToFile(args.project+","+args.bugNum+","+str(firstTSName)+","+str(variantFolderSecond)+","+str(numTestsInTSFromFirstPatch)+","+str(numFailingTestsInTSFromFirstPatch), detailedFile)
+	print("\nWhen evaluating test suite "+str(firstTSName)+" in folder "+str(variantFolderSecond)+" there are "+ str(numTestsInTSFromFirstPatch)+" tests from which "+str(numFailingTestsInTSFromFirstPatch)+ " fail.\n")
 		
 	#Create TS in Patch 2 and Evaluate in Patch 1
-	createAndMoveTS(workingDir,secondPatch,args)
-	[numTestsInTSFromSecondPatch, numFailingTestsInTSFromSecondPatch] = evaluateTSOnPatch(patchedFolderSecond+"/"+secondTSName,patchedFolderFirst)
-	writeToFile(patch.getProject()+","+patch.getBugNum()+","+str(secondTSName)+","+str(firstPatch)+","+str(numTestsInTSFromSecondPatch)+","+str(numFailingTestsInTSFromSecondPatch), detailedFile)
-	print("\nWhen evaluating test suite "+str(secondTSName)+" in folder "+str(firstPatch)+" there are "+ str(numTestsInTSFromSecondPatch)+" tests from which "+str(numFailingTestsInTSFromSecondPatch)+ " fail.\n")
+	createAndMoveTS(variantFolderSecond,secondTSName,args)
+	[numTestsInTSFromSecondPatch, numFailingTestsInTSFromSecondPatch] = evaluateTSOnPatch(args.output+"/"+secondTSName,variantFolderFirst)
+	writeToFile(args.project+","+args.bugNum+","+str(secondTSName)+","+str(variantFolderFirst)+","+str(numTestsInTSFromSecondPatch)+","+str(numFailingTestsInTSFromSecondPatch), detailedFile)
+	print("\nWhen evaluating test suite "+str(secondTSName)+" in folder "+str(variantFolderFirst)+" there are "+ str(numTestsInTSFromSecondPatch)+" tests from which "+str(numFailingTestsInTSFromSecondPatch)+ " fail.\n")
 		
 	#store results
+	print("numFailingTestsInTSFromFirstPatch:"+str(numFailingTestsInTSFromFirstPatch)+" numFailingTestsInTSFromSecondPatch:"+str(numFailingTestsInTSFromSecondPatch)+" numTestsInTSFromFirstPatch:"+str(numTestsInTSFromFirstPatch)+" numTestsInTSFromSecondPatch:"+str(numTestsInTSFromSecondPatch))
 	diversityScore = (float(numFailingTestsInTSFromFirstPatch)+float(numFailingTestsInTSFromSecondPatch))/(float(numTestsInTSFromFirstPatch)+float(numTestsInTSFromSecondPatch))
 	similarityScore = (100.0 - diversityScore)
-	writeToFile(str(firstPatch)+","+str(secondPatch)+","+str(diversityScore)+","+str(similarityScore), summarizedFile)
+	print("diversityScore: "+diversityScore+ " similarityScore: "+similarityScore)
+	writeToFile(str(variantFolderFirst)+","+str(variantFolderSecond)+","+str(diversityScore)+","+str(similarityScore), summarizedFile)
+	
+
 	
 def getOptions():
-	parser = argparse.ArgumentParser(description="Example of usage:  python diversityScores.py /home/mausoto/JavaRepair-results/patches/GenProg/RQ0/ /home/mausoto/defects4jJava8/defects4j/framework/lib/test_generation/generation/evosuite-1.0.6.jar ./")
+	parser = argparse.ArgumentParser(description="Example of usage: python ~/diversityProject/DiversityGenProg/genprog4java/src/clegoues/genprog4java/fitness/diversityScores.py Chart 1 ~/pleaseRemove/home/mausoto/diversityProject/slicingMutOps/defects4j/ExamplesCheckedOutAppend/chart1Buggy/tmp/variant6/org/jfree/chart/renderer/category/AbstractCategoryItemRenderer.java ~/pleaseRemove/home/mausoto/diversityProject/slicingMutOps/defects4j/ExamplesCheckedOutAppend/chart1Buggy/tmp/variant2/org/jfree/chart/renderer/category/AbstractCategoryItemRenderer.java /home/mausoto/defects4jJava8/defects4j/framework/lib/test_generation/generation/evosuite-1.0.6.jar ~/pleaseRemove/")
 	parser.add_argument("project", help="Project of defects4j (Chart, Math, etc)")
 	parser.add_argument("bugNum", help="Bug number from defects4j")
-	parser.add_argument("variant1", help="Location of variant 1")
-	parser.add_argument("variant2", help="Location of variant 2")
+	parser.add_argument("variant1Loc", help="Location of variant 1")
+	parser.add_argument("variant2Loc", help="Location of variant 2")
+	parser.add_argument("evosuite", help="Location of evosuite jar")
 	parser.add_argument("output", help="output folder")
 	
 	return parser.parse_args()
+	
+#var is a string, either var1 or var2
+def createFolderForVariant(var, project, bugNum, variantLoc):
+	p = subprocess.call("rm -rf /tmp/"+str(var)+"/", shell=True)
+	p = subprocess.call("mkdir /tmp/"+str(var)+"/", shell=True)
+	checkout("/tmp/"+str(var)+"/", str(project), str(bugNum), "f")
+	patch = PatchInfo(project, bugNum, "/tmp/"+str(var))
+	patch.setScrPath()
+	#print("cp "+variantLoc+" /tmp/"+str(var)+"/"+str(patch.getSrcPath())+"/"+str(patch.getModifClassPath()))
+	p = subprocess.call("cp "+variantLoc+" /tmp/"+str(var)+"/"+str(patch.getSrcPath())+"/"+str(patch.getModifClassPath()), shell=True)
+	patch.compile()
+	return patch
+	
 
 def main():
 	args=getOptions()
+
+	variant1 = createFolderForVariant("var1",args.project, args.bugNum, args.variant1Loc)
+	if int(variant1.getCompiledSuccessful()) == -1:
+		print("Variant 1 did not compile. Diversity Score cannot be computed")
+		return 0
+
+	variant2 = createFolderForVariant("var2",args.project, args.bugNum, args.variant2Loc)
+	if int(variant2.getCompiledSuccessful()) == -1:
+		print("Variant 2 did not compile. Diversity Score cannot be computed")
+		return 0
 	
-	p = subprocess.call("rm -rf /tmp/var1/", shell=True)
-	checkout("/tmp/var1/", str(args.project), str(args.bugNum), "f")
-	replaceVariantFile()
+	try:
+		crossEvaluate(args)
+	except:
+		writeToFile(str(variant1.getPatch())+","+str(variant2.getPatch())+",Error,Error", summarizedFile)
 
-	p = subprocess.call("rm -rf /tmp/var2/", shell=True)
-	checkout("/tmp/var2/", str(args.project), str(args.bugNum), "f")
-	replaceVariantFile()
-	
-	crossEvaluate()
-
-
-
-
-
-	createTS()
-	createTS()
-	tsIndivNumTests = numberOfTests(tsIndiv)
-	tsVarNumTests = numberOfTests(tsVar)
-	numTestsFailedByIndiv = indiv.numFailedTestsTS(tsVar)
-	numTestsFailedByVar = variant.numFailedTestsTS(tsIndiv)
-	return (numTestsFailedByIndiv + numTestsFailedByVar) / (tsIndivNumTests + tsVarNumTests)
-
-
-	
-
-
-
-	
-	
-	
-	
-	setOutputFiles(args.output)
-	[defects,patches] = createSetOfPatchesFromDir(args)
-	#one defect (e.g., chart1, has a lot of patches)
-	for defect in defects:
-		#all patches that apply for this defect (e.g., defect: chart1, patch: chart1_Seed1_d_601.patch)
-		patchesForThisDefect = [patch for patch in patches if defect == str(patch.getPatch()).split('_')[0]]
-		for patch in patchesForThisDefect:
-			print "\nDefect: " + patch.project + " " + str(patch.bugNum)
-			print str("Creating folder for patch: "+patch.getPatch())
-			checkoutAndPatchFile(patch,args)
-			
-		#print "Up until here its all good"
-		allPatchPairs = list(itertools.combinations(patchesForThisDefect, 2))
-		#print ""
-		for pair in allPatchPairs:
-			try:
-				print("\nWorking in pair: "+ str(pair[0].getPatch()) + " "+ str(pair[1].getPatch())+"\n")
-				crossEvaluate(pair, patch, args)
-			except:
-				writeToFile(str(pair[0].getPatch())+","+str(pair[1].getPatch())+",Error,Error", summarizedFile)		
 
 main()
+
