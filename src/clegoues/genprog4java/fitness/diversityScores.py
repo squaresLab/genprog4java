@@ -355,7 +355,6 @@ def crossEvaluate(args):
 	print("diversityScore: "+diversityScore+ " similarityScore: "+similarityScore)
 	writeToFile(str(variantFolderFirst)+","+str(variantFolderSecond)+","+str(diversityScore)+","+str(similarityScore), summarizedFile)
 	
-
 	
 def getOptions():
 	parser = argparse.ArgumentParser(description="Example of usage: python ~/diversityProject/DiversityGenProg/genprog4java/src/clegoues/genprog4java/fitness/diversityScores.py Chart 1 ~/pleaseRemove/home/mausoto/diversityProject/slicingMutOps/defects4j/ExamplesCheckedOutAppend/chart1Buggy/tmp/variant6/org/jfree/chart/renderer/category/AbstractCategoryItemRenderer.java ~/pleaseRemove/home/mausoto/diversityProject/slicingMutOps/defects4j/ExamplesCheckedOutAppend/chart1Buggy/tmp/variant2/org/jfree/chart/renderer/category/AbstractCategoryItemRenderer.java /home/mausoto/defects4jJava8/defects4j/framework/lib/test_generation/generation/evosuite-1.0.6.jar ~/pleaseRemove/")

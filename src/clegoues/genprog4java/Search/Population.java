@@ -36,7 +36,9 @@ package clegoues.genprog4java.Search;
 import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.INT;
 import static clegoues.util.ConfigurationBuilder.STRING;
+import static clegoues.util.ConfigurationBuilder.BOOLEAN;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -91,7 +93,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		.withHelp( "crossover algorithm" )
 		.inGroup( "Population Parameters" )
 		.build();
-	private static boolean multiObjectiveFitness = ConfigurationBuilder.of( BOOLEAN )
+	private static Boolean multiObjectiveFitness = ConfigurationBuilder.of( BOOLEAN )
 		.withVarName( "multiObjectiveFitness" )
 		.withDefault( "false" )
 		.withHelp( "true if multi objective fitness is desired" )
@@ -461,7 +463,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		return result; 
 	}
 	
-	private Representation<G> selectBasedOnMultiObjective(int desired) {
+	private ArrayList<Representation<G>> selectBasedOnMultiObjective(int desired) {
 		//Collections.shuffle(population);
 		//List<Representation<G>> pool = population;
 		assert(correctnessContribution < 1);
@@ -490,7 +492,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		return toReturn;
 	}
 	
-	private int correctnessScore(Representation<G> indiv){
+	private double correctnessScore(Representation<G> indiv){
 		//If fitness here is calculated as number of passed test cases, then we are all good here. 
 		return indiv.getFitness();
 	}
@@ -507,13 +509,22 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	private int indivDiversityScore(Representation<G> indiv, Representation<G> variant){
 		
 		Runtime rt = Runtime.getRuntime();
-		String command = "/home/mausoto/diversityProject/DiversityGenProg/diversityScores.py "; 
+		String command = "python ~/diversityProject/DiversityGenProg/genprog4java/src/clegoues/genprog4java/fitness/diversityScores.py "; 
 		command += d4jProject() + " ";
 		command += d4jBugNum() + " ";
 		command += indiv.getVariantFolder()+"/"+indiv.getName() + " ";
-		command += variant.getVariantFolder()+"/"+variant.getName();
-		Process pr = rt.exec(command); 
-		
+		command += variant.getVariantFolder()+"/"+variant.getName() + " ";
+		command += "/home/mausoto/defects4jJava8/defects4j/framework/lib/test_generation/generation/evosuite-1.0.6.jar ";
+		command += "~/diversityProject/DiversityGenProg/testSuitesForDiversityScore/";
+		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+command);
+		try{
+			Process pr = rt.exec(command); 
+		}catch(IOException e){
+			System.err.println("Error when excecution the call for the python script " + e);
+		}
+		//DO SOMETHING TO GET THE RESULT OF THE PYTHON SCRIPT
+		int pythonScriptResult = 0;
+		return pythonScriptResult;
 		
 		//tsIndiv = indiv.createTS();
 		//tsVar = variant.createTS();
@@ -525,10 +536,10 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	}
 	
 	private String d4jProject(){
-		
+		return "Chart";
 	}
 	private String d4jBugNum(){
-		
+		return "1";
 	}
 	
 	//Returns the number of tests in the test suite indicated in the location
