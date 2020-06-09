@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Iterator;
 
 import clegoues.genprog4java.Search.GiveUpException;
 import clegoues.genprog4java.Search.Search;
@@ -418,12 +419,12 @@ public class DefaultLocalization extends Localization {
 		out.flush();
 		out.close();
 
-		if(String.equals(faultLocStrategy.trim(),"slicingFaultLoc")){
+		if(faultLocStrategy.trim().equals("slicingFaultLoc")){
 			System.out.println("TreeSet atoms: " + atoms);
 			int numberOfSubSets = Integer.parseInt(faultSpaceSubSet.substring(faultSpaceSubSet.indexOf("/")+1)); 
 			int whichSubSet = Integer.parseInt(faultSpaceSubSet.substring(0,faultSpaceSubSet.indexOf("/"))); 
 			int size = atoms.size();
-			int itemsPerSubSet = Math.ceil(size/numberOfSubSets);
+			int itemsPerSubSet = (int)Math.ceil(size/numberOfSubSets);
 			int from = (whichSubSet - 1 ) * itemsPerSubSet;
 			int to = whichSubSet * itemsPerSubSet;
 			Iterator it = atoms.iterator();	
@@ -434,7 +435,7 @@ public class DefaultLocalization extends Localization {
 			TreeSet<Integer> subSet = new TreeSet<Integer>();
 			//add elements in the range to subset			
 			for(int i = from; i < to && it.hasNext(); ++i){
-				subSet.add(it);
+				subSet.add((int)it.next());
 			}
 			System.out.println("Subset ("+faultSpaceSubSet+") of TreeSet atoms: "+subSet);
 			atoms = subSet;
