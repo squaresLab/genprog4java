@@ -357,7 +357,7 @@ def crossEvaluate(args):
 	
 	
 def getOptions():
-	parser = argparse.ArgumentParser(description="Example of usage: python ~/diversityProject/DiversityGenProg/genprog4java/src/clegoues/genprog4java/fitness/diversityScores.py Chart 1 ~/pleaseRemove/home/mausoto/diversityProject/slicingMutOps/defects4j/ExamplesCheckedOutAppend/chart1Buggy/tmp/variant6/org/jfree/chart/renderer/category/AbstractCategoryItemRenderer.java ~/pleaseRemove/home/mausoto/diversityProject/slicingMutOps/defects4j/ExamplesCheckedOutAppend/chart1Buggy/tmp/variant2/org/jfree/chart/renderer/category/AbstractCategoryItemRenderer.java /home/mausoto/defects4jJava8/defects4j/framework/lib/test_generation/generation/evosuite-1.0.6.jar ~/pleaseRemove/")
+	parser = argparse.ArgumentParser(description="Example of usage: python ~/diversityProject/DiversityGenProg/genprog4java/src/clegoues/genprog4java/fitness/diversityScores.py Chart 1 ~/pleaseRemove/home/mausoto/diversityProject/slicingMutOps/defects4j/ExamplesCheckedOutAppend/chart1Buggy/tmp/variant6/ ~/pleaseRemove/home/mausoto/diversityProject/slicingMutOps/defects4j/ExamplesCheckedOutAppend/chart1Buggy/tmp/variant2/ /home/mausoto/defects4jJava8/defects4j/framework/lib/test_generation/generation/evosuite-1.0.6.jar ~/pleaseRemove/")
 	parser.add_argument("project", help="Project of defects4j (Chart, Math, etc)")
 	parser.add_argument("bugNum", help="Bug number from defects4j")
 	parser.add_argument("variant1Loc", help="Location of variant 1")
@@ -374,8 +374,8 @@ def createFolderForVariant(var, project, bugNum, variantLoc):
 	checkout("/tmp/"+str(var)+"/", str(project), str(bugNum), "f")
 	patch = PatchInfo(project, bugNum, "/tmp/"+str(var))
 	patch.setScrPath()
-	#print("cp "+variantLoc+" /tmp/"+str(var)+"/"+str(patch.getSrcPath())+"/"+str(patch.getModifClassPath()))
-	p = subprocess.call("cp "+variantLoc+" /tmp/"+str(var)+"/"+str(patch.getSrcPath())+"/"+str(patch.getModifClassPath()), shell=True)
+	print("cp "+variantLoc+"/"+str(patch.getSrcPath())+"/"+str(patch.getModifClassPath()))
+	p = subprocess.call("cp "+variantLoc+"/"+str(patch.getSrcPath())+"/"+str(patch.getModifClassPath()) + " /tmp/"+str(var)+"/"+str(patch.getSrcPath())+"/"+str(patch.getModifClassPath()), shell=True)
 	patch.compile()
 	return patch
 	

@@ -99,15 +99,15 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		.withHelp( "true if multi objective fitness is desired" )
 		.inGroup( "Population Parameters" )
 		.build();
-	private static int diversityContribution = ConfigurationBuilder.of( INT )
+	private static double diversityContribution = ConfigurationBuilder.of( DOUBLE )
 		.withVarName( "diversityContribution" )
-		.withDefault( "50" )
+		.withDefault( "0.5" )
 		.withHelp( "the percentage that the diversity score contributes to fitness" )
 		.inGroup( "Population Parameters" )
 		.build();
-	private static int correctnessContribution = ConfigurationBuilder.of( INT )
+	private static double correctnessContribution = ConfigurationBuilder.of( DOUBLE )
 		.withVarName( "correctnessContribution" )
-		.withDefault( "50" )
+		.withDefault( "0.5" )
 		.withHelp( "the percentage that the correctness score contributes to fitness" )
 		.inGroup( "Population Parameters" )
 		.build();
@@ -509,19 +509,21 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 	private int indivDiversityScore(Representation<G> indiv, Representation<G> variant){
 		
 		Runtime rt = Runtime.getRuntime();
+		String varLoc = getVarLoc();
 		String command = "python ~/diversityProject/DiversityGenProg/genprog4java/src/clegoues/genprog4java/fitness/diversityScores.py "; 
 		command += d4jProject() + " ";
 		command += d4jBugNum() + " ";
-		command += indiv.getVariantFolder()+"/"+indiv.getName() + " ";
-		command += variant.getVariantFolder()+"/"+variant.getName() + " ";
+		command += varLoc + "tmp/" + indiv.getVariantFolder()+"/ "; 
+		command += varLoc + "tmp/" + variant.getVariantFolder()+"/ ";
 		command += "/home/mausoto/defects4jJava8/defects4j/framework/lib/test_generation/generation/evosuite-1.0.6.jar ";
 		command += "~/diversityProject/DiversityGenProg/testSuitesForDiversityScore/";
 		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+command);
-		try{
-			Process pr = rt.exec(command); 
-		}catch(IOException e){
-			System.err.println("Error when excecution the call for the python script " + e);
-		}
+		
+		System.out.println("Command executed here");
+		//Process pr = rt.exec(command); 
+		GlobalUtils.getOutputFromCommand(command);
+			
+
 		//DO SOMETHING TO GET THE RESULT OF THE PYTHON SCRIPT
 		int pythonScriptResult = 0;
 		return pythonScriptResult;
@@ -535,11 +537,39 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		//return (numTestsFailedByIndiv + numTestsFailedByVar) / (tsIndivNumTests + tsVarNumTests);
 	}
 	
+	private String getProjAndNum(){
+		String fullPath = GlobalUtils.getOutputFromCommand("pwd");
+		String projAndNum = null;
+		String[] words = fullPath.split("/");
+		for(String s: words){
+			if(s.contains("Buggy"))
+				projAndNum = s.substring(0,s.indexOf("Buggy"));
+		}
+		return projAndNum;
+	}	
+	
+	private String getVarLoc(){
+		//$D4J_HOME/$BUGSFOLDER/"$LOWERCASEPACKAGE""$BUGNUMBER"Buggy/tmp/
+		//System.out.println("executing getVarLoc");
+		String fullPath = GlobalUtils.getOutputFromCommand("pwd");
+		//System.out.println("full path: "+ fullPath);
+		int lastIndex = fullPath.indexOf("Buggy")+5;
+		//System.out.println("Lastindex: "+ lastIndex + " full length: "+ fullPath.length());
+		String varLoc = fullPath.substring(0,lastIndex)+"/";
+		return varLoc;
+		
+	}
+
 	private String d4jProject(){
-		return "Chart";
+		//System.out.println("executing d4jProject");
+		String projAndNum = getProjAndNum();
+		String toCap = projAndNum.replaceAll("[0-9]","");
+		return toCap.substring(0, 1).toUpperCase() + toCap.substring(1);
 	}
 	private String d4jBugNum(){
-		return "1";
+		//System.out.println("executing d4jBugNum");
+		String projAndNum = getProjAndNum();
+		return projAndNum.replaceAll("[A-Za-z]","");
 	}
 	
 	//Returns the number of tests in the test suite indicated in the location

@@ -251,6 +251,7 @@ public class DefaultLocalization extends Localization {
 			break;
 		case "standardPathFile":
 		default:
+			executionData = null;
 			negativePath = getPathInfo(DefaultLocalization.negCoverageFile, Fitness.negativeTests, false);
 		}
 		switch(faultLocStrategy.trim()) { // FIXME: push this to a subclass.
