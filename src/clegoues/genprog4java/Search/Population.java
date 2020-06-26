@@ -510,22 +510,34 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		
 		Runtime rt = Runtime.getRuntime();
 		String varLoc = getVarLoc();
-		String command = "python ~/diversityProject/DiversityGenProg/genprog4java/src/clegoues/genprog4java/fitness/diversityScores.py "; 
+		String command = "python /home/mausoto/diversityProject/DiversityGenProg/genprog4java/src/clegoues/genprog4java/fitness/diversityScores.py "; 
 		command += d4jProject() + " ";
 		command += d4jBugNum() + " ";
 		command += varLoc + "tmp/" + indiv.getVariantFolder()+"/ "; 
 		command += varLoc + "tmp/" + variant.getVariantFolder()+"/ ";
 		command += "/home/mausoto/defects4jJava8/defects4j/framework/lib/test_generation/generation/evosuite-1.0.6.jar ";
-		command += "~/diversityProject/DiversityGenProg/testSuitesForDiversityScore/";
-		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+command);
+		command += "/home/mausoto/diversityProject/DiversityGenProg/testSuitesForDiversityScore/";
+		System.out.println("Executed python script to obtain diversity score: "+command);
 		
 		System.out.println("Command executed here");
 		//Process pr = rt.exec(command); 
-		GlobalUtils.getOutputFromCommand(command);
-			
-
-		//DO SOMETHING TO GET THE RESULT OF THE PYTHON SCRIPT
+		String p = GlobalUtils.getOutputFromCommand(command);
+		System.out.println(p);
 		int pythonScriptResult = 0;
+		//TEST IF THIS IS WORKING!!!!!!!!!!1
+		System.out.println("Here it is going to check if 'diversityScore' is in the string");
+		if(p.contains("diversityScore")){
+			System.out.println("'diversityScore' was in the string: ");
+			System.out.println(p);
+			String dsString = p.substring(p.indexOf("diversityScore:")+15, p.length());
+			System.out.println("!!!!!!!!!!!!!!!!!!!the int is just: "+ dsString);
+			int ds = Integer.parseInt(dsString);
+			pythonScriptResult = ds;
+		}else{
+			System.out.println("diversityScore was not in the string: "+ p + " End of string. \n");
+			
+		}
+
 		return pythonScriptResult;
 		
 		//tsIndiv = indiv.createTS();

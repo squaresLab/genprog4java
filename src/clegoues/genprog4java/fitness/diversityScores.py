@@ -34,7 +34,7 @@ class PatchInfo(object):
 		self.fixedFolder = wd + "/"  
 		self.srcPath=""
 		self.patch=""
-		self.modifClass = ""
+		self.modifClassAndPath = ""
 		self.modifClassPath = ""
 		self.compiledSuccessful = 0
 
@@ -66,7 +66,8 @@ class PatchInfo(object):
 		cmd = defects4jCommand + " compile"
 		#print("\n\n\n"+cmd+" ran in "+self.getBugPath()+"\n\n\n\n\n")
 		p = subprocess.Popen(cmd, shell=True, cwd=self.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		for i in p.stderr:
+		out, err = p.communicate()
+		for i in err:
 			if "BUILD FAILED" in str(i):
 				self.compiledSuccessful = -1
 		if self.compiledSuccessful != -1:
@@ -78,15 +79,25 @@ class PatchInfo(object):
 		cmd = defects4jCommand + " export -p dir.src.classes"
 		print "bugpath:"+str(self.getBugPath())
 		p = subprocess.Popen(cmd, shell=True, cwd=self.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		for i in p.stdout:
-			self.srcPath = str(i).split("2>&1")[-1].strip().replace('.','/')	
-		#print "srcPath:" + str(self.srcPath)
+		out, err = p.communicate()
+		builder = ""
+		for i in out:
+			builder = builder+str(i)
+		#self.srcPath = str(i).split("2>&1")[-1].strip().replace('.','/')	
+		self.srcPath=builder
+		print "srcPath:" + str(self.srcPath)
 		
 		cmd = defects4jCommand + " export -p classes.modified"
 		p = subprocess.Popen(cmd, shell=True, cwd=self.getBugPath(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		for i in p.stdout:
-			self.modifClass = str(i).split("2>&1")[-1].strip().replace('.','/')		
-			self.modifClassPath = str(self.modifClass).replace(str(self.modifClass).split("/")[-1] , '')
+		out, err = p.communicate()
+		builder = ""
+		for i in out:
+			builder = builder+str(i)
+		#self.modifClass = str(i).split("2>&1")[-1].strip().replace('.','/')		
+		builder = str(builder).strip().replace('.','/')
+		self.modifClass = str(builder).split("/")[-1]+".java"
+		self.modifClassPath = str(builder).replace(str(builder).split("/")[-1] , '')
+		print("modifClassPath:" + str(self.modifClassPath)+ " modifClass:"+ str(self.modifClass))
 						
 	def setPatch(self,patch):
 		self.patch=patch
@@ -107,8 +118,9 @@ def evaluateQuality(bug,combinedPatchFolderName,folderToKeep):
 		cmd = defects4jCommand+" test -s "+ suitePath
 		#print cmd
 		p = subprocess.Popen(cmd, shell=True, cwd=combinedPatchFolderName, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		out, err = p.communicate()
 		failingTests=""
-		for line in p.stdout:
+		for line in out:
 			if "Failing tests:" in line: 
 				#print line
 				failingTests=line.split("Failing tests:")[-1].strip() 
@@ -129,15 +141,15 @@ def getNumberOfTC(testSuite,whereToCall):
 	#print out
 	return out
 	
-def saveFileAndRemoveFolder(folderToRemove, bug, whereToSave):
-	#save file
-	cmd = "cp " + folderToRemove + "/" + bug.getSrcPath() +"/" + bug.getModifClass() + ".java" + " "+ whereToSave
-	print cmd
-	p = subprocess.call(cmd, shell=True)
-		
-	#remove folder
-	if(os.path.exists(folderToRemove)):
-		shutil.rmtree(folderToRemove)
+#def saveFileAndRemoveFolder(folderToRemove, bug, whereToSave):
+#	#save file
+#	cmd = "cp " + folderToRemove + "/" + bug.getSrcPath() +"/" + bug.getModifClass() + ".java" + " "+ whereToSave
+#	print cmd
+#	p = subprocess.call(cmd, shell=True)
+#		
+#	#remove folder
+#	if(os.path.exists(folderToRemove)):
+#		shutil.rmtree(folderToRemove)
 	
 #def createSetOfPatchesFromDir(args):
 #	patches = []	
@@ -277,9 +289,11 @@ def writeToFile(lineToStore, outputFile):
 def createAndMoveTS(variantFolder,tsName,args):
 	if not os.path.exists(str(args.output+"/"+tsName)):
 		#if the test suite doesnt exist
-		print(str(variantFolder+"/"+tsName)+ " doesnt exist, creating it now\n")
+		print(str(args.output+"/"+tsName)+ " doesnt exist, creating it now\n")
 		createTS(args,variantFolder,tsName)
 		subprocess.Popen("mv "+tsName+" " +args.output+"/"+tsName, shell=True, cwd=str(variantFolder)+"/evosuite-tests/")
+	else:
+		print(str(args.output+"/"+tsName)+ " exists, using the existing one\n")
 	
 def setOutputFiles(output):
 	global summarizedFile 
@@ -357,7 +371,7 @@ def crossEvaluate(args):
 	
 	
 def getOptions():
-	parser = argparse.ArgumentParser(description="Example of usage: python ~/diversityProject/DiversityGenProg/genprog4java/src/clegoues/genprog4java/fitness/diversityScores.py Chart 1 ~/pleaseRemove/home/mausoto/diversityProject/slicingMutOps/defects4j/ExamplesCheckedOutAppend/chart1Buggy/tmp/variant6/ ~/pleaseRemove/home/mausoto/diversityProject/slicingMutOps/defects4j/ExamplesCheckedOutAppend/chart1Buggy/tmp/variant2/ /home/mausoto/defects4jJava8/defects4j/framework/lib/test_generation/generation/evosuite-1.0.6.jar ~/pleaseRemove/")
+	parser = argparse.ArgumentParser(description="Example of usage: python /home/mausoto/diversityProject/DiversityGenProg/genprog4java/src/clegoues/genprog4java/fitness/diversityScores.py Chart 1 /home/mauosto/pleaseRemove/home/mausoto/diversityProject/slicingMutOps/defects4j/ExamplesCheckedOutAppend/chart1Buggy/tmp/variant6/ /home/mausoto/pleaseRemove/home/mausoto/diversityProject/slicingMutOps/defects4j/ExamplesCheckedOutAppend/chart1Buggy/tmp/variant2/ /home/mausoto/defects4jJava8/defects4j/framework/lib/test_generation/generation/evosuite-1.0.6.jar /home/mausotog/pleaseRemove/")
 	parser.add_argument("project", help="Project of defects4j (Chart, Math, etc)")
 	parser.add_argument("bugNum", help="Bug number from defects4j")
 	parser.add_argument("variant1Loc", help="Location of variant 1")
@@ -374,8 +388,9 @@ def createFolderForVariant(var, project, bugNum, variantLoc):
 	checkout("/tmp/"+str(var)+"/", str(project), str(bugNum), "f")
 	patch = PatchInfo(project, bugNum, "/tmp/"+str(var))
 	patch.setScrPath()
-	print("cp "+variantLoc+"/"+str(patch.getSrcPath())+"/"+str(patch.getModifClassPath()))
-	p = subprocess.call("cp "+variantLoc+"/"+str(patch.getSrcPath())+"/"+str(patch.getModifClassPath()) + " /tmp/"+str(var)+"/"+str(patch.getSrcPath())+"/"+str(patch.getModifClassPath()), shell=True)
+	cmd = "cp "+variantLoc+"/"+str(patch.getModifClassPath())+"/"+str(patch.getModifClass()) + " /tmp/"+str(var)+"/"+str(patch.getSrcPath())+"/"+str(patch.getModifClassPath())
+	print(cmd + " ")
+	p = subprocess.call(cmd, shell=True)
 	patch.compile()
 	return patch
 	
@@ -396,7 +411,8 @@ def main():
 	try:
 		crossEvaluate(args)
 	except:
-		writeToFile(str(variant1.getPatch())+","+str(variant2.getPatch())+",Error,Error", summarizedFile)
+		print("CrossEvaluate Failed to execute properly!!")
+		#writeToFile(str(variant1.getPatch())+","+str(variant2.getPatch())+",Error,Error", summarizedFile)
 
 
 main()
