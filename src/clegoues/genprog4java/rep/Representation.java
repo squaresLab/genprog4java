@@ -129,6 +129,9 @@ Comparable<Representation<G>> {
 	public abstract double getDiversityScore();
 
 	public abstract double getCorrectnessScore();
+	
+	public abstract double getNumberOfPassedTestCasesTotal();
+
 
 	public abstract boolean compile(String sourceName, String exeName);
 
@@ -162,6 +165,10 @@ Comparable<Representation<G>> {
 	public abstract void setDiversityScore(double div);
 		
 	public abstract void setCorrectnessScore(double cor);
+	
+	public abstract void setNumberOfPassedTestCasesTotal(double n);
+	
+	
 
 	@Override
 	public int compareTo(Representation<G> o) {

@@ -439,6 +439,7 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 		}
 	}
 	
+	
 	private ArrayList<Representation<G>> multiObjectiveSelection(int desired) {
 		assert(desired >= 0);
 		assert(population.size() >= 0);
@@ -455,22 +456,60 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 				population.add(toInsert);
 			}
 		}
-		/*for(int i = 0 ; i < desired; i++) {
-			result.add(selectBasedOnMultiObjective());
-		}*/
+		for(int i = 0; i< population.size(); ++i) {
+			Representation<G> indiv = population.get(i);
+			createFoldersAndTS(indiv);
+		}
+		//for(int i = 0 ; i < desired; i++) {
+		//	result.add(getMostDiverse());
+		//}
 		result.addAll(selectBasedOnMultiObjective(desired));
+		//System.out.println("The desired number of variants is "+ desired+ " but we only have "+ result.size()+ " in result set");
 		
 		return result; 
 	}
 	
+	private void createFoldersAndTS(Representation<G> indiv){
+		Runtime rt = Runtime.getRuntime();
+		String varLoc = getVarLoc();
+		String command = "python /home/mausoto/diversityProject/DiversityGenProg/genprog4java/src/clegoues/genprog4java/fitness/createFoldersAndTS.py "; 
+		command += d4jProject() + " ";
+		command += d4jBugNum() + " ";
+		command += Configuration.seed + " ";
+		command += varLoc + "tmp/" + indiv.getVariantFolder()+"/ "; 
+		command += "/home/mausoto/defects4jJava8/defects4j/framework/lib/test_generation/generation/evosuite-1.0.6.jar ";
+		command += "/home/mausoto/diversityProject/DiversityGenProg/testSuitesForDiversityScore/";
+		System.out.println(command);
+		String p = GlobalUtils.getOutputFromCommand(command);
+		System.out.println(p);
+	}
+	
+	
+	
+	
 	private ArrayList<Representation<G>> selectBasedOnMultiObjective(int desired) {
 		//Collections.shuffle(population);
 		//List<Representation<G>> pool = population;
+		//System.out.println("1population has "+ population.size()+ " elements");
 		assert(correctnessContribution < 1);
 		assert(diversityContribution < 1);
+		//set diversity score and fitness
 		for(Representation<G> indiv : population) {
-			//TODO: MAKE THIS FITNESS WORK
-			double fitness =  (correctnessContribution * correctnessScore(indiv)) + (diversityContribution * diversityScore(indiv));
+			//System.out.println("Population Name:"+indiv.getName()+ " fitness:"+ indiv.getFitness() + " divScore:"+ indiv.getDiversityScore() + " corrScore:" + indiv.getCorrectnessScore());
+			
+			//double cS = correctnessScore(indiv);
+			double cS = indiv.getCorrectnessScore();
+			double dS = diversityScore(indiv);
+			//indiv.setCorrectnessScore(cS);
+			indiv.setDiversityScore(dS);
+			double fitness =  (correctnessContribution * cS) + (diversityContribution * dS);
+			
+			//System.out.println("correctnessContribution is: "+ correctnessContribution);
+			//System.out.println("diversityContribution is: "+ diversityContribution);
+			//System.out.println("cS is: "+ cS);
+			//System.out.println("dS is: "+ dS);
+			System.out.println("fitness is: "+ fitness);
+			
 			indiv.setFitness(fitness);
 		}
 		Comparator<Representation<G>> myComp = new Comparator<Representation<G>>() {
@@ -479,63 +518,78 @@ public class Population<G extends EditOperation> implements Iterable<Representat
 				return new Double(two.getFitness()).compareTo(new Double(one.getFitness()));
 			}
 		}; // we sort in descending order by fitness
-		TreeSet<Representation<G>> sorted = new TreeSet<Representation<G>>(myComp);
-		sorted.addAll(population);
+		List<Representation<G>> pool = population.subList(0, population.size());
+		Collections.sort(pool,myComp);
 		
+		System.out.println("Pool after sorting");
+		for(Representation<G> indiv : pool) {
+			System.out.println("Pool Name:"+indiv.getName()+ " fitness:"+ indiv.getFitness() + " divScore:"+ indiv.getDiversityScore() + " corrScore:" + indiv.getCorrectnessScore());
+		}
+
 		ArrayList<Representation<G>> toReturn = new ArrayList<Representation<G>>();
-		for(Representation<G> indiv : sorted) {
+		for(Representation<G> indiv : pool) {
 			if(toReturn.size() < desired){
 				toReturn.add(indiv.copy());
 			}
 		}
+		
 		//return population.get(0).copy(); // FIXME: this should never happen, right?
+		//System.out.println("toReturn has "+toReturn.size()+" elements before returning");
 		return toReturn;
 	}
 	
-	private double correctnessScore(Representation<G> indiv){
+	/*private double correctnessScore(Representation<G> indiv){
 		//If fitness here is calculated as number of passed test cases, then we are all good here. 
-		return indiv.getFitness();
-	}
+		System.out.println("Fitness.numPositiveTests:"+Fitness.numPositiveTests);
+		System.out.println("Fitness.numNegativeTests:"+Fitness.numNegativeTests);
+		System.out.println("Fitness.sample:"+Fitness.sample);
+		System.out.println("indiv.getFitness():"+indiv.getFitness());
+		return indiv.getFitness() / Math.round(Fitness.sample * Fitness.numPositiveTests);
+		return indiv.
+	}*/
 	
-	private int diversityScore(Representation<G> variant){
-		int overallScore = 0;
+	private double diversityScore(Representation<G> variant){
+		double overallScore = 0;
 		for(Representation<G> indiv : population) {
-			overallScore += indivDiversityScore(indiv, variant);
+			if (indiv != variant){
+				
+				overallScore += (indivDiversityScore(indiv, variant) / population.size());
+			}
 		}
+		System.out.println("Overall diversity score of variant "+ variant.getName() + ": "+overallScore);
 		return overallScore;
 	}
 	
 	//How many tests behave differently between representations
-	private int indivDiversityScore(Representation<G> indiv, Representation<G> variant){
+	private double indivDiversityScore(Representation<G> indiv, Representation<G> variant){
 		
 		Runtime rt = Runtime.getRuntime();
 		String varLoc = getVarLoc();
 		String command = "python /home/mausoto/diversityProject/DiversityGenProg/genprog4java/src/clegoues/genprog4java/fitness/diversityScores.py "; 
 		command += d4jProject() + " ";
 		command += d4jBugNum() + " ";
+		command += Configuration.seed + " ";
 		command += varLoc + "tmp/" + indiv.getVariantFolder()+"/ "; 
 		command += varLoc + "tmp/" + variant.getVariantFolder()+"/ ";
 		command += "/home/mausoto/defects4jJava8/defects4j/framework/lib/test_generation/generation/evosuite-1.0.6.jar ";
 		command += "/home/mausoto/diversityProject/DiversityGenProg/testSuitesForDiversityScore/";
 		System.out.println("Executed python script to obtain diversity score: "+command);
 		
-		System.out.println("Command executed here");
+		//System.out.println("Command executed here");
 		//Process pr = rt.exec(command); 
 		String p = GlobalUtils.getOutputFromCommand(command);
 		System.out.println(p);
-		int pythonScriptResult = 0;
-		//TEST IF THIS IS WORKING!!!!!!!!!!1
-		System.out.println("Here it is going to check if 'diversityScore' is in the string");
+		double pythonScriptResult = 0;
+		//System.out.println("Here it is going to check if 'diversityScore' is in the string");
 		if(p.contains("diversityScore")){
-			System.out.println("'diversityScore' was in the string: ");
-			System.out.println(p);
+			//System.out.println("'diversityScore' was in the string: ");
+			//System.out.println(p);
 			String dsString = p.substring(p.indexOf("diversityScore:")+15, p.length());
-			System.out.println("!!!!!!!!!!!!!!!!!!!the int is just: "+ dsString);
-			int ds = Integer.parseInt(dsString);
-			pythonScriptResult = ds;
+			dsString = dsString.substring(0,dsString.indexOf("\n"));
+			//System.out.println("!!!!!!!!!!!!!!!!!!!the int is just: "+ dsString);
+			pythonScriptResult = Double.parseDouble(dsString);
 		}else{
-			System.out.println("diversityScore was not in the string: "+ p + " End of string. \n");
-			
+			System.err.println("diversityScore was not in the string");//+ p + " End of string. \n");
 		}
 
 		return pythonScriptResult;

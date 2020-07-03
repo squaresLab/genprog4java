@@ -253,7 +253,11 @@ public class DefaultLocalization extends Localization {
 		default:
 			executionData = null;
 			negativePath = getPathInfo(DefaultLocalization.negCoverageFile, Fitness.negativeTests, false);
+			
 		}
+		//for(Integer n : negativePath){
+		//	System.out.println("Negative path statement:"+n);
+		//}
 		switch(faultLocStrategy.trim()) { // FIXME: push this to a subclass.
 		case "humanInjected":
 		case "standardPathFile":

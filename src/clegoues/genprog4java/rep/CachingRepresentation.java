@@ -84,6 +84,7 @@ Representation<G>  {
 	private double fitness = -1.0;
 	private double diversityScore = -1.0;
 	private double correctnessScore = -1.0;
+	private double numberOfPassedTestCasesTotal = -1.0;
 
 	public ArrayList<Pair<ClassInfo, String>> alreadySourceBuffers = null;
 
@@ -116,6 +117,16 @@ Representation<G>  {
 	@Override
 	public double getCorrectnessScore() {
 		return this.correctnessScore;
+	}
+	
+	@Override
+	public double getNumberOfPassedTestCasesTotal() {
+		return this.numberOfPassedTestCasesTotal;
+	}
+	
+	@Override
+	public void setNumberOfPassedTestCasesTotal(double n) {
+		this.numberOfPassedTestCasesTotal = n;
 	}
 
 	private Pair<Boolean, String> alreadyCompiled = null;

@@ -616,12 +616,14 @@ public class Fitness {
 				
 		double maxFitness = Fitness.numPositiveTests
 				+ ((Fitness.numNegativeTests * fac));
-		double curFit = rep.getFitness();
+
+		//double curFit = rep.getFitness();
+		double curFit = rep.getNumberOfPassedTestCasesTotal();
 		if (curFit > -1.0) {
 			logger.info("\t gen: " + generation + " " + curFit + " " + rep.getName() + " (stored at: " + rep.getVariantFolder() + ")");
 			return !(curFit < maxFitness);
 		}
-		Pair<Double, Double> fitnessPair =  Pair.of(-1.0, -1.0);
+		Pair<Double, Double> fitnessPair =  Pair.of(0.0, 0.0);
 		if (Fitness.sample < 1.0) {
 			if (((Fitness.sampleStrategy == "generation") && (Fitness.generation != generation)) ||
 					(Fitness.sampleStrategy == "variant")) {
@@ -633,7 +635,13 @@ public class Fitness {
 			fitnessPair = this.testFitnessFull(rep, fac);
 		}
 		logger.info("\t gen: " + generation + " " + fitnessPair.getLeft() + " " + rep.getName()+ " (stored at: " + rep.getVariantFolder() + ")");
-		rep.setFitness(fitnessPair.getRight());
+		//rep.setFitness(fitnessPair.getRight());
+		rep.setNumberOfPassedTestCasesTotal(fitnessPair.getRight());
+		double correctnessScore = fitnessPair.getRight()/(Math.round(Fitness.sample * Fitness.numPositiveTests));		
+		rep.setCorrectnessScore(correctnessScore);
+		//System.out.println("fitnessPair.getRight():"+fitnessPair.getRight());
+		//System.out.println("(Fitness.sample * Fitness.numPositiveTests):"+Math.round(Fitness.sample * Fitness.numPositiveTests));
+		//System.out.println("correctnessScore:"+correctnessScore);
 		rep.cleanup();
 		return !(fitnessPair.getLeft() < maxFitness);
 

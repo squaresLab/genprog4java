@@ -147,14 +147,14 @@ public class GlobalUtils {
 			//System.out.println("Here is the standard output of the command:\n");
 				
 			while ((s = stdInput.readLine()) != null) {
-				System.out.println("Output:"+s);
+				//System.out.println("Output:"+s);
 				toReturn.append(s+"\n");
 			}
 
 			// Read any errors from the attempted command
 			//System.out.println("Here is the standard error of the command (if any):\n");
 			while ((s = stdError.readLine()) != null) {
-				System.out.println("Error:"+s);
+				//System.out.println("Error:"+s);
 			}
 		}catch (IOException e){
 			System.err.println(e);
