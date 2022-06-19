@@ -1,21 +1,20 @@
 package clegoues.genprog4java.java;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
+import clegoues.genprog4java.mut.holes.java.JavaLocation;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import clegoues.genprog4java.mut.holes.java.JavaLocation;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class JavaSourceInfo {
 
 	private static HashMap<ClassInfo, String> originalSource = new HashMap<ClassInfo, String>();
 	private static HashMap<Integer, JavaStatement> codeBank = new HashMap<Integer, JavaStatement>();
-	private static  HashMap<Integer, JavaStatement> base = new HashMap<Integer, JavaStatement>();
+	private static HashMap<Integer, JavaStatement> base = new HashMap<Integer, JavaStatement>();
 	private static HashMap<ClassInfo, CompilationUnit> baseCompilationUnits = new HashMap<ClassInfo, CompilationUnit>();
 	
-	private static HashMap<Integer, ArrayList<Integer>> lineNoToAtomIDMap = new HashMap<Integer, ArrayList<Integer>>();
+	private static HashMap<ClassInfo, HashMap<Integer, ArrayList<Integer>>> lineNoToAtomIDMap = new HashMap<>();
 	private static HashMap<Integer, ClassInfo> stmtToFile = new HashMap<Integer, ClassInfo>();
 	
 	private static HashMap<Integer,JavaLocation> locationInformation = new HashMap<Integer,JavaLocation>();
@@ -58,19 +57,24 @@ public class JavaSourceInfo {
 	}
 	
 	
-	public ArrayList<Integer> atomIDofSourceLine(int lineno) {
-		return lineNoToAtomIDMap.get(lineno);
+	public ArrayList<Integer> atomIDofSourceLine(ClassInfo cls, int lineno) {
+		return lineNoToAtomIDMap.get(cls).get(lineno);
 	}
-	public void augmentLineInfo(int stmtId, ASTNode node) {
+	public void augmentLineInfo(ClassInfo cls, int atomId, ASTNode node) {
+		HashMap<Integer, ArrayList<Integer>> clsMap = lineNoToAtomIDMap.get(cls);
+		if (clsMap == null) {
+			clsMap = new HashMap<>();
+			lineNoToAtomIDMap.put(cls, clsMap);
+		}
 		int lineNo = ASTUtils.getLineNumber(node);
 		ArrayList<Integer> lineNoList = null;
-		if (lineNoToAtomIDMap.containsKey(lineNo)) {
-			lineNoList = lineNoToAtomIDMap.get(lineNo);
+		if (clsMap.containsKey(lineNo)) {
+			lineNoList = clsMap.get(lineNo);
 		} else {
 			lineNoList = new ArrayList<Integer>();
 		}
-		lineNoList.add(stmtId);
-		lineNoToAtomIDMap.put(lineNo, lineNoList);		
+		lineNoList.add(atomId);
+		clsMap.put(lineNo, lineNoList);
 	}
 	
 	public void storeStmtInfo(JavaStatement s, ClassInfo pair) {
