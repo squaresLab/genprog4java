@@ -31,9 +31,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package clegoues.genprog4java.Search;
+package clegoues.genprog4java.search;
 
-// oneday FIXME: lowercase the package name because it annoys me...
 import static clegoues.util.ConfigurationBuilder.BOOLEAN;
 import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.INT;
@@ -42,13 +41,8 @@ import static clegoues.util.ConfigurationBuilder.STRING;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
@@ -57,7 +51,6 @@ import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.localization.Localization;
 import clegoues.genprog4java.localization.Location;
 import clegoues.genprog4java.main.Configuration;
-import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.EditOperation;
 import clegoues.genprog4java.mut.Mutation;
 import clegoues.genprog4java.mut.WeightedHole;
@@ -263,41 +256,51 @@ public abstract class Search<G extends EditOperation> {
 
 		ArrayList<Location> faultyAtoms = localization.getFaultLocalization();
 		
-		ArrayList<Location> proMutList = new ArrayList<Location>();
 		boolean foundMutationThatCanApplyToAtom = false;
 		boolean alreadySetAllStmtsToFixLoc = false;
 		while(!foundMutationThatCanApplyToAtom){
+			ArrayList<Location> proMutList = new ArrayList<Location>();
 			//promut default is 1 // promut stands for proportional mutation rate, which controls the probability that a genome is mutated in the mutation step in terms of the number of genes within it should be modified.
 			for (int i = 0; i < Search.promut; i++) {
 				//chooses a random location
-				Pair<?, Double> wa = null;
-				boolean alreadyOnList = false;
+				Location wa = null;
+				boolean foundUsableLoc = false;
+
 				//If it already picked all the fix atoms from current FixLocalization, then start picking from the ones that remain
 				if(proMutList.size()>=faultyAtoms.size()){ 
 					localization.setAllPossibleStmtsToFixLocalization();				
 					alreadySetAllStmtsToFixLoc = true;
+					faultyAtoms = localization.getFaultLocalization();
 				}
-				//only adds the random atom if it is different from the others already added
-				do {
+
+				//only adds the random atom if it is different from the others already added & it has available mutations
+				while(!foundUsableLoc) {
 					//chooses a random faulty atom from the subset of faulty atoms
-					wa = localization.getRandomLocation(Configuration.randomizer.nextDouble());
-					// insert a check to see if this location has any valid mutations?  If not, look again
-					// if not, somehow tell the variant to remove that location from the list of faulty atoms
-					alreadyOnList = proMutList.contains(wa);
-				} while(alreadyOnList);
-				proMutList.add((Location)wa);
+					wa = (Location) GlobalUtils.chooseOneWeighted(new ArrayList(faultyAtoms), Configuration.randomizer.nextDouble());
+
+					if (wa == null) {
+						// unable to find another mutation
+						if (alreadySetAllStmtsToFixLoc && proMutList.isEmpty()) {
+							// if we've completely exhausted the statements and found nothing
+							throw new GiveUpException();
+						} else {
+							// continue with for loop or continue on to trying the mutations already in proMutList
+							break;
+						}
+					} else if (!variant.hasAvailableMutations(wa)) {
+						faultyAtoms.remove(wa);
+					} else {
+						foundUsableLoc = !proMutList.contains(wa);
+					}
+				}
+				proMutList.add(wa);
+				foundMutationThatCanApplyToAtom = true;
 			}
+
 			for (Location location : proMutList) {
 				//the available mutations for this stmt
 				List<WeightedMutation> availableMutations = variant.availableMutations(location);
-				if(availableMutations.isEmpty()){
-					if(alreadySetAllStmtsToFixLoc && proMutList.size()>=faultyAtoms.size() && location==proMutList.get(proMutList.size())){
-						throw new GiveUpException();
-					}
-					continue; 
-				}else{
-					foundMutationThatCanApplyToAtom = true;
-				}
+
 				//choose a mutation 
 				List availableMutationsAL = rescaleMutations(availableMutations);
 				Pair<Mutation, Double> chosenMutation = (Pair<Mutation, Double>) GlobalUtils.chooseOneWeighted(availableMutationsAL);
@@ -309,7 +312,6 @@ public abstract class Search<G extends EditOperation> {
 						.chooseOneWeighted(new ArrayList(allowed));
 				variant.performEdit(mut, location, selected.getHole());
 				}
-
 			}
 		}
 	}

@@ -42,50 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jdt.core.dom.ASTMatcher;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ArrayAccess;
-import org.eclipse.jdt.core.dom.ArrayType;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CastExpression;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.ConditionalExpression;
-import org.eclipse.jdt.core.dom.DoStatement;
-import org.eclipse.jdt.core.dom.EnhancedForStatement;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.NullLiteral;
-import org.eclipse.jdt.core.dom.NumberLiteral;
-import org.eclipse.jdt.core.dom.ParameterizedType;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.QualifiedType;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.SuperFieldAccess;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.SwitchStatement;
-import org.eclipse.jdt.core.dom.ThisExpression;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.UnionType;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.core.dom.WhileStatement;
-import org.eclipse.jdt.core.dom.WildcardType;
+import org.eclipse.jdt.core.dom.*;
 
 import clegoues.genprog4java.rep.JavaRepresentation;
 
@@ -97,17 +54,15 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	private int stmtId; // unique
 	private Set<String> mustBeInScope;
 	private Set<String> namesDeclared;
+	private boolean isLastStatementInControlFlow;
+
+	public JavaStatement(int stmtCounter, ASTNode node) {
+		this.setStmtId(stmtCounter);
+		this.setASTNode(node);
+	}
 
 	public void setClassInfo(ClassInfo ci) {
 		this.classInfo = ci;
-	}
-
-	public Set<String> getNamesDeclared() {
-		return this.namesDeclared;
-	}
-
-	public void setNamesDeclared(Set<String> names) {
-		this.namesDeclared = names;
 	}
 
 	public ClassInfo getClassInfo() {
@@ -130,12 +85,28 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		this.astNode = node;
 	}
 
+	public Set<String> getNamesDeclared() {
+		return this.namesDeclared;
+	}
+
+	public void setNamesDeclared(Set<String> names) {
+		this.namesDeclared = names;
+	}
+
 	public Set<String> getRequiredNames() {
 		return mustBeInScope;
 	}
 
 	public void setRequiredNames(Set<String> scopes) {
 		this.mustBeInScope = scopes;
+	}
+
+	public void setIsLastStatementInControlFlow(boolean isLast) {
+		this.isLastStatementInControlFlow = isLast;
+	}
+
+	public boolean isLastStatementInControlFlow() {
+		return isLastStatementInControlFlow;
 	}
 
 	public String toString() {
@@ -146,6 +117,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	}
 
 	// method to get the statemetn parent of an ASTnode. We traverse the ast upwards until the parent node is an instance of statement
+
 	private ASTNode getParent(ASTNode node) {
 		ASTNode parent = node.getParent();
 		while(!(parent instanceof Statement)){
@@ -174,12 +146,12 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						if(!arrayAccesses.containsKey(parent)){
 							List<ASTNode> arraynodes = new ArrayList<ASTNode>();
 							arraynodes.add(node);
-							arrayAccesses.put(parent, arraynodes);		
+							arrayAccesses.put(parent, arraynodes);
 						}else{
 							List<ASTNode> arraynodes = (List<ASTNode>) arrayAccesses.get(parent);
 							if(!arraynodes.contains(node))
 								arraynodes.add(node);
-							arrayAccesses.put(parent, arraynodes);	
+							arrayAccesses.put(parent, arraynodes);
 						}
 					}
 					return true;
@@ -223,7 +195,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				}
 
 				private boolean isNullCheckable(ASTNode node) {
-					if(node == null) 
+					if(node == null)
 						return false;
 					if(node instanceof SimpleName) {
 						SimpleName asSimpleName = (SimpleName) node;
@@ -233,7 +205,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 					return node instanceof ArrayAccess || node instanceof CastExpression || node instanceof ClassInstanceCreation ||
 							node instanceof SuperMethodInvocation || node instanceof  ParenthesizedExpression ||
-							node instanceof SuperFieldAccess || node instanceof SuperMethodInvocation 
+							node instanceof SuperFieldAccess || node instanceof SuperMethodInvocation
 							;
 					/* maybe: ArrayCreation */
 				}
@@ -271,7 +243,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		this.getASTNode().accept(new ASTVisitor() {
 
 			public boolean visit(CastExpression node) {
-				ASTNode parent = getParent(node); 
+				ASTNode parent = getParent(node);
 				List<ASTNode> thisParentsCasts;
 				if(casts.containsKey(parent)) {
 					thisParentsCasts = casts.get(parent);
@@ -343,7 +315,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				this.getASTNode().accept(new ASTVisitor() {
 
 					public boolean visit(IfStatement node) {
-						handleCondition(node.getExpression());				
+						handleCondition(node.getExpression());
 						return true;
 					}
 
@@ -397,7 +369,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				private void handleCandidateReplacements(List<Expression> args) {
 					for(Expression arg : args) {
 						ITypeBinding paramType = arg.resolveTypeBinding();
-						if(paramType != null) { 
+						if(paramType != null) {
 							String typName = paramType.getName();
 							List<Expression> replacements = JavaSemanticInfo.getMethodParamReplacementExpressions(methodName, md, typName);
 							String argAsString = arg.toString();
@@ -435,7 +407,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 				}
 
 				@SuppressWarnings("unchecked")
-				public boolean visit(MethodInvocation node) {		
+				public boolean visit(MethodInvocation node) {
 					List<Expression> args = node.arguments();
 					handleCandidateReplacements(args);
 					return true;
@@ -448,7 +420,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	}
 
 
-	// FIXME: if the fix set is expanded, clear any of these caches?? 
+	// FIXME: if the fix set is expanded, clear any of these caches??
 
 	private boolean paramTypesMatch(ArrayList<ITypeBinding> firstList, ArrayList<ITypeBinding> secondList) {
 		for(int i = 0; i < firstList.size(); i++) {
@@ -466,7 +438,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 	}
 
 	private boolean compatibleMethodMatch(IMethodBinding method1, IMethodBinding method2, boolean checkShrinkable) {
-		if(method2.equals(method1) || (checkShrinkable && !method2.getName().equals(method1.getName()))) 
+		if(method2.equals(method1) || (checkShrinkable && !method2.getName().equals(method1.getName())))
 			return false;
 
 		ITypeBinding returnType1 = method1.getReturnType();
@@ -474,8 +446,8 @@ public class JavaStatement implements Comparable<JavaStatement>{
 		if(!returnType1.isAssignmentCompatible(returnType2))
 			return false;
 
-		ArrayList<ITypeBinding> paramTypes1 = getParamTypes(method1); 
-		ArrayList<ITypeBinding> paramTypes2 = getParamTypes(method2); 
+		ArrayList<ITypeBinding> paramTypes1 = getParamTypes(method1);
+		ArrayList<ITypeBinding> paramTypes2 = getParamTypes(method2);
 		if(checkShrinkable && (paramTypes2.size() < paramTypes1.size()) ||
 				(!checkShrinkable && (paramTypes2.size() == paramTypes1.size() )))
 		{
@@ -585,7 +557,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 
 			});
 		}
-		return extendableParameterMethods;	
+		return extendableParameterMethods;
 	}
 
 	private List<ASTNode> indexedCollectionObjects = null;
@@ -604,7 +576,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					case "subList":
 						break;
 					case "add":
-					case "addAll": 
+					case "addAll":
 						if(node.arguments().size() > 1) {
 							break;
 						}
@@ -618,10 +590,10 @@ public class JavaStatement implements Comparable<JavaStatement>{
 					}
 
 					ITypeBinding methodCallTypeBinding = methodCall.resolveTypeBinding();
-					if(methodCallTypeBinding == null) 
+					if(methodCallTypeBinding == null)
 						return true;
 					ITypeBinding td = methodCallTypeBinding.getTypeDeclaration();
-					if(td == null) 
+					if(td == null)
 						return true;
 					String name = td.getName();
 					ITypeBinding decl = methodCallTypeBinding.getTypeDeclaration();
@@ -629,7 +601,7 @@ public class JavaStatement implements Comparable<JavaStatement>{
 						decl = decl.getSuperclass().getTypeDeclaration();
 						name = decl.getName();
 					}
-					if(!name.equals("AbstractList")) { 
+					if(!name.equals("AbstractList")) {
 						return true;
 					}
 					indexedCollectionObjects.add(node);
@@ -659,7 +631,7 @@ loop for all method invocation in C
  insert a conditional expression that checks whether the index parameter is smaller than the size of its collection object
  }
 }
-concatenate conditions using AND 
+concatenate conditions using AND
 
 if B include return statement
 {
@@ -828,15 +800,6 @@ if B include return statement
 		return candidateMethodReplacements;
 	}
 
-
-	public ASTNode blockThatContainsThisStatement(){
-		ASTNode parent = this.getASTNode().getParent();
-		while(parent != null && !(parent instanceof Block)){
-			parent = parent.getParent();
-		}
-		return parent;
-	}
-
 	private static int howManyReturns = 0;
 
 	public static boolean hasMoreThanOneReturn(MethodDeclaration method){
@@ -854,8 +817,8 @@ if B include return statement
 	public boolean canBeDeleted() {
 		ASTNode faultyNode = this.getASTNode();
 		ASTNode parent = faultyNode.getParent();
-		//Heuristic: Don't remove returns from functions that have only one return statement.
-		if(faultyNode instanceof ReturnStatement){
+		// Heuristic: Don't remove returns from functions that have only one return statement.
+		if (faultyNode instanceof ReturnStatement){
 			parent = ASTUtils.getEnclosingMethod(this.getASTNode());
 			if(parent != null && parent instanceof MethodDeclaration) {
 				if(!hasMoreThanOneReturn((MethodDeclaration)parent))
@@ -863,10 +826,14 @@ if B include return statement
 			}
 		}
 
+		// Heuristic: don't remove variable declarations, other things need that
+		if (ASTUtils.isVariableDeclaration(faultyNode)) {
+			return false;
+		}
+
 		return true;
 	}
 
-	
 	private List<Expression> casteeExpressions = null;
 	public  List<Expression> getCasteeExpressions(){
 		if(casteeExpressions == null) {
@@ -932,7 +899,7 @@ if B include return statement
 
 		return toReplaceCasteeExpressions;
 	}
-	
+
 	private List<Type> casterTypes = null;
 	public  List<Type> getCasterTypes(){
 		if(casterTypes == null) {
@@ -959,6 +926,7 @@ if B include return statement
 	}
 
 	private List<ASTNode> toReplaceCasterTypes = null;
+
 	public  List<ASTNode> getTypesToReplaceCaster(){
 		if(toReplaceCasterTypes == null) {
 			toReplaceCasterTypes = new LinkedList<ASTNode>();
@@ -1022,12 +990,12 @@ if B include return statement
 			});
 		}
 
-		return toReplaceCasterTypes; 
+		return toReplaceCasterTypes;
 	}
 
 	public boolean isLikelyAConstructor() {
 		ASTNode enclosingMethod = ASTUtils.getEnclosingMethod(this.getASTNode());
-		return (enclosingMethod != null) && (enclosingMethod instanceof MethodDeclaration) && 
+		return (enclosingMethod != null) && (enclosingMethod instanceof MethodDeclaration) &&
 				((MethodDeclaration) enclosingMethod).isConstructor();
 	}
 
@@ -1037,7 +1005,7 @@ if B include return statement
 			MethodDeclaration asMd = (MethodDeclaration) enclosingMethod;
 			Type returnType = asMd.getReturnType2();
 			if(returnType != null) {
-				String asStr = returnType.toString(); 
+				String asStr = returnType.toString();
 				return asStr.equalsIgnoreCase("void") || asStr.equalsIgnoreCase("null");
 			} else {
 				return true;
@@ -1048,30 +1016,12 @@ if B include return statement
 
 	public boolean isWithinLoopOrCase() {
 		ASTNode buggyNode = this.getASTNode();
-		if(buggyNode instanceof SwitchStatement 
-				|| buggyNode instanceof ForStatement 
-				|| buggyNode instanceof WhileStatement
-				|| buggyNode instanceof DoStatement
-				|| buggyNode instanceof EnhancedForStatement)
-			return true;
 
-		while(buggyNode.getParent() != null){
-			buggyNode = buggyNode.getParent();
-			if(buggyNode instanceof SwitchStatement 
-					|| buggyNode instanceof ForStatement 
-					|| buggyNode instanceof WhileStatement
-					|| buggyNode instanceof DoStatement
-					|| buggyNode instanceof EnhancedForStatement)
-				return true;
-		}
-		return false;
+		// less efficient implementation than before but ....
+		return ASTUtils.getEnclosing(SwitchStatement.class, buggyNode) != null
+				|| ASTUtils.getEnclosing(ForStatement.class, buggyNode) != null
+				|| ASTUtils.getEnclosing(WhileStatement.class, buggyNode) != null
+				|| ASTUtils.getEnclosing(DoStatement.class, buggyNode) != null
+				|| ASTUtils.getEnclosing(EnhancedForStatement.class, buggyNode) != null;
 	}
-
-	public void setInfo(int stmtCounter, ASTNode node) {
-		this.setStmtId(stmtCounter);
-		this.setASTNode(node);
-	}
-
-
-
 }

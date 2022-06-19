@@ -6,8 +6,6 @@ import static clegoues.util.ConfigurationBuilder.DOUBLE;
 import static clegoues.util.ConfigurationBuilder.STRING;
 
 import org.apache.log4j.Logger;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.MethodRef;
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
 import org.jacoco.core.analysis.IClassCoverage;
@@ -37,12 +35,11 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Iterator;
 
-import clegoues.genprog4java.Search.GiveUpException;
-import clegoues.genprog4java.Search.Search;
+import clegoues.genprog4java.search.GiveUpException;
+import clegoues.genprog4java.search.Search;
 import clegoues.genprog4java.fitness.Fitness;
 import clegoues.genprog4java.fitness.TestCase;
 import clegoues.genprog4java.java.ClassInfo;
-import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.main.Configuration;
 import clegoues.genprog4java.mut.WeightedMutation;
 import clegoues.genprog4java.rep.JavaRepresentation;
@@ -147,8 +144,8 @@ public class DefaultLocalization extends Localization {
 		this.original = orig;
 		this.computeLocalization();
 
-		if(justTestingFaultLoc == true){
-			logger.info("Fault localization was peprformed successfully");
+		if(justTestingFaultLoc){
+			logger.info("Fault localization was performed successfully");
 			System.exit(0);
 		}
 	}

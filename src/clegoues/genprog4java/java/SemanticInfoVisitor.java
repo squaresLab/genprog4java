@@ -40,29 +40,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
 
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.EnhancedForStatement;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.SuperFieldAccess;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.*;
 
 import clegoues.genprog4java.rep.JavaRepresentation;
 
@@ -70,6 +48,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	private List<ASTNode> nodeSet;
 	private ScopeInfo scopes;
+	private CFBlockInfo cfBlockInfo;
 
 	private boolean containsFinalVar = false;
 	private Stack<Boolean> finalVarStack = new Stack<Boolean>();
@@ -91,10 +70,10 @@ public class SemanticInfoVisitor extends ASTVisitor {
 	private Stack<HashSet<String>> loopScopeStack = new Stack<HashSet<String>>();
 
 	// declared or imported; primitive types are always available;
-	private HashSet<String> availableTypes; 
+	private HashSet<String> availableTypes;
 	// it might make sense to store these separately, but for now, this will do
 	// upon reflection, it makes more sense to do add these after the whole thing has been parsed
-	private HashSet<String> availableMethodsAndFields; 
+	private HashSet<String> availableMethodsAndFields;
 
 	private HashSet<String> namesDeclared = new HashSet<String>();
 	private Stack<HashSet<String>> namesDeclaredStack = new Stack<HashSet<String>>();
@@ -122,7 +101,7 @@ public class SemanticInfoVisitor extends ASTVisitor {
 		finalVarStack.push(containsFinalVar);
 		containsFinalVar = false;
 
-		if (JavaRepresentation.canRepair(node)) 
+		if (JavaRepresentation.canRepair(node))
 		{
 			// add scope information
 			TreeSet<String> newScope = new TreeSet<String>();
@@ -133,9 +112,11 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			this.scopes.addToClassScope(this.availableMethodsAndFields);
 			this.nodeSet.add(node);
 
+			// only register nodes we will later keep track of.
+			this.cfBlockInfo.registerNode(node);
 		}
 
-		if(node instanceof EnhancedForStatement || 
+		if(node instanceof EnhancedForStatement ||
 				node instanceof ForStatement) {
 			loopScopeStack.push(currentLoopScope);
 			currentLoopScope = new HashSet<String>(currentLoopScope);
@@ -146,17 +127,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			currentMethodScope = new HashSet<String>(currentMethodScope);
 		}
 
-		//		if(node instanceof EnhancedForStatement ||
-		//				node instanceof ForStatement ||
-		//				node instanceof DoStatement || 
-		//				node instanceof IfStatement ||
-		//				node instanceof SwitchStatement ||
-		//				node instanceof TryStatement ||
-		//				    node instanceof WhileStatement) {
-		//			
-		//		}
-		//				   
-		//				 
+
+
 		this.namesDeclaredStack.push(namesDeclared);
 		namesDeclared = new HashSet<String>();
 		super.preVisit(node);
@@ -190,6 +162,8 @@ public class SemanticInfoVisitor extends ASTVisitor {
 			this.scopes.addRequiredNames(node,new HashSet<String>(this.requiredNames));
 			this.scopes.setContainsFinalVarDecl(node, containsFinalVar);
 			this.scopes.setNamesDeclared(node, new HashSet<String>(this.namesDeclared));
+
+			this.cfBlockInfo.endOfNode(node);
 		}
 
 		if (node instanceof Block) {
@@ -410,6 +384,10 @@ public class SemanticInfoVisitor extends ASTVisitor {
 
 	public void setScopeList(ScopeInfo scopeList) {
 		this.scopes = scopeList;
+	}
+
+	public void setCFBlockInfo(CFBlockInfo cfBlockInfo) {
+		this.cfBlockInfo = cfBlockInfo;
 	}
 
 	//	@Override
