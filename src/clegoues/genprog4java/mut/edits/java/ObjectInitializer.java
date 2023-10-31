@@ -65,7 +65,7 @@ public class ObjectInitializer extends JavaEditOperation {
 					SimpleName asExp = (SimpleName) arg;
 					ITypeBinding binding = asExp.resolveTypeBinding();
 
-					if(binding.isClass()) {
+					if(binding != null && binding.isClass()) {
 						SimpleName newVarName = myAST.newSimpleName(((SimpleName) arg).getIdentifier());
 						Assignment newAssignment = myAST.newAssignment();
 						newAssignment.setLeftHandSide(newVarName);

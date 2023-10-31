@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
@@ -34,7 +35,12 @@ public class MethodReplacer extends JavaEditOperation {
 		SimpleName newMethodName = rewriter.getAST().newSimpleName(replaceWith.getName());
 		newNode.setName(newMethodName);
 		
-		List<ASTNode> paramNodes = ((MethodInvocation) toReplace).arguments();
+		List<ASTNode> paramNodes;
+		if (toReplace instanceof SuperMethodInvocation) {
+			paramNodes = ((SuperMethodInvocation) toReplace).arguments();
+		} else {
+			paramNodes = ((MethodInvocation) toReplace).arguments();
+		}
 		for(ASTNode param : paramNodes) {
 			ASTNode newParam = rewriter.createCopyTarget(param);
 			newNode.arguments().add(newParam);
