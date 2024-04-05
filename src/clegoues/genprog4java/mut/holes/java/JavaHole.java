@@ -1,17 +1,15 @@
 package clegoues.genprog4java.mut.holes.java;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
-
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Expression;
-
 import clegoues.genprog4java.java.ASTUtils;
 import clegoues.genprog4java.java.JavaStatement;
 import clegoues.genprog4java.mut.EditHole;
 import clegoues.genprog4java.mut.WeightedHole;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Expression;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public abstract class JavaHole implements EditHole<ASTNode> {
 	private String name;
@@ -80,17 +78,37 @@ public abstract class JavaHole implements EditHole<ASTNode> {
 			for(Map.Entry<Expression, List<Expression>> exps : replacableExps.entrySet()) {
 				Expression toBeReplaced = exps.getKey();
 				int locationLineNumber = ASTUtils.getLineNumber(toBeReplaced);
-				for(Expression replacementExp : exps.getValue()) { 
-					ExpHole thisHole = new ExpHole(toBeReplaced, replacementExp, parentStmt.getStmtId());
-					int replacementLineNumber = ASTUtils.getLineNumber(replacementExp);
-					int lineDistance = Math.abs(locationLineNumber - replacementLineNumber);
-					double weight = lineDistance != 0 ? 1.0 / lineDistance : 1.0;
-					retVal.add(new WeightedHole(thisHole, weight));
+				for(Expression replacementExp : exps.getValue()) {
+					if (!isParent(toBeReplaced, replacementExp)) {
+						ExpHole thisHole = new ExpHole(toBeReplaced, replacementExp, parentStmt.getStmtId());
+						int replacementLineNumber = ASTUtils.getLineNumber(replacementExp);
+						int lineDistance = Math.abs(locationLineNumber - replacementLineNumber);
+						double weight = lineDistance != 0 ? 1.0 / lineDistance : 1.0;
+						retVal.add(new WeightedHole(thisHole, weight));
+					}
 				}
 			}
 			return retVal;
 		}
 		return null;
+	}
+
+	/**
+	 * Check if one node is a child node of another
+	 *
+	 * Useful for avoiding StackOverflowException, e.g., when replacing a child node with one of its parent node
+	 */
+	public static boolean isParent(ASTNode node, ASTNode suspectParent) {
+	    if (node == null)
+	    	return false;	// root
+	    else {
+			if (node != suspectParent) {
+				return isParent(node.getParent(), suspectParent);
+			}
+			else {
+				return true;
+			}
+		}
 	}
 
 }
