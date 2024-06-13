@@ -83,7 +83,7 @@ public class RangeCheckOperation extends JavaEditOperation {
 			upperBoundCheck.setOperator(Operator.LESS);
 
 			SimpleName uqualifier = rewriter.getAST().newSimpleName(
-					((ArrayAccess) array).getArray().toString());
+					((ArrayAccess) array).getArray().toString().split("\\[")[0]);
 			SimpleName uname = rewriter.getAST().newSimpleName(
 					"length");
 			upperBoundCheck.setRightOperand(rewriter.getAST()
